@@ -1,0 +1,276 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Light Message Queue | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Light Message Queue -->
+<div class="pagetitle" id="PageId_1132928107">Light Message Queue</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_1132928107_h1_1">Light Message Queue Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_1132928107_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_1132928107_h3_1">Differences From the Message Queue Feature</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_1132928107_h2_2">Using a Light Message Queue</a>
+      </li>
+      <li>
+        <a href="#Anchor_1132928107_h2_3">Light Message Queue API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_1132928107_h2_4">Considerations When Using Light Message Queues</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_1132928107_h3_2">Light Message Queue Buffer</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_1132928107_h1_1">Light Message Queue Feature</h1>
+<h2 id="Anchor_1132928107_h2_1">Feature Overview</h2>
+<p>The light message queue is a synchronization feature for sending and receiving data between <a href="../Pages/Page_83955697.html">threads</a>.</p>
+<h3 id="Anchor_1132928107_h3_1">Differences From the Message Queue Feature</h3>
+<p>Functionally, the light message queue is similar to the <a href="../Pages/Page_83955748.html">message queue</a>, but with the following differences.</p>
+<ul>
+  <li>When the message queue is in the NotFull state when sending data, the current thread does not enter a wait state due to other light message queue processing functions.</li>
+  <li>When the message queue is in the NotEmpty state when receiving data, the current thread does not enter a wait state due to other light message queue processing functions.</li>
+  <li>Cannot be specified for <a href="../Pages/Page_83955865.html">multiple waits</a>.</li>
+</ul>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_1132928107_h2_2">Using a Light Message Queue</h2>
+<p>To use a light message queue, you must prepare an <span class="ApiLink_nn__os__LightMessageQueueType">nn::os::LightMessageQueueType</span> structure object as follows.<br />There are no restrictions on where the object can be defined.</p>
+<p>The buffer area for the light message queue must be allocated separately.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="k">const</span> <span class="kt">int</span>                  <span class="n">bufferSize</span> <span class="o">=</span> <span class="mi">32</span><span class="p">;</span>
+<span class="kt">uintptr_t</span>                  <span class="n">g_Buffer</span><span class="p">[</span> <span class="n">bufferSize</span> <span class="p">];</span>
+<span class="nn">nn::os::</span><span class="n">LightMessageQueueType</span>   <span class="n">g_MessageQueue</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Use the defined object according to the following procedure.</p>
+<ol>
+  <li>
+    <p>You must initialize the light message queue before use.<br />Specify the buffer area in the second parameter and the maximum number of data items that can be stored in the light message queue in the third parameter.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeLightMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MessageQueue</span><span class="p">,</span> <span class="n">g_Buffer</span><span class="p">,</span> <span class="n">bufferSize</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Receive data from the light message queue as necessary.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">uintptr_t</span>  <span class="n">data</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">ReceiveLightMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_MessageQueue</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Send data to the light message queue as necessary.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">uintptr_t</span>  <span class="n">data</span> <span class="o">=</span> <span class="n">GetNextDataOfSendPacket</span><span class="p">();</span>       <span class="c1">// Get the next data to send.
+</span><span class="nn">nn::os::</span><span class="n">SendLightMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MessageQueue</span><span class="p">,</span> <span class="n">data</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>After you have finished using the light message queue, free it.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FinalizeLightMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MessageQueue</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_1132928107_h2_3">Light Message Queue API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeLightMessageQueue(LightMessageQueueType_*messageQueue|_uintptr_t_*buffer|_size_t_count)_NN_NOEXCEPT">nn::os::InitializeLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__FinalizeLightMessageQueue">nn::os::FinalizeLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__SendLightMessageQueue">nn::os::SendLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TrySendLightMessageQueue(LightMessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT">nn::os::TrySendLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__TimedSendLightMessageQueue">nn::os::TimedSendLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__JamLightMessageQueue">nn::os::JamLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryJamLightMessageQueue(LightMessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT">nn::os::TryJamLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__TimedJamLightMessageQueue">nn::os::TimedJamLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__ReceiveLightMessageQueue">nn::os::ReceiveLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__TryReceiveLightMessageQueue">nn::os::TryReceiveLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__TimedReceiveLightMessageQueue">nn::os::TimedReceiveLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__PeekLightMessageQueue">nn::os::PeekLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__TryPeekLightMessageQueue">nn::os::TryPeekLightMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TimedPeekLightMessageQueue(uintptr_t_*outData|_const_LightMessageQueueType_*messageQueue|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedPeekLightMessageQueue</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_1132928107_h2_4">Considerations When Using Light Message Queues</h2>
+<h3 id="Anchor_1132928107_h3_2">Light Message Queue Buffer</h3>
+<p>Light message queue internal processing handles the light message queue buffer as an array of <code>uintptr_t</code> type objects.</p>
+<p>Make sure that you specify the beginning address of an array of this type in the second parameter of the <span class="ApiLink_void_nn__os__InitializeLightMessageQueue(LightMessageQueueType_*messageQueue|_uintptr_t_*buffer|_size_t_count)_NN_NOEXCEPT">nn::os::InitializeLightMessageQueue()</span> function.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__LightMessageQueueType', '../../../Api/HtmlNX/structnn_1_1os_1_1_light_message_queue_type.html' )
+SetUrl( 'ApiLink_void_nn__os__InitializeLightMessageQueue(LightMessageQueueType_*messageQueue|_uintptr_t_*buffer|_size_t_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3b9261137505f66b2d185aafeed5c9dc' )
+SetUrl( 'ApiLink_nn__os__FinalizeLightMessageQueue', '../../../Api/HtmlNX/namespacenn_1_1os.html#a6bf0c1a8c8136bc6a3aedf792009f1a4' )
+SetUrl( 'ApiLink_nn__os__SendLightMessageQueue', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2ec37a4b03c00777cb0840d4f5becf0e' )
+SetUrl( 'ApiLink_bool_nn__os__TrySendLightMessageQueue(LightMessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a78f71a4b08b8492646bad8aed17d296b' )
+SetUrl( 'ApiLink_nn__os__TimedSendLightMessageQueue', '../../../Api/HtmlNX/namespacenn_1_1os.html#a431668e7d0b3605da365a406becace2b' )
+SetUrl( 'ApiLink_nn__os__JamLightMessageQueue', '../../../Api/HtmlNX/namespacenn_1_1os.html#ae544b7a419a19f766d0d5fc22dbb89a9' )
+SetUrl( 'ApiLink_bool_nn__os__TryJamLightMessageQueue(LightMessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3715853cab09866f3a6ee79e7988a145' )
+SetUrl( 'ApiLink_nn__os__TimedJamLightMessageQueue', '../../../Api/HtmlNX/namespacenn_1_1os.html#ac75336eea6700c67ec9a53fb3214e71b' )
+SetUrl( 'ApiLink_nn__os__ReceiveLightMessageQueue', '../../../Api/HtmlNX/namespacenn_1_1os.html#a20eb39483646e5dd69388d01985e0307' )
+SetUrl( 'ApiLink_nn__os__TryReceiveLightMessageQueue', '../../../Api/HtmlNX/namespacenn_1_1os.html#a4faba929a7270dce159e1e8b0e52477a' )
+SetUrl( 'ApiLink_nn__os__TimedReceiveLightMessageQueue', '../../../Api/HtmlNX/namespacenn_1_1os.html#a0e96e17480064f66c6aff10c3ef989b6' )
+SetUrl( 'ApiLink_nn__os__PeekLightMessageQueue', '../../../Api/HtmlNX/namespacenn_1_1os.html#a1d34d548b81497f306cd26ebff16ab54' )
+SetUrl( 'ApiLink_nn__os__TryPeekLightMessageQueue', '../../../Api/HtmlNX/namespacenn_1_1os.html#a60ecfcd68491819e5ede0dcae313cace' )
+SetUrl( 'ApiLink_bool_nn__os__TimedPeekLightMessageQueue(uintptr_t_*outData|_const_LightMessageQueueType_*messageQueue|_TimeSpan_timeout)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a0346a384e4e057f6162bad8da416ba98' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

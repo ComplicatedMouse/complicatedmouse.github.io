@@ -1,0 +1,217 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<link href="../css/template.css" rel="stylesheet" type="text/css" />
+<title>Binary Intermediate Files</title>
+</head>
+<body>
+<h1>Binary Intermediate Files</h1>
+<h2>Overview</h2>
+<p>
+Binary intermediate files are intermediate files in which some of the data has been binarized to increase read/write speeds.<strong><strong>This type of file is distinct from runtime binary files used by the system.</strong></strong>The file extension of binary intermediate files ends with the letter <em>b</em> (binary format) rather than <em>a</em> (text format).
+</p>
+<h2>Structure of Binary Intermediate Files</h2>
+<p>
+Binary intermediate files are split into two parts: a text format part and a binary data part. <CODE><a href="../reference/elements/stream_array.html">&lt;stream_array&gt;</a></CODE> uses a lot of time performing I/O on intermediate files. Use of a binary format achieves high-speed I/O.
+</p>
+<h2>Text Format Part</h2>
+<p>
+The first text format part of a binary intermediate file is the same as a standard <a href="text_intermediate_file.html">text intermediate file</a>, except that attributes listed under <CODE><a href="../reference/elements/stream_array.html">&lt;stream_array&gt;</a></CODE> have been removed.
+</p>
+<p>
+The text format part can be viewed with a text editor.<br /><strong>Note, however, that binary data found later in the file will be corrupted if you edit and save it with a text editor.</strong>
+</p>
+<p>
+<strong>1 to 32 bytes</strong> of data between the end of the text format part (<CODE>&lt;/nw4f_3dif&gt;\r\n</CODE>) and the beginning of the binary data part are padded with zeros to achieve 32-byte alignment. The first zero address plus one encountered is rounded up to a 32-byte boundary and used as the start address of the binary data part of the file.
+</p>
+<p>
+If, however, there is no <CODE><a href="../reference/elements/stream_array.html">&lt;stream_array&gt;</a></CODE> element in the original file, the binary intermediate file will only consist of the text format part, making its contents exactly the same as the <a href="text_intermediate_file.html">text intermediate file</a>.
+</p>
+<h2>Binary Data Part</h2>
+<p>
+The binary data part is further split into units called &quot;chunks&quot; that represent data blocks. The start address of each chunk has 32-byte alignment from the start of the file and the size of a chunk itself is 32-bytes.
+</p>
+<p>
+The order of data is little Endian.
+</p>
+<p>
+Because data usually included under <CODE><a href="../reference/elements/stream_array.html">&lt;stream_array&gt;</a></CODE> has been binarized, the binary data part includes a corresponding stream array chunk plus multiple stream chunks.
+</p>
+<h3>Stream Array Chunk</h3>
+<p>
+The stream array chunk comes at the start of the binary data part.
+</p>
+<table>
+    <thead>
+        <tr>
+<th>Offset</th>
+<th>Size</th>
+<th>Content</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="nowrap_center">0</td>
+            <td class="nowrap_center">8</td>
+<td>The chunk header is &quot;g3dstrma&quot; (0x616D727473643367).</td>
+        </tr>
+        <tr>
+            <td class="nowrap_center">8</td>
+            <td class="nowrap_center">4</td>
+<td>Represents the number of stream chunks.<BR>Stream chunk information is specified in order, for the number of chunks necessary.</td>
+        </tr>
+        <tr>
+<td class="nowrap_center">12 + 8 *<br />index</td>
+            <td class="nowrap_center">4</td>
+<td>The offset from the start of the binary data part to the start of the stream chunk.<br /><CODE>index</CODE> gives the index of the stream chunk. </td>
+        </tr>
+        <tr>
+<td class="nowrap_center">16 + 8 *<br />index</td>
+            <td class="nowrap_center">4</td>
+<td>Represents the size of the stream chunk.<BR><CODE>index</CODE> gives the index of the stream chunk.</td>
+        </tr>
+        <tr>
+            <td class="nowrap_center">?</td>
+            <td class="nowrap_center">? % 32</td>
+<td>Data is padded with zeros to ensure alignment.</td>
+        </tr>
+    </tbody>
+</table>
+<h3>Stream Chunks</h3>
+<p>
+Multiple stream chunks are listed in order as specified in stream array chunk.
+</p>
+<table>
+    <thead>
+        <tr>
+<th>Offset</th>
+<th>Size</th>
+<th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="nowrap_center">0</td>
+            <td class="nowrap_center">8</td>
+<td>Represents the chunk header: &quot;stream□□&quot; (0x20206D6165727473).<br />The boxes are used to represent ASCII space characters.</td>
+        </tr>
+        <tr>
+            <td class="nowrap_center">8</td>
+            <td class="nowrap_center">4</td>
+<td>Represents the stream data type.<BR>0: 0: <CODE>float</CODE>, 1: <CODE>int</CODE>, 2: <CODE>byte</CODE>, 3: <CODE>string</CODE>, 4: <CODE>wstring</CODE>.</td>
+        </tr>
+        <tr>
+            <td class="nowrap_center">12</td>
+            <td class="nowrap_center">4</td>
+<td>Represents the number of data items included in the stream.<BR>Always <CODE>1</CODE>, if the data type is <CODE>string</CODE> or <CODE>wstring</CODE>.
+            </td>
+        </tr>
+        <tr>
+            <td class="nowrap_center">16</td>
+            <td class="nowrap_center">4</td>
+<td>Represents the column used in the corresponding text intermediate file.<BR>This will be specified in the <CODE>column</CODE> attribute of <a href="../reference/elements/stream.html">&lt;stream&gt;</a> when converting to a text intermediate file. Always <CODE>0</CODE>, if the data type is <CODE>string</CODE> or <CODE>wstring</CODE>.
+            </td>
+        </tr>
+        <tr>
+            <td class="nowrap_center">20</td>
+            <td class="nowrap_center">4</td>
+<td>Represents the data size (the number of bytes in the data array).<BR>The number of bytes includes the terminating null character used in strings if the data type is <CODE>string</CODE> or <CODE>wstring</CODE>.
+            </td>
+        </tr>
+        <tr>
+            <td class="nowrap_center">24</td>
+            <td class="nowrap_center">8</td>
+<td>Data is padded with zeros to ensure alignment.</td>
+        </tr>
+        <tr>
+            <td class="nowrap_center">32</td>
+<td class="nowrap_center">Data<br />Size</td>
+<td>Represents an array of data type values corresponding to each of the data items in the stream. <CODE>string</CODE> stores ASCII strings, while <CODE>wstring</CODE> stores UTF-16 LE strings. <strong>LF</strong> is used as the return code for both <CODE>string</CODE> and <CODE>wstring</CODE>.
+            </td>
+        </tr>
+        <tr>
+            <td class="nowrap_center">?</td>
+            <td class="nowrap_center">? % 32</td>
+<td>Data is padded with zeros to ensure alignment.</td>
+        </tr>
+    </tbody>
+</table>
+<p>
+The end of the last stream chunk is the end of the file.
+</p>
+
+<h2>Overview of a Binary Intermediate File</h2>
+<div class="code_block"><pre class="code">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;nw4f_3dif&gt;
+ ...
+ &lt;stream_array&gt; DELETED
+ ...
+&lt;/nw4f_3dif&gt;\r\n
+1 to 32 bytes of zeros for padding
+
+Stream array chunk
+{
+ &quot;g3dstrma&quot;
+ Number of stream chunks
+
+ {
+  Offsets from the start of the stream array chuck to the start of each stream chunk.
+  The size of each stream chunk
+ } * number of stream chunks.
+
+ 0 to 31 bytes of zeros for padding
+}
+
+Stream chunks
+{
+ &quot;stream  &quot;
+ Stream data type
+ Amount of data
+ Number of columns
+ Data size
+ 8 bytes of zero-padding
+
+ Data array
+
+ 0 to 31 bytes of zeros for padding
+} * number of stream chunks.
+</pre></div>
+
+<h2>Binary Intermediate File Data Structure</h2>
+<div class="code_block"><pre class="code">
+struct ChunkOffset
+{
+    u32 offset;
+    u32 size;
+};
+
+struct StreamChunk
+{
+    u64 header;
+    StreamType type;
+    s32 count;
+    s32 column;
+    s32 size;
+
+    u64 padding;
+
+    void* data;
+};
+
+struct StreamArray
+{
+    u64 header;
+    u32 chunkCount;
+    std::vector&lt;ChunkOffset&gt; chunkOffset;
+
+    // Padding to ensure that StreamChunk has 32-byte alignment
+
+    std::vector&lt;StreamChunk&gt; streamChunk;
+};
+</pre></div>
+
+</body>
+</html>

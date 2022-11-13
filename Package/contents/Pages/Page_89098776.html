@@ -1,0 +1,300 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Expanded Heap | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Expanded Heap -->
+<div class="pagetitle" id="PageId_89098776">Expanded Heap</div>
+<div class="text_separate">
+<h1 id="Anchor_89098776_h1_1">Expanded Heap Features</h1>
+<h2 id="Anchor_89098776_h2_1">Feature Overview</h2>
+<p>The expanded heap (<code>ExpHeap</code>) manages the supplied memory space and provides memory allocation and deallocation features for that space.</p>
+<p>This heap has fewer limitations than a frame heap or unit heap and can also be used as a generic memory allocator.</p>
+<h2 id="Anchor_89098776_h2_2">Using ExpHeap</h2>
+<p>Allocate the memory space to be managed, and use <span class="ApiLink_HeapHandle_nn__lmem__CreateExpHeap(void_*startAddress|_size_t_size|_int_option)_NN_NOEXCEPT">nn::lmem::CreateExpHeap()</span> to create an expanded heap.</p>
+<p>The memory space that is passed to the expanded heap must be statically or dynamically allocated beforehand.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;cstdlib&gt;
+#include &lt;nn/lmem/lmem_ExpHeap.h&gt;
+</span>&nbsp;
+<span class="k">const</span> <span class="kt">size_t</span> <span class="n">MemoryHeapSize</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>        <span class="c1">// This example gets a 32-MiB space from the operating system.
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">heap</span> <span class="o">=</span> <span class="nn">std::</span><span class="n">malloc</span><span class="p">(</span><span class="n">MemoryHeapSize</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Initializes the expanded heap.
+</span><span class="nn">nn::lmem::</span><span class="n">HeapHandle</span> <span class="n">heapHandle</span><span class="p">;</span>
+<span class="n">heapHandle</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">CreateExpHeap</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="n">MemoryHeapSize</span><span class="p">,</span> <span class="nn">nn::lmem::</span><span class="n">CreationOption_NoOption</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span><span class="n">heapHandle</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Failed to initialize the expanded heap.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>Use <span class="ApiLink_void_*_nn__lmem__AllocateFromExpHeap(HeapHandle_heapHandle|_size_t_size)_NN_NOEXCEPT">nn::lmem::AllocateFromExpHeap()</span> to allocate the memory block after initialization.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">address</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">AllocateFromExpHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="mi">64</span><span class="p">);</span>    <span class="c1">// Allocate 64 bytes as an example
+</span><span class="k">if</span><span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocation of the memory fails.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Alignment may be specified during memory allocation.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">address</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">AllocateFromExpHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">);</span>    <span class="c1">// This example allocates a 64-byte space with 4-KiB alignment.
+</span><span class="k">if</span><span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocation of the memory fails.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>When you have finished using the allocated space, deallocate it by using <span class="ApiLink_void_nn__lmem__FreeToExpHeap(HeapHandle_heapHandle|_void_*pBlock)_NN_NOEXCEPT">nn::lmem::FreeToExpHeap()</span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::lmem::</span><span class="n">FreeToExpHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="n">address</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>When you have finished using the heap, free it by using <span class="ApiLink_void_nn__lmem__DestroyExpHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::DestroyExpHeap()</span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::lmem::</span><span class="n">DestroyExpHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>For more information about other functions, see the API reference for each.</p>
+<h2 id="Anchor_89098776_h2_3">ExpHeap API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_HeapHandle_nn__lmem__CreateExpHeap(void_*startAddress|_size_t_size|_int_option)_NN_NOEXCEPT">nn::lmem::CreateExpHeap()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__DestroyExpHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::DestroyExpHeap()</span>
+  </li>
+  <li>
+    <span class="ApiLink_MemoryRange_nn__lmem__AdjustExpHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::AdjustExpHeap()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_*_nn__lmem__AllocateFromExpHeap(HeapHandle_heapHandle|_size_t_size)_NN_NOEXCEPT">nn::lmem::AllocateFromExpHeap()  (no alignment)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_*_nn__lmem__AllocateFromExpHeap(HeapHandle_heapHandle|_size_t_size|_int_alignment)_NN_NOEXCEPT">nn::lmem::AllocateFromExpHeap()  (with alignment)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__FreeToExpHeap(HeapHandle_heapHandle|_void_*pBlock)_NN_NOEXCEPT">nn::lmem::FreeToExpHeap()</span>
+  </li>
+  <li>
+    <span class="ApiLink_size_t_nn__lmem__ResizeExpHeapBlock(HeapHandle_heapHandle|_void_*pBlock|_size_t_newSize)_NN_NOEXCEPT">nn::lmem::ResizeExpHeapBlock()</span>
+  </li>
+  <li>
+    <span class="ApiLink_size_t_nn__lmem__GetExpHeapTotalFreeSize(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::GetExpHeapTotalFreeSize()</span>
+  </li>
+  <li>
+    <span class="ApiLink_size_t_nn__lmem__GetExpHeapAllocatableSize(HeapHandle_heapHandle|_int_alignment)_NN_NOEXCEPT">nn::lmem::GetExpHeapAllocatableSize()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__SetExpHeapAllocationMode(HeapHandle_heapHandle|_AllocationMode_allocationMode)_NN_NOEXCEPT">nn::lmem::SetExpHeapAllocationMode()</span>
+  </li>
+  <li>
+    <span class="ApiLink_AllocationMode_nn__lmem__GetExpHeapAllocationMode(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::GetExpHeapAllocationMode()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__SetExpHeapUseMarginOfAlignment(HeapHandle_heapHandle|_bool_reuse)_NN_NOEXCEPT">nn::lmem::SetExpHeapUseMarginOfAlignment()</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__lmem__GetExpHeapUseMarginOfAlignment(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::GetExpHeapUseMarginOfAlignment()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__SetExpHeapGroupId(HeapHandle_heapHandle|_Bit16_groupId)_NN_NOEXCEPT">nn::lmem::SetExpHeapGroupId()</span>
+  </li>
+  <li>
+    <span class="ApiLink_Bit16_nn__lmem__GetExpHeapGroupId(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::GetExpHeapGroupId()</span>
+  </li>
+  <li>
+    <span class="ApiLink_size_t_nn__lmem__GetExpHeapBlockSize(const_void_*pBlock)_NN_NOEXCEPT">nn::lmem::GetExpHeapBlockSize()</span>
+  </li>
+  <li>
+    <span class="ApiLink_Bit16_nn__lmem__GetExpHeapGroupIdOfBlock(const_void_*pBlock)_NN_NOEXCEPT">nn::lmem::GetExpHeapGroupIdOfBlock()</span>
+  </li>
+  <li>
+    <span class="ApiLink_AllocationDirection_nn__lmem__GetExpHeapAllocationDirectionOfBlock(const_void_*pBlock)_NN_NOEXCEPT">nn::lmem::GetExpHeapAllocationDirectionOfBlock()</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__lmem__CheckExpHeap(HeapHandle_heapHandle|_int_option)_NN_NOEXCEPT">nn::lmem::CheckExpHeap()</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__lmem__CheckExpHeapBlock(HeapHandle_heapHandle|_const_void_*pBlock|_int_option)_NN_NOEXCEPT">nn::lmem::CheckExpHeapBlock()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__VisitExpHeapAllBlocks(HeapHandle_heapHandle|_HeapVisitor_visitor|_uintptr_t_userParam)_NN_NOEXCEPT">nn::lmem::VisitExpHeapAllBlocks()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__DumpExpHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::DumpExpHeap()</span>
+  </li>
+</ul>
+<h2 id="Anchor_89098776_h2_4">Notes About Using ExpHeap</h2>
+<h3 id="Anchor_89098776_h3_1">Using StandardAllocator</h3>
+<p>We recommend using <a href="../Pages/Page_89102552.html">StandardAllocator</a> when creating a heap larger than 1 MiB because it allocates and deallocates memory faster than using an expanded heap.</p>
+<p>That said, you can still use <code>ExpHeap</code> in the following instances even when the size of the heap to be created exceeds 1 MiB.</p>
+<ul>
+  <li>The allocated region is nearly completely used, except for a few kibibytes.</li>
+  <li>The heap experiences very few allocations and deallocations (less than ten) after it is created.</li>
+</ul>
+<h3 id="Anchor_89098776_h3_2">Heap Management Region</h3>
+<p>The heap management region requires 100 bytes in a 32-bit environment, and 176 bytes in a 64-bit environment.</p>
+<p>Because the heap has at least one memory block in addition to the memory block management region, creating a heap requires at least 124 bytes in a 32-bit environment and 216 bytes in a 64-bit environment.</p>
+<h3 id="Anchor_89098776_h3_3">Minimum Allocatable Memory Block Size</h3>
+<p>With an expanded heap, you need 20 bytes in a 32-bit environment, and 32 bytes in a 64-bit environment to use as a memory block management region.</p>
+<p>In addition, allocated memory blocks must be aligned at 4-byte boundaries at a minimum.</p>
+<p>The upshot is that allocating a 1-byte memory block consumes 24 bytes of memory in a 32-bit environment and 36 bytes in a 64-bit environment.</p>
+<h3 id="Anchor_89098776_h3_4">Allocating Memory Blocks</h3>
+<p>The expanded heap provides two methods to allocate empty memory blocks:  <code>First Fit</code> and <code>Best Fit</code>.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Mode</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <code>AllocationMode_FirstFit</code>
+      </td>
+      <td>Allocates a memory block from the first free region that is at least the size of the memory block to allocate.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>AllocationMode_BestFit</code>
+      </td>
+      <td>Searches for a free region nearest in size to the memory block to allocate, then allocates the memory block from this free region.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>FirstFit</code> is used by default.</p>
+<p>The memory block allocation method can be changed by using <span class="ApiLink_void_nn__lmem__SetExpHeapAllocationMode(HeapHandle_heapHandle|_AllocationMode_allocationMode)_NN_NOEXCEPT"><code>nn::lmem::SetExpHeapAllocationMode()</code></span>.</p>
+<p>The memory allocation and deallocation speed will be increased at the cost of memory space efficiency when <code>BestFit</code> is specified.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_HeapHandle_nn__lmem__CreateExpHeap(void_*startAddress|_size_t_size|_int_option)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a3d46d370c3b53aed4a127962761ed0fc' )
+SetUrl( 'ApiLink_void_*_nn__lmem__AllocateFromExpHeap(HeapHandle_heapHandle|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a96055cfc77bfd3eac47da134a3746aa9' )
+SetUrl( 'ApiLink_void_nn__lmem__FreeToExpHeap(HeapHandle_heapHandle|_void_*pBlock)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#aa8b756491ff15ef5937719943d7146a5' )
+SetUrl( 'ApiLink_void_nn__lmem__DestroyExpHeap(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#af8f5ea9ad1df5559ac024fee0564744a' )
+SetUrl( 'ApiLink_MemoryRange_nn__lmem__AdjustExpHeap(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a3b21c96cee5ec4ae3bb5048fdb483666' )
+SetUrl( 'ApiLink_void_*_nn__lmem__AllocateFromExpHeap(HeapHandle_heapHandle|_size_t_size|_int_alignment)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a64c4062e0fa7e47cc9a604681317525a' )
+SetUrl( 'ApiLink_size_t_nn__lmem__ResizeExpHeapBlock(HeapHandle_heapHandle|_void_*pBlock|_size_t_newSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#adacfd64bdeac5be2b33f2f5f79656379' )
+SetUrl( 'ApiLink_size_t_nn__lmem__GetExpHeapTotalFreeSize(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#aaecc883dba00f234bd0d3e123d1365d2' )
+SetUrl( 'ApiLink_size_t_nn__lmem__GetExpHeapAllocatableSize(HeapHandle_heapHandle|_int_alignment)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a65a9bfe39ef9ba8ac6500bcd39defde8' )
+SetUrl( 'ApiLink_void_nn__lmem__SetExpHeapAllocationMode(HeapHandle_heapHandle|_AllocationMode_allocationMode)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a0215a6fd274ee1b7f82356aca8ff4ac7' )
+SetUrl( 'ApiLink_AllocationMode_nn__lmem__GetExpHeapAllocationMode(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a7958c3154e912e2f1d4df040a03dccb7' )
+SetUrl( 'ApiLink_void_nn__lmem__SetExpHeapUseMarginOfAlignment(HeapHandle_heapHandle|_bool_reuse)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a48a7f1f27f38901e2dcedd42ca0ab2ab' )
+SetUrl( 'ApiLink_bool_nn__lmem__GetExpHeapUseMarginOfAlignment(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a6b29bb41e1795da84b1f8ec5544a594a' )
+SetUrl( 'ApiLink_void_nn__lmem__SetExpHeapGroupId(HeapHandle_heapHandle|_Bit16_groupId)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#ab5de7bf254d6a4182e9c4070a94e1b9c' )
+SetUrl( 'ApiLink_Bit16_nn__lmem__GetExpHeapGroupId(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#afd47c4651a7f6385ba616a076d0a1457' )
+SetUrl( 'ApiLink_size_t_nn__lmem__GetExpHeapBlockSize(const_void_*pBlock)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#aa4c92d4f94738d803197c67a268c1705' )
+SetUrl( 'ApiLink_Bit16_nn__lmem__GetExpHeapGroupIdOfBlock(const_void_*pBlock)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a3fb1220e2063a1660e5e1c1ca8f87d94' )
+SetUrl( 'ApiLink_AllocationDirection_nn__lmem__GetExpHeapAllocationDirectionOfBlock(const_void_*pBlock)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a8f7e706930f05cd5e4e17f2eb2f30ade' )
+SetUrl( 'ApiLink_bool_nn__lmem__CheckExpHeap(HeapHandle_heapHandle|_int_option)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a04838ca06b67385b6eb99e63684444a9' )
+SetUrl( 'ApiLink_bool_nn__lmem__CheckExpHeapBlock(HeapHandle_heapHandle|_const_void_*pBlock|_int_option)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a761bf1d98698d5fd19019e748f4d0ecf' )
+SetUrl( 'ApiLink_void_nn__lmem__VisitExpHeapAllBlocks(HeapHandle_heapHandle|_HeapVisitor_visitor|_uintptr_t_userParam)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#ae59c5a804990cae8619eab581b693ace' )
+SetUrl( 'ApiLink_void_nn__lmem__DumpExpHeap(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a3ba05f8df1e914f5748889a52daf7ec7' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

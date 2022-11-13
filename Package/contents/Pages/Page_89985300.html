@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>WaveConverter | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- WaveConverter -->
+<div class="pagetitle" id="PageId_89985300">WaveConverter</div>
+<div class="text_separate">
+<h1 id="Anchor_89985300_h1_1">Introduction</h1>
+<p>WaveConverter is a command-line tool for converting waveform files (WAV and AIFF files) into resource files (BFWAV and BFSTM files). <br />The resource files created by WaveConverter can be used by the <code><span class="ApiLink_nn__atk">nn::atk</span></code> library.</p>
+<p>This document describes how to use WaveConverter and its features.</p>
+<h1 id="Anchor_89985300_h1_2">Using WaveConverter</h1>
+<h2 id="Anchor_89985300_h2_1">How to Run</h2>
+<p>To use WaveConverter, run it from the command line in the following format.</p>
+<p>
+  <strong>WaveConverter.exe [<em>Options</em>] <em>Input_file_path</em></strong>
+</p>
+<p>Examples:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>WaveConverter.exe --format=bfwav --encoding=adpcm yoshi.wav
+WaveConverter.exe --format=bfstm --encoding=pcm16 -o bgm.adpcm.bfstm bgm.txt</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If the conversion process is successful, the BFWAV and BFSTM resource files are output to the file path specified by the <code>--output</code> option. <br />If the <code>--output</code> option is omitted, then the resource files are output to the input file path, but with the filename extensions changed to <code>.bfwav</code> and <code>.bfstm</code>.</p>
+<h2 id="Anchor_89985300_h2_2">Command-Line Arguments</h2>
+<h3 id="Anchor_89985300_h3_1">Input File Path</h3>
+<p>Specifies the file path of the input waveforms. <br />If <code>-format=bfstm</code> has been specified, you can output a multi-track stream binary file by specifying the path to a waveform list file.</p>
+<p>A waveform list file is a text file like the following with waveform file paths separated by newline characters.</p>
+<p>Examples:</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>piano.wav
+bass.wav
+drum.wav
+</pre>
+  </div>
+</div>
+<h3 id="Anchor_89985300_h3_2">Command-Line Options</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>
+        <p>Option</p>
+      </th>
+      <th>
+        <p>Description</p>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <p>
+          <code>-h / --help</code>
+        </p>
+      </td>
+      <td>
+        <p>Display a Help message and exit.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>-v / --verbose</p>
+      </td>
+      <td>
+        <p>Displays detailed internal operations.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>--format &lt;format-type&gt;</td>
+      <td>
+        <p>Specifies the format of the waveform binary files to output (as BFSTM or BFWAV).</p>
+        <p>This option must be specified.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>--encoding &lt;encoding-type&gt;</td>
+      <td>
+        <p>Specifies the output encoding as <code>pcm16</code> or <code>adpcm</code>.</p>
+        <p>This option must be specified.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>-o, --output &lt;output-filepath&gt;</td>
+      <td>Specifies the output file path. <br />If omitted, the resource files are output to the input file path, but with the file extensions changed to <code>.bfwav</code> and <code>.bfstm</code>.</td>
+    </tr>
+    <tr>
+      <td>--loop-start &lt;frame&gt;</td>
+      <td>
+        <p>Specifies the starting frame of the loop. If the sound is not being looped, do not specify this option.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>--loop-end &lt;frame&gt;</td>
+      <td>
+        <p>Specifies the ending frame of the loop. If you specify <code>--loop-start</code> but omit <code>--loop-end</code>,</p>
+        <p>the sound loops between the position of <code>--loop-begin</code> and the end of the waveform.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>--stream-prefetch</td>
+      <td>Creates the stream prefetch binary file. Only valid when <code>--format=bfstm</code> is specified.</td>
+    </tr>
+    <tr>
+      <td>--stream-buffer-scale &lt;arg&gt;</td>
+      <td>
+        <p>Specify the stream buffer stream prefetch multiplier. <br />Only valid when <code>--format=bfstm</code> and <code>--stream-prefetch</code> are specified.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk', '../../../Api/HtmlNX/namespacenn_1_1atk.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

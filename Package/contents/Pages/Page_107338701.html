@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Resource Data (ROM) (NX Add-On) | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Resource Data (ROM) (NX Add-On) -->
+<div class="pagetitle" id="PageId_107338701">Resource Data (ROM) (NX Add-On)</div>
+<div class="text_separate">
+<p>In NX applications, you can reference resource data using <code><span class="ApiLink_nn__fs__MountRom">nn::fs::MountRom</span>()</code> just like for <a href="../Pages/Page_107320203.html">Applications Built on a Windows Platform</a>, but the resource data is located in different locations.</p>
+<p>To perform duplicate referencing, you can specify a different name for the same resource data. NX applications can duplicate reference up to 10 sets of resource data at the same time.</p>
+<h1 id="Anchor_107338701_h1_1">Location of Resource Data When Executing Applications Built on a NX Platform</h1>
+<p class="with-breadcrumbs">The location of the application resource data differs depending on the application's executable format.<br />You can select either NSP and RAW as the executable format by selecting <strong>Project Properties</strong> &gt; <strong>Configuration Properties</strong> &gt; <strong>General</strong> and changing the setting for <strong>Application Program Format</strong>. For more information about the differences between formats, see <a href="../Pages/Page_107779298.html">Developing an NX Application</a>.<br />For more information about installing applications on the development hardware, see <a href="../Pages/Page_107779320.html">Installing and Running an NX Application on the Development Hardware</a>.</p>
+<h2 id="Anchor_107338701_h2_1">Executing an Application Built in NSP Format</h2>
+<p>The files stored in the data region of the NSP file are referenced as the resource data.</p>
+<p>Change the NX application project to use the NX platform as the solution platform, and select <strong>Authoring</strong> ＞ <strong>General</strong> &gt; <strong>Application Data Directory</strong> in the project properties to specify a directory path. When you perform this step, the files in the specified directory will be included in the data region of the NSP file output by the build.<br />The following example shows the settings when the directory <code>$(ProjectDir)dataSrc</code> is specified.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_107338701/163745396.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The <strong>Authoring</strong> ＞ <strong>General</strong> &gt; <strong>Application Data Directory</strong> project properties can be configured when the platform has been set to the NX platform.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The NSP file with the resource data is created after linking during the build, so any conversions or other processing of the resource data must be completed in advance before linking.</p>
+  </div>
+</div>
+<p>If you use <a href="../Pages/Page_107320233.html"><code>AuthoringTool</code></a> to create the NSP file directly from the result of the RAW format build, you can specify which resource data to include in the data region when you create the NSP file.</p>
+<h2 id="Anchor_107338701_h2_2">Executing an Application Installed on the Development Hardware</h2>
+<p>The files stored in the data region of the NSP file are referenced as the resource data. You can specify which resource data to include in the data region when you create the NSP file using <a href="../Pages/Page_107320233.html">AuthoringTool</a>.<br /><br /></p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If you use the <a href="../Pages/Page_325711330.html#Anchor_325711330_set-host-romfs-redirection-target"><code>debug set-host-romfs-redirection-target</code> option in <code>DevMenuCommand</code></a>, even if you execute the application on the host PC, it still references the application resource data installed on the development hardware.</p>
+  </div>
+</div>
+<h2 id="Anchor_107338701_h2_3">Executing an Application Built in RAW Format</h2>
+<p>The files in the <code>data</code> directory inside the NSPD directory (where the build results were output) is referenced as the resource data.<br /></p>
+<p>Change the NX application project to use the NX platform as the solution platform, and select <strong>Authoring</strong> ＞ <strong>General</strong> &gt; <strong>Application Data Directory</strong> in the project properties to specify a directory path. When you perform this step, the junction in the specified directory will be created as the <code>data</code> directory during the build.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Junctions cannot be created for directories on a network drive. For this reason, a build error will occur if you specify resource data on a network drive for <strong>Application Data Directory</strong>.<br />If you want to use this type of resource data, first create a symbolic link to the resource data on a drive on which junctions can be created, and then specify this symbolic link for <strong>Application Data Directory</strong>.<br />However, Windows Administrator privileges are required for creating symbolic links.<br />Junctions cannot be created in volumes formatted in formats other than NTFS. Set the output directory of build outputs in a volume in NTFS format.</p>
+  </div>
+</div>
+<h1 id="Anchor_107338701_h1_2">Example of Project File Settings</h1>
+<p>For an example of these project settings, see the resource data specification method in the following sample project file.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>Samples/Sources/Applications/FsRom/FsRom-spec.NX.vcxproj</pre>
+  </div>
+</div>
+<h1 id="Anchor_107338701_h1_3">Updating Resource Data For a Running Application</h1>
+<p>Resource data (in ROM) is cached to RAM as appropriate for fast access, so inconsistencies can arise if you update the resource data while the application is running.</p>
+<p>For an application in NSP format, the resource data cannot be updated while it is running. You must update the application image and restart the application.</p>
+<p>To update the resource data of a Raw format application while it is running, you must first call the <code><span class="ApiLink_nn__fs__Unmount">nn::fs::Unmount</span>()</code> function and otherwise ensure that the resource data on the PC is not being accessed from any application process.<br />If resource data on the PC for which access has been enabled by the <code><span class="ApiLink_nn__fs__MountRom">nn::fs::MountRom</span>()</code> function is updated, it might not be properly applied to the application.</p>
+<p>Regardless of the execution format of the application, the updates to files and directories are always applied to the application if <code><span class="ApiLink_nn__fs__MountHost">nn::fs::MountHost</span>()</code> and  <code><span class="ApiLink_nn__fs__MountHostRoot">nn::fs::MountHostRoot</span>()</code> are called, even if <code><span class="ApiLink_nn__fs__Unmount">nn::fs::Unmount</span>()</code> is not called first.</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__MountRom', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2e453fe1fbf8f818dc45bbd2897105cd' )
+SetUrl( 'ApiLink_nn__fs__Unmount', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac8a95249afd4a87a55d319dfecb0466c' )
+SetUrl( 'ApiLink_nn__fs__MountHost', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a1b85bf3f3cf038cb67a991a3e3304751' )
+SetUrl( 'ApiLink_nn__fs__MountHostRoot', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2ea39d2487ac28bc767cd699eeeebe11' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

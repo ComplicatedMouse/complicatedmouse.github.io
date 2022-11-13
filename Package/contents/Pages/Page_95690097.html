@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Memory Pool | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Memory Pool -->
+<div class="pagetitle" id="PageId_95690097">Memory Pool</div>
+<div class="text_separate">
+<h1 id="Anchor_95690097_h1_1">Memory Pool</h1>
+<h2 id="Anchor_95690097_h2_1">Overview</h2>
+<p>A <em>memory pool</em> is an object that represents the memory used by the GPU.</p>
+<p>Initialize a memory pool object to a specific pointer and size to make that memory space visible to the GPU. Note that the alignment and size of the specified area might be limited by the page size, which depends on the runtime environment. In addition, if a platform or low-level graphics API requires a separate area to be allocated on the device, the specified area is used as the initial value of the device memory to be allocated instead of being shared with the GPU directly. If no initial value is required and the boolean value of whether memory will be requested from the memory pool of the target class is <code>false</code>, you can pass a value of <code>NULL</code> at this time instead of a memory pool.</p>
+<p>Buffers, textures, and other objects that have memory referenced by the GPU request memory from the memory pool. A request is a part of the memory pool represented by an offset and a size. Multiple objects can reference the same area or separate areas of a single memory pool. When requesting memory with an alignment and size smaller than the page size, carving that part out of a larger memory pool wastes less memory than preparing a dedicated memory pool.</p>
+<p>Memory pool properties can be configured for the memory pool being created The memory pool properties indicate properties like whether that memory space can be accessed by the CPU, and how the GPU can access the space. If access from the CPU is not required, set the property so it is not visible to the CPU.</p>
+<p>If you create a memory pool that is visible to the CPU, you can map the memory to get addresses for the CPU to use so the CPU can access part of the memory pool for reading and writing. Data read and written by the CPU is not automatically cache-controlled, so you must either manually flush the cache as needed or invalidate the cache. Unmap the memory pool if reading and writing by the CPU is no longer necessary.</p>
+<h2 id="Anchor_95690097_h2_2">Information</h2>
+<p>The memory pool information is defined as <span class="ApiLink_nn__gfx__MemoryPoolInfo"><code>MemoryPoolInfo</code></span>.</p>
+<h3 id="Anchor_95690097_h3_1">Memory Pool Properties</h3>
+<p>To set the CPU and GPU page properties of the memory space to use as a memory pool, use <span class="ApiLink_void_nn__gfx__MemoryPoolInfo__SetMemoryPoolProperty(int_value)_NN_NOEXCEPT"><code>SetMemoryPoolProperty</code></span>.<br />For the CPU page property, you can choose one from among the following: <span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuInvisible"><code>MemoryPoolProperty_CpuInvisible</code></span>, <span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuCached"><code>MemoryPoolProperty_CpuCached</code></span>, or <span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuUncached"><code>MemoryPoolProperty_CpuUncached</code></span>. You can only make one selection. If you select <span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuInvisible"><code>MemoryPoolProperty_CpuInvisible</code></span>, you cannot access the memory space with the CPU. If you select <span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuCached"><code>MemoryPoolProperty_CpuCached</code></span>, CPU write operations will be cached. For this reason, you must flush the cache and deactivate it to maintain consistency with the GPU. If you select <span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuUncached"><code>MemoryPoolProperty_CpuUncached</code></span>, CPU write operations will occur without passing through the cache. In this case, write operations may be optimized, but read operations may become slower because the cache is not used.<br />For the GPU page property, you can choose one from among the following: <span class="ApiLink_nn__gfx__MemoryPoolProperty_GpuInvisible"><code>MemoryPoolProperty_GpuInvisible</code></span>, <span class="ApiLink_nn__gfx__MemoryPoolProperty_GpuCached"><code>MemoryPoolProperty_GpuCached</code></span>, or <span class="ApiLink_nn__gfx__MemoryPoolProperty_GpuUncached"><code>MemoryPoolProperty_GpuUncached</code></span>. You can only make one selection. If you select <span class="ApiLink_nn__gfx__MemoryPoolProperty_GpuInvisible"><code>MemoryPoolProperty_GpuInvisible</code></span>, you cannot access the memory space with the GPU. If you select <span class="ApiLink_nn__gfx__MemoryPoolProperty_GpuCached"><code>MemoryPoolProperty_GpuCached</code></span>, GPU write operations will be cached. If you select <span class="ApiLink_nn__gfx__MemoryPoolProperty_GpuUncached"><code>MemoryPoolProperty_GpuUncached</code></span>, GPU write operations will not be cached. The caching of resources that the GPU accesses can often yield performance benefits, but in the case of a command buffer that submits only once, there is a benefit to not caching at that time.<br />When the memory pool includes shader code, specify the additional property <span class="ApiLink_nn__gfx__MemoryPoolProperty_ShaderCode"><code>MemoryPoolProperty_ShaderCode</code></span>. </p>
+<h3 id="Anchor_95690097_h3_2">Memory for the Pool</h3>
+<p>To set the pointer to the memory for the pool and the size of that memory, use <span class="ApiLink_void_nn__gfx__MemoryPoolInfo__SetPoolMemory(void_*value|_size_t_size)_NN_NOEXCEPT"><code>SetPoolMemory</code></span>. If a platform or low-level graphics API requires a separate area to be allocated on the device, the specified area is simply used as the initial value.</p>
+<p>There are restrictions on the alignment and size granularity for pool memory. They are available, respectively, with the <span class="ApiLink_static_size_t_nn__gfx__TMemoryPool__GetPoolMemoryAlignment(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT"><code>nn::gfx::MemoryPool::GetPoolMemoryAlignment</code></span> and <span class="ApiLink_static_size_t_nn__gfx__TMemoryPool__GetPoolMemorySizeGranularity(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT"><code>nn::gfx::MemoryPool::GetPoolMemorySizeGranularity</code></span> functions. The pool memory address must be a multiple of the alignment you get, and the pool memory size must be a multiple of the size granularity you get.</p>
+<h2 id="Anchor_95690097_h2_3">Object</h2>
+<p>The memory pool object is defined as <span class="ApiLink_nn__gfx__MemoryPool"><code>nn::gfx::MemoryPool</code></span>.</p>
+<h3 id="Anchor_95690097_h3_3">Initialization and Destruction</h3>
+<p>Initializing and freeing memory pools generally follows the method for <a href="../Pages/Page_83955654.html">objects</a>.</p>
+<h3 id="Anchor_95690097_h3_4">Maps</h3>
+<p>To map a memory pool, it must be specified with the property that makes it visible to the CPU. If the memory pool is specified with the property to use CPU cache, you must flush the CPU cache as needed or invalidate the cache.</p>
+<p>To map the memory pool and get addresses for reading and writing by the CPU, call <span class="ApiLink_void_*_nn__gfx__TMemoryPool__Map()_const_NN_NOEXCEPT"><code>Map</code></span>.<br />To invalidate the CPU cache to ensure that the GPU reads content, call <span class="ApiLink_void_nn__gfx__TMemoryPool__InvalidateMappedRange(ptrdiff_t_offset|_size_t_size)_const_NN_NOEXCEPT"><code>InvalidateMappedRange</code></span>.<br />To flush the cache to ensure that the GPU reads what the CPU has written, call <code><span class="ApiLink_void_nn__gfx__TMemoryPool__FlushMappedRange(ptrdiff_t_offset|_size_t_size)_const_NN_NOEXCEPT">FlushMappedRange</span></code>.</p>
+<p>If reading and writing by the CPU is finished, call <code><span class="ApiLink_void_nn__gfx__TMemoryPool__Unmap()_const_NN_NOEXCEPT">Unmap</span></code> to unmap the memory.</p>
+<h4 id="Anchor_95690097_h4_1">Restrictions on Mapping</h4>
+<p> In the current GL version, rewriting data in the memory pool using the memory map does not affect resources that have already been created. In addition, even if the content of a created resource is changed, those changes are not applied to what is read using the memory pool map.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolInfo', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_memory_pool_info.html' )
+SetUrl( 'ApiLink_void_nn__gfx__MemoryPoolInfo__SetMemoryPoolProperty(int_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_memory_pool_info.html#a49eb9305aa9e2e39b25e775c5c0bfeff' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_CpuInvisible', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623ab3cc70e30a942511e9a19ff7a222ce80' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_CpuCached', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623a663a11b1bc56170998d3ca281574e1f1' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_CpuUncached', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623a52c9ef53497763d967da50e415056a2e' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_GpuInvisible', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623a7ebd960ee014d9b3375e1195bff0df38' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_GpuCached', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623a98262dd58342754947cd689a64939f13' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_GpuUncached', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623a410e392d5f1a31852aa4e768707836f7' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_ShaderCode', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623aa62da2fc041aacfdd997af125d47f57a' )
+SetUrl( 'ApiLink_void_nn__gfx__MemoryPoolInfo__SetPoolMemory(void_*value|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_memory_pool_info.html#aba32b6de36f3db1702087a8c06d5097d' )
+SetUrl( 'ApiLink_static_size_t_nn__gfx__TMemoryPool__GetPoolMemoryAlignment(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_memory_pool.html#a24ea067d3fd3c752dcb7332ad2ce3b56' )
+SetUrl( 'ApiLink_static_size_t_nn__gfx__TMemoryPool__GetPoolMemorySizeGranularity(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_memory_pool.html#aee1bf8475049973f8637ed19653833a1' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPool', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ad620d8208dd309eb7c4dd5973a6aeee5' )
+SetUrl( 'ApiLink_void_*_nn__gfx__TMemoryPool__Map()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_memory_pool.html#a5d3bdba22ff2a1ac666916ffd96c4fe6' )
+SetUrl( 'ApiLink_void_nn__gfx__TMemoryPool__InvalidateMappedRange(ptrdiff_t_offset|_size_t_size)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_memory_pool.html#a40f97df8403e38d5aa114b8537129073' )
+SetUrl( 'ApiLink_void_nn__gfx__TMemoryPool__FlushMappedRange(ptrdiff_t_offset|_size_t_size)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_memory_pool.html#aad3bd8d831eb63ab9136ee0e40a98010' )
+SetUrl( 'ApiLink_void_nn__gfx__TMemoryPool__Unmap()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_memory_pool.html#a213c2b4de9f80ba22eb0cfc7df3c5b5b' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

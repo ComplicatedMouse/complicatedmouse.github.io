@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Considerations | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Considerations -->
+<div class="pagetitle" id="PageId_208416174">Considerations</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_208416174_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_208416174_h1_2">Considerations of Cases Where Time Is Rolled Back or Advanced Beyond the Actual Elapsed Time</a>
+    </li>
+    <li>
+      <a href="#Anchor_208416174_h1_3">Considerations for the Windows Version</a>
+    </li>
+    <li>
+      <a href="#Anchor_208416174_h1_4">Conditions Preventing Comparisons With the Steady Clock</a>
+    </li>
+    <li>
+      <a href="#Anchor_208416174_h1_5">Calculating the Elapsed Time When the Steady Clock Comparison Is Unavailable</a>
+    </li>
+    <li>
+      <a href="#Anchor_208416174_h1_6">Comparing nn::time::SystemClockContext Values to Correct the Time and Determine Clock Manipulation</a>
+    </li>
+    <li>
+      <a href="#Anchor_208416174_h1_7">Recommended Implementation When the Application Is Greatly Affected by Incorrect Clock Time</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_208416174_h1_1">Introduction</h1>
+<p>This section describes how to use the <code>time</code> library.</p>
+<h1 id="Anchor_208416174_h1_2">Considerations of Cases Where Time Is Rolled Back or Advanced Beyond the Actual Elapsed Time</h1>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The time obtained via the <code>time</code> library may be rolled back or advanced beyond the actual elapsed time.</p>
+    <p>For applications that do not need to constantly follow the latest time on the system, we strongly recommend using <span class="ApiLink_nn__time__AdjustableUserSystemClock">nn::time::AdjustableUserSystemClock</span> and <span class="ApiLink_nn__time__AdjustableNetworkSystemClock">nn::time::AdjustableNetworkSystemClock</span>.</p>
+  </div>
+</div>
+<p>
+  <br />
+  <span class="ApiLink_nn__time__StandardUserSystemClock">nn::time::StandardUserSystemClock</span> can be freely set via the system settings, and <span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span> can be automatically corrected by the system. Both can occur, even while the application is running.</p>
+<p>Make sure that you implement your application so that it can advance without a problem in this case.<br />For example, make sure that your application can advance without a problem in the following situations.</p>
+<ul>
+  <li>When the current time is stored in the save data, and the current time while the application is running precedes the time stored in the save data.</li>
+  <li>When the current time is used to determine the season, and summer changes to winter over the course of one frame.</li>
+</ul>
+<h1 id="Anchor_208416174_h1_3">Considerations for the Windows Version</h1>
+<ul>
+  <li>The PC clock fills the role of the counter that uses a monotonic increase with a fixed internal pace.<ul><li>If the PC clock is manipulated, the time derived via the <code>time</code> library will be off by that amount. The <code>time</code> library cannot detect these gaps.</li><li>However, if the PC clock is manipulated between the initialization and the closing of the <code>time</code> library, the time derived via the <code>time</code> library is not affected.</li></ul></li>
+  <li>The default time indicated by <span class="ApiLink_nn__time__StandardUserSystemClock">nn::time::StandardUserSystemClock</span> is the time of the PC clock.<ul><li>This value is set the first time the <code>time</code> library is used.</li></ul></li>
+  <li>
+    <span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span> is corrected using the time of the PC clock.<ul><li>Manipulating the PC clock after initializing and before finalizing the <code>time</code> library does not affect the time obtained via the <code>time</code> library.</li></ul></li>
+  <li>This library uses features of the fs library when running in a Windows environment.<ul><li>Use this with the <code>fs</code> library in a state where it can allocate memory with either <code>malloc()</code> or the allocator set by the <span class="ApiLink_void_nn__fs__SetAllocator(AllocateFunction_alloc|_DeallocateFunction_dealloc)_NN_NOEXCEPT">nn::fs::SetAllocator()</span> function. For more information, see the <code>fs</code> library manual.</li></ul></li>
+</ul>
+<h1 id="Anchor_208416174_h1_4">Conditions Preventing Comparisons With the Steady Clock</h1>
+<p>Under the following conditions, the <span class="ApiLink_nn__time__StandardSteadyClock">nn::time::StandardSteadyClock</span> monotonic increasing clock value saved to save data and the like cannot be compared with the clock value the next time the system is started.</p>
+<ul style="list-style-type: square;">
+  <li>The clock loses power (and gets reset) due to the system being turned off.</li>
+  <li>Data is ported to another console for repair purposes.</li>
+  <li>Save data is transferred from one device to another.</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>These cases do not occur if the power for the device remains on.  </p>
+  </div>
+</div>
+<p>
+  <br />The following clock behavior occurs if data is ported to another console for repair purposes, and in addition, the clock is reset.</p>
+<ul style="list-style-type: square;">
+  <li>The <span class="ApiLink_nn__time__SteadyClockTimePoint">nn::time::SteadyClockTimePoint</span> values obtained before and after the data is ported to another console cannot be compared.<br />The <span class="ApiLink_Result_nn__time__GetSpanBetween(int64_t_*pOutSeconds|_const_SteadyClockTimePoint_&from|_const_SteadyClockTimePoint_&to)_NN_NOEXCEPT">nn::time::GetSpanBetween()</span> function fails.</li>
+  <li>The <span class="ApiLink_nn__time__SystemClockContext">nn::time::SystemClockContext</span> values obtained before and after data is ported data to another console will never match.</li>
+  <li>
+    <span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock </span> is unadjusted, and the <span class="ApiLink_static_Result_nn__time__StandardNetworkSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT">nn::time::StandardNetworkSystemClock::GetCurrentTime()</span> function fails.<ul style="list-style-type: square;"><li>Automatic correction by the system will be attempted soon after the network connection is established.</li></ul></li>
+  <li>
+    <span class="ApiLink_nn__time__StandardUserSystemClock">nn::time::StandardUserSystemClock</span> indicates the time as 2017-1-1 00:00:00 (UTC).<br /><ul style="list-style-type: square;"><li>Due to the differences of time zones set in the system, there may be some discrepancy in the YYYYMMDDHHMMSS notation.</li></ul></li>
+  <li>Also, the settings for whether to adjust the time according to the time zone or network time are inherited from before the data is transferred.</li>
+</ul>
+<h1 id="Anchor_208416174_h1_5">Calculating the Elapsed Time When the Steady Clock Comparison Is Unavailable</h1>
+<p>In situations where comparisons with the monotonic increasing clock are not possible, you can use <span class="ApiLink_nn__time__ClockSnapshot">nn::time::ClockSnapshot</span> to calculate the elapsed time using the network clock (<span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span>).<br />Note, however, that you cannot use this method to calculate the elapsed time if the network clock has not been corrected.</p>
+<p>For more information, see the <span class="ApiLink_bool_nn__time__CalculateSpanBetween(nn__TimeSpan_*pOut|_const_ClockSnapshot_&from|_const_ClockSnapshot_&to)_NN_NOEXCEPT">nn::time::CalculateSpanBetween()</span> function.</p>
+<h1 id="Anchor_208416174_h1_6">Comparing nn::time::SystemClockContext Values to Correct the Time and Determine Clock Manipulation</h1>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Regardless of which clock is getting the clock context, do not assume that the user has manipulated the clock when the <span class="ApiLink_nn__time__SystemClockContext">nn::time::SystemClockContext</span> values do not match.</p>
+    <p>To determine whether the clock was manipulated by the user, call the <span class="ApiLink_nn__TimeSpan_nn__time__CalculateStandardUserSystemClockDifferenceByUser(const_ClockSnapshot_&from|_const_ClockSnapshot_&to)_NN_NOEXCEPT">nn::time::CalculateStandardUserSystemClockDifferenceByUser()</span> function using <span class="ApiLink_nn__time__ClockSnapshot">nn::time::ClockSnapshot</span>.</p>
+  </div>
+</div>
+<p>The <span class="ApiLink_nn__time__SystemClockContext">nn::time::SystemClockContext</span> obtained from the clock is changed even when the time has been automatically corrected via the network by the system.</p>
+<p>As a result, if you compare <span class="ApiLink_nn__time__SystemClockContext">nn::time::SystemClockContext</span> before and after this automatic correction, they will not match.</p>
+<p>This behavior occurs not only for <span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span>, but also for <span class="ApiLink_nn__time__StandardUserSystemClock">nn::time::StandardUserSystemClock</span> if either of the following conditions are met.</p>
+<ul style="list-style-type: square;">
+  <li>The system settings are configured to use the Internet to adjust the time.</li>
+  <li>
+    <strong>Automatic Correction</strong> has been selected on the Device page of DevMenu.</li>
+</ul>
+<h1 id="Anchor_208416174_h1_7">Recommended Implementation When the Application Is Greatly Affected by Incorrect Clock Time</h1>
+<p>You can use the network clock time to deal with the time that elapses while resetting <span class="ApiLink_nn__time__StandardSteadyClock">nn::time::StandardSteadyClock</span> and the time before the reset, so we recommend that you first consider using the <span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span> time.</p>
+<ul style="list-style-type: square;">
+  <li>Use the time of <span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span>.</li>
+  <li>Always trust this time, without bothering to detect <span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span> operations.</li>
+</ul>
+<p>However, if <span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span> is unadjusted, the only option is to use the time of <span class="ApiLink_nn__time__StandardUserSystemClock">nn::time::StandardUserSystemClock</span>.<br />The user can freely manipulate the time of this clock.</p>
+<p>If you want to use the time of the <span class="ApiLink_nn__time__StandardUserSystemClock">nn::time::StandardUserSystemClock</span> for things like events that occur on fixed days of the week or for rewards that become available when the date changes, you can use the <span class="ApiLink_nn__time__ClaimPeriodicBenefitWithUserSystemClock">nn::time::ClaimPeriodicBenefitWithUserSystemClock()</span> function.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__time__AdjustableUserSystemClock', '../../../Api/HtmlNX/classnn_1_1time_1_1_adjustable_user_system_clock.html' )
+SetUrl( 'ApiLink_nn__time__AdjustableNetworkSystemClock', '../../../Api/HtmlNX/classnn_1_1time_1_1_adjustable_network_system_clock.html' )
+SetUrl( 'ApiLink_nn__time__StandardUserSystemClock', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_user_system_clock.html' )
+SetUrl( 'ApiLink_nn__time__StandardNetworkSystemClock', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_network_system_clock.html' )
+SetUrl( 'ApiLink_void_nn__fs__SetAllocator(AllocateFunction_alloc|_DeallocateFunction_dealloc)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac021c163ba94a44a2b53cb848c462930' )
+SetUrl( 'ApiLink_nn__time__StandardSteadyClock', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_steady_clock.html' )
+SetUrl( 'ApiLink_nn__time__SteadyClockTimePoint', '../../../Api/HtmlNX/structnn_1_1time_1_1_steady_clock_time_point.html' )
+SetUrl( 'ApiLink_Result_nn__time__GetSpanBetween(int64_t_*pOutSeconds|_const_SteadyClockTimePoint_&from|_const_SteadyClockTimePoint_&to)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1time.html#a029976fde1c33e311557957f3fc57a6b' )
+SetUrl( 'ApiLink_nn__time__SystemClockContext', '../../../Api/HtmlNX/structnn_1_1time_1_1_system_clock_context.html' )
+SetUrl( 'ApiLink_static_Result_nn__time__StandardNetworkSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_network_system_clock.html#a75e6450e1746922b7794116c49388ac2' )
+SetUrl( 'ApiLink_nn__time__ClockSnapshot', '../../../Api/HtmlNX/classnn_1_1time_1_1_clock_snapshot.html' )
+SetUrl( 'ApiLink_bool_nn__time__CalculateSpanBetween(nn__TimeSpan_*pOut|_const_ClockSnapshot_&from|_const_ClockSnapshot_&to)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1time.html#a992889d77943f2f8f8d0c827ebd7eef1' )
+SetUrl( 'ApiLink_nn__TimeSpan_nn__time__CalculateStandardUserSystemClockDifferenceByUser(const_ClockSnapshot_&from|_const_ClockSnapshot_&to)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1time.html#a7ebe8af7470bcbe489878e09cde9f3cd' )
+SetUrl( 'ApiLink_nn__time__ClaimPeriodicBenefitWithUserSystemClock', '../../../Api/HtmlNX/namespacenn_1_1time.html#aa5e24f241a0806d6ac316075b655b3f7' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

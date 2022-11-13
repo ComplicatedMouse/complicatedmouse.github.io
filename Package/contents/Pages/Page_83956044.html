@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>LOD Export | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- LOD Export -->
+<div class="pagetitle" id="PageId_83956044">LOD Export</div>
+<div class="text_separate">
+<p>This section describes the use and features of LOD Export.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83956044_h1_1">Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956044_h2_1">Hierarchical Structure</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_83956044_h1_2">How to Use</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956044_h2_2">Modeling Restrictions</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956044_h2_3">Vertex Attribute Quantization Type</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83956044_h1_1">Feature</h1>
+<p>Set the <strong>LOD Export</strong> option in the export plug-in to <strong>ON</strong> to enable LOD Export mode. In this mode, you can export an intermediate file in which LOD models are combined.</p>
+<p>In LOD Export mode, you can only export FMD and FTX files.</p>
+<h2 id="Anchor_83956044_h2_1">Hierarchical Structure</h2>
+<p>Organize your LOD base model and the models at each LOD level in the following hierarchical structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>LodGroup (LOD group root)
+&nbsp;&nbsp;+ Base (base model root)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ head
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ body
+&nbsp;&nbsp;+ LOD1 (level 1 model root)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ head
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ body
+&nbsp;&nbsp;+ LOD2 (level 2 model root)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ head
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ body</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Create an <strong>LOD group root</strong> (a transform node with any name) to serve as the common hierarchical root containing the base model and LOD models.</li>
+  <li>Directly beneath this LOD group root, create a root for the base model (a transform node named <strong>Base</strong>), and a root for each LOD model (transform nodes named <strong>LODn</strong>). <strong>n</strong> creates an integer ranging from 1 to 9, indicating the LOD level.</li>
+  <li>Put polygon objects for the base model under the <strong>Base</strong> root. They may be organized in any order.</li>
+  <li>Put the polygon objects for each LOD model under the corresponding root directory. Make sure that the polygon objects have the same hierarchical structure and same node names as they do under the <code>Base</code> root directory.<br />The LOD model can have fewer polygon objects than the base model. However, a polygon object that does not exist in a higher level LOD model cannot be present in a lower level LOD model.</li>
+  <li>For skinned polygon objects, influences are shared between LOD levels.<br />When placing influences in the hierarchy, we recommend placing them so they are not dependent on a particular LOD level.<br /><strong>Influence automatically becomes an export target even if it is not selected.</strong><br /><strong>If the <a href="../Pages/Page_83955859.html">plug-in for disabling node compression</a> was used to disable compression on the parent node of the influence, the nodes beneath that parent node are also automatically exported.</strong> </li>
+  <li>You can also use an <code>lodGroup</code> node as the LOD group root. However, the LOD attributes for the <code>lodGroup</code> node are not applied in the intermediate file.</li>
+  <li>The LOD group root, the base model root, and the root of each LOD model do not output intermediate files.<br />The attributes of nodes that are not output will not affect the intermediate files, so even if the movement of each of the LOD model roots is changed so that the LOD models do not overlap in Maya, the intermediate files that are output will still be the same.</li>
+</ul>
+<p>A sample hierarchy structure when using skinning. The root node for FMD files is <code>nw4f_root</code>, and <code>plane</code> and <code>joint1</code> are in place as child nodes.<br />When exporting FSK files, disable <strong>LOD Export</strong> and export only the files below <code>joint1</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>ModelRoot (not exported)
+&nbsp;&nbsp;+ LodGroup (not exported)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ Base (not exported)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ plane (the base polygon object)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ LOD1 (not exported)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ plane (the LOD1 polygon object)
+&nbsp;&nbsp;+ joint1 (The influence root. The translation, rotation, and scaling for the model as a whole, are controlled with this node.)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ joint2 (Influence)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ joint3 (Influence)</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_83956044_h1_2">How to Use</h1>
+<p>If the <strong>Export Target</strong> option is set to <strong>Selection</strong>, select the LOD group roots you want to export. If the <strong>Export Target</strong> option is set to <strong>All</strong>, you do not need to select any nodes.<br />If the <strong>Export Target</strong> option is set to <strong>Selection</strong> and there are nodes other than the LOD group root that you also want to export, also select those nodes. <strong>Skinning influence is also automatically exported even if it has not been selected.</strong></p>
+<p>To export an intermediate file, specify the appropriate options and click <strong>Export</strong> or <strong>Apply</strong>.</p>
+<p>An error occurs if a valid LOD group root does not exist for the export targets or if there are multiple LOD group roots.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Cases where there is only a base model or only an LOD model are handled as if there is no valid LOD group root.</p>
+  </div>
+</div>
+<h2 id="Anchor_83956044_h2_2">
+  <a name="Anchor_83956044_modeling_limitation"></a>Modeling Restrictions</h2>
+<p>There are several restrictions on the polygon objects for the base model (the base polygons) and the corresponding polygon objects for the LOD models (the LOD polygons).<br />If you try to export a file that does not conform to these restrictions, an error occurs. The problem component is selected based on the type of error.</p>
+<ul>
+  <li>Match up the translation, rotation, scaling and pivot values for the nodes. <br />For the root node, you can also use the <a href="../Pages/Page_83956186.html#Anchor_83956186_model_options">Reset Root Transform option</a> to match up the translation, rotation, and scaling.</li>
+  <li>Apply the same materials and textures.<br />Materials that do not exist in the base model cannot be used in an LOD model.<br />The LOD model can have fewer materials than the base model. However, a material that does not exist in a higher level LOD model cannot be present in a lower level LOD model.</li>
+  <li>Use the same vertex color set configuration.<br />Also configure a color for the LOD polygon when setting a vertex color for the base polygon. Vertex color sets are not exported when vertex colors are not configured. Similarly, configure a color for the base polygon when your have set a vertex color for the LOD polygon.</li>
+  <li>Use the same UV set configuration.</li>
+  <li>If you have set skinning, influences that are not used in any base polygon may not be used with the LOD polygons. (Influences with a weight of 0 are treated as unused.)<br />(In NintendoSDK versions earlier than 13.0.0, influences that are not used for the base polygons are still unavailable for the corresponding LOD polygons.)</li>
+  <li>For base polygons with a skinning weight of 0 or 1 (which corresponds to rigid skinning in NintendoWare), the skinning weights for LOD polygons must also be 0 or 1.<br />Use of rigid skinning is determined on a face-by-face basis for faces to which the same material is applied.</li>
+  <li>The maximum number of influences for LOD polygon skinning needs to be less than the number of base polygons.</li>
+  <li>Skinning with maximum influence counts of the 4 or less level cannot be mixed with the 5 or greater level.</li>
+</ul>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>If the error &quot;the LOD model's bone scale, rotation, or translation does not match that of the base model&quot; occurs in a model with skinning, there may be a mismatch between the bind poses of the base model and LOD model.<br />In that case, try rebinding each polygon object skin using the same pose.</p>
+  </div>
+</div>
+<h2 id="Anchor_83956044_h2_3">Vertex Attribute Quantization Type</h2>
+<p>A <em>vertex attribute quantization type</em> that can represent all of the values used for the base model and LOD models is selected.<br />For example, even if the all the UV values for the base model are in the range from 0 through 1 (and could be represented with <code>unorm_8_8</code>), the <code>float_16_16</code> quantization type is used if any of the LOD models has a UV value greater than 1 (and a warning is displayed in the script editor).</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If you want to minimize the amount of vertex data, make sure to limit the range of vertex colors and UV values you use for your LOD models.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

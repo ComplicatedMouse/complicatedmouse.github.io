@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Information Common to All Library Applets | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Information Common to All Library Applets -->
+<div class="pagetitle" id="PageId_162184139">Information Common to All Library Applets</div>
+<div class="text_separate">
+<p>This section describes the common information when using library applets.</p>
+<h1 id="Anchor_162184139_h1_1">Connecting Applets and Pictures</h1>
+<p>When a library applet is called, the frame picture at the point it was called will be captured and used as the background for the library applet.</p>
+<p>When the library applet exits, the captured picture that was used for the background will be subject to fadeout processing. When calling the applet, stop updating pictures in the application if you want the background picture to connect to (match) the application. </p>
+<p>Also, the maximum rendering resolution of the library applet is 720p. If the resolution is different from the application side, you may experience differences in resolution before and after the call.</p>
+<h1 id="Anchor_162184139_h1_2">Library Applet Sounds</h1>
+<h2 id="Anchor_162184139_h2_1">Sound Threads</h2>
+<p>The thread calling the library applet will wait for restoration.<br />As a result, if you make the sound thread the same thread that calls the library applet, the sound will stop when the library applet is called.</p>
+<h2 id="Anchor_162184139_h2_2">Controlling the Volume Balance</h2>
+<p>It is possible to change the volume of the application and library applet when calling the library applet from an application.</p>
+<p>For more information, see <a href="../Pages/Page_174233259.html">Operating Environment Controls</a> and the API Reference.</p>
+<h1 id="Anchor_162184139_h1_3">Specifying the Color Types for Displaying Library Applets</h1>
+<p>With some exceptions, you can change the color types (for the screen background color and the text color) to use when displaying the library applets used by the application.</p>
+<p>The color type can be chosen from among the color themes prepared for the NX system. (You cannot specify any color you want.)<br />At the NX launch, there will be two color types: black and white. <strong>These might be added to in the future.</strong>  </p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <div class="confluence-information-macro-body">
+      <p>The following applets do not support the specification of a color type. They are always displayed using the same color, regardless of the theme set by the user.</p>
+      <ul>
+        <li>Mii applet</li>
+        <li>Web Applet</li>
+        <li>Offline Web Applet</li>
+        <li>EC applet</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<h2 id="Anchor_162184139_h2_3">Corresponding Functions and How to Use Them<br /></h2>
+<p>The table shows the correspondence between features and API functions. For more information, see <a href="../Pages/Page_174233259.html">Operating Environment Controls</a> and the API Reference.</p>
+<h4 id="Anchor_162184139_h4_1">Specifying a Theme Color</h4>
+<table class="wrapped relative-table" style="width: 48.2871%;">
+  <colgroup>
+    <col style="width: 64.5245%;" />
+    <col style="width: 35.4946%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Function</th>
+      <th style="text-align: center;">Corresponding Function</th>
+    </tr>
+    <tr>
+      <td>Specify the color type to use for the library applets.</td>
+      <td> <span class="ApiLink_nn__oe__SetExpectedThemeColor">nn::oe::SetExpectedThemeColor</span></td>
+    </tr>
+  </tbody>
+</table>
+<p>Any library applet called after the call to this function will use the color type specified by the function.<br />Any of the following color types can be specified.</p>
+<ul>
+  <li>The color type that was configured by the user. (<strong>The default</strong>)</li>
+  <li>A color type directly specified from among those provided in the system features.</li>
+</ul>
+<h3 id="Anchor_162184139_h3_1">Including the Header File</h3>
+<p>To use this feature, add the following code to your program.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/oe.h&gt;
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_162184139_h1_4">Simultaneously Starting Multiple Library Applets</h1>
+<p>Multiple library applets cannot be started simultaneously. Only one applet can be started at a time.</p>
+<p>If the program attempts to start up multiple library applets each from multiple threads, the system behavior is as follows.</p>
+<ul>
+  <li>The start of the second applet is delayed until the first applet terminates.<br />In other words, the thread that attempts to start a second applet enters an infinite wait state until the first applet terminates.</li>
+</ul>
+<p>Library applets use system resources to operate; this infinite wait system is included as a minimum safety measure to prevent insufficient resources. However, if an application attempts to start multiple applets with the expectation of this infinite wait mechanism, the following bugs occur.</p>
+<ul class="alternate">
+  <li>If two or more applications are waiting for startup, the application cannot control which applet to start next.</li>
+  <li>Even if the second and later applets are no longer required, the application cannot cancel startup.</li>
+  <li>If the user terminates the application, the applicable thread cannot immediately move to other processing (such as termination processing).</li>
+</ul>
+<p />
+<p>For the preceding reasons, you must implement controls in the application to avoid starting multiple library applets simultaneously.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__oe__SetExpectedThemeColor', '../../../Api/HtmlNX/namespacenn_1_1oe.html#accebbb1e7485a01bdcb5a3ec7ff44717' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,282 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Memory Pools | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Memory Pools -->
+<div class="pagetitle" id="PageId_164722471">Memory Pools</div>
+<div class="text_separate">
+<h1 id="Anchor_164722471_h1_1">Using Memory Pools in the VFX Runtime</h1>
+<p>This section describes the memory pools that are created in the VFX runtime.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_164722471_h2_1">Memory Pools Created During Effect Binary Initialization</a>
+    </li>
+    <li>
+      <a href="#Anchor_164722471_h2_2">Placing Effect Binaries in External Memory Pools</a>
+    </li>
+  </ul>
+</p>
+<h2 id="Anchor_164722471_h2_1">Memory Pools Created During Effect Binary Initialization</h2>
+<p>There are two basic patterns for the memory pools created when effect binaries are initialized.</p>
+<ul>
+  <li>Memory pools created during the set up of textures objects (<code><span class="ApiLink_nn__gfx__ResTextureFile">nn::gfx::ResTextureFile</span></code>) and shader objects (<code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code>)</li>
+  <li>Memory pools dynamically created during the initialization of resources such as trimming primitive vertex data and constant buffers</li>
+</ul>
+<p>You can avoid creating these memory pools by placing and initializing the effect binaries in an external memory pool.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th> </th>
+      <th>
+        <p style="text-align: center;">External Memory</p>
+        <p>Pool Placement</p>
+      </th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Vertex and pixel shaders</td>
+      <td style="text-align: center;">○</td>
+      <td>
+        <p>Memory pools in which vertex and pixel shader binaries are placed are created when loading resources.</p>
+        <p>You can also output the shaders to a separate file (<code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code>), place and initialize it in a memory pool prepared by the application,</p>
+        <p>and then bind it to the separately initialized effect binaries for use.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Compute shaders</td>
+      <td style="text-align: center;">○</td>
+      <td>
+        <p>A memory pool for placing the compute shader binaries is created when the resources are loaded.<br />You can also output the shaders to a separate file (<code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code>), place and initialize it in a memory pool prepared by the application,<br />and then bind it to the separately initialized effect binaries for use.</p>
+      </td>
+    </tr>
+    <tr>
+      <td> Textures</td>
+      <td style="text-align: center;">○</td>
+      <td>
+        <p>A memory pool for placing the texture binaries is created when the resources are loaded.</p>
+        <p>This memory pool is not created if the texture binaries are going be placed and used from memory pools created by the application.</p>
+        <p>In this case, you must pass the instance of the memory pool in which they are placed and the placement target offset to the parameters of the <code><span class="ApiLink_nn__vfx__System__EntryResource">nn::vfx::System::EntryResource</span></code> member function.</p>
+        <p />
+      </td>
+    </tr>
+    <tr>
+      <td>Primitives</td>
+      <td style="text-align: center;">
+        <p>△</p>
+        <p> </p>
+      </td>
+      <td>
+        <p>When an FMDB file is specified for particle shape, a memory pool for storing the model binary is created.</p>
+        <p>This memory pool is not created if the texture binaries are going be placed and used from memory pools created by the application.</p>
+        <p>However, when using the trimming feature, a memory pool for storing the primitive vertex data is created, and the trimming vertices are copied to the created memory pool.<br /></p>
+      </td>
+    </tr>
+    <tr>
+      <td>Constant buffers</td>
+      <td style="text-align: center;">&times;</td>
+      <td>
+        <p>Memory pools in which static constant buffers that each emitter uses are placed are created when loading resources.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_164722471_h2_2">Placing Effect Binaries in External Memory Pools</h2>
+<p>By placing and initializing the effect binaries in a user-created memory pool, you can avoid creating memory pools in which the shader and texture binaries included within effect binaries are placed. However, depending on the platform you are developing for, it may not be possible to put texture binaries and shader binaries in the same memory pool. In this case, you must output the shader binaries to separate files, initialize those files individually, and then bind them.</p>
+<p>For more information about the restrictions on placing data in memory pools by platform, see <a href="../Pages/Page_95696747.html">Platform-Specific Information</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12</td>
+      <td class="code">
+        <div class="codeblock"><pre>// Load the effect binary.
+void* pEffectBinary = FileLoad( &quot;vfx.ptcl&quot; );
+
+// Initialize the loaded binary space as a memory pool.
+nn::gfx::MemoryPoolInfo info;
+info.SetMemoryPoolProperty( nn::gfx::MemoryPoolProperty_CpuCached | nn::gfx::MemoryPoolProperty_GpuCached | nn::gfx::MemoryPoolProperty_ShaderCode );
+info.SetPoolMemory( pEffectBinary, effectBinarySize );
+nn::gfx::MemoryPool effectBinaryMemoryPool;
+effectBinaryMemoryPool.Initialize( device, info );
+
+// Specify the memory pool and initialize the effect binary.
+vfxSystem-&gt;EntryResource( heap, effectBinary, &amp;effectBinaryMemoryPool, effectBinaryMemoryPoolOffset, resourceId, 0 );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25</td>
+      <td class="code">
+        <div class="codeblock"><pre>// Load the effect binary.
+void* pEffectBinary = FileLoad( &quot;vfx.ptcl&quot; );
+
+// Initialize the loaded binary space as a memory pool.
+nn::gfx::MemoryPoolInfo info;
+info.SetMemoryPoolProperty( nn::gfx::MemoryPoolProperty_CpuCached | nn::gfx::MemoryPoolProperty_GpuCached );
+info.SetPoolMemory( pEffectBinary, effectBinarySize );
+nn::gfx::MemoryPool effectBinaryMemoryPool;
+effectBinaryMemoryPool.Initialize( device, info );
+
+// Specify the memory pool and initialize the effect binary.
+vfxSystem-&gt;EntryResource( heap, effectBinary, &amp;effectBinaryMemoryPool, effectBinaryMemoryPoolOffset, resourceId, 0 );
+
+// Load the vertex, pixel, and compute shaders.
+void* pShaderBinary = FileLoad( &quot;shader.bnsh&quot; );
+void* pComputeShaderBinary = FileLoad( &quot;compute_shader.bnsh&quot; );
+
+// Initialize the vertex, pixel, and compute shaders.
+nn::gfx::ResShaderFile* pResShaderFile = nn::gfx::ResShaderFile::ResCast( pShaderBinary );
+pResShaderFile-&gt;GetShaderContainer()-&gt;Initialize( device );
+
+nn::gfx::ResShaderFile* pComputeResShaderFile = nn::gfx::ResShaderFile::ResCast( pComputeShaderBinary );
+pComputeResShaderFile-&gt;GetShaderContainer()-&gt;Initialize( device );
+
+vfxSystem-&gt;GetResource( resourceId )-&gt;BindExternalResShaderFile( pResShaderFile, pComputeResShaderFile );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Use the <code>output-shader-binary</code> and <code>output-compute-shader-binary</code> command-line options when converting effect binary data to output vertex shaders, pixel shaders, and compute shaders from the effect binary as separate files.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="gutter">1<br />
+2<br />
+3<br />
+4</td>
+          <td class="code">
+            <div class="codeblock"><pre>EffectConverter.exe --output vfx.ptcl --convert-list ConvertList.xml 
+--api-type xxx --code-type xxx --tile-mode xxx
+--output-shader-binary shader.bnsh 
+--output-compute-shader-binary compute_shader.bnsh </pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p> </p>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__ResTextureFile', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_res_texture_file.html' )
+SetUrl( 'ApiLink_nn__gfx__ResShaderFile', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_res_shader_file.html' )
+SetUrl( 'ApiLink_nn__vfx__System__EntryResource', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_system.html#a0418cc91c6dceab635cb5117b6aaf5e2' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

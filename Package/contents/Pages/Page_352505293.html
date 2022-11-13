@@ -1,0 +1,333 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>3dIntermediateFileTextureCompositor | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- 3dIntermediateFileTextureCompositor -->
+<div class="pagetitle" id="PageId_352505293">3dIntermediateFileTextureCompositor</div>
+<div class="text_separate">
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This feature is currently being verified. When using this feature, note that its operation and specifications are subject to change without notice.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>This section describes how to use the 3dIntermediateFileTextureCompositor (<code>%NINTENDO_SDK_ROOT%\Tools\Graphics\3dTools\3dIntermediateFileTextureCompositor.exe</code>).</p>
+<h1 id="Anchor_352505293_h1_1">Overview</h1>
+<p>Material samplers, and the textures assigned to samplers, are integrated according to the shader definition.</p>
+<h1 id="Anchor_352505293_h1_2">Command-Line Options</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dIntermediateFileTextureCompositor.exe [--version] [-h] [-s] [-j &quot;&quot;] [-o &quot;&quot;] [--shader-definition &quot;&quot;] [--callbacks &quot;&quot;] [--callback-user-argument &quot;&quot;] [--material-search-path &quot;&quot;] [Material intermediate file, model intermediate file]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>--version</strong>
+</p>
+<p>Displays version information.</p>
+<p>
+  <strong>-h --help</strong>
+</p>
+<p>Displays Help.</p>
+<p>
+  <strong>-s --silent</strong> 　</p>
+<p>Suppresses the display of messages during processing.</p>
+<p>
+  <strong>-j --jobs &quot;&quot;</strong>
+</p>
+<p>Specifies the number of jobs to run. When unspecified, the processor count is assigned.</p>
+<p>
+  <strong>-o &quot;&quot; --output &quot;&quot;</strong>
+</p>
+<p>Specifies the path to the folder where the output files (material intermediate file, model intermediate file, and texture intermediate file) are stored.</p>
+<p>
+  <strong>Material intermediate file, model intermediate file</strong>
+</p>
+<p>Specifies the material intermediate file or model intermediate file for input.</p>
+<p>
+  <strong>--shader-definition &quot;&quot;</strong>
+</p>
+<p>Specifies the shader definition file referenced by the material in the input file, and the folder where the file is stored. Use semicolons as delimiters to enter multiple paths.</p>
+<p>
+  <strong>--callbacks &quot;&quot;</strong>
+</p>
+<p>Specifies the paths to DLL or C# source code (.cs) that includes callback implementations for material preprocessing and texture conversion. Use semicolons as delimiters to enter multiple paths.</p>
+<p>
+  <strong>--callback-user-argument &quot;&quot;</strong>
+</p>
+<p>Specifies any string arguments to pass to callback processing.</p>
+<p>
+  <strong>--material-search-path &quot;&quot;</strong>
+</p>
+<p>The material search path. Used to determine the parent material. If not specified, the processes applied to the parent material are skipped.</p>
+<p>
+  <strong>--texture-search-path &quot;&quot;</strong>
+</p>
+<p>The texture search path. Used to resolve the paths of textures referenced by materials.</p>
+<p>
+  <strong>--cache-directory &quot;&quot;</strong>
+</p>
+<p>Specifies the folder for saving the internally generated cache to speed up processing. When you specify this option, the cache is referenced during the second and subsequent changes, and changes are only made where they need to be made again.</p>
+<p>
+  <strong>--continue-on-error</strong>
+</p>
+<!--Remove-->
+<p>If the error is not continuable, processing continues despite the error.</p>
+<!--Remove-->
+<p>
+  <br />
+</p>
+<h1 id="Anchor_352505293_h1_3">Callbacks</h1>
+<h2 id="Anchor_352505293_h2_1">Material Preprocessing</h2>
+<p>By defining a class that inherits an interface called <code>IPreprocessMaterial</code> or <code>IPreprocessMaterials</code>, you can apply any processing to materials prepared before merging samplers and textures. The following processes are primarily performed inside this callback.</p>
+<ul>
+  <li>Determine which sampler pattern to use, and set the corresponding shader options.</li>
+  <li>Consolidate sampler parameters for samplers to be integrated.</li>
+</ul>
+<p>The tool will not specify anything if a callback is not specified. If materials are not configured with a callback, the settings needed for materials must be completed in advance.</p>
+<p>The following example shows a callback that sets the shader options for merging channels based on a particular material sampler structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">using</span> <span class="nn">_3dIntermediateFileCallbacks</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Nintendo.G3dTool.Entities</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Text</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.IO</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">PreprocessMaterialCallback</span> <span class="p">:</span> <span class="n">IPreprocessMaterial</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">public</span> <span class="k">void</span> <span class="n">PreprocessMaterial</span><span class="p">(</span><span class="n">PreprocessMaterialArgument</span> <span class="n">arg</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Material</span> <span class="n">material</span> <span class="p">=</span> <span class="n">arg</span><span class="p">.</span><span class="n">Target</span><span class="p">.</span><span class="n">Material</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">ShaderDefinition</span> <span class="n">shaderDef</span> <span class="p">=</span> <span class="n">arg</span><span class="p">.</span><span class="n">Target</span><span class="p">.</span><span class="n">ShaderDefinition</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// enable_mix_tex is automatically set in accordance to the presence or absence of sampler assign.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">var</span> <span class="n">option</span> <span class="p">=</span> <span class="n">material</span><span class="p">.</span><span class="n">ShaderAssign</span><span class="p">.</span><span class="n">ShaderOptions</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Id</span> <span class="p">==</span> <span class="s">&quot;enable_mix_tex&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">option</span> <span class="p">==</span> <span class="k">null</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">option</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ShaderOption</span><span class="p">()</span> <span class="p">{</span> <span class="n">Id</span> <span class="p">=</span> <span class="s">&quot;enable_mix_tex&quot;</span> <span class="p">};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">material</span><span class="p">.</span><span class="n">ShaderAssign</span><span class="p">.</span><span class="n">ShaderOptions</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">option</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">var</span> <span class="n">specularSamplerAssign</span> <span class="p">=</span> <span class="n">material</span><span class="p">.</span><span class="n">ShaderAssign</span><span class="p">.</span><span class="n">SamplerAssigns</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Id</span> <span class="p">==</span> <span class="s">&quot;_s0&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">bool</span> <span class="n">isSpeculerAssigned</span> <span class="p">=</span> <span class="n">specularSamplerAssign</span> <span class="p">!=</span> <span class="k">null</span> <span class="p">&amp;&amp;</span> <span class="p">!</span><span class="kt">string</span><span class="p">.</span><span class="n">IsNullOrEmpty</span><span class="p">(</span><span class="n">specularSamplerAssign</span><span class="p">.</span><span class="n">SamplerName</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">var</span> <span class="n">aoSamplerAssign</span> <span class="p">=</span> <span class="n">material</span><span class="p">.</span><span class="n">ShaderAssign</span><span class="p">.</span><span class="n">SamplerAssigns</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Id</span> <span class="p">==</span> <span class="s">&quot;_x0&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">bool</span> <span class="n">isAoAssigned</span> <span class="p">=</span> <span class="n">aoSamplerAssign</span> <span class="p">!=</span> <span class="k">null</span> <span class="p">&amp;&amp;</span> <span class="p">!</span><span class="kt">string</span><span class="p">.</span><span class="n">IsNullOrEmpty</span><span class="p">(</span><span class="n">aoSamplerAssign</span><span class="p">.</span><span class="n">SamplerName</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">isSpeculerAssigned</span> <span class="p">&amp;&amp;</span> <span class="n">isAoAssigned</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">option</span><span class="p">.</span><span class="n">Value</span> <span class="p">=</span> <span class="s">&quot;1&quot;</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">else</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">option</span><span class="p">.</span><span class="n">Value</span> <span class="p">=</span> <span class="s">&quot;0&quot;</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_352505293_h2_2">Texture Conversion</h2>
+<p>You can customize texture conversion by defining a class that inherits an <code>IConvertTexture</code> or <code>IConvertTextures</code> interface. Because tools pass the default texture converter options, the script determines the final options, and performs conversion based on those options. If source code specifications are omitted, conversion is performed with the default options.</p>
+<p>The following is an example of a callback that converts textures using the passed options without modification.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">using</span> <span class="nn">_3dIntermediateFileCallbacks</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Nintendo.G3dTool.Entities</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">ConvertTextureCallback</span> <span class="p">:</span> <span class="n">IConvertTexture</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">public</span> <span class="k">void</span> <span class="n">ConvertTexture</span><span class="p">(</span><span class="n">ConvertTextureArgument</span> <span class="n">arg</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">ExecuteProcess</span><span class="p">(</span><span class="n">arg</span><span class="p">.</span><span class="n">TextureConverterPath</span><span class="p">,</span> <span class="n">arg</span><span class="p">.</span><span class="n">Target</span><span class="p">.</span><span class="n">TextureConverterOption</span><span class="p">.</span><span class="n">ToString</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">private</span> <span class="k">static</span> <span class="k">void</span> <span class="n">ExecuteProcess</span><span class="p">(</span><span class="kt">string</span> <span class="n">cmd</span><span class="p">,</span> <span class="kt">string</span> <span class="n">args</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">var</span> <span class="n">info</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ProcessStartInfo</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span> <span class="n">UseShellExecute</span> <span class="p">=</span> <span class="k">false</span> <span class="p">};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">info</span><span class="p">.</span><span class="n">RedirectStandardError</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">info</span><span class="p">.</span><span class="n">RedirectStandardOutput</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">info</span><span class="p">.</span><span class="n">CreateNoWindow</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">var</span> <span class="n">process</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Process</span> <span class="p">{</span> <span class="n">StartInfo</span> <span class="p">=</span> <span class="n">info</span> <span class="p">};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">OutputDataReceived</span> <span class="p">+=</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="p">=&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">Data</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">Data</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">};</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">ErrorDataReceived</span> <span class="p">+=</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="p">=&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">Data</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Console</span><span class="p">.</span><span class="n">Error</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">Data</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">};</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">Start</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">BeginOutputReadLine</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">BeginErrorReadLine</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">WaitForExit</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following is an example of a callback that converts up to BNTX after texture compression.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">using</span> <span class="nn">_3dIntermediateFileCallbacks</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Nintendo.G3dTool.Entities</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">ConvertTexturesCallback</span> <span class="p">:</span> <span class="n">IConvertTextures</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">public</span> <span class="k">void</span> <span class="n">ConvertTextures</span><span class="p">(</span><span class="n">ConvertTexturesArgument</span> <span class="n">arg</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">StringBuilder</span> <span class="n">convertBntxArgs</span> <span class="p">=</span> <span class="k">new</span> <span class="n">StringBuilder</span><span class="p">();</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Compress each texture.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">target</span> <span class="k">in</span> <span class="n">arg</span><span class="p">.</span><span class="n">Targets</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Utility</span><span class="p">.</span><span class="n">ExecuteProcess</span><span class="p">(</span><span class="n">arg</span><span class="p">.</span><span class="n">TextureConverterPath</span><span class="p">,</span> <span class="n">target</span><span class="p">.</span><span class="n">TextureConverterOption</span><span class="p">.</span><span class="n">ToString</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">convertBntxArgs</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="err">$</span><span class="s">&quot;{target.TextureConverterOption.Output} &quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">string</span> <span class="n">texOutputFolder</span> <span class="p">=</span> <span class="n">Path</span><span class="p">.</span><span class="n">GetDirectoryName</span><span class="p">(</span><span class="n">arg</span><span class="p">.</span><span class="n">Targets</span><span class="p">.</span><span class="n">First</span><span class="p">().</span><span class="n">TextureConverterOption</span><span class="p">.</span><span class="n">Output</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">string</span> <span class="n">outputFolder</span> <span class="p">=</span> <span class="n">Path</span><span class="p">.</span><span class="n">GetDirectoryName</span><span class="p">(</span><span class="n">texOutputFolder</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Presumes that the BNTX filename and additional options are stored in the user argument.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">var</span> <span class="n">splited</span> <span class="p">=</span> <span class="n">arg</span><span class="p">.</span><span class="n">UserArgument</span><span class="p">.</span><span class="n">Split</span><span class="p">(</span><span class="sc">';'</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">string</span> <span class="n">bntxFileName</span> <span class="p">=</span> <span class="n">splited</span><span class="p">[</span><span class="m">0</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">string</span> <span class="n">additionalArgs</span> <span class="p">=</span> <span class="n">splited</span><span class="p">[</span><span class="m">1</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">string</span> <span class="n">outputBntxPath</span> <span class="p">=</span> <span class="n">Path</span><span class="p">.</span><span class="n">Combine</span><span class="p">(</span><span class="n">outputFolder</span><span class="p">,</span> <span class="err">$</span><span class="s">&quot;{bntxFileName}.bntx&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">convertBntxArgs</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="err">$</span><span class="s">&quot;--output {outputBntxPath} {additionalArgs}&quot;</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Convert to BNTX.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Utility</span><span class="p">.</span><span class="n">ExecuteProcess</span><span class="p">(</span><span class="n">arg</span><span class="p">.</span><span class="n">TextureConverterPath</span><span class="p">,</span> <span class="n">convertBntxArgs</span><span class="p">.</span><span class="n">ToString</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">private</span> <span class="k">static</span> <span class="k">void</span> <span class="n">ExecuteProcess</span><span class="p">(</span><span class="kt">string</span> <span class="n">cmd</span><span class="p">,</span> <span class="kt">string</span> <span class="n">args</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">var</span> <span class="n">info</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ProcessStartInfo</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span> <span class="n">UseShellExecute</span> <span class="p">=</span> <span class="k">false</span> <span class="p">};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">info</span><span class="p">.</span><span class="n">RedirectStandardError</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">info</span><span class="p">.</span><span class="n">RedirectStandardOutput</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">info</span><span class="p">.</span><span class="n">CreateNoWindow</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">var</span> <span class="n">process</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Process</span> <span class="p">{</span> <span class="n">StartInfo</span> <span class="p">=</span> <span class="n">info</span> <span class="p">};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">OutputDataReceived</span> <span class="p">+=</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="p">=&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">Data</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">Data</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">};</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">ErrorDataReceived</span> <span class="p">+=</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="p">=&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">Data</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Console</span><span class="p">.</span><span class="n">Error</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">Data</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">};</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">Start</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">BeginOutputReadLine</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">BeginErrorReadLine</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">process</span><span class="p">.</span><span class="n">WaitForExit</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_352505293_h1_4">Usage Example</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dIntermediateFileTextureCompositor.exe Input.fmtb --output ./Outputs --shader-definition ../Shaders --callbacks <span class="s2">&quot;../Callbacks&quot;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

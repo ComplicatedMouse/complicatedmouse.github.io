@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Notes When Changing Environments | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Notes When Changing Environments -->
+<div class="pagetitle" id="PageId_93357758">Notes When Changing Environments</div>
+<div class="text_separate">
+<h1 id="Anchor_93357758_h1_1">Notes About Migrating Between Platforms</h1>
+<p>This section contains information about the migration between platforms with different data-type models. These notes mainly focus on the differences between 32-bit and 64-bit environments.</p>
+<p>In particular, developers who are used to a 32-bit environment should familiarize themselves with these notes when migrating to a 64-bit environment or writing source code to be built in both 32-bit and 64-bit environments.</p>
+<h2 id="Anchor_93357758_h2_1">Do not use the long type</h2>
+<p>The <code>long</code> data type can be 32 bits or 64 bits, depending on the date-type model. So if you are coding for both the 32-bit and 64-bit environments, we recommend not using the <code>long</code> data type. <code>sizeof(long) == sizeof(int)</code> in particular is not expected in a 64-bit environment.</p>
+<p>Instead of <code>long</code>, you can use <code>(u)int32_t</code> and <code>(u)int64_t</code>, where the bit width is easy to discern just by looking at the name. Also, use <code>uintptr_t</code> for the integer type that can convert and assign pointers.</p>
+<h2 id="Anchor_93357758_h2_2">Do not assign pointers to int and other integer types</h2>
+<p>Pointers like <code>void*</code> are typical of types where the size can differ. In the 32-bit environment, there are cases where pointers are converted to <code>unsigned int</code> or <code>unsigned long</code> and added and subtracted, their alignment is adjusted, and other logical operations are performed. But in the 64-bit environment, the high-order bit can be lost in this kind of assignment to integer types.</p>
+<p>We recommend using <code>uintptr_t</code> for addition and subtraction on integer-type addresses. To compute alignment adjustments and the like, you can use the following utility functions.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__util__is_aligned">nn::util::is_aligned</span>()</li>
+  <li>
+    <span class="ApiLink_nn__util__align_up">nn::util::align_up</span>()</li>
+  <li>
+    <span class="ApiLink_nn__util__align_down">nn::util::align_down</span>()</li>
+</ul>
+<h2 id="Anchor_93357758_h2_3">Be careful with radix complement and sign extension of constants</h2>
+<p>In the 32-bit environment, you must be careful about places where the negative constant <code>-1</code> represents <code>0xFFFFFFFF</code>. If this is an unsigned type and it is substituted by a 64-bit data type, the upper 32 bits will be extended with zeros and it will no longer be <code>-1</code>.</p>
+<p>You also need to be careful about logical operations on 64-bit data and constants. Below is an example of code containing a bug.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kr">inline</span> <span class="kt">uint64_t</span>  <span class="nf">SetBit</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">position</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ASSERT</span><span class="p">(</span> <span class="n">position</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">position</span> <span class="o">&lt;=</span> <span class="mi">63</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="n">data</span> <span class="o">|</span> <span class="p">(</span><span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="n">position</span><span class="p">);</span>
+<span class="p">}</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This function passes the positions of bits 0 through 63 to <code>position</code> and returns the values of the <code>position</code> bits of the <code>data</code> variable set to <code>1</code>. It will not return the expected result for <code>position</code> bits 31 through 63.</p>
+<p>For example, it will return <code>0xFFFFFFFF80000000</code> for <code>SetBit(0, 31)</code>, but always return <code>0</code> for anything from <code>SetBit(0, 32)</code> to <code>SetBit(0, 63)</code>.</p>
+<p>The problem is that the constant <code>0x1</code> is a 32-bit signed value. By correcting this to <code>0x1ull</code> as shown below, the function will return the expected values.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kr">inline</span>  <span class="kt">uint64_t</span>  <span class="nf">SetBit</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">position</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ASSERT</span><span class="p">(</span> <span class="n">position</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">position</span> <span class="o">&lt;=</span> <span class="mi">63</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="n">data</span> <span class="o">|</span> <span class="p">(</span><span class="mh">0x1ull</span> <span class="o">&lt;&lt;</span> <span class="n">position</span><span class="p">);</span>
+<span class="p">}</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_93357758_h2_4">Be careful with the size of structures</h2>
+<p>When structure members contain <code>long</code> or pointer types, the size of the structure will differ in the 32-bit and 64-bit environments. In addition, padding will be inserted between individual member variables for alignment purposes.</p>
+<!--Remove-->
+<p> </p>
+<h2 id="Anchor_93357758_h2_5">Be careful about alignment</h2>
+<p>There is no problem in the x86 and x86-64 environments, but in the target hardware environment, the processor specifications can put restrictions on the alignment of placed data.</p>
+<p>In addition, if you are using an assembler, there are restrictions on the alignment of addresses pointed to by the stack pointer (the <code>sp</code> register). For example, with <strong>AArch32</strong>, alignment must always be 8 bytes, whereas with <strong>AArch64</strong>, alignment must always be 16 bytes. For more information, see the reference manuals for the different processors.</p>
+<h2 id="Anchor_93357758_h2_6">Note the format of NN_LOG()</h2>
+<p>The following code runs correctly in a 32-bit environment but provides incorrect results in a 64-bit environment.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/nn_Common.h&gt;
+#include &lt;nn/nn_Log.h&gt;
+</span>
+<span class="kt">void</span> <span class="nf">print_info</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">address</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;address = 0x%08x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">address</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;size    = 0x%08x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In the 64-bit environment, the parameters <code>address</code> and <code>size</code> are 64-bit wide variables, so <code>%x</code> cannot get the correct value. In fact, <code>%08x</code> clearly assumes a 32-bit environment.</p>
+<p>These can be fixed in the following way.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;address = 0x%p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">address</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;size    = 0x%zx</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__util__is_aligned', '../../../Api/HtmlNX/namespacenn_1_1util.html#a861c56e3f44d1b1d2cd238efffb5c566' )
+SetUrl( 'ApiLink_nn__util__align_up', '../../../Api/HtmlNX/namespacenn_1_1util.html#a275a3c89db5d0ab915559d8a85f9cbdd' )
+SetUrl( 'ApiLink_nn__util__align_down', '../../../Api/HtmlNX/namespacenn_1_1util.html#ac7655ccdb1f67a75ae553c06dec485b3' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

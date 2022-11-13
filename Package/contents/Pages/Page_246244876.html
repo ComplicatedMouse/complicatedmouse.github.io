@@ -1,0 +1,452 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Secure Coding Support Manual | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Secure Coding Support Manual -->
+<div class="pagetitle" id="PageId_246244876">Secure Coding Support Manual</div>
+<div class="text_separate">
+<h1 id="Anchor_246244876_h1_1">Protecting Against Invalid Data From Sources Beyond the Platform</h1>
+<h2 id="Anchor_246244876_h2_1">Threats From Invalid External Data</h2>
+<p>For applications that read and use external data, there is a risk when external data has not been validated that fabricated external data could be used to produce invalid codes (exploit codes) from beyond the platform to penetrate the game and alter game content.</p>
+<p>As an example, additional care is needed when transferring save data from one platform to another. If the source platform has been hacked, an attack could be devised against the target platform.</p>
+<h2 id="Anchor_246244876_h2_2">Example of Measures to Protect From Invalid Data</h2>
+<h3 id="Anchor_246244876_h3_1">Buffer Overflow</h3>
+<p>Buffer overflow is linked to the execution of invalid code, and is the most representative example case.</p>
+<h4 id="Anchor_246244876_h4_1">Typical Attack Scenario</h4>
+<ul>
+  <li>Stack Corruption Attack<ul><li>Local function variables and return addresses to those functions exist within the stack.<br />As copies to the local variables cause the buffer to overflow, it is possible to overwrite return address information.<br />When the functions return, because they try to return to the overwritten return addresses, program execution can jump to arbitrary addresses.<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_246244876/246244826.png" class="embedded-image" /></span></li></ul></li>
+</ul>
+<p>
+  <br />
+</p>
+<ul>
+  <li>Attacks on Static Variable Areas<ul><li>When arrays and function pointer tables are arranged in succession in the static variable area, by making the buffer overflow, it is possible to overwrite function pointer table addresses as a continuation. When a function indicated by the function pointer is called, it may jump to an arbitrary address.<br /><br /></li></ul></li>
+</ul>
+<h4 id="Anchor_246244876_h4_2">Countermeasures</h4>
+<ul>
+  <li>Check input data from external sources strictly.<ul><li>When copying variable-length areas, ensure that the size copied does not exceed the buffer size at the destination.</li><li>When copying strings, ensure that the size copied does not exceed the buffer size at the destination.</li></ul></li>
+  <li>Use the static code analysis tool.</li>
+</ul>
+<h5 id="Anchor_246244876_h5_1">Program Example</h5>
+<h6 id="Anchor_246244876_h6_1">Overflow due to string processing</h6>
+<ul>
+  <li style="list-style-type: none; background-image: none;">
+    <ul>
+      <li>
+        <p>Example of dangerous code</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre><span class="cp">#define MAXSIZE 256
+</span>
+<span class="kt">int</span> <span class="nf">badcode</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">pSource</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">dest</span><span class="p">[</span><span class="n">MAXSIZE</span><span class="p">];</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">strcpy</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">pSource</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// If the size of the string pSource points to, including null characters, is larger than MAXSIZE, the buffer will overflow.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// When returning from the function, you can make it jump to an arbitrary address in the stack.
+</span><span class="p">}</span></pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li>
+        <p>Example of safe code</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre><span class="cp">#define MAXSIZE 256
+</span>
+<span class="kt">int</span> <span class="nf">safecode</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">pSource</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">dest</span><span class="p">[</span><span class="n">MAXSIZE</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pSource</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// Error
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memset</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">MAXSIZE</span><span class="p">);</span> <span class="c1">// Clear the copy destination region to 0.
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">MAXSIZE</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">strnlen</span><span class="p">(</span><span class="n">pSource</span><span class="p">,</span> <span class="n">MAXSIZE</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="c1">// Compares the size of the copy destination region and the size of the string.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">strlcpy</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">MAXSIZE</span><span class="p">);</span> <span class="c1">// Use the function with a limit on the number of copied bytes.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+</ul>
+<h6 id="Anchor_246244876_h6_2">Overflow due to improper handling of variable length data</h6>
+<ul>
+  <li style="list-style-type: none; background-image: none;">
+    <ul>
+      <li>
+        <p>Example of dangerous code</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre><span class="cp">#define DATASIZE 16
+</span>&nbsp;
+<span class="k">struct</span> <span class="n">externalData</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">length</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">data</span><span class="p">[</span><span class="n">DATASIZE</span><span class="p">];</span>
+<span class="p">};</span>
+&nbsp;
+<span class="kt">int</span> <span class="nf">badcode</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">externalData</span> <span class="n">e</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="n">DATASIZE</span><span class="p">];</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">readExternalData</span><span class="p">(</span><span class="o">&amp;</span><span class="n">e</span><span class="p">);</span> <span class="c1">// Data is read from an external source.
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memcpy</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">length</span><span class="p">);</span> <span class="c1">// When the data length is invalid, it causes the buffer to overflow.
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// When returning from the function, you can make it jump to an arbitrary address in the stack.
+</span><span class="p">}</span></pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li>
+        <p>Example of safe code</p>
+        <div class="layout-base">
+          <div class="layout-section">
+            <div class="layout-cell">
+              <table class="codeblock">
+                <tbody>
+                  <tr>
+                    <td class="code">
+                      <div class="codeblock"><pre><span class="cp">#define DATASIZE 16
+</span>&nbsp;
+<span class="k">struct</span> <span class="n">externalData</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">length</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">data</span><span class="p">[</span><span class="n">DATASIZE</span><span class="p">];</span>
+<span class="p">};</span>
+&nbsp;
+<span class="kt">int</span> <span class="nf">safecode</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">externalData</span> <span class="n">e</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="n">DATASIZE</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Reads the data from an external location.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">readExternalData</span><span class="p">(</span><span class="o">&amp;</span><span class="n">e</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Checks the length of the external data.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// If e.length is negative and you omit the check,
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// there will be a buffer overflow, so be careful.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">e</span><span class="p">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">DATASIZE</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Data length has been checked already, so it is safe to copy.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memcpy</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">length</span><span class="p">);</span> 
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="layout-cell">
+              <table class="codeblock">
+                <tbody>
+                  <tr>
+                    <td class="code">
+                      <div class="codeblock"><pre><span class="cp">#define DATASIZE 16
+</span>&nbsp;
+<span class="k">struct</span> <span class="n">externalData</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Change to size_t so you do not need to be concerned about a negative number.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">length</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">data</span><span class="p">[</span><span class="n">DATASIZE</span><span class="p">];</span>
+<span class="p">};</span>
+&nbsp;
+<span class="kt">int</span> <span class="nf">safecode</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">externalData</span> <span class="n">e</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="n">DATASIZE</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Reads the data from an external location.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">readExternalData</span><span class="p">(</span><span class="o">&amp;</span><span class="n">e</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Checks the length of the external data. 
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">DATASIZE</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Data length has been checked already, so it is safe to copy.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memcpy</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">length</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <p>
+          <br />
+        </p>
+        <p>
+          <br />
+        </p>
+      </li>
+    </ul>
+  </li>
+</ul>
+<h6 id="Anchor_246244876_h6_3">Overflow due to print format string</h6>
+<ul>
+  <li>
+    <p>Example of dangerous code</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">int</span> <span class="nf">badcode</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">pString</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">sprintf</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="s">&quot;%s&quot;</span><span class="p">,</span> <span class="n">pString</span><span class="p">);</span> <span class="c1">// When the entered string exceeds 32 bytes, the buffer overflows.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// When returning from the function, you can make it jump to an arbitrary address in the stack.
+</span><span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Example of safe code</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">int</span> <span class="nf">safecode</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">pString</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pString</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="c1">// Check whether arguments are null.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// Error
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">snprintf</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="s">&quot;%s&quot;</span><span class="p">,</span> <span class="n">pString</span><span class="p">);</span> <span class="c1">// Sets the upper limit of the output size to 32 bytes.
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<h6 id="Anchor_246244876_h6_4">Integer Overflow</h6>
+<ul>
+  <li>
+    <p>Example of dangerous code</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">int</span> <span class="nf">badcode</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">n</span><span class="p">,</span> <span class="k">const</span> <span class="n">T</span> <span class="o">*</span><span class="n">pData</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">T</span> <span class="o">*</span><span class="n">pBuffer</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">n</span><span class="p">);</span> <span class="c1">// The result of sizeof(T) * n may overflow the buffer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pBuffer</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="c1">// If sizeof(T) * n overflows the buffer,
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// then an unintentionally long block of memory has been allocated to pBuffer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pBuffer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pData</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="c1">// Depending on the size of the allocated memory, the buffer may overflow.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Example of safe code</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">int</span> <span class="nf">safecode</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">n</span><span class="p">,</span> <span class="k">const</span> <span class="n">T</span> <span class="o">*</span><span class="n">pData</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">size_t</span> <span class="n">dataSize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">n</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">((</span><span class="n">dataSize</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">T</span><span class="p">))</span> <span class="o">!=</span> <span class="n">n</span><span class="p">)</span> <span class="c1">// Check that sizeof(T) * n will not result in a buffer overflow.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">T</span> <span class="o">*</span><span class="n">pBuffer</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">dataSize</span><span class="p">);</span> <span class="c1">// The data length has been checked already, and the intended size of memory has been allocated.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pBuffer</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pBuffer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pData</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="c1">// The correct size of memory has been allocated, so out-of-bounds access will not occur.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<h6 id="Anchor_246244876_h6_5">Functions not recommended for use</h6>
+<ul>
+  <li>strcpy, sprintf, strcat, vsprintf<br /><ul><li>These functions are not recommended because they do not assess the data region size.</li><li>Use functions such as <code>strlcpy</code>, <code>strlcat</code>, <code>snprintf</code>, and <code>vsnprintf</code>, and copy only after setting limits on the area size.</li></ul></li>
+</ul>
+<p style="margin-left: 60.0px;">
+  <strong>Note:</strong> The compiler and SDK do not include any features to produce a warning when such functions are used. The developer must be careful when implementing the code.<br /><br /></p>
+<ul>
+  <li>Notes on <code>strncpy</code> and <code>strncat</code><ul><li><p>For <code>strncpy</code> and <code>strncat</code>, when the length of the string to be copied is larger than the copy size, the null character <code>\0</code> is not added, so the following description is required.</p><table class="codeblock"><tbody><tr><td class="code"><div class="codeblock"><pre><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">source</span> <span class="o">=</span> <span class="s">&quot;0123456789&quot;</span><span class="p">;</span>
+<span class="kt">char</span> <span class="n">dest</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+<span class="n">strncpy</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>  <span class="c1">// &quot;012345678&quot; is placed in dest (without the null character).
+</span><span class="n">dest</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sc">'\0'</span><span class="p">;</span> <span class="c1">// Text indicating the null character is required.
+</span></pre></div></td></tr></tbody></table><p>The <code>strlcpy</code> and <code>strlcat</code> functions add a null character when copying. This enables cleaner code, as in the following example.</p><table class="codeblock"><tbody><tr><td class="code"><div class="codeblock"><pre><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">source</span> <span class="o">=</span> <span class="s">&quot;0123456789&quot;</span><span class="p">;</span>
+<span class="kt">char</span> <span class="n">dest</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+<span class="n">strlcpy</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">dest</span><span class="p">));</span> <span class="c1">// &quot;012345678&quot; + the null character is placed in dest.
+</span></pre></div></td></tr></tbody></table></li></ul></li>
+</ul>
+<h3 id="Anchor_246244876_h3_2">Format String Attack</h3>
+<h4 id="Anchor_246244876_h4_3">Overview</h4>
+<p>In a format string attack, a malicious user can trigger states that are similar to a buffer overflow when specifying optional formats, such as <code>%s</code> or <code>%n</code>, when directly specifying variables for format characters within functions that specify those format characters, like <code>printf</code> and <code>sprintf</code>.</p>
+<h4 id="Anchor_246244876_h4_4">Countermeasures</h4>
+<ul>
+  <li>Do not directly specify variables for format characters.</li>
+</ul>
+<h5 id="Anchor_246244876_h5_2">Program Example</h5>
+<h6 id="Anchor_246244876_h6_6">A format string attack using <code>sprintf</code>.</h6>
+<ul>
+  <li>
+    <p>Example of dangerous code</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">int</span> <span class="nf">badcode</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">pString</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pString</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="c1">// Check whether arguments are null.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// Error
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">snprintf</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="n">pString</span><span class="p">);</span> <span class="c1">// An input string variable is directly specified for the format argument.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// pString might include &quot;%s&quot; or &quot;%n&quot;.
+</span>&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Example of safe code</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">int</span> <span class="nf">safecode</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">pString</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pString</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="c1">// Check whether arguments are null.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// Error
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">snprintf</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="s">&quot;%s&quot;</span><span class="p">,</span> <span class="n">pString</span><span class="p">);</span> <span class="c1">// An input string variable is not directly specified for the format argument.
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_246244876_h2_3">Reference Materials</h2>
+<ul>
+  <li>Seacord, Robert C. &quot;Chapter 2. Strings.&quot; In <em>Secure Coding in C and C++</em>. 2nd ed. Upper Saddle River, NJ: Addison-Wesley, 2013.</li>
+  <li>IPA Secure Programming Course (Japanese)<br /><a href="https://www.ipa.go.jp/security/awareness/vendor/programmingv2/contents/c901.html">https://www.ipa.go.jp/security/awareness/vendor/programmingv2/contents/c901.html<br /></a><a href="https://www.ipa.go.jp/security/awareness/vendor/programmingv2/contents/c906.html">http://www.ipa.go.jp/security/awareness/vendor/programmingv2/contents/c901.html</a></li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

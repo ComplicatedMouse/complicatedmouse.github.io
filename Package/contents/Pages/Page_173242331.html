@@ -1,0 +1,501 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Various Test Features | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Various Test Features -->
+<div class="pagetitle" id="PageId_173242331">Various Test Features</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_173242331_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_173242331_h1_2">Network Clock Test Features</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_173242331_h2_1">Disabling Automatic Correction of the Network Clock by the System</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_173242331_h3_1">Setting Method</a>
+        </li>
+        <li>
+          <a href="#Anchor_173242331_h3_2">Sample Test Procedure</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_173242331_h2_2">Invalidating the Network Clock</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_173242331_h3_3">Setting Method</a>
+        </li>
+        <li>
+          <a href="#Anchor_173242331_h3_4">Sample Test Procedure</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_173242331_h2_3">Setting the Time on a Network Clock</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_173242331_h3_5">Setting Method</a>
+        </li>
+        <li>
+          <a href="#Anchor_173242331_h3_6">Sample Test Procedure</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_173242331_h1_3">Steady Clock Test Features</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_173242331_h2_4">Resetting the Steady Clock</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_173242331_h3_7">Setting Method</a>
+        </li>
+        <li>
+          <a href="#Anchor_173242331_h3_8">Sample Test Procedure</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_173242331_h2_5">Adding an Offset to the Steady Clock Value</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_173242331_h3_9">Setting Method</a>
+        </li>
+        <li>
+          <a href="#Anchor_173242331_h3_10">Sample Test Procedure</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_173242331_h1_1">Introduction</h1>
+<p>This documentation describes the <code>time</code> library test features.<br />The following development tools are used.</p>
+<ul style="list-style-type: square;">
+  <li>
+    <a href="../Pages/Page_107328771.html">DevMenu</a>
+    <ul style="list-style-type: square;">
+      <li>Time Test Page</li>
+    </ul>
+  </li>
+  <li>
+    <a href="../Pages/Page_107328760.html">DevMenuCommand</a>
+    <ul style="list-style-type: square;">
+      <li>
+        <code>time</code> subcommand</li>
+    </ul>
+  </li>
+</ul>
+<p>The following table shows key information to note when using the <code>time</code> library, and the different test methods.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Clock</th>
+      <th>Notes</th>
+      <th>Features Available for Testing</th>
+      <th>Significant Functions</th>
+    </tr>
+    <tr>
+      <td>
+        <p>Steady Clock</p>
+        <p>
+          <span class="ApiLink_nn__time__StandardSteadyClock">nn::time::StandardSteadyClock</span>
+        </p>
+      </td>
+      <td>
+        <p>The ability to calculate passing time is lost during a device shutdown.</p>
+        <p>
+          <br />This occurs when, as a result of a loss of battery power, the counter for the steady clock's reset clock is itself reset.</p>
+        <p>
+          <br />
+          <strong>Resets do not occur while the device is running.</strong>
+        </p>
+      </td>
+      <td>
+        <ul>
+          <li>
+            <a href="#Anchor_173242331_reset_steady_clock">Resetting the Steady Clock</a>
+          </li>
+        </ul>
+        <p>
+          <br />
+        </p>
+        <p>When you reset the steady clock, the user clock will revert to a predetermined default, and the network clock will revert to an uncorrected state.</p>
+      </td>
+      <td>
+        <p>You lose the ability to get the elapsed time between two instances of <code><span class="ApiLink_nn__time__SteadyClockTimePoint">nn::time::SteadyClockTimePoint</span></code> during a reset.</p>
+        <ul>
+          <li> <span class="ApiLink_Result_nn__time__GetSpanBetween(int64_t_*pOutSeconds|_const_SteadyClockTimePoint_&from|_const_SteadyClockTimePoint_&to)_NN_NOEXCEPT">nn::time::GetSpanBetween()</span></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>User Clock Time</p>
+        <p>
+          <span class="ApiLink_nn__time__StandardUserSystemClock">nn::time::StandardUserSystemClock</span>
+        </p>
+      </td>
+      <td>
+        <p>Issues such as rollbacks and noncontinuous time advances can occur even while an application is running.</p>
+      </td>
+      <td>
+        <p>Try manipulating the user clock time during application startup or shutdown to test this.</p>
+        <p>
+          <br />
+        </p>
+        <p>Reverts to a predetermined default, even when <a href="#Anchor_173242331_reset_steady_clock">Resetting the Steady Clock</a> occurs.</p>
+      </td>
+      <td>
+        <ul>
+          <li>
+            <span class="ApiLink_static_Result_nn__time__StandardUserSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT">nn::time::StandardUserSystemClock::GetCurrentTime()</span>
+          </li>
+          <li>
+            <span class="ApiLink_static_time_point_nn__time__StandardUserSystemClock__now()_NN_NOEXCEPT">nn::time::StandardUserSystemClock::now()</span>
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="3">
+        <p>Network Clock</p>
+        <p>
+          <span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span>
+        </p>
+      </td>
+      <td>
+        <p>In some cases, you will not be able to get the time.</p>
+        <p>
+          <br />
+        </p>
+        <p>Even if you can get time at one point, you might not be able to get time during the next startup.</p>
+      </td>
+      <td>
+        <ul>
+          <li>
+            <a href="#Anchor_173242331_invalidate_network_clock">Invalidating the Network Clock</a>
+          </li>
+          <li>
+            <a href="#Anchor_173242331_disable_network_clock_auto_correction">Disabling Automatic Correction of the Network Clock by the system.</a>
+          </li>
+          <li>
+            <a href="#Anchor_173242331_reset_steady_clock">Resetting the Steady Clock</a>
+          </li>
+        </ul>
+      </td>
+      <td rowspan="3">
+        <ul>
+          <li>
+            <span class="ApiLink_static_Result_nn__time__StandardNetworkSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT">nn::time::StandardNetworkSystemClock::GetCurrentTime()</span>
+          </li>
+          <li>
+            <span class="ApiLink_static_time_point_nn__time__StandardNetworkSystemClock__now()_NN_NOEXCEPT">nn::time::StandardNetworkSystemClock::now()</span>
+          </li>
+        </ul>
+        <br />
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>In some situations during device startup, you transition from a state that cannot get the time to one that can.</p>
+        <p>
+          <br />
+        </p>
+        <p>
+          <strong>A reverse transition, from one that can get time to one that cannot, does not occur during device startup. </strong>
+        </p>
+      </td>
+      <td>
+        <ul>
+          <li>
+            <a href="#Anchor_173242331_invalidate_network_clock">Invalidating the Network Clock</a>
+          </li>
+        </ul>
+        <p>
+          <br />
+        </p>
+        <p>While the application is starting, the system performs an auto-correct when you transition from a state where networks are not available to a state where they are, such as when you plug in a LAN cable.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Issues such as rollbacks and noncontinuous time advances can occur even while an application is running.</p>
+      </td>
+      <td>
+        <ul>
+          <li>
+            <a href="#Anchor_173242331_set_network_clock_datetime">Setting the Time on the Network Clock</a>
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_173242331_h1_2">Network Clock Test Features</h1>
+<p>This section describes the test features of <code><span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span></code>, the network clock.</p>
+<h2 id="Anchor_173242331_h2_1">
+  <a name="Anchor_173242331_disable_network_clock_auto_correction"></a>Disabling Automatic Correction of the Network Clock by the System</h2>
+<p>You can use the system to disable and enable the automatic correction of the network clock.</p>
+<p>As a result, it is possible, for example, to test cases where the network clock is not corrected even though the device can connect to a network.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>All you are doing is using the system to disable the automatic correction of the network clock. You cannot revert a network clock that has already been corrected to an uncorrected state.</p>
+  </div>
+</div>
+<h3 id="Anchor_173242331_h3_1">Setting Method</h3>
+<p>Configure the check box, framed in red, using <a href="../Pages/Page_107328771.html">DevMenu</a>. Select the check box to enable automatic correction, and clear the check box to disable it.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_173242331/174064635.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>You can also select this option using <a href="../Pages/Page_107328760.html">DevMenuCommand</a>.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>You must reset the system to update the settings.</p>
+  </div>
+</div>
+<h3 id="Anchor_173242331_h3_2">Sample Test Procedure</h3>
+<ol>
+  <li>Disable system-based network clock automatic correction.</li>
+  <li>This step disables the network clock when it is already enabled. (Described later.)</li>
+  <li>Reset the system.</li>
+  <li>Open the application. The <span class="ApiLink_static_Result_nn__time__StandardNetworkSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT"><code>nn::time::StandardNetworkSystemClock::GetCurrentTime</code></span> function fails. Test the sequence for this scenario.</li>
+</ol>
+<h2 id="Anchor_173242331_h2_2">
+  <a name="Anchor_173242331_invalidate_network_clock"></a>Invalidating the Network Clock</h2>
+<p>You can put the function that gets the network clock time, <code><span class="ApiLink_static_Result_nn__time__StandardNetworkSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT">nn::time::StandardNetworkSystemClock::GetCurrentTime</span></code>, into a state where it fails.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>To maintain the network clock in a disabled state, you must disable system-based automatic correction of the network clock in advance.<br />Failure to do so can result in the network clock being automatically corrected when a network becomes available. </p>
+  </div>
+</div>
+<h3 id="Anchor_173242331_h3_3">Setting Method</h3>
+<p>Configure this setting in <a href="../Pages/Page_107328771.html">DevMenu</a> by pressing the button outlined in red in the following image.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_173242331/174064638.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>You can also select this option using <a href="../Pages/Page_107328760.html">DevMenuCommand</a>.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>You must reset the system to update the settings.</p>
+  </div>
+</div>
+<h3 id="Anchor_173242331_h3_4">Sample Test Procedure</h3>
+<ol>
+  <li>Place the device in a state where it cannot connect to the network.<br /><strong>Note:</strong> You could, for example, configure the device to only use a wired connection and then unplug the LAN cable.</li>
+  <li>Disable the network clock.</li>
+  <li>Reset the system.</li>
+  <li>Open the application. The <span class="ApiLink_static_Result_nn__time__StandardNetworkSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT"><code>nn::time::StandardNetworkSystemClock::GetCurrentTime</code></span> function fails. Test the sequence for this scenario.</li>
+  <li>Place the device in a state where it can connect to the network.<br /><strong>Note:</strong> When configured to only use a wired connection and the LAN cable has been unplugged, you can plug the LAN cable back in.</li>
+  <li>The system automatically corrects the network clock. The  <code><span class="ApiLink_static_Result_nn__time__StandardNetworkSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT">nn::time::StandardNetworkSystemClock::GetCurrentTime</span></code> function will automatically return a success result. Test the sequence for this scenario.</li>
+</ol>
+<h2 id="Anchor_173242331_h2_3">
+  <a name="Anchor_173242331_set_network_clock_datetime"></a>Setting the Time on a Network Clock</h2>
+<p>You can set the time for the network clock, <code><span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock::GetCurrentTime</span></code>, to any desired time.</p>
+<p>You can use this function to help test how in-game events are triggered after a certain network time has passed, or to test game behavior when the network time has been rolled back, for example.</p>
+<h3 id="Anchor_173242331_h3_5">Setting Method</h3>
+<p>Configure this setting in <a href="../Pages/Page_107328771.html">DevMenu</a> by pressing the button outlined in red in the following image.<br />Adjust the date and time using the settings on the right. On the left, click the <strong>Commit New Date-Time</strong> button to immediately update the device's date and time settings.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_173242331/174064642.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>You can also select this option using <a href="../Pages/Page_107328760.html">DevMenuCommand</a>.</p>
+<p>You do not need to reset the system.</p>
+<h3 id="Anchor_173242331_h3_6">Sample Test Procedure</h3>
+<ol>
+  <li>Set the network clock to any desired time.</li>
+  <li>Open the application. Use the <code><span class="ApiLink_static_Result_nn__time__StandardNetworkSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT">nn::time::StandardNetworkSystemClock::GetCurrentTime</span></code> function to get the current time. Confirm any in-game events that are set to be triggered after the time configured in step 1 has passed.</li>
+  <li>Switch back to DevMenu, and then roll back the time to one that is three minutes prior to the network clock time you configured in step 1.<br /><strong>Note:</strong> You can even switch to DevMenu while the application is starting.</li>
+  <li>Switch back to the application. Wait again until the time for the event triggered by the time configured in step 1 arrives. Test to make sure that application behavior at that time conforms to your expectations.</li>
+</ol>
+<h1 id="Anchor_173242331_h1_3">Steady Clock Test Features</h1>
+<p>This section describes the test features for <code><span class="ApiLink_nn__time__StandardSteadyClock">nn::time::StandardSteadyClock</span></code>, the steady clock.</p>
+<h2 id="Anchor_173242331_h2_4">
+  <a name="Anchor_173242331_reset_steady_clock"></a>Resetting the Steady Clock</h2>
+<p>You can forcibly reset the value indicated by the steady clock.<br />Doing so allows you to test behavior when the power supply to the steady clock is interrupted.</p>
+<p>You can, for example, test cases where elapsed time cannot be calculated when handling things like in-game events that are triggered after a certain time passes during the interval between an interruption to device power and the application's shutting down.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>This operation has the following effects.</p>
+    <ul>
+      <li>The time indicated by <code><span class="ApiLink_nn__time__StandardUserSystemClock">nn::time::StandardUserSystemClock</span></code> reverts to the default.</li>
+      <li>
+        <code>
+          <span class="ApiLink_nn__time__StandardNetworkSystemClock">nn::time::StandardNetworkSystemClock</span>
+        </code> reverts to an uncorrected state.</li>
+      <li>
+        <code>
+          <span class="ApiLink_nn__time__SteadyClockTimePoint">nn::time::SteadyClockTimePoint</span>
+        </code> instances straddling the reset cannot calculate the elapsed time.<br /><strong>Note:</strong> The <code><span class="ApiLink_nn__time__GetSpanBetween">nn::time::GetSpanBetween</span></code> function returns failure.</li>
+    </ul>
+  </div>
+</div>
+<h3 id="Anchor_173242331_h3_7">Setting Method</h3>
+<p>Configure this setting in <a href="../Pages/Page_107328771.html">DevMenu</a> using the button outlined in red in the following image.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_173242331/174064650.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>This can also be set using <a href="../Pages/Page_107328760.html">DevMenuCommand</a>.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>You must reset the system to update the settings.</p>
+  </div>
+</div>
+<h3 id="Anchor_173242331_h3_8">Sample Test Procedure</h3>
+<ol>
+  <li>Open the application. Use the <code><span class="ApiLink_static_Result_nn__time__StandardSteadyClock__GetCurrentTimePoint(SteadyClockTimePoint_*pOutSteadyClockTimePoint)_NN_NOEXCEPT">nn::time::StandardSteadyClock::GetCurrentTimePoint</span></code> function to perpetuate the <code><span class="ApiLink_nn__time__SteadyClockTimePoint">nn::time::SteadyClockTimePoint</span></code> (A) value to a medium such as save data.</li>
+  <li>Reset the steady clock.</li>
+  <li>Reset the system.</li>
+  <li>Open the application. Use the <code><span class="ApiLink_static_Result_nn__time__StandardSteadyClock__GetCurrentTimePoint(SteadyClockTimePoint_*pOutSteadyClockTimePoint)_NN_NOEXCEPT">nn::time::StandardSteadyClock::GetCurrentTimePoint</span></code> function to get the <code><span class="ApiLink_nn__time__SteadyClockTimePoint">nn::time::SteadyClockTimePoint</span></code> (B) value for that time.</li>
+  <li>Any attempt to calculate the elapsed time between the <code><span class="ApiLink_nn__time__SteadyClockTimePoint">nn::time::SteadyClockTimePoint</span></code> (A) and (B) values, using the <code><span class="ApiLink_nn__time__GetSpanBetween">nn::time::GetSpanBetween</span></code> function will fail. Test the sequence for this scenario.</li>
+</ol>
+<h2 id="Anchor_173242331_h2_5">Adding an Offset to the Steady Clock Value</h2>
+<p>You can advance the value indicated by <code><span class="ApiLink_nn__time__StandardSteadyClock">nn::time::StandardSteadyClock</span></code>, the steady clock, to any desired time.</p>
+<p>The elapsed time as calculated by <code><span class="ApiLink_nn__time__SteadyClockTimePoint">nn::time::SteadyClockTimePoint</span></code> instances straddling this operation is increased by this offset value.<br /><strong>Note:</strong> Use the <code><span class="ApiLink_Result_nn__time__GetSpanBetween(int64_t_*pOutSeconds|_const_SteadyClockTimePoint_&from|_const_SteadyClockTimePoint_&to)_NN_NOEXCEPT">nn::time::GetSpanBetween</span></code> function to calculate the elapsed time. </p>
+<p>For example, this function can help to test in-game events that are triggered only after a certain time passes during the interval between an interruption to device power and the application shutting down.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>The steady clock never rolls back as a device is starting.<br />Reset the steady clock to eliminate your advanced time. </p>
+  </div>
+</div>
+<h3 id="Anchor_173242331_h3_9">Setting Method</h3>
+<p>Configure this setting in <a href="../Pages/Page_107328771.html">DevMenu</a> using the button outlined in red in the following image.<br />You can accumulate the total advanced forward. The following message appears on the screen: <code>Total offset: XXXX</code>. Note that you cannot reduce an offset value after it has increased.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_173242331/174064653.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>You can also select this option using <a href="../Pages/Page_107328760.html">DevMenuCommand</a>.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>You must reset the system to update the settings.</p>
+  </div>
+</div>
+<h3 id="Anchor_173242331_h3_10">Sample Test Procedure</h3>
+<ol>
+  <li>Open the application. Use the <code><span class="ApiLink_static_Result_nn__time__StandardSteadyClock__GetCurrentTimePoint(SteadyClockTimePoint_*pOutSteadyClockTimePoint)_NN_NOEXCEPT">nn::time::StandardSteadyClock::GetCurrentTimePoint</span></code> function to perpetuate the <code><span class="ApiLink_nn__time__SteadyClockTimePoint">nn::time::SteadyClockTimePoint</span></code> (A) value to a medium such as save data.</li>
+  <li>Advance the steady clock by a desired time.</li>
+  <li>Reset the system.</li>
+  <li>Open the application. Use the <code><span class="ApiLink_static_Result_nn__time__StandardSteadyClock__GetCurrentTimePoint(SteadyClockTimePoint_*pOutSteadyClockTimePoint)_NN_NOEXCEPT">nn::time::StandardSteadyClock::GetCurrentTimePoint</span></code> function to get the <code><span class="ApiLink_nn__time__SteadyClockTimePoint">nn::time::SteadyClockTimePoint</span></code> (B) value for that time.</li>
+  <li>The returned elapsed time between the (A) and (B) values for <code><span class="ApiLink_nn__time__SteadyClockTimePoint">nn::time::SteadyClockTimePoint</span></code> is the amount of time that you advanced the steady clock by, and not the actual elapsed time, when you calculate using the <code><span class="ApiLink_Result_nn__time__GetSpanBetween(int64_t_*pOutSeconds|_const_SteadyClockTimePoint_&from|_const_SteadyClockTimePoint_&to)_NN_NOEXCEPT">nn::time::GetSpanBetween</span></code> function. Test the sequence for this scenario.</li>
+</ol>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__time__StandardSteadyClock', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_steady_clock.html' )
+SetUrl( 'ApiLink_nn__time__SteadyClockTimePoint', '../../../Api/HtmlNX/structnn_1_1time_1_1_steady_clock_time_point.html' )
+SetUrl( 'ApiLink_Result_nn__time__GetSpanBetween(int64_t_*pOutSeconds|_const_SteadyClockTimePoint_&from|_const_SteadyClockTimePoint_&to)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1time.html#a029976fde1c33e311557957f3fc57a6b' )
+SetUrl( 'ApiLink_nn__time__StandardUserSystemClock', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_user_system_clock.html' )
+SetUrl( 'ApiLink_static_Result_nn__time__StandardUserSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_user_system_clock.html#adffdbaa1a805ced47c7c9e48b78f042f' )
+SetUrl( 'ApiLink_static_time_point_nn__time__StandardUserSystemClock__now()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_user_system_clock.html#ac07b5ef9024de43e63284aeebf4aca2b' )
+SetUrl( 'ApiLink_nn__time__StandardNetworkSystemClock', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_network_system_clock.html' )
+SetUrl( 'ApiLink_static_Result_nn__time__StandardNetworkSystemClock__GetCurrentTime(PosixTime_*pOutPosixTime)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_network_system_clock.html#a75e6450e1746922b7794116c49388ac2' )
+SetUrl( 'ApiLink_static_time_point_nn__time__StandardNetworkSystemClock__now()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_network_system_clock.html#ad1008fc4eb012f704f5ebf19502a1092' )
+SetUrl( 'ApiLink_nn__time__GetSpanBetween', '../../../Api/HtmlNX/namespacenn_1_1time.html#a029976fde1c33e311557957f3fc57a6b' )
+SetUrl( 'ApiLink_static_Result_nn__time__StandardSteadyClock__GetCurrentTimePoint(SteadyClockTimePoint_*pOutSteadyClockTimePoint)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_steady_clock.html#aaa969aa98d8e6c911a49fb6f3df7f97d' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

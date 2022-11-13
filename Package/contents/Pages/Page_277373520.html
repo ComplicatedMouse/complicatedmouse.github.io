@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Access Priority | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Access Priority -->
+<div class="pagetitle" id="PageId_277373520">Access Priority</div>
+<div class="text_separate">
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Access priority can be used with NX Add-On 5.1.0 and later.</p>
+  </div>
+</div>
+<h1 id="Anchor_277373520_h1_1">Feature Overview</h1>
+<p>This page describes information about access priority. Access priority is the priority order of file system operations that can be set for each <a href="../Pages/Page_83955697.html">thread</a>. Appropriately setting the access priority relatively improves the response time of file system operations that accompany processes that need to be prioritized.</p>
+<h1 id="Anchor_277373520_h1_2">Types of Access Priority</h1>
+<p>Access priority has the following three types, in order from the highest priority.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Access Priority</th>
+      <th>Overview</th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <span class="ApiLink_nn__fs__Priority_Realtime">nn::fs::Priority_Realtime</span>
+        </p>
+      </td>
+      <td>Specifies access with high priority suitable for real-time processing.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <span class="ApiLink_nn__fs__Priority_Normal">nn::fs::Priority_Normal</span>
+        </p>
+      </td>
+      <td>Specifies access with normal priority.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <span class="ApiLink_nn__fs__Priority_Low">nn::fs::Priority_Low</span>
+        </p>
+      </td>
+      <td>Specifies access with low priority.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The higher the priority, the more priority processing is given.</p>
+<p>
+  <code>
+    <span class="ApiLink_nn__fs__Priority_Normal">nn::fs::Priority_Normal</span>
+  </code> is the priority suitable for loading general files, such as models, textures, and scene information. <code><span class="ApiLink_nn__fs__Priority_Low">nn::fs::Priority_Low</span></code> is the priority suitable for access that can be executed when access is idle, such as auto-saving and pre-loading scenes. <code><span class="ApiLink_nn__fs__Priority_Realtime">nn::fs::Priority_Realtime</span></code> is the priority suitable for access that must be done in real time, such as streaming playback of video and music data.</p>
+<h1 id="Anchor_277373520_h1_3">Setting Access Priority</h1>
+<p>You can set the priority for each <a href="../Pages/Page_83955697.html">thread</a>. Set a suitable <a href="../Pages/Page_83955697.html">thread priority</a> according to the access priority, so that processing accompanying FS access is appropriately prioritized.</p>
+<p>Access priority is only referenced for setting process priority order in the file system, and does not stipulate thread priorities within the application. For example, set <code><span class="ApiLink_nn__fs__Priority_Realtime">nn::fs::Priority_Realtime</span></code> as the access priority for threads that load streaming data, and set thread priorities for adjacent threads for other streaming data processing. If the priority of a thread for which the access priority was set to <code><span class="ApiLink_nn__fs__Priority_Realtime">nn::fs::Priority_Realtime</span></code> is set low, the file system processing might complete quickly and prioritize the processing of other threads.</p>
+<p>Set the <span style="color: rgb(33,33,33); text-decoration: none;">access priority</span> of <span style="color: rgb(33,33,33); text-decoration: none;">the current thread</span> with the <code><span class="ApiLink_nn__fs__SetPriorityOnCurrentThread">nn::fs::SetPriorityOnCurrentThread</span>()</code> function, and get it with the <code><span class="ApiLink_nn__fs__GetPriorityOnCurrentThread">nn::fs::GetPriorityOnCurrentThread</span>()</code> function. You can set the access priority for threads other than the current thread.</p>
+<p>The default value <code><span class="ApiLink_nn__fs__Priority_Normal">nn::fs::Priority_Normal</span></code> is set for threads for which an access priority has never been set.</p>
+<h1 id="Anchor_277373520_h1_4">Determining Access Priority</h1>
+<p>Access priority determines the relative order of processing. This means that even when all access is set to <strong><span class="ApiLink_nn__fs__Priority_Realtime">nn::fs::Priority_Realtime</span></strong>, performance does not improve.</p>
+<p>We recommend limiting the use of <code><span class="ApiLink_nn__fs__Priority_Realtime">nn::fs::Priority_Realtime</span></code> to access that demands real-time processing, such as streaming playback of video and music data.</p>
+<p>We recommend using <code><span class="ApiLink_nn__fs__Priority_Low">nn::fs::Priority_Low</span></code> for save data updates and other access where the progress is indicated to the user, and access that can be processed in the background.</p>
+<p>There is only one communication channel each for system memory, game card, and SD card. When a high-priority access request is received during processing of low-priority access, the time it takes to suspend the low-priority access is overhead for the high-priority access. The lower the priority of the suspended access, the shorter the overhead time.</p>
+<h1 id="Anchor_277373520_h1_5">Important Information</h1>
+<p>Note the following points when using access priority.</p>
+<ul>
+  <li>FS performance is decreased by interruptions that occur as the result of file system operations with high access priority.<ul><li>The reason is that sequential access (where files are accessed from sequential offset addresses) is faster than random access (where files are accessed from non-sequential offset addresses). For more information, see <span style="color: rgb(51,51,51);">fs Library &gt; </span><a href="../Pages/Page_185130689.html">Performance</a>.</li></ul></li>
+  <li>Access priority is only referenced for setting process priority order in the file system, and does not ensure the order that file system operations are executed.<ul><li>In the <code><span class="ApiLink_nn__fs">nn::fs</span></code> API, file system operation request and response processing depend on the CPU load and thread priority. The processing time of the file system operations depends on access priority and the response time of the access and write operations executed so far.</li></ul></li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__Priority_Realtime', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2e4a9f55e854a9755c9264838caa97d3a0fa1620fa464966eddf7e9a82a0eef91' )
+SetUrl( 'ApiLink_nn__fs__Priority_Normal', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2e4a9f55e854a9755c9264838caa97d3a3fe1f52283573973940fa566d116289e' )
+SetUrl( 'ApiLink_nn__fs__Priority_Low', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2e4a9f55e854a9755c9264838caa97d3aa4c563bb69a4dfd6ac970ba42def209a' )
+SetUrl( 'ApiLink_nn__fs__SetPriorityOnCurrentThread', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a3280722d232526f011908c2e7e50400d' )
+SetUrl( 'ApiLink_nn__fs__GetPriorityOnCurrentThread', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a1b0bae7e05be65b11e83a5a63640680f' )
+SetUrl( 'ApiLink_nn__fs', '../../../Api/HtmlNX/namespacenn_1_1fs.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

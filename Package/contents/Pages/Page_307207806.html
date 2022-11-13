@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>AAC Decoder | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- AAC Decoder -->
+<div class="pagetitle" id="PageId_307207806">AAC Decoder</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_307207806_h1_1">AAC Decoder</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_307207806_h2_1">Feature Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_307207806_h2_2">Usage Examples</a>
+      </li>
+      <li>
+        <a href="#Anchor_307207806_h2_3">API References</a>
+      </li>
+      <li>
+        <a href="#Anchor_307207806_h2_4">Restrictions</a>
+      </li>
+      <li>
+        <a href="#Anchor_307207806_h2_5">Important Information</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_307207806_h1_1">AAC Decoder</h1>
+<h2 id="Anchor_307207806_h2_1">Feature Overview</h2>
+<p>The AAC decoder provides features for decoding AAC data and converting it to PCM data.</p>
+<p>The AAC decoder provides the following classes.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 174.0px;" />
+    <col style="width: 297.0px;" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>
+        <p>Class Name</p>
+      </th>
+      <th>
+        <p>Overview</p>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__codec__AacDecoder">nn::codec::AacDecoder</span>
+      </td>
+      <td>Uses CPU resources to perform AAC decoding.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The AAC decoder requires the user to prepare a work buffer.</p>
+<p>To get the size of the work buffer needed for decoding, use the <span class="ApiLink_nn__codec__AacDecoder__GetWorkBufferSize">nn::codec::AacDecoder::GetWorkBufferSize()</span> function together with the following parameters.</p>
+<ul>
+  <li>Sample rate</li>
+  <li>Number of channels</li>
+  <li>Audio object type</li>
+</ul>
+<p>Pass these parameters and the work buffer information to the <span class="ApiLink_virtual_AacDecoderResult_nn__codec__AacDecoder__Initialize(int_sampleRate|_int_channelCount|_Mpeg4AudioObjectType_type|_void_*buffer|_size_t_size)_noexcept_NN_OVERRIDE">nn::codec::AacDecoder::Initialize()</span> function to initialize the AAC decoder and make it ready it for use. After the AAC decoder has been initialized, you must not modify the work buffer until the <span class="ApiLink_nn__codec__AacDecoder__Finalize">nn::codec::AacDecoder::Finalize()</span> function is called.</p>
+<p>Decoding is performed with the <span class="ApiLink_virtual_AacDecoderResult_nn__codec__AacDecoder__DecodeInterleaved(size_t_*pOutConsumed|_int_*pOutSampleCount|_int16_t_*outputBuffer|_size_t_outputSize|_const_void_*inputBuffer|_size_t_inputSize)_noexcept_NN_OVERRIDE">nn::codec::AacDecoder::DecodeInterleaved()</span> function. When using input and output buffers, note the following.</p>
+<ul>
+  <li>Input Buffer<ul><li>The maximum AAC input buffer size is (768 &times; <em>number_of_channels</em>) bytes.</li></ul></li>
+  <li>Output Buffer<ul><li>For AAC-LC, a maximum of 1024 samples can be output, so a sufficient size for the buffer is (1024 &times; <em>number_of_channels</em> &times; <code>sizeof(int16_t)</code>) bytes.</li></ul></li>
+</ul>
+<p>You can determine the quantity of input data and number of output samples actually used in decoding from the values specified in the arguments of the <span class="ApiLink_nn__codec__AacDecoder__DecodeInterleaved">nn::codec::AacDecoder::DecodeInterleaved()</span> function.</p>
+<h2 id="Anchor_307207806_h2_2">Usage Examples</h2>
+<p>See the <span class="ApiLink_PageSampleCodecAacDecoder">AAC decoder sample</span>.</p>
+<h2 id="Anchor_307207806_h2_3">API References</h2>
+<p>See the <span class="ApiLink_nn__codec__AacDecoder">AacDecoder</span> class in the <span class="ApiLink_nn__codec">nn::codec</span> namespace.</p>
+<h2 id="Anchor_307207806_h2_4">Restrictions</h2>
+<p>None.</p>
+<h2 id="Anchor_307207806_h2_5">Important Information</h2>
+<ul>
+  <li>The output results from the AAC decoder in the <code><span class="ApiLink_nn__codec">nn::codec</span></code> namespace do not necessarily match the output results from the AAC decoder in the <a href="../Pages/Page_174233568.html">movie Library</a> back end.</li>
+  <li>A brief fade occurs and noise might result when decoding an AAC data file midway instead of from the beginning, such as during random seek playback or looped playback.<br />Decoding the frame immediately prior to the frame where decoding is set to begin allows you to avoid this phenomenon.</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__codec__AacDecoder', '../../../Api/HtmlNX/classnn_1_1codec_1_1_aac_decoder.html' )
+SetUrl( 'ApiLink_nn__codec__AacDecoder__GetWorkBufferSize', '../../../Api/HtmlNX/classnn_1_1codec_1_1_aac_decoder.html#a3cd6c82d89486464df694231323e025a' )
+SetUrl( 'ApiLink_virtual_AacDecoderResult_nn__codec__AacDecoder__Initialize(int_sampleRate|_int_channelCount|_Mpeg4AudioObjectType_type|_void_*buffer|_size_t_size)_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_aac_decoder.html#afe1df0b43aad6af769833cf591fa4c38' )
+SetUrl( 'ApiLink_nn__codec__AacDecoder__Finalize', '../../../Api/HtmlNX/classnn_1_1codec_1_1_aac_decoder.html#a0967682e0217fff92847c4614a2fa799' )
+SetUrl( 'ApiLink_virtual_AacDecoderResult_nn__codec__AacDecoder__DecodeInterleaved(size_t_*pOutConsumed|_int_*pOutSampleCount|_int16_t_*outputBuffer|_size_t_outputSize|_const_void_*inputBuffer|_size_t_inputSize)_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_aac_decoder.html#a2748114f2a0ed88c0bfacc7c60c10c96' )
+SetUrl( 'ApiLink_nn__codec__AacDecoder__DecodeInterleaved', '../../../Api/HtmlNX/classnn_1_1codec_1_1_aac_decoder.html#a2748114f2a0ed88c0bfacc7c60c10c96' )
+SetUrl( 'ApiLink_PageSampleCodecAacDecoder', '../../../Api/HtmlNX/_page_sample_codec_aac_decoder.html' )
+SetUrl( 'ApiLink_nn__codec', '../../../Api/HtmlNX/namespacenn_1_1codec.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Shaders | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Shaders -->
+<div class="pagetitle" id="PageId_83956018">Shaders</div>
+<div class="text_separate">
+<h1 id="Anchor_83956018_h1_1">Shaders</h1>
+<p>Shaders provide features to manage and set programmable stage programs in the GPU pipeline.</p>
+<p>The source code, intermediate language, or binary can be specified as the program code for initializing a shader. However, the type of code that is supported differs due to the platform and low-level graphics API.</p>
+<p>A <code>gfx</code> shader can include any of the programmable stages in the pipeline. The following list shows the stages that are included.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Shader Stage Name</th>
+    </tr>
+    <tr>
+      <td>Vertex shader</td>
+    </tr>
+    <tr>
+      <td>Hull shader</td>
+    </tr>
+    <tr>
+      <td>Domain shader</td>
+    </tr>
+    <tr>
+      <td>Geometry shader</td>
+    </tr>
+    <tr>
+      <td>Pixel shader</td>
+    </tr>
+    <tr>
+      <td>Compute shader</td>
+    </tr>
+  </tbody>
+</table>
+<p>A vertex shader is requested to move the graphics pipeline; a compute shader is requested to move a compute pipeline.</p>
+<p>When creating a shader, you can set it to separable or non-separable. A separable shader can be used with other shader objects. For example, if you set a separable shader that includes a vertex shader, and then set a separable shader than includes a pixel shader, you can form a pipeline with both vertex shaders and pixel shaders enabled. Non-separable shaders cannot work with other shaders. Consequently, each shader must include all of the required stages.</p>
+<p>In <code>gfx</code>, a shader can be set in a <a href="../Pages/Page_83955991.html">pipeline</a> or set directly in a command buffer. Each corresponds to an <a href="../Pages/Page_83955534.html">execution model </a> that uses a pipeline and an execution model that does not use a pipeline.</p>
+<h2 id="Anchor_83956018_h2_1">Information<a name="Anchor_83956018_Info"></a></h2>
+<p>Shader information is defined as <span class="ApiLink_nn__gfx__ShaderInfo"><code>nn::gfx::ShaderInfo</code></span>.</p>
+<h3 id="Anchor_83956018_h3_1">Enabling and Disabling Separation</h3>
+<p>To select whether a shader is separable or non-separable, use <span class="ApiLink_void_nn__gfx__ShaderInfo__SetSeparationEnabled(bool_value)_NN_NOEXCEPT"><code>SetSeparationEnabled</code></span>.</p>
+<h3 id="Anchor_83956018_h3_2">Code Type</h3>
+<p>The code type indicates the type of program code.<br />Use <span class="ApiLink_void_nn__gfx__ShaderInfo__SetCodeType(ShaderCodeType_value)_NN_NOEXCEPT"><code>SetCodeType</code></span> to set the code type to use to initialize the shader.</p>
+<h4 id="Anchor_83956018_h4_1">Considerations for Using Source Formats</h4>
+<p>Setting the code type to <span class="ApiLink_nn__gfx__ShaderCodeType_Source"><code>nn::gfx::ShaderCodeType_Source</code></span> and then compiling in the runtime is not preferable when it comes to speed and memory efficiency. It would only be recommended for low-level graphics APIs that had no binary compatibility with GL and the like. Another effect of setting the code type to <span class="ApiLink_nn__gfx__ShaderCodeType_Source"><code>nn::gfx::ShaderCodeType_Source</code></span> is that the <code>gfx</code> library dynamically allocates memory internally.</p>
+<p>However, it is possible to use source formats with development hardware within a production environment. In such cases, note the preceding considerations.</p>
+<h3 id="Anchor_83956018_h3_3">Source Format</h3>
+<p>When the code type is source code, use <span class="ApiLink_void_nn__gfx__ShaderInfo__SetSourceFormat(ShaderSourceFormat_value)_NN_NOEXCEPT"><code>SetSourceFormat</code></span> to specify the source format.<br />The source formats that can be used are limited by the variations of low level graphics API.<br />There are restrictions when GLSL source code is used. For more information, see  <a href="../Pages/Page_83955873.html">Restrictions</a>. </p>
+<h3 id="Anchor_83956018_h3_4">Binary Format</h3>
+<p>When the code type is binary format, use <span class="ApiLink_void_nn__gfx__ShaderInfo__SetBinaryFormat(int_value)_NN_NOEXCEPT"><code>SetBinaryFormat</code></span> to specify the binary format.<br />In OpenGL, this format is the <code>binaryFormat</code> value obtained when getting the program binary.<br />The binary formats that can be used are limited by the runtime environment and the variations of low level graphics API.<br />There are restrictions when OpenGL binary is used. For more information, see  <a href="../Pages/Page_83955873.html">Restrictions</a>.</p>
+<h3 id="Anchor_83956018_h3_5">Code Pointer</h3>
+<p>To set the shader code for the target stage, use <span class="ApiLink_void_nn__gfx__ShaderInfo__SetShaderCodePtr(ShaderStage_shaderStage|_const_void_*pCode)_NN_NOEXCEPT"><code>SetShaderCodePtr</code></span>.<br />The specified code type and format must conform with those specified by other parameters.<br />If the code type is source, the pointer points to <span class="ApiLink_nn__gfx__ShaderCode"><code>nn::gfx::ShaderCode</code></span>. If the code type is an array of sources, the pointer points to  <span class="ApiLink_nn__gfx__SourceArrayCode"><code>nn::gfx::SourceArrayCode</code></span>. For all other code types, the pointer points to <span class="ApiLink_nn__gfx__ShaderCode"><code>nn::gfx::ShaderCode</code></span> or a proprietary shader structure in the low-level graphics API.</p>
+<h2 id="Anchor_83956018_h2_2">Object<a name="Anchor_83956018_Object"></a></h2>
+<p> The shader object is defined as <span class="ApiLink_nn__gfx__Shader"><code>nn::gfx::Shader</code></span>.</p>
+<h3 id="Anchor_83956018_h3_6">Initialization and Destruction</h3>
+<p>Initializing and freeing shaders generally follows the rules for <a href="../Pages/Page_83955654.html">objects</a>, but unlike most other objects, the shader initialization function returns the initialization result.<br />Even if shader initialization fails, an error does not occur and only the error code is returned. The following list shows the result codes and their meanings.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Result Code</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__gfx__ShaderInitializeResult_Success">nn::gfx::ShaderInitializeResult_Success</span>
+      </td>
+      <td>Shader initialization succeeded.</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__gfx__ShaderInitializeResult_InvalidType">nn::gfx::ShaderInitializeResult_InvalidType</span>
+      </td>
+      <td>The shader code type is invalid.</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__gfx__ShaderInitializeResult_InvalidFormat">nn::gfx::ShaderInitializeResult_InvalidFormat</span>
+      </td>
+      <td>The shader code format is invalid.</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__gfx__ShaderInitializeResult_SetupFailed">nn::gfx::ShaderInitializeResult_SetupFailed</span>
+      </td>
+      <td>Shader setup failed.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <span class="ApiLink_nn__gfx__ShaderInitializeResult_SetupFailed">
+    <code>ShaderInitializeResult_SetupFailed</code>
+  </span> returns when neither the code type or the format are invalid, but initialization failed.</p>
+<p>The application can confirm these results and then select what to do next. For example, first a shader using binary is initialized but does not succeed. A shader using source can then be initialized.</p>
+<h3 id="Anchor_83956018_h3_7">Getting Reflection Information</h3>
+<p>Querying various types of reflection information for the shader is supported.</p>
+<h4 id="Anchor_83956018_h4_2">Getting the Interface Slot</h4>
+<p>To set a resource used by the shader in a suitable location, the shader can get the slot number of the target resource. This is done by specifying the name and type of the target resource in <span class="ApiLink_int_nn__gfx__TShader__GetInterfaceSlot(ShaderStage_stage|_ShaderInterfaceType_shaderInterfaceType|_const_char_*pName)_const_NN_NOEXCEPT"><code>GetInterfaceSlot</code></span>. Later, the slot number obtained by this function is specified when setting the target resource.</p>
+<p>If you are using a shader in <span class="ApiLink_nn__gfx__ResShaderFile"><code>nn::gfx::ResShaderFile</code></span>, the <code>--reflection</code> option must be added when converting the shader.</p>
+<p>With OpenGL, even if the slot number is set in an unordered access buffer, constant buffer, or sampler from within the shader, if the shader is separable, the interface slot must be obtained at runtime because <code>gfx</code> changes the number when the shader is initialized. For more information, see  <a href="../Pages/Page_83955873.html">Restrictions</a>.</p>
+<h4 id="Anchor_83956018_h4_3">Getting the Compute Shader Work Group Size</h4>
+<p>To get the compute shader work group size, use <span class="ApiLink_void_nn__gfx__TShader__GetWorkGroupSize(int_*pOutWorkGroupSizeX|_int_*pOutWorkGroupSizeY|_int_*pOutWorkGroupSizeZ)_const_NN_NOEXCEPT"><code>GetWorkGroupSize</code></span>. You can use this for operations such as determining the appropriate number of work groups to dispatch the compute shader.</p>
+<h2 id="Anchor_83956018_h2_3">Shader Sets</h2>
+<p>When you are using an execution model that uses a pipeline, set the shader in the pipeline information.</p>
+<p>When you are using an execution model that does not use a pipeline, set the shader by calling <span class="ApiLink_nn__gfx__CommandBuffer"><code>SetShader</code></span> of the <span class="ApiLink_void_nn__gfx__TCommandBuffer__SetShader(const_TShader__Target___*pShader|_int_stageBits)_NN_NOEXCEPT"><code>nn::gfx::CommandBuffer</code></span> class. Specify the target shader in the first parameter and the target stage in the second parameter. To set all stages included in the target shader, specify <code><span class="ApiLink_nn__gfx__ShaderStageBit_All">nn::gfx::ShaderStageBit_All</span></code>. If the target shader does not include the specified stage, or if <code>NULL</code> is specified for the shader, the stage is disabled.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__ShaderInfo', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_shader_info.html' )
+SetUrl( 'ApiLink_void_nn__gfx__ShaderInfo__SetSeparationEnabled(bool_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_shader_info.html#a281495fe6c18ea882544a90391dba39b' )
+SetUrl( 'ApiLink_void_nn__gfx__ShaderInfo__SetCodeType(ShaderCodeType_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_shader_info.html#aa740e0a0c30b5b639189c98ab450b2a7' )
+SetUrl( 'ApiLink_nn__gfx__ShaderCodeType_Source', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ad67937775401e7564a312a54dedf6455a3cf271292131cceee9c228c73f9f788e' )
+SetUrl( 'ApiLink_void_nn__gfx__ShaderInfo__SetSourceFormat(ShaderSourceFormat_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_shader_info.html#a9b2040b1e673b5a12445fd28cdb2b0e3' )
+SetUrl( 'ApiLink_void_nn__gfx__ShaderInfo__SetBinaryFormat(int_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_shader_info.html#a4e8ae539d73448f049f033cd1fdf42c3' )
+SetUrl( 'ApiLink_void_nn__gfx__ShaderInfo__SetShaderCodePtr(ShaderStage_shaderStage|_const_void_*pCode)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_shader_info.html#a76d3b906c15eebfb00589b5969d242bc' )
+SetUrl( 'ApiLink_nn__gfx__ShaderCode', '../../../Api/HtmlNX/structnn_1_1gfx_1_1_shader_code.html' )
+SetUrl( 'ApiLink_nn__gfx__SourceArrayCode', '../../../Api/HtmlNX/structnn_1_1gfx_1_1_source_array_code.html' )
+SetUrl( 'ApiLink_nn__gfx__Shader', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a134193f9c28fadc8dfd08e80f55677b1' )
+SetUrl( 'ApiLink_nn__gfx__ShaderInitializeResult_Success', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a52eb9f5e1bec94e73a2bb152af8e3d91ad542c72930fffff3ee80a71bef4e3c07' )
+SetUrl( 'ApiLink_nn__gfx__ShaderInitializeResult_InvalidType', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a52eb9f5e1bec94e73a2bb152af8e3d91a9a1453a4872e1d39245212c36f35ad54' )
+SetUrl( 'ApiLink_nn__gfx__ShaderInitializeResult_InvalidFormat', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a52eb9f5e1bec94e73a2bb152af8e3d91ad189d49b6c3429b7e9ca8ea797953d30' )
+SetUrl( 'ApiLink_nn__gfx__ShaderInitializeResult_SetupFailed', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a52eb9f5e1bec94e73a2bb152af8e3d91a6b288c6d220d0b962c3e8ea6b1208411' )
+SetUrl( 'ApiLink_int_nn__gfx__TShader__GetInterfaceSlot(ShaderStage_stage|_ShaderInterfaceType_shaderInterfaceType|_const_char_*pName)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_shader.html#a40f2b7445a7507aa747549259ce13a86' )
+SetUrl( 'ApiLink_nn__gfx__ResShaderFile', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_res_shader_file.html' )
+SetUrl( 'ApiLink_void_nn__gfx__TShader__GetWorkGroupSize(int_*pOutWorkGroupSizeX|_int_*pOutWorkGroupSizeY|_int_*pOutWorkGroupSizeZ)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_shader.html#afc8c9ebc71e345e052797b205d34a7e3' )
+SetUrl( 'ApiLink_nn__gfx__CommandBuffer', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#af719859a76c249a182d878f0cffd47c5' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetShader(const_TShader__Target___*pShader|_int_stageBits)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#affa101add0b7e50e308ef467bb3a574c' )
+SetUrl( 'ApiLink_nn__gfx__ShaderStageBit_All', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a1e02bfe3380ee94c02ac4f0c762c4196a8e27619452b69059d788f7a91c54a40c' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,529 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Dynamic Modules | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Dynamic Modules -->
+<div class="pagetitle" id="PageId_161310949">Dynamic Modules</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_161310949_h1_1">Introduction</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_161310949_h2_1">Overview</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_161310949_h1_2">ro Library</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_161310949_h2_2">1. Initializing the ro Library</a>
+      </li>
+      <li>
+        <a href="#Anchor_161310949_h2_3">2. Registering Dynamic Module Information</a>
+      </li>
+      <li>
+        <a href="#Anchor_161310949_h2_4">3. Loading Dynamic Modules</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_161310949_h3_1">Number of Dynamic Modules That Can Be Loaded</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_161310949_h2_5">4. Searching for Symbols</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_161310949_h3_2">nn::ro::LookupSymbol()</a>
+        </li>
+        <li>
+          <a href="#Anchor_161310949_h3_3">nn::ro::LookupModuleSymbol()</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_161310949_h2_6">5. Releasing Dynamic Modules</a>
+      </li>
+      <li>
+        <a href="#Anchor_161310949_h2_7">6. Deleting Dynamic Module Information</a>
+      </li>
+      <li>
+        <a href="#Anchor_161310949_h2_8">7. Finalizing the ro Library</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_161310949_h1_3">Symbols</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_161310949_h2_9">Binding Symbols</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_161310949_h3_4">Controlling Symbol Binding</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_161310949_h2_10">Symbol Visibility</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_161310949_h3_5">Controlling Symbol Visibility</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_161310949_h2_11">Symbol Resolution</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_161310949_h3_6">Resolving Function Symbols</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_161310949_h4_1">Immediate Resolution</a>
+          </li>
+          <li>
+            <a href="#Anchor_161310949_h4_2">Delayed Resolution</a>
+          </li>
+        </ul>
+        <li>
+          <a href="#Anchor_161310949_h3_7">Resolving Variable Symbols</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_161310949_h2_12">Considerations When Releasing Dynamic Modules</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_161310949_h1_1">Introduction</h1>
+<h2 id="Anchor_161310949_h2_1">Overview</h2>
+<p>A module combines executable data, read-only data, and readable/writable data into one.</p>
+<p>A symbol indicates where data such as the functions and variables in the module is located in memory.</p>
+<p>If a symbol is public, this symbol can then be referenced by other modules.</p>
+<p>
+  <br />
+</p>
+<p>There are two types of modules.</p>
+<p>
+  <br />
+</p>
+<p>
+  <strong>Static Modules</strong>
+</p>
+<p>A static module is loaded when the program is started.</p>
+<p>The modules included in <code>nnMain</code> are static modules.</p>
+<p>After a static module is loaded, it is not released until you exit the application.</p>
+<p>The filename extension for static modules is <code>.nso</code>.</p>
+<p>
+  <br />
+</p>
+<p>
+  <strong>Dynamic Modules</strong>
+</p>
+<p>Dynamic modules can be loaded dynamically when the program is running.</p>
+<p>In addition, they can be released after the application has finished using the module.</p>
+<p>The filename extension for dynamic modules is <code>.nro</code>.</p>
+<p>
+  <br />
+</p>
+<p>The <code>ro</code> library provides features for managing dynamic modules.</p>
+<p>This documentation describes the following.</p>
+<ul style="list-style-type: square;">
+  <li>Using the ro Library</li>
+  <li>Overview of Symbols and How to Control Them</li>
+</ul>
+<p>For more information about creating the NRO and NRR files using your own build system instead of VSI, see <a href="../Pages/Page_94757421.html">Creating an Independent Build System (NX Development Hardware Environment)</a>.</p>
+<h1 id="Anchor_161310949_h1_2">ro Library</h1>
+<p>This section describes how to use the <code>ro</code> library using a workflow that starts when a dynamic module is loaded and then used, and continues until all resources are released after use.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_161310949_h2_2">1. Initializing the ro Library</h2>
+<p>Before using the <code>ro</code> library, you must first initialize it by calling <code><span class="ApiLink_nn__ro__Initialize">nn::ro::Initialize</span></code>.</p>
+<p>For standard applications, it is normally sufficient to perform this processing one time while the application is running.</p>
+<p>After <code><span class="ApiLink_nn__ro__Initialize">nn::ro::Initialize</span>()</code> has been called one time, it must not be called again until <code><span class="ApiLink_nn__ro__Finalize">nn::ro::Finalize</span>()</code> is called.</p>
+<p>
+  <br />
+</p>
+<p> The following functions cannot be used unless <code><span class="ApiLink_nn__ro__Initialize">nn::ro::Initialize</span>()</code> is called.</p>
+<ul style="list-style-type: square;">
+  <li>
+    <code>
+      <span class="ApiLink_nn__ro__RegisterModuleInfo">nn::ro::RegisterModuleInfo</span>()</code>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__ro__UnregisterModuleInfo">nn::ro::UnregisterModuleInfo</span>()</code>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__ro__LoadModule">nn::ro::LoadModule</span>()</code>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__ro__UnloadModule">nn::ro::UnloadModule</span>()</code>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_161310949_h2_3">2. Registering Dynamic Module Information</h2>
+<p>Before loading a dynamic module, you must first register the NRR file that contains the information for the dynamic file you want to load.</p>
+<p>Load the NNR file from ROM FS to the heap area.</p>
+<p>The target loading address must be aligned with <code><span class="ApiLink_nn__os__MemoryPageSize">nn::os::MemoryPageSize</span></code>.</p>
+<p>
+  <br />
+</p>
+<p>Pass the next address that is read to <code><span class="ApiLink_nn__ro__RegisterModuleInfo">nn::ro::RegisterModuleInfo</span>()</code> and register the NRR file.</p>
+<p>You can register information for multiple NRO files to the NRR file. Calling <code><span class="ApiLink_nn__ro__RegisterModuleInfo">nn::ro::RegisterModuleInfo</span>()</code> one time is sufficient for loading the registered NRO files.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>The NRR file that is created must be be saved in ROM-FS, and must be saved in <code>/.nrr</code> assuming that the ROM-FS root directory is <code>/</code>.</p>
+    <p>Do not place files other than the NRR file in the <code>/.nrr</code> directory. Do not encrypt or compress the NRR file.</p>
+    <p>
+      <code>
+        <span class="ApiLink_nn__ro__RegisterModuleInfo">nn::ro::RegisterModuleInfo</span>()</code> always fails when executed in VSI's RAW format. You must execute the function in NSP format.</p>
+    <p>However, these restrictions are disabled if <span class="toc-item-body"><span class="toc-item-body">Ease Nro Restriction</span></span>, in the <span class="toc-link"><a href="../Pages/Page_310879077.html">Development Assistance Settings</a></span> of DevMenu, is enabled.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<p>If calling <code><span class="ApiLink_nn__ro__RegisterModuleInfo">nn::ro::RegisterModuleInfo</span>()</code> succeeds, you cannot use the memory area that was passed by <code><em>pOutInfo</em></code> and <code><em>pImage</em></code> until <code><span class="ApiLink_nn__ro__UnregisterModuleInfo">nn::ro::UnregisterModuleInfo</span>()</code> is called.</p>
+<p>The area in <code><em>pImage</em></code> that can no longer be used is the area specified by the NRR file size, starting from the address passed as an argument.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_161310949_h2_4">3. Loading Dynamic Modules</h2>
+<p>Load the NRO file to the heap area.</p>
+<p>The target loading address must be aligned with <code><span class="ApiLink_nn__os__MemoryPageSize">nn::os::MemoryPageSize</span></code>.</p>
+<p>
+  <br />
+</p>
+<p>Prepare a heap area that will be used as the BSS area by the dynamic module.</p>
+<p>You can use <code><span class="ApiLink_nn__ro__GetBufferSize">nn::ro::GetBufferSize</span>()</code> to get the required BSS size.</p>
+<p>The leading address of the prepared memory area must be aligned with <code><span class="ApiLink_nn__os__MemoryPageSize">nn::os::MemoryPageSize</span></code>.</p>
+<p>
+  <br />
+</p>
+<p>Pass the two heap areas to <code><span class="ApiLink_nn__ro__LoadModule">nn::ro::LoadModule</span>()</code> to make it possible to use the dynamic module.</p>
+<p>At this time, you can specify setting and immediately resolving <code><span class="ApiLink_nn__ro__BindFlag_Now">nn::ro::BindFlag_Now</span></code> and setting and immediately resolving <code><span class="ApiLink_nn__ro__BindFlag_Lazy">nn::ro::BindFlag_Lazy</span></code>.</p>
+<p>
+  <br />
+</p>
+<p>This API calls the constructor of the static object that is possessed by the dynamic module to load.</p>
+<p>
+  <code>
+    <span class="ApiLink_nn__ro__LoadModule">nn::ro::LoadModule</span>()</code>, <code><span class="ApiLink_nn__ro__UnloadModule">nn::ro::UnloadModule</span>()</code>, <code>and <span class="ApiLink_nn__ro__Finalize">nn::ro::Finalize</span>()</code> must not be called in the constructor of the static object.</p>
+<p>
+  <br />
+</p>
+<p>After calling the object succeeds, the two heap areas can no longer be used.</p>
+<p>In the memory area where the NRO file is loaded, the area specified from the address passed as an argument using the NRO file size cannot be used.</p>
+<p>In the memory area that was passed as the BSS area, the area specified by the address passed as an argument specifying the passed size cannot be used.</p>
+<p>The memory area will be available for use again if you call <code><span class="ApiLink_nn__ro__UnloadModule">nn::ro::UnloadModule</span>()</code> and release the target dynamic module.</p>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_161310949_h3_1">Number of Dynamic Modules That Can Be Loaded</h3>
+<p>A maximum of 64 dynamic modules be used simultaneously by one application.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_161310949_h2_5">4. Searching for Symbols</h2>
+<p>After a dynamic module has been loaded, its symbols can be called directly, similar to the symbols of a static module.</p>
+<p>However, there are two ways to search for a symbol inside a loaded module and get its address.</p>
+<p>Symbols that can be searched for are those in a state where they can be referenced by other modules.</p>
+<h3 id="Anchor_161310949_h3_2">nn::ro::LookupSymbol()</h3>
+<p>Searches for symbols in all loaded modules.</p>
+<p>The search also includes static modules.</p>
+<h3 id="Anchor_161310949_h3_3">nn::ro::LookupModuleSymbol()</h3>
+<p>Specifies the module you want to search and looks for symbols within that module.</p>
+<p>Some instances of functions or variables will not be referenced if the same symbol is defined for multiple modules.</p>
+<p>By using this API, you can access instances like these that are not referenced because they were loaded later.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_161310949_h2_6">5. Releasing Dynamic Modules</h2>
+<p>You can release a dynamic module by passing the <code><span class="ApiLink_nn__ro__Module">nn::ro::Module</span></code> obtained from calling <code><span class="ApiLink_nn__ro__LoadModule">nn::ro::LoadModule</span>()</code> to <code><span class="ApiLink_nn__ro__UnloadModule">nn::ro::UnloadModule</span>()</code>.</p>
+<p>The destructor of the static object in the released dynamic module is called when calling <code><span class="ApiLink_nn__ro__UnloadModule">nn::ro::UnloadModule</span>()</code>.</p>
+<p>After calling <code><span class="ApiLink_nn__ro__UnloadModule">nn::ro::UnloadModule</span>()</code> ends, the memory area passed to <code><span class="ApiLink_nn__ro__LoadModule">nn::ro::LoadModule</span>()</code> can be used again.</p>
+<p>
+  <br />
+</p>
+<p>The area where NRO was loaded is subject to erase-write cycles while the module is being used, so you cannot pass it to <code><span class="ApiLink_nn__ro__LoadModule">nn::ro::LoadModule</span>()</code> as is.</p>
+<p>To reload the same module, you must load the NRO file to the heap area again.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_161310949_h2_7">6. Deleting Dynamic Module Information</h2>
+<p>To delete the dynamic module information, pass the <code><span class="ApiLink_nn__ro__RegistrationInfo">nn::ro::RegistrationInfo</span></code> obtained when calling <code><span class="ApiLink_nn__ro__RegisterModuleInfo">nn::ro::RegisterModuleInfo</span>()</code> to <code><span class="ApiLink_nn__ro__UnregisterModuleInfo">nn::ro::UnregisterModuleInfo</span>()</code>.</p>
+<p>After finishing calling <code><span class="ApiLink_nn__ro__UnregisterModuleInfo">nn::ro::UnregisterModuleInfo</span>()</code>, the NRO files containing NRR files registered afterwards can no longer be loaded by <code><span class="ApiLink_nn__ro__LoadModule">nn::ro::LoadModule</span>()</code>.</p>
+<p>In addition, the memory area passed to <code><span class="ApiLink_nn__ro__RegisterModuleInfo">nn::ro::RegisterModuleInfo</span>()</code> is released and available for use again.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_161310949_h2_8">7. Finalizing the ro Library</h2>
+<p>All resources managed by the <code>ro</code> library are released when <code><span class="ApiLink_nn__ro__Finalize">nn::ro::Finalize</span>()</code> is called.</p>
+<p>When <code><span class="ApiLink_nn__ro__Finalize">nn::ro::Finalize</span>()</code> is called, the destructor of the static objects of the registered dynamic object is called.</p>
+<p>After <code><span class="ApiLink_nn__ro__Finalize">nn::ro::Finalize</span>()</code> is called, the memory areas passed to <code><span class="ApiLink_nn__ro__LoadModule">nn::ro::LoadModule</span>()</code> and <code><span class="ApiLink_nn__ro__RegisterModuleInfo">nn::ro::RegisterModuleInfo</span>()</code> are released and available for use again.</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_161310949_h1_3">Symbols</h1>
+<p>You can control the privacy level and reference specifications for each symbol.</p>
+<p>This section describes how to control symbols.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_161310949_h2_9">Binding Symbols</h2>
+<p>Binding controls the privacy level of the symbol.</p>
+<ul>
+  <li>
+    <code>GLOBAL</code>
+    <ul>
+      <li>The symbol can be referenced by other modules.</li>
+    </ul>
+  </li>
+  <li>
+    <code>LOCAL</code>
+    <ul>
+      <li>The symbol cannot be referenced by other modules.</li>
+    </ul>
+  </li>
+  <li>
+    <code>WEAK</code>
+    <ul>
+      <li>Works the same way as GLOBAL symbols.</li>
+    </ul>
+  </li>
+</ul>
+<h3 id="Anchor_161310949_h3_4">Controlling Symbol Binding</h3>
+<p>You can control symbol binding by specifying a version script in the linker.</p>
+<p>However, WEAK symbols cannot be controlled.</p>
+<p>
+  <br />
+</p>
+<p>First, create a text file like the following.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>{
+&nbsp;&nbsp;&nbsp;&nbsp;global:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;extern &quot;C++&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Global*;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+&nbsp;&nbsp;&nbsp;&nbsp;local:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*;
+};</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In the preceding example, the symbol with the prefix <code>Global</code> uses GLOBAL binding, and all other symbols use LOCAL binding.</p>
+<p>You may use an asterisk (*) as a wildcard.</p>
+<p>
+  <br />
+</p>
+<p>Next, specify the version script with the following options in the compiler when creating the dynamic module.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-Wl,--version-script=sample.txt</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>A module combines executable data, read-only data, and readable/writable data into one.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_161310949_h2_10">Symbol Visibility</h2>
+<p>Visibility controls whether the symbol can be referenced by other dynamic modules.</p>
+<p>There are three types of visibility.</p>
+<ul>
+  <li>
+    <code>DEFAULT</code>
+    <ul>
+      <li>The symbol can be referenced by other modules.</li>
+      <li>If the same symbol is referenced by multiple modules, the reference target will be the same.</li>
+    </ul>
+  </li>
+  <li>
+    <code>HIDDEN</code>
+    <ul>
+      <li>The symbol cannot be referenced by other modules.</li>
+      <li>Even if the same symbol is referenced by multiple modules, each module will reference the symbol within itself.</li>
+    </ul>
+  </li>
+  <li>
+    <code>PROTECTED</code>
+    <ul>
+      <li>The symbol can be referenced by other modules.</li>
+      <li>Even if the same symbol is referenced by multiple modules, each module will reference the symbol within itself.</li>
+    </ul>
+  </li>
+</ul>
+<h3 id="Anchor_161310949_h3_5">Controlling Symbol Visibility</h3>
+<p>If there is a symbol whose visibility you want to control, you can control it by applying compiler attributes in the source code.</p>
+<p>
+  <br />
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">g_HiddenVariable</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">visibility</span><span class="p">(</span><span class="s">&quot;hidden&quot;</span><span class="p">)))</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="kt">int</span> <span class="nf">ProtectedFunction</span><span class="p">()</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">visibility</span><span class="p">(</span><span class="s">&quot;protected&quot;</span><span class="p">)))</span><span class="p">;</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_161310949_h2_11">Symbol Resolution</h2>
+<p>When a module referenced a public symbol, you must first determine which module the symbol belongs to before referencing it.</p>
+<p>Determining the reference target for the symbol is called <em>symbol resolution</em>.</p>
+<p>The symbol contained in the module that was loaded first is referenced if the same symbol name is defined in multiple modules.</p>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_161310949_h3_6">Resolving Function Symbols</h3>
+<p>You can select how to resolve function symbols when using <code><span class="ApiLink_nn__ro__LoadModule">nn::ro::LoadModule</span>()</code> to load dynamic modules.</p>
+<h4 id="Anchor_161310949_h4_1">Immediate Resolution</h4>
+<p>Immediate resolution resolves the symbols in a module when the module is loaded.</p>
+<p>If some symbols are unresolved, they are handled in the same way as delayed resolution.</p>
+<h4 id="Anchor_161310949_h4_2">Delayed Resolution</h4>
+<p>Delayed resolution resolves the symbols at the point when they are actually used.</p>
+<p>If you use delayed resolution, you can resolve symbols using dynamic modules that are loaded later.</p>
+<p>The program ends if the reference target symbol does not exist at the point where delayed resolution occurs.</p>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_161310949_h3_7">Resolving Variable Symbols</h3>
+<p>Variable symbols are resolved when the dynamic module is loaded.</p>
+<p>If some symbols are unresolved, the reference target will be in an undefined state.</p>
+<p>The behavior when a symbol in this state is referenced is TBD.</p>
+<p>If a newly loaded module can resolve undefined symbols in existing modules, the symbols will be resolved at the point when the new module is loaded.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_161310949_h2_12">Considerations When Releasing Dynamic Modules</h2>
+<p>While it is possible to load and release dynamic modules at any time, sudden changes may occur if the referenced symbols are changed when the module is released.</p>
+<p>For example, Module A and Module B exist and Module B references a symbol in Module A.</p>
+<p>At this point, if Module A is released first, the symbol in Module B that references Module A will be processed as follows.</p>
+<ul>
+  <li>Function symbol: Symbol resolution will be determined again the next time it is accessed.</li>
+  <li>Variable symbol: When module A is released, the reference source will be undefined. Undefined symbols will be resolved again by modules loaded later.</li>
+</ul>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__ro__Initialize', '../../../Api/HtmlNX/namespacenn_1_1ro.html#a0425902c59e6cfb7c1b3a2d648493315' )
+SetUrl( 'ApiLink_nn__ro__Finalize', '../../../Api/HtmlNX/namespacenn_1_1ro.html#ae97f20f6181a31bfa21d8d0a63748c6a' )
+SetUrl( 'ApiLink_nn__ro__RegisterModuleInfo', '../../../Api/HtmlNX/namespacenn_1_1ro.html#a2e643dca01008cc8ed285d9f59653482' )
+SetUrl( 'ApiLink_nn__ro__UnregisterModuleInfo', '../../../Api/HtmlNX/namespacenn_1_1ro.html#ace8d9f0ec61122ca185d10f621e438af' )
+SetUrl( 'ApiLink_nn__ro__LoadModule', '../../../Api/HtmlNX/namespacenn_1_1ro.html#aec4ecffa6d58c6f29427483d4754e5de' )
+SetUrl( 'ApiLink_nn__ro__UnloadModule', '../../../Api/HtmlNX/namespacenn_1_1ro.html#a0cb495a4165afe33f1c622746bcadd46' )
+SetUrl( 'ApiLink_nn__os__MemoryPageSize', '../../../Api/HtmlNX/namespacenn_1_1os.html#ac880b46610757e748d5bd79211af4236' )
+SetUrl( 'ApiLink_nn__ro__GetBufferSize', '../../../Api/HtmlNX/namespacenn_1_1ro.html#a3a1abb08d9b6e8dfed7fd9ff73a7e7b3' )
+SetUrl( 'ApiLink_nn__ro__BindFlag_Now', '../../../Api/HtmlNX/namespacenn_1_1ro.html#a4533185b3e7edc8fb1b8173c57666734a28fe4e9a9c0b11a6f312e66735aea311' )
+SetUrl( 'ApiLink_nn__ro__BindFlag_Lazy', '../../../Api/HtmlNX/namespacenn_1_1ro.html#a4533185b3e7edc8fb1b8173c57666734ac2b60b0da6505d87f0ec40d7474b8024' )
+SetUrl( 'ApiLink_nn__ro__Module', '../../../Api/HtmlNX/structnn_1_1ro_1_1_module.html' )
+SetUrl( 'ApiLink_nn__ro__RegistrationInfo', '../../../Api/HtmlNX/structnn_1_1ro_1_1_registration_info.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

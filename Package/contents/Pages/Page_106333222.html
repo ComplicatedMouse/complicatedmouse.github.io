@@ -1,0 +1,456 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Shader Resource Workflow | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Shader Resource Workflow -->
+<div class="pagetitle" id="PageId_106333222">Shader Resource Workflow</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_106333222_h1_1">Overview</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106333222_h2_1">File List</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_106333222_h1_2">High-Level Workflow</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106333222_h2_2">1. Creating the Shader Source</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333222_h2_3">2. Creating the Shader Settings Files (FSCA, FSDB)</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333222_h2_4">3. Generating the Shader Definition File (FSDB)</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333222_h2_5">4. Using the Shader Definition File (FSDB)</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333222_h2_6">5. (Optional) Creating Shader Variation Files (FSVA and FSVB)</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333222_h2_7">6. Creating the Shader Archive File (BFSHA)</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_106333222_h1_1">Overview</h1>
+<p>This section describes the resource workflow for converting shader source code to the binary format used by the <code>g3d</code> runtime. User-generated shader source code is ultimately converted to a binary file for use in the runtime. The shader source code and intermediate files used in this resource workflow are primarily responsible for defining the structure of the shaders used in the runtime (such as shading models and shader programs) and for configuring settings for editing model materials in <a href="../Pages/Page_83955978.html">3DEditor</a>.</p>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_106333222/flowchart_1.svg" />
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_106333222_h2_1">File List</h2>
+<p>The <code>g3d</code> shader system uses the following five types of files. For more information about these intermediate file types, see the <a href="../IntermediateFileFormat/Html/3d/3dIntermediateFileFormat.html">3D Intermediate File Specification Manual</a>. Although shader definition files can also be saved with the <code>.fsda</code> extension, 3D Shader Converter does not support the FSDA file type. For that reason, in most cases use the <code>.fsdb</code> extension.</p>
+<table class="relative-table wrapped" style="width: 81.6786%;">
+  <colgroup>
+    <col style="width: 18.9516%;" />
+    <col style="width: 6.51882%;" />
+    <col style="width: 10.6855%;" />
+    <col style="width: 29.8387%;" />
+    <col style="width: 5.91398%;" />
+    <col style="width: 28.0914%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Name</th>
+      <th style="text-align: center;">Filename Extension</th>
+      <th style="text-align: center;">Format</th>
+      <th style="text-align: center;">Creation Method</th>
+      <th style="text-align: center;">Required</th>
+      <th style="text-align: center;">Role</th>
+    </tr>
+    <tr>
+      <th>Shader Source Code</th>
+      <td style="text-align: center;">Any</td>
+      <td style="text-align: center;">Source code</td>
+      <td style="text-align: center;">
+        <p>Written by the user.</p>
+      </td>
+      <td style="text-align: center;">〇</td>
+      <td style="text-align: center;">
+        <p>Defines shader logic.</p>
+        <p>Defines annotations.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Shader Settings File</th>
+      <td style="text-align: center;">.fsca/.fscb</td>
+      <td style="text-align: center;">Intermediate file</td>
+      <td style="text-align: center;">Written by the user.</td>
+      <td style="text-align: center;">〇</td>
+      <td style="text-align: center;">
+        <p>Defines the shading model.</p>
+        <p>Configures value ranges for variations.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Shader Definition Files</th>
+      <td style="text-align: center;">.fsdb</td>
+      <td style="text-align: center;">Intermediate file</td>
+      <td style="text-align: center;">Created by using <a href="../Pages/Page_83956037.html">3D Shader Converter</a> to convert a shader settings file.</td>
+      <td style="text-align: center;">〇</td>
+      <td style="text-align: center;">
+        <p>Contains material editing reference targets for 3DEditor.</p>
+        <p>Assigns shaders to intermediate model files.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Shader Variation File</th>
+      <td style="text-align: center;">.fsva/.fsvb</td>
+      <td style="text-align: center;">Intermediate file</td>
+      <td style="text-align: center;">
+        <p>Coded by the user or generated by 3dIntermediateFileShaderVariationGenerator.</p>
+        <p />
+      </td>
+      <td style="text-align: center;">Optional</td>
+      <td style="text-align: center;">Specifies details of variations.</td>
+    </tr>
+    <tr>
+      <th>Shader Archive</th>
+      <td style="text-align: center;">.bfsha</td>
+      <td style="text-align: center;">Binary file</td>
+      <td style="text-align: center;">Created by using 3D Shader Converter to convert the shader definitions file.</td>
+      <td style="text-align: center;">〇</td>
+      <td style="text-align: center;">Loads files in the <code>g3d</code> runtime.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_106333222_h1_2">High-Level Workflow</h1>
+<p>This section describes a simple workflow for converting shader source code to the binary format used by the runtime.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_106333222_h2_1">File List</a>
+    </li>
+    <li>
+      <a href="#Anchor_106333222_h2_2">1. Creating the Shader Source</a>
+    </li>
+    <li>
+      <a href="#Anchor_106333222_h2_3">2. Creating the Shader Settings Files (FSCA, FSDB)</a>
+    </li>
+    <li>
+      <a href="#Anchor_106333222_h2_4">3. Generating the Shader Definition File (FSDB)</a>
+    </li>
+    <li>
+      <a href="#Anchor_106333222_h2_5">4. Using the Shader Definition File (FSDB)</a>
+    </li>
+    <li>
+      <a href="#Anchor_106333222_h2_6">5. (Optional) Creating Shader Variation Files (FSVA and FSVB)</a>
+    </li>
+    <li>
+      <a href="#Anchor_106333222_h2_7">6. Creating the Shader Archive File (BFSHA)</a>
+    </li>
+  </ul>
+</p>
+<h2 id="Anchor_106333222_h2_2">1. Creating the Shader Source</h2>
+<p>Shader source code includes the shader code itself and the <a href="../Pages/Page_84052806.html">shader annotations</a>. In most regards, users are free to write their own shader code as they see fit. However, to get the code working together with the <code>g3d</code> library, intermediate model files, and tools such as <a href="../Pages/Page_83955978.html">3DEditor</a>, annotations must be added to symbol information such as variables and uniform blocks. Also, some uniform block features supported by the <code>g3d</code> library must be defined in a way that is compatible with the <code>g3d</code> system specifications.</p>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_1">Shader Annotations</h3>
+<p>The <code>g3d</code> shader system uses <a href="../Pages/Page_84052806.html">shader annotations</a>, which are formatted as comments in the shader source code, to control which information is used by the <code>g3d</code> library, intermediate model files, and tools. Annotations can be used to configure the following types of settings.</p>
+<ul>
+  <li>Shader variation controls</li>
+  <li>Embedded hint information for associating models with shaders</li>
+  <li>3DEditor UI definitions</li>
+  <li>Model vertex buffer and vertex interleaving settings</li>
+  <li>Uniform block settings</li>
+</ul>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_2">Uniform Blocks</h3>
+<p>Although <a href="../Pages/Page_106332818.html">uniform blocks</a> can be freely configured by the user, the <code>g3d</code> system also natively supports four predefined uniform block types: shapes, skeletons, materials, and options. These uniform blocks can be used to load calculation results from the associated classes in the <code>g3d</code> library directly into shaders. These values are calculated in the <span class="ApiLink_nn__g3d__ShapeObj"><code>nn::g3d::ShapeObj</code></span> class for shapes, in the <span class="ApiLink_nn__g3d__SkeletonObj"><code>nn::g3d::SkeletonObj</code></span> class for skeletons, in the <span class="ApiLink_nn__g3d__MaterialObj"><code>nn::g3d::MaterialObj</code></span> class for materials, and in the <span class="ApiLink_nn__g3d__ShadingModelObj"><code>nn::g3d::ShadingModelObj</code></span> class for options, for example. The calculated results can then be loaded directly into the respective uniform blocks for the shader. However, when using the uniform blocks supported by the <code>g3d</code> system, the blocks must be defined in a way that is compatible with the <code>g3d</code> specifications in the shader source code. For more information, see <a href="../Pages/Page_106332818.html">Uniform Blocks</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// When using the uniform blocks supported by g3d, the appropriate annotations must be added in the source code.
+</span><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Skeleton</span> <span class="c1">// @@ id=&quot;skel&quot; type=&quot;skeleton&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">mtx</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="mi">128</span><span class="p">];</span>
+<span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_3">Option Variables</h3>
+<p>Option variables are used to control the generation of <a href="../Pages/Page_286721565.html">shader variations</a>. Defining option variables and then writing the shader generation process to branch based on those option variables makes it possible to define various shader variations. Shader variations are not created simply by writing conditional branches within a single shader. Instead, each variation is generated as a separate shader in advance to improve runtime performance. For more information, see <a href="../Pages/Page_286721565.html">Shader Variations</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#define MULTI_TEX           ( 0 )       </span><span class="c1">// @@ id=&quot;multi_tex&quot; choice=&quot;0: None, 1: Interpolation, 2: Multiplicative , 3: Additive&quot;
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_4">Vertex Attributes</h3>
+<p>In <code>g3d</code>, we recommend specifying the locations of vertex attributes explicitly. When vertex attribute locations are not specified and those attributes are used while switching between multiple shader programs in the form of shader variations, the vertex attribute locations are not always the same for each shader program, which means that vertex state must be generated separately for each variation. Explicitly specifying vertex attribute locations makes it possible to fix those locations from the shader source code so that the shader system does not have to switch between different locations for each shader program. For this reason, we strongly recommend explicitly specifying vertex attribute locations as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="n">in</span> <span class="n">vec3</span> <span class="n">position</span><span class="p">;</span>
+<span class="n">layout</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="n">in</span> <span class="n">vec3</span> <span class="n">normal</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_106333222_h2_3">2. Creating the Shader Settings Files (FSCA, FSDB)</h2>
+<p>Shader settings files are primarily used to define shading model declarations and the shader variation scope and settings. These files must be created by the user in XML format, as described in the FSC section of the <a href="../IntermediateFileFormat/Html/3d/3dIntermediateFileFormat.html">3D Intermediate File Specification Manual</a>.</p>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_5">Specifying a Variation</h3>
+<p>Shading model definitions are included within the <code>&lt;shader&gt;</code> element. <em>Shading models</em> describe the type of shading used when rendering data, and each separate shader code file defines a different shading model. The shader code that defines shading models is included within the <code>&lt;vertex_shader&gt;</code>, <code>&lt;geometry_shader&gt;</code>, <code>&lt;compute_shader&gt;</code>, and <code>&lt;fragment_shader&gt;</code> elements. Also, the <code>&lt;macro&gt;</code> element can be used to define macros to be applied to an overall shading model. For this reason, if you want to create multiple separate <code>&lt;macro&gt;</code> definitions, you must define separate shading models, even if the path of base shader code is the same. For example, if you had three shader source code files (<code>a_vs.glsl</code>, <code>b_vs.glsl</code>, and <code>c_fs.glsl</code>) and wanted (<code>a_vs.glsl</code> + <code>c_vs.glsl</code>) to be Shading Model A and (<code>b_vs.glsl</code> + <code>c_vs.glsl</code>) to be Shading Model B, you could combine the shader source code and create the respective macro definitions.</p>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_6">Setting Variations</h3>
+<p>In the shader code for shading models, the <code>&lt;variation&gt;</code> element is used to configure the ranges of values that can be taken by option variables. Option variables are used to control generation of shader variations. For the <code>id</code> attribute, specify an identifier for the option variable corresponding to the annotation. For the <code>choice</code> attribute, specify the range of values that can be taken by the option variable. For the <code>default</code> attribute, specify the default value. For the <code>branch</code> attribute, specify whether to treat the variation as a preprocessor variable branch or as a uniform variable branch. For more information about preprocessor variable branches and uniform variable branches, see <a href="../Pages/Page_286721565.html">Shader Variations</a>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Shader variation ranges can also be specified using annotations in the shader code. This specification facilitates the use of shared shader code across multiple projects.<br />For example, in annotations in the shader code, you could specify wide variation ranges that are applicable to all projects using that shader code. In the shader configuration files (.fsca, .fscb), you could then specify variation ranges that are narrower than in the annotations and more appropriate for each respective project.</p>
+  </div>
+</div>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_7">Example Notation</h3>
+<p>The following example shows a shader settings file. In this example, one shading model named <code>basic</code> is declared, and a range is specified for the values that can be taken by three <a href="../Pages/Page_84052806.html#Anchor_84052806_optionvalue">option variables</a>. For more information about the XML elements that can be described in the shader configuration file, see the FSC section in the <a href="../IntermediateFileFormat/Html/3d/3dIntermediateFileFormat.html">3D Intermediate File Specification Manual</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;? &gt;
+<span class="nt">&lt;nw4f_3dif</span> <span class="na">version=</span><span class="s">&quot;4.0.0&quot;</span><span class="nt">&gt;</span>
+<span class="nt">&lt;shader_config</span> <span class="na">version=</span><span class="s">&quot;4.0.0&quot;</span><span class="nt">&gt;</span>
+<span class="nt">&lt;shader_config_info</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">code_page=</span><span class="s">&quot;65001&quot;</span>
+<span class="nt">/&gt;</span>
+<span class="nt">&lt;include_path_array</span> <span class="na">length=</span><span class="s">&quot;2&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;include_path</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">path=</span><span class="s">&quot;include&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;include_path</span> <span class="na">index=</span><span class="s">&quot;1&quot;</span> <span class="na">path=</span><span class="s">&quot;src&quot;</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/include_path_array&gt;</span>
+<span class="nt">&lt;shader_array</span> <span class="na">length=</span><span class="s">&quot;1&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;shader</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">name=</span><span class="s">&quot;basic&quot;</span> <span class="na">material_shader=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;vertex_shader</span> <span class="na">path=</span><span class="s">&quot;basic.glsl&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;fragment_shader</span> <span class="na">path=</span><span class="s">&quot;basic.glsl&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;variation_array</span> <span class="na">length=</span><span class="s">&quot;3&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;variation</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">id=</span><span class="s">&quot;albedo_tex&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">choice=</span><span class="s">&quot;bool&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">default=</span><span class="s">&quot;1&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">branch=</span><span class="s">&quot;true&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;variation</span> <span class="na">index=</span><span class="s">&quot;1&quot;</span> <span class="na">id=</span><span class="s">&quot;vertex_color&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">choice=</span><span class="s">&quot;bool&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">default=</span><span class="s">&quot;0&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">branch=</span><span class="s">&quot;true&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;variation</span> <span class="na">index=</span><span class="s">&quot;2&quot;</span> <span class="na">id=</span><span class="s">&quot;multi_tex&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">choice=</span><span class="s">&quot;[0, 3]&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">default=</span><span class="s">&quot;0&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">branch=</span><span class="s">&quot;true&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/variation_array&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/shader&gt;</span>
+<span class="nt">&lt;/shader_array&gt;</span>
+<span class="nt">&lt;/shader_config&gt;</span>
+<span class="nt">&lt;/nw4f_3dif&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_106333222_h2_4">3. Generating the Shader Definition File (FSDB)</h2>
+<p>Shader definition files are used primarily to associate shader variable information with intermediate model files in the assign utility and to resolve references when editing model materials in 3DEditor. Shader definition files act as a container for shader source code, shader annotations, and shader settings files. Never directly edit or modify them.</p>
+<p>To generate a shader definition file, use <a href="../Pages/Page_83956037.html">3D Shader Converter</a> to convert the shader settings file. The command in the following example would create the <code>output.fsdb</code> file from the <code>shader.fsca</code> file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dShaderConverter.exe --output output.fsdb shader.fsca</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_106333222_h2_5">4. Using the Shader Definition File (FSDB)</h2>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_8">Associating With Intermediate Model Files</h3>
+<p>Using the <a href="../Pages/Page_83956043.html">assign utility</a> to associate a shader definition file with an intermediate model file adds a portion of the shader information corresponding to the annotations in the shader code to that intermediate model file. For more information, see the <a href="../Pages/Page_83956043.html">assign utility documentation</a>.</p>
+<ul>
+  <li>The shader's rendering information, option variables, sampler variables, material uniform block variables, and vertex attribute information are added to the <code>&lt;shader_assign&gt;</code> element in the intermediate model file.</li>
+  <li>The vertex buffer definition in the intermediate model file is updated based on the vertex interleave information specified in the shader annotations.</li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If a shader with tessellation stages is assigned to the model materials, <br />you must change the <code>&lt;primitive_topology&gt;</code> of the shape that references the materials to <code>patch_list</code>.<br />Because the tool provided by <code>g3d</code> cannot change the <code>primitive_topology</code> value, the user must directly replace it, such as by using a script.</p>
+  </div>
+</div>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_106333222/flowchart_2.svg" />
+</div>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_9">Usage in 3DEditor</h3>
+<p>In <a href="../Pages/Page_83955978.html">3DEditor</a>, opening a shader definition file together with an intermediate model file makes it possible to edit values for the materials used in the model and to edit the values of option variables. At this time, 3DEditor references the UI settings (such as the names of elements, whether editable, and the editable range of values) defined in the shader annotations in the shader definition file to build a UI that can then be used by designers to edit these values. Edits made in 3DEditor overwrite the values previously stored in the intermediate model file. The shader definition file itself is only used for reference and is not modified or overwritten in any way.</p>
+<p>In addition, connecting 3DEditor to the viewer library makes it possible to edit shaders in real time. In real-time editing mode, 3DEditor extracts the shader source code stored in the shader definition file to a temporary region and then waits for the editor to make edits. After the edits are complete and the shader source code extracted to the temporary region is saved, the shader program is recompiled, and the viewer library switches to the edited shader program. Note, however, that this only updates the instance of the resource stored in the viewer library. The shader definition file itself is not modified or overwritten in any way. To apply the changes in the original shader source code, you must open and edit that original shader source code and then repeat the preceding steps to re-generate the shader definition file.</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_106333222/flowchart_3.svg" />
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_106333222_h2_6">5. (Optional) Creating Shader Variation Files (FSVA and FSVB)</h2>
+<p>Shader variation files further restrict the variation ranges specified in the shader settings file to reduce the number of variations included in the shader archive. Including all possible variations in the binary increases conversion time and binary size. Shader variation files can be used to solve these problems by generating the shader archive to include only variations corresponding to option variable values that are actually used in models.</p>
+<p>You can generate shader variation files using the <a href="../Pages/Page_286731115.html">3D Shader Variation Generator</a>, or you can create them manually in XML format as described in the FSV section of the <a href="../IntermediateFileFormat/Html/3d/3dIntermediateFileFormat.html">3D Intermediate File Specification Manual</a>.</p>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_10">Example Notation</h3>
+<p>The following example shows a shader settings file. In this example, the <code>&lt;option&gt;</code> elements restrict the range of values that can be taken by each option variable. This restricted range limits the number of variations of the shading model that are named <code>ShadingModelName</code> in the shader archive named <code>ArchiveName</code> to one.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;? &gt;
+<span class="nt">&lt;nw4f_3dif</span> <span class="na">version=</span><span class="s">&quot;4.0.0&quot;</span><span class="nt">&gt;</span>
+<span class="nt">&lt;shader_variation</span> <span class="na">version=</span><span class="s">&quot;4.0.0&quot;</span><span class="nt">&gt;</span>
+<span class="nt">&lt;shader_variation_info</span> <span class="na">shader_archive=</span><span class="s">&quot;ArchiveName&quot;</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;target_shader_array</span> <span class="na">length=</span><span class="s">&quot;1&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;target_shader</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">shading_model_name=</span><span class="s">&quot;ShadingModelName&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;shader_program_array</span> <span class="na">length=</span><span class="s">&quot;1&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;shader_program</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;option_array</span> <span class="na">length=</span><span class="s">&quot;5&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;option</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">id=</span><span class="s">&quot;use_hemisphere_light&quot;</span> <span class="na">choice=</span><span class="s">&quot;1&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;option</span> <span class="na">index=</span><span class="s">&quot;1&quot;</span> <span class="na">id=</span><span class="s">&quot;use_fog&quot;</span> <span class="na">choice=</span><span class="s">&quot;0&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;option</span> <span class="na">index=</span><span class="s">&quot;2&quot;</span> <span class="na">id=</span><span class="s">&quot;use_directional_light&quot;</span> <span class="na">choice=</span><span class="s">&quot;1&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;option</span> <span class="na">index=</span><span class="s">&quot;3&quot;</span> <span class="na">id=</span><span class="s">&quot;factor_function&quot;</span> <span class="na">choice=</span><span class="s">&quot;mul&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;option</span> <span class="na">index=</span><span class="s">&quot;4&quot;</span> <span class="na">id=</span><span class="s">&quot;use_degamma&quot;</span> <span class="na">choice=</span><span class="s">&quot;0&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/option_array&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/shader_program&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/shader_program_array&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/target_shader&gt;</span>
+<span class="nt">&lt;/target_shader_array&gt;</span>
+<span class="nt">&lt;/shader_variation&gt;</span>
+<span class="nt">&lt;/nw4f_3dif&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_11">How to Use</h3>
+<p>To create a shader archive from a shader definition file, use <a href="../Pages/Page_83956037.html">3D Shader Converter</a>.</p>
+<h2 id="Anchor_106333222_h2_7">6. Creating the Shader Archive File (BFSHA)</h2>
+<p>Shader archives are binary files that store the information needed to use shaders in the runtime. Shader archives have the <code>g3d</code> shader structure, which includes shading models defined in the shader settings file and any shader programs created as variations. By getting each type of location using the same index for different shader program variations within the same shading model, or by attaching the shader archive directly to the viewer library, you can edit shaders in real time.</p>
+<p>To create a shader archive file, use <a href="../Pages/Page_83956037.html">3D Shader Converter</a> to convert a shader definition file. 3D Shader Converter does not support shader definition files with the <code>.fsda</code> extension, so the input shader definition file must be saved with the <code>.fsdb</code> extension. The command in the following example would create the <code>output.bfsha</code> file from the <code>shader.fsdb</code> and <code>shader.fsva</code> files. For more information, see <a href="../Pages/Page_83956037.html">3D Shader Converter</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dShaderConverter.exe --glsl-version 430 --api-type GL --code-type Binary_Source --output output.bfsha shader.fsdb shader.fsva</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="margin-left: 0.5em;" id="Anchor_106333222_h3_12">How to Use</h3>
+<p>To begin using a shader archive file in the runtime, cast the file to an <span class="ApiLink_nn__g3d__ResShaderFile"><code>nn::g3d::ResShaderFile</code></span> object and then call the <code>Setup</code> function on that object. The <code><span class="ApiLink_nn__g3d__ResShaderFile">nn::g3d::ResShaderFile</span></code> object stores an <span class="ApiLink_nn__g3d__ResShaderArchive"><code>nn::g3d::ResShaderArchive</code></span> object and information for managing <span class="ApiLink_nn__util__BinaryFileHeader"><code>nn::util::BinaryFileHeader</code></span> objects, string pools, and the like. Call the <span class="ApiLink_ResShaderArchive_*_nn__g3d__ResShaderFile__GetResShaderArchive()_NN_NOEXCEPT"><code>nn::g3d::ResShaderFile::GetResShaderArchive()</code></span> function to get the <span class="ApiLink_nn__g3d__ResShaderArchive"><code>nn::g3d::ResShaderArchive</code></span> object (the shader archive itself) and then begin working with the included shaders. For more information about subsequent usage, see <a href="../Pages/Page_286721547.html">Shader Runtime Workflow</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Load the user-implemented file.
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">pFile</span> <span class="o">=</span> <span class="n">LoadFile</span><span class="p">(</span><span class="s">&quot;ShaderArchive.bfsha&quot;</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Use nn::g3d::ResShaderFile::ResCast() to cast to a file pointer.
+</span><span class="nn">nn::g3d::</span><span class="n">ResShaderFile</span><span class="o">*</span> <span class="n">pResShaderFile</span> <span class="o">=</span> <span class="nn">nn::g3d::ResShaderFile::</span><span class="n">ResCast</span><span class="p">(</span><span class="n">pFile</span><span class="p">);</span>
+
+<span class="c1">// nn::g3d::ResShaderFile setup.
+</span><span class="n">pResShaderFile</span><span class="o">-&gt;</span><span class="n">Setup</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Get nn::g3d::ResShaderArchive.
+</span><span class="nn">nn::g3d::</span><span class="n">ResShaderArchive</span> <span class="n">pResShaderArchive</span> <span class="o">=</span> <span class="n">pResShaderFile</span><span class="o">-&gt;</span><span class="n">GetResShaderArchive</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__ShapeObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__SkeletonObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeleton_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__MaterialObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_material_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__ShadingModelObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderFile', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_file.html' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderArchive', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_archive.html' )
+SetUrl( 'ApiLink_nn__util__BinaryFileHeader', '../../../Api/HtmlNX/structnn_1_1util_1_1_binary_file_header.html' )
+SetUrl( 'ApiLink_ResShaderArchive_*_nn__g3d__ResShaderFile__GetResShaderArchive()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_file.html#ab2a9392d9a139efe97b011ac5aec96c4' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

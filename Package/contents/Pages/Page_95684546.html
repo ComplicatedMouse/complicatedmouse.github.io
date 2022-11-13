@@ -1,0 +1,335 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>gfx for NX Guide | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- gfx for NX Guide -->
+<div class="pagetitle" id="PageId_95684546">gfx for NX Guide</div>
+<div class="text_separate">
+<p>This section provides information specific to <code>gfx</code> that is needed to create applications for the NX hardware environment.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_95684546_h1_1">Library</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_95684546_h2_1">Low-Level Graphics API</a>
+      </li>
+      <li>
+        <a href="#Anchor_95684546_h2_2">Features and Operating Environment</a>
+      </li>
+      <li>
+        <a href="#Anchor_95684546_h2_3">Descriptor Pool Reserved Region</a>
+      </li>
+      <li>
+        <a href="#Anchor_95684546_h2_4">Descriptor Pool Memory Characteristics</a>
+      </li>
+      <li>
+        <a href="#Anchor_95684546_h2_5">Color Buffer and Depth Buffer Memory Characteristics</a>
+      </li>
+      <li>
+        <a href="#Anchor_95684546_h2_6">Shader Scratch Memory</a>
+      </li>
+      <li>
+        <a href="#Anchor_95684546_h2_7">Online Compiling</a>
+      </li>
+      <li>
+        <a href="#Anchor_95684546_h2_8">gfx Functions</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_95684546_h3_1">nn::gfx::TextureInfo::SetSwizzle</a>
+        </li>
+        <li>
+          <a href="#Anchor_95684546_h3_2">nn::gfx::CommandBuffer::PushDebugGroup</a>
+        </li>
+        <li>
+          <a href="#Anchor_95684546_h3_3">nn::gfx::CommandBuffer::BeginQuery / nn::gfx::CommandBuffer::EndQuery</a>
+        </li>
+        <li>
+          <a href="#Anchor_95684546_h3_4">nn::gfx::CommandBuffer::UpdateBuffer</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_95684546_h2_9">Using NVNGD on the Development Hardware</a>
+      </li>
+      <li>
+        <a href="#Anchor_95684546_h2_10">Texture Initialization in the Windows Version</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_95684546_h1_2">Tools</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_95684546_h2_11">Texture Converter</a>
+      </li>
+      <li>
+        <a href="#Anchor_95684546_h2_12">Shader Converter</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_95684546_h3_5">Specifying GLSLC Option Flags</a>
+        </li>
+        <li>
+          <a href="#Anchor_95684546_h3_6">Dump Information</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_95684546_h1_1">Library</h1>
+<h2 id="Anchor_95684546_h2_1">Low-Level Graphics API</h2>
+<p>On the NX, <code>nvn</code> is selected as the default <code>gfx</code> low-level graphics API. For more information about <code>nvn</code>, see <a href="../Pages/Page_87937845.html">nvn Library</a>.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>
+      <code>gfx</code> receives the limitations conforming to the specifications of the low-level graphics API being used. For more information about each low-level graphics API, see the relevant documentation. </p>
+  </div>
+</div>
+<h2 id="Anchor_95684546_h2_2">Features and Operating Environment</h2>
+<p>
+  <span style="background-color: rgb(255,255,255);">The use of memory pools, descriptor pools (texture), and descriptor pools (samplers) is required when using <code>nvn</code> as a low-level graphics API, unlike with OpenGL.</span> You may not pass <code>NULL</code> to a memory pool or directly set textures and samplers.</p>
+<p>  The table lists the new features of the <code>gfx</code> library and whether they are required when using <code>nvn</code>. For more information about these features, see <a href="../Pages/Page_83955628.html">here</a>.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Functionality</th>
+      <th>Required by nvn</th>
+    </tr>
+    <tr>
+      <td>Memory Pool</td>
+      <td>Required</td>
+    </tr>
+    <tr>
+      <td>Descriptor Pool (Texture)</td>
+      <td>Required</td>
+    </tr>
+    <tr>
+      <td>Descriptor Pool (Sampler)</td>
+      <td>Required</td>
+    </tr>
+    <tr>
+      <td>Descriptor Pool (Buffer)</td>
+      <td>Not Needed</td>
+    </tr>
+    <tr>
+      <td>Resource State</td>
+      <td>Not Needed</td>
+    </tr>
+    <tr>
+      <td>Pipelines</td>
+      <td>Not Needed</td>
+    </tr>
+    <tr>
+      <td>Root Signature</td>
+      <td>Not Needed</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_95684546_h2_3">Descriptor Pool Reserved Region</h2>
+<p>A number of slots in a descriptor pool are reserved by the system. The number of these reserved slots must be found before using the descriptor pool. The number is available by calling the <code>nvnDeviceGetInteger()</code> function together with the <code>NVN_DEVICE_INFO_RESERVED_TEXTURE_DESCRIPTORS</code> parameter. For more information, see the NVN documentation.</p>
+<h2 id="Anchor_95684546_h2_4">Descriptor Pool Memory Characteristics</h2>
+<p>On the development hardware, the memory pool that is specified when the descriptor pool is initialized must be accessible from the CPU (either <code><span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuCached">nn::gfx::MemoryPoolProperty_CpuCached</span></code> or <code><span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuUncached">nn::gfx::MemoryPoolProperty_CpuUncached</span></code>). We recommend <code><span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuUncached">nn::gfx::MemoryPoolProperty_CpuUncached</span></code>.<br />For applications running on Windows, you will get better performance if you specify <code><span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuInvisible">nn::gfx::MemoryPoolProperty_CpuInvisible</span></code>.</p>
+<h2 id="Anchor_95684546_h2_5">Color Buffer and Depth Buffer Memory Characteristics</h2>
+<p>The memory pool specified when initializing textures to use as color or depth buffers must have the compressible characteristic (<code><span class="ApiLink_nn__gfx__MemoryPoolProperty_Compressible">nn::gfx::MemoryPoolProperty_Compressible</span></code>).</p>
+<h2 id="Anchor_95684546_h2_6">Shader Scratch Memory</h2>
+<p>Scratch memory may be required to operate the shader. It can be configured with the <code>nvnCommandBufferSetShaderScratchMemory()</code> function. We recommend two sizes for scratch memory. One is the minimum size for operation, and the other is the ideal size for maximum performance. Ordinarily, the required size for scratch memory is determined through a calculation from the desired size per warp. Note, also, that there are restrictions on the alignment and size for scratch memory. For more information, see the NVN documentation.</p>
+<p>You can get the recommended size using the <code><span class="ApiLink_nn__gfx__ResShaderProgram">NvnGetRecommendedScratchMemorySize</span></code> function of the <code><span class="ApiLink_size_t_nn__gfx__ResShaderProgram__NvnGetRecommendedScrachMemorySize(TDevice__TTarget___*pDevice)_const_NN_NOEXCEPT">nn::gfx::ResShaderProgram</span></code> class.</p>
+<h2 id="Anchor_95684546_h2_7">Online Compiling</h2>
+<p>When initializing shaders from source code, <code>glslc.nso</code> must be added in the development hardware version. In the PC version, the <code>NvnGlslc32.dll</code> file (for 32-bit versions) or the <code>NvnGlslc.dll</code> file (for 64-bit versions) must be located in the same folder as the application's EXE file. In the development hardware version, you must call the <code>glslcSetAllocator()</code> function once before using the online compilation features.</p>
+<h2 id="Anchor_95684546_h2_8">gfx Functions</h2>
+<h3 id="Anchor_95684546_h3_1">
+  <span class="ApiLink_void_nn__gfx__TextureInfo__SetSwizzle(int_value)_NN_NOEXCEPT">nn::gfx::TextureInfo::SetSwizzle</span>
+</h3>
+<p>When running on <code>nvn</code>, calling this function has no effect, and the specified values will be ignored when initializing the texture.</p>
+<h3 id="Anchor_95684546_h3_2">
+  <span class="ApiLink_void_nn__gfx__TCommandBuffer__PushDebugGroup(const_char_*description)_NN_NOEXCEPT">nn::gfx::CommandBuffer::PushDebugGroup</span>
+</h3>
+<p>Use 0x00676678 for the domain ID when running with nvn. When you use a unique <code>nvnCommandBufferPushDebugGroupStatic</code> or <code>nvnCommandBufferPushDebugGroupDynamic</code> other than <code>gfx</code>, use a domain ID that does not collide with this value.</p>
+<h3 id="Anchor_95684546_h3_3">
+  <span class="ApiLink_void_nn__gfx__TCommandBuffer__BeginQuery(QueryTarget_target)_NN_NOEXCEPT">nn::gfx::CommandBuffer::BeginQuery</span> / <span class="ApiLink_void_nn__gfx__TCommandBuffer__EndQuery(const_GpuAddress_&dstBufferAddress|_QueryTarget_target)_NN_NOEXCEPT">nn::gfx::CommandBuffer::EndQuery</span></h3>
+<p>When running on nvn, even if you specify <span class="ApiLink_nn__gfx__QueryTarget_ComputeShaderInvocations">nn::gfx::QueryTarget_ComputeShaderInvocations</span> as the query target, it is not possible to get the number of compute shader calls, or write anything to the specified buffer.</p>
+<h3 id="Anchor_95684546_h3_4">
+  <span class="ApiLink_void_nn__gfx__TCommandBuffer__UpdateBuffer(const_GpuAddress_&dstBufferAddress|_size_t_bufferSize|_ptrdiff_t_dstOffset|_size_t_dataSize|_const_void_*pData)_NN_NOEXCEPT">nn::gfx::CommandBuffer::UpdateBuffer</span>
+</h3>
+<p>
+  <code>When running with nvn</code>, you can specify that only the buffers used as constant buffers by the shader are update targets.</p>
+<h2 id="Anchor_95684546_h2_9">Using NVNGD on the Development Hardware</h2>
+<p>If you are using NVNGD version 3.0.0 or earlier on the development hardware, define the <code><span class="ApiLink_NN_GFX_USE_NVN_GRAPHICS_DEBUGGER">NN_GFX_USE_NVN_GRAPHICS_DEBUGGER</span></code> preprocessor and rebuild <code>gfx</code>. If you are using NVNGD 3.1.0 or later, this procedure is not necessary.</p>
+<h2 id="Anchor_95684546_h2_10">Texture Initialization in the Windows Version</h2>
+<p>When textures are initialized in the Windows version, if the tiling mode is <code><span class="ApiLink_nn__gfx__TileMode_Optimal">nn::gfx::TileMode_Optimal</span></code> and the GPU access flags include <code><span class="ApiLink_nn__gfx__GpuAccess_Texture">nn::gfx::GpuAccess_Texture</span></code>, then tiling will be performed on the contents of the specified memory pool for the environment that is running. The contents of the CPU cache might not be applied at that time, so flush the CPU cache in the memory pool, as necessary, before textures are initialized.</p>
+<h1 id="Anchor_95684546_h1_2">Tools</h1>
+<h2 id="Anchor_95684546_h2_11">Texture Converter</h2>
+<ul>
+  <li>Specify NX by using the <code>--tile-mode</code> option to output texture binary files for NX (BNTX files) (<code>--tile-mode=Nx</code>).</li>
+  <li>You can specify the tiling optimization mode using the <strong>--tile-optimize</strong> and <strong>--tile-size-threshold</strong> options.</li>
+  <li>Specify <code>true</code> in the <code>--sparse-tiled</code> option if you are performing tiling conversion for sparse textures (<code><strong>--sparse-tiled=true</strong></code>).<br />If <code>--sparse-tiled=true</code> is specified, the specification for the <code>--tile-optimize</code> option is ignored.</li>
+  <li>The ASTC format for NX does not support HDR video. Conversion using the texture converter clamps the results within the range from 0 to 1.</li>
+  <li>GPU encoding requires an NVIDIA Kepler or later generation video card.</li>
+  <li>The unorm_4_4, ETC, EAC, and PVRTC formats cannot be used for texture binary files for NX.<br />Using these formats causes an error when generating a texture binary file.</li>
+  <li>One-dimensional and one-dimensional array textures cannot be used as compression formats for texture binary files for NX.<br />Using these formats causes an error when generating a texture binary file.</li>
+  <li>The encoder has been changed in NX Add-On 5.0.0 for converting the BC1, BC2 and BC3 formats.<br />If you want to use the old encoder, run the texture converter with the environment variable <code>NINTENDO_TEXTURE_CONVERTER_NVTT_BC123</code> defined as <code>0</code>.</li>
+  <li>
+    <p>An NX texture binary file stores the array texture and cube map data in the following order.</p>
+    <table class="wrapped">
+      <colgroup>
+        <col />
+      </colgroup>
+      <tbody>
+        <tr>
+          <td>0th texture Level 0</td>
+        </tr>
+        <tr>
+          <td>1st texture Level 0</td>
+        </tr>
+        <tr>
+          <td>...</td>
+        </tr>
+        <tr>
+          <td>0th texture Level 1</td>
+        </tr>
+        <tr>
+          <td>1st texture Level 1</td>
+        </tr>
+        <tr>
+          <td>...</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>For array textures and cube maps, <code><span class="ApiLink_nn__gfx__ResTextureData__pMipPtrArray">nn::gfx::ResTextureData::pMipPtrArray</span></code> is a pointer to a pointer array for all the levels of texture data for the 0th texture.</p>
+  </li>
+</ul>
+<h2 id="Anchor_95684546_h2_12">Shader Converter</h2>
+<p>
+  <span style="background-color: rgb(255,255,255);">Specify <code>Nvn</code> for the <code>--api-type</code> option to output an NVN shader binary file (BNSH file) (<code>--api-type=Nvn</code>). You can specify <code>Glsl</code> or <code>SpirV</code> for the <code>--source-format</code> option.</span>
+</p>
+<p>You must specify the <code>--reflection</code> option if <code><span class="ApiLink_int_nn__gfx__TShader__GetInterfaceSlot(ShaderStage_stage|_ShaderInterfaceType_shaderInterfaceType|_const_char_*pName)_const_NN_NOEXCEPT">nn::gfx::Shader::GetInterfaceSlot</span></code> will be used by the runtime.</p>
+<p>To generate binary that also must run on Windows, in the <code>--code-type</code> option, specify <code>Binary_Ir</code>. The binary for which <code>Binary_Ir</code> has been specified can also run on the NX platform, but if the binary does not need to run on Windows, you can output less data by specifying <code>Binary</code> for the option instead.</p>
+<p>When specifying <code>Binary_Ir</code> in the <code>--code-type</code> option for Windows and generating many variations using variation constants, you can specify the <code>--decompose-binary</code> option to make it possible to reduce the resource size. This option attempts to increase the shared parts among the variations by resolving the binary into multiple parts. However, this results in a cost to rebuild the resolved binary when setting up the shader in the runtime.</p>
+<p>Because variations created using variation constants are compiled at the same time, when there are a large number of variations, they can be complied at a higher speed than when using the pre-processor variation.<br />For variations created using variation constants, the cache created using the <code>--shader-cache-directory</code> option is also one cache, not individual caches for each variation. This indicates that the granularity applied to the cache is coarser. Because a massive cache may result in insufficient memory during conversion, we do not recommend using the <code>--shader-cache-directory</code> option when mainly using variation constants for creating variations.<br />Any loose variations that result from preprocessor variations will be compiled in parallel unless you specify <code>1</code> for the <code>-jobs</code> option. Note that current glslc restrictions, however, prevent parallel compiling when the <code>--dump-directory</code> option is used.</p>
+<h3 id="Anchor_95684546_h3_5">Specifying GLSLC Option Flags</h3>
+<p>GLSLC is used as the low-level compiler when shaders are compiled for <code>nvn</code>. Option flags to pass to GLSLC can be specified using the <code>--glslc-option-flags</code> option. You specify <code>GLSLCoptionFlags</code> members as sub-options, inside this option, using the same option notation. Currently, the following sub-options can be specified.</p>
+<ul>
+  <li>--spillControl</li>
+  <li>--tessellationAndPassthroughGS</li>
+  <li>--enableFastMathMask</li>
+  <li>--optLevel</li>
+  <li>--unrollControl</li>
+  <li>--errorOnScratchMemUsage</li>
+  <li>--enableCBFOptimization</li>
+  <li>--enableWarpCulling</li>
+  <li>--warnUninitControl</li>
+  <li>--ignoreBindings</li>
+</ul>
+<p>If a member is a enumerated type, specify an enumerator. If it is a numerical type, specify a number.<br />The following is an example specification of option flags.</p>
+<p> <code>--glslc-option-flags=&quot;--optLevel=GLSLC_OPTLEVEL_NONE --errorOnScratchMemUsage=1 --spillControl=NO_SPILL --unrollControl=GLSLC_LOOP_UNROLL_NONE&quot;</code></p>
+<p>When <code>--glslc-option-flags</code> is set, <code>--optimization-level</code> cannot be selected and the <code>--optLevel</code> setting is enabled. When <code>--optLevel</code> is not set, <code>GLSLC_OPTLEVEL_DEFAULT</code> is enabled by default.<br /></p>
+<h3 id="Anchor_95684546_h3_6">Dump Information</h3>
+<p>If you specify the <code>--dump-directory</code> option, the following information will be output for each variation when shaders are compiled for NVN.</p>
+<ul>
+  <li>Reflection information.</li>
+  <li>Shader information, including the amount of scratch memory used.</li>
+  <li>Shader statistics.</li>
+  <li>The compiled source code.</li>
+  <li>The compilation result assembly.</li>
+  <li>The option flags passed to GLSLC.</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_CpuCached', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623a663a11b1bc56170998d3ca281574e1f1' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_CpuUncached', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623a52c9ef53497763d967da50e415056a2e' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_CpuInvisible', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623ab3cc70e30a942511e9a19ff7a222ce80' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_Compressible', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623aa4997d0d2f3098f3ad4ebae926432472' )
+SetUrl( 'ApiLink_nn__gfx__ResShaderProgram', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_res_shader_program.html' )
+SetUrl( 'ApiLink_size_t_nn__gfx__ResShaderProgram__NvnGetRecommendedScrachMemorySize(TDevice__TTarget___*pDevice)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_res_shader_program.html#a0aede4dec38cdd5e138a53a1718bb58c' )
+SetUrl( 'ApiLink_void_nn__gfx__TextureInfo__SetSwizzle(int_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_texture_info.html#a7e0bdbcb011d1f9a47bbddb77c38c62a' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__PushDebugGroup(const_char_*description)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a3c541dc719b81ec50feb0daee0225fba' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__BeginQuery(QueryTarget_target)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a0381b042fcebe5e9c2b53d71f0d6c4e3' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__EndQuery(const_GpuAddress_&dstBufferAddress|_QueryTarget_target)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a03300c989d50ccaf02a409cd7a3b0c96' )
+SetUrl( 'ApiLink_nn__gfx__QueryTarget_ComputeShaderInvocations', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a48005f3f40b9a2a1048a070dfb310161a2b28a2334c531dbed97b110444511c2d' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__UpdateBuffer(const_GpuAddress_&dstBufferAddress|_size_t_bufferSize|_ptrdiff_t_dstOffset|_size_t_dataSize|_const_void_*pData)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#aad87822025549ddd4e2fa47397db547e' )
+// ApiLink_NN_GFX_USE_NVN_GRAPHICS_DEBUGGER
+SetUrl( 'ApiLink_nn__gfx__TileMode_Optimal', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a35d6955da6f9f2af739d26025bce7502aee2025e5d379e35eff8063fb7bedf3e0' )
+SetUrl( 'ApiLink_nn__gfx__GpuAccess_Texture', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a24dbcd6d86531138895622b5a854e4f5a4a531ae2d7e145f647300ea67bc76ccc' )
+SetUrl( 'ApiLink_nn__gfx__ResTextureData__pMipPtrArray', '../../../Api/HtmlNX/structnn_1_1gfx_1_1_res_texture_data.html#a8487cf826f8bbc8346c03f99c8c96594' )
+SetUrl( 'ApiLink_int_nn__gfx__TShader__GetInterfaceSlot(ShaderStage_stage|_ShaderInterfaceType_shaderInterfaceType|_const_char_*pName)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_shader.html#a40f2b7445a7507aa747549259ce13a86' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

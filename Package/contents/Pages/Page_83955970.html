@@ -1,0 +1,610 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Intermediate File Filter | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Intermediate File Filter -->
+<div class="pagetitle" id="PageId_83955970">Intermediate File Filter</div>
+<div class="text_separate">
+<p>This chapter describes procedures and important considerations for using the intermediate file filter.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955970_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955970_h1_2">Command-Line Options</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955970_h1_3">Options in Development</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955970_h1_4">Sample Description</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955970_h1_5">Rules for Writing Filter Scripts</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_83955970_h1_1">Overview</h1>
+<p>Processes intermediate files using scripts.</p>
+<p>You can create a filter to verify or change the contents of an intermediate file by using a filter script written in IronPython.<br />For more information about creating filter scripts, see <a href="#Anchor_83955970_filter_script">Rules for Writing Filter Scripts</a>.</p>
+<p>To run a script on intermediate files, drag the scrip and the intermediate files or their folder to the executable file (<code>3dIntermediateFileFilter.exe</code>) or the executable's shortcut. <br />Files other than scripts and intermediate files are ignored.</p>
+<p>You can execute a particular filter script on intermediate files by creating Windows batch files and dragging the intermediate files onto those batch files.<br />For more information about writing scripts, see the sample.</p>
+<h1 id="Anchor_83955970_h1_2">Command-Line Options</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dIntermediateFileFilter.exe [--args-file &quot;&quot;] [--version] [-h] [-s] [-j &quot;&quot;] [--disable-xsd-check]
+[--enable-extension &quot;&quot;] [--disable-extension &quot;&quot;] [--disable-file-info] [--error-detail-output &quot;&quot;] [--script &quot;&quot;] [-a &quot;&quot;]
+[intermediate_file|script_file|folder]...</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Processes intermediate files using scripts.</p>
+<p>
+  <strong>--args-file &quot;&quot;</strong>
+</p>
+<p>Specifies the file.<br />You can use the contents in the parameter file to specify arguments.<br />The parameter file allows you to specify each option over several lines.<br />Lines starting with a number sign (#) are treated as comments.<br />Newline characters cannot be included in escape sequences used in option specifications that appear between quotation marks (&quot;).</p>
+<p>
+  <strong>--version</strong>
+</p>
+<p>Displays version information.</p>
+<p>
+  <strong>-h --help</strong>
+</p>
+<p>Displays Help.</p>
+<p>
+  <strong>-s --silent</strong>
+</p>
+<p>Suppresses the display of messages during processing.</p>
+<p>
+  <strong>-j &quot;&quot; --jobs &quot;&quot;</strong>
+</p>
+<p>Specifies the number of jobs. When unspecified, the processor count is assigned.</p>
+<p>
+  <strong>--disable-xsd-check</strong>
+</p>
+<p>Disables format checking of intermediate files using schemas (XSD files).<br />Only the latest version intermediate files can be processed when this option is enabled.</p>
+<p>
+  <strong>--enable-extension &quot;&quot;</strong>
+</p>
+<p>Specifies the extensions to be processed among text intermediate files. 　<br />Use a comma (,) as a delimiter when listing more than one filename extension. 　<br />Example: <code>--enable-extension &quot;fmdb,ftxb&quot;</code></p>
+<p>
+  <strong>--disable-extension &quot;&quot;</strong>
+</p>
+<p>Specifies the extensions to be processed among text intermediate files. 　<br />Use a comma (,) as a delimiter when listing more than one filename extension. 　<br />Example: <code>--disable-extension &quot;fmdb,ftxb&quot;</code></p>
+<p>
+  <strong>--disable-file-info</strong>
+</p>
+<p>Does not update <code>&lt;file_info&gt;</code> when saving intermediate files.</p>
+<p>
+  <strong>--error-detail-output</strong>
+</p>
+<p>Specifies a folder for saving detailed information when an error occurs. If not specified, this information is written to the default folder.</p>
+<p>
+  <strong>--script &quot;&quot;</strong>
+</p>
+<p>Specifies the filter script written in IronPython, a PY file, that implements filter processing.</p>
+<p>
+  <strong style="letter-spacing: 0.0px;">-a &quot;&quot; --argument &quot;&quot;</strong>
+</p>
+<p>Specifies arguments for the filter script.<br />The strings passed as arguments can be accessed from <code>ScriptArgument</code> in the Python script.</p>
+<p>Example: <code>--script &quot;filter.py&quot; -a &quot;ScriptArgument&quot; cube.fmda</code></p>
+<p>In this example, the argument string can be accessed as follows in the Python script.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>def Filter(target)
+&nbsp;&nbsp;&nbsp;&nbsp;print(ScriptArgument) # &quot;ScriptArgument&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Intermediate File | Folder</strong>
+</p>
+<p>Specifies the intermediate file or folder to be processed.<br />Files located under the specified folder are recursively processed when a folder is specified.<br />Ignores all files that are not intermediate files or filter scripts.</p>
+<p>Supports wildcards (?: Replaces one character; *: Replaces one or more characters).<br />Example: <code>&quot;a?b*&quot;</code><br />Converts files with a first letter &quot;a&quot; and a third letter &quot;b&rdquo;.</p>
+<h1 id="Anchor_83955970_h1_3">Options in Development</h1>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The following options are in development. Compatibility may be lost without warning in the future.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>
+  <strong>--script &quot;&quot;</strong>
+</p>
+<p>Filename extensions, including <code>.csx</code>, <code>.cs</code>, and <code>.dll</code> (compiled from <code>.cs</code>), can be entered. You can use semicolons as delimiters to specify multiple paths. You cannot specify CSX, CS, and PY file formats at the same time. If you specify a CS or CSX file format at the same time as a DLL file format, the DLL file will be treated as an additional reference assembly when the CS or CSX file is compiled.</p>
+<p>
+  <strong>--cache-directory &quot;&quot;</strong>
+</p>
+<p>Specifies the folder for writing the internally generated cache to speed up processing. Specifying this option speeds up script execution because the script is not recompiled on the second and subsequent passes. This feature is only available in the CSX and CS versions of the intermediate file filter.</p>
+<p>
+  <strong>--disable-dirty-check</strong>
+</p>
+<!--Remove-->
+<p>Specify this option in the CSX and CS versions of the intermediate file filter to export a file regardless of whether the intermediate file has been changed. If not specified, it only exports a file if it has been changed.</p>
+<p>
+  <strong>--skip-read-binary-part</strong>
+</p>
+<!--Remove-->
+<p>Skips reading the binary part of an intermediate file. When editing only the text part, you can shorten the processing time by enabling this option. This feature is only available in the CSX and CS versions of the intermediate file filter.</p>
+<p>
+  <strong>--assembly-search-paths</strong>
+</p>
+<!--Remove-->
+<p>
+  <code>Specifying this option in the C# script version of an intermediate file filter allows you to add a path to search for the assembly specified in the #r directive. More than one can be specified.</code>
+</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_83955970_h1_4">Sample Description</h1>
+<p>The intermediate file filter sample is located in <code>Samples/Sources/Tools/3dTools/3dIntermediateFileFilter/</code>.</p>
+<h2 id="Anchor_83955970_h2_1">Adding Streams (AddStream)</h2>
+<p>Adds a <code>&lt;stream&gt;</code> element to intermediate files.</p>
+<h2 id="Anchor_83955970_h2_2">Generating a List of Names (DumpNameCsv)</h2>
+<p>You can save unique names included in an intermediate file in CSV format by dragging the intermediate file or folder in <code>DumpNameCsv.bat</code>.</p>
+<p>A list of all names is saved as <code>Name.csv</code>, and a list of names excluding duplicates is saved as <code>UniqueName.csv</code>.</p>
+<p>Use <code>System.IO.File</code> of the .NET system to save files.</p>
+<h2 id="Anchor_83955970_h2_3">Changing the Material Name (EditMaterialName)</h2>
+<p>Drag the <code>human.fmdb</code> file to <code>EditMaterialName.bat</code> and change the material with the name <code>human_all</code> to <code>human_all_edited</code>.</p>
+<p>You can also change the name of any material to an optional name by rewriting the batch.</p>
+<h2 id="Anchor_83955970_h2_4">Creating a List of Mipmap Checkers (MipMapCheckCsv)</h2>
+<p>Dragging a texture intermediate file or folder to <code>MipmapCheckCsv.bat</code> saves texture intermediate files with a mipmap level of 1 in CSV format.</p>
+<h2 id="Anchor_83955970_h2_5">Creating a List of Model Information (ModelCsv)</h2>
+<p>Dragging a model intermediate file or folder to <code>ModelCsv.bat</code> saves the following model information in CSV format.</p>
+<ul>
+  <li>Model filename</li>
+  <li>Number of vertices</li>
+  <li>Polygon count</li>
+  <li>Number of render sets</li>
+  <li>Number of materials</li>
+  <li>Number of bones</li>
+  <li>Shape count</li>
+  <li>Full path of the model file</li>
+</ul>
+<p>Use <code>System.IO.File</code> of the .NET system to save files.</p>
+<h2 id="Anchor_83955970_h2_6">Creating a Model Optimization Log List (ModelOptimizeLogCsv)</h2>
+<p>Dragging a model intermediate file or folder to <code>ModelOptimizeLogCsv.bat</code> saves the following optimization logs in CSV format.<br />Columns are left empty if there is no corresponding optimization log.</p>
+<ul>
+  <li>Model filename</li>
+  <li>Material Compression</li>
+  <li>Bone Compression</li>
+  <li>Shape compression</li>
+  <li>Merge</li>
+  <li>Optimizing Primitives</li>
+  <li>Quantization Analysis</li>
+  <li>Full path of the model file</li>
+</ul>
+<p>Use <code>System.IO.File</code> of the .NET system to save files.</p>
+<h2 id="Anchor_83955970_h2_7">Creating a Primitive Optimization Checklist (OptimizePrimitiveCheckCsv)</h2>
+<p>Dragging a model intermediate file or folder to <code>OptimizePrimitiveCheckCsv.bat</code> saves model intermediate files with a primitive optimization priority level of <code>force</code> or higher in CSV format.</p>
+<p>Use <code>System.IO.File</code> of the .NET system to save files.</p>
+<h2 id="Anchor_83955970_h2_8">Removing Elements (RemoveElement)</h2>
+<p>Dragging an intermediate file or folder to <code>RemoveElement.bat</code> removes the elements specified by <code>--argument=&quot;&quot;</code>.</p>
+<h2 id="Anchor_83955970_h2_9">
+  <a name="Anchor_83955970_remove_cache"></a>Removing the Primitive Optimization Cache (RemoveOptimizePrimitiveCache)</h2>
+<p>Dragging a model intermediate file or folder to <code>RemoveOptimizePrimitiveCache.bat</code> puts model files that have already undergone primitive optimization into a state where optimization can be executed again.</p>
+<h2 id="Anchor_83955970_h2_10">Removing Private Data (RemovePrivateData)</h2>
+<p>Dragging an intermediate file or folder to <code>RemovePrivateData.bat</code> deletes private data such as the user name, hostname, path information, and date and time.</p>
+<h2 id="Anchor_83955970_h2_11">
+  <a name="Anchor_83955970_remove_quantize"></a>Removing the Quantization Settings (RemoveQuantizeType)</h2>
+<p>Dragging an intermediate file to <code>RemoveQuantizeType.bat</code> removes the quantization settings of models and animations.</p>
+<h2 id="Anchor_83955970_h2_12">Creating a Shader Assignment Checklist (ShaderAssignCheckCsv)</h2>
+<p>Dragging a model intermediate file or folder to <code>ShaderAssignCheckCsv.bat</code> saves models that have not been assigned a shader in CSV format.<br />A dialog box appears only if a model of the corresponding type exists.</p>
+<h2 id="Anchor_83955970_h2_13">Sharing Motion (SharedMotion)</h2>
+<p>Dragging skeletal animation intermediate files or folders to <code>SharedMotion.bat</code> saves data so that motion is shared.</p>
+<p>By setting &lt;bone_anim&gt; binarize_translate to false, you can assign shared skeletal animations to models having different shapes.</p>
+<p>If you want to specify a different motion animation for some nodes, specify the name of any such nodes as arguments to the script to set <code>binarize_translate</code> to <code>true</code> for those nodes.</p>
+<h2 id="Anchor_83955970_h2_14">Creating a Texture Information List (TextureCsv)</h2>
+<p>Dragging a texture intermediate file or folder to <code>ModelCsv.bat</code> saves the following texture information in CSV format.</p>
+<ul>
+  <li>Texture filename</li>
+  <li>Dimension</li>
+  <li>Format</li>
+  <li>Width</li>
+  <li>Height</li>
+  <li>Into screen (away from user)</li>
+  <li>Mipmap level</li>
+  <li>Data Size</li>
+  <li>Full path of the texture file</li>
+</ul>
+<p>Use <code>System.IO.File</code> of the .NET system to save files.</p>
+<h2 id="Anchor_83955970_h2_15">Creating Texture Information in JSON Format (TextureJson)</h2>
+<p>Dragging a texture intermediate file or folder to <code>TextureJson.bat</code> saves the following texture information in JSON format.</p>
+<ul>
+  <li>Texture filename</li>
+  <li>Dimension</li>
+  <li>Format</li>
+  <li>Width</li>
+  <li>Height</li>
+  <li>Into screen (away from user)</li>
+  <li>Mipmap level</li>
+  <li>Data Size</li>
+  <li>Full path of the texture file</li>
+</ul>
+<p>Use the JSON module of the Python standard library to convert to JSON format.</p>
+<h2 id="Anchor_83955970_h2_16">Displaying Texture Size Totals (TotalTextureSize)</h2>
+<p>Dragging a texture intermediate file or folder to <code>TextureCsv.bat</code> displays a dialog box showing texture size totals.</p>
+<p>
+  <code>System.Windows.Forms.MessageBox</code> of the .NET system is used to display the dialog box.</p>
+<h2 id="Anchor_83955970_h2_17">Creating an Unused Texture List (UnusedTextureCsv)</h2>
+<p>Dragging a folder to <code>UnusedTextureCsv.bat</code> saves texture file paths that are not being used in CSV format.</p>
+<p>You must specify as script arguments the relative path from the texture pattern animation to the folder that contains textures for patterns.</p>
+<h2 id="Anchor_83955970_h2_18">Creating a Version Checklist (VersionCheckCsv)</h2>
+<p>Dragging a texture intermediate file or folder to <code>VersionCheckCsv.bat</code> saves the intermediate files that are not the latest version of the CSV format.</p>
+<p>Use <code>System.IO.File</code> of the .NET system to save files.</p>
+<h1 id="Anchor_83955970_h1_5">
+  <a name="Anchor_83955970_filter_script"></a>Rules for Writing Filter Scripts</h1>
+<p>Filter scripts define specific filter functions to filter target files, according to arguments specified to the filter function.</p>
+<p>There are three types of filter functions: <code>PreFilter</code>, <code>Filter</code>, and <code>PostFilter</code>. Filter targets are implemented as <code>IfFilterTarget</code> class objects.</p>
+<p>There are also global variables that can be shared among all filter functions.</p>
+<p>Filter scripts run on IronPython 2.7.</p>
+<h2 id="Anchor_83955970_h2_19">Filter Function</h2>
+<p>The following <code>List&lt;&gt;</code> is a <code>System.Collections.Generic.List&lt;&gt;</code> of the .NET system.</p>
+<h3 id="Anchor_83955970_h3_1">PreFilter</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+&nbsp;&nbsp;&nbsp;&nbsp;void PreFilter(List&lt;IfFilterTarget&gt; targets) { }
+Python:
+&nbsp;&nbsp;&nbsp;&nbsp;PreFilter(targets):</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> Executes preprocessing on all filter targets.</p>
+<p>Use this option before filtering in situations such as when you need to collect information from all filter targets.</p>
+<h3 id="Anchor_83955970_h3_2">Filter</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+&nbsp;&nbsp;&nbsp;&nbsp;void Filter(IfFilterTarget target) { }
+Python:
+&nbsp;&nbsp;&nbsp;&nbsp;Filter(target):</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> Filters the individual intermediate files that are targeted by the filter.</p>
+<p>Multiple filter targets are processed in parallel using multiple threads.</p>
+<h3 id="Anchor_83955970_h3_3">PostFilter</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+&nbsp;&nbsp;&nbsp;&nbsp;void PostFilter(List&lt;IfFilterTarget&gt; targets) { }
+Python:
+&nbsp;&nbsp;&nbsp;&nbsp;PostFilter(targets):</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> Executes post-processing on all filter targets.</p>
+<p>Used to collect statistics on filtering results.</p>
+<h2 id="Anchor_83955970_h2_20">Filter Targets (IfFilterTarget)</h2>
+<p>Filter targets are loaded for each individual intermediate file. Functionality for making changes and saving data is provided.<br />This section describes members of the <code>nw.g3d.iflib.IfFilterTarget</code> class that serve as filter targets.</p>
+<h3 id="Anchor_83955970_h3_4">Intermediate File XML Document</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+&nbsp;&nbsp;&nbsp;&nbsp;public System.Xml.XmlDocument Document { get; }
+Python:
+&nbsp;&nbsp;&nbsp;&nbsp;target.Document</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Gets the intermediate file XML document.</p>
+<p>Used when handling intermediate files as DOM.</p>
+<p>For more information about <code>System.Xml.XmlDocument</code>, see the .NET reference.</p>
+<p>For more information about the intermediate file specifications, see <a href="../external.html?file=IntermediateFileFormat/Html/3d/entry.html">3D Intermediate File Specification Manual</a>.</p>
+<h3 id="Anchor_83955970_h3_5">Intermediate File Serialized Objects</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+&nbsp;&nbsp;&nbsp;&nbsp;public nw.g3d.iflib.nw4f_IfType nw4f_3dif { get; }
+Python:
+&nbsp;&nbsp;&nbsp;&nbsp;target.nw4f_If</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Gets the intermediate file serialized objects.</p>
+<p>Used when handling intermediate files as objects.</p>
+<p>For more information about <code>nw4f_3difType</code>, see <code>Tools/Graphics/3dTools/3dIntermediateFileSerializer</code>.</p>
+<p>For more information about the intermediate file specifications, see <a href="../external.html?file=IntermediateFileFormat/Html/3d/entry.html">3D Intermediate File Specification Manual</a>.</p>
+<h3 id="Anchor_83955970_h3_6">Intermediate File Stream Arrays</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+public List&lt;nw.g3d.nw4f_If.G3dStream&gt; Streams { get; }
+Python:
+target.Streams</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p> Gets the intermediate file stream array.</p>
+<p>Used when handling <code>&lt;stream_array&gt;</code> elements in intermediate files.</p>
+<p>
+  <code>G3dStream</code> has the following members.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Member</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>public nw.g3d.nw4f_3dif.stream_typeType type { get; set; }</td>
+      <td>Enumeration of type <code>stream_typeType,</code> used to specify the type of the stream.<br />Specified as either <code>float</code>, <code>int</code>,<code>byte</code>, <code>string</code>, or <code>wstring</code>.</td>
+    </tr>
+    <tr>
+      <td>public List&lt;float&gt; FloatData { get; }</td>
+      <td>The data string when <code><em>type</em></code> is <code>stream_typeType.float</code>.</td>
+    </tr>
+    <tr>
+      <td>public List&lt;int&gt; IntData { get; }</td>
+      <td>The data string when <code><em>type</em></code> is <code>stream_typeType.int</code>.</td>
+    </tr>
+    <tr>
+      <td>public List&lt;byte&gt; ByteData { get; }</td>
+      <td>The data string when <code><em>type</em></code> is <code>stream_typeType.byte</code>.</td>
+    </tr>
+    <tr>
+      <td>public string StringData { get; set; }</td>
+      <td>The data when <code><em>type</em></code> is <code>stream_typeType.string</code> or <code><em>stream_typeType.wstring</em></code>.</td>
+    </tr>
+    <tr>
+      <td>public int column { get; set; }</td>
+      <td>The number of columns for the data string in the text intermediate file.</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955970_h3_7">Intermediate File Path</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+&nbsp;&nbsp;&nbsp;&nbsp;public string FilePath { get; }
+&nbsp;&nbsp;&nbsp;&nbsp;public string FileName { get; }
+&nbsp;&nbsp;&nbsp;&nbsp;public string FileNameWithoutExtension { get; }
+&nbsp;&nbsp;&nbsp;&nbsp;public string Extension { get; }
+&nbsp;&nbsp;&nbsp;&nbsp;public string FullPath { get; }
+&nbsp;&nbsp;&nbsp;&nbsp;public string DirectoryName { get; }
+Python:
+&nbsp;&nbsp;&nbsp;&nbsp;target.FilePath
+&nbsp;&nbsp;&nbsp;&nbsp;target.FileName
+&nbsp;&nbsp;&nbsp;&nbsp;target.FileNameWithoutExtension
+&nbsp;&nbsp;&nbsp;&nbsp;target.Extension
+&nbsp;&nbsp;&nbsp;&nbsp;target.FullPath
+&nbsp;&nbsp;&nbsp;&nbsp;target.DirectoryName</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p> Gets path information about intermediate files targeted by the filter.</p>
+<h3 id="Anchor_83955970_h3_8">Filter Results</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+public object Result { get; set; }
+Python:
+target.Result</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> This property is for users to save filter results.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">def</span> <span class="nf">PreFilter</span><span class="p">(</span><span class="n">targets</span><span class="p">):</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">args</span> <span class="o">=</span> <span class="n">ScriptArgument</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Specify the FSV template file in --argument.&quot;</span><span class="p">)</span> <span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Result</span> <span class="o">=</span> <span class="bp">False</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955970_h3_9">Saving Intermediate Files</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+&nbsp;&nbsp;&nbsp;&nbsp;public void Write(string filePath)
+&nbsp;&nbsp;&nbsp;&nbsp;public void Write()
+Python:
+&nbsp;&nbsp;&nbsp;&nbsp;target.Write(filePath)
+&nbsp;&nbsp;&nbsp;&nbsp;target.Write()</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> Saves intermediate files targeted by the filter.</p>
+<p>Saves the file to the specified file path or overwrites the original file if omitted.</p>
+<h2 id="Anchor_83955970_h2_21">Global Variables</h2>
+<p>These global variables can be used with any of the <code>PreFilter</code>, <code>Filter</code>, or <code>PostFilter</code> functions.</p>
+<h3 id="Anchor_83955970_h3_10">Script Argument</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+&nbsp;&nbsp;&nbsp;&nbsp;string ScriptArgument { get; }
+Python:
+&nbsp;&nbsp;&nbsp;&nbsp;ScriptArgument</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> The string is specified with the <code>-a=&quot;&quot;</code> or <code>--argument=&quot;&quot;</code> option when <code>3dIntermediateFileFilter.exe</code> is run.</p>
+<h3 id="Anchor_83955970_h3_11">Script Dictionary</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+&nbsp;&nbsp;&nbsp;&nbsp;PythonDictionary ScriptDictionary { get; }
+Python:
+&nbsp;&nbsp;&nbsp;&nbsp;ScriptDictionary</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> A dictionary that can be accessed by the following functions: <code>PreFilter</code>, <code>Filter</code>, and <code>PostFilter</code>.</p>
+<p>You must take care when accessing this dictionary, because filters execute in parallel.</p>
+<p>Use the <code>-j</code> or <code>--jobs</code> to execute in series.</p>
+<h3 id="Anchor_83955970_h3_12">Execution Results</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>C#:
+&nbsp;&nbsp;&nbsp;&nbsp;bool Result { get; set; }
+Python:
+&nbsp;&nbsp;&nbsp;&nbsp;Result</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> Sets execution results.</p>
+<p>The default value is <code>true</code>.</p>
+<p>This must be declared as a global <code>Result</code> when assigning values.</p>
+<p>If <code>false</code> is specified, filtering is interrupted and <code>3dIntermediateFileFilter.exe</code> ends on exit code <code>1</code>. (The exit code is code is <code>0</code> for a normal exit.)</p>
+<h2 id="Anchor_83955970_h2_22">Using the Python Library</h2>
+<p>You can place <code>*.py</code> files in <code>Tools\Graphics\3dTools\Lib\</code> to load them as modules using <code>import</code> statements.<br />The Python standard library belonging to IronPython is placed in each <code>Lib</code> folder.</p>
+<p>The following example uses the JSON module included in the <code>Python</code> standard library.</p>
+<p>TextureJson.py</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>import json
+target.Result = json.dumps(obj, indent=4, separators=(',',': ')) + &quot;\n&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83955970_h2_23">Using the .NET Library</h2>
+<p>
+  <code>IronPython</code> can transparently use the .NET library.</p>
+<p>
+  <code>TextureCsv.py</code>
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>from System.IO import *
+# System.IO.File
+File.WriteAllText( ... ) ;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can write code like the following if you are strictly defining the classes to use.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>from System.IO import File
+# System.IO.File
+File.WriteAllText( ... ) ;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can use CLR modules when adding DLLs to reference.</p>
+<p>TotalTextureSize.py</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>import clr
+clr.AddReference(&quot;System.Windows.Forms&quot;)
+from System.Windows.Forms import *
+# System.Windows.Forms.MessageBox
+MessageBox.Show( ... )</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

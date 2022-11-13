@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Bone Visibility Animation Mirroring | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Bone Visibility Animation Mirroring -->
+<div class="pagetitle" id="PageId_916342860">Bone Visibility Animation Mirroring</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_916342860_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_916342860_h1_2">Model Constraints</a>
+    </li>
+    <li>
+      <a href="#Anchor_916342860_h1_3">Model Intermediate Files (FMDA and FMDB)</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_916342860_h2_1">Settings to Use Mirroring</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_916342860_h1_4">How to Use</a>
+    </li>
+    <li>
+      <a href="#Anchor_916342860_h1_5">Troubleshooting</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_916342860_h2_2">The BoneVisibilityAnimObj::Bind() fails.</a>
+      </li>
+      <li>
+        <a href="#Anchor_916342860_h2_3">Mirroring for the model is not played as expected.</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_916342860_h1_1">Overview</h1>
+<p>The <code>g3d</code> feature for mirroring bone visibility animation is for playing bone visibility animation after the bones to which it is applied have been flipped horizontally. The animation is flipped with the model's central yz-plane as the symmetric face. Constraints are put in place for the model bone architecture to lower runtime CPU calculation costs.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_916342860/936577126.gif" width="400" class="embedded-image" />
+  </span>
+</p>
+<h1 id="Anchor_916342860_h1_2">Model Constraints</h1>
+<p>The constraints are the same as those for motion mirroring of skeletal animation. For more information about the procedure for creating models, see Maya Plug-In &gt; Skeletal Animation &gt; <a href="../Pages/Page_416020631.html">Motion Mirroring</a>.</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_916342860_h1_3">Model Intermediate Files (FMDA and FMDB)</h1>
+<h2 id="Anchor_916342860_h2_1">Settings to Use Mirroring</h2>
+<p>The settings are the same as those for using skeletal animation motion mirroring.<br />For more information about the settings, see <a href="../Pages/Page_412412381.html">Motion Mirroring</a>.</p>
+<h1 id="Anchor_916342860_h1_4">How to Use</h1>
+<p>In the runtime, you can specify whether to use mirroring for playback when you bind <code><span class="ApiLink_nn__g3d__ResModel">nn::g3d::ResModel</span></code> using the <code><span class="ApiLink_nn__g3d__BoneVisibilityAnimObj__Bind">nn::g3d::BoneVisibilityAnimObj::Bind</span>()</code> function.<br />Unlike with skeletal animation motion mirroring, the CPU load of the <code><span class="ApiLink_nn__g3d__BoneVisibilityAnimObj__Calculate">nn::g3d::BoneVisibilityAnimObj::Calculate</span>()</code> function is the same for regular playback and mirrored playback. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Bind the model resource using the argument class.
+</span><span class="nn">nn::g3d::BoneVisibilityAnimObj::</span><span class="n">BindArgument</span> <span class="n">bindArg</span><span class="p">;</span>
+<span class="n">bindArg</span><span class="p">.</span><span class="n">SetResource</span><span class="p">(</span><span class="n">m_pModelObj</span><span class="o">-&gt;</span><span class="n">GetResource</span><span class="p">());</span>
+
+
+<span class="c1">// Check that motion mirroring information is stored for the skeleton.
+</span><span class="k">if</span><span class="p">(</span><span class="n">m_pModelObj</span><span class="o">-&gt;</span><span class="n">GetResource</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetSkeleton</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">HasMirroringInfo</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Configure the setting to use mirroring for playback with bindArg.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">bindArg</span><span class="p">.</span><span class="n">SetMirroringEnabled</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// Bind.
+</span><span class="n">pBoneVisibilityAnimObj</span><span class="o">-&gt;</span><span class="n">Bind</span><span class="p">(</span><span class="n">bindArg</span><span class="p">);</span>
+
+<span class="c1">// If you disable mirroring playback, bind ResModel again using the setting to disable mirroring.
+</span><span class="nn">nn::g3d::BoneVisibilityAnimObj::</span><span class="n">BindArgument</span> <span class="n">bindArg</span><span class="p">;</span>
+<span class="n">bindArg</span><span class="p">.</span><span class="n">SetResource</span><span class="p">(</span><span class="n">m_pModelObj</span><span class="o">-&gt;</span><span class="n">GetResource</span><span class="p">());</span>
+<span class="n">bindArg</span><span class="p">.</span><span class="n">SetMirroringDisabled</span><span class="p">();</span>
+<span class="n">pBoneVisibilityAnimObj</span><span class="o">-&gt;</span><span class="n">Bind</span><span class="p">(</span><span class="n">bindArg</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_916342860_h1_5">Troubleshooting</h1>
+<h2 id="Anchor_916342860_h2_2">The BoneVisibilityAnimObj::Bind() fails.</h2>
+<p>Mirroring information may not be included in the model binary resources. Check the following.</p>
+<ul>
+  <li>
+    <strong>Use Motion Mirroring Settings</strong> is enabled on this page.</li>
+  <li>Binary conversion is succeeding.</li>
+</ul>
+<h2 id="Anchor_916342860_h2_3">Mirroring for the model is not played as expected.</h2>
+<ul>
+  <li>Confirm that the <a href="../Pages/Page_416020631.html">Motion Mirroring</a> specifications for the Maya Plug-In are being followed.</li>
+  <li>Confirm that the expected shapes are bound to the bones subject to mirroring.</li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__ResModel', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_model.html' )
+SetUrl( 'ApiLink_nn__g3d__BoneVisibilityAnimObj__Bind', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_bone_visibility_anim_obj.html#a1f8a291a269be152dd60f2d98f8fd8a5' )
+SetUrl( 'ApiLink_nn__g3d__BoneVisibilityAnimObj__Calculate', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_bone_visibility_anim_obj.html#a3ef3fa37f140b3e541306ce485bb13c9' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

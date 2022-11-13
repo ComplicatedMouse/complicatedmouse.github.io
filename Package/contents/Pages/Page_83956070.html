@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Nodes | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Nodes -->
+<div class="pagetitle" id="PageId_83956070">Nodes</div>
+<div class="text_separate">
+<p>In this manual, the term <em>node</em> refers to the basic unit for the hierarchical structure of a 3D model. These nodes correspond to the transform and joint nodes found in Maya.<br /> Maya nodes are exported as bones in model intermediate files.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83956070_h1_1">Node Names</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956070_h1_2">Root Bone</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956070_h1_3">Nodes Not Exported</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956070_h1_4">Compression Feature for Nodes Not Required for Model Display</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956070_h1_5">Transform Nodes</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956070_h1_6">Joint Nodes</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956070_h1_7">Camera, Light, and Fog Nodes</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_83956070_h1_1">Node Names</h1>
+<p>Although it is possible to assign the same name to more than one node in Maya as long as the parent node differs, bone names must not be duplicated in the intermediate file.</p>
+<p>If more than one node having the same name is present, the node highest in the hierarchy is output using that name, but other nodes with that node name are output with an underscore and a number (such as &quot;<strong>_1</strong>&quot; and &quot;<strong>_2</strong>&quot;) appended to the end.<br /> If more than one node with the same name exists at the same hierarchical depth, the node displayed nearest to the top of the list when <strong>Scene Hierarchy</strong> is used as the <strong>Sort Order</strong> under the outliner is exported with its name as is, and underscores and numbers are added to the other nodes (numbers are applied in descending order).</p>
+<h1 id="Anchor_83956070_h1_2">Root Bone</h1>
+<p>Only one root bone exists for a single model when using intermediate files.</p>
+<p>If there are multiple root nodes on Maya, the plug-in will add a bone with the name <strong>nw4f_root</strong>, which groups the nodes together to the intermediate file, and output them.</p>
+<h1 id="Anchor_83956070_h1_3">Nodes Not Exported</h1>
+<p>Transform nodes and joint nodes are not output when the <strong>Template</strong> attribute is selected or when these nodes are <strong>hidden in the display layers</strong>. (The exception is influence objects, which are output.)<br /> Child nodes of nodes that are not output will also not be output.</p>
+<p>Transform nodes that do not have children (such as a locator or an empty group) are not output.<br /> If the <strong>Primary Visibility</strong> attribute of a mesh node is OFF, its <strong>Template</strong> attribute is ON, or its <strong>Intermediate Object</strong> attribute is ON, the parent transform node is exported as a meshless node. (Polygon data is not exported.)<br /> Nodes are not exported if the display layer <strong>Shading</strong> attribute is cleared. (Always show wireframes.)<br /> Blend-shape target shapes are not exported.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Nodes whose compression enable flag has been set using the <a href="../Pages/Page_83955859.html">plug-in for not compressing nodes</a> will always be exported, regardless of these conditions.</p>
+  </div>
+</div>
+<h1 id="Anchor_83956070_h1_4">Compression Feature for Nodes Not Required for Model Display</h1>
+<p>Setting the Export plug-in option <a href="../Pages/Page_83956186.html#Anchor_83956186_compress_bone">Compress Node</a> to <strong>Cull Useless Node</strong> or <strong>Merge Useless Node</strong> causes nodes not already exported and not needed to display the model to be compressed for output.<br /> For topographical data and other cases where a hierarchical structure is unnecessary, you can collect all the nodes for output as a single node by setting the Compress Bone option to <strong>Unite All</strong>.</p>
+<h1 id="Anchor_83956070_h1_5">Transform Nodes</h1>
+<p>This section describes attributes that require particular attention.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Pivot: </th>
+      <td>
+        <p>We recommend using the same value for <strong>Rotate Pivot</strong> and <strong>Scale Pivot</strong>.<br />If these values differ, the amount of animation data may grow immensely.</p>
+        <p>The <strong>Scale Pivot</strong> is treated as the origin for local coordinates when the intermediate file is output.</p>
+        <p>Data cannot be exported correctly if the pivot is not fixed for all frames. (Do not animate the pivot.)</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Shear  </th>
+      <td>Set <strong>Shear</strong> to (<code>0, 0, 0</code>). Data cannot be exported properly unless (<code>0, 0, 0</code>) is used.</td>
+    </tr>
+    <tr>
+      <th>Rotate Order </th>
+      <td>
+        <p>We recommend setting xyz for <strong>Rotate Order</strong>.<br />Using some other order of rotation may increase the amount of animation data.<br />However, for the camera's transform node, we recommend setting zxy for <strong>Rotate Order</strong>.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Rotate Axis </th>
+      <td>We recommend setting the <strong>Rotate Axis</strong> to (<code>0, 0, 0</code>).<br />If a <strong>Rotate Axis</strong> other than (<code>0, 0, 0</code>) is used, the amount of animation data may increase.</td>
+    </tr>
+    <tr>
+      <th>Inherits Transform </th>
+      <td>Be sure to select <strong>Inherits Transform</strong>.<br />Data cannot be exported if this attribute is cleared. As an exception, it is acceptable to clear <strong>Inherits Transform</strong> only for shape transform nodes if skinning has been set.</td>
+    </tr>
+    <tr>
+      <th>Transform Offset Parent Matrix<br /><br /><br /></th>
+      <td>
+        <p>If the transform offset parent matrix is not an identity matrix, the amount of animation data can increase significantly.<br />If the scale of the transform offset parent matrix is not uniform in the xyz-directions, set the <strong>Rotate</strong> and <strong>Rotate Axis</strong> transform attributes to <code>(0, 0, 0)</code>. Data cannot be exported properly unless (<code>0, 0, 0</code>) is used.<br />Set the shear of the transform offset parent matrix to <code>(0, 0, 0)</code>. Data cannot be exported properly unless (<code>0, 0, 0</code>) is used.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Visibility</th>
+      <td>
+        <p>If <strong>Visibility</strong> is cleared for a transform node, all nodes lower in the hierarchy are hidden from view. If you want to hide just the polygon objects in a particular hierarchical layer, clear mesh node <strong>Visibility</strong>.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_83956070_h1_6">Joint Nodes</h1>
+<p>This section describes attributes that require particular attention.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Rotate Order </th>
+      <td>We recommend setting xyz for <strong>Rotate Order</strong>.<br />Using some other order of rotation may increase the amount of animation data.</td>
+    </tr>
+    <tr>
+      <th>Rotate Axis </th>
+      <td>We recommend setting the <strong>Rotate Axis</strong> to (<code>0, 0, 0</code>).<br />If a <strong>Rotate Axis</strong> other than (<code>0, 0, 0</code>) is used, the amount of animation data may increase.</td>
+    </tr>
+    <tr>
+      <th>Inherits Transform </th>
+      <td>Be sure to select <strong>Inherits Transform</strong>. Data cannot be exported if this attribute is cleared.</td>
+    </tr>
+    <tr>
+      <th>Transform Offset Parent Matrix<br /><br /><br /></th>
+      <td>
+        <p>If the transform offset parent matrix is not an identity matrix, the amount of animation data can increase significantly.<br /></p>
+        <p>If the scale of the transform offset parent matrix is not uniform in the xyz-directions, set the <strong>Rotate</strong> and <strong>Rotate Axis</strong> transform attributes and also <strong>Joint Orient</strong> to (<code>0, 0, 0</code>). Data cannot be exported properly unless (<code>0, 0, 0</code>) is used.<br />Set the shear of the transform offset parent matrix to <code>(0, 0, 0)</code>. Data cannot be exported properly unless (<code>0, 0, 0</code>) is used.<br />If <strong>Segment Scale Compensate</strong> is selected, set the scale of the transform offset parent matrix of the parent joint node to <code>1</code>. The data cannot be exported correctly if <code>1</code> is not set.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Joint Orient </th>
+      <td>We recommend that <strong>Joint Orient</strong> be set to (<code>0, 0, 0</code>).<br />If a <strong>Rotate Axis</strong> other than (<code>0, 0, 0</code>) is used, the amount of animation data may increase.</td>
+    </tr>
+    <tr>
+      <th>Segment Scale Compensate</th>
+      <td>
+        <p>Do not change the value specified by Segment Scale Compensate when outputting FMD or FSK files.</p>
+        <p>Even when this attribute is enabled, if the parent node is not a <code>joint</code> node, the attribute is output as disabled in the intermediate file.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Intermediate files are no longer displayed for <strong>Side</strong>, <strong>Type</strong>, and <strong>Other Type</strong> attributes in NintendoSDK 7.0.0 and later.<br />You can configure motion mirroring types in batches from side attributes for joint nodes with the <a href="../Pages/Page_409304046.html">Plug-In for Setting Motion Mirroring</a>.</p>
+  </div>
+</div>
+<h1 id="Anchor_83956070_h1_7">Camera, Light, and Fog Nodes</h1>
+<p>Camera/Light/Fog nodes are output only to fsn files.</p>
+<p>Even if a child node of Camera, Light, or Fog is used as a normal node, it is not affected by the Translate, Rotate, and Scale operations performed on the Camera, Light, or Fog node.<br /> To cause movement of a normal node tied to a Camera, Light, or Fog node, use measures such as Parent constrain.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

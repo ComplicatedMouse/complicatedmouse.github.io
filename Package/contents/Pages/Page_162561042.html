@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>TransparentAdjuster | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- TransparentAdjuster -->
+<div class="pagetitle" id="PageId_162561042">TransparentAdjuster</div>
+<div class="text_separate">
+<h1 id="Anchor_162561042_h1_1">TransparentAdjuster</h1>
+<h2 id="Anchor_162561042_h2_1">Overview</h2>
+<p>The <code><span class="ApiLink_nn__mii__TransparentAdjuster">nn::mii::TransparentAdjuster</span></code> class provides features to prevent bleeding of transparent pixel color due to linear interpolation. This class generates a texture that has overwritten the color value of the transparent pixels in the texture, with the result calculated from the average color of the surrounding opaque pixels.</p>
+<p>It provides features that generate a texture similar to if you specified <code>true</code> in <code>--adjust-transparent-rgb</code> in the texture converter provided in the SDK.</p>
+<h2 id="Anchor_162561042_h2_2">TransparentAdjusterInfo</h2>
+<p>The <code><span class="ApiLink_nn__mii__TransparentAdjusterInfo">nn::mii::TransparentAdjusterInfo</span></code> class sets the information required to use <code>TransparentAdjuster</code>.</p>
+<p>The following values can be set in <code>TransparentAdjusterInfo</code>.</p>
+<ul>
+  <li>Setting for whether to flip the image vertically</li>
+  <li>Output mip level of the texture to write to</li>
+  <li>Image format of the texture to write to</li>
+  <li>Image format of the conversion source texture</li>
+</ul>
+<h2 id="Anchor_162561042_h2_3">Preparing the Shader File</h2>
+<p>Before initializing <code>TransparentAdjuster</code>, you must prepare the shader file that is used.</p>
+<p>Load the shader file below.</p>
+<p>$(NINTENDO_SDK_ROOT)/Resources/Mii/$(platform)/shader/TransparentAdjuster.bnsh</p>
+<p>Cast the loaded data to <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> and initialize.</p>
+<h2 id="Anchor_162561042_h2_4">Initializing and Finalizing</h2>
+<p>The following are notes regarding initialization and finalization. You can also view the API reference for each function.</p>
+<h3 id="Anchor_162561042_h3_1">Initialization</h3>
+<p>Use the <code><span class="ApiLink_nn__mii__TransparentAdjuster__Initialize">nn::mii::TransparentAdjuster::Initialize</span>()</code> function to perform initialization.</p>
+<p>Following the shader file preparation procedure, pass the initialized <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> and <code><span class="ApiLink_nn__gfx__ShaderCodeType">nn::gfx::ShaderCodeType</span>,</code> obtained in the process of initialization, to the <code>Initialize()</code> function.</p>
+<p>You can use the <code><span class="ApiLink_nn__mii__TransparentAdjuster__CalculateMemorySize">nn::mii::TransparentAdjuster::CalculateMemorySize</span>()</code> and <code><span class="ApiLink_nn__mii__TransparentAdjuster__GetAlignment">nn::mii::TransparentAdjuster::GetAlignment</span>()</code> functions to get the memory size and alignment required for initialization. <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code>, <code><span class="ApiLink_nn__gfx__ShaderCodeType">nn::gfx::ShaderCodeType</span></code>, and <code>TransparentAdjusterInfo</code> passed to these functions, must be the same as those passed during initialization. <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> must be initialized.</p>
+<p>The shader for rendering icon textures is composed from <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> and <code>TransparentAdjusterInfo,</code> used during initialization. The initialized content cannot be changed until the object is finalized.</p>
+<p>
+  <code>
+    <span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span>
+  </code> and the memory used during initialization, must be maintained until you call termination processing.</p>
+<h3 id="Anchor_162561042_h3_2">Finalization</h3>
+<p>Call <code><span class="ApiLink_nn__mii__TransparentAdjuster__Finalize">nn::mii::TransparentAdjuster::Finalize</span>()</code> to perform termination processing. After termination processing, you can destroy <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> and the memory used in initialization.</p>
+<h2 id="Anchor_162561042_h2_5">Generating a Texture to Prevent Bleeding</h2>
+<p>First, prepare <code><span class="ApiLink_nn__mii__TransparentAdjusterGpuBuffer">nn::mii::TransparentAdjusterGpuBuffer</span></code>, which contains the constant buffer and color target view required for rendering the icon texture.</p>
+<p>Using the following procedure, prepare to pass <code>TransparentAdjusterGpuBuffer</code> to the <code><span class="ApiLink_nn__mii__TransparentAdjuster__Enqueue">nn::mii::TransparentAdjuster::Enqueue</span>()</code> function.</p>
+<ol>
+  <li>Call the <code><span class="ApiLink_nn__mii__TransparentAdjusterGpuBuffer__Initialize">nn::mii::TransparentAdjusterGpuBuffer::Initialize</span>()</code> function to perform initialization.</li>
+  <li>Use the <code>Calculate</code> functions for <code>TransparentAdjusterGpuBuffer</code> for the memory and memory pool size.</li>
+  <li>Use the <code><span class="ApiLink_nn__mii__TransparentAdjusterGpuBuffer__SetParameter">nn::mii::TransparentAdjusterGpuBuffer::SetParameter</span>()</code> function to set each parameter.<br />Set the conversion source texture, output target texture, output target texture width and height, and <code>TransparentAdjusterInfo</code> passed during initialization for the <code>TransparentAdjuster</code> that is used. If the memory pool passed during initialization is <code>CpuCached</code>, you must flush the memory pool after calling this function.</li>
+</ol>
+<p>Between calling the <code><span class="ApiLink_nn__gfx__CommandBuffer__Begin">nn::gfx::CommandBuffer::Begin</span>()</code> and the <code><span class="ApiLink_nn__gfx__CommandBuffer__End">nn::gfx::CommandBuffer::End</span>()</code> functions, call the <code><span class="ApiLink_nn__mii__TransparentAdjuster__Enqueue">nn::mii::TransparentAdjuster::Enqueue</span>()</code> function.</p>
+<p>Pass the command buffer, <code>TransparentAdjusterGpuBuffer</code>, sampler, and texture slot of the conversion source texture to the <code>Enqueue()</code> function. For the sampler, pass the sampler created using <code> <span class="ApiLink_nn__mii__GetSamplerInfo">nn::mii::GetSamplerInfo</span>()</code>.</p>
+<p>In the <code>Enqueue()</code> function, add a command to render the texture with bleed prevention processing applied to the command buffer passed as a parameter.</p>
+<p>When execution of the command added with the <code>Enqueue()</code> function is complete, <code>TransparentAdjuster</code>, <code>TransparentAdjusterGpuBuffer</code>, and the conversion source texture can be destroyed if they are not needed.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__mii__TransparentAdjuster', '../../../Api/HtmlNX/classnn_1_1mii_1_1_transparent_adjuster.html' )
+SetUrl( 'ApiLink_nn__mii__TransparentAdjusterInfo', '../../../Api/HtmlNX/classnn_1_1mii_1_1_transparent_adjuster_info.html' )
+SetUrl( 'ApiLink_nn__gfx__ResShaderFile', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_res_shader_file.html' )
+SetUrl( 'ApiLink_nn__mii__TransparentAdjuster__Initialize', '../../../Api/HtmlNX/classnn_1_1mii_1_1_transparent_adjuster.html#a49aed413e33f48d06caccd38973208b2' )
+SetUrl( 'ApiLink_nn__gfx__ShaderCodeType', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ad67937775401e7564a312a54dedf6455' )
+SetUrl( 'ApiLink_nn__mii__TransparentAdjuster__CalculateMemorySize', '../../../Api/HtmlNX/classnn_1_1mii_1_1_transparent_adjuster.html#a6cf5afbab90ad5dbc34a5ab390a5edc5' )
+SetUrl( 'ApiLink_nn__mii__TransparentAdjuster__GetAlignment', '../../../Api/HtmlNX/classnn_1_1mii_1_1_transparent_adjuster.html#a5a377bc8c0cd3bdd9e2ad3a3dd430fe3' )
+SetUrl( 'ApiLink_nn__mii__TransparentAdjuster__Finalize', '../../../Api/HtmlNX/classnn_1_1mii_1_1_transparent_adjuster.html#adeb09f450e777224b442912013d301d8' )
+SetUrl( 'ApiLink_nn__mii__TransparentAdjusterGpuBuffer', '../../../Api/HtmlNX/classnn_1_1mii_1_1_transparent_adjuster_gpu_buffer.html' )
+SetUrl( 'ApiLink_nn__mii__TransparentAdjuster__Enqueue', '../../../Api/HtmlNX/classnn_1_1mii_1_1_transparent_adjuster.html#ac281265975ead0b18526a1cac2be0a21' )
+SetUrl( 'ApiLink_nn__mii__TransparentAdjusterGpuBuffer__Initialize', '../../../Api/HtmlNX/classnn_1_1mii_1_1_transparent_adjuster_gpu_buffer.html#a2ff278640ced2182296faa0c82859320' )
+SetUrl( 'ApiLink_nn__mii__TransparentAdjusterGpuBuffer__SetParameter', '../../../Api/HtmlNX/classnn_1_1mii_1_1_transparent_adjuster_gpu_buffer.html#a5ce652fce48b9a2b2534f32f5d63458e' )
+SetUrl( 'ApiLink_nn__gfx__CommandBuffer__Begin', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#ab22bb14832e8fca483b977dcb18d5286' )
+SetUrl( 'ApiLink_nn__gfx__CommandBuffer__End', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a3b4d64880cd75e66c314bdbac29c04f0' )
+SetUrl( 'ApiLink_nn__mii__GetSamplerInfo', '../../../Api/HtmlNX/namespacenn_1_1mii.html#a7b31fffe1758ba0a5ec80843410a0549' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

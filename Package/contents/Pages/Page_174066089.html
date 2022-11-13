@@ -1,0 +1,284 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>MemoryPool | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- MemoryPool -->
+<div class="pagetitle" id="PageId_174066089">MemoryPool</div>
+<div class="text_separate">
+<h1 id="Anchor_174066089_h1_1">Introduction</h1>
+<p>This document describes the <code>MemoryPool(<span class="ApiLink_nn__gfx__MemoryPool">nn::gfx::MemoryPool</span>)</code> that is created within the ui2d and font libraries.</p>
+<h1 id="Anchor_174066089_h1_2">Types and Numbers of MemoryPool</h1>
+<p>
+  <code>MemoryPool</code> is used for the following applications within ui2d.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Usage</th>
+      <th>Related Classes and Resources</th>
+      <th>Quantity</th>
+      <th>Generally a quantity used by that application.</th>
+    </tr>
+    <tr>
+      <td>Vertex buffer and index buffer for rendering.</td>
+      <td>
+        <span class="ApiLink_nn__ui2d__GraphicsResource">nn::ui2d::GraphicsResource</span>
+      </td>
+      <td>One for each application.</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>Vertex buffer, index buffer, and constant buffer for rendering strings.</td>
+      <td>
+        <span class="ApiLink_nn__font__RectDrawer">nn::font::RectDrawer</span>
+      </td>
+      <td>
+        <p>One (normally) each application.</p>
+      </td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>Constant Buffers for Rendering</td>
+      <td>
+        <span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span>
+      </td>
+      <td>One per buffer.</td>
+      <td>From one to many, depending on the application design.</td>
+    </tr>
+    <tr>
+      <td>Texture Resources</td>
+      <td>
+        <span class="ApiLink_nn__ui2d__ArcResourceAccessor">nn::ui2d::ArcResourceAccessor</span>
+      </td>
+      <td>
+        <p>One per layout archive.</p>
+        <p>(A single memory pool is created per BNTX file. When there are multiple textures within an archive, they are consolidated within a single BNTX file.)</p>
+      </td>
+      <td>Several, depending on archive breakdown policy</td>
+    </tr>
+    <tr>
+      <td>Shader Resources</td>
+      <td>
+        <span class="ApiLink_nn__ui2d__ArcResourceAccessor">nn::ui2d::ArcResourceAccessor</span>
+      </td>
+      <td>One per layout archive.
+(A single memory pool is created per BNSH file. When there are multiple shaders within an archive, they are consolidated within a single BNSH file.)</td>
+      <td>Same as above.</td>
+    </tr>
+    <tr>
+      <td>Bitmap Font</td>
+      <td>
+        <span class="ApiLink_nn__font__ResFont">nn::font::ResFont</span>
+      </td>
+      <td>One per font bitmap.</td>
+      <td>Several</td>
+    </tr>
+    <tr>
+      <td>Texture Cache (for scalable fonts)</td>
+      <td>
+        <span class="ApiLink_nn__font__TextureCache">nn::font::TextureCache</span>
+      </td>
+      <td>One per texture cache.</td>
+      <td>Several</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_174066089_h1_3">Reducing the Number of Memory Pools by Consolidating MemoryPool Resources</h1>
+<p>You can consolidate the number of memory pools by using member functions to externally specify a memory pool used to initialize resources.</p>
+<p>Reducing the number of memory pool initializations can reduce the processing load.</p>
+<p>The following member functions are available.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__ui2d__GraphicsResource__Setup">nn::ui2d::GraphicsResource::Setup</span>()</li>
+  <li>
+    <span class="ApiLink_nn__ui2d__ArcResourceAccessor__Attach">nn::ui2d::ArcResourceAccessor::Attach</span>()</li>
+  <li>
+    <span class="ApiLink_nn__font__RectDrawer__Initialize">nn::font::RectDrawer::Initialize</span>()</li>
+  <li>
+    <span class="ApiLink_nn__font__ResFont__SetResource">nn::font::ResFont::SetResource</span>()</li>
+  <li>
+    <span class="ApiLink_nn__font__TextureCache__Initialize">nn::font::TextureCache::Initialize</span>()</li>
+</ul>
+<h3 id="Anchor_174066089_h3_1">Sample Initialization Code</h3>
+<p>There is an extract of the Ui2dDemo (<code>\Samples\Sources\Applications\Ui2dDemo\Ui2dSimple.cpp</code>) where member functions are used to specify memory pools externally.</p>
+<p>The FontDemo (<code>\Samples\Sources\Applications\FontDemo\FontScalableFont.cpp</code>) is also code that can serve as a reference.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27<br />
+28<br />
+29<br />
+30<br />
+31<br />
+32<br />
+33<br />
+34<br />
+35<br />
+36<br />
+37<br />
+38<br />
+39<br />
+40</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">ptrdiff_t</span> <span class="n">startOffset</span> <span class="o">=</span> <span class="n">resourceMemoryPoolOffset</span><span class="p">;</span>
+<span class="kt">ptrdiff_t</span> <span class="n">arcOffset</span><span class="p">;</span>
+<span class="kt">ptrdiff_t</span> <span class="n">fntOffset</span><span class="p">;</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">pFontResource</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Maps and then gets a pointer to a memory region to manage.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">void</span><span class="o">*</span> <span class="n">pMemPoolBuffer</span> <span class="o">=</span> <span class="n">pMemoryPool</span><span class="o">-&gt;</span><span class="n">Map</span><span class="p">();</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Loads the layout archive.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arcOffset</span> <span class="o">=</span> <span class="n">resourceMemoryPoolOffset</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arcOffset</span> <span class="o">=</span> <span class="nn">nn::util::</span><span class="n">align_up</span><span class="p">(</span><span class="n">arcOffset</span><span class="p">,</span> <span class="nn">nn::ui2d::</span><span class="n">ArchiveResourceAlignment</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">fileSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_pLayoutArchiveBinary</span> <span class="o">=</span> <span class="n">ReadFileToBuffer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fileSize</span><span class="p">,</span> <span class="s">&quot;Contents:/Ui2dDemo.arc&quot;</span><span class="p">,</span> <span class="n">pMemPoolBuffer</span><span class="p">,</span> <span class="n">arcOffset</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">resourceMemoryPoolOffset</span> <span class="o">=</span> <span class="n">arcOffset</span> <span class="o">+</span> <span class="n">fileSize</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Loads the fonts.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">fntOffset</span> <span class="o">=</span> <span class="n">resourceMemoryPoolOffset</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">fntOffset</span> <span class="o">=</span> <span class="nn">nn::util::</span><span class="n">align_up</span><span class="p">(</span><span class="n">fntOffset</span><span class="p">,</span> <span class="nn">nn::font::</span><span class="n">ResourceAlignment</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">fileSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pFontResource</span> <span class="o">=</span> <span class="n">ReadFileToBuffer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fileSize</span><span class="p">,</span> <span class="s">&quot;Contents:/sample.bffnt&quot;</span><span class="p">,</span> <span class="n">pMemPoolBuffer</span><span class="p">,</span> <span class="n">fntOffset</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">resourceMemoryPoolOffset</span> <span class="o">+=</span> <span class="n">fntOffset</span> <span class="o">+</span> <span class="n">fileSize</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Flashes loaded content from the CPU cache to memory.Call before calling the Unmap function.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pMemoryPool</span><span class="o">-&gt;</span><span class="n">FlushMappedRange</span><span class="p">(</span><span class="n">startOffset</span><span class="p">,</span> <span class="n">resourceMemoryPoolOffset</span> <span class="o">-</span> <span class="n">startOffset</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pMemoryPool</span><span class="o">-&gt;</span><span class="n">Unmap</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// The memory pool is initialized after the content is created.
+</span><span class="kt">bool</span> <span class="n">resultArcInit</span> <span class="o">=</span> <span class="n">pArcResourceAccessor</span><span class="o">-&gt;</span><span class="n">Attach</span><span class="p">(</span><span class="n">g_pLayoutArchiveBinary</span><span class="p">,</span> <span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="n">pMemoryPool</span><span class="p">,</span> <span class="n">arcOffset</span><span class="p">,</span> <span class="n">ResourceMemoryPoolSize</span><span class="p">);</span>
+<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">resultArcInit</span><span class="p">);</span>
+<span class="kt">bool</span> <span class="n">resultFntInit</span> <span class="o">=</span> <span class="n">pFont</span><span class="o">-&gt;</span><span class="n">SetResource</span><span class="p">(</span><span class="n">pDevice</span><span class="p">,</span> <span class="n">pFontResource</span><span class="p">,</span> <span class="n">pMemoryPool</span><span class="p">,</span> <span class="n">fntOffset</span><span class="p">,</span> <span class="n">ResourceMemoryPoolSize</span><span class="p">);</span>
+<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">resultFntInit</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__MemoryPool', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ad620d8208dd309eb7c4dd5973a6aeee5' )
+SetUrl( 'ApiLink_nn__ui2d__GraphicsResource', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_graphics_resource.html' )
+SetUrl( 'ApiLink_nn__font__RectDrawer', '../../../Api/HtmlNX/classnn_1_1font_1_1_rect_drawer.html' )
+SetUrl( 'ApiLink_nn__font__GpuBuffer', '../../../Api/HtmlNX/classnn_1_1font_1_1_gpu_buffer.html' )
+SetUrl( 'ApiLink_nn__ui2d__ArcResourceAccessor', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_arc_resource_accessor.html' )
+SetUrl( 'ApiLink_nn__font__ResFont', '../../../Api/HtmlNX/classnn_1_1font_1_1_res_font.html' )
+SetUrl( 'ApiLink_nn__font__TextureCache', '../../../Api/HtmlNX/classnn_1_1font_1_1_texture_cache.html' )
+SetUrl( 'ApiLink_nn__ui2d__GraphicsResource__Setup', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_graphics_resource.html#abf174973a19b5e84a0bfa17e733a4f05' )
+SetUrl( 'ApiLink_nn__ui2d__ArcResourceAccessor__Attach', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_arc_resource_accessor.html#a2bcb4d23689676e641815efafa0097cf' )
+SetUrl( 'ApiLink_nn__font__RectDrawer__Initialize', '../../../Api/HtmlNX/classnn_1_1font_1_1_rect_drawer.html#a9583fcd58c7e2cd856dff98cfb65d6f4' )
+SetUrl( 'ApiLink_nn__font__ResFont__SetResource', '../../../Api/HtmlNX/classnn_1_1font_1_1_res_font.html#ad12a6d532e5d298927cc5fc5839bf737' )
+SetUrl( 'ApiLink_nn__font__TextureCache__Initialize', '../../../Api/HtmlNX/classnn_1_1font_1_1_texture_cache.html#a2f6d759bd8b3bdfd9077e25936ee40af' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

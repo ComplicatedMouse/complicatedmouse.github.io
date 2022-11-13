@@ -1,0 +1,262 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Cancellation | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Cancellation -->
+<div class="pagetitle" id="PageId_522506358">Cancellation</div>
+<div class="text_separate">
+<p class="auto-cursor-target">
+  <br />
+</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The cancellation feature described on this page is available starting with NX Add-On 9.1.0 and later.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_522506358_h1_1">Overview</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_522506358_h2_1">Coordinated Cancellation</a>
+      </li>
+      <li>
+        <a href="#Anchor_522506358_h2_2">CancellationToken and CancellationTokenSource</a>
+      </li>
+      <li>
+        <a href="#Anchor_522506358_h2_3">Execution Result of the Canceled Asynchronous Process</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_522506358_h1_2">How to Use</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_522506358_h2_4">Creating a CancellationTokenSource Object</a>
+      </li>
+      <li>
+        <a href="#Anchor_522506358_h2_5">Get cancellation tokens</a>
+      </li>
+      <li>
+        <a href="#Anchor_522506358_h2_6">Send cancellation requests</a>
+      </li>
+      <li>
+        <a href="#Anchor_522506358_h2_7">Confirming Reception of Cancellation Requests</a>
+      </li>
+      <li>
+        <a href="#Anchor_522506358_h2_8">CancellationToken Objects That Do Not Receive Cancellation Requests</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_522506358_h1_1">Overview</h1>
+<h2 id="Anchor_522506358_h2_1">Coordinated Cancellation</h2>
+<p>Cancellation in the <code>async</code> library is made possible when a thread that is running a certain asynchronous process and a thread that wants to cancel that asynchronous process coordinate. The asynchronous process is canceled using the following procedure.</p>
+<ol>
+  <li>When thread A needs to cancel an asynchronous process running in thread B without waiting for the process to complete, it requests thread B to cancel that asynchronous process.</li>
+  <li>Thread B periodically checks whether another thread is requesting the cancellation of the process. If a cancellation has been requested, thread B accepts that request and appropriately interrupts and ends the running process.</li>
+</ol>
+<p>Note that with the <code>async</code> library, the cancellation request does not directly affect the actions of the thread that is running the asynchronous process. For example, the cancellation request does not forcibly end the thread execution or throw an exception in the thread. To cancel the process, the thread that is running the asynchronous process must be able to receive the cancellation request from the application, and the running process must be in an state where it can be properly interrupted and ended. Because of this requirement, you must pay attention to the following points in your application.</p>
+<ul>
+  <li>Depending on the asynchronous function, specifications differ for factors such as whether a particular asynchronous process supports cancellation, and what state the canceled asynchronous process is in when it ends. This reflects the fact that the asynchronous process implementation is deeply involved in the coordinated cancellation. For example, the function might not support cancellation if it would be difficult to safely interrupt the process at the request of the application due to the nature of the asynchronous process.</li>
+  <li>An asynchronous process cannot always be canceled. For example, a single asynchronous process might contain a mix of tasks that can and cannot be canceled. When that is the case, depending on when the cancellation request is made, the thread running the asynchronous process might not respond to the request and the process might run to completion.</li>
+  <li>The asynchronous process is not always immediately canceled. The cancellation request is not conveyed synchronously to the thread running the asynchronous process. Rather, the thread checks for cancellation requests independently, and this is the only way the request is conveyed. In addition, even after a thread has confirmed the existence of the cancellation request, the current process might continue to execute until it reaches a point where it can be safely interrupted. As a result, there may be some delay between the time when the cancellation request is made and the time when the asynchronous process is ended.</li>
+</ul>
+<h2 id="Anchor_522506358_h2_2">CancellationToken and CancellationTokenSource</h2>
+<p>The <span class="ApiLink_nn__async__CancellationToken">nn::async::CancellationToken</span> and <span class="ApiLink_nn__async__CancellationTokenSource">nn::async::CancellationTokenSource</span> classes are used for conveying cancellation requests between two or more threads. <code>CancellationToken</code> is the class used on the receiving side of the cancellation request, and <code>CancellationTokenSource</code> is the class used on the sending side.</p>
+<p>The application mainly uses <code>CancellationTokenSource</code> to send a request for canceling an asynchronous process. The application can perform the two following operations using <code>CancellationTokenSource</code>.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Operation</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Get cancellation tokens</td>
+      <td>Get <code>CancellationToken</code> objects from the class object itself that can receive cancellation requests.</td>
+    </tr>
+    <tr>
+      <td>Send cancellation requests</td>
+      <td>Send cancellation requests to all of the obtained <code>CancellationToken</code> objects.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Taking the <code>CancellationToken</code> objects obtained from the <code>CancellationTokenSource</code> object and passing them from thread A to thread B provides a way to send a cancellation request from thread A to thread B. Coordinated cancellation between the two threads is achieved by thread B accepting the received cancellation request.</p>
+<p>Consider the following implementation in the application to cancel an asynchronous process using these two classes.</p>
+<ol>
+  <li>Create a <code>CancellationTokenSource</code> object.</li>
+  <li>Get <code>CancellationToken</code> objects from the <code>CancellationTokenSource</code> object.</li>
+  <li>Using the obtained <code>CancellationToken</code> object as the argument, call the asynchronous API and get a <code>Future</code> object.</li>
+  <li>Send a cancellation request from the <code>CancellationTokenSource</code> object to these <code>CancellationToken</code> objects.</li>
+  <li>Wait until an execution result can be obtained from the <code>Future</code> object obtained in step 3.</li>
+  <li>Get the execution result from the <code>Future</code> object and check whether the process was canceled or run until completion.</li>
+</ol>
+<h2 id="Anchor_522506358_h2_3">Execution Result of the Canceled Asynchronous Process</h2>
+<p>The <code>async</code> library does not use exceptions to return error information for asynchronous processes. For this reason, even if an asynchronous process has been canceled, the <span class="ApiLink_nn__async__Future">nn::async::Future</span> object always returns some kind of execution result to the application. To learn what kind of execution result gets returned when a cancellation has been requested, see the various asynchronous API references.</p>
+<h1 id="Anchor_522506358_h1_2">How to Use</h1>
+<h2 id="Anchor_522506358_h2_4">Creating a CancellationTokenSource Object</h2>
+<p>Memory must be dynamically allocated, so the <code>CancellationTokenSource</code> object shares internal states with the <code>CancellationToken</code> objects. Prepare an appropriate instance of <span class="ApiLink_nn__MemoryResource">nn::MemoryResource</span> ahead of time in the application and pass it to the <code>CancellationTokenSource</code> constructor. For more information, see <a href="../Pages/Page_468125898.html">Preparing to Use The Library</a>.</p>
+<h2 id="Anchor_522506358_h2_5">Get cancellation tokens</h2>
+<p>Use the <span class="ApiLink_CancellationToken_nn__async__CancellationTokenSource__GetToken()_const_NN_NOEXCEPT">GetToken()</span> function to get the <code>CancellationToken</code> objects.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">CancellationTokenSource</span> <span class="n">cts</span><span class="p">(...);</span>
+
+<span class="c1">// Get CancellationToken objects from cts that can receive cancellation requests.
+</span><span class="nn">nn::async::</span><span class="n">CancellationToken</span> <span class="n">ct</span> <span class="o">=</span> <span class="n">cts</span><span class="p">.</span><span class="n">GetToken</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can get any number of cancellation tokens. All of these objects are tokens that will receive the cancellation request from the <code>CancellationTokenSource</code> object from which they were obtained.</p>
+<h2 id="Anchor_522506358_h2_6">Send cancellation requests</h2>
+<p>Call the <span class="ApiLink_void_nn__async__CancellationTokenSource__RequestCancel()_NN_NOEXCEPT">RequestCancel()</span> function to send cancellation requests to the obtained <code>CancellationToken</code> objects.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">CancellationTokenSource</span> <span class="n">cts</span><span class="p">(...);</span>
+
+<span class="nn">nn::async::</span><span class="n">CancellationToken</span> <span class="n">ct</span> <span class="o">=</span> <span class="n">cts</span><span class="p">.</span><span class="n">GetToken</span><span class="p">();</span>
+
+<span class="c1">// Send cancellation requests to ct.
+</span><span class="n">cts</span><span class="p">.</span><span class="n">RequestCancel</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_522506358_h2_7">Confirming Reception of Cancellation Requests</h2>
+<p>Call the <span class="ApiLink_bool_nn__async__CancellationToken__IsCancellationRequested()_const_NN_NOEXCEPT">CancellationToken::IsCancellationRequested()</span> function to check whether the cancel tokens received the cancellation request.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">CancellationToken</span> <span class="n">ct</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">ct</span><span class="p">.</span><span class="n">IsCancellationRequested</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Cancellation has been requested.
+</span><span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Cancellation has not been requested.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_522506358_h2_8">CancellationToken Objects That Do Not Receive Cancellation Requests</h2>
+<p>
+  <code>CancellationToken</code> defines a <span class="ApiLink_nn__async__CancellationToken__CancellationToken()_NN_NOEXCEPT=default">default constructor</span>. <code>CancellationToken</code> objects created by this default constructor do not receive cancellation requests.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Create CancellationToken objects using the default constructor.
+</span><span class="nn">nn::async::</span><span class="n">CancellationToken</span> <span class="n">ct</span><span class="p">;</span>
+
+<span class="c1">// Always returns false.
+</span><span class="n">NN_ASSERT</span><span class="p">(</span><span class="o">!</span><span class="n">ct</span><span class="p">.</span><span class="n">IsCancellationRequested</span><span class="p">());</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p class="auto-cursor-target">
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__async__CancellationToken', '../../../Api/HtmlNX/classnn_1_1async_1_1_cancellation_token.html' )
+SetUrl( 'ApiLink_nn__async__CancellationTokenSource', '../../../Api/HtmlNX/classnn_1_1async_1_1_cancellation_token_source.html' )
+SetUrl( 'ApiLink_nn__async__Future', '../../../Api/HtmlNX/classnn_1_1async_1_1_future.html' )
+SetUrl( 'ApiLink_nn__MemoryResource', '../../../Api/HtmlNX/classnn_1_1_memory_resource.html' )
+SetUrl( 'ApiLink_CancellationToken_nn__async__CancellationTokenSource__GetToken()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_cancellation_token_source.html#a60680933f3b102ec74d32e7a98c676ce' )
+SetUrl( 'ApiLink_void_nn__async__CancellationTokenSource__RequestCancel()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_cancellation_token_source.html#af2d70f9cb499728d94c9e34e2d381ee9' )
+SetUrl( 'ApiLink_bool_nn__async__CancellationToken__IsCancellationRequested()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_cancellation_token.html#a17eeed0a8e9c9285a4cb0bebd52d76ce' )
+SetUrl( 'ApiLink_nn__async__CancellationToken__CancellationToken()_NN_NOEXCEPT=default', '../../../Api/HtmlNX/classnn_1_1async_1_1_cancellation_token.html#acb64c2de8333195be7dafaa7d1f87b43' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

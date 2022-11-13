@@ -1,0 +1,238 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Digitizer | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Digitizer -->
+<div class="pagetitle" id="PageId_761286875">Digitizer</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_761286875_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_761286875_h1_2">Structure in the Windows Environment</a>
+    </li>
+    <li>
+      <a href="#Anchor_761286875_h1_3">How to Use</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_761286875_h1_1">Introduction</h1>
+<p>This API is for implementing digitizer operations for debugging.</p>
+<p>You can get the following input states.</p>
+<ul style="list-style-type: square;">
+  <li>Pen tip button, second pen tip button, barrel button, eraser button</li>
+  <li>Pen tip position (including the distance from the digitizer)</li>
+  <li>Pen tip direction and &quot;twist&quot; angle</li>
+  <li>Pressure on the pen (pen tip, airbrush wheel, pressure sensor button)</li>
+</ul>
+<p>The input state is updated in intervals of 4 milliseconds or greater based on the most recent sample values at that time.</p>
+<p>The coordinates indicating the pen tip position are stored in <span class="ApiLink_nn__hid__DigitizerState__x">DigitizerState::x</span> and <span class="ApiLink_nn__hid__DigitizerState__y">DigitizerState::y</span> with the upper-left edge as the origin (0, 0).</p>
+<p>
+  <code>DigitizerState::<em>x</em></code> and <code>DigitizerState::<em>y</em></code> can each reference its maximum value from <span class="ApiLink_nn__hid__DigitizerState__xMax">DigitizerState::xMax</span> and <span class="ApiLink_nn__hid__DigitizerState__yMax">DigitizerState::yMax</span>, and the amount equivalent to one inch from <span class="ApiLink_nn__hid__DigitizerState__xResolution">DigitizerState::xResolution</span> and <span class="ApiLink_nn__hid__DigitizerState__yResolution">DigitizerState::yResolution</span> respectively.</p>
+<p>Similarly, values are stored in <span class="ApiLink_nn__hid__DigitizerState__z">DigitizerState::z</span>, <span class="ApiLink_nn__hid__DigitizerState__zMax">DigitizerState::zMax</span>, and <span class="ApiLink_nn__hid__DigitizerState__zResolution">DigitizerState::zResolution</span> for the distance between the digitizer and pen tip.</p>
+<p>
+  <span class="ApiLink_nn__hid__DigitizerState__altitudeAngle">DigitizerState::altitudeAngle</span> has a value between 0 and 90 based on the angle (degrees) between the horizontal surface of the digitizer and the main axis of the pen. When the value is <code>90</code>, the pen is perpendicular to the digitizer surface.</p>
+<p>
+  <span class="ApiLink_nn__hid__DigitizerState__azimuthAngle">DigitizerState::azimuthAngle</span> has a value between 0 and 359 based on the azimuth (degrees) of the pen's main axis and is measured clockwise. When the value is <code>0</code>, the pen tip is pointed towards you.</p>
+<p>
+  <span class="ApiLink_nn__hid__DigitizerState__twistAngle">DigitizerState::twistAngle</span> is the twist angle centered around the main axis of the pen. It can have a value between 0 and 359, going clockwise.</p>
+<p>Also, <span class="ApiLink_nn__hid__DigitizerAttribute__IsInverted">DigitizerAttribute::IsInverted</span> can be referenced to see if the pen is inverted to use the eraser and so forth.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_761286875/761286961.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>Pressure on the pen tip is normalized to a range from 0.0 to 1.0 and recorded in <span class="ApiLink_nn__hid__DigitizerState__normalPressure">DigitizerState::normalPressure</span>.</p>
+<p>Airbrush pressure is normalized to a range from -1.0 to 1.0, or from 0.0 to 1.0 depending on the device, and recorded in <span class="ApiLink_nn__hid__DigitizerState__tangentPressure">DigitizerState::tangentPressure</span>.</p>
+<p>Pressure on the pressure sensor button is normalized to a range from 0.0 to 1.0 and recorded in <span class="ApiLink_nn__hid__DigitizerState__buttonPressure">DigitizerState::buttonPressure</span>.</p>
+<p>
+  <br />
+</p>
+<p>When using the API, you must first call <span class="ApiLink_void_nn__hid__InitializeDigitizer()_NN_NOEXCEPT">InitializeDigitizer()</span> and initialize the digitizer.</p>
+<p>The <span class="ApiLink_void_nn__hid__GetDigitizerState(DigitizerState_*pOutValue)_NN_NOEXCEPT">GetDigitizerState()</span> and <span class="ApiLink_int_nn__hid__GetDigitizerStates(DigitizerState_outValues[]|_int_count)_NN_NOEXCEPT">GetDigitizerStates()</span> functions are available for getting input states.</p>
+<p>Use <span class="ApiLink_void_nn__hid__GetDigitizerState(DigitizerState_*pOutValue)_NN_NOEXCEPT">GetDigitizerState()</span> to get the latest input state.</p>
+<p>Use <span class="ApiLink_int_nn__hid__GetDigitizerStates(DigitizerState_outValues[]|_int_count)_NN_NOEXCEPT">GetDigitizerStates()</span> to get multiple input states by going back from the latest state. It can go back as many as <span class="ApiLink_nn__hid__DigitizerStateCountMax">DigitizerStateCountMax</span> states.</p>
+<p>
+  <span style="color: rgb(23,43,77);">Getting input states does not change the internal state. For this reason, if you call the same function repeatedly, you get the same values each time unless the input state has been updated in the interim.</span>
+</p>
+<p>The input state is assigned a number (<span class="ApiLink_nn__hid__DigitizerState__samplingNumber">TouchScreenState::samplingNumber</span>) that increments with each update. This number can be used to determine the obtained input state.</p>
+<p>
+  <br />
+</p>
+<p>This function can always be used, regardless of the connection state of the digitizer.</p>
+<p>If sampling fails because a digitizer is not connected or for another similar reason, it is considered to have no input and handled as follows.</p>
+<ul style="list-style-type: square;">
+  <li>None of the buttons are pressed.</li>
+  <li>All coordinates, maximums, and resolution values are <code>0</code>.</li>
+  <li>All resolution angles are 0.</li>
+  <li>No pressure is applied at all.</li>
+</ul>
+<p>After <span class="ApiLink_void_nn__hid__InitializeDigitizer()_NN_NOEXCEPT">InitializeDigitizer()</span> has been called, even if the mouse is disconnected and reconnected, it can continue to be used without re-initialization.</p>
+<p>When you need to determine whether the digitizer is connected, reference the <span class="ApiLink_nn__hid__DigitizerAttribute__IsConnected">DigitizerAttribute::IsConnected</span> flag from <span class="ApiLink_nn__hid__DigitizerState__attributes">DigitizerState::attributes</span>.</p>
+<p>Whether the digitizer is detecting the pen can be determined using the <span class="ApiLink_nn__hid__DigitizerAttribute__IsInRange">DigitizerAttribute::IsInRange</span> flag from <span class="ApiLink_nn__hid__DigitizerState__attributes">DigitizerState::attributes</span>.</p>
+<p>The input state when the pen is not detected is generally the same handling as when the digitizer is not connected, but the maximum coordinate values and the resolution are valid values.</p>
+<h1 id="Anchor_761286875_h1_2">Structure in the Windows Environment</h1>
+<p>Currently, the Windows environment is not supported and the digitizer is treated as always disconnected.</p>
+<h1 id="Anchor_761286875_h1_3">How to Use</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/nn_Common.h&gt;
+#include &lt;nn/nn_Log.h&gt;
+#include &lt;nn/nn_TimeSpan.h&gt;
+#include &lt;nn/hid.h&gt;
+#include &lt;nn/os.h&gt;
+</span>
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// 1. Initializing the digitizer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">InitializeDigitizer</span><span class="p">();</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// 2. Get the input state as necessary.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">DigitizerState</span> <span class="n">state</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetDigitizerState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Waiting for the digitizer connection.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">state</span><span class="p">.</span><span class="n">attributes</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::DigitizerAttribute::</span><span class="n">IsConnected</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">SleepThread</span><span class="p">(</span><span class="nn">nn::TimeSpan::</span><span class="n">FromMilliSeconds</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetDigitizerState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Displays the physical size of the digitizer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">attributes</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::DigitizerAttribute::</span><span class="n">IsConnected</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;W %4.1f [cm]</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">xMax</span> <span class="o">*</span> <span class="mf">2.54f</span><span class="p">)</span> <span class="o">/</span> <span class="n">state</span><span class="p">.</span><span class="n">xResolution</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;H %4.1f [cm]</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">yMax</span> <span class="o">*</span> <span class="mf">2.54f</span><span class="p">)</span> <span class="o">/</span> <span class="n">state</span><span class="p">.</span><span class="n">yResolution</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">while</span> <span class="p">(</span><span class="n">NN_STATIC_CONDITION</span><span class="p">(</span><span class="nb">true</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Displays the touch point of the pen tip.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">buttons</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::DigitizerButton::</span><span class="n">Tip</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;Touched: (%4d, %4d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">state</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">state</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Terminates by pressing the button on the pen barrel.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">buttons</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::DigitizerButton::</span><span class="n">Barrel</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">SleepThread</span><span class="p">(</span><span class="nn">nn::TimeSpan::</span><span class="n">FromMilliSeconds</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetDigitizerState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__DigitizerState__x', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a50354d0f00a36f6de51574ae915e4c5f' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__y', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#af18e78455ffc944634b49ed028bfe5c9' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__xMax', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#aa98c707e8d6a4190f6e3fa58634d3f77' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__yMax', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#acb4baa93142e5ccbf5f7344192c86e64' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__xResolution', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#adc91719a543537330aebe1ab806b7d2c' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__yResolution', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a0451f23f319cb5a783f6f637a61f988f' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__z', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a03edd94c367ab3108e8fddd2944cd4bc' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__zMax', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a2b87cdd17a7af1507c861bcb2053ba27' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__zResolution', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a0ee29dd93a8d1803997c325bee0c19e1' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__altitudeAngle', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a8fed5eea83c083b1fc2761b7fce9a75d' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__azimuthAngle', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a4f357422dbae8605c29cede52407bd82' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__twistAngle', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#ae2c6938bf6d9f4597851d2114367e294' )
+SetUrl( 'ApiLink_nn__hid__DigitizerAttribute__IsInverted', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_attribute.html#a0131ad308055e41921d4ebf20f2eb26f' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__normalPressure', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#acb16fdef9976afd19f5a21590226ff66' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__tangentPressure', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a8e78762f5cb090021cc48607348b3197' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__buttonPressure', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a18d90e0c26b8845a0a424851657fe48b' )
+SetUrl( 'ApiLink_void_nn__hid__InitializeDigitizer()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a1b77564dd958e68916c1c13bad99546d' )
+SetUrl( 'ApiLink_void_nn__hid__GetDigitizerState(DigitizerState_*pOutValue)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#aa199f5e0474ad63f3d3ff0f89a80781f' )
+SetUrl( 'ApiLink_int_nn__hid__GetDigitizerStates(DigitizerState_outValues[]|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a15908d2bb614d01e6008d8d742d93270' )
+SetUrl( 'ApiLink_nn__hid__DigitizerStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a5b962357fe4725eefa5820deab01af5f' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__samplingNumber', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a152e3400f9e27273ce91b0384bf1b521' )
+SetUrl( 'ApiLink_nn__hid__DigitizerAttribute__IsConnected', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_attribute.html#abe13dab65a4d9036b498ac300ee53f83' )
+SetUrl( 'ApiLink_nn__hid__DigitizerState__attributes', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_state.html#a7cf81a0202a7fff761f8270260d8a9e0' )
+SetUrl( 'ApiLink_nn__hid__DigitizerAttribute__IsInRange', '../../../Api/HtmlNX/structnn_1_1hid_1_1_digitizer_attribute.html#a1953269fc4b38af40e95af8b06b3877d' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

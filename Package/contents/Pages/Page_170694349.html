@@ -1,0 +1,289 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Build Procedure: Creating the Object File | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Build Procedure: Creating the Object File -->
+<div class="pagetitle" id="PageId_170694349">Build Procedure: Creating the Object File</div>
+<div class="text_separate">
+<h1 id="Anchor_170694349_h1_1">Creating the Object File</h1>
+<h2 id="Anchor_170694349_h2_1">Creating the o File</h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_94757421/171995241.png" class="embedded-image" />
+  </span>
+</p>
+<p>An object file is created from the source files using the <code>clang</code> tool.</p>
+<p>For more information about compiler option restrictions, see <a href="#Anchor_170694349_compiler-option-restriction">Restrictions on Compiler Options</a>.</p>
+<p>For more information about the NintendoSDK include directories, see <a href="#Anchor_170694349_include-directories">here</a>. For more information about the preprocessor macros required by the SDK, see <a href="#Anchor_170694349_preprocessor-macros">here</a>.</p>
+<p>What follows is a simple compile method for creating 64-bit applications in the NintendoSDK.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>clang
+&nbsp;&nbsp;&nbsp;&nbsp;-x c++
+&nbsp;&nbsp;&nbsp;&nbsp;-std=gnu++14
+&nbsp;&nbsp;&nbsp;&nbsp;-fno-common
+&nbsp;&nbsp;&nbsp;&nbsp;-fno-short-enums
+&nbsp;&nbsp;&nbsp;&nbsp;-ffunction-sections
+&nbsp;&nbsp;&nbsp;&nbsp;-fdata-sections
+&nbsp;&nbsp;&nbsp;&nbsp;-fPIC
+&nbsp;&nbsp;&nbsp;&nbsp;-mcpu=cortex-a57+fp+simd+crypto+crc
+&nbsp;&nbsp;&nbsp;&nbsp;-g
+&nbsp;&nbsp;&nbsp;&nbsp;-I%NINTENDO_SDK_ROOT%\Include
+&nbsp;&nbsp;&nbsp;&nbsp;-I%NINTENDO_SDK_ROOT%\Common\Configs\Targets\&lt;BuildTarget&gt;\Include
+&nbsp;&nbsp;&nbsp;&nbsp;-DNN_NINTENDO_SDK
+&nbsp;&nbsp;&nbsp;&nbsp;-DNN_SDK_BUILD_&lt;BuildType&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;-c
+&nbsp;&nbsp;&nbsp;&nbsp;-o &lt;object file&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;SOURCE_FILE&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_170694349_h1_2">Restrictions on Compiler Options<a name="Anchor_170694349_compiler-option-restriction"></a></h1>
+<h2 id="Anchor_170694349_h2_2">Required Compiler Options</h2>
+<p>Make sure that you specify the following compiler options when you compile.</p>
+<!--Remove-->
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-std=gnu++14
+-fno-common
+-fno-short-enums
+-ffunction-sections
+-fdata-sections
+-fPIC</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For <code>-std=gnu++14</code>, you can also use <code>-std=gnu++17</code>.</p>
+<p>Make sure that you specify the following compiler options when creating 32-bit applications.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-mabi=aapcs-linux
+-mcpu=cortex-a57
+-mfloat-abi=hard
+-mfpu=crypto-neon-fp-armv8</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Make sure that you specify the following compiler options when creating 64-bit applications.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-mcpu=cortex-a57+fp+simd+crypto+crc</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the warning options, optimization options, and debug information options that are appropriate for the application you are creating. For reference, applications created with the NintendoSDK application wizard are built using the following compiler options by default.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 78.0px;" />
+    <col style="width: 115.0px;" />
+    <col style="width: 237.0px;" />
+    <col style="width: 101.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>Warning Option</th>
+      <th>Optimization Option</th>
+      <th>Debugging information</th>
+    </tr>
+    <tr>
+      <th>Debug</th>
+      <td rowspan="3">
+        <pre>-Wall</pre>
+      </td>
+      <td>
+        <code>
+          <code>-O0 -fno-omit-frame-pointer</code>
+          <br />
+        </code>
+      </td>
+      <td rowspan="3">-g</td>
+    </tr>
+    <tr>
+      <th>Develop</th>
+      <td>
+        <code>
+          <code>-O3 -fno-omit-frame-pointer</code>
+        </code>
+      </td>
+    </tr>
+    <tr>
+      <th>Release</th>
+      <td>
+        <code>-O3 -fno-omit-frame-pointer            </code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <pre>
+      <span style="color: rgb(23,43,77);">The <code>-fno-omit-frame-pointer</code> compile option is specified by default for all built types so the <code>diag</code> library can be used to get the backtrace.</span>
+      <br />This option specification might be changed in the future. For more information, see <a href="../Pages/Page_107325197.html">diag Library</a>. </pre>
+  </div>
+</div>
+<h2 id="Anchor_170694349_h2_3">Prohibited Compiler Options</h2>
+<p>The following compiler option cannot be used. <strong>Do not</strong> specify this compiler option when you compile.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-fshort-wchar</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Do not use the following compiler options. Behavior is not assured when changing the alignment for structures defined in the NintendoSDK from their defaults.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-fpack-struct</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_170694349_h1_3">SDK Include Directories<a name="Anchor_170694349_include-directories"></a></h1>
+<p>The include directories of the NintendoSDK are located in the following places. You must specify these include directories at compilation time.</p>
+<ul>
+  <li>%NINTENDO_SDK_ROOT%\Common\Configs\Targets\<em>BuildTarget</em>\Include</li>
+  <li>%NINTENDO_SDK_ROOT%\Include</li>
+</ul>
+<p>For more information about build targets, see <a href="../Pages/Page_106361459.html">Build Targets and Build Types</a>.</p>
+<h1 id="Anchor_170694349_h1_4">Preprocessor Macros Required by the SDK<a name="Anchor_170694349_preprocessor-macros"></a></h1>
+<p>Several preprocessor macros are required for switching among the provided features in NintendoSDK. Specify the following preprocessor macros as compiler options.</p>
+<h2 id="Anchor_170694349_h2_4">Required Macros</h2>
+<p>Always define the following preprocessor macros.</p>
+<ul>
+  <li>
+    <span class="ApiLink_NN_NINTENDO_SDK">NN_NINTENDO_SDK</span>
+  </li>
+</ul>
+<h2 id="Anchor_170694349_h2_5">Marcos Requiring Selection</h2>
+<p>Based on your build settings, define one of the following preprocessor macros.</p>
+<h3 id="Anchor_170694349_h3_1">Build Type</h3>
+<p>Define one of these, based on the build type of the NintendoSDK libraries you are using.</p>
+<ul>
+  <li>
+    <span class="ApiLink_NN_SDK_BUILD_DEBUG">NN_SDK_BUILD_DEBUG</span>
+  </li>
+  <li>
+    <span class="ApiLink_NN_SDK_BUILD_DEVELOP">NN_SDK_BUILD_DEVELOP</span>
+  </li>
+  <li>
+    <span class="ApiLink_NN_SDK_BUILD_RELEASE">NN_SDK_BUILD_RELEASE</span>
+  </li>
+</ul>
+<h1 id="Anchor_170694349_h1_5">Next Procedure</h1>
+<ul>
+  <li>
+    <a href="../Pages/Page_170694496.html">Creating a Static Library</a>
+  </li>
+  <li>
+    <a href="../Pages/Page_170694375.html">Creating a Dynamic Module</a>
+  </li>
+  <li>
+    <a href="../Pages/Page_170694365.html">Creating an Application Program</a>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+// ApiLink_NN_NINTENDO_SDK
+// ApiLink_NN_SDK_BUILD_DEBUG
+// ApiLink_NN_SDK_BUILD_DEVELOP
+// ApiLink_NN_SDK_BUILD_RELEASE
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

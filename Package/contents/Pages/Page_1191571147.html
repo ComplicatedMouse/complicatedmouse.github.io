@@ -1,0 +1,198 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Using Static Analyzer with Clang | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Using Static Analyzer with Clang -->
+<div class="pagetitle" id="PageId_1191571147">Using Static Analyzer with Clang</div>
+<div class="text_separate">
+<p>With Clang for NX 1.11.x, users have two ways of using the static analyzer: manually running a series of commands, or using an external tool CodeCheck.er</p>
+<p>For example, with the following two source files <em>main.cpp</em> and <em>foo.cpp</em>, and compilation database <em>compile_commands.json</em>:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// main.cpp
+int foo();
+
+int main() {
+&nbsp;&nbsp;return 3 / foo();
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// foo.cpp
+int foo() {
+&nbsp;&nbsp;return 0;
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>[
+&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&quot;directory&quot;: &quot;/path/to/your/project&quot;,
+&nbsp;&nbsp;&nbsp;&nbsp;&quot;command&quot;: &quot;clang++ -c foo.cpp -o foo.o&quot;,
+&nbsp;&nbsp;&nbsp;&nbsp;&quot;file&quot;: &quot;foo.cpp&quot;
+&nbsp;&nbsp;},
+&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&quot;directory&quot;: &quot;/path/to/your/project&quot;,
+&nbsp;&nbsp;&nbsp;&nbsp;&quot;command&quot;: &quot;clang++ -c main.cpp -o main.o&quot;,
+&nbsp;&nbsp;&nbsp;&nbsp;&quot;file&quot;: &quot;main.cpp&quot;
+&nbsp;&nbsp;}
+]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 style="text-align: justify;" id="Anchor_1191571147_h2_1">Manual Commands</h2>
+<p style="text-align: justify;">To analyze <em>main.cpp</em> and discover if there is any division by zero bug, we first inline the definition of <em>foo</em> from <em>foo.cpp.</em> We generate the <em>AST</em> (or <em>PCH</em>) file of <em>foo.cpp</em></p>
+<pre>$ <span class="nb" style="color: rgb(0,112,32);">pwd</span> $ /path/to/your/project
+$ clang++ -emit-ast -o foo.cpp.ast foo.cpp
+$ <span class="c1" style="color: rgb(96,160,176);"># Check that the .ast file is generated:</span>
+$ ls
+compile_commands.json  foo.cpp.ast  foo.cpp  main.cpp
+
+</pre>
+<p style="text-align: justify;">
+  <br />
+</p>
+<p style="text-align: justify;">The next step is to create a CTU (Cross Translation Unit) index file which holds the <em>USR</em> name and location of external definitions in the source files:</p>
+<pre>$ clang-extdef-mapping -p . foo.cpp
+c:@F@foo# /path/to/your/project/foo.cpp
+$ clang-extdef-mapping -p . foo.cpp &gt; externalDefMap.txt
+</pre>
+<p style="text-align: justify;">
+  <br />
+</p>
+<p style="text-align: justify;">We have to modify&nbsp;<em>externalDefMap.txt</em>&nbsp;to contain the name of the&nbsp;<em>ast&nbsp;</em>files instead of the source files:</p>
+<pre>$ sed -i -e <span class="s2" style="color: rgb(64,112,160);">&quot;s/.cpp/.cpp.ast/g&quot;</span> externalDefMap.txt
+</pre>
+<p style="text-align: justify;">
+  <br />
+</p>
+<p style="text-align: justify;">We still have to further modify the&nbsp;<em>externalDefMap.txt&nbsp;</em>file to contain relative paths:</p>
+<pre>$ sed -i -e <span class="s2" style="color: rgb(64,112,160);">&quot;s|</span><span class="k" style="color: rgb(0,112,32);">$(</span><span class="nb" style="color: rgb(0,112,32);">pwd</span><span class="k" style="color: rgb(0,112,32);">)</span><span class="s2" style="color: rgb(64,112,160);">/||g&quot;</span> externalDefMap.txt
+</pre>
+<p style="text-align: justify;">
+  <br />
+</p>
+<p style="text-align: justify;">Now everything is available for the CTU analysis. We have to feed Clang with CTU specific extra arguments:</p>
+<pre>$ <span class="nb" style="color: rgb(0,112,32);">pwd</span>
+/path/to/your/project
+$ clang++ --analyze <span class="se" style="color: rgb(64,112,160);">\</span>
+    -Xclang -analyzer-config -Xclang experimental-enable-naive-ctu-analysis<span class="o" style="color: rgb(102,102,102);">=</span><span class="nb" style="color: rgb(0,112,32);">true</span> <span class="se" style="color: rgb(64,112,160);">\</span>
+    -Xclang -analyzer-config -Xclang -analyzer-output<span class="o" style="color: rgb(102,102,102);">=</span>plist-multi-file main.cpp
+main.cpp:5:12: warning: Division by zero
+  <span class="k" style="color: rgb(0,112,32);">return</span> <span class="m" style="color: rgb(64,160,112);">3</span> / foo<span class="o" style="color: rgb(102,102,102);">()</span><span class="p">;</span>
+         ~~^~~~~~~
+<span class="m" style="color: rgb(64,160,112);">1</span> warning generated.
+$ <span class="c1" style="color: rgb(96,160,176);"># The plist file with the result is generated.</span>
+$ ls -F
+compile_commands.json  externalDefMap.txt  foo.ast  foo.cpp  foo.cpp.ast  main.cpp  main.plist
+
+</pre>
+<p style="text-align: justify;">This manual procedure is error-prone and not scalable, therefore to analyze real projects it is recommended to use <em>CodeChecker</em></p>
+<h2 style="text-align: justify;" id="Anchor_1191571147_h2_2">Using CodeChecker</h2>
+<p>Prerequisites: Python (minimum version 3.6) and <a href="https://programwithus.com/learn/python/pip-virtualenv-windows">pip</a>.&nbsp;</p>
+<p>To <a href="https://github.com/Ericsson/codechecker/#Install-guide">install</a> CodeChecker</p>
+<pre>$ pip3 install codechecker
+</pre>
+<p>
+  <span style="letter-spacing: 0.0px;">CodeChecker is installed to /path/to/Python/Scripts</span>
+</p>
+<p>
+  <span style="letter-spacing: 0.0px;">Add the path of CodeChecker to PATH environment variable.</span>
+</p>
+<p style="text-align: justify;">Then we can start using CodeChecker:</p>
+<pre>$ CodeChecker analyze compile_commands.json -o reports</pre>
+<p style="text-align: justify;">The <em>plist</em> files contain the results of the analysis. Users may use&nbsp;<em>CodeChecker parse&nbsp;</em>to view the results in command line:</p>
+<pre>$ CodeChecker parse reports
+<span class="o" style="color: rgb(102,102,102);">[</span>HIGH<span class="o" style="color: rgb(102,102,102);">]</span> /home/egbomrt/ctu_mini_raw_project/main.cpp:5:12: Division by zero <span class="o" style="color: rgb(102,102,102);">[</span>core.DivideZero<span class="o" style="color: rgb(102,102,102);">]</span>
+  <span class="k" style="color: rgb(0,112,32);">return</span> <span class="m" style="color: rgb(64,160,112);">3</span> / foo<span class="o" style="color: rgb(102,102,102);">()</span><span class="p">;</span>
+           ^
+
+Found <span class="m" style="color: rgb(64,160,112);">1</span> defect<span class="o" style="color: rgb(102,102,102);">(</span>s<span class="o" style="color: rgb(102,102,102);">)</span> in main.cpp
+
+
+----<span class="o" style="color: rgb(102,102,102);">====</span> <span class="nv" style="color: rgb(187,96,213);">Summary</span> <span class="o" style="color: rgb(102,102,102);">====</span>----
+-----------------------
+Filename <span class="p">|</span> Report count
+-----------------------
+main.cpp <span class="p">|</span>            <span class="m" style="color: rgb(64,160,112);">1</span>
+-----------------------
+-----------------------
+Severity <span class="p">|</span> Report count
+-----------------------
+HIGH     <span class="p">|</span>            <span class="m" style="color: rgb(64,160,112);">1</span>
+-----------------------
+----<span class="o" style="color: rgb(102,102,102);">=================</span>----
+Total number of reports: <span class="m" style="color: rgb(64,160,112);">1</span>
+----<span class="o" style="color: rgb(102,102,102);">=================</span>----</pre>
+<h2 id="Anchor_1191571147_h2_3">External References</h2>
+<p>
+  <a href="https://releases.llvm.org/11.1.0/tools/clang/docs/analyzer/user-docs/CrossTranslationUnit.html">Clang 11 Cross Translation Unit Analysis</a>
+</p>
+<p>
+  <a href="https://programwithus.com/learn/python/pip-virtualenv-windows">Pip and Virtualenv on Windows</a>
+</p>
+<p>
+  <a href="https://github.com/Ericsson/codechecker">CodeChecker on github</a>
+</p>
+<p>
+  <a href="https://pypi.org/project/codechecker/">CodeChecker on pypi</a>
+</p>
+<p>
+  <a href="https://github.com/Ericsson/codechecker/blob/master/docs/usage.md">CodeChecker official site</a>
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

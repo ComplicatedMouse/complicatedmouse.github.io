@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Example 4: Get the Disassembly of the Most Hit Function | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Example 4: Get the Disassembly of the Most Hit Function -->
+<div class="pagetitle" id="PageId_753912843">Example 4: Get the Disassembly of the Most Hit Function</div>
+<div class="text_separate">
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre># Get the disassembly of the most hit function.
+#   1. Filter the functions tab to remove idle time.
+#   2. Get the most hit function.
+#   3. Disassemble the function.
+#   4. Output the disassembly to a file.
+#   5. Reset the UI back to normal.
+# Note: This example assumes there is already a profile loaded.
+
+# 1. Filter the functions tab to remove idle time.
+Profiler-Filter -Tab Functions -Negate -FilterName &quot;System Idle Thread&quot;
+
+# 2. Get the most hit function.
+Profiler-Sort -Tab Functions -SortBy Self
+$functionsText = Profiler-Copy -Tab Functions -NoClipboard
+if ([string]::IsNullOrEmpty($functionsText))
+{
+&nbsp;&nbsp;&nbsp;&nbsp;Write-Error &quot;Text copied from Functions Tab is empty&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;exit
+}
+
+# Note: The first 3 lines are headers.
+$functions = $functionsText -split [System.Environment]::NewLine
+if ($functions.Length -lt 4)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;Write-Error &quot;There were no functions.&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;exit
+}
+
+$mostHitFunctionLine = $functions[3]
+$mostHitFunctionColumns = $mostHitFunctionLine -split '\t'
+$mostHitFunctionName = $mostHitFunctionColumns[$mostHitFunctionColumns.Length - 1]
+Write-Output $mostHitFunctionName
+
+# 3. Disassemble the function.
+Profiler-Assembly -FunctionName $mostHitFunctionName
+Profiler-Assembly -ShowSource $true
+# Give the interleaved source time to fill.
+Start-Sleep 1.0
+
+# 4. Output the disassembly to a file.
+$outputFile = Join-Path -Path $env:TEMP -ChildPath &quot;example-4.txt&quot;
+$assemblyText = Profiler-Copy -Tab Assembly -NoClipboard
+Out-File -FilePath $outputFile -Encoding &quot;utf8&quot; -InputObject $assemblyText
+
+# 5. Reset the UI back to normal
+Profiler-Filter -Tab Function -FilterName &quot;&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

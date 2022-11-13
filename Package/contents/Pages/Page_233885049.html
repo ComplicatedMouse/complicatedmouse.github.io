@@ -1,0 +1,522 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Using NatVis | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Using NatVis -->
+<div class="pagetitle" id="PageId_233885049">Using NatVis</div>
+<div class="text_separate">
+<p>Visual Studio provides custom visualization of variables within variable windows through the NatVis framework.</p>
+<p>VSI for NX supports a subset of this functionality. The supported nodes, attributes, and high-level features are documented in the following sections.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_233885049_h2_1">High Level Features</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_233885049_h3_1">NatVis file locations</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_2">NatVis expression context</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_3">NatVis error reporting through “Oasis Output” in the Output window</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_4">Type matching for types with inherited NatVis types</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_5">Templates</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_6">NatVis types within structs or classes</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_7">Array and Vector indexing (MyArray[0] for example)</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_8">Dynamic NatVis definition reloading, “.natvisreload”</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_9">Multiple definitions for the same type name</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_233885049_h2_2">Terminology</a>
+    </li>
+    <li>
+      <a href="#Anchor_233885049_h2_3">Nodes</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_233885049_h3_10">&lt;DisplayString&gt;</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_11">&lt;AlternativeType&gt;</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_12">&lt;Version&gt;</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_13">&lt;StringView&gt;, &lt;UIVisualizer&gt;, &lt;CustomVisualizer&gt;</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_14">&lt;HResult&gt;</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_15">&lt;Expand&gt;</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_233885049_h4_1">&lt;Item&gt;</a>
+        </li>
+        <li>
+          <a href="#Anchor_233885049_h4_2">&lt;ArrayItems&gt;</a>
+        </li>
+        <li>
+          <a href="#Anchor_233885049_h4_3">&lt;TreeItems&gt;</a>
+        </li>
+        <li>
+          <a href="#Anchor_233885049_h4_4">&lt;LinkedListItems&gt;</a>
+        </li>
+        <li>
+          <a href="#Anchor_233885049_h4_5">&lt;Synthetic&gt;</a>
+        </li>
+        <li>
+          <a href="#Anchor_233885049_h4_6">&lt;IndexListItems&gt;</a>
+        </li>
+        <li>
+          <a href="#Anchor_233885049_h4_7">&lt;ExpandedItem&gt;</a>
+        </li>
+        <li>
+          <a href="#Anchor_233885049_h4_8">&lt;CustomListItems&gt;</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_233885049_h2_4">Attributes</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_233885049_h3_16">Name=</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_17">Condition=</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_18">Optional=</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_19">Priority=</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_20">IncludeView=, ExcludeView=</a>
+      </li>
+      <li>
+        <a href="#Anchor_233885049_h3_21">Inheritable=</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h2 id="Anchor_233885049_h2_1">High Level Features</h2>
+<h3 id="Anchor_233885049_h3_1">NatVis file locations</h3>
+<p>Users can create new NatVis files by right-clicking on your vcxproj and selecting &quot;Add -&gt; New Item...&quot;, then under the Visual C++ menu, select &quot;Utility&quot;. &nbsp;Then select &quot;Debugger visualization file (.natvis)&quot;. The NX debugger will also search the following directories for NatVis files:&nbsp;</p>
+<ul>
+  <li>%USERPROFILE%\Documents\Nintendo\NX\Visualizers.</li>
+  <li>natvis files included in any vcxproj project in your solution.</li>
+</ul>
+<h3 id="Anchor_233885049_h3_2">NatVis expression context</h3>
+<p>Supported in VSI 3.0. Improved support for expressions containing &ldquo;this&rdquo; in VSI 4.0 and later. Paraphrased excerpt from the NatVis framework documentation: The LinkedListItems &ldquo;NextPointer&rdquo; and &ldquo;ValueNode&rdquo;, and the TreeItems &ldquo;LeftPointer&rdquo;, &ldquo;RightPointer&rdquo;, and &ldquo;ValueNode&rdquo; are evaluated in the context of the nodes, not the parent type.<br />As a result, NatVis expressions in those contexts cannot access parent member data. Local variables also cannot be accessed in these NatVis expressions. Global variables can be accessed in VSI 6.0 and later.</p>
+<h3 id="Anchor_233885049_h3_3">NatVis error reporting through &ldquo;Oasis Output&rdquo; in the Output window</h3>
+<p>Supported in VSI 4.0 and later. In the event a NatVis expression for a node fails, a debugging<br />string should be displayed in the output window. For VSI, any failed NatVis expressions will be<br />displayed in the &ldquo;Oasis Output&rdquo; section of within the &ldquo;Output&rdquo; window.</p>
+<h3 id="Anchor_233885049_h3_4">Type matching for types with inherited NatVis types</h3>
+<p>Supported in VSI 4.0 and later. Any derived types that have NatVis definitions for parent types will be displayed as specified by their parent NatVis definition. If a derived type contains multiple parent NatVis defined types, the most immediate parent type take precedence. If a derived type&nbsp;has a NatVis definition defined, that definition takes precedence over all defined parent types.</p>
+<h3 id="Anchor_233885049_h3_5">Templates</h3>
+<p>Supported in VSI 3.0 and later. Templated types are supported and NatVis node expressions can use &ldquo;$T1&rdquo;, &ldquo;$T2&rdquo;, etc, to use the Templated types within their expressions. Templated NatVis &lt;Type&gt; definitions can use &ldquo;*&rdquo; in place of the template parameters to match all types for a given template parameter. For example, to match all &ldquo;list&rdquo; types, regardless of their template arguments:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;Type Name=&quot;list&amp;lt;*&amp;gt;&quot;&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_233885049_h3_6">NatVis types within structs or classes</h3>
+<p>Partial support added in VSI 4.0 and later. For a struct or class variable that contains NatVis types, their display string will not be formatted with each child&rsquo;s appropriate visualization. VSI does not support this feature. However, all expanded child elements within the struct that have NatVis definitions will correctly be formatted as defined by their NatVis definitions.</p>
+<h3 id="Anchor_233885049_h3_7">Array and Vector indexing (MyArray[0] for example)</h3>
+<p>Not supported. Indexing within variable expressions for NatVis defined types is a new VS 2015 NatVis framework feature. Support has not yet been added for this feature.</p>
+<h3 id="Anchor_233885049_h3_8">Dynamic NatVis definition reloading, &ldquo;.natvisreload&rdquo;</h3>
+<p>Supported in VSI 6.3 and later. If a .natvis file is modified and saved while a program is being debugged, the NatVis file will be reloaded. Expressions that use its NatVis definitions will then reflect the latest changes.</p>
+<p>.natvisreload is not supported.</p>
+<h3 id="Anchor_233885049_h3_9">Multiple definitions for the same type name</h3>
+<p>Not supported. In the event multiple matches are detected, the first loaded definition will be used. The NatVis framework supports multiple matches by using the Priority attribute. This attribute is not yet supported by VSI.</p>
+<h2 id="Anchor_233885049_h2_2">Terminology</h2>
+<p>The terminology used to describe the NatVis syntax is defined as follows.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Terminology</th>
+      <th>Example</th>
+    </tr>
+    <tr>
+      <td>Type</td>
+      <td>&lt;Type Name=&quot;MyArrayType&quot;&gt;</td>
+    </tr>
+    <tr>
+      <td>Node</td>
+      <td>&lt;DisplayString&gt;The display string for MyArrayType&lt;/DisplayString&gt;</td>
+    </tr>
+    <tr>
+      <td>Node</td>
+      <td>&lt;Expand&gt;</td>
+    </tr>
+    <tr>
+      <td>Node</td>
+      <td>w/Attribute &lt;Item Condition=&quot;m_bInitialized == true&quot; Name=&quot;[Size]&quot;&gt;m_Size&lt;/Item&gt;</td>
+    </tr>
+    <tr>
+      <td>Node</td>
+      <td>&lt;ArrayItems&gt;</td>
+    </tr>
+    <tr>
+      <td>Node</td>
+      <td>&lt;Size&gt;m_End - m_Begin&lt;/Size&gt;</td>
+    </tr>
+    <tr>
+      <td>Node</td>
+      <td>&lt;ValuePointer&gt;m_Begin&lt;/ValuePointer&gt;</td>
+    </tr>
+    <tr>
+      <td>End Node</td>
+      <td>&lt;/ArrayItems&gt;</td>
+    </tr>
+    <tr>
+      <td>End Node</td>
+      <td>&lt;/Expand&gt;</td>
+    </tr>
+    <tr>
+      <td>End Type</td>
+      <td>&lt;/Type&gt;</td>
+    </tr>
+  </tbody>
+</table>
+<p>For more information on the NatVis framework syntax, features, and requirements, please refer to <a href="https://msdn.microsoft.com/en-us/library/jj620914.aspx">https://msdn.microsoft.com/en-us/library/jj620914.aspx</a></p>
+<h2 id="Anchor_233885049_h2_3">Nodes</h2>
+<p>The nodes for a NatVis type define the display and overall behavior for the given type. The supported and unsupported nodes are listed below.</p>
+<h3 id="Anchor_233885049_h3_10">&lt;DisplayString&gt;</h3>
+<p>Supported in VSI 3.0 and later. The DisplayString defines the string displayed in the &ldquo;Value&rdquo; column in the variable windows. The &ldquo;Condition&rdquo; attribute can be used to define multiple DisplayStrings depending on the state of the variable.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;DisplayString</span> <span class="na">Condition=</span><span class="s">&quot;m_pID == 0&quot;</span><span class="nt">&gt;</span>Invalid ID<span class="nt">&lt;/DisplayString&gt;</span>
+<span class="nt">&lt;DisplayString</span> <span class="na">Condition=</span><span class="s">&quot;m_pID != 0&quot;</span><span class="nt">&gt;</span>Valid ID<span class="nt">&lt;/DisplayString&gt;</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_233885049_h3_11">&lt;AlternativeType&gt;</h3>
+<p>Supported in VSI 3.0 and later. AlternativeType is used to define an alternate type name for the variable. This could be used to specify a typedef alias or using declaration for example. The type name and all alternative type names will be used when searching for visualizers for a given variable. For example, to also match a templated typedef named SparseArray:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;AlternativeType</span> <span class="na">Name=</span><span class="s">&quot;SparseArray&amp;lt;*&amp;gt;&quot;</span><span class="nt">/&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_233885049_h3_12">&lt;Version&gt;</h3>
+<p>Not supported. Version is used to scope the visualization to a specific module (dll). Furthermore, the dll min and max versions could also be specified. No plans to support in the near future.</p>
+<h3 id="Anchor_233885049_h3_13">&lt;StringView&gt;, &lt;UIVisualizer&gt;, &lt;CustomVisualizer&gt;</h3>
+<p>Not supported. These nodes are used to specify the type visualization belongs to another custom visualizer. For example, the StringView node specifies the variable should use the VS built-in Text Visualizer. The UIVisualizer and CustomVisualizer is a similar feature that specifies the user defined visualizer through a VSPackage or VSIX guid.</p>
+<h3 id="Anchor_233885049_h3_14">&lt;HResult&gt;</h3>
+<p>Not supported . The HResult nodes are used to define custom error strings for each HResult.<br />This is not supported, but a similar <span class="ApiLink_nn__Result">nn::Result</span> could be created.</p>
+<h3 id="Anchor_233885049_h3_15">&lt;Expand&gt;</h3>
+<p>Supported in VSI 3.0 and later. The Expand node is used to list multiple child elements that fall<br />into one of the following sub node categories:</p>
+<h4 id="Anchor_233885049_h4_1">&lt;Item&gt;</h4>
+<p>Supported in VSI 3.0 and later. Item can be used to create a child of the NatVis type.<br />This node specifies the name and value of the child. For example:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;Expand&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Item</span> <span class="na">Name=</span><span class="s">&quot;[Size]&quot;</span><span class="nt">&gt;</span>m_Size<span class="nt">&lt;/Item&gt;</span>
+<span class="nt">&lt;/Expand&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_233885049_h4_2">&lt;ArrayItems&gt;</h4>
+<p>Supported in VSI 3.0 and later. ArrayItems is used to iterate over an array like structure. The NatVis framework defines how the array is iterated over with the Size and ValuePointer sub nodes. For example:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;Expand&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ArrayItems&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Size&gt;</span>m_End - m_Begin<span class="nt">&lt;/Size&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ValuePointer&gt;</span>m_Begin<span class="nt">&lt;/ValuePointer&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/ArrayItems&gt;</span>
+<span class="nt">&lt;/Expand&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_233885049_h4_3">&lt;TreeItems&gt;</h4>
+<p>Supported in VSI 3.0 and later. TreeItems is used to iterate over a binary tree like structure. The NatVis framework defines how the tree is iterated over with the Size, HeadPointer, LeftPointer, RightPointer, and ValueNode sub nodes. For example:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;Expand&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;TreeItems&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Size&gt;</span>m_Size<span class="nt">&lt;/Size&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;HeadPointer&gt;</span>m_pHead<span class="nt">&lt;/HeadPointer&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;LeftPointer&gt;</span>m_pLeft<span class="nt">&lt;/LeftPointer&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;RightPointer&gt;</span>m_pRight<span class="nt">&lt;/RightPointer&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ValueNode&gt;</span>m_Value<span class="nt">&lt;/ValueNode&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/TreeItems&gt;</span>
+<span class="nt">&lt;/Expand&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_233885049_h4_4">&lt;LinkedListItems&gt;</h4>
+<p>Supported in VSI 3.0 and later. LinkedListItems is used to iterate over a linked list like structure. The NatVis framework defines how the list is iterated over with the Size, HeadPointer, NextPointer, and ValueNode sub nodes. For example:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;Expand&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;LinkedListItems&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;HeadPointer&gt;</span>m_pHead<span class="nt">&lt;/HeadPointer&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;NextPointer&gt;</span>m_pNext<span class="nt">&lt;/NextPointer&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ValueNode&gt;</span>m_Value<span class="nt">&lt;/ValueNode&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/LinkedListItems&gt;</span>
+<span class="nt">&lt;/Expand&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_233885049_h4_5">&lt;Synthetic&gt;</h4>
+<p>Supported in VSI 4.0 and later. Synthetic is used to display any additional data that may not be a direct member of the type. This could be a string used to describe the state of the variable, or it could be an entire structure that contains other nodes, such as ArrayItems, or nested Synthetic nodes. For example:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;Expand&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Synthetic</span> <span class="na">Name=</span><span class="s">&quot;Additional debug data&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;DisplayString&gt;</span>Expand for more information<span class="nt">&lt;/DisplayString&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Expand&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Item</span> <span class="na">Name=</span><span class="s">&quot;Name&quot;</span><span class="nt">&gt;</span>m_pName<span class="nt">&lt;/Item&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Item</span> <span class="na">Name=</span><span class="s">&quot;ID&quot;</span><span class="nt">&gt;</span>m_pID<span class="nt">&lt;/Item&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Item</span> <span class="na">Name=</span><span class="s">&quot;Next variable name&quot;</span><span class="nt">&gt;</span>m_pNext-<span class="ni">&amp;gt;</span>m_pName<span class="nt">&lt;/Item&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Expand&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Synthetic&gt;</span>
+<span class="nt">&lt;/Expand&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_233885049_h4_6">&lt;IndexListItems&gt;</h4>
+<p>Supported in VSI 3.0 and later. IndexListItems is used to iterate over an array like structure when iterating over the array requires some manipulation of the index. For example</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;Expand&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;IndexListItems</span> <span class="na">Condition=</span><span class="s">&quot;m_Size != 0&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Size&gt;</span>m_Size<span class="nt">&lt;/Size&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ValueNode&gt;</span>m_Array[($i + m_Start)]<span class="nt">&lt;/ValueNode&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/IndexListItems&gt;</span>
+<span class="nt">&lt;/Expand&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_233885049_h4_7">&lt;ExpandedItem&gt;</h4>
+<p>Supported in VSI 4.0 and later. ExpandedItem is used to display child expansions at the current expand level. This can be used to to display an entire child structure as if its members are direct children of the type. For &nbsp;example, to display all of the items within the m_Array child as direct children of the NatVis type:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;Expand&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ExpandedItem&gt;</span>m_Array<span class="nt">&lt;/ExpandedItem&gt;</span>
+<span class="nt">&lt;/Expand&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_233885049_h4_8">&lt;CustomListItems&gt;</h4>
+<p>Supported in VSI 6.1 and later. CustomListItems can be used to visualize complex types, which are not suitable for simpler visualizers such as ArrayItems. It can be used like a general programming language. For example</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cm">&lt;!--Fibonacci Sequence--&gt;</span>
+<span class="nt">&lt;Expand&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;CustomListItems&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Variable</span> <span class="na">Name=</span><span class="s">&quot;CurIter&quot;</span> <span class="na">InitialValue=</span><span class="s">&quot;0&quot;</span><span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Variable</span> <span class="na">Name=</span><span class="s">&quot;F0&quot;</span> <span class="na">InitialValue=</span><span class="s">&quot;1&quot;</span><span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Variable</span> <span class="na">Name=</span><span class="s">&quot;F1&quot;</span> <span class="na">InitialValue=</span><span class="s">&quot;1&quot;</span><span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Variable</span> <span class="na">Name=</span><span class="s">&quot;CurFib&quot;</span> <span class="na">InitialValue=</span><span class="s">&quot;0&quot;</span><span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Loop</span> <span class="na">Condition=</span><span class="s">&quot;CurIter &amp;lt; m_Iterations&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;If</span> <span class="na">Condition=</span><span class="s">&quot;CurIter == 0 || CurIter == 1&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Item&gt;</span>1<span class="nt">&lt;/Item&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/If&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Else&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Exec&gt;</span>CurFib = F0 + F1<span class="nt">&lt;/Exec&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Item&gt;</span>CurFib<span class="nt">&lt;/Item&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Exec&gt;</span>F0 = F1<span class="nt">&lt;/Exec&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Exec&gt;</span>F1 = CurFib<span class="nt">&lt;/Exec&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Else&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Exec&gt;</span>++CurIter<span class="nt">&lt;/Exec&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Loop&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/CustomListItems&gt;</span>
+<span class="nt">&lt;/Expand&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following nodes are supported:</p>
+<ul>
+  <li>&lt;Variable&gt; - Creates a new variable, with required Name and InitialValue attributes. Variables can be referenced in other nodes.</li>
+  <li>&lt;Size&gt;&nbsp; &nbsp; &nbsp; - Caps the max number of children in the visualizer to the value provided.</li>
+  <li>&lt;Loop&gt;&nbsp; &nbsp; &nbsp;- Loops over sub-nodes until either Condition attribute evaluates to false, or a Break node is encountered.</li>
+  <li>&lt;Break&gt;&nbsp; &nbsp; - Breaks out of the outer loop. If not within a loop, exits the CustomListItems node.</li>
+  <li>&lt;If&gt;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; - Can contain sub-nodes, which are only evaluated if the node's Condition attribute evaluates to true.</li>
+  <li>&lt;Elseif&gt;&nbsp; &nbsp; - Similar to If node, can be used to form an If, Elseif, Else chain.</li>
+  <li>&lt;Else&gt;&nbsp; &nbsp; &nbsp; - Similar to If node, can be used to form an If, Elseif, Else chain.</li>
+  <li>&lt;Exec&gt;&nbsp; &nbsp; &nbsp;- Evaluates the provided expression, which may have side effects on Variables.</li>
+  <li>&lt;Item&gt;&nbsp; &nbsp; &nbsp; - Creates an child that will be visible in the Watch, Locals, and Autos windows. Name attribute is optional, if not provided, it will default to the child's index in the CustomListItems node.</li>
+</ul>
+<h2 id="Anchor_233885049_h2_4">Attributes</h2>
+<h3 id="Anchor_233885049_h3_16">Name=</h3>
+<p>Supported in VSI 3.0 and later. Name is supported and is required for the Item node. It is used to define the display name used in the &ldquo;Name&rdquo; column in the variable windows. For example:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;Item</span> <span class="na">Name=</span><span class="s">&quot;[Size]&quot;</span><span class="nt">&gt;</span>m_Size<span class="nt">&lt;/Item&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_233885049_h3_17">Condition=</h3>
+<p>Supported in VSI 3.0 and later. Condition is used to determine whether the node should be evaluated based on a boolean expression. Multiple DisplayStrings can be defined, each with a different Condition expression. For example:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;DisplayString</span> <span class="na">Condition=</span><span class="s">&quot;m_pID == 0&quot;</span><span class="nt">&gt;</span>Invalid ID<span class="nt">&lt;/DisplayString&gt;</span>
+<span class="nt">&lt;DisplayString</span> <span class="na">Condition=</span><span class="s">&quot;m_pID != 0&quot;</span><span class="nt">&gt;</span>Valid ID<span class="nt">&lt;/DisplayString&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_233885049_h3_18">Optional=</h3>
+<p>Supported in VSI 3.0 and later (disabled in VSI 6.1 and VSI 6.2). Optional is used to skip an Item node in the event that the specified node fails to evaluate. For example:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;Item</span> <span class="na">Name=</span><span class="s">&quot;[Name]&quot;</span> <span class="na">Optional=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>m_pID-<span class="ni">&amp;gt;</span>m_Name<span class="nt">&lt;/Item&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_233885049_h3_19">Priority=</h3>
+<p>Not supported. Priority is used to specify when this visualization should be used in the event multiple definitions are found. Note, this attribute is only applicable to the top level Type node.</p>
+<h3 id="Anchor_233885049_h3_20">IncludeView=, ExcludeView=</h3>
+<p>Not supported. IncludeView and ExcludeView are used to include or exclude items from the NatVis visualization. For example, if &ldquo;MyVar,view(simple)&rdquo; is entered in the Watch window, the resulting variable would display the MyVar variable as defined by the NatVis definition, add any NatVis nodes flagged with IncludeView=&rdquo;simple&rdquo;, and exclude any nodes flagged with ExcludeView=&rdquo;simple&rdquo;.</p>
+<h3 id="Anchor_233885049_h3_21">Inheritable=</h3>
+<p>Not supported. The NatVis framework will use the defined visualization for a given type, including all derived types that inherit from that type. Inheritable is used to prevent derived types from using a parent NatVis definition. Note that if a derived type has a defined visualization, the framework will use that defined visualization regardless of this attribute. This attribute is only needed when the parent visualization should not be used for any derived types, including types that do not have any visualization defined.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__Result', '../../../Api/HtmlNX/classnn_1_1_result.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

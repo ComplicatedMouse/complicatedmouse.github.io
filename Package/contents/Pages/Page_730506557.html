@@ -1,0 +1,297 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Socket Statistics Overlay Meters | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Socket Statistics Overlay Meters -->
+<div class="pagetitle" id="PageId_730506557">Socket Statistics Overlay Meters</div>
+<div class="text_separate">
+<h2 id="Anchor_730506557_h2_1">Overview</h2>
+<p>The socket statistics DevMenuOverlay tool displays statistics about your application and the system's network usage. The meter features three different view modes that display information focused on performance, memory, and network health, respectively. In order for your application statistics to be visible to the tool you must register it by calling <span class="ApiLink_nn__socket__RegisterForStatistics">nn::socket::RegisterForStatistics</span>(). Available on NX Addon 10.0.0 and later.</p>
+<h2 id="Anchor_730506557_h2_2">How to use</h2>
+<h4 style="margin-left: 0.6em;" id="Anchor_730506557_h4_1">How to turn on the statistics overlay:</h4>
+<ol>
+  <li>Ensure that your program has initialized the socket library by calling &quot;<span class="ApiLink_nn__socket__Initialize">nn::socket::Initialize</span>()&quot;</li>
+  <li>Ensure that your program is registered by calling &quot;<span class="ApiLink_nn__socket__RegisterForStatistics">nn::socket::RegisterForStatistics</span>()&quot;.</li>
+  <li>Turn on socket statistics display by holding the &quot;home button&quot;&rarr;QuickMenu&rarr;Debug...&rarr;<strong>[<span style="color: rgb(0,51,102);">&radic;</span>]</strong>SocketStaistics&rarr;OK</li>
+  <li>Run your program.&nbsp;</li>
+</ol>
+<h4 style="margin-left: 0.6em;" id="Anchor_730506557_h4_2">How to configure the display:</h4>
+<p>The DebugMenu SocketStatistics has options for Application selection, Display Channel, and View Mode.</p>
+<ul>
+  <li>To select between applications and Display Channels use the up and down arrow buttons to toggle between the options. For the view mode select the option from the drop-down menu.</li>
+  <li>
+    <strong>Application Selection</strong>:<ul><li>Select a registered application&nbsp;on the system.&nbsp;Typically, only your application is registered in the system.</li></ul></li>
+  <li>
+    <strong>Display Channel options</strong>&nbsp;(aka Channel):<ul><li>Single: channel&nbsp;<strong>0-31</strong>&nbsp;will display socket with correlating socket descriptor and peer IP in the view.</li><li>App: Shows the&nbsp;<strong>sum</strong>&nbsp;of all open sockets owned by the application.</li><li>System: Shows system-wide&nbsp;(<strong>Sys</strong>) usage of all open sockets. (<span style="color: rgb(255,0,0);">Memory Usage View Mode not supported</span>)</li></ul></li>
+  <li>
+    <strong>View Mode options</strong>:<ul><li><strong>Performance</strong>&nbsp;View: Shows the bandwidth (bytes), packet rate (packets/second), and round trip time (ms) if the socket is has a peer.</li><li><strong>Memory Usage</strong>&nbsp;View: Shows the memory usage of the send and receive buffers as well as the dns resolver memory usage.</li><li><strong>Health</strong>&nbsp;View:&nbsp;Shows connection statistics on received udp packets that were dropped and tcp packets retransmitted.</li></ul></li>
+</ul>
+<h2 id="Anchor_730506557_h2_3">Socket Statistics Overlay Meter Layout</h2>
+<h3 style="margin-left: 0.5em;" id="Anchor_730506557_h3_1">Network performance meter view mode details</h3>
+<p>
+  <strong>Legend</strong>:</p>
+<ul>
+  <li>
+    <strong>RTT:</strong>&nbsp;Round Trip Time</li>
+</ul>
+<p>
+  <strong>Title</strong>: Shows the selected application name and the current download and upload rates for the application. (updated at 2 fps).<strong><br /></strong></p>
+<p>
+  <strong>Graphs 1,2,3:</strong>
+</p>
+<ul>
+  <li>
+    <strong>Bandwidth</strong>&nbsp;(Updated at 30 fps):<ul><li>Channel 0-31: Graphs the number of udp&nbsp;<strong>or</strong>&nbsp;tcp bytes sent to and received by the&nbsp;<strong>socket</strong>&nbsp;over ~33ms.</li><li>Channel App: Graphs the number of udp&nbsp;<strong>and</strong>&nbsp;tcp bytes sent to and received by the <strong>application</strong>&nbsp;over ~33ms.</li><li>Channel Sys: Graphs the number of udp&nbsp;<strong>and</strong>&nbsp;tcp bytes sent to and received by the&nbsp;<strong>system</strong>&nbsp;over ~33ms.</li></ul></li>
+  <li>
+    <strong>Packet Rate</strong>&nbsp;(Updated at 1 fps)<ul><li>Channel 0-31: Graphs the number of udp&nbsp;<strong>or</strong>&nbsp;tcp packets sent to and received by the&nbsp;<strong>socket</strong>&nbsp;over 1 second.</li><li>Channel App: Graphs the number of udp&nbsp;<strong>and</strong>&nbsp;tcp packets sent to and received by the&nbsp;<strong>application</strong>&nbsp;over 1 second.</li><li>Channel&nbsp;Sys: Graphs the number of udp&nbsp;<strong>and</strong>&nbsp;tcp packets sent to and received by the&nbsp;<strong>system</strong>&nbsp;over 1 second.</li></ul></li>
+  <li>
+    <strong>Round Trip Time</strong>&nbsp;(RTT, Updated at ~2 fps)<ul><li>Channel 0-31, App, System: Graphs the RTT of packets to the socket's peer address.</li><li>Channel App, Sys: App and Sys modes default to Channel 0's connection when selected.</li><li>RTT is calculated via ICMP echo requests and may update at a rate &lt;2 fps depending on the connection to the peer.</li><li>RTT cannot be calculated if the socket is not connected to a peer. The graph will display &quot;RTT NA&quot; above the graph if the selected socket is not connected.</li></ul></li>
+</ul>
+<p>
+  <strong>Text</strong>:</p>
+<ul>
+  <li>Channel Display&nbsp;Information: Text which indicates what Channel Display is active and the current state.</li>
+  <li>&quot;Peak[rcv,snd]: [<strong>PeakBytesReceivedOver33ms</strong>, <strong>PeakBytesSentOver33ms</strong>] KB/MB [<strong>PeakPacketsReceivedOver1Second</strong>, <strong>PeakPacketsSentOver1Second</strong>] pkt/s&quot;<ul><li>PeakBytesReceivedOver33ms: Peak bytes received over ~33ms</li><li>PeakBytesSentOver33ms: Peak bytes sent over ~33ms</li><li>PeakPacketsReceivedOver1Second: Peak packets received over 1 second</li><li>PeakPacketsSentOver1Second: Peak packets sent over 1 second</li></ul></li>
+  <li>&quot;RTT[min,pk]: [<strong>MinimumRTT</strong>,&nbsp;<strong>PeakRTT</strong>] ms.&quot;<ul><li>MinimumRTT: The minimum RTT on the selected display since the display channel became active.</li><li>PeakRTT: The peak RTT on the selected display since the display channel became active.</li></ul></li>
+</ul>
+<h3 style="margin-left: 0.5em;" id="Anchor_730506557_h3_2">Socket library memory meter view mode details</h3>
+<p>
+  <strong>Legend</strong>:</p>
+<ul>
+  <li>
+    <strong>Memory Overhead</strong>: The socket library uses fixed-sized buffers. Network messages that may not efficiently use the fixed-sized buffers.</li>
+  <li>
+    <strong>Efficiency Factor</strong>: When you call &quot;<span class="ApiLink_nn__socket__Initialize">nn::socket::Initialize</span>(config)&quot; the efficiency factor is one of the parameters&nbsp;that affects&nbsp;memory usage of the socket buffers.</li>
+  <li>
+    <strong>So_SndBuf</strong>: Directly correlates to&nbsp;<span style="color: rgb(255,153,0);"><strong>sb_size</strong>&nbsp;</span>and defaults to config type passed in Initialize. This size may be changed dynamically using &quot;<span class="ApiLink_nn__socket__SetSockOpt">nn::socket::SetSockOpt</span>&quot;.</li>
+  <li>
+    <strong>So_RcvBuf</strong>:&nbsp;Directly correlates to&nbsp;<span style="color: rgb(255,153,0);"><strong>sb_size</strong>&nbsp;</span>and defaults to config type&nbsp;passed in Initialize. This size may be changed dynamically using &quot;<span class="ApiLink_nn__socket__SetSockOpt">nn::socket::SetSockOpt</span>&quot;.</li>
+  <li>
+    <span style="color: rgb(255,0,255);">
+      <strong>mb_pool</strong>:&nbsp;memory buffer pool</span>
+    <ul>
+      <li>Send, Receive = Efficiency Factor *&nbsp;<span style="color: rgb(255,153,0);"><strong>sb_size</strong></span>.</li>
+    </ul>
+  </li>
+  <li>
+    <span style="color: rgb(51,204,204);">
+      <strong>mb_used</strong>:&nbsp;memory buffer used</span>
+    <ul>
+      <li>Send, Receive =&nbsp;<strong><span style="color: rgb(51,153,102);">sb_data</span>&nbsp;</strong>+ Memory Overhead</li>
+      <li>
+        <strong>
+          <span style="color: rgb(51,204,204);">mb_used</span>&nbsp;</strong>may never exceed mp_pool.</li>
+      <li>Note: (UDP ONLY) If the receive buffer is full (ie.&nbsp;<strong><span style="color: rgb(51,204,204);">mb_used</span>&nbsp;</strong>is nearing&nbsp;<strong><span style="color: rgb(255,0,255);">mb_pool</span></strong>) all subsequent packets will be dropped.</li>
+    </ul>
+  </li>
+  <li>
+    <span style="color: rgb(255,153,0);">
+      <strong>sb_size</strong>:&nbsp;socket buffer size</span>
+    <ul>
+      <li>Send = So_SndBuf</li>
+      <li>Receive = So_RcvBuf</li>
+    </ul>
+  </li>
+  <li>
+    <span style="color: rgb(51,153,102);">
+      <strong>sb_data</strong>:&nbsp;socket buffer data</span>
+    <ul>
+      <li>Send, Receive = The count of actual data bytes in the socket buffer, not accounting memory buffer overhead.</li>
+      <li>
+        <strong>
+          <span style="color: rgb(51,153,102);">sb_data&nbsp;</span>
+        </strong>may never exceed&nbsp;<span style="color: rgb(255,153,0);"><strong>sb_size</strong></span>.</li>
+      <li>Note: (UDP ONLY) If the receive buffer is full (ie.&nbsp;<span style="color: rgb(51,153,102);"><strong>sb_data</strong>&nbsp;</span>is nearing&nbsp;<span style="color: rgb(255,153,0);"><strong>sb_size</strong></span>) all subsequent&nbsp;packets will be dropped.</li>
+    </ul>
+  </li>
+</ul>
+<p>
+  <strong>
+    <br />
+  </strong>
+</p>
+<p>
+  <strong>Title:</strong>&nbsp;Shows the selected application&nbsp;name and the current (sum of&nbsp;<strong><span style="color: rgb(51,204,204);">mb_used</span></strong>) memory out of all memory given to the socket library (updated at 2 fps).</p>
+<p>
+  <strong>Graph 1,2</strong>:</p>
+<ul>
+  <li>
+    <strong>Socket buffer Send and Receive</strong>&nbsp;(Updated at 30 fps)<ul><li>Channel 0-31: Graphs the&nbsp;<span style="color: rgb(255,0,255);"><strong>mb_pool</strong></span>,&nbsp;<span style="color: rgb(51,204,204);"><strong>mb_used</strong></span>,&nbsp;<span style="color: rgb(255,153,0);"><strong>sb_size</strong></span>, and&nbsp;<strong><span style="color: rgb(51,153,102);">sb_data</span>&nbsp;</strong>for the udp&nbsp;<strong>or</strong>&nbsp;tcp socket over ~33 ms intervals.</li><li>Channel App: Graphs the&nbsp;<span style="color: rgb(255,0,255);"><strong>mb_pool</strong></span>,&nbsp;<span style="color: rgb(51,204,204);"><strong>mb_used</strong></span>,&nbsp;<span style="color: rgb(255,153,0);"><strong>sb_size</strong></span>, and&nbsp;<strong><span style="color: rgb(51,153,102);">sb_data</span>&nbsp;</strong>as a sum of all live udp&nbsp;<strong>and</strong>&nbsp;tcp socket over ~33 ms&nbsp;intervals.</li><li>Channel Sys:&nbsp;<span style="color: rgb(255,0,0);">Not supported</span></li></ul></li>
+</ul>
+<p>
+  <strong>Text</strong>:</p>
+<ul>
+  <li>Channel Display&nbsp;Information: Text which indicates what Channel Display is active and the current state.</li>
+  <li>&quot;Live fd[pk]: <strong>LiveSockets</strong>[<strong>LiveSocketsPeak</strong>]. Sum mb_pool pk: <strong>SocketMbPoolPeak</strong>&nbsp;KB&quot;<br /><ul><li>LiveSockets: The current number of live sockets opened by the application.</li><li>LiveSocketsPeak: The peak number of sockets open since initialize of the socket library.</li><li>SocketMbPoolPeak: The peak number of KBs allocated to socket buffers opened by the application since initialize of the socket library.</li></ul></li>
+  <li>&quot;Mem over&nbsp;[rcv,snd]: [<strong>ReceiveSocketBufferMemoryOverhead</strong>,&nbsp;<strong>SendSocketBufferMemoryOverhead&nbsp;</strong>KB]&quot;<br /><ul><li>ReceiveSocketBufferMemoryOverhead: The current number of KB in the sockets receive buffer's&nbsp;<span style="color: rgb(255,0,255);"><strong>mb_pool</strong>&nbsp;</span>lost to internal overhead.</li><li>SendSocketBufferMemoryOverhead: The current number of KB in the sockets send buffer's&nbsp;<span style="color: rgb(255,0,255);"><strong>mb_pool</strong>&nbsp;</span>lost to&nbsp;internal overhead.</li></ul></li>
+</ul>
+<p>
+  <strong>Graph 3</strong>:</p>
+<ul>
+  <li>
+    <strong>DNS Resolver Memory</strong>&nbsp;(Updated at 2 fps)<ul><li>Channel 0-31, App: Shows the registered applications' memory used<ul><li><strong><span style="color: rgb(255,0,255);">avail</span></strong>: Total memory available to the dns resolver.</li><li><strong><span style="color: rgb(51,153,102);">used</span></strong>(<span style="color: rgb(255,153,0);"><strong>pk</strong></span>):&nbsp;<strong><span style="color: rgb(51,153,102);">used</span></strong>: Current memory used by the dns resolver.&nbsp;<strong><span style="color: rgb(255,153,0);">pk</span></strong>: Peak memory used since initialize of the socket library.</li></ul></li><li>Channel Sys:&nbsp;<span style="color: rgb(255,0,0);">Not supported</span></li></ul></li>
+</ul>
+<p>
+  <strong>Additional Notes</strong>:</p>
+<ul>
+  <li>(TCP ONLY)&nbsp;If you have very small send and/or receive buffer and the connection is very poor the tcp window size will also be small which can inhibit data transfer dramatically as the sender can only attempt to send a window size's worth of packets before receiving acknowledgment packets to continue.</li>
+</ul>
+<h3 style="margin-left: 0.5em;" id="Anchor_730506557_h3_3">Socket health meter view mode details</h3>
+<p>
+  <strong>Legend</strong>:</p>
+<ul>
+  <li>
+    <strong>RTT:</strong>&nbsp;Round Trip Time</li>
+  <li>
+    <strong>Udp drop</strong>: A udp socket may drop a received packet if there is no room in the receive buffer to store it before it is read by the application. Drops observed in software only.</li>
+  <li>
+    <strong>Tcp&nbsp;re-transmit</strong>: A tcp socket may re-transmit any given packet multiple times so long as it does not receive an acknowledgment&nbsp;packet from the peer confirming the packet was successfully received.</li>
+</ul>
+<p>
+  <strong>Title</strong>: Shows the selected application&nbsp;name<strong><br /></strong></p>
+<p>
+  <strong>Graphs 1,2:</strong>
+</p>
+<ul>
+  <li>
+    <strong>Bandwidth dropped/re-transmitted</strong>&nbsp;(Updated at 30 fps):<ul><li>Channel 0-31: Graphs the number of udp bytes dropped by the receive buffer&nbsp;<strong>or</strong>&nbsp;tcp bytes re-transmitted to the peer by the&nbsp;<strong>socket</strong>&nbsp;over ~33ms.</li><li>Channel App: Graphs the number of udp bytes dropped by the receive buffer&nbsp;<strong>and</strong>&nbsp;tcp bytes re-transmitted to the peer by the&nbsp;<strong>application&nbsp;</strong>over ~33ms.</li><li>Channel Sys:&nbsp;Graphs the number of udp bytes dropped by the receive buffer&nbsp;<strong>and&nbsp;</strong>tcp bytes re-transmitted to the peer by the&nbsp;<strong>system</strong>&nbsp;over ~33ms.</li></ul></li>
+  <li>
+    <strong>Packet rate dropped/re-transmitted&nbsp;</strong>&nbsp;(Updated at 1 fps)<ul><li>Channel 0-31: Graphs the number of udp packets dropped by the receive buffer&nbsp;<strong>or</strong>&nbsp;tcp packets retransmitted to the peer by the&nbsp;<strong>socket</strong>&nbsp;over 1 second.</li><li>Channel App:&nbsp;Graphs the number of udp packets dropped by the receive buffer&nbsp;<strong>and</strong>&nbsp;tcp packets retransmitted to the peer by the&nbsp;<strong>application</strong>&nbsp;over 1 second.</li><li>Channel&nbsp;Sys:&nbsp;Graphs the number of udp packets dropped by the receive buffer&nbsp;<strong>and</strong>&nbsp;tcp packets retransmitted to the peer by the&nbsp;<strong>system</strong>&nbsp;over 1 second.</li></ul></li>
+</ul>
+<p>
+  <strong>Text</strong>:</p>
+<ul>
+  <li>Channel Display&nbsp;Information: Text which indicates what Channel Display is active and the current state.</li>
+  <li>&quot;Live fd[pk]: <strong>LiveSockets</strong>[<strong>LiveSocketsPeak</strong>]. RTT[min,ave,pk]: [<strong>MinimumRTT</strong>, <strong>AverageRTT</strong>, <strong>PeakRTT</strong>] ms&quot;<br /><ul><li>LiveSockets: The current number of live sockets opened by the application.</li><li>LiveSocketsPeak: The peak number of sockets open since initialize of the socket library.</li><li>MinimumRTT: The minimum RTT on the selected display since the display channel became active.</li><li>AverageRTT: The average RTT on the selected display over the last ~2 seconds.</li><li>PeakRTT: The peak RTT on the selected display since the display channel became active.</li></ul></li>
+  <li>&quot;Socket buffer mem full [rcv,snd]: [<strong>ReceiveBufferPercentFull</strong>%,&nbsp;<strong>SendBufferPercentFull</strong>%]&quot;<br /><ul><li>ReceiveBufferPercentFull: An approximation for how much space is used in the socket's receive buffer</li><li>SendBufferPercentFull:&nbsp;An approximation for how much space is used in the socket's send buffer</li></ul></li>
+</ul>
+<p>
+  <strong>Additional Notes</strong>:</p>
+<ul>
+  <li>
+    <strong>(TCP ONLY)</strong>: A poor connection in which a sizable number of packets may be lost in transmitting may benefit from a large send and receive buffers. This improved the window size and allows the sender to send up to the last known window size allowing for wider stream reconstruction by the peer.</li>
+</ul>
+<h2 id="Anchor_730506557_h2_4">Socket Statistics Overlay Sample Code</h2>
+<h3 style="margin-left: 0.5em;" id="Anchor_730506557_h3_4">Overview</h3>
+<p>The Socket Statistics Overlay sample is a simple server-client connection which transfers data from the server to the client. While the sample runs you may look at the socket statistics tools to see how certain types of unhealthy and normal behavior appear in the graphs.</p>
+<h3 style="margin-left: 0.5em;" id="Anchor_730506557_h3_5">Building the sample</h3>
+<p>The sample program may be compiled for windows or NX. The socket statistics are only visible on NX side of the connection. If you only have 1 device you may run the client or server on the NX device to see its statistics and then swap to see the other's behavior.&nbsp;If you want to see the behavior of both the server and client at the same time you will need 2 NX devices; running one as a server and the other as a client.</p>
+<h3 style="margin-left: 0.5em;" id="Anchor_730506557_h3_6">Running the sample (SocketStatisticsOverlay)</h3>
+<p>Both server and client use the same&nbsp;sample program and it chooses to be the server or client based on its command line arguments.</p>
+<p>Run server: Startup a single server to listen for both tcp and udp client requests. Client requests include: Burst Send request (both udp and tcp), and Hello Server request (udp).&nbsp;</p>
+<ul>
+  <li>Server command-line arguments (both tcp and udp):<strong>&nbsp;&quot;-server&quot;</strong></li>
+  <li>Server function description:<ul><li>Burst Send Request: Requests the server to send back 1 KB messages at a specified rate.</li><li>Hello Server: Reply back with Hello Client message to client.</li></ul></li>
+</ul>
+<p>Run client: Startup a udp&nbsp;<strong>or</strong>&nbsp;tcp client to connect to a server.</p>
+<ul>
+  <li>Udp Client command line arguments:&nbsp;<strong>&quot;-udpClient server=192.168.1.20:22819&quot;</strong></li>
+  <li>Tcp Client command line arguments:&nbsp;<strong>&quot;-tcpClient server=192.168.1.20:15215&quot;</strong></li>
+  <li>Note: You can find the IpAddress and port to pass the client as a command line argument from server program's print output.<ul><li><p>Example Log: &quot;<strong>Udp Server</strong>: Listening for incoming messages on fd 1 at:&nbsp;<strong>192.168.1.20:22819</strong>&quot;</p></li><li><p>Example Log: &quot;<strong>Tcp Server</strong>: Listening for incoming messages on fd 0 at:&nbsp;<strong>192.168.1.20:15215</strong>&quot;</p></li></ul></li>
+  <li>Client function description:<ul><li>Changes send and receive socket buffer size before each burst send requests.</li><li>Connects to the server and sends out 2 burst send requests and receives the messages in sequence.<ul><li>The first burst send request shows a build-up on the client side whereby the client is not reading data quickly enough. This causes a buildup of information on the client side's receive buffer.<ul><li>TCP only: The sender will only send if there is widow size can fit the transmission so any sends will backup and fill the sender's send buffer once the receiver's receive buffer is full. When the sender's buffer is full, Send() will block if it is blocking I/O. This effect is visible in the Performance and Memory Usage View Modes.</li><li>UDP only: The build-up in the client's receive buffer will cause packets to drop in software. This effect is visible in the Performance, Memory Usage, and Health View Mode.</li></ul></li><li>The second burst send request shows a healthy connection whereby the client is reading slightly faster than the server is sending. Because the client is reading slightly faster then the sender, the client doesn't have any buildup which avoids the issues&nbsp;</li></ul></li></ul></li>
+</ul>
+<p>Open the socket statistics DevMenuOverlay by holding the &quot;Home button&quot;&rarr;QuickMenu&rarr;Debug...&rarr;SocketStaistics&rarr; OK to enable the display.</p>
+<p>Note: There are is also some printed logs from the client and server to indicate what is being seen in the socket statistics graphs that should give you a head start in understanding the behavior of the sample and how it relates to the meter graphs.</p>
+<h2 id="Anchor_730506557_h2_5">Frequently Asked Questions (FAQ)</h2>
+<p>What are the expected memory and run-time costs of using the socket statistics display?</p>
+<ul>
+  <li>StatisticsMemory struct: 8 KB of memory.</li>
+  <li>Registration resources:&nbsp;1 Thread added</li>
+  <li>Runtime overhead while statistics display is not open: None</li>
+  <li>Runtime overhead while&nbsp;statistics&nbsp;display is running: 2-5%.&nbsp;</li>
+  <li>When the system is under high load you might notice that the statistics graphs update at lower than 30 fps or appear to stutter/freeze for a few hundred milliseconds. This is because other aspects of the system take priority over the devOverlayDisplay and may prevent it from updating when busy.</li>
+</ul>
+<p>How accurate are the socket statistics display round trip time (RTT, Ping) readings?</p>
+<ul>
+  <li>The latency readings are gotten by sending an ICMP echo request (ping) 2 times per second.</li>
+  <li>ICMP requests may be processed more quickly or slowly than UDP, TCP, or SSL/TSL traffic depending on the peer connection. As a result, the latency readings may not match your protocol-specific latency.&nbsp;</li>
+  <li>If you want more accurate RTT and are using TCP, please see&nbsp;&quot;<span class="ApiLink_nn__socket__GetSockOpt">nn::socket::GetSockOpt</span>(socketDescriptor, <span class="ApiLink_nn__socket__Level__Sol_Tcp">nn::socket::Level::Sol_Tcp</span>, <span class="ApiLink_nn__socket__Option__Tcp_Info">nn::socket::Option::Tcp_Info</span>, output, len)&quot; for a TCP specific RTT.</li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__socket__RegisterForStatistics', '../../../Api/HtmlNX/namespacenn_1_1socket.html#ab7cfb63b9f078a668a1522f98948f64b' )
+SetUrl( 'ApiLink_nn__socket__Initialize', '../../../Api/HtmlNX/namespacenn_1_1socket.html#adacc3405184e8f28fb630745b9f43db0' )
+SetUrl( 'ApiLink_nn__socket__SetSockOpt', '../../../Api/HtmlNX/namespacenn_1_1socket.html#a92711556ee5f0122c71d8aedfe8399d7' )
+SetUrl( 'ApiLink_nn__socket__GetSockOpt', '../../../Api/HtmlNX/namespacenn_1_1socket.html#ad51ebcc4967c212c6922fe29664d49df' )
+SetUrl( 'ApiLink_nn__socket__Level__Sol_Tcp', '../../../Api/HtmlNX/namespacenn_1_1socket.html#a8f9b7859b60d1ee546e472a7e2a9beaaa07877ef6eba5cd50e7fd156ab490e25e' )
+SetUrl( 'ApiLink_nn__socket__Option__Tcp_Info', '../../../Api/HtmlNX/namespacenn_1_1socket.html#a9706518d71ec37371e9aa3ae9a2fa92ca702daca3186e133db09b35f6f08dd7a0' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

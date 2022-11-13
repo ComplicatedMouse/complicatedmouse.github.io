@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Full Integration Setup | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Full Integration Setup -->
+<div class="pagetitle" id="PageId_685594274">Full Integration Setup</div>
+<div class="text_separate">
+<p>This section shows how to integrate the Nintendo NX CPU Profiler into your game to leverage deeper data collection and analysis.</p>
+<p>If you are a Unity developer, this section does not apply, so please see the <a href="../Pages/Page_693933925.html">Unity Setup</a> section.</p>
+<p>
+  <br />
+</p>
+<p>Full integration unlocks:</p>
+<ul>
+  <li>The ability to capture and analyze thread synchronization.</li>
+  <li>The ability to instrument individual functions for precision measurement.</li>
+  <li>The ability to analyze CPU and GPU events in relation to each other.</li>
+  <li>The ability to log timings/counts around particular sections of code.</li>
+  <li>The ability to log additional data, such as floats over time.</li>
+  <li>The ability to profile on EDEV development kits (not recommended).</li>
+</ul>
+<h1 id="Anchor_685594274_h1_1">Setup</h1>
+<p>The full integration setup is fairly straightforward and fast to complete.</p>
+<h2 id="Anchor_685594274_h2_1">1. Link against the profiler library</h2>
+<p>Perform the following for all build configurations (Debug, Develop, and Release):</p>
+<ol>
+  <li>
+    <p>Right click on your project and click &quot;Properties&quot;.</p>
+  </li>
+  <li>
+    <p>Under &quot;Configuration Properties&quot;, go to &quot;Linker&quot;,&nbsp;and then go to &quot;Input&quot;.</p>
+  </li>
+  <li>
+    <p>In the &quot;Additional Dependencies&quot; field, add &quot;libnn_profiler.a;&quot; to the list of libraries.</p>
+  </li>
+</ol>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_804026171/813981886.png" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_685594274_h2_2">2. Initialize the profiler with a memory buffer</h2>
+<ol>
+  <li>
+    <p>Find your application initialization. Include the profiler library:</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>#include &lt;nn/profiler.h&gt;</pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Allocate a memory buffer for the profiler to use.&nbsp;This buffer must be at least <span class="ApiLink_nn__profiler__MinimumBufferSize">nn::profiler::MinimumBufferSize</span> bytes.&nbsp;The following line would accomplish this:</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>void* profBuffer = (void*) new char[nn::profiler::MinimumBufferSize];</pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Initialize the profiler with <span class="ApiLink_nn__profiler__Initialize">nn::profiler::Initialize</span>().&nbsp;The first argument is the buffer. The second argument is the buffer size.&nbsp;The following line would accomplish this:</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>nn::profiler::Initialize(profBuffer, nn::profiler::MinimumBufferSize);</pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>
+      <strong>IMPORTANT:</strong>&nbsp;If you initialize HTCS, ensure that you do so before&nbsp;initializing the profiler.</p>
+  </li>
+</ol>
+<h2 id="Anchor_685594274_h2_3">3. Log the framerate (optional, but recommended)</h2>
+<p>This step allows a more accurate data visualization within the profiler by graphing data against your actual frames.</p>
+<ol>
+  <li>
+    <p>Find your main rendering loop. Include the profiler library:</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>#include &lt;nn/profiler.h&gt;</pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Inside the main rendering loop, at the top of the loop, insert the line:</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>nn::profiler::RecordHeartbeat(nn::profiler::Heartbeats_Main);</pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_685594274_h2_4">4. Enable Graphics Tracing (optional, but recommended)</h2>
+<p>This step enables GPU data to be recorded along with CPU data (to collect the GPU data, enable the&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981675.png" width="20" class="embedded-image" /></span>&nbsp;<strong>Graphics</strong>&nbsp;button on the&nbsp;<strong>Sampled Profile</strong>&nbsp;tab or&nbsp;<strong>Instrumented Profile</strong>&nbsp;tab).</p>
+<p>Before you initialize the profiler with <span class="ApiLink_nn__profiler__Initialize">nn::profiler::Initialize</span>() and before NVN functions are loaded with either the nvnLoadCProcs() or nvnLoadCPPProcs() functions, call:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::profiler::InstallGraphicsHooks();    // Can be called safely from a static initializer</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Calling <span class="ApiLink_nn__profiler__InstallGraphicsHooks">nn::profiler::InstallGraphicsHooks</span>() will automatically reserve 4MB of the your profiling buffer for graphics data (which is 64MB by default). For this reason, you might wish to only enable GPU Tracing when you are interested in collecting that data.</p>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Ideally, ensure that <span class="ApiLink_nn__profiler__Initialize">nn::profiler::Initialize</span>() is called before any NVN Queues are initialized.</p>
+    <p>If this is not possible, call <span class="ApiLink_nn__profiler__SetQueuePerFrameOperationEstimates">nn::profiler::SetQueuePerFrameOperationEstimates</span>() on the queue immediately following the call to <span class="ApiLink_nn__profiler__Initialize">nn::profiler::Initialize</span>().</p>
+  </div>
+</div>
+<h2 id="Anchor_685594274_h2_5">&nbsp;5. Enable Audio Tracing (optional, but recommended)</h2>
+<p>This step enables AudioRenderer performance metrics to be recorded along with CPU data (to collect the Audio data, enable the&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/898112158.png" width="20" class="embedded-image" /></span>&nbsp;<strong>Audio</strong>&nbsp;button on the&nbsp;<strong>Sampled Profile</strong>&nbsp;tab or&nbsp;<strong>Instrumented Profile</strong>&nbsp;tab).</p>
+<p>There are two steps:</p>
+<ol>
+  <li>Call <span class="ApiLink_nn__profiler__RegisterAudioRenderer">nn::profiler::RegisterAudioRenderer</span>() after opening an AudioRenderer.</li>
+  <li>Call <span class="ApiLink_nn__profiler__RecordAudioRendererPerformance">nn::profiler::RecordAudioRendererPerformance</span>() each audio frame.</li>
+</ol>
+<h1 id="Anchor_685594274_h1_2">Next Steps</h1>
+<ul>
+  <li>Notes on&nbsp;<a href="../Pages/Page_685594300.html">Limitations and Resource Requirements</a>.</li>
+  <li>Advice on settings when you&nbsp;<a href="../Pages/Page_693933941.html">Take a Profile</a>.</li>
+  <li>Guidance to help you&nbsp;<a href="../Pages/Page_693933913.html">Analyze your Profile</a>.</li>
+  <li>Explore targeted ways to use the profiler in&nbsp;<a href="../Pages/Page_712248228.html">Example Workflows</a>.</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__profiler__MinimumBufferSize', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a9bc180dcf49e08d2b3c8f0bb7d8358b6' )
+SetUrl( 'ApiLink_nn__profiler__Initialize', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a1fd4585e5e75647e1cb20bb264f58f6e' )
+SetUrl( 'ApiLink_nn__profiler__InstallGraphicsHooks', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a907804e676e1b37f7e1b62f5bace7992' )
+SetUrl( 'ApiLink_nn__profiler__SetQueuePerFrameOperationEstimates', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a7eba4662b2649f42259c6604171e7425' )
+SetUrl( 'ApiLink_nn__profiler__RegisterAudioRenderer', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a9312a49b962cc1cee3ee4a2be86c21fa' )
+SetUrl( 'ApiLink_nn__profiler__RecordAudioRendererPerformance', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#aaff43cb30e5803f4a44ce4f3a741c300' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

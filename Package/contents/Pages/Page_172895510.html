@@ -1,0 +1,380 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Important Implementation Information (NX Add-On) | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Important Implementation Information (NX Add-On) -->
+<div class="pagetitle" id="PageId_172895510">Important Implementation Information (NX Add-On)</div>
+<div class="text_separate">
+<!--Remove-->
+<p>
+  <br />
+</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_172895510_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_172895510_h1_2">Notes About Implementation</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_172895510_h2_1">Structural Alignment</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_172895510_h1_3">Notes About Performance</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_172895510_h2_2">Differences in Memory Access Speeds for Each Start When ASLR Is Enabled</a>
+      </li>
+      <li>
+        <a href="#Anchor_172895510_h2_3">Effects on Applications With Video Capture Enabled</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_172895510_h3_1">Available Memory</a>
+        </li>
+        <li>
+          <a href="#Anchor_172895510_h3_2">Load on the Application</a>
+        </li>
+        <li>
+          <a href="#Anchor_172895510_h3_3">Handling on the Application Side</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_172895510_h1_4">Important Information About Time</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_172895510_h2_4">A single frame is not always exactly 1/60 of a second. Each library handles time precision differently.</a>
+      </li>
+      <li>
+        <a href="#Anchor_172895510_h2_5">System ticks continue to occur in sleep mode.</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_172895510_h1_5">Important Information About Entering Sleep Mode and Waking Up</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_172895510_h2_6">There are no set times required for entering sleep mode or waking up.</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_172895510_h1_6">Important Information About Docking and Undocking</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_172895510_h2_7">Real-time processing by the system is not ensured when docking and undocking.</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_172895510_h1_7">Important Information About TV Output and the LCD Screen</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_172895510_h2_8">Avoid the prolonged display of unchanging content.</a>
+      </li>
+      <li>
+        <a href="#Anchor_172895510_h2_9">Avoid using effects that make the LCD screen prone to residual images or flickering.</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_172895510_h3_4">Examples of A</a>
+        </li>
+        <li>
+          <a href="#Anchor_172895510_h3_5">Examples of B</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_172895510_h2_10">About HDCP Behavior</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_172895510_h1_1">Overview</h1>
+<p>Applications that use the NX Add-On package are subject to several implementation restrictions and limitations that are inherent to the package.<br />The following restrictions on application implementations are not specific to any particular module or library in the package. </p>
+<h1 id="Anchor_172895510_h1_2">Notes About Implementation</h1>
+<h2 id="Anchor_172895510_h2_1">Structural Alignment</h2>
+<p>Do not change the alignments for the structures and classes provided in the NintendoSDK from their defaults. Behavior is not assured when alignments are changed. One example could be when specifying an alignment size that is different from the default, when using the <code>=fpack-struct=&lt;N&gt;</code> option for the compile option.</p>
+<p>There are no particular restrictions for structures that the application defines on its own. In such cases, do not use the preceding compile option. Use <code>#pragma pack()</code> instead.</p>
+<h1 id="Anchor_172895510_h1_3">Notes About Performance</h1>
+<h2 id="Anchor_172895510_h2_2">Differences in Memory Access Speeds for Each Start When ASLR Is Enabled</h2>
+<p>Hardware specifications result in slight differences for memory access speeds every time an application starts. There are additional variations from SDEV to EDEV. It is sufficient to confirm an application's final testing using EDEV with ASLR enabled.</p>
+<p>Start the application with ASLR disabled when you want to have the same memory access speeds for testing. For more information about disabling ASLR, see <a href="../Pages/Page_92310396.html">Starting and Initializing Programs</a>.</p>
+<h2 id="Anchor_172895510_h2_3">Effects on Applications With Video Capture Enabled</h2>
+<p>Applications are affected in the following ways when video capture is enabled.</p>
+<ul>
+  <li>Amount of memory available to application</li>
+  <li>CPU and GPU resources available to the application</li>
+  <li>Memory bandwidth available to the application</li>
+</ul>
+<p>The video capture feature can be disabled in the NMETA settings.<br />Effects also vary depending on the application platform (NX32 or NX64). <br />The effects of the video capture feature are compiled in this table.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Video Capture Functionality</th>
+      <th>Platform</th>
+      <th>Memory</th>
+      <th>CPU and GPU resources</th>
+      <th>Memory bandwidth</th>
+    </tr>
+    <tr>
+      <td rowspan="2">Enabled (Default)</td>
+      <td>NX64</td>
+      <td class="highlight-red">Decreased by 96 MiB.</td>
+      <td class="highlight-red">Generates a load (see note).</td>
+      <td class="highlight-red">Generates a load.</td>
+    </tr>
+    <tr>
+      <td>NX32</td>
+      <td>Not affected.</td>
+      <td class="highlight-red">Generates a load (see note).</td>
+      <td class="highlight-red">Generates a load.</td>
+    </tr>
+    <tr>
+      <td rowspan="2">While disabled by a function.</td>
+      <td>NX64</td>
+      <td class="highlight-red">Still decreased by 96 MiB.</td>
+      <td>Not affected.</td>
+      <td>Not affected.</td>
+    </tr>
+    <tr>
+      <td>NX32</td>
+      <td>Not affected.</td>
+      <td>Not affected.</td>
+      <td>Not affected.</td>
+    </tr>
+    <tr>
+      <td>Statically disabled in NMETA.</td>
+      <td>NX64, NX32</td>
+      <td>Not affected.</td>
+      <td>Not affected.</td>
+      <td>
+        <p>Not affected.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Note:</strong> The effect on CPU and GPU resources depends largely on how the application was created. For more information, see the following section.</p>
+<h3 id="Anchor_172895510_h3_1">Available Memory</h3>
+<p>When the video capture feature is enabled in an application on the NX64 platform, available memory is decreased by 96 MiB.<br />There is no decrease on the NX32 platform.</p>
+<h3 id="Anchor_172895510_h3_2">Load on the Application</h3>
+<p>When an application with video capture enabled is in focus, it puts a load on memory bandwidth.</p>
+<p>The application also uses more CPU and GPU processing time when it is in focus.<br />Video capture occurs once every two vertical blanking intervals, so when the application is operating at 60 fps and processing in every vblank, the processing load varies between odd-numbered frames and even-numbered frames. For applications running at 30 fps, the processing load varies depending on how application processing staggers with the video capture feature.</p>
+<p>The overall result is as follows.</p>
+<ul>
+  <li>For applications running at 60 fps, frames with a large increase in the processing load alternate with frames with a small increase in the processing load.</li>
+  <li>For applications running at 30 fps, one of these two patterns of increased processing load is seen each time the application runs.</li>
+</ul>
+<p>The actual increase in processing speed depends greatly on how the application is built.</p>
+<p>The effect on the memory bandwidth and CPU/GPU processing time was mitigated by improvements added in NX Add-On 6.1.0 (Firmware for NX 6.0.0-1.0). However, the amount of mitigation depends greatly on how the application is implemented.</p>
+<h3 id="Anchor_172895510_h3_3">Handling on the Application Side</h3>
+<p>The video capture feature is enabled by default in applications built with NX Add-On 4.2.0 and later (or in the case of NX Add-On 3.x.x, versions 3.6.0 and later). Note this fact when migrating between NX Add-On versions.<br />In particular, we recommend checking whether there are any problems with decreased availability of memory, and whether there is any effect on scenes that consume large portions of memory bandwidth.</p>
+<p>If there is no surplus memory space or memory bandwidth, or if it difficult to verify performance, you can statically disable video capture in the NMETA file settings.<br />Statically disabling video capture completely eliminates these effects on the application.<br />For more information about how to configure settings, see the Video Capture section in <a href="../Pages/Page_166503043.html">Writing the NMETA File</a>.</p>
+<p>In addition, intervals in which the video capture feature is disabled, can be dynamically set for specific scenes by calling the <code>oe</code> API from the application.<br />While disabled, there is no load on memory bandwidth, but 96 MiB of memory are not returned.<br />For more information about API, see <a href="../Pages/Page_174233259.html">Operating Environment Controls</a>.</p>
+<h1 id="Anchor_172895510_h1_4">Important Information About Time</h1>
+<h2 id="Anchor_172895510_h2_4">A single frame is not always exactly 1/60 of a second. Each library handles time precision differently.</h2>
+<p>Each frame as detected using VSYNC events is not necessarily exactly 1/60 of a second. This may potentially cause non-negligible error in time calculations.<br />In addition, time precision is handled differently in most of the libraries in the SDK. For example, the progression of time as measured using <span class="ApiLink_nn__os__Tick">system ticks</span> is different from the progression of time reported by <span class="ApiLink_nn__time__StandardSteadyClock">nn::time::StandardSteadyClock</span>.</p>
+<p>For this reason, avoid implementations that depend on either of the following conditions being true.</p>
+<ul>
+  <li>After 60 frames have elapsed after a specified amount of time, 1 second will have elapsed (or vice versa)</li>
+  <li>After one second of time as measured using <span class="ApiLink_nn__os__Tick">system ticks</span> has elapsed, one second of time as reported by <span class="ApiLink_nn__time__StandardSteadyClock">nn::time::StandardSteadyClock</span> will have elapsed (or vice versa)</li>
+</ul>
+<h2 id="Anchor_172895510_h2_5">System ticks continue to occur in sleep mode.</h2>
+<p>
+  <span class="ApiLink_nn__os__Tick">System ticks</span> continue to occur while the system is in sleep mode.<br />As a result, from the perspective of an application, the <span class="ApiLink_nn__os__Tick">system tick</span> value obtained when the system wakes up from sleep mode is not continuous with the value from when the system entered sleep mode.</p>
+<h1 id="Anchor_172895510_h1_5">Important Information About Entering Sleep Mode and Waking Up</h1>
+<h2 id="Anchor_172895510_h2_6">There are no set times required for entering sleep mode or waking up.</h2>
+<p>There are no set times required for entering sleep mode or waking because there are variables, including controller or network status, and the firmware version that affect these times.<br />The development hardware tends to require more time to enter sleep mode or wake than the retail unit.</p>
+<h1 id="Anchor_172895510_h1_6">Important Information About Docking and Undocking</h1>
+<h2 id="Anchor_172895510_h2_7">Real-time processing by the system is not ensured when docking and undocking.</h2>
+<p>During docking and undocking, there will be cases where system-dependent function calls will take longer than normal. Not only because the clock may change due to the performance configuration and throttling, but also because the docking and undocking processes are conducted by the system.</p>
+<p>Example: The calls to the <code>nvnQueuePresentTexture()</code> and <code>nvnWindowAcquireTexture()</code> functions can be blocked for anywhere from 200 ms to 300 ms, depending on the timing at which the display is switched when the console is docked and undocked. The application's render loop can stop operating at a set interval and, depending on the implementation of the application, this can result in the sound becoming out of sync and also cause other symptoms. In scenes such as when video clips are playing and the screen and audio must be synchronized for a long time, you must implement the application in a way that explicitly forces synchronization between the screen and the audio, without expecting the render loop to operate at a set interval.</p>
+<h1 id="Anchor_172895510_h1_7">Important Information About TV Output and the LCD Screen</h1>
+<h2 id="Anchor_172895510_h2_8">Avoid the prolonged display of unchanging content.</h2>
+<p>The Nintendo Switch detects inactivity and automatically activates the Screen Burn-In Reduction feature. (<a href="../Pages/Page_198946139.html">Control Over Idle State Actions</a>)</p>
+<p>However, this feature is inactive during normal gameplay and the input of user operations.<br />The upshot is that the following types of fixed, unchanging display may cause screen burn-in, depending on the display method for the Switch OLED model or the TV.</p>
+<ul>
+  <li>Examples of fixed, unchanging display.<br /><ul><li>Filling the margins around the rendering area with a still image while a movie is playing.</li><li>Showing unchanging text like TIME and SCORE that serve as the game's user interface in the same place on the screen for a long time.</li><li>Displaying with a screen aspect ratio of 16:9 but rendering in just a 4:3 region and filling the margins with a still image</li></ul></li>
+</ul>
+<p>In general, when static images and non-moving text are displayed very brightly (that is, using nearly primary colors), screen burn-in will be particularly noticeable in the boundary between the still image and the rendering area, and between the text and the surrounding areas.</p>
+<p>If you need to have a fixed, unchanging display, you must take the following kinds of measures to avoid screen burn-in.</p>
+<ul>
+  <li>Limit the continuous display of the same content to no more than 15 minutes.</li>
+  <li>Dim the overall display brightness.</li>
+  <li>Periodically change the brightness of the display.</li>
+  <li>Display the margins with the same approximate brightness as the rendering area.</li>
+  <li>When switching screens, use the same color and pattern of the margin for the full screen.</li>
+</ul>
+<h2 id="Anchor_172895510_h2_9">Avoid using effects that make the LCD screen prone to residual images or flickering.</h2>
+<ul>
+  <li>A: Iterative display at intervals of an odd numbers of frames.</li>
+  <li>B: Animations that cycle over even numbers of frames.</li>
+</ul>
+<p>If either of these situations continues for a period of time, depending on the images being displayed, the LCD may start to exhibit flickering or residual images similar to screen burn-in (where the previous image remains even when a new image is displayed).</p>
+<p>If the LCD screen starts to display images in a strange manner, check whether you are displaying data that satisfies one of these patterns. LCD screen performance will gradually return to normal after the corresponding image patterns stop being displayed, but you may need to take additional steps to ensure that the problem does not occur again.</p>
+<p>
+  <br />
+</p>
+<div class="expand-container" id="expander-172895510-1">
+  <div class="expand-control" id="expander-control-172895510-1">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">(Reference) LCD Features</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-172895510-1">
+    <p>The pixel voltage is reversed in every frame while the LCD is operating. (This effect is called <em>inversion driving</em>.)</p>
+    <p>As a result, even if the LCD continues to display &quot;white,&quot; for example, the pixels change between plus and minus voltage in every frame.</p>
+    <p>(The following figure is a simplified representation. A more precise image would depict the RGB subpixels.)</p>
+    <p>
+      <span class="embedded-file-wrapper ">
+        <img src="../Attachments/Attach_172895510/232873659.png" height="250" class="embedded-image" />
+      </span>
+    </p>
+    <p>Inversion driving stabilizes the display by preserving the balance between plus and minus voltages.</p>
+  </div>
+</div>
+<h3 id="Anchor_172895510_h3_4">Examples of A</h3>
+<ul>
+  <li>Switching pixels between two colors at one-frame intervals to achieve translucency</li>
+  <li>Repeatedly changing the position at which an image is displayed back and forth between several pixels at three-frame intervals to achieve a vibrating effect</li>
+</ul>
+<p>The severity of these symptoms depend on the images being displayed, but in the worst-case scenarios for the LCD screen, flickering may start to occur after as little as several dozen seconds.</p>
+<p>
+  <br />
+</p>
+<div class="expand-container" id="expander-172895510-2">
+  <div class="expand-control" id="expander-control-172895510-2">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Cause</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-172895510-2">
+    <p>Iterative display every odd number of frames can cancel the effect of inversion driving.</p>
+    <p>The worst effect comes from switching between black and white every other frame.</p>
+    <p>
+      <span class="embedded-file-wrapper ">
+        <img src="../Attachments/Attach_172895510/232873843.png" height="250" class="embedded-image" />
+      </span>
+    </p>
+    <p>Voltage also builds up, which causes afterimages and flickering.</p>
+  </div>
+</div>
+<p>To avoid this problem and prevent residual images and flickering, simply change the interval at which the images are updated to an even number of frames (such as two or four frames).</p>
+<h3 id="Anchor_172895510_h3_5">Examples of B</h3>
+<ul>
+  <li>An animation in which a white object 20&times;200 pixels in size rotates one time every 60 frames on a black background, similar to a clock hand.</li>
+</ul>
+<p> <span class="embedded-file-wrapper "><img src="../Attachments/Attach_172895510/221749064.png" height="250" class="embedded-image" /></span> </p>
+<p>If such an animation is displayed for approximately 10 minutes, flickering will start to be perceptible on screens that make residual images more evident (such as screens made up mostly of a single dark color), although this flickering is typically not severe enough to be noticeable on normal game screens.</p>
+<p>
+  <br />
+</p>
+<div class="expand-container" id="expander-172895510-3">
+  <div class="expand-control" id="expander-control-172895510-3">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Cause</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-172895510-3">
+    <p>In this animation of a white object that rotates with a period of 60 frames, the voltage of every pixel changes as shown in the following figure.</p>
+    <p>
+      <span class="embedded-file-wrapper ">
+        <img src="../Attachments/Attach_172895510/232874022.png" height="250" class="embedded-image" />
+      </span>
+    </p>
+    <p>Voltage also builds up when white is being displayed, which causes afterimages and flickering.</p>
+  </div>
+</div>
+<p>This type of flickering is typically less severe and takes longer to occur than in Situation A, and as a result it does not typically pose a problem during normal system usage. However, you can eradicate this type of flickering and residual images completely by doing the following.</p>
+<ul>
+  <li>Reduce the contrast between the object and the background.</li>
+  <li>Make the animation an odd number of frames in duration.</li>
+  <li>Move the object every two frames instead of every frame.</li>
+</ul>
+<h2 id="Anchor_172895510_h2_10">About HDCP Behavior</h2>
+<p>HDCP is disabled by default. In addition, the process for enabling it is not provided for standard packages. (An individual request is required.)</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__Tick', '../../../Api/HtmlNX/classnn_1_1os_1_1_tick.html' )
+SetUrl( 'ApiLink_nn__time__StandardSteadyClock', '../../../Api/HtmlNX/classnn_1_1time_1_1_standard_steady_clock.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

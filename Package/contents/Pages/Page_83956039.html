@@ -1,0 +1,259 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Sound Actors | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Sound Actors -->
+<div class="pagetitle" id="PageId_83956039">Sound Actors</div>
+<div class="text_separate">
+<h1 id="Anchor_83956039_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83956039_h2_1">Sound Actors</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956039_h2_2">Sound Actor Program</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956039_h2_3">Actor Players</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956039_h2_4">Dynamically Changing the Sound ID</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_83956039_h1_2">Sound Actors</h1>
+<p>This chapter describes how to use sound actors that manage sound for each actor.</p>
+<h2 id="Anchor_83956039_h2_1">Sound Actors</h2>
+<p>Some characters in a game may have audible footsteps as they walk or talk as they swing a sword. At this time, the sounds of the footsteps, voice, and sword are made by a single character. <br />A sound actor collectively manages the multiple sounds produced by a single character.</p>
+<p>Sound actors enable the following scenarios.</p>
+<ul>
+  <li>When a character disappears from a game, all of the sounds that the character makes can be stopped at the same time.</li>
+  <li>The volume and other parameters for the sounds produced by a character can all be changed at the same time.</li>
+  <li>The number of sounds that one character can make simultaneously can be limited.</li>
+</ul>
+<h2 id="Anchor_83956039_h2_2">Sound Actor Program</h2>
+<p>This section describes the sound program using examples of source code.</p>
+<p>The sample program is the <code>AtkSoundActor.cp</code> file in the <code>Samples\Sources\Applications\AtkSoundActor</code> directory.</p>
+<h3 id="Anchor_83956039_h3_1">Initializing an Instance</h3>
+<p>Create and initialize an instance of the sound actor class (<code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code>).</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::atk::SoundActor g_SoundActor;
+
+
+g_SoundActor.Initialize( g_SoundArchivePlayer );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For its parameter, the <code>Initialize</code> function of the <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code> class takes a reference to a sound archive player (<code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code>). <br />When a sound is played using <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code>, it is played using the  <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code> passed here.</p>
+<h3 id="Anchor_83956039_h3_2">Playing Sounds Using a Sound Actor</h3>
+<p>Sounds are played using the <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code> class instead of the <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code> class. <br />The <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code> class has functions for playing sounds, just like <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>bool result = g_SoundActor.StartSound( &amp;g_SoundHandle, SE_YOSHI ).IsSuccess();</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83956039_h3_3">Setting a Maximum Number of Simultaneously Played Sounds</h3>
+<p>You can set a maximum for the number of sounds that can be played simultaneously by any single actor. The default is an unlimited number of sounds.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>g_SoundActor.SetPlayableSoundCount( 0, 2 );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The first argument is the actor player number. The actor player is described in detail in the following section.</p>
+<p>The second argument is the maximum number of sounds that can be played simultaneously. In this example, up to two sounds can be played simultaneously.</p>
+<h3 id="Anchor_83956039_h3_4">Updating Parameters</h3>
+<p>The volume and pan values for each actor can be changed.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>g_SoundActor.SetVolume( g_ActorVolume );
+g_SoundActor.SetPan( g_ActorPan );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83956039_h3_5">Freeing Sound Actors</h3>
+<p>Even if the <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code> instance is freed (for example, when an actor disappears), the sound played by the actor continues to play.</p>
+<p>To stop sounds that are playing, you must explicitly call the <code><span class="ApiLink_nn__atk__SoundActor__StopAllSound">nn::atk::SoundActor::StopAllSound</span></code> function.</p>
+<h2 id="Anchor_83956039_h2_3">Actor Players</h2>
+<h3 id="Anchor_83956039_h3_6">Maximum Number of Simultaneously Played Sounds and the Actor Players</h3>
+<p>Although the description stated that the maximum number of sounds that are played simultaneously can be set for each sound actor, more precisely, the maximum can be set for each actor player.</p>
+<p>Each sound actor has four actor players. A maximum number of sounds that are played simultaneously can be set for each actor player, from number 0 to number 3.</p>
+<p>For example, if there is a character that has footsteps and speaks, there are cases when it is desirable to limit the voice to one and have an unlimited number of footsteps.</p>
+<p>For this case, set the maximum number of sounds that are played simultaneously to one for only actor player number 1, and set the voice to playback with actor player number 1. Do not set a limit for actor player number 0, and set the footsteps to play back on actor player number 0.</p>
+<p>Figure 4. Actor Player</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956039/83080912.png" class="embedded-image" />
+  </span>
+</p>
+<p>By default, when a sound actor instance is created, the maximum number of sounds to be played simultaneously is set to unlimited for actor player number 0, but is limited to one each for actor player numbers 1, 2, and 3.</p>
+<h3 id="Anchor_83956039_h3_7">Setting the Number of the Actor Player to Be Played</h3>
+<p>Set the number of the actor player to be played in the sound data as a parameter for each sound. The default setting is actor player number 0.</p>
+<p>This can be set in the <strong>Actor Player</strong> column in the SoundMaker program.</p>
+<h2 id="Anchor_83956039_h2_4">
+  <a name="Anchor_83956039_SND_ID_DynamicChange"></a>Dynamically Changing the Sound ID</h2>
+<p>If a sound actor is used, the sound being played can change dynamically according to the actor status.</p>
+<p>For example, when footsteps are being played, it may be desirable to change the sound being played according to the type of surface where the actor is walking.</p>
+<p>Normally, it is enough to change the sound ID passed in the parameter of the <code>StartSound</code> function, but you can also change the ID of the sound to play by overriding the <code><span class="ApiLink_nn__atk__SoundActor__SetupSound">nn::atk::SoundActor::SetupSound</span></code> function.</p>
+<h3 id="Anchor_83956039_h3_8">SoundActor::SetupSound Function</h3>
+<p>
+  <code>
+    <span class="ApiLink_nn__atk__SoundActor__SetupSound">nn::atk::SoundActor::SetupSound</span>
+  </code> is a virtual function. You can inherit the <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code> class and then override this function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>virtual SoundStartable::StartResult SetupSound(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SoundHandle* handle,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32_t soundId,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const SoundStartable::StartInfo* startInfo,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void* setupArg
+&nbsp;&nbsp;&nbsp;&nbsp;);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The <code><span class="ApiLink_nn__atk__SoundActor__SetupSound">nn::atk::SoundActor::SetupSound</span></code> function is called when sounds are played.</p>
+<p>The arguments are mostly the same as for the <code>StartSound</code> function. The fourth argument, <code><em>setupArg</em></code>, takes the parameters needed for sound setup.</p>
+<p>When the <code>SetupSound</code> function of the base class is called, this argument must be passed without being altered.</p>
+<h3 id="Anchor_83956039_h3_9">Changing the Sound ID</h3>
+<p>The following example uses the <code>MySoundActor</code> class inheriting the <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code> class and changes what a bounce sounds like depending on the type of ground.</p>
+<p>The <code>MySoundActor::SetupSound</code> function is implemented in the following way.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::atk::SoundStartable::StartResult MySoundActor::SetupSound(
+&nbsp;&nbsp;&nbsp;&nbsp;SoundHandle* handle,
+&nbsp;&nbsp;&nbsp;&nbsp;uint32_t soundId,
+&nbsp;&nbsp;&nbsp;&nbsp;const SoundStartable::StartInfo* startInfo,
+&nbsp;&nbsp;&nbsp;&nbsp;void* setupArg
+)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;if ( soundId == SE_BOUND_BASE )
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch ( m_FloorType )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case FloorTypeSand:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;soundId = SE_BOUND_SAND;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case FloorTypeWater:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;soundId = SE_BOUND_WATER;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case FloorTypeWood:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;soundId = SE_BOUND_WOOD;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;return nn::atk::SoundActor::SetupSound(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;handle,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;soundId,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;startInfo,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setupArg
+&nbsp;&nbsp;&nbsp;&nbsp;);
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk__SoundActor', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_actor.html' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html' )
+SetUrl( 'ApiLink_nn__atk__SoundActor__StopAllSound', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_actor.html#a9e2ae682bf6c431f5d04fbf0967473d4' )
+SetUrl( 'ApiLink_nn__atk__SoundActor__SetupSound', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_actor.html#a26320f0a247b6324ce764037fe7b0441' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,260 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Application Operating Environments (Development Hardware Environment) | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Application Operating Environments (Development Hardware Environment) -->
+<div class="pagetitle" id="PageId_107776143">Application Operating Environments (Development Hardware Environment)</div>
+<div class="text_separate">
+<h1 id="Anchor_107776143_h1_1">Application Operating Environments (Development Hardware Environment)</h1>
+<h2 id="Anchor_107776143_h2_1">Introduction</h2>
+<p>This section describes the platform environments in which NintendoSDK programs operate and execute.</p>
+<p>In this description, <em>platform</em> refers not to the NintendoSDK build environment, but rather the target environment in which the program built using NintendoSDK actually runs.</p>
+<p>For more information about the PC environment for building, see <a href="../Pages/Page_97640247.html">Operating Environment</a>.</p>
+<h2 id="Anchor_107776143_h2_2">Platform Types</h2>
+<p>NintendoSDK can be made to operate in both the Windows environment and the development hardware environment. This section describes the development hardware environment. For more information about the Windows environment, see <a href="../Pages/Page_93357496.html">Application Operating Environments (Windows Environment)</a> (Also see the <a href="../Pages/Page_106339384.html">Differences in Application Development Environments (NX Add-On)</a> page).</p>
+<p>In the development hardware environment, you can select either <strong>NX32</strong> or <strong>NX64</strong> as the Visual Studio solution platform.</p>
+<h3 id="Anchor_107776143_h3_1">Differences in Instruction Code</h3>
+<p>
+  <strong>NX32</strong> can use the <code>AArch32</code> state instruction code and register set, while <strong>NX64</strong> can use the <code>AArch64</code> state instruction code and register set.</p>
+<h3 id="Anchor_107776143_h3_2">Differences in Address Space Size</h3>
+<p>The following table describes the amount of address space available in user space.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th> </th>
+      <th style="text-align: center;">
+        <p>NX32</p>
+        <p>(Has Reserved Region)</p>
+      </th>
+      <th>
+        <p style="text-align: center;">NX32</p>
+        <p style="text-align: center;">(No Reserved Region)</p>
+      </th>
+      <th style="text-align: center;">NX64</th>
+    </tr>
+    <tr>
+      <td>Total size of address space (bit width)</td>
+      <td style="text-align: center;">32-bit</td>
+      <td style="text-align: center;">32-bit</td>
+      <td style="text-align: center;">64-bit</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__os">nn::os</span> memory heap space</td>
+      <td style="text-align: center;">
+        <p>1.0 GiB</p>
+      </td>
+      <td style="text-align: center;">2.0 GiB</td>
+      <td style="text-align: center;">
+        <p>4.0 GiB</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In the <strong>NX32 (has reserved region)</strong> environment, up to 1 GiB (30 bits) of the 32-bit space is reserved for the memory heap.<br />In the <strong>NX32 (no reserved region)</strong> environment, up to 2 GiB (31 bits) of the 32-bit space is reserved for the memory heap.<br /> In the <strong>NX64</strong> environment, up to 4 GiB (32 bits) of the 64-bit space is reserved for the memory heap.</p>
+<p>Information about reserved regions is described later.</p>
+<p>However, if the application is handling addressing,  always use address widths of 32 bits in the <strong>NX32</strong> environment, and address widths of 64 bits in the <strong>NX64</strong> environment.</p>
+<h3 id="Anchor_107776143_h3_3">Available Memory</h3>
+<p>In the <strong>NX32</strong> environment, <strong>1.0 GiB</strong> or <strong>2.0 GiB</strong>, and in the <strong>NX64</strong> environment, <strong>3,285 MiB</strong> of memory is available.</p>
+<p>These memory sizes are the maximums when you add together the size of the program, the size of the memory heap, and the stack for the initial startup thread. As a result, the larger the application, the smaller the memory region available for the heap.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>You can discover how much memory is currently being used, and how much is available, by calling the <code><span class="ApiLink_void_nn__os__QueryMemoryInfo(MemoryInfo_*info)_NN_NOEXCEPT">nn::os::QueryMemoryInfo()</span></code> function.</p>
+  </div>
+</div>
+<p> </p>
+<p>In the <strong>NX32</strong> environment, the default environment is <strong>has reserved region</strong> and the maximum size of the memory heap is <strong>1.0 GiB.</strong> To use a memory heap of <strong>2.0 GiB</strong> with <strong>no reserved region</strong>, edit the NMETA file as shown, and rebuild the application.</p>
+<ol>
+  <li>Open <code>Application.arm.ilp32.nmeta</code> included in <strong>Preparing the NMETA File</strong> in <a href="../Pages/Page_170694395.html">Build Procedure: Creating an Application Image</a>.</li>
+  <li>
+    <p>Revise the content of the <code>&lt;ProcessAddressSpace&gt;</code> block to <code>AddressSpace32BitNoReserved</code> as follows.<br /><br /></p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9</td>
+          <td class="code">
+            <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot;? &gt;
+<span class="nt">&lt;Meta&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;Core&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Name&gt;</span>Application<span class="nt">&lt;/Name&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ApplicationId&gt;</span>0x0005000C10000000<span class="nt">&lt;/ApplicationId&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Is64BitInstruction&gt;</span>False<span class="nt">&lt;/Is64BitInstruction&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ProcessAddressSpace&gt;</span>AddressSpace32BitNoReserved<span class="nt">&lt;/ProcessAddressSpace&gt;</span>     // ← Revise this.
+&nbsp;&nbsp;<span class="nt">&lt;/Core&gt;</span>
+<span class="nt">&lt;/Meta&gt;</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Build the application.</li>
+</ol>
+<p> </p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The reserved region is one memory space region reserved for specific features and future feature expansion. In the <strong>NX32</strong> environment, use this region as the region for the memory heap to make approximately 2.0 GiB available for the memory heap, which normally has only 1.0 GiB available.</p>
+    <p>Even when changing to <code>AddressSpace32BitNoReserved</code> using the preceding method, the application will not strain the system's upper memory limit. Functional constraints are not imposed on the application either. However, note that when using specific features or features added in the future, an insufficient memory error might occur, or the constraint might not be able to use these features.</p>
+    <p>There is also a reserved region in the <strong>NX64</strong> environment, but the userland's overall memory space is sufficiently large that this specification does not exist.</p>
+  </div>
+</div>
+<p> </p>
+<h3 id="Anchor_107776143_h3_4">Data-Type Models</h3>
+<p>In the <strong>NX32</strong> environment, the data type model is <code>ilp32</code>. In the <strong>NX64</strong> environment, it is <code>lp64</code>. The following table shows the sizes of typical types.</p>
+<p>The unit is bits.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Type</th>
+      <th style="text-align: center;">
+        <p>ilp32</p>
+        <p>(NX32)</p>
+      </th>
+      <th style="text-align: center;">
+        <code>llp64</code>
+      </th>
+      <th style="text-align: center;">
+        <p>lp64</p>
+        <p>(NX64)</p>
+      </th>
+      <th style="text-align: center;">
+        <code>ilp64</code>
+      </th>
+    </tr>
+    <tr>
+      <td class="highlight-blue">char</td>
+      <td style="text-align: right;">8</td>
+      <td style="text-align: right;">8</td>
+      <td style="text-align: right;">8</td>
+      <td style="text-align: right;">8</td>
+    </tr>
+    <tr>
+      <td class="highlight-blue">short</td>
+      <td style="text-align: right;">16</td>
+      <td style="text-align: right;">16</td>
+      <td style="text-align: right;">16</td>
+      <td style="text-align: right;">16</td>
+    </tr>
+    <tr>
+      <td class="highlight-blue">int</td>
+      <td style="text-align: right;">32</td>
+      <td style="text-align: right;">32</td>
+      <td style="text-align: right;">32</td>
+      <td class="highlight-yellow" style="text-align: right;">64</td>
+    </tr>
+    <tr>
+      <td class="highlight-blue">long</td>
+      <td style="text-align: right;">32</td>
+      <td style="text-align: right;">32</td>
+      <td class="highlight-yellow" style="text-align: right;">64</td>
+      <td class="highlight-yellow" style="text-align: right;">64</td>
+    </tr>
+    <tr>
+      <td class="highlight-blue">Pointer</td>
+      <td style="text-align: right;">32</td>
+      <td class="highlight-yellow" style="text-align: right;">64</td>
+      <td class="highlight-yellow" style="text-align: right;">64</td>
+      <td class="highlight-yellow" style="text-align: right;">64</td>
+    </tr>
+  </tbody>
+</table>
+<p>As the table shows, the  data width handled by the various types differs depending on the data-type model. When you are writing code for both <strong>NX32</strong> and <strong>NX64</strong>, be aware of the data types being used.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In the Windows environment, the data type models are  <code>ilp32</code> for <strong>Win32</strong> and <code>llp64</code> for <strong>x64</strong>.<br />Note that the size of type <code>long</code> differs in <strong>x64</strong> and <strong>NX64</strong>.</p>
+  </div>
+</div>
+<p> </p>
+<h2 id="Anchor_107776143_h2_3">Notes for Migrating From an NX32 to an NX64 Environment</h2>
+<p>For more information, see <a href="../Pages/Page_93357758.html">Notes When Migrating Between Environments</a></p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os', '../../../Api/HtmlNX/namespacenn_1_1os.html' )
+SetUrl( 'ApiLink_void_nn__os__QueryMemoryInfo(MemoryInfo_*info)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a79f2a489da0a124ebdc8130595c70b94' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

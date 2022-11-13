@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Indexed Cache Storage | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Indexed Cache Storage -->
+<div class="pagetitle" id="PageId_276903214">Indexed Cache Storage</div>
+<div class="text_separate">
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Apply in advance to use the indexed cache storage feature. To apply, contact Nintendo.</p>
+    <p>Provide the following information when contacting Nintendo.</p>
+    <ul>
+      <li>The maximum number of cache storages you want to use</li>
+      <li>The maximum size of the total of the data save area size, and the journaling area size, for one cache storage</li>
+      <li>Breakdown of the data save area size (content of each element, size, and number of elements) for one cache storage</li>
+      <li>Is there any data that does not need to be made permanent? (Place data that does not need to be made permanent in <a href="../Pages/Page_685577216.html">RamDisk</a> or <a href="../Pages/Page_224955140.html">Temporary Storage</a>.)</li>
+      <li>Is there any data that would cause problems if the cache storage was rolled back or skipped forward?</li>
+      <li>Was the size optimized using compression or data format conversion without detracting from the gameplay?</li>
+      <li>What user actions trigger the creation and deletion of individual cache storages?</li>
+    </ul>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The indexed cache storage feature is available with NX Add-On 5.0.0 and later.</p>
+  </div>
+</div>
+<h1 id="Anchor_276903214_h1_1">Feature Overview</h1>
+<p>The indexed cache storage feature can make the size occupied by storage media the minimum required in use cases where the amount of data that can be regenerated and reacquired changes based on the user's play style.<br />The application can create and delete multiple cache storages managed in an index as necessary. The features each cache storage has are equivalent to those defined in <a href="../Pages/Page_224957652.html">Cache Storage</a>.</p>
+<p>The following is possible when you use indexed cache storages.</p>
+<ul>
+  <li>Create a cache storage with a specified index</li>
+  <li>Delete a cache storage with a specified index</li>
+  <li>Mount a cache storage with a specified index</li>
+  <li>Get a list of cache storages held by the application</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>
+      <strong>The application must get the list at the required time and must check whether cache storages exist.</strong>
+      <br />
+    </p>
+    <p>When indexed cache storage is used, cache storages are not created when the application starts.</p>
+  </div>
+</div>
+<h1 id="Anchor_276903214_h1_2">Indexed Cache Storage Settings</h1>
+<p>Starting the application with the following elements written in the NMETA file, makes it possible to create cache storages from the application.</p>
+<p>
+  <strong>Cache storages are not created when the application starts.</strong>
+</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item Name</th>
+      <th>Overview</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>NintendoSdkMeta/Application/CacheStorageIndexMax</td>
+      <td>Maximum value of the cache storage index.</td>
+      <td>The value of the number of cache storages you want to create, minus 1. The value needs to be 99 or less. (The maximum cache storage capacity is 100 or less.)</td>
+    </tr>
+    <tr>
+      <td>NintendoSdkMeta/Application/CacheStorageDataAndJournalSizeMax</td>
+      <td>The maximum value of the total of the data save area size and the journaling area size for each cache storage.</td>
+      <td>Must be between 96 KiB and 4000 MiB, and also a multiple of 16 KiB.</td>
+    </tr>
+  </tbody>
+</table>
+<p>These options cannot be set at the same time as <code>NintendoSdkMeta/Application/CacheStorageSize</code> and <code>NintendoSdkMeta/Application/CacheStorageJournalSize</code>.</p>
+<h2 id="Anchor_276903214_h2_1">
+  <span style="color: rgb(117,117,117);">Example Configuration</span>
+</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;?xml <span class="nv">version</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span>? &gt;
+&lt;NintendoSdkMeta&gt;
+&nbsp;&nbsp;&lt;Core&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Name&gt;Application&lt;/Name&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ApplicationId&gt;0x0005000C10000000&lt;/ApplicationId&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Is64BitInstruction&gt;True&lt;/Is64BitInstruction&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ProcessAddressSpace&gt;AddressSpace64Bit&lt;/ProcessAddressSpace&gt;
+&nbsp;&nbsp;&lt;/Core&gt;
+&nbsp;&nbsp;&lt;Application&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CacheStorageDataAndJournalSizeMax&gt;0x0000000003F00000&lt;/CacheStorageDataAndJournalSizeMax&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CacheStorageIndexMax&gt;0x63&lt;/CacheStorageIndexMax&gt;
+&nbsp;&nbsp;&lt;/Application&gt;
+&lt;/NintendoSdkMeta&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_276903214_h1_3">Indexed Cache Storage Location</h1>
+<p>Indexed cache storages are placed in the same location.</p>
+<p>In most cases, if <code><span class="ApiLink_nn__fs__CreateCacheStorage">nn::fs::CreateCacheStorage</span>()</code> is called when there are no indexed cache storages, the cache storage will be placed on the SD card.<br />But if the SD card is not inserted, or if the SD card does not have sufficient space, the cache storage is placed in the system memory.</p>
+<p>If one or more cache storages exist, the cache storage is placed in the same location as the others.</p>
+<p>If indexed cache storages for an application exist both on the SD card and in system memory when the system starts, all indexed cache storages in system memory are deleted.</p>
+<p>For more information, see the Location page in <a href="../Pages/Page_224957652.html#Anchor_224957652_h1_6">Cache Storage</a>.</p>
+<h1 id="Anchor_276903214_h1_4">Indexed Cache Storage Error Handling</h1>
+<p>If you call <code><span class="ApiLink_nn__fs__CreateCacheStorage">nn::fs::CreateCacheStorage</span>()</code> and create an indexed cache storage, error handling is necessary.<br />If there is not enough space to create a cache storage, the system automatically displays the following message.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Not enough memory.
+You need XX GB of memory to play this game.
+Free up or adjust your game data.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>After this message appears, you are prompted to resolve the issue of insufficient memory. The <code><span class="ApiLink_nn__fs__ResultUsableSpaceNotEnough">nn::fs::ResultUsableSpaceNotEnough</span></code> value is returned when no resolution occurs.<br />If this occurs, cache storages will not be created as intended. Interrupt the cache storage operations to handle the error appropriately.</p>
+<ul>
+  <li>Example: In scenes where an indexed cache storage is created, when <code><span class="ApiLink_nn__fs__CreateCacheStorage">nn::fs::CreateCacheStorage</span>()</code> is called and <code><span class="ApiLink_nn__fs__ResultUsableSpaceNotEnough">nn::fs::ResultUsableSpaceNotEnough</span></code> is returned, cancel operations to create data and enter a deletion sequence.</li>
+</ul>
+<p>You can fill the NAND free space using <a href="../Pages/Page_310879077.html">DevMenu</a> or <a href="../Pages/Page_325711330.html">DevMenuCommand</a>. After creating a state of insufficient free space, make sure that <code><span class="ApiLink_nn__fs__ResultUsableSpaceNotEnough">nn::fs::ResultUsableSpaceNotEnough</span></code> can handle the operations correctly.</p>
+<p>The error handling for other save data operations is identical to that for other file system operations. See <a href="../Pages/Page_174247773.html">Error Handling</a>.</p>
+<h1 id="Anchor_276903214_h1_5">Changing the Maximum Size and Number Retained for Indexed Cache Storage</h1>
+<p>Large changes can be made to the values for <code>NintendoSdkMeta/Application/CacheStorageDataAndJournalSizeMax</code> and <code>NintendoSdkMeta/Application/CacheStorageIndexMax</code> in <a href="../Pages/Page_166503043.html">NMETA files</a> using patches.</p>
+<p>These changes do not affect cache storage created prior to applying the patch.</p>
+<p>The size of previously created cache storage cannot be expanded or reduced using API calls. If you need to change the size of cache storage that has already been created, delete and re-create it.</p>
+<h1 id="Anchor_276903214_h1_6">Migrating From Using Non-Indexed Cache Storage to Indexed<a name="Anchor_276903214_FromWithoutIndexToWithIndex"></a></h1>
+<p>By removing the <code>NintendoSdkMeta/Application/CacheStorageSize</code> and <code>NintendoSdkMeta/Application/CacheStorageJournalSize</code> descriptors from the <a href="../Pages/Page_166503043.html">NMETA file</a> and adding ones for <code>NintendoSdkMeta/Application/CacheStorageDataAndJournalSizeMax</code> and <code>NintendoSdkMeta/Application/CacheStorageIndexMax</code>, you can use indexed cache storage after applying a patch.</p>
+<p>Cache storage that existed prior to migrating to use indexed cache storage can be used as index 0.</p>
+<p>A value of <code>NintendoSdkMeta/Application/CacheStorageSize</code> + <code>NintendoSdkMeta/Application/CacheStorageJournalSize</code> or greater from before applying the patch must be specified for <code>NintendoSdkMeta/Application/CacheStorageDataAndJournalSizeMax</code>.</p>
+<h1 id="Anchor_276903214_h1_7">Important Information</h1>
+<p>The following is a summary of important information.</p>
+<ul>
+  <li>When using the indexed cache storage feature, the application must get the list at the necessary time and must check whether cache storages exist.</li>
+  <li>As appropriate, use <code><span class="ApiLink_nn__fs__DeleteCacheStorage">nn::fs::DeleteCacheStorage</span>()</code> and free space to use in storage media.</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__fs__CreateCacheStorage">nn::fs::CreateCacheStorage</span>()</code> cannot be called on the index of cache storage that has already been created.</li>
+  <li>
+    <span style="color: rgb(23,43,77);">There is no feature for increasing the size of indexed cache storage that has already been created.</span>
+  </li>
+  <li>Changing the values of the <code>NintendoSdkMeta/Application/CacheStorageDataAndJournalSizeMax</code> or <code>NintendoSdkMeta/Application/CacheStorageIndexMax</code> elements in the NMETA file for a patch does not have any effect on indexed cache storage that has already been created.<br /></li>
+</ul>
+<p>Also see the Important Information for <a href="../Pages/Page_224957652.html#Anchor_224957652_h1_9">Cache Storage</a>.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__CreateCacheStorage', '../../../Api/HtmlNX/namespacenn_1_1fs.html#af3735c46a459dbf4ba3d6de862b611d4' )
+SetUrl( 'ApiLink_nn__fs__ResultUsableSpaceNotEnough', '../../../Api/HtmlNX/classnn_1_1fs_1_1_result_usable_space_not_enough.html' )
+SetUrl( 'ApiLink_nn__fs__DeleteCacheStorage', '../../../Api/HtmlNX/namespacenn_1_1fs.html#adf2bd15a53fcc2a6c8895de9c264ab86' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

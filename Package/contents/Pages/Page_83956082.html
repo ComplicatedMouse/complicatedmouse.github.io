@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Command Buffer | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Command Buffer -->
+<div class="pagetitle" id="PageId_83956082">Command Buffer</div>
+<div class="text_separate">
+<h1 id="Anchor_83956082_h1_1">Command Buffer</h1>
+<h2 id="Anchor_83956082_h2_1">Overview</h2>
+<p>The command buffer provides features to store commands to the GPU and to play them later.</p>
+<p>Before adding a command to a command buffer, you must first add command memory and control memory. Command memory is added from the memory pool, and control memory is added from a pointer to memory on the CPU.</p>
+<p>After you start adding commands to a command buffer, any command can be added. When you add a command, it begins using the position in the command memory and the control memory immediately following the position that was used in the previous addition of a command. You can add to these memory types while a command is being added. To reuse memory after it has been used once, verify that the GPU is done using the memory, reset the memory, and then re-add the memory that you want to reuse.<br />Also note that if an event callback is registered in the command buffer, the callback is invoked when the available memory is used up.</p>
+<p>After a command has been added or if the command addition is no longer necessary, the command addition is terminated. An attempt to set a command in the command buffer without the command addition being started causes an error. Starting and ending a command must always appear mutually as a pair.</p>
+<p>After you have added commands to a command buffer, you can execute all of the commands, from the latest starting point until the end of the buffer, by submitting it to a queue. Command buffers that have completed command addition once can be submitted to a queue any number of times.</p>
+<p>In a multithread, commands can be added to different command buffers in parallel.</p>
+<p>The GPU state is not inherited between command buffers. If a command buffer is executed by anticipating a sate that is set by another command buffer that was previously executed, unexpected operations are caused. Set all required states in each command buffer.</p>
+<p>Command buffers can have other command buffers nested in them before they are called. The nested command buffers inherit the GPU state unless explicitly specified otherwise. You can also copy and include commands from a different command buffer.</p>
+<p>Command buffer execution can be synchronized between the CPU and GPU by using a <a href="../Pages/Page_83955552.html">Fence</a>. In addition, queues executing command buffers can be synchronized by using a <a href="../Pages/Page_83955565.html">semaphore</a>.</p>
+<h2 id="Anchor_83956082_h2_2">Information</h2>
+<p>Command buffer information is defined as <span class="ApiLink_nn__gfx__CommandBufferInfo"><code>nn::gfx::CommandBufferInfo</code></span>.</p>
+<h3 id="Anchor_83956082_h3_1">Command Buffer Type</h3>
+<p>Use <span class="ApiLink_void_nn__gfx__CommandBufferInfo__SetCommandBufferType(CommandBufferType_value)_NN_NOEXCEPT"><code>SetCommandBufferType</code></span> to specify whether the command buffer is submitted directly to a queue, or whether it is nested in a different command buffer.</p>
+<h3 id="Anchor_83956082_h3_2">Queue Capability</h3>
+<p>To specify the capabilities of the queue to which the command buffer will be submitted, use <span class="ApiLink_void_nn__gfx__CommandBufferInfo__SetQueueCapability(int_value)_NN_NOEXCEPT"><code>SetQueueCapability</code></span>.</p>
+<h2 id="Anchor_83956082_h2_3">Object</h2>
+<p>The command buffer object is defined as <span class="ApiLink_nn__gfx__CommandBuffer"><code>nn::gfx::CommandBuffer</code></span>.</p>
+<p>For more information, see the manual pages corresponding to each method to set each resource and state into the command buffer.</p>
+<h3 id="Anchor_83956082_h3_3">Initialization and Destruction</h3>
+<p>Initializing and freeing command buffers follows the rules for <a href="../Pages/Page_83955654.html">objects</a></p>
+<h3 id="Anchor_83956082_h3_4">Adding Command Memory</h3>
+<p>You can use <span class="ApiLink_void_nn__gfx__TCommandBuffer__AddCommandMemory(TMemoryPool__Target___*pMemoryPool|_ptrdiff_t_memoryPoolOffset|_size_t_memorySize)_NN_NOEXCEPT"><code>AddCommandMemory</code></span> to add command memory. The command memory is for storing commands and is allocated from a memory pool. Command memory can be added before adding commands, while adding commands, and during an event callback. Command memory must be added before you can start adding commands.</p>
+<p>You can reuse command memory that the GPU has finished using. To reuse memory, call <span class="ApiLink_void_nn__gfx__TCommandBuffer__Reset()_NN_NOEXCEPT"><code>Reset</code></span> and add the memory again using <span class="ApiLink_void_nn__gfx__TCommandBuffer__AddCommandMemory(TMemoryPool__Target___*pMemoryPool|_ptrdiff_t_memoryPoolOffset|_size_t_memorySize)_NN_NOEXCEPT"><code>AddCommandMemory</code></span>. </p>
+<p>The memory pool offset has an alignment limitation when specifying command memory to add. You can get this value using <span class="ApiLink_static_size_t_nn__gfx__TCommandBuffer__GetCommandMemoryAlignment(TDevice__Target___*pDevice)_NN_NOEXCEPT"><code>nn::gfx::CommandBuffer::GetCommandMemoryAlignment</code></span>.</p>
+<h3 id="Anchor_83956082_h3_5">Adding Control Memory</h3>
+<p>You can use <span class="ApiLink_void_nn__gfx__TCommandBuffer__AddControlMemory(void_*pMemory|_size_t_memorySize)_NN_NOEXCEPT"><code>AddControlMemory</code></span> to add control memory. Control memory stores the control information for submitting commands, and is allocated from standard CPU memory. Control memory can be added before adding commands, while adding commands, and during an event callback. Control memory must be added before you can start adding commands.</p>
+<p>You can reuse control memory after the GPU has finished using it. To reuse memory, call <span class="ApiLink_void_nn__gfx__TCommandBuffer__Reset()_NN_NOEXCEPT"><code>Reset</code></span> and add the memory again using <span class="ApiLink_void_nn__gfx__TCommandBuffer__AddControlMemory(void_*pMemory|_size_t_memorySize)_NN_NOEXCEPT"><code>AddControlMemory</code></span>.</p>
+<p>The address of the control memory to add has an alignment limitation. You can get this value using <span class="ApiLink_static_size_t_nn__gfx__TCommandBuffer__GetControlMemoryAlignment(TDevice__Target___*pDevice)_NN_NOEXCEPT"><code>nn::gfx::CommandBuffer::GetControlMemoryAlignment</code></span>.</p>
+<h3 id="Anchor_83956082_h3_6">Starting and Ending Command Additions</h3>
+<p>Starting and ending a command addition is performed with <span class="ApiLink_void_nn__gfx__TCommandBuffer__Begin()_NN_NOEXCEPT"><code>Begin</code></span> and <span class="ApiLink_void_nn__gfx__TCommandBuffer__End()_NN_NOEXCEPT"><code>End</code></span>, respectively. After starting a command addition using <code><span class="ApiLink_void_nn__gfx__TCommandBuffer__Begin()_NN_NOEXCEPT">Begin</span></code>, various commands are added and then the command addition is terminated using <code><span class="ApiLink_void_nn__gfx__TCommandBuffer__End()_NN_NOEXCEPT">End</span></code>. Submitting a command buffer that has not terminated command addition causes an error. You can execute a command buffer that calls <code><span class="ApiLink_void_nn__gfx__TCommandBuffer__Begin()_NN_NOEXCEPT">Begin</span></code> and <code><span class="ApiLink_void_nn__gfx__TCommandBuffer__End()_NN_NOEXCEPT">End</span></code> only and does not actually add any commands.</p>
+<p>After terminating command addition to the command buffer, command addition can be started again. In this case, commands are not added in continuation from where the previous addition ended but rather commands are added from the start.</p>
+<h3 id="Anchor_83956082_h3_7">Event Callback</h3>
+<p>Use <span class="ApiLink_void_nn__gfx__TCommandBuffer__SetOutOfCommandMemoryEventCallback(OutOfMemoryEventCallback_pEventCallback)_NN_NOEXCEPT"><code>SetOutOfCommandMemoryCallback</code></span> and <span class="ApiLink_void_nn__gfx__TCommandBuffer__SetOutOfControlMemoryEventCallback(OutOfMemoryEventCallback_pEventCallback)_NN_NOEXCEPT"><code>SetOutOfControlMemoryCallback</code></span>, respectively, to set a callback function that is used to receive notice when the command memory or the control memory is exhausted. By adding command memory or control memory from the callback function that is invoked when the memory is exhausted, you can continue to add commands without any extra steps.</p>
+<h3 id="Anchor_83956082_h3_8">Draw Call</h3>
+<p>To process graphics using the GPU, the draw call command must be added. Call the <code>Draw</code> function to perform a draw call that does not use the index buffer, and call <span class="ApiLink_void_nn__gfx__TCommandBuffer__DrawIndexed(PrimitiveTopology_primitiveTopology|_IndexFormat_indexFormat|_const_GpuAddress_&indexBufferAddress|_int_indexCount|_int_baseVertex)_NN_NOEXCEPT"><code>DrawIndexed</code></span> to perform an indexed draw call that uses the index buffer. At this time, you can make instantiated draw calls. Each call is performed by an overload function that removes several additional arguments.</p>
+<p>You can also make an indirect draw call that uses parameters that are taken from a buffer. Call  <span class="ApiLink_void_nn__gfx__TCommandBuffer__DrawIndirect(PrimitiveTopology_primitiveTopology|_const_GpuAddress_&indirectBufferAddress)_NN_NOEXCEPT"><code>DrawIndirect</code></span> to perform an indirect draw call that does not use the index buffer, and call <span class="ApiLink_void_nn__gfx__TCommandBuffer__DrawIndexedIndirect(PrimitiveTopology_primitiveTopology|_IndexFormat_indexFormat|_const_GpuAddress_&indexBufferAddress|_const_GpuAddress_&indirectBufferAddress)_NN_NOEXCEPT"><code>DrawIndexedIndirect</code></span> to perform an indexed draw call that uses the index buffer. Because the indirect draw call is not supported by the variations of the low-level graphics API, an error occurs. For parameter types and arrangement in the buffer, see the low-level graphics API manual.</p>
+<h3 id="Anchor_83956082_h3_9">Dispatch Call</h3>
+<p>To make the GPU perform computational processing, the dispatch call command, via <span class="ApiLink_void_nn__gfx__TCommandBuffer__Dispatch(int_groupCountX|_int_groupCountY|_int_groupCountZ)_NN_NOEXCEPT"><code>Dispatch</code></span>, must be added. You can also make an indirect dispatch call using <span class="ApiLink_void_nn__gfx__TCommandBuffer__DispatchIndirect(const_GpuAddress_&indirectBufferAddress)_NN_NOEXCEPT"><code>DispatchIndirect</code></span>, in which the parameters are taken from a buffer. For parameter types and arrangement in the buffer, see the low-level graphics API manual.</p>
+<h3 id="Anchor_83956082_h3_10">Calling and Copying a Command Buffer</h3>
+<p>A command buffer created with the <span class="ApiLink_nn__gfx__CommandBufferType_Direct"><code>nn::gfx::CommandBuffer_Direct</code></span> setting can call or copy a command buffer created with the <span class="ApiLink_nn__gfx__CommandBufferType_Nested"><code>nn::gfx::CommandBufferType_Nested</code></span> setting. To call a command buffer means to make a nested call on the target command buffer. Use <span class="ApiLink_void_nn__gfx__TCommandBuffer__CallCommandBuffer(const_TCommandBuffer__Target___*pNestedCommandBuffer)_NN_NOEXCEPT"><code>CallCommandBuffer</code></span> for this operation. Copying a command buffer involves taking the content of the command memory of the target command buffer and inserting it into the command memory that is currently being written. Use <span class="ApiLink_void_nn__gfx__TCommandBuffer__CopyCommandBuffer(const_TCommandBuffer__Target___*pNestedCommandBuffer)_NN_NOEXCEPT"><code>CopyCommandBuffer</code></span> for this operation.</p>
+<p>Nested command buffers inherit the state set in the parent unless otherwise mentioned or restricted by the low-level graphics API.</p>
+<h3 id="Anchor_83956082_h3_11">Cache Operations</h3>
+<p>The GPU read cache and write cache request, if necessary, explicit invalidation and flushing by each application. The read cache is invalidated by calling <span class="ApiLink_void_nn__gfx__TCommandBuffer__InvalidateMemory(int_gpuAccessFlags)_NN_NOEXCEPT"><code>InvalidateMemory</code></span>, and the write cache is flushed by calling <span class="ApiLink_void_nn__gfx__TCommandBuffer__FlushMemory(int_gpuAccessFlags)_NN_NOEXCEPT"><code>FlushMemory</code></span>. For either, the memory content to be invalidated is specified in an argument as a combination. By combining all the bits, it is possible to invalidate or flush all memory types of cache.</p>
+<h3 id="Anchor_83956082_h3_12">State Operations</h3>
+<p>Almost all states are set using state objects. The following states, however, are set directly in the command buffer.</p>
+<h4 id="Anchor_83956082_h4_1">Depth Boundary Test Scope</h4>
+<p>Use <span class="ApiLink_void_nn__gfx__TCommandBuffer__SetDepthBounds(float_minDepthBounds|_float_maxDepthBounds)_NN_NOEXCEPT"><code>SetDepthBounds</code></span> to set the minimum and maximum values for the scope used in the depth boundary test.</p>
+<h4 id="Anchor_83956082_h4_2">Line Width</h4>
+<p>Use <span class="ApiLink_void_nn__gfx__TCommandBuffer__SetLineWidth(float_lineWidth)_NN_NOEXCEPT"><code>SetLineWidth</code></span> to set the width of line primitives.</p>
+<h4 id="Anchor_83956082_h4_3">Viewport</h4>
+<p>Use <span class="ApiLink_void_nn__gfx__TCommandBuffer__SetViewports(int_firstViewport|_int_viewportCount|_const_ViewportStateInfo_*pViewports)_NN_NOEXCEPT"><code>SetViewport</code></span> to set the viewport.</p>
+<h4 id="Anchor_83956082_h4_4">Scissor</h4>
+<p>Use <span class="ApiLink_void_nn__gfx__TCommandBuffer__SetScissors(int_firstScissor|_int_scissorCount|_const_ScissorStateInfo_*pScissors)_NN_NOEXCEPT"><code>SetScissor</code></span> to set the scissors.</p>
+<h3 id="Anchor_83956082_h3_13">GL4-Specific Operations</h3>
+<p>Because the low-level graphics API does not have features equivalent to the command buffer with the GL4 variation, these features are emulated in the <code>gfx</code> library. Because this library is currently used together with the low-level graphics API when it is used directly, the <span class="ApiLink_void_nn__gfx__TCommandBuffer__Gl4SetUserCommand(Gl4UserCommandCallbackType_pCallback|_const_void_*pParam)_NN_NOEXCEPT"><code>Gl4SetUserCommand</code></span> function can be used to insert a user-defined callback to any location. When executing a later <span class="ApiLink_nn__gfx__Queue"><code>ExecuteCommand</code></span> function of the <span class="ApiLink_void_nn__gfx__TQueue__ExecuteCommand(TCommandBuffer__Target___*pCommandBuffer|_TFence__Target___*pFence)_NN_NOEXCEPT"><code>nn::gfx::Queue</code></span> class, processing moves to the user-defined callback function when reaching this location of this command.</p>
+<h2 id="Anchor_83956082_h2_4">Command Buffer Execution</h2>
+<p>All commands contained in command buffers for which command addition has terminated can be executed any number of times by being submitted to a queue. Perform this action using the <span class="ApiLink_nn__gfx__Queue"><code>ExecuteCommand</code></span> of the <span class="ApiLink_void_nn__gfx__TQueue__ExecuteCommand(TCommandBuffer__Target___*pCommandBuffer|_TFence__Target___*pFence)_NN_NOEXCEPT"><code>nn::gfx::Queue</code></span> class. For more information, see <a href="../Pages/Page_83956110.html">Queues</a>.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__CommandBufferInfo', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_command_buffer_info.html' )
+SetUrl( 'ApiLink_void_nn__gfx__CommandBufferInfo__SetCommandBufferType(CommandBufferType_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_command_buffer_info.html#a2dc75925a14c5d81ebd838b730a6a026' )
+SetUrl( 'ApiLink_void_nn__gfx__CommandBufferInfo__SetQueueCapability(int_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_command_buffer_info.html#a1ee219b3f9aa9bc7ffb878de1e4e7574' )
+SetUrl( 'ApiLink_nn__gfx__CommandBuffer', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#af719859a76c249a182d878f0cffd47c5' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__AddCommandMemory(TMemoryPool__Target___*pMemoryPool|_ptrdiff_t_memoryPoolOffset|_size_t_memorySize)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#acdb687c47bf13d8d1e65a499a5d8a4a9' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__Reset()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a6232e70a4abb4bfbf1e4e94ce6726f58' )
+SetUrl( 'ApiLink_static_size_t_nn__gfx__TCommandBuffer__GetCommandMemoryAlignment(TDevice__Target___*pDevice)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a83c6570a8bf3ad63a2c88604fdb64660' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__AddControlMemory(void_*pMemory|_size_t_memorySize)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a5803f064362d4af367f7fd061cf10f39' )
+SetUrl( 'ApiLink_static_size_t_nn__gfx__TCommandBuffer__GetControlMemoryAlignment(TDevice__Target___*pDevice)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a2a74828d24db1eec34e72d3f088a5803' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__Begin()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#ab22bb14832e8fca483b977dcb18d5286' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__End()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a3b4d64880cd75e66c314bdbac29c04f0' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetOutOfCommandMemoryEventCallback(OutOfMemoryEventCallback_pEventCallback)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a4ed672bd30534da1157e6db1e934ff9c' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetOutOfControlMemoryEventCallback(OutOfMemoryEventCallback_pEventCallback)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#af62031e416ae376fdb07c3cecac651b6' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__DrawIndexed(PrimitiveTopology_primitiveTopology|_IndexFormat_indexFormat|_const_GpuAddress_&indexBufferAddress|_int_indexCount|_int_baseVertex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#af9cfb2a18747ed8eafad571a4e1bb20c' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__DrawIndirect(PrimitiveTopology_primitiveTopology|_const_GpuAddress_&indirectBufferAddress)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a1fbaa67de90c238d2102224b3191dbde' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__DrawIndexedIndirect(PrimitiveTopology_primitiveTopology|_IndexFormat_indexFormat|_const_GpuAddress_&indexBufferAddress|_const_GpuAddress_&indirectBufferAddress)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a2d81ee6865a605d7ac0abb3408b2d3d2' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__Dispatch(int_groupCountX|_int_groupCountY|_int_groupCountZ)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#aea6ca6c590f78c2c94c9eeba63171b64' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__DispatchIndirect(const_GpuAddress_&indirectBufferAddress)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#ad9ed7f9c6fc6849c1d78106b3f76c7ac' )
+SetUrl( 'ApiLink_nn__gfx__CommandBufferType_Direct', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a0e171a31353ada1910b428cd08e7d2d3a6009481892695c8b4bcfca4ab86d9313' )
+SetUrl( 'ApiLink_nn__gfx__CommandBufferType_Nested', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a0e171a31353ada1910b428cd08e7d2d3a334e30250c695f8bfed86fc89b3dc49e' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__CallCommandBuffer(const_TCommandBuffer__Target___*pNestedCommandBuffer)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a41c75c6bf8f1ef0f723480ac1b93e52b' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__CopyCommandBuffer(const_TCommandBuffer__Target___*pNestedCommandBuffer)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#ab5fa4106a304bd64c103f06b0bebef84' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__InvalidateMemory(int_gpuAccessFlags)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a7e5cade7802122a5272657dfaec5d1f1' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__FlushMemory(int_gpuAccessFlags)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a3b43b17e57f564190229a914370bfb9b' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetDepthBounds(float_minDepthBounds|_float_maxDepthBounds)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a4d0b72716d43461e047b336aed3ebf31' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetLineWidth(float_lineWidth)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#ad1bebc2d99727fefa4b8ddfe2f02c01d' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetViewports(int_firstViewport|_int_viewportCount|_const_ViewportStateInfo_*pViewports)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a41e679f5189f3daa7818504b5585bbd4' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetScissors(int_firstScissor|_int_scissorCount|_const_ScissorStateInfo_*pScissors)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a732469837b969d305ef752b257c0fc6f' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__Gl4SetUserCommand(Gl4UserCommandCallbackType_pCallback|_const_void_*pParam)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#adf046ccaeada2834e769085dbbc4445e' )
+SetUrl( 'ApiLink_nn__gfx__Queue', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#afceb1f20a49ed58f99e33f2324312e1b' )
+SetUrl( 'ApiLink_void_nn__gfx__TQueue__ExecuteCommand(TCommandBuffer__Target___*pCommandBuffer|_TFence__Target___*pFence)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_queue.html#a3513accbae08380417a92fb51043f1e8' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

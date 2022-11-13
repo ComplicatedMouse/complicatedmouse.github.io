@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Texture View | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Texture View -->
+<div class="pagetitle" id="PageId_83955952">Texture View</div>
+<div class="text_separate">
+<h1 id="Anchor_83955952_h1_1">Texture View</h1>
+<h2 id="Anchor_83955952_h2_1">Overview</h2>
+<p>Texture view provides the functionality for referencing some <a href="../Pages/Page_83955793.html">textures</a>.<br />Texture view does not manage the texture memory. That resembles referencing with C++.</p>
+<p>Although <a href="../Pages/Page_83955793.html">textures</a> cannot be directly set in the command buffer, a texture viewer can be set in a command buffer. When specifying the texture viewer, pair it with the corresponding sampler.</p>
+<p>Also, texture viewer provides features to interpret the dimension and format when they differ from the dimension and format of the source texture. However, to interpret the differences, they must be compatible. For more information about the compatible dimensions and formats, see the appropriate low level graphics API manual.</p>
+<h2 id="Anchor_83955952_h2_2">Information<a name="Anchor_83955952_Info"></a></h2>
+<p>Use <code><span class="ApiLink_nn__gfx__TextureViewInfo">nn::gfx::TextureViewInfo</span></code> to define the texture view information.</p>
+<h3 id="Anchor_83955952_h3_1">Dimension</h3>
+<p>Use the <code><span class="ApiLink_void_nn__gfx__TextureViewInfo__SetImageDimension(ImageDimension_value)_NN_NOEXCEPT">SetImageDimension</span></code> function to specify which dimension to use when interpreting the source texture. <br />This dimension must be compatible with the dimension of the source texture.<br />When the same dimension as the source texture is specified, compatibility is guaranteed.</p>
+<p>To create a cube map texture view, specify cube map for the dimension, and 6 for the array length of the sub-resource range. At this point, the dimension for the original texture must be 2D, and the array length must be at least 6.<br />To create a cube map array texture view, specify a cube map array for the dimension, and 6 * n for the array length of the sub-resource range. At this point, the dimension for the original texture must be 2D, and the array length must be at least 6 * n.</p>
+<h3 id="Anchor_83955952_h3_2">Format</h3>
+<p> Use the <code><span class="ApiLink_void_nn__gfx__TextureViewInfo__SetImageFormat(ImageFormat_value)_NN_NOEXCEPT">SetImageFormat</span></code> function to specify the format to use when interpreting the source texture.<br />This format must be compatible with the format of the source texture.<br />When the same format as the source texture is specified, compatibility is guaranteed.</p>
+<h3 id="Anchor_83955952_h3_3"> Texture Pointer</h3>
+<p>Use the <code><span class="ApiLink_void_nn__gfx__TextureViewInfo__SetTexturePtr(const_TTexture__TTarget___*value)_NN_NOEXCEPT">SetTexturePtr</span></code> function to specify which source texture to reference.<br />The source texture must be initialized in a way that includes <code><span class="ApiLink_nn__gfx__GpuAccess_Texture">nn::gfx::GpuAccess_Texture</span></code> or <span class="ApiLink_nn__gfx__GpuAccess_Image"><code>nn::gfx::GpuAccess_Image</code></span> as a method for GPU access.</p>
+<h3 id="Anchor_83955952_h3_4">Element Mapping</h3>
+<p>
+  <code>
+    <span class="ApiLink_void_nn__gfx__TextureViewInfo__SetChannelMapping(ChannelMapping_red|_ChannelMapping_green|_ChannelMapping_blue|_ChannelMapping_alpha)_NN_NOEXCEPT">SetChannelMapping</span>
+  </code> specifies which elements will correspond to red, green, blue, and alpha when texture sampling.<br />A  fixed value of <code>0</code> or <code>1</code> can  be selected instead of elements.</p>
+<h3 id="Anchor_83955952_h3_5">Sub Resource Range</h3>
+<p> Use the <span class="ApiLink_TextureSubresourceRange_&_nn__gfx__TextureViewInfo__EditSubresourceRange()_NN_NOEXCEPT">EditSubresourceRange</span> function to edit which area of the source texture to reference.<br />The area is continuous and is expressed by the mipmap range and the array range.</p>
+<h3 id="Anchor_83955952_h3_6">Depth Stencil Mode</h3>
+<p>If the texture is a depth stencil texture, use the <span class="ApiLink_void_nn__gfx__TextureViewInfo__SetDepthStencilTextureMode(DepthStencilFetchMode_value)_NN_NOEXCEPT"><code>SetDepthStencilTextureMode</code></span> function to set whether to fetch depth or stencil values.</p>
+<h2 id="Anchor_83955952_h2_3">Object<a name="Anchor_83955952_Object"></a></h2>
+<p>Use  <code><span class="ApiLink_nn__gfx__TextureView">nn::gfx::TextureView</span></code> to define the texture view object.</p>
+<h3 id="Anchor_83955952_h3_7">Initialization and Destruction</h3>
+<p>Texture views are initialized and finalized according to the rules for <a href="../Pages/Page_83955654.html">objects</a>.</p>
+<h2 id="Anchor_83955952_h2_4">Setting a Texture View</h2>
+<h3 id="Anchor_83955952_h3_8">Setting to the Descriptor Pool</h3>
+<p>The texture view is set to the descriptor pool as either a sampling texture (by using the <code><span class="ApiLink_nn__gfx__DescriptorPool">nn::gfx::DescriptorPool</span></code> class <code><span class="ApiLink_void_nn__gfx__TDescriptorPool__SetTextureView(int_indexSlot|_const_TTextureView__Target___*pTextureView)_NN_NOEXCEPT">SetTextureView</span></code> member function) or as an image for image load/store (by using the <code><span class="ApiLink_void_nn__gfx__TDescriptorPool__SetImage(int_indexSlot|_const_TTextureView__Target___*pImage)_NN_NOEXCEPT">SetImage</span></code> member function).<br />Get the descriptor slot for the set texture view using the <code><span class="ApiLink_nn__gfx__DescriptorPool">GetDescriptorSlot</span></code> function of the <code><span class="ApiLink_void_nn__gfx__TDescriptorPool__GetDescriptorSlot(DescriptorSlot_*pOutDescriptorSlot|_int_indexSlot)_const_NN_NOEXCEPT">nn::gfx::DescriptorPool</span></code> class.</p>
+<h3 id="Anchor_83955952_h3_9">Setting to the Command Buffer</h3>
+<p>To add a command to set a sampling texture, pair a texture with a sampler and set their values in the <code><span class="ApiLink_nn__gfx__CommandBuffer">SetTextureAndSampler</span></code> function of the <code><span class="ApiLink_void_nn__gfx__TCommandBuffer__SetTextureAndSampler(int_slot|_ShaderStage_stage|_const_DescriptorSlot_&textureDescriptor|_const_DescriptorSlot_&samplerDescriptor)_NN_NOEXCEPT">nn::gfx::CommandBuffer</span></code> class. To add a command to set an image for image load/store, use the <code><span class="ApiLink_nn__gfx__CommandBuffer">SetImage</span></code> function of the <code><span class="ApiLink_void_nn__gfx__TCommandBuffer__SetImage(int_slot|_ShaderStage_stage|_const_TTextureView__Target___*pImage)_NN_NOEXCEPT">nn::gfx::CommandBuffer</span></code> class. When using the descriptor pool, pass the descriptor slot as an argument. When not using it, pass the texture view.<br />At this time, set the shader slot number using the value dynamically obtained from the shader object.  (See <a href="../Pages/Page_83955873.html">Uniform Blocks and Sampler Initialization Overwrites in the GLSL Shader)</a>.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__TextureViewInfo', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_texture_view_info.html' )
+SetUrl( 'ApiLink_void_nn__gfx__TextureViewInfo__SetImageDimension(ImageDimension_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_texture_view_info.html#a172ca9e1807a64f8a029f5e6ef07735e' )
+SetUrl( 'ApiLink_void_nn__gfx__TextureViewInfo__SetImageFormat(ImageFormat_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_texture_view_info.html#accbd6647f7d583cfeaddeecfdc48843e' )
+SetUrl( 'ApiLink_void_nn__gfx__TextureViewInfo__SetTexturePtr(const_TTexture__TTarget___*value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_texture_view_info.html#a541b3523db0743886085c5f17a13acf2' )
+SetUrl( 'ApiLink_nn__gfx__GpuAccess_Texture', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a24dbcd6d86531138895622b5a854e4f5a4a531ae2d7e145f647300ea67bc76ccc' )
+SetUrl( 'ApiLink_nn__gfx__GpuAccess_Image', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a24dbcd6d86531138895622b5a854e4f5a651b4131559d89eabd39541b70986048' )
+SetUrl( 'ApiLink_void_nn__gfx__TextureViewInfo__SetChannelMapping(ChannelMapping_red|_ChannelMapping_green|_ChannelMapping_blue|_ChannelMapping_alpha)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_texture_view_info.html#a8706781da06568ef9ee3da23a6971f49' )
+SetUrl( 'ApiLink_TextureSubresourceRange_&_nn__gfx__TextureViewInfo__EditSubresourceRange()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_texture_view_info.html#af3e48d110aab5ddeecab6215644aa492' )
+SetUrl( 'ApiLink_void_nn__gfx__TextureViewInfo__SetDepthStencilTextureMode(DepthStencilFetchMode_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_texture_view_info.html#a9ece67d0103ea8dfbdb1603fb86cfd17' )
+SetUrl( 'ApiLink_nn__gfx__TextureView', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ac96ae14e7816fb1316ccc186a52eb9aa' )
+SetUrl( 'ApiLink_nn__gfx__DescriptorPool', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a8328da4b85c36c8bdeade65a44196d84' )
+SetUrl( 'ApiLink_void_nn__gfx__TDescriptorPool__SetTextureView(int_indexSlot|_const_TTextureView__Target___*pTextureView)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#af45507b68edfff5b381d5e62e5fa4157' )
+SetUrl( 'ApiLink_void_nn__gfx__TDescriptorPool__SetImage(int_indexSlot|_const_TTextureView__Target___*pImage)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#a212777e735a221db13aa967049f20659' )
+SetUrl( 'ApiLink_void_nn__gfx__TDescriptorPool__GetDescriptorSlot(DescriptorSlot_*pOutDescriptorSlot|_int_indexSlot)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#ac2b65342f8057bd6423d99bfa6aa526b' )
+SetUrl( 'ApiLink_nn__gfx__CommandBuffer', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#af719859a76c249a182d878f0cffd47c5' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetTextureAndSampler(int_slot|_ShaderStage_stage|_const_DescriptorSlot_&textureDescriptor|_const_DescriptorSlot_&samplerDescriptor)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a9467eab0515bf34ac7db35da6ced273f' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetImage(int_slot|_ShaderStage_stage|_const_TTextureView__Target___*pImage)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#acb321e56aa3ed060c7c8134d7b479b40' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

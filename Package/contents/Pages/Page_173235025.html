@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Important Information for the Six-Axis Sensor | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Important Information for the Six-Axis Sensor -->
+<div class="pagetitle" id="PageId_173235025">Important Information for the Six-Axis Sensor</div>
+<div class="text_separate">
+<h1 id="Anchor_173235025_h1_1">Introduction</h1>
+<p>The section is a collection of important information for application developers about handling the sensor input provided by the <code>SixAxisSensor</code>.</p>
+<h2 id="Anchor_173235025_h2_1">Support for Static Noise</h2>
+<p>
+  <strong>Applications that use minute sensor input must account for static noise in the sensor.</strong>
+</p>
+<p>Even when the controller appears to be stationary, a small amount of input due to noise generated in the sensor is steadily entered for both acceleration and angular velocity. (For convenience, this input is called <em>static noise</em>.)</p>
+<p>This static noise is generated randomly within the following ranges for each axis of <span class="ApiLink_nn__hid__SixAxisSensorState__acceleration"><code>SixAxisSensorState::acceleration</code></span> and <span class="ApiLink_nn__hid__SixAxisSensorState__angularVelocity"><code>SixAxisSensorState::angularVelocity</code></span>.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Sensor Value</th>
+      <th>Maximum Static Noise</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__SixAxisSensorState__acceleration">acceleration</span>
+      </td>
+      <td>&plusmn;0.02</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__SixAxisSensorState__angularVelocity">angularVelocity</span>
+      </td>
+      <td>&plusmn;0.005</td>
+    </tr>
+  </tbody>
+</table>
+<p>Handle a small amount of  input in an appropriate way, for example, by truncating the values so that your application does not mistake static noise for input.</p>
+<p />
+<p>At times such as when the user has placed the controller on a table, use the <span class="ApiLink_bool_nn__hid__IsSixAxisSensorAtRest(const_SixAxisSensorHandle_&handle)_NN_NOEXCEPT">IsSixAxisSensorAtRest()</span> function to determine whether the controller is stationary and there is no user input.</p>
+<p>
+  <span style="letter-spacing: 0.0px;">Static noise increases in the six-axis sensor when the IR Motion Camera is used, so we do not recommend using this function to determine whether the controller is at rest.</span>
+</p>
+<p>Also, <span style="color: rgb(23,43,77);">we do not recommend using the feature for determining whether the controller is at rest, because acceleration and angular velocity are included even for trivial noises when the speakers play a strong sound at high volume.</span></p>
+<h2 id="Anchor_173235025_h2_2">Handling Sensitivity Drift</h2>
+<p>
+  <strong>Account for changes in sensitivity due to humidity, temperature, and aging.</strong>
+</p>
+<p>When you implement your application, consider that sensor sensitivity can vary by as much as &plusmn;8% along each axis for <span class="ApiLink_nn__hid__SixAxisSensorState__acceleration"><code>SixAxisSensorState::acceleration</code></span> and <span class="ApiLink_nn__hid__SixAxisSensorState__angularVelocity"><code>SixAxisSensorState::angularVelocity</code></span>.</p>
+<p>Even among controllers of the same type, there are individual differences that can significantly alter the feel of gameplay.</p>
+<p> For example, if operations are judged based on whether the input value simply exceeds the threshold value, then the nature of gameplay in your title will change because two different controllers will generate different input values for the same operation.</p>
+<p> If the game requires the user to perform subtle operations, you may need to adjust the input sensitivity because the sensor sensitivity greatly affects how these motions are detected.</p>
+<h2 id="Anchor_173235025_h2_3">Support for Zero-Point Drift</h2>
+<p>
+  <strong>Applications that use at-rest determination or information about minute changes in attitude must take zero-point drift into account.</strong>
+</p>
+<p>When you implement your application, consider that the zero point for the accelerometer can accrue as much as &plusmn; 0.13 G of drift along each axis for <code><span class="ApiLink_nn__hid__SixAxisSensorState__acceleration">SixAxisSensorState::acceleration</span></code>.</p>
+<p>The zero point of the gyroscope is dynamically and successively corrected in the system.</p>
+<p>When the user is not shaking the controller and the sensor input is stable,<strong> </strong>the gyroscope's zero point is corrected and drift discrepancies are canceled out.</p>
+<p>Unintended input may be input in the transition period until automatic correction is complete.</p>
+<h2 id="Anchor_173235025_h2_4">
+  <code>
+    <span class="ApiLink_nn__hid__GetSixAxisSensorState">nn::hid::GetSixAxisSensorState</span>
+  </code> Sometimes gets an invalid attitude rotation.</h2>
+<h6 id="Anchor_173235025_h6_1">Symptoms</h6>
+<p>The <code>SixAxisSensorState::direction</code> value obtained by <code><span class="ApiLink_nn__hid__GetSixAxisSensorState">nn::hid::GetSixAxisSensorState</span></code> is sometimes an invalid attitude rotation (a zero matrix or an identify matrix).</p>
+<p>A zero matrix can be obtained in the following situations.</p>
+<ul class="alternate">
+  <li>No sampling is performed after the application starts.</li>
+  <li>An Npad play format based on <code>SixAxisSensorHandle</code> is not enabled.</li>
+  <li>Immediately after control has returned to the application from an applet or HOME.</li>
+</ul>
+<p>An identify matrix can be obtained in the following situations.</p>
+<ul class="alternate">
+  <li>Immediately after the controller has established a wireless connection</li>
+  <li>When sampling does not start (<code><span class="ApiLink_nn__hid__StartSixAxisSensor">nn::hid::StartSixAxisSensor</span></code> has not been called or <code><span class="ApiLink_nn__hid__StopSixAxisSensor">nn::hid::StopSixAxisSensor</span></code> has been called)</li>
+</ul>
+<p>In use cases where a time-series variation of attitude rotation is used, it is possible when getting the attitude rotation amount in one of these cases for the values to be deemed as abrupt rotating positions or discontinuous movement.</p>
+<p>When getting a zero matrix or identity matrix, the quaternion obtained by <code><span class="ApiLink_nn__hid__SixAxisSensorState__GetQuaternion">nn::hid::SixAxisSensorState::GetQuaternion</span>()</code> is <code>(Q, X, Y, Z) = (1.0f, 0.f, 0.f, 0.f)</code>.</p>
+<h6 id="Anchor_173235025_h6_2">Workaround</h6>
+<p>If <code>SixAxisSensorState::direction</code> returns a zero matrix or an identity matrix, assume the value is invalid and discard it.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__SixAxisSensorState__acceleration', '../../../Api/HtmlNX/structnn_1_1hid_1_1_six_axis_sensor_state.html#aa66ff48ea73363a4c112b65df7d39d60' )
+SetUrl( 'ApiLink_nn__hid__SixAxisSensorState__angularVelocity', '../../../Api/HtmlNX/structnn_1_1hid_1_1_six_axis_sensor_state.html#ad72278b7dd3bb8c5410d33eca1fe59a8' )
+SetUrl( 'ApiLink_bool_nn__hid__IsSixAxisSensorAtRest(const_SixAxisSensorHandle_&handle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a3146b6ef32e7228a5580833a41f4e3fd' )
+SetUrl( 'ApiLink_nn__hid__GetSixAxisSensorState', '../../../Api/HtmlNX/namespacenn_1_1hid.html#ae3fb413f442f5c150025765fd6c2cfb8' )
+SetUrl( 'ApiLink_nn__hid__StartSixAxisSensor', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a3a9ed9cc3e5b674c40cbf08a93ebdb62' )
+SetUrl( 'ApiLink_nn__hid__StopSixAxisSensor', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a58870d9163a3be00cefe3ad6bb8e1852' )
+SetUrl( 'ApiLink_nn__hid__SixAxisSensorState__GetQuaternion', '../../../Api/HtmlNX/structnn_1_1hid_1_1_six_axis_sensor_state.html#ac9e0928b1d6eaf8064a24bd0fb51f81a' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

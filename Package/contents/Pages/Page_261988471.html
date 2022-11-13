@@ -1,0 +1,362 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Converting to Character Codes. | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Converting to Character Codes. -->
+<div class="pagetitle" id="PageId_261988471">Converting to Character Codes.</div>
+<div class="text_separate">
+<h1 id="Anchor_261988471_h1_1">Feature Overview</h1>
+<p>Provides a feature for converting keyboard key codes (USB HID Keyboard/Keypad Page Usage ID) into character codes (UTF-16).</p>
+<p>
+  <br />
+</p>
+<p>Character code conversion is based on the character code conversion table  (<span class="ApiLink_nn__kpr__KeyCodeMap">KeyCodeMap</span>).</p>
+<p>Call the <span class="ApiLink_void_nn__kpr__GetKeyCodeMap(KeyCodeMap_*pOutValue)_noexcept">GetKeyCodeMap()</span> function to get the keyboard array specified in the system settings and the corresponding  <span class="ApiLink_nn__kpr__KeyCodeMap">KeyCodeMap</span>.</p>
+<p>To match the changes to the system settings, you must get the <span class="ApiLink_nn__kpr__KeyCodeMap">KeyCodeMap</span> again.</p>
+<p>
+  <br />
+</p>
+<p>To convert to character codes, call  <span class="ApiLink_nn__kpr__GetKeyCode">GetKeyCode()</span> while specifying the key code and modifier state  (<span class="ApiLink_nn__hid__KeyboardModifierSet">nn::hid::KeyboardModifierSet</span>) and character code conversion table and conversion mode for that table  (<span class="ApiLink_nn__kpr__KeyCodeMapMode">KeyCodeMapMode</span>).</p>
+<p>
+  <span class="ApiLink_nn__kpr__GetKeyCode">GetKeyCode()</span> does not have an internal state, so the same result is returned for the same parameter.</p>
+<p>The character code value can be referenced from  <span class="ApiLink_nn__kpr__KeyCode__code">KeyCode::code</span>. If no character code corresponds to the specified parameter, the  <span class="ApiLink_nn__kpr__KeyCode__code">KeyCode::code</span> value is set to <code>0</code>.</p>
+<p>
+  <span class="ApiLink_nn__kpr__KeyCode__attributes">KeyCode::attributes</span> includes the attribute information for the character code that was obtained.</p>
+<p>Reference <span class="ApiLink_nn__kpr__KeyCodeAttribute__IsPrintable">KeyCodeAttribute::IsPrintable</span> to differentiate between printable characters and control characters such as dead keys.</p>
+<p>Reference <span class="ApiLink_nn__kpr__KeyCodeAttribute__IsAsciiConvertible">KeyCodeAttribute::IsAsciiConvertible</span> to differentiate between characters that exist in the supported ASCII character code and those that do not.</p>
+<p>
+  <br />
+</p>
+<p>If multiple conversion modes exist in the character conversion table, specify the conversion mode (<span class="ApiLink_nn__kpr__KeyCodeMapMode">KeyCodeMapMode</span>) to switch between them.</p>
+<p>Call the <span class="ApiLink_bool_nn__kpr__IsKeyCodeMapModeSupported(const_KeyCodeMap_&map|_KeyCodeMapMode_mode)_noexcept">IsKeyCodeMapModeSupported()</span> function to determine whether the character conversion table supports the conversion mode.</p>
+<p>If the character conversion table is valid, <span class="ApiLink_nn__kpr__KeyCodeMapMode__Default">KeyCodeMapMode::Default</span> is always supported.</p>
+<p>If an unsupported conversion mode is specified, the same result is returned as when <span class="ApiLink_nn__kpr__KeyCodeMapMode__Default">KeyCodeMapMode::Default</span> is specified.</p>
+<p>
+  <br />
+</p>
+<p>Specify <span class="ApiLink_nn__kpr__KeyCodeMapMode__Hiragana">KeyCodeMapMode::Hiragana</span> or <span class="ApiLink_nn__kpr__KeyCodeMapMode__Katakana">KeyCodeMapMode::Katakana</span> as appropriate when supporting Japanese kana input.</p>
+<p>Specify <span class="ApiLink_nn__kpr__KeyCodeMapMode__Cyrillic">KeyCodeMapMode::Cyrillic</span> as appropriate when supporting Cyrillic.</p>
+<p>
+  <br />
+</p>
+<p>Simplified Chinese, Traditional Chinese, and Korean layouts are also supported in NintendoSDK 6.0.0 and later.</p>
+<p>When getting Hangul (Korean) input, specify <span class="ApiLink_nn__kpr__KeyCodeMapMode__Hangul">KeyCodeMode::Hangul</span>.</p>
+<p>When supporting Zhuyin and Cangjie input methods, specify <span class="ApiLink_nn__kpr__KeyCodeMapMode__Zhuyin">KeyCodeMapMode::Zhuyin</span> or <span class="ApiLink_nn__kpr__KeyCodeMapMode__Cangjie">KeyCodeMapMode::Cangjie</span> as appropriate.<br /></p>
+<h1 id="Anchor_261988471_h1_2">Determining Keyboard Layouts</h1>
+<p>In NintendoSDK 6.2.0 and later versions, determine the keyboard layout as follows, referring to the keyboard layout setting and language setting values.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Keyboard Layout Setting</th>
+      <th>Language</th>
+      <th>Keyboard Layouts</th>
+    </tr>
+    <tr>
+      <td>Japanese</td>
+      <td style="text-align: center;">*</td>
+      <td>Japanese</td>
+    </tr>
+    <tr>
+      <td>English (US)</td>
+      <td style="text-align: left;">Languages other than Chinese and Korean</td>
+      <td>English (US)</td>
+    </tr>
+    <tr>
+      <td>English (UK)</td>
+      <td style="text-align: center;">*</td>
+      <td>English (UK)</td>
+    </tr>
+    <tr>
+      <td>French</td>
+      <td style="text-align: center;">*</td>
+      <td>French</td>
+    </tr>
+    <tr>
+      <td>French (Canada)</td>
+      <td style="text-align: center;">*</td>
+      <td>French (Canada)</td>
+    </tr>
+    <tr>
+      <td>Spanish</td>
+      <td style="text-align: center;">*</td>
+      <td>Spanish</td>
+    </tr>
+    <tr>
+      <td>Spanish (Latin America)</td>
+      <td style="text-align: center;">*</td>
+      <td>Spanish (Latin America)</td>
+    </tr>
+    <tr>
+      <td>German</td>
+      <td style="text-align: center;">*</td>
+      <td>German</td>
+    </tr>
+    <tr>
+      <td>Italian</td>
+      <td style="text-align: center;">*</td>
+      <td>Italian</td>
+    </tr>
+    <tr>
+      <td>English (US-International)</td>
+      <td style="text-align: center;">*</td>
+      <td>English (US-International)</td>
+    </tr>
+    <tr>
+      <td>Portuguese</td>
+      <td style="text-align: center;">*</td>
+      <td>Portuguese</td>
+    </tr>
+    <tr>
+      <td>Russian</td>
+      <td style="text-align: center;">*</td>
+      <td>Russian</td>
+    </tr>
+    <tr>
+      <td>English (US)</td>
+      <td style="text-align: left;">Chinese (Simplified)</td>
+      <td>Simplified Chinese</td>
+    </tr>
+    <tr>
+      <td>English (US)</td>
+      <td style="text-align: left;">Chinese (Traditional)</td>
+      <td>Traditional Chinese</td>
+    </tr>
+    <tr>
+      <td>English (US)</td>
+      <td style="text-align: left;">Korean</td>
+      <td>Korean</td>
+    </tr>
+  </tbody>
+</table>
+<p>In NintendoSDK 6.1.0 and earlier versions, determine the keyboard layout as follows, referring to the language setting values.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 204.0px;" />
+    <col style="width: 208.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Language</th>
+      <th>Keyboard Layouts</th>
+    </tr>
+    <tr>
+      <td>Japanese</td>
+      <td>Japanese</td>
+    </tr>
+    <tr>
+      <td>English (US region)</td>
+      <td>English (US)</td>
+    </tr>
+    <tr>
+      <td>English (EU region)</td>
+      <td>English (UK)</td>
+    </tr>
+    <tr>
+      <td>French (US region)</td>
+      <td>French (Canada)</td>
+    </tr>
+    <tr>
+      <td>French (EU region)</td>
+      <td>French</td>
+    </tr>
+    <tr>
+      <td>Spanish (US region)</td>
+      <td>Spanish (Latin America)</td>
+    </tr>
+    <tr>
+      <td>Spanish (EU region)</td>
+      <td>Spanish</td>
+    </tr>
+    <tr>
+      <td>German</td>
+      <td>German</td>
+    </tr>
+    <tr>
+      <td>Italian</td>
+      <td>Italian</td>
+    </tr>
+    <tr>
+      <td>Dutch</td>
+      <td>English (US-International)</td>
+    </tr>
+    <tr>
+      <td>Portuguese</td>
+      <td>Portuguese</td>
+    </tr>
+    <tr>
+      <td>Russian</td>
+      <td>Russian</td>
+    </tr>
+    <tr>
+      <td>Chinese (Simplified)</td>
+      <td>Simplified Chinese</td>
+    </tr>
+    <tr>
+      <td>Chinese (Traditional)</td>
+      <td>Traditional Chinese</td>
+    </tr>
+    <tr>
+      <td>Korean</td>
+      <td>Korean</td>
+    </tr>
+    <tr>
+      <td>Other</td>
+      <td>English (US)</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_261988471_h1_3">How to Use</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;memory&gt;
+#include &lt;nn/nn_Log.h&gt;
+#include &lt;nn/nn_TimeSpan.h&gt;
+#include &lt;nn/hid/hid_Keyboard.h&gt;
+#include &lt;nn/kpr/kpr_KeyCode.h&gt;
+#include &lt;nn/os/os_Thread.h&gt;
+#include &lt;nn/util/util_CharacterEncoding.h&gt;
+</span>
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">InitializeKeyboard</span><span class="p">();</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;Waiting for keyboard input</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">SleepThread</span><span class="p">(</span><span class="nn">nn::TimeSpan::</span><span class="n">FromSeconds</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">KeyboardState</span> <span class="n">state</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetKeyboardState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">state</span><span class="p">.</span><span class="n">modifiers</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::hid::KeyboardModifier::</span><span class="n">NumLock</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="c1">// 1. Get the character code conversion chart.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">std::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="nn">nn::kpr::</span><span class="n">KeyCodeMap</span><span class="o">&gt;</span> <span class="n">pMap</span><span class="p">(</span><span class="k">new</span> <span class="nn">nn::kpr::</span><span class="n">KeyCodeMap</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::kpr::</span><span class="n">GetKeyCodeMap</span><span class="p">(</span><span class="n">pMap</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="nn">nn::hid::KeyboardKey::A::</span><span class="n">Index</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nn">nn::hid::KeyboardKey::ZenkakuHankaku::</span><span class="n">Index</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">keys</span><span class="p">.</span><span class="n">Test</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+<span class="c1">// 2. Convert the key code to a character code.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::kpr::</span><span class="n">KeyCode</span> <span class="n">code</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::kpr::</span><span class="n">GetKeyCode</span><span class="p">(</span><span class="o">&amp;</span><span class="n">code</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">state</span><span class="p">.</span><span class="n">modifiers</span><span class="p">,</span> <span class="o">*</span><span class="n">pMap</span><span class="p">,</span> <span class="nn">nn::kpr::KeyCodeMapMode::</span><span class="n">Default</span><span class="p">);</span>
+
+<span class="c1">// 3. Output printable character codes to the log if they exist.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">code</span><span class="p">.</span><span class="n">attributes</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::kpr::KeyCodeAttribute::</span><span class="n">IsPrintable</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">achar</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">ConvertStringUtf16NativeToUtf8</span><span class="p">(</span><span class="n">achar</span><span class="p">,</span> <span class="n">NN_ARRAY_SIZE</span><span class="p">(</span><span class="n">achar</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">code</span><span class="p">.</span><span class="n">code</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;Code %02X was converted to %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">achar</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__kpr__KeyCodeMap', '../../../Api/HtmlNX/structnn_1_1kpr_1_1_key_code_map.html' )
+SetUrl( 'ApiLink_void_nn__kpr__GetKeyCodeMap(KeyCodeMap_*pOutValue)_noexcept', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a37c971cd726502e1ebbfc0aa365224e8' )
+SetUrl( 'ApiLink_nn__kpr__GetKeyCode', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#aa4db9ff402126de12437f59f91c1dddc' )
+SetUrl( 'ApiLink_nn__hid__KeyboardModifierSet', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a93f953afa0aacfb8081e7d7d028bb96c' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeMapMode', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a5bf2ba4864b5e6da1ac9b325dac6ed4b' )
+SetUrl( 'ApiLink_nn__kpr__KeyCode__code', '../../../Api/HtmlNX/structnn_1_1kpr_1_1_key_code.html#a507df9e53b31a341f6de451f33b3f49e' )
+SetUrl( 'ApiLink_nn__kpr__KeyCode__attributes', '../../../Api/HtmlNX/structnn_1_1kpr_1_1_key_code.html#aca4b8ca675b69785868bc9968585bbe7' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeAttribute__IsPrintable', '../../../Api/HtmlNX/structnn_1_1kpr_1_1_key_code_attribute.html#aa3b984738a58e1864edbbdf21fe8bcfd' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeAttribute__IsAsciiConvertible', '../../../Api/HtmlNX/structnn_1_1kpr_1_1_key_code_attribute.html#ab5d29959ca8458c490dfe6acf49dcd7b' )
+SetUrl( 'ApiLink_bool_nn__kpr__IsKeyCodeMapModeSupported(const_KeyCodeMap_&map|_KeyCodeMapMode_mode)_noexcept', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a75664c56f300cd59423bf58be2a1deed' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeMapMode__Default', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a5bf2ba4864b5e6da1ac9b325dac6ed4ba7a1920d61156abc05a60135aefe8bc67' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeMapMode__Hiragana', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a5bf2ba4864b5e6da1ac9b325dac6ed4ba8a669786c77c822944af012803ce7ab5' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeMapMode__Katakana', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a5bf2ba4864b5e6da1ac9b325dac6ed4baedb097c9a1cb7aed483367f825211f75' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeMapMode__Cyrillic', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a5bf2ba4864b5e6da1ac9b325dac6ed4ba4baf319143e8257bc8f7061e54525078' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeMapMode__Hangul', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a5bf2ba4864b5e6da1ac9b325dac6ed4ba614a55cdf2537954043d5b01d175285a' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeMapMode__Zhuyin', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a5bf2ba4864b5e6da1ac9b325dac6ed4baf6319e9709567e5a98a6cb4597312f7a' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeMapMode__Cangjie', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a5bf2ba4864b5e6da1ac9b325dac6ed4bae4b1ccfaf19287add6715a00afc6f3a3' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

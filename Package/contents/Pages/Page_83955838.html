@@ -1,0 +1,238 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Texture | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Texture -->
+<div class="pagetitle" id="PageId_83955838">Texture</div>
+<div class="text_separate">
+<p>This section describes the following considerations when using textures.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955838_h1_1">Texture Names</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955838_h1_2">Texture Nodes</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955838_h1_3">Texture Files and Formats</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955838_h1_4">Valid Attributes</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955838_h1_5">Multi-UV</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955838_h1_6">Normal mapping</a>
+    </li>
+  </ul>
+</p>
+<p>
+  <a name="Anchor_83955838_tex_name"></a>
+</p>
+<h1 id="Anchor_83955838_h1_1">Texture Names</h1>
+<p>The filename of the texture, excluding the extension, is exported as the texture name.</p>
+<p>If you leave the <strong>Image Name</strong> attribute in the file node empty, the texture name is exported as a blank name. However, an error occurs if the image name is blank if the export of <a href="../Pages/Page_83955527.html">texture pattern animation</a> has been specified and <strong>Use Image Sequence</strong> has been selected.</p>
+<p>
+  <a name="Anchor_83955838_tex_node"></a>
+</p>
+<h1 id="Anchor_83955838_h1_2">Texture Nodes</h1>
+<p>You can use <strong>file nodes (single texture)</strong> or <strong>layeredTexture nodes (multitextures)</strong> as textures with the following attributes for standard materials.</p>
+<ul>
+  <li>Color</li>
+  <li>Transparency</li>
+  <li>Incandescence</li>
+  <li>Specular color</li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the same texture file is used by a color and alpha attribute, an opaque texture sampler is not exported.</p>
+  </div>
+</div>
+<p>
+  <strong style="letter-spacing: 0.0px;">File nodes</strong>, <strong style="letter-spacing: 0.0px;">layeredTexture nodes</strong>, <strong style="letter-spacing: 0.0px;">envBall nodes (environmental spheres)</strong>, and <strong style="letter-spacing: 0.0px;">envCube nodes (environmental cubes)</strong> can be used as textures in a standard material's <strong style="letter-spacing: 0.0px;">Reflection Color</strong> attribute.</p>
+<ul>
+  <li>For a file node (<code>envBall</code> node), you can specify a file containing an <a href="../Pages/Page_239574379.html#Anchor_239574379_horizontal_cross">horizontal or vertical cross-shaped cube map</a>. (If the height and width are not right for a cube map, the image is exported as an ordinary 2D texture.)</li>
+  <li>For an <code>envCube</code> node, if a file node is connected to each surface, the filename (without extension) associated with the <strong>Front Face</strong> is used as the texture name.</li>
+  <li>You can also use a DDS cube map file by attaching it to the file node of the <strong>right face</strong> of the <code>envCube</code> node.</li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Make sure that you connect a file node or <code>envCube</code> node to the <code>layeredTexture</code> node.</p>
+  </div>
+</div>
+<p>Procedure textures, such as <code>checker</code> and <code>ramp</code>, cannot be exported in their original form. Use <strong>Convert to File Texture</strong> to convert them to file and then export them.<br />Use the <strong>Export images to disk</strong> button in the attribute editor to convert substances to file nodes before exporting.</p>
+<p>Set the mapping method in the Create Render Node window to <strong>Normal</strong>. (<strong>As projection</strong> and <strong>As stencil</strong> are not supported.)</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>PSD file textures (<code>psdFileTex</code> nodes) cannot be exported.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The UV tiling feature is not supported.</p>
+  </div>
+</div>
+<p>Textures are exported in the &lt;<code>sampler_array</code>&gt; element of the intermediate file in the following order of attributes they are attached to.</p>
+<ol>
+  <li>Color</li>
+  <li>Transparency</li>
+  <li>Incandescence</li>
+  <li>Bump Mapping</li>
+  <li>Specular color</li>
+  <li>Reflected Color</li>
+</ol>
+<p>If a <code>layeredTexture</code> node is attached, textures are exported starting from the top (left).</p>
+<p>Names and hints used in the <code>&lt;sampler&gt;</code> element of the intermediate file are, by default, automatically determined based on the node the file node is connected to.<br /> To specify a sampler name and hint, use the <a href="../Pages/Page_83956027.html">plug-in for setting sampler attributes</a>.</p>
+<p>If an envCub node is being used, set sampler attributes for the file node connected to the <strong>front face</strong> or <strong>right face</strong>.<br />You can export textures attached to the <strong>Translucence Depth</strong> attribute of a standard material using the plug-in for setting sampler attributes.<br />You can restrain export of a file node by setting a string starting with <strong>nw_ignore</strong> in <strong>Hint Information</strong> with the plug-in for setting sampler attributes. Exporting is the same as when the specified file node does not exist.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Due to a bug in Maya, texture attached to <strong>Translucence Depth</strong> is not displayed on relationship editor by default.<br />The following is required to specify the UV set for the texture attached to <strong>Translucence Depth</strong>.<br />Right-click the right outliner in relationship editor (with the UV link at the center of UV) and turn off <strong>Display</strong> &gt; <strong>Connected</strong>. A list of all attributes appears.<br />In the <strong>View</strong> &gt; <strong>Select Attribute</strong> menu on the right, turn on <strong>Translucence Depth</strong> to only display the file nodes that are connected to <strong>Translucence Depth</strong>.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>For <a href="../Pages/Page_83955689.html#Anchor_83955689_h1_4">extended materials</a>, the textures linked to the attributes specified in the config file are exported.<br />The order in which <code>&lt;sampler_array&gt;</code> are exported is the same as the order specified in the config file.<br />You can also use the <a href="../Pages/Page_83956027.html">plug-in for setting sampler attributes</a> for the <code>file</code> node connected to an extended material.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>
+  <a name="Anchor_83955838_tex_format"></a>
+</p>
+<h1 id="Anchor_83955838_h1_3">Texture Files and Formats</h1>
+<p>When you export an FTX file from Maya, use TGA, PNG, or DDS for texture files. (All of the image file formats supported by Maya can be used when creating an FTX file with another tool.)<br />16 bit/channel PNG files are handled as real-number type files.<br /> Only the following formats are supported for DDS files: R8G8B8, A8R8G8B8, A16B16G16R16F, and A32B32G32R32F.</p>
+<p>Mipmap data that may be present in the texture file is not applied in these files. Mipmaps are created by compressing the top-level image at the time of export.</p>
+<p>The texture format is automatically determined based on the following rules.<br />At this time, texture images having an 8-bit alpha value of 255 are treated as opaque, those with a value of 0 are treated as transparent, and those with a value ranging from 1 to 254 are treated as translucent.</p>
+<ul>
+  <li>If R = G = B for all texels:<ul><li>All texels are opaque &rarr; unorm_bc4</li><li>Both transparent and translucent texels are present &rarr; unorm_bc5</li></ul></li>
+  <li>If there are texels for which R = G = B is not true:<ul><li>All texels are opaque &rarr; unorm_bc1 or srgb_bc1</li><li>Transparent texels are present, but there are no translucent ones (missing texture) &rarr; unorm_bc1or srgb_bc1</li><li>Translucent texels are present &rarr; unorm_bc3 or srgb_bc3</li></ul></li>
+</ul>
+<p>Set whether to use a unorm_* or srgb_* format in the <a href="../Pages/Page_83956186.html#Anchor_83956186_config_file">config file</a>.</p>
+<p>The default format for normal map textures is <code>snorm_bc5</code>, but you can modify this in the <a href="../Pages/Page_83956186.html#Anchor_83956186_config_file">config file</a>.<br /> <code>float_16_16_16_16</code> is always used as the format for real number texture files.</p>
+<p>
+  <a name="Anchor_83955838_valid_attribute"></a>
+</p>
+<h1 id="Anchor_83955838_h1_4">Valid Attributes</h1>
+<p>The following place2dTexture node attributes are applied in intermediate files: <strong>Translate Frame</strong>, <strong>Rotate Frame</strong>, <strong>Mirror U</strong>, <strong>Mirror V</strong>, <strong>Wrap U</strong>, <strong>Wrap V</strong>, and <strong>Repeat UV</strong>.<br />However, textures connected to the reflected color attribute of the standard material (<strong>Reflected Color</strong>) do not have the attribute of the <code>place2dTexture</code> node applied.</p>
+<p>Make sure that you set the <strong>Coverage</strong> attribute of the place2dTexture node to (1, 1), <strong>Offset</strong> to (0, 0), and <strong>Rotate UV</strong> to 0.</p>
+<p>Attributes of layeredTexture nodes are not exported to intermediate files.</p>
+<p>
+  <a name="Anchor_83955838_multiple_uv"></a>
+</p>
+<h1 id="Anchor_83955838_h1_5">Multi-UV</h1>
+<p>UV sets used by textures and UV sets having names that start with <code>nw4f_uv</code> or <code>nw4f_fix</code> are exported as texture coordinates of the intermediate file. Up to eight sets per vertex can be exported for texture coordinates.<br />However, texture coordinates are not exported for textures connected to the reflected color attribute of the standard material (<strong>Reflected Color</strong>).</p>
+<p>If a single material is assigned to multiple objects, make sure that you share texture and UV set combinations among all objects.<br /> For example, if &quot;Tex1&quot; and &quot;Tex2&quot; both use the same UV set, &quot;uvSet1&quot;, for a specified object, &quot;Tex1&quot; and &quot;Tex2&quot; must also use the same UV set, &quot;uvSet1&quot;, for other objects.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The UV set name may differ as long as the combination of textures that use the same UV set matches.</p>
+  </div>
+</div>
+<p>UV sets used by textures connected to the following attributes are assigned in the order they appear in the &lt;<code>vtx_attrib</code>&gt; element of the intermediate file, starting with <code>uv0</code> for the hint node. (Only one UV set is exported when more than one texture shares the same UV set.)</p>
+<ol>
+  <li>Color</li>
+  <li>Transparency</li>
+  <li>Incandescence</li>
+  <li>Bump Mapping</li>
+  <li>Specular color</li>
+</ol>
+<p>You can explicitly specify hint assignments by giving UV sets names that start with <code>nw4f_fixN</code>.</p>
+<p>If a <code>layeredTexture</code> node is attached, UV sets used by textures are assigned starting from the top (left).<br /> After UV sets being used are assigned, UV sets not being used are assigned in alphabetical order starting from <code>nw4f_uv</code> or <code>nw4f_fix_</code>.<br /> If a UV set name starts with <code>nw4f_fix_</code>, the part of the string after <code>nw4f_fix_</code> is used for name under the <code>&lt;vtx_attrib&gt;</code> element.</p>
+<p>For example, UV sets would be assigned as follows for a UV set named uvSet1 being used for color, a UV set named uvSet2 being used for transparency, and two UV sets, nw4f_uv_a and nw4f_uv_b, that are not being used.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>uv0 : uvSet1 (name is <code>_u0</code>)<br />uv1 : uvSet2 (name is <code>_u1</code>)<br />uv2 : nw4f_uv_a (name is <code>_u2</code>)<br />uv3 : nw4f_uv_b (name is <code>_u3</code>)</p>
+  </div>
+</div>
+<p>If you use a UV set named <code><strong>nw4f_fixN</strong></code> (where <code>N</code> is an integer in the range from 0 through 254), you can directly specify the assignment for <code>hint</code> of the  &lt;<code>vtx_attrib</code>&gt; element.<br /> For example, if the UV set is named <strong>nw4f_fix3</strong>, <code>hint</code> is exported as <strong>uv3</strong>.</p>
+<p>When the name of a UV set starts with <code>nw4f_fixN</code>, make sure that the UV set name used by the texture is the same in all objects.<br /> UV sets with names that do not start with <code>nw4f_fixN</code> are assigned to empty hints in order from the beginning.</p>
+<p>If a UV set name starts with <code>nw4f_fixN_</code>, the part of the string after <code>nw4f_fixN_</code> is used for name under the <code>&lt;vtx_attrib&gt;</code> element.</p>
+<p>For example, the assignments are as follows for a UV set named <code>uvSet1</code> that is used for color, and three UV sets that are not being used named <code>nw4f_fix_decal</code>, <code>nw4f_fix0</code>, and <code>nw4f_fix7_bake</code>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>uv0 : nw4f_fix0 (name is <code>_u0</code>)<br />uv1 : uvSet1 (name is <code>_u1</code>)<br />uv2 : nw4f_fix_decal (name is <code>decal</code>)<br />uv7 : nw4f_fix7_bake (name is <code>bake</code>)</p>
+  </div>
+</div>
+<h2 id="Anchor_83955838_h2_1">Summary</h2>
+<p>To summarize the previous information, hint attributes set under <code>&lt;vtx_attrib&gt;</code> are set in the following order.</p>
+<ol>
+  <li>UV sets that have names starting with <code>nw4f_fixN</code>. (Set with the <code>hint</code> number fixed at <code>N</code>.)</li>
+  <li>UV sets used by the texture. (Set starting from the lowest <code>hint</code> not used so far.)</li>
+  <li>UV sets that have names starting with <code>nw4f_fix_</code>. (Set starting from the lowest <code>hint</code> not used so far.)</li>
+  <li>UV sets that have names starting with <code>nw4f_uv</code>. (Set starting from the lowest <code>hint</code> not used so far.)</li>
+</ol>
+<p>
+  <a name="Anchor_83955838_normal_mapping"></a>
+</p>
+<h1 id="Anchor_83955838_h1_6">Normal mapping</h1>
+<p>To configure normal mapping, connect a <code>file</code> node or a <code>layeredTexture</code> node to the <strong>bump-mapping</strong> (the <strong>normalCamera</strong> attribute) of a standard material via the <code>bump2d</code> node (or the <code>aiNormalMap</code> node), and specify a texture for normal mapping in the <code>file</code> node's <strong>Image Name</strong>.<br />(The <code>aiNormalMap</code> node is supported in NintendoSDK 10.4.0 and later.)<br /> Use a tangent space texture for the normal map texture.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Make sure that you set the <strong>Use As</strong> attribute of the <code>bump2d</code> node to <strong>Tangent Space Normals</strong>. Only tangent space normals are displayed correctly by Maya.</p>
+  </div>
+</div>
+<p>Select <strong>Lighting/Shading</strong> &gt; <strong>Transfer Maps</strong> to create a normal map texture.<br /> Make sure that you set the <strong>Map space</strong> used for map transfer to <strong>Tangent space</strong>.</p>
+<p>When the <strong>Connect maps to shader</strong> option is selected, and the <strong>Connect maps to</strong> option is set to <strong>Assigned shader</strong>, the created texture is automatically connected to the bump mapping of the target material.</p>
+<p>When you set normal mapping, the tangent and binormal vectors corresponding to the UV set linked to the texture for normal mapping are exported.<br /> A value of <code>1</code> is exported for the W component of tangent and binormal vectors if the UV wind order is clockwise (toward the front). If the wind direction is counterclockwise (toward the back), the value that is exported is <code>&ndash;1</code>.</p>
+<p>Using a <code>layeredTexture</code> node allows you to export multiple textures for vector maps.<br />If the file nodes connected to a <code>layeredTexture</code> node use different UV sets, tangent and binormal vectors are exported corresponding to the number of UV sets (up to 4).<br />In this case, tangent and binormal vectors are assigned to <code>&lt;vtx_attrib&gt;</code> of the intermediate file in order, starting from the upper (left-side) texture.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>For <a href="../Pages/Page_83955689.html#Anchor_83955689_h1_4">extended materials</a>, connect the textures for normal maps to the attributes for which <code>normal</code> is specified as the hint information prefix.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

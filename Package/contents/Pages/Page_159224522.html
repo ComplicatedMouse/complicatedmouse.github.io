@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Font Tag Processing | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Font Tag Processing -->
+<div class="pagetitle" id="PageId_159224522">Font Tag Processing</div>
+<div class="text_separate">
+<h1 id="Anchor_159224522_h1_1">Introduction</h1>
+<p>This section describes font tag processing.</p>
+<h1 id="Anchor_159224522_h1_2">Tag Processing</h1>
+<p>Tag processing is a feature used to optionally process aspects of parts of strings, such as their color and size, by interpreting the character code of strings below 0x1f as special tagged strings.</p>
+<p>Replace the <code>TagProcessorBase</code> configured in <code>TextWriterBase</code> with settings customized at the user's discretion to enclose the string containing the tagged string with optional processing during rendering.</p>
+<h1 id="Anchor_159224522_h1_3">How to Use</h1>
+<p>
+  <code>TextWriterBase</code> sets <code>TagProcessorBase</code> as the default, which does not do any processing for tagged strings. Replace this version of <code>TagProcessorBase</code> with one customized on the user side.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>class MyTagProcessor: public TagProcessorBase&lt;uint16_t&gt;
+{
+&nbsp;&nbsp;&nbsp;&nbsp;virtual Operation Process(uint32_t code, PrintContext&lt;uint16_t&gt;* pContext)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Code contains tagged strings (string code below 0x1f), and processing is performed according to the code's value.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// For example, if you want to change the color of the string, call and configure pContext-&gt;writer-&gt;SetTextColor().
+&nbsp;&nbsp;&nbsp;&nbsp;}
+};
+
+nn::font::TextWriterBase&lt;uint16_t&gt; writer;
+MyTagProcessor myTagProcessor;
+writer.SetTagProcessor(&amp;myTagProcessor);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This code overrides the <code>Process</code> function of <code>TagProcessorBase</code>, and performs optional processing using <code><em>pContext</em></code>, which contains various types of information.</p>
+<p>If tag processing affects a specific area on the screen, <code>CalculateRect</code> is overridden and information used to calculate the drawing rectangle of the string is returned.</p>
+<p>Then, if the string containing string code below 0x1f is rendered, tag processing is performed.</p>
+<h1 id="Anchor_159224522_h1_4">Adding Optional Binary Arrays to Tags</h1>
+<p>Advance the reference target of <code><em>pContext</em>-&gt;str</code> within the <code>Process</code> function to skip several characters in string processing.</p>
+<p>Use this functionality to add an optional binary array of several characters immediately after the tag.</p>
+<p>For example, in the following sample, when the &quot;0x01&quot; tag of the character code comes, it advances three characters to perform processing as if it were handling the tag of &quot;0x01 + binary array of three characters.&quot;</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>virtual Operation Process(uint32_t code, PrintContext&lt;uint16_t&gt;* pContext)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;if (code == 0x01)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (pContext-&gt;str[0] == 0x02 &amp;&amp; pContext-&gt;str[1] == 0x03 &amp;&amp; pContext-&gt;str[2] == 0x04)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str += 3; // Advances three characters, which is the binary array attached to the tag.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Processes as if there were the 4-character tag of 0x01 0x02 0x03 0x04.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_159224522_h1_5">Embedding Tag Text Into the ui2d Text Box Pane</h1>
+<p>Entering a caret (^) followed by a 2-digit hexadecimal number from 00 through 1F (^00 through&nbsp;^1F) into the text box pane in LayoutEditor automatically converts each value into a character with 0x00 through 0x1F character encoding when converting in LayoutConverter.</p>
+<p>To output a string from ^00 through ^1F without performing this conversion, add <code>--no-convert-cvtrchar</code> in the LayoutConverter options.</p>
+<h1 id="Anchor_159224522_h1_6">Related Samples</h1>
+<p>The sample program <code>Samples\Sources\Applications\FontSimple</code> provides an example of tag processing, and <code>FontWordWrapping.h</code> provides an example of its use.</p>
+<p>This sample program creates the <code>MyTagProcessor</code> class that inherits <code>TagProcessorBase</code> and highlights strings enclosed by <code>0x01</code> and <code>0x02</code>.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

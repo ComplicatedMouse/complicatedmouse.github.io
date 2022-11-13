@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Platform-Specific Information | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Platform-Specific Information -->
+<div class="pagetitle" id="PageId_161289849">Platform-Specific Information</div>
+<div class="text_separate">
+<h1 id="Anchor_161289849_h1_1">Notes About the NX Environment</h1>
+<h2 id="Anchor_161289849_h2_1">Do Not Place Synchronization Objects in Uncached Memory</h2>
+<p>Some of the ARM processor's locking-related instructions do not execute correctly with uncached regions of memory. For this reason, do not place any synchronization objects that were provided by the <code>os</code> library into uncached memory regions. If you do so, there is a risk that synchronization objects that were provided by the <code>os</code> library (such as <code><span class="ApiLink_nn__os__EventType">nn::os::EventType</span></code> and <code><span class="ApiLink_nn__os__MutexType">nn::os::MutexType</span></code>) will be placed into the application's memory space, after that space has been passed to some NintendoSDK API.</p>
+<p>In the Debug and Develop builds, the placement of synchronization objects is checked at initialization time, and if any are placed in uncached memory, an assertion failure occurs in the API and the following log is output.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>SDK Assertion Failure: '!(memoryInfo.attribute &amp; svc::MemoryAttribute_Uncached)' in InternalCriticalSectionImplByHorizon() ～
+Tried to place a synchronization object in uncached memory.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Note that to speed up the process, placement is not checked in the Release build.</p>
+<h2 id="Anchor_161289849_h2_2">Testing Whether the Memory Passed to the System Is Locked</h2>
+<p>In some cases, the application memory area is passed to the system when some using a NintendoSDK API (such as when calling graphics or library applet functions). The memory that is passed to the system is temporarily locked, and this lock is removed and the memory returned to the application after the system has finished using it. An abort or user exception might occur if the application attempts to use that memory before it is returned.</p>
+<p>The following functions can be used in the program development stage to test whether a specific memory region has been locked by the system. Both functions perform the same operations, only with different address parameter types.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>#include &lt;nn/os/os_InvestigationApiForDebug.h&gt;
+
+bool isLocked1 = nn::os::IsMemoryLocked(uintptr_t address, size_t size);
+bool isLocked2 = nn::os::IsMemoryLocked(void* address, size_t size);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If these functions return <code>true</code>, part or all of the specified range of the memory area has been locked (is being used) by the system. If the result is unintended for the application, there might be a bug where the instructions indicating completing use of that memory have not been correctly issued to the system.</p>
+<p>However, this test function might not work as intended for all functions in the NintendoSDK. Note that some functions do not lock the target memory region even when the memory was passed to the system. Consult with the assignee for each module to determine whether it is possible to test the memory that you want to test with these functions.</p>
+<p>Neither of these functions may be used on production devices. These functions are intended only for debugging during the development stage.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__EventType', '../../../Api/HtmlNX/structnn_1_1os_1_1_event_type.html' )
+SetUrl( 'ApiLink_nn__os__MutexType', '../../../Api/HtmlNX/structnn_1_1os_1_1_mutex_type.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

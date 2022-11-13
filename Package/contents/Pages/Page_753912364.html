@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Memory Tracking | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Memory Tracking -->
+<div class="pagetitle" id="PageId_753912364">Memory Tracking</div>
+<div class="text_separate">
+<p>A memory tracking API is provided to help find problems with heap management. The API works in conjunction with the provided Heap Inspector tool, located in NintendoSDK/Tools/HeapInspector, that is provided as a part of the Nintendo NX CPU Profiler package.</p>
+<h1 id="Anchor_753912364_h1_1">Memory Tracking API Integration</h1>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>The Memory Tracking API can introduce serious overhead on memory allocations, frees, and reallocations. This is due to recording every memory operation internally and relaying it in real-time to the PC. For more information on any functions mentioned on this page, check the API reference page.</p>
+  </div>
+</div>
+<ol>
+  <li>Initialize the Nintendo NX CPU Profiler.</li>
+  <li>
+    <p>Register the application heaps by calling <span class="ApiLink_nn__profiler__RecordHeapRange">nn::profiler::RecordHeapRange</span> for each heap in the application. For example:</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">startAddr</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">endAddr</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">UINTPTR_MAX</span><span class="p">);</span>
+<span class="nn">nn::profiler::</span><span class="n">RecordHeapRange</span><span class="p">(</span><span class="n">startAddr</span><span class="p">,</span> <span class="n">endAddr</span><span class="p">,</span> <span class="s">&quot;Example&quot;</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Log allocations, frees, and reallocations.<ol><li>Find each place where memory is allocated, freed, or reallocated. Ideally, these should be in a central location. These functions can also be called before the profiler API is initialized. Starting in Nintendo NX CPU Profiler v1.7, a small number of these allocations can be tracked before library initialization, but it is recommended to initialize the profiler library and connect the memory tracking tool to the application as quickly as possible.</li><li>After each operation, place the corresponding Track operation. For example, after calling malloc, place:<br /><span class="ApiLink_nn__profiler__TrackMalloc">nn::profiler::TrackMalloc</span>(memory, size);</li><li><p>[optional] Before each operation, generate a tracking id. This enforces memory operation ordering when the data gets to the PC. The tracking id must then be also used in the argument list from step 3b. For example:</p><table class="codeblock"><tbody><tr><td class="code"><div class="codeblock"><pre><span class="k">auto</span> <span class="n">id</span> <span class="o">=</span> <span class="nn">nn::profiler::</span><span class="n">GenerateNextTrackingId</span><span class="p">();</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">memory</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+<span class="nn">nn::profiler::</span><span class="n">TrackMalloc</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="n">memory</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span></pre></div></td></tr></tbody></table></li></ol></li>
+</ol>
+<h1 id="Anchor_753912364_h1_2">Heap Inspector Tool Setup</h1>
+<ol>
+  <li>Create an HTCS reservation for '@NvMemoryProfiler'.<ol><li>In Target Manager, go to Tools -&gt;&nbsp;Edit HTCS reservations.</li><li>Edit the text file to include the reservation for the SDEV's serial number with the port name '@NvMemoryProfiler' and a port number under 10000. For example:<br />XAW02121004141, @NvMemoryProfiler, 6569</li><li>Save and close the text file.</li><li>Reset the SDEV.</li></ol></li>
+  <li>Set NX plugin options in Heap Inspector.<ol><li>Start Heap Inspector.</li><li>Go to Tools -&gt;&nbsp;Options -&gt;&nbsp;NX.</li><li>Set 'Path to addr2line.exe' to the addr2line executable that comes in NX Addon. It should be located in the Compilers directory. For example:<br />F:\NintendoSDK\Compilers\NX\nx\aarch64\bin\aarch64-nintendo-nx-elf-addr2line.exe</li><li>Similarly, set 'Path to readelf.exe' to the readelf executable that comes in NX Addon. It should be located in the Compilers directory. For example:<br />F:\NintendoSDK\Compilers\NX\nx\aarch64\bin\aarch64-nintendo-nx-elf-readelf.exe</li></ol></li>
+  <li>Create a connection profile.<ol><li>In Heap Inspector, go to Live/Recording -&gt;&nbsp;Connect.</li><li>In the Connect window, click the '...' button in the Connection group.</li><li>Click the 'Add' button.</li><li>Set the settings for the connection. The Name can be anything. The IP address should be 127.0.0.1. The Port should be the same as the one set in 1b. For example:<br />Name: SDEV 4141<br />IP address: 127.0.0.1<br />Port: 6569</li></ol></li>
+  <li>Connect to the runtime.<ol><li>In the Connect window, select the connection profile created in Step 3.</li><li>It is generally recommended to leave the Callstack mode set to 'Full'.</li><li>Click the 'OK' button to connect.</li></ol></li>
+</ol>
+<p>Note: If Step 2 is skipped, callstacks will just be addresses and show the function as 'Unresolved symbol'.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__profiler__RecordHeapRange', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a3bf0a5b9753b627089dfcc0d0493d64c' )
+SetUrl( 'ApiLink_nn__profiler__TrackMalloc', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a70fbafbd6cf9c09fbc2629af278c77d1' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

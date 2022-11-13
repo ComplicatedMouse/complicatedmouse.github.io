@@ -1,0 +1,2206 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Built-in Functions Support | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Built-in Functions Support -->
+<div class="pagetitle" id="PageId_768705906">Built-in Functions Support</div>
+<div class="text_separate">
+<h2 id="Anchor_768705906_h2_1">Clang Built-in Functions</h2>
+<p>As stated in the Clang documentation, Clang supports built-in functions using the same syntax as GCC with prefixed __builtin.&nbsp;</p>
+<p>
+  <span style="color: rgb(51,51,51);">The backward compatibility of __builtin functions are not guaranteed. It would be the best to wrap the __builtin functions for portability.</span>
+</p>
+<p>With Clang 10 and beyond, we can check if a built-in function is supported using&nbsp;__has_builtin. Prior to Clang 10&nbsp;__has_builtin&nbsp;cannot be used to detect most&nbsp;<span style="color: rgb(51,51,51);">pseudo builtin-functions.&nbsp;</span></p>
+<p>The following table lists the built-in functions that are supported in Clang but not in GCC. GCC built-in functions is listed in the next section. Functions in<span style="color: rgb(165,173,186);"><strong>&nbsp;Gray</strong>&nbsp;</span>are&nbsp;<strong>not supported</strong>&nbsp;in NX.</p>
+<p>More information can be found here:&nbsp;<a href="https://clang.llvm.org/docs/LanguageExtensions.html#builtin-functions">https://clang.llvm.org/docs/LanguageExtensions.html#builtin-functions</a></p>
+<p>
+  <span class="status_macro_base status_macro_Green">Note</span>&nbsp;Please use Chrome for proper viewing of the following tables. There are known issues in Firefox that prevent the table cells from correctly formatted.&nbsp;</p>
+<table class="fixed-table wrapped">
+  <colgroup>
+    <col style="width: 679.0px;" />
+    <col style="width: 563.0px;" />
+    <col style="width: 748.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <div class="content-wrapper">
+          <p>Built-in Function</p>
+          <p>
+            <br />
+          </p>
+        </div>
+      </th>
+      <th>
+        <div class="content-wrapper">
+          <p>Description</p>
+          <p>
+            <br />
+          </p>
+        </div>
+      </th>
+      <th>
+        <div class="content-wrapper">
+          <p>Examples</p>
+          <p>
+            <br />
+          </p>
+        </div>
+      </th>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_assume</span>
+          <span class="p">(</span>
+          <span class="kt" style="color: rgb(144,32,0);">bool</span>
+          <span class="p">)</span>
+        </pre>
+      </td>
+      <td>
+        <span style="color: rgb(51,51,51);">The boolean argument to this function is defined to be true. The optimizer may analyze the form of the expression provided as the argument and deduce from that information used to optimize the program. If the condition is violated during execution, the behavior is undefined. The argument itself is never evaluated, so any side effects of the expression will be discarded.</span>
+      </td>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">int</span> <span class="nf" style="color: rgb(6,40,126);">foo</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">int</span> <span class="n">x</span><span class="p">) {</span>
+  <span class="n">__builtin_assume</span><span class="p">(</span><span class="n">x</span> <span class="o" style="color: rgb(102,102,102);">!=</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">);</span>
+
+  <span class="c1" style="color: rgb(96,160,176);">// The optimizer may short-circuit this check using the invariant.</span>
+  <span class="k" style="color: rgb(0,112,32);">if</span> <span class="p">(</span><span class="n">x</span> <span class="o" style="color: rgb(102,102,102);">==</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">)</span>
+    <span class="k" style="color: rgb(0,112,32);">return</span> <span class="n">do_something</span><span class="p">();</span>
+
+  <span class="k" style="color: rgb(0,112,32);">return</span> <span class="n">do_something_else</span><span class="p">(); }</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_readcyclecounter</span>
+          <span class="p">()</span>
+        </pre>
+      </td>
+      <td>
+        <p style="text-align: justify;">The&nbsp;<code class="docutils literal notranslate"><span class="pre">__builtin_readcyclecounter()</span></code>&nbsp;builtin returns the cycle counter value, which may be either global or process/thread-specific depending on the target. As the backing counters often overflow quickly (on the order of seconds) this should only be used for timing small intervals. When not supported by the target, the return value is always zero. This builtin takes no arguments and produces an unsigned long long result.</p>
+        <p style="text-align: justify;">
+          <br />
+        </p>
+        <p style="text-align: justify;">Note that even if present, its use may depend on run-time privilege or other OS controlled state.</p>
+        <p style="text-align: justify;">
+          <br />
+        </p>
+        <p style="text-align: justify;">
+          <strong>NX Specific:</strong>
+        </p>
+        <p>__builtin_readcyclecounter() can not be used if PMU is not enabled. Run the following code to enable PMU:</p>
+        <pre>__asm volatile(&quot;msr &quot; &quot;pmselr_el0&quot; &quot;, %0&quot;::&quot;r&quot;((uint64_t)31):&quot;memory&quot;);
+__asm volatile(&quot;msr &quot; &quot;pmxevtyper_el0&quot; &quot;, %0&quot;::&quot;r&quot;((uint64_t)((1u &lt;&lt; 31) | (0u &lt;&lt; 30) | 0x00)):&quot;memory&quot;);
+__asm volatile(&quot;msr &quot; &quot;pmcntenset_el0&quot; &quot;, %0&quot;::&quot;r&quot;((uint64_t)((1u &lt;&lt; 31))):&quot;memory&quot;);
+__asm volatile(&quot;msr &quot; &quot;pmcr_el0&quot; &quot;, %0&quot;::&quot;r&quot;((uint64_t)((1u &lt;&lt; 2) | (1u &lt;&lt; 1) | (1u &lt;&lt; 0))):&quot;memory&quot;);
+</pre>
+        <p>
+          <br />
+        </p>
+        <p>However, the counter exists in each CPU core.</p>
+        <p>
+          <br />
+        </p>
+        <p>If a thread that uses this function moves to other CPU core, this function read it from a different counter.</p>
+        <p>
+          <br />
+        </p>
+        <p>Note that this function cannot be used in retail release. To get the counter,&nbsp;<span class="ApiLink_nn__os__GetSystemTick">nn::os::GetSystemTick</span>() should be used.</p>
+        <p style="text-align: justify;">
+          <br />
+        </p>
+      </td>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">t0</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_readcyclecounter</span><span class="p">();</span>
+<span class="n">do_something</span><span class="p">();</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">t1</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_readcyclecounter</span><span class="p">();</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">cycles_to_do_something</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">t1</span> <span class="o" style="color: rgb(102,102,102);">-</span> <span class="n">t0</span><span class="p">;</span> <span class="c1" style="color: rgb(96,160,176);">// assuming no overflow</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_shufflevector</span>
+          <span class="p">(</span>
+          <span class="n">vec1</span>
+          <span class="p">,</span> <span class="n">vec2</span><span class="p">,</span> <span class="n">index1</span><span class="p">,</span> <span class="n">index2</span><span class="p">, ...)</span></pre>
+      </td>
+      <td>
+        <p style="text-align: justify;">The first two arguments to&nbsp;<code class="docutils literal notranslate"><span class="pre">__builtin_shufflevector</span></code>&nbsp;are vectors that have the same element type. The remaining arguments are a list of integers that specify the elements indices of the first two vectors that should be extracted and returned in a new vector. These element indices are numbered sequentially starting with the first vector, continuing into the second vector. Thus, if&nbsp;<code class="docutils literal notranslate"><span class="pre">vec1</span></code>&nbsp;is a 4-element vector, index 5 would refer to the second element of&nbsp;<code class="docutils literal notranslate"><span class="pre">vec2</span></code>. An index of -1 can be used to indicate that the corresponding element in the returned vector is a don&rsquo;t care and can be optimized by the backend.</p>
+        <p style="text-align: justify;">
+          <br />
+        </p>
+        <p style="text-align: justify;">The result of&nbsp;<code class="docutils literal notranslate"><span class="pre">__builtin_shufflevector</span></code>&nbsp;is a vector with the same element type as&nbsp;<code class="docutils literal notranslate"><span class="pre">vec1</span></code>/<code class="docutils literal notranslate"><span class="pre">vec2</span></code>&nbsp;but that has an element count equal to the number of indices specified.</p>
+      </td>
+      <td>
+        <pre>
+          <span class="c1" style="color: rgb(96,160,176);">// identity operation - return 4-element vector v1.</span>
+<span class="n">__builtin_shufflevector</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">1</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">2</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">3</span><span class="p">)</span>
+
+<span class="c1" style="color: rgb(96,160,176);">// &quot;Splat&quot; element 0 of V1 into a 4-element result.</span>
+<span class="n">__builtin_shufflevector</span><span class="p">(</span><span class="n">V1</span><span class="p">,</span> <span class="n">V1</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">)</span>
+
+<span class="c1" style="color: rgb(96,160,176);">// Reverse 4-element vector V1.</span>
+<span class="n">__builtin_shufflevector</span><span class="p">(</span><span class="n">V1</span><span class="p">,</span> <span class="n">V1</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">3</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">2</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">1</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">)</span>
+
+<span class="c1" style="color: rgb(96,160,176);">// Concatenate every other element of 4-element vectors V1 and V2.</span>
+<span class="n">__builtin_shufflevector</span><span class="p">(</span><span class="n">V1</span><span class="p">,</span> <span class="n">V2</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">2</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">4</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">6</span><span class="p">)</span>
+
+<span class="c1" style="color: rgb(96,160,176);">// Concatenate every other element of 8-element vectors V1 and V2.</span>
+<span class="n">__builtin_shufflevector</span><span class="p">(</span><span class="n">V1</span><span class="p">,</span> <span class="n">V2</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">2</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">4</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">6</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">8</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">10</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">12</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">14</span><span class="p">)</span>
+
+<span class="c1" style="color: rgb(96,160,176);">// Shuffle v1 with some elements being undefined</span>
+<span class="n">__builtin_shufflevector</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">3</span><span class="p">,</span> <span class="o" style="color: rgb(102,102,102);">-</span><span class="mi" style="color: rgb(64,160,112);">1</span><span class="p">,</span> <span class="mi" style="color: rgb(64,160,112);">1</span><span class="p">,</span> <span class="o" style="color: rgb(102,102,102);">-</span><span class="mi" style="color: rgb(64,160,112);">1</span><span class="p">)</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_convertvector</span>
+          <span class="p">(</span>
+          <span class="n">src_vec</span>
+          <span class="p">,</span> <span class="n">dst_vec_type</span><span class="p">)</span></pre>
+      </td>
+      <td>
+        <p style="text-align: justify;">The first argument to&nbsp;<code class="docutils literal notranslate"><span class="pre">__builtin_convertvector</span></code>&nbsp;is a vector, and the second argument is a vector type with the same number of elements as the first argument.</p>
+        <p style="text-align: justify;">
+          <br />
+        </p>
+        <p style="text-align: justify;">The result of&nbsp;<code class="docutils literal notranslate"><span class="pre">__builtin_convertvector</span></code>&nbsp;is a vector with the same element type as the second argument, with a value defined in terms of the action of a C-style cast applied to each element of the first argument.</p>
+      </td>
+      <td>
+        <pre>
+          <span class="k" style="color: rgb(0,112,32);">typedef</span> <span class="kt" style="color: rgb(144,32,0);">double</span> <span class="n">vector4double</span> <span class="nf" style="color: rgb(6,40,126);">__attribute__</span><span class="p">((</span><span class="n">__vector_size__</span><span class="p">(</span><span class="mi" style="color: rgb(64,160,112);">32</span><span class="p">)));</span>
+<span class="k" style="color: rgb(0,112,32);">typedef</span> <span class="kt" style="color: rgb(144,32,0);">float</span>  <span class="n">vector4float</span>  <span class="nf" style="color: rgb(6,40,126);">__attribute__</span><span class="p">((</span><span class="n">__vector_size__</span><span class="p">(</span><span class="mi" style="color: rgb(64,160,112);">16</span><span class="p">)));</span>
+<span class="k" style="color: rgb(0,112,32);">typedef</span> <span class="kt" style="color: rgb(144,32,0);">short</span>  <span class="n">vector4short</span>  <span class="nf" style="color: rgb(6,40,126);">__attribute__</span><span class="p">((</span><span class="n">__vector_size__</span><span class="p">(</span><span class="mi" style="color: rgb(64,160,112);">8</span><span class="p">)));</span>
+<span class="n">vector4float vf</span><span class="p">;</span> <span class="n">vector4short vs</span><span class="p">;</span>
+
+<span class="c1" style="color: rgb(96,160,176);">// convert from a vector of 4 floats to a vector of 4 doubles.</span>
+<span class="n">__builtin_convertvector</span><span class="p">(</span><span class="n">vf</span><span class="p">,</span> <span class="n">vector4double</span><span class="p">)</span>
+<span class="c1" style="color: rgb(96,160,176);">// equivalent to:</span>
+<span class="p">(</span><span class="n">vector4double</span><span class="p">) { (</span><span class="kt" style="color: rgb(144,32,0);">double</span><span class="p">)</span> <span class="n">vf</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">], (</span><span class="kt" style="color: rgb(144,32,0);">double</span><span class="p">)</span> <span class="n">vf</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">1</span><span class="p">], (</span><span class="kt" style="color: rgb(144,32,0);">double</span><span class="p">)</span> <span class="n">vf</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">2</span><span class="p">], (</span><span class="kt" style="color: rgb(144,32,0);">double</span><span class="p">)</span> <span class="n">vf</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">3</span><span class="p">] }</span>
+
+<span class="c1" style="color: rgb(96,160,176);">// convert from a vector of 4 shorts to a vector of 4 floats.</span>
+<span class="n">__builtin_convertvector</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">vector4float</span><span class="p">)</span>
+<span class="c1" style="color: rgb(96,160,176);">// equivalent to:</span>
+<span class="p">(</span><span class="n">vector4float</span><span class="p">) { (</span><span class="kt" style="color: rgb(144,32,0);">float</span><span class="p">)</span> <span class="n">vs</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">], (</span><span class="kt" style="color: rgb(144,32,0);">float</span><span class="p">)</span> <span class="n">vs</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">1</span><span class="p">], (</span><span class="kt" style="color: rgb(144,32,0);">float</span><span class="p">)</span> <span class="n">vs</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">2</span><span class="p">], (</span><span class="kt" style="color: rgb(144,32,0);">float</span><span class="p">)</span> <span class="n">vs</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">3</span><span class="p">] }</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_bitreverse8</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">)</span>
+        </pre>
+        <pre>
+          <span class="n">__builtin_bitreverse16</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">)</span>
+        </pre>
+        <pre>
+          <span class="n">__builtin_bitreverse32</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">)</span>
+        </pre>
+        <pre>
+          <span class="n">__builtin_bitreverse64</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">)</span>
+        </pre>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(51,51,51);">The &lsquo;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__builtin_bitreverse</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&rsquo; family of builtins is used to reverse the bitpattern of an integer value; </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">
+            <br />
+          </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">for example&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">0b10110110</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;becomes&nbsp;</span>
+        </p>
+        <p>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">0b01101101</span>
+          </code>
+          <span style="color: rgb(51,51,51);">.</span>
+        </p>
+      </td>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">uint8_t</span> <span class="n">rev_x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_bitreverse8</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">uint16_t</span> <span class="n">rev_x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_bitreverse16</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">uint32_t</span> <span class="n">rev_y</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_bitreverse32</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">uint64_t</span> <span class="n">rev_z</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_bitreverse64</span><span class="p">(</span><span class="n">z</span><span class="p">);</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_rotateleft8</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">,</span> <span class="n">y</span><span class="p">)</span></pre>
+        <pre>
+          <span class="n">__builtin_rotateleft16</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">,</span> <span class="n">y</span><span class="p">)</span></pre>
+        <pre>
+          <span class="n">__builtin_rotateleft32</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">,</span> <span class="n">y</span><span class="p">)</span></pre>
+        <pre>
+          <span class="n">__builtin_rotateleft64</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">,</span> <span class="n">y</span><span class="p">)</span></pre>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(51,51,51);">The &lsquo;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__builtin_rotateleft</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&rsquo; family of builtins is used to rotate the bits in the first argument by the amount in the second argument. </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">
+            <br />
+          </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">For example,&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">0b10000110</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;rotated left by 11 becomes&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">0b00110100</span>
+          </code>
+          <span style="color: rgb(51,51,51);">. </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">
+            <br />
+          </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">The shift value is treated as an unsigned amount modulo the size of the arguments. Both arguments and the result have the bitwidth specified by the name of the builtin.</span>
+        </p>
+      </td>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">uint8_t</span> <span class="n">rot_x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_rotateleft8</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">uint16_t</span> <span class="n">rot_x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_rotateleft16</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">uint32_t</span> <span class="n">rot_x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_rotateleft32</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">uint64_t</span> <span class="n">rot_x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_rotateleft64</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_rotateright8</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">,</span> <span class="n">y</span><span class="p">)</span></pre>
+        <pre>
+          <span class="n">__builtin_rotateright16</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">,</span> <span class="n">y</span><span class="p">)</span></pre>
+        <pre>
+          <span class="n">__builtin_rotateright32</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">,</span> <span class="n">y</span><span class="p">)</span></pre>
+        <pre>
+          <span class="n">__builtin_rotateright64</span>
+          <span class="p">(</span>
+          <span class="n">x</span>
+          <span class="p">,</span> <span class="n">y</span><span class="p">)</span></pre>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(51,51,51);">The &lsquo;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__builtin_rotateright</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&rsquo; family of builtins is used to rotate the bits in the first argument by the amount in the second argument. </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">
+            <br />
+          </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">For example,&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">0b10000110</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;rotated right by 3 becomes&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">0b11010000</span>
+          </code>
+          <span style="color: rgb(51,51,51);">. </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">
+            <br />
+          </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">The shift value is treated as an unsigned amount modulo the size of the arguments. Both arguments and the result have the bitwidth specified by the name of the builtin.</span>
+        </p>
+      </td>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">uint8_t</span> <span class="n">rot_x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_rotateright8</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">uint16_t</span> <span class="n">rot_x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_rotateright16</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">uint32_t</span> <span class="n">rot_x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_rotateright32</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">uint64_t</span> <span class="n">rot_x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_rotateright64</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_unreachable</span>
+          <span class="p">()</span>
+        </pre>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(51,51,51);">The&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__builtin_unreachable()</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;builtin has completely undefined behavior. Since it has undefined behavior, it is a statement that it is never reached and the optimizer can take advantage of this to produce better code. </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">
+            <br />
+          </span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">This builtin takes no arguments and produces a void result.</span>
+        </p>
+      </td>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">void</span> <span class="nf" style="color: rgb(6,40,126);">myabort</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">void</span><span class="p">)</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">noreturn</span><span class="p">));</span>
+<span class="kt" style="color: rgb(144,32,0);">void</span> <span class="nf" style="color: rgb(6,40,126);">myabort</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">void</span><span class="p">) {</span>
+  <span class="k" style="color: rgb(0,112,32);">asm</span><span class="p">(</span><span class="s" style="color: rgb(64,112,160);">&quot;int3&quot;</span><span class="p">);</span>
+  <span class="n">__builtin_unreachable</span><span class="p">(); }</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_unpredictable</span>
+          <span class="p">(</span>
+          <span class="kt" style="color: rgb(144,32,0);">long long</span>
+          <span class="p">)</span>
+        </pre>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(51,51,51);">The&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__builtin_unpredictable()</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;builtin is expected to be used with control flow conditions such as in&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">if</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;and&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">switch</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;</span>
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">statements.</span>
+        </p>
+      </td>
+      <td>
+        <pre>
+          <span class="k" style="color: rgb(0,112,32);">if</span> <span class="p">(</span><span class="n">__builtin_unpredictable</span><span class="p">(</span><span class="n">x</span> <span class="o" style="color: rgb(102,102,102);">&gt;</span> <span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">)) {</span>
+   <span class="n">foo</span><span class="p">(); }</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">type __sync_swap</span>
+          <span class="p">(</span>
+          <span class="n">type</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">ptr</span><span class="p">,</span> <span class="n">type value</span><span class="p">, ...)</span></pre>
+      </td>
+      <td>
+        <span style="color: rgb(51,51,51);">The&nbsp;</span>
+        <code class="docutils literal notranslate" style="text-align: justify;">
+          <span class="pre">__sync_swap()</span>
+        </code>
+        <span style="color: rgb(51,51,51);">&nbsp;builtin extends the existing&nbsp;</span>
+        <code class="docutils literal notranslate" style="text-align: justify;">
+          <span class="pre">__sync_*()</span>
+        </code>
+        <span style="color: rgb(51,51,51);">&nbsp;family of atomic intrinsics to allow code to atomically swap the current value with the new value. More importantly, it helps developers write more efficient and correct code by avoiding expensive loops around&nbsp;</span>
+        <code class="docutils literal notranslate" style="text-align: justify;">
+          <span class="pre">__sync_bool_compare_and_swap()</span>
+        </code>
+        <span style="color: rgb(51,51,51);">&nbsp;or relying on the platform specific implementation details of&nbsp;</span>
+        <code class="docutils literal notranslate" style="text-align: justify;">
+          <span class="pre">__sync_lock_test_and_set()</span>
+        </code>
+        <span style="color: rgb(51,51,51);">. The&nbsp;</span>
+        <code class="docutils literal notranslate" style="text-align: justify;">
+          <span class="pre">__sync_swap()</span>
+        </code>
+        <span style="color: rgb(51,51,51);">&nbsp;builtin is a full barrier.</span>
+      </td>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">int</span> <span class="n">old_value</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__sync_swap</span><span class="p">(</span><span class="o" style="color: rgb(102,102,102);">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">new_value</span><span class="p">);</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_addressof()</span>
+        </pre>
+      </td>
+      <td>
+        <span style="color: rgb(51,51,51);">It performs the functionality of the built-in&nbsp;</span>
+        <code class="docutils literal notranslate" style="text-align: justify;">
+          <span class="pre">&amp;</span>
+        </code>
+        <span style="color: rgb(51,51,51);">&nbsp;operator, ignoring any&nbsp;</span>
+        <code class="docutils literal notranslate" style="text-align: justify;">
+          <span class="pre">operator&amp;</span>
+        </code>
+        <span style="color: rgb(51,51,51);">&nbsp;overload. This is useful in constant expressions in C++11, where there is no other way to take the address of an object that overloads&nbsp;</span>
+        <code class="docutils literal notranslate" style="text-align: justify;">
+          <span class="pre">operator&amp;</span>
+        </code>
+        <span style="color: rgb(51,51,51);">.</span>
+      </td>
+      <td>
+        <pre>
+          <span class="k" style="color: rgb(0,112,32);">template</span>
+          <span class="o" style="color: rgb(102,102,102);">&lt;</span>
+          <span class="k" style="color: rgb(0,112,32);">typename</span> <span class="n">T</span><span class="o" style="color: rgb(102,102,102);">&gt;</span> <span class="k" style="color: rgb(0,112,32);">constexpr</span> <span class="n">T</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">addressof</span><span class="p">(</span><span class="n">T</span> <span class="o" style="color: rgb(102,102,102);">&amp;</span><span class="n">value</span><span class="p">) {</span>
+  <span class="k" style="color: rgb(0,112,32);">return</span> <span class="n">__builtin_addressof</span><span class="p">(</span><span class="n">value</span><span class="p">); }</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">__builtin_operator_new</span>
+        </pre>
+        <pre>
+          <span class="n">__builtin_operator_delete</span>
+        </pre>
+      </td>
+      <td>
+        <p style="text-align: justify;">
+          <code class="docutils literal notranslate">
+            <span class="pre">__builtin_operator_new</span>
+          </code>&nbsp;allocates memory just like a non-placement non-class&nbsp;<em>new-expression</em>. This is exactly like directly calling the normal non-placement&nbsp;<code class="docutils literal notranslate"><span class="pre">::operator</span>&nbsp;<span class="pre">new</span></code>, except that it allows certain optimizations that the C++ standard does not permit for a direct function call to&nbsp;<code class="docutils literal notranslate"><span class="pre">::operator</span>&nbsp;<span class="pre">new</span></code>&nbsp;(in particular, removing&nbsp;<code class="docutils literal notranslate"><span class="pre">new</span></code>&nbsp;/&nbsp;<code class="docutils literal notranslate"><span class="pre">delete</span></code>&nbsp;pairs and merging allocations).</p>
+        <p style="text-align: justify;">
+          <br />
+        </p>
+        <p style="text-align: justify;">Likewise,&nbsp;<code class="docutils literal notranslate"><span class="pre">__builtin_operator_delete</span></code>&nbsp;deallocates memory just like a non-class&nbsp;<em>delete-expression</em>, and is exactly like directly calling the normal&nbsp;<code class="docutils literal notranslate"><span class="pre">::operator</span>&nbsp;<span class="pre">delete</span></code>, except that it permits optimizations. Only the unsized form of&nbsp;<code class="docutils literal notranslate"><span class="pre">__builtin_operator_delete</span></code>&nbsp;is currently available.</p>
+        <p style="text-align: justify;">
+          <br />
+        </p>
+        <p style="text-align: justify;">These builtins are intended for use in the implementation of&nbsp;<code class="docutils literal notranslate"><span class="pre">std::allocator</span></code>&nbsp;and other similar allocation libraries, and are only available in C++</p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="status_macro_base status_macro_Red">Not Supported</span>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">type __builtin_preserve_access_index(type arg)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(165,173,186);">
+            <code class="docutils literal notranslate" style="text-align: justify;">
+              <span class="pre">__builtin_preserve_access_index</span>
+            </code>&nbsp;specifies a code section where array subscript access and structure/union member access are relocatable under bpf compile-once run-everywhere framework. Debuginfo (typically with&nbsp;<code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">-g</span></code>) is needed, otherwise, the compiler will exit with an error. The return type for the intrinsic is the same as the type of the argument.</span>
+        </p>
+        <p>
+          <br />
+        </p>
+      </td>
+      <td>
+        <pre>
+          <br />
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">unsigned char</span>      <span class="nf" style="color: rgb(6,40,126);">__builtin_addcb</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned char</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned char</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned char</span> <span class="n">carryin</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned char</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">carryout</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned short</span>     <span class="nf" style="color: rgb(6,40,126);">__builtin_addcs</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned short</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned short</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned short</span> <span class="n">carryin</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned short</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">carryout</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned</span>           <span class="nf" style="color: rgb(6,40,126);">__builtin_addc</span>  <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">carryin</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">carryout</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned long</span>      <span class="nf" style="color: rgb(6,40,126);">__builtin_addcl</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">carryin</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">carryout</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_addcll</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">carryin</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">carryout</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned char</span>      <span class="nf" style="color: rgb(6,40,126);">__builtin_subcb</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned char</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned char</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned char</span> <span class="n">carryin</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned char</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">carryout</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned short</span>     <span class="nf" style="color: rgb(6,40,126);">__builtin_subcs</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned short</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned short</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned short</span> <span class="n">carryin</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned short</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">carryout</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned</span>           <span class="nf" style="color: rgb(6,40,126);">__builtin_subc</span>  <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">carryin</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">carryout</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned long</span>      <span class="nf" style="color: rgb(6,40,126);">__builtin_subcl</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">carryin</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">carryout</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_subcll</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">carryin</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">carryout</span><span class="p">);</span></pre>
+        <pre>
+          <br />
+        </pre>
+      </td>
+      <td>
+        <p style="text-align: justify;">Clang provides a set of builtins which expose multiprecision arithmetic in a manner amenable to C. They all have the following form:</p>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">x</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="p">...,</span> <span class="n">y</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="p">...,</span> <span class="n">carryin</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="p">...,</span> <span class="n">carryout</span><span class="p">;</span>
+<span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">sum</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_addc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">carryin</span><span class="p">,</span> <span class="o" style="color: rgb(102,102,102);">&amp;</span><span class="n">carryout</span><span class="p">);</span></pre>
+      </td>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">x</span><span class="p">,</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">y</span><span class="p">,</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">z</span><span class="p">,</span> <span class="n">carryin</span><span class="o" style="color: rgb(102,102,102);">=</span><span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">,</span> <span class="n">carryout</span><span class="p">;</span>
+<span class="n">z</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">]</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_addc</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">0</span><span class="p">],</span> <span class="n">carryin</span><span class="p">,</span> <span class="o" style="color: rgb(102,102,102);">&amp;</span><span class="n">carryout</span><span class="p">);</span>
+<span class="n">carryin</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">carryout</span><span class="p">;</span>
+<span class="n">z</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">1</span><span class="p">]</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_addc</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">1</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">1</span><span class="p">],</span> <span class="n">carryin</span><span class="p">,</span> <span class="o" style="color: rgb(102,102,102);">&amp;</span><span class="n">carryout</span><span class="p">);</span>
+<span class="n">carryin</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">carryout</span><span class="p">;</span>
+<span class="n">z</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">2</span><span class="p">]</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_addc</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">2</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">2</span><span class="p">],</span> <span class="n">carryin</span><span class="p">,</span> <span class="o" style="color: rgb(102,102,102);">&amp;</span><span class="n">carryout</span><span class="p">);</span>
+<span class="n">carryin</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">carryout</span><span class="p">;</span>
+<span class="n">z</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">3</span><span class="p">]</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__builtin_addc</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">3</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi" style="color: rgb(64,160,112);">3</span><span class="p">],</span> <span class="n">carryin</span><span class="p">,</span> <span class="o" style="color: rgb(102,102,102);">&amp;</span><span class="n">carryout</span><span class="p">);</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_add_overflow</span>   <span class="p">(</span><span class="n">type1 x</span><span class="p">,</span> <span class="n">type2 y</span><span class="p">,</span> <span class="n">type3</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">sum</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_sub_overflow</span>   <span class="p">(</span><span class="n">type1 x</span><span class="p">,</span> <span class="n">type2 y</span><span class="p">,</span> <span class="n">type3</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">diff</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_mul_overflow</span>   <span class="p">(</span><span class="n">type1 x</span><span class="p">,</span> <span class="n">type2 y</span><span class="p">,</span> <span class="n">type3</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">prod</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_uadd_overflow</span>  <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">sum</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_uaddl_overflow</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">sum</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_uaddll_overflow</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">sum</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_usub_overflow</span>  <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">diff</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_usubl_overflow</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">diff</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_usubll_overflow</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">diff</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_umul_overflow</span>  <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">prod</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_umull_overflow</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">prod</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_umulll_overflow</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned long long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">prod</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_sadd_overflow</span>  <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">int</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">int</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">sum</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_saddl_overflow</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">sum</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_saddll_overflow</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">long long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">sum</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_ssub_overflow</span>  <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">int</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">int</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">diff</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_ssubl_overflow</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">diff</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_ssubll_overflow</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">long long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">diff</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_smul_overflow</span>  <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">int</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">int</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">prod</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_smull_overflow</span> <span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">prod</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">bool</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_smulll_overflow</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">long long</span> <span class="n">x</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long long</span> <span class="n">y</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">long long</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">prod</span><span class="p">);</span></pre>
+      </td>
+      <td>
+        <span style="color: rgb(51,51,51);">Clang provides a set of builtins that implement checked arithmetic for security critical applications in a manner that is fast and easily expressable in C.</span>
+      </td>
+      <td>
+        <pre>
+          <span class="n">errorcode_t</span> <span class="nf" style="color: rgb(6,40,126);">security_critical_application</span><span class="p">(...) {</span>
+  <span class="kt" style="color: rgb(144,32,0);">unsigned</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">result</span><span class="p">; ...</span>
+  <span class="k" style="color: rgb(0,112,32);">if</span> <span class="p">(</span><span class="n">__builtin_mul_overflow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o" style="color: rgb(102,102,102);">&amp;</span><span class="n">result</span><span class="p">))</span>
+    <span class="k" style="color: rgb(0,112,32);">return</span> <span class="n">kErrorCodeHackers</span><span class="p">; ...</span>
+  <span class="n">use_multiply</span><span class="p">(</span><span class="n">result</span><span class="p">); ... }</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="status_macro_base status_macro_Red">Not Supported</span>
+          <p>
+            <span style="color: rgb(165,173,186);">double __builtin_canonicaliz(double);</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">float __builtin_canonicalizf(float);</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">long double __builtin_canonicalizl(long double);<br /></span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Returns the platform specific canonical encoding of a floating point number. This canonicalization is useful for implementing certain numeric primitives such as frexp.</span>
+      </td>
+      <td>More info on <a href="https://llvm.org/docs/LangRef.html#llvm-canonicalize-intrinsic">https://llvm.org/docs/LangRef.html#llvm-canonicalize-intrinsic</a></td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <span style="color: rgb(51,51,51);">Clang provides constant expression evaluation support for builtins forms of the following functions from the C standard library&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">&lt;string.h&gt;</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;header:</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <pre>void * __builtin_memchr (void * ptr1, int value, size_t num);</pre>
+        <pre>void * __builtin_char_memchr (const void * ptr1, int value, size_t num);</pre>
+        <pre>int __builtin_memcmp (const void * ptr1, const void * ptr2, size_t num);</pre>
+        <pre>char * __builtin_strchr (char * str, int character);</pre>
+        <p>
+          <br />
+        </p>
+        <pre>int __builtin_strcmp (const char * str1, const char * str2);</pre>
+        <p>
+          <br />
+        </p>
+        <pre>size_t __builtin_strlen (const char * str);</pre>
+        <p>
+          <br />
+        </p>
+        <pre>int __builtin_strncmp (const char * str1, const char * str2, size_t num);</pre>
+        <pre>wchar_t* __builtin_wcschr (wchar_t* ws, wchar_t wc);</pre>
+        <p>
+          <br />
+        </p>
+        <pre>int __builtin_wcscmp (const wchar_t* wcs1, const wchar_t* wcs2);</pre>
+        <p>
+          <br />
+        </p>
+        <pre>size_t __builtin_wcslen (const wchar_t* wcs);</pre>
+        <p>
+          <br />
+        </p>
+        <pre>int __builtin_wcsncmp (const wchar_t* wcs1, const wchar_t* wcs2, size_t num);</pre>
+        <pre>wchar_t* __builtin_wmemchr (wchar_t* ptr, wchar_t wc, size_t num);</pre>
+        <p>
+          <span style="color: rgb(0,128,0);">
+            <br />
+          </span>
+        </p>
+      </td>
+      <td>
+        <p>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__builtin_char_memchr(a,</span>&nbsp;<span class="pre">b,</span>&nbsp;<span class="pre">c)</span></code>
+          <span style="color: rgb(51,51,51);">&nbsp;is identical to&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">(char*)__builtin_memchr(a,</span>&nbsp;<span class="pre">b,</span>&nbsp;<span class="pre">c)</span></code>
+          <span style="color: rgb(51,51,51);">&nbsp;except that its use is permitted within constant expressions in C++11 onwards (where a cast from&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">void*</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;to&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">char*</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;is disallowed in general).</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">Support for constant expression evaluation for the builtins can be detected with&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__has_feature(cxx_constexpr_string_builtins)</span>
+          </code>
+        </p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <pre>
+            <span class="n">unsigned int __atomic_fetch_min</span>
+            <span class="p">(</span>
+            <span class="kt" style="color: rgb(144,32,0);">unsigned int</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">pi</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned int</span> <span class="n">ui</span><span class="p">,</span> <span class="n">__ATOMIC_RELAXED</span><span class="p">);</span></pre>
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">unsigned int __atomic_fetch_max(unsigned int *pi, unsigned int ui, __ATOMIC_RELAXED);</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(51,51,51);">The builtins work with signed and unsigned integers and require to specify memory ordering. The return value is the original value that was stored in memory before comparison.</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p style="text-align: justify;">The third argument is one of the memory ordering specifiers&nbsp;<code class="docutils literal notranslate"><span class="pre">__ATOMIC_RELAXED</span></code>,&nbsp; <code class="docutils literal notranslate"><span class="pre">__ATOMIC_CONSUME</span></code>,&nbsp; <code class="docutils literal notranslate"><span class="pre">__ATOMIC_ACQUIRE</span></code>, &nbsp;<code class="docutils literal notranslate"><span class="pre">__ATOMIC_RELEASE</span></code>,&nbsp; <code class="docutils literal notranslate"><span class="pre">__ATOMIC_ACQ_REL</span></code>, or&nbsp;<code class="docutils literal notranslate"><span class="pre">__ATOMIC_SEQ_CST</span></code>&nbsp;following C++11 memory model semantics.</p>
+        <p style="text-align: justify;">
+          <br />
+        </p>
+        <p style="text-align: justify;">In terms of aquire-release ordering barriers these two operations are always considered as operations with&nbsp;<em>load-store</em>&nbsp;semantics, even when the original value is not actually modified after comparison.</p>
+      </td>
+      <td>
+        <pre>
+          <span class="kt" style="color: rgb(144,32,0);">unsigned int</span> <span class="n">val</span> <span class="o" style="color: rgb(102,102,102);">=</span> <span class="n">__atomic_fetch_min</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">unsigned int</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">pi</span><span class="p">,</span> <span class="kt" style="color: rgb(144,32,0);">unsigned int</span> <span class="n">ui</span><span class="p">,</span> <span class="n">__ATOMIC_RELAXED</span><span class="p">);</span></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>__c11_atomic_init</p>
+        <p>__c11_atomic_thread_fence</p>
+        <p>__c11_atomic_signal_fence</p>
+        <p>__c11_atomic_is_lock_free</p>
+        <p>__c11_atomic_store</p>
+        <p>__c11_atomic_load</p>
+        <p>__c11_atomic_exchange</p>
+        <p>__c11_atomic_compare_exchange_strong</p>
+        <p>__c11_atomic_compare_exchange_weak</p>
+        <p>__c11_atomic_fetch_add</p>
+        <p>__c11_atomic_fetch_sub</p>
+        <p>__c11_atomic_fetch_and</p>
+        <p>__c11_atomic_fetch_or</p>
+        <p>__c11_atomic_fetch_xor</p>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(51,51,51);">Clang provides a set of builtins which are intended to be used to implement C11&rsquo;s&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">&lt;stdatomic.h&gt;</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;header. These builtins provide the semantics of the&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">_explicit</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;form of the corresponding C11 operation, and are named with a&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__c11_</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;prefix.</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p>
+          <span style="color: rgb(51,51,51);">The macros&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__ATOMIC_RELAXED</span>
+          </code>
+          <span style="color: rgb(51,51,51);">,&nbsp; </span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__ATOMIC_CONSUME</span>
+          </code>
+          <span style="color: rgb(51,51,51);">,&nbsp; </span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__ATOMIC_ACQUIRE</span>
+          </code>
+          <span style="color: rgb(51,51,51);">,&nbsp; </span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__ATOMIC_RELEASE</span>
+          </code>
+          <span style="color: rgb(51,51,51);">,&nbsp; </span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__ATOMIC_ACQ_REL</span>
+          </code>
+          <span style="color: rgb(51,51,51);">, and&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">__ATOMIC_SEQ_CST</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;are provided, with values corresponding to the enumerators of C11&rsquo;s&nbsp;</span>
+          <code class="docutils literal notranslate" style="text-align: justify;">
+            <span class="pre">memory_order</span>
+          </code>
+          <span style="color: rgb(51,51,51);">&nbsp;enumeration.</span>
+        </p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__atomic_init</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__atomic_compare_exchange_strong</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__atomic_compare_exchange_weak<br /></span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Clang additionally provides GCC-compatible&nbsp;<code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">__atomic_*</span></code>&nbsp;builtins. These three builtins are not currently supported.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>__atomic_thread_fence</p>
+        <p>__atomic_signal_fence</p>
+        <p>__atomic_is_lock_free</p>
+        <p>__atomic_store</p>
+        <p>__atomic_load</p>
+        <p>__atomic_exchange</p>
+        <p>__atomic_fetch_add</p>
+        <p>__atomic_fetch_sub</p>
+        <p>__atomic_fetch_and</p>
+        <p>__atomic_fetch_or</p>
+        <p>__atomic_fetch_xor</p>
+      </td>
+      <td>
+        <span style="color: rgb(51,51,51);">These GCC-compatible __atomic_* builtins are supported</span>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_thread_fence</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_signal_fence</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_is_lock_free<br /></span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Clang additionally provides OpenCL 2.0&nbsp;<code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">__opencl_atomic_*</span></code>&nbsp;builtins but these three builtins are not currently supported.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_init</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_store</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_load</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_exchange</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_compare_exchange_strong</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_compare_exchange_weak</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_fetch_add</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_fetch_sub</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_fetch_and</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_fetch_or</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__opencl_atomic_fetch_xor</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Clang additionally provides OpenCL 2.0&nbsp;<code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">__opencl_atomic_*</span></code>&nbsp;builtins. The OpenCL 2.0 atomic builtins are an explicit form of the corresponding OpenCL 2.0 builtin function, and are named with a&nbsp;<code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">__opencl_</span></code>&nbsp;prefix. The macros&nbsp; <code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">__OPENCL_MEMORY_SCOPE_WORK_ITEM</span></code>, &nbsp;<code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">__OPENCL_MEMORY_SCOPE_WORK_GROUP</span></code>,&nbsp; <code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">__OPENCL_MEMORY_SCOPE_DEVICE</span></code>,&nbsp; <code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">__OPENCL_MEMORY_SCOPE_ALL_SVM_DEVICES</span></code>, and&nbsp; <code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">__OPENCL_MEMORY_SCOPE_SUB_GROUP</span></code>&nbsp;are provided, with values corresponding to the enumerators of OpenCL&rsquo;s&nbsp;<code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">memory_scope</span></code>&nbsp;enumeration</span>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">T</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_arm_ldrex</span><span class="p">(</span><span class="k" style="color: rgb(0,112,32);">const volatile</span> <span class="n">T</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">addr</span><span class="p">);</span>
+<span class="n">T</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_arm_ldaex</span><span class="p">(</span><span class="k" style="color: rgb(0,112,32);">const volatile</span> <span class="n">T</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">addr</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">int</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_arm_strex</span><span class="p">(</span><span class="n">T val</span><span class="p">,</span> <span class="k" style="color: rgb(0,112,32);">volatile</span> <span class="n">T</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">addr</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">int</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_arm_stlex</span><span class="p">(</span><span class="n">T val</span><span class="p">,</span> <span class="k" style="color: rgb(0,112,32);">volatile</span> <span class="n">T</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">addr</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">void</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_arm_clrex</span><span class="p">(</span><span class="kt" style="color: rgb(144,32,0);">void</span><span class="p">);</span></pre>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(51,51,51);">Clang provides overloaded builtins giving direct access to the three key ARM instructions for implementing atomic operations.</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p style="text-align: justify;">The types&nbsp;<code class="docutils literal notranslate"><span class="pre">T</span></code>&nbsp;currently supported are:</p>
+        <ul class="simple">
+          <li style="list-style-type: none;">Integer types with width at most 64 bits (or 128 bits on AArch64).</li>
+          <li style="list-style-type: none;">Floating-point types</li>
+          <li style="list-style-type: none;">Pointer types.</li>
+        </ul>
+        <p style="text-align: justify;">Note that the compiler does not guarantee it will not insert stores which clear the exclusive monitor in between an&nbsp;<code class="docutils literal notranslate"><span class="pre">ldrex</span></code>&nbsp;type operation and its paired&nbsp;<code class="docutils literal notranslate"><span class="pre">strex</span></code>. In practice this is only usually a risk when the extra store is on the same cache line as the variable being modified and Clang will only insert stack stores on its own, so it is best not to use these operations on variables with automatic storage duration.</p>
+        <p style="text-align: justify;">Also, loads and stores may be implicit in code written between the&nbsp;<code class="docutils literal notranslate"><span class="pre">ldrex</span></code>&nbsp;and&nbsp;<code class="docutils literal notranslate"><span class="pre">strex</span></code>. Clang will not necessarily mitigate the effects of these either, so care should be exercised.</p>
+        <p style="text-align: justify;">
+          <br />
+        </p>
+        <p style="text-align: justify;">For these reasons the higher level atomic primitives should be preferred where possible.</p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre>
+          <span class="n">T</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_nontemporal_load</span><span class="p">(</span><span class="n">T</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">addr</span><span class="p">);</span>
+<span class="kt" style="color: rgb(144,32,0);">void</span> <span class="nf" style="color: rgb(6,40,126);">__builtin_nontemporal_store</span><span class="p">(</span><span class="n">T value</span><span class="p">,</span> <span class="n">T</span> <span class="o" style="color: rgb(102,102,102);">*</span><span class="n">addr</span><span class="p">);</span></pre>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(51,51,51);">Clang provides overloaded builtins allowing generation of non-temporal memory accesses.</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p style="text-align: justify;">The types&nbsp;<code class="docutils literal notranslate"><span class="pre">T</span></code>&nbsp;currently supported are:</p>
+        <ul class="simple">
+          <li style="list-style-type: none;">Integer types.</li>
+          <li style="list-style-type: none;">Floating-point types.</li>
+          <li style="list-style-type: none;">Vector types.</li>
+        </ul>
+        <p style="text-align: justify;">Note that the compiler does not guarantee that non-temporal loads or stores will be used.</p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">void&nbsp; __builtin_coro_resume(void *addr);</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">void&nbsp; __builtin_coro_destroy(void *addr);</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">bool&nbsp; __builtin_coro_done(void *addr);</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">void *__builtin_coro_promise(void *addr, int alignment, bool from_promise);</span>
+          </p>
+          <p>
+            <br />
+          </p>
+          <p>
+            <br />
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Clang provides experimental builtins to support C++ Coroutines as defined by&nbsp;<a style="text-align: justify;" href="https://wg21.link/P0057"><span style="color: rgb(165,173,186);">https://wg21.link/P0057</span></a>. The following four are intended to be used by the standard library to implement&nbsp;<cite style="text-align: justify;">std::experimental::coroutine_handle</cite>&nbsp;type.</span>
+      </td>
+      <td>
+        <pre>
+          <br />
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">size_t __builtin_coro_size();</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">void&nbsp; *__builtin_coro_frame();</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">void&nbsp; *__builtin_coro_free(void *coro_frame);</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">void&nbsp; *__builtin_coro_id(int align, void *promise, void *fnaddr, void *parts);</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">void&nbsp; *__builtin_coro_begin(void *memory);</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">void&nbsp; &nbsp;__builtin_coro_end(void *coro_frame, bool unwind);</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">char&nbsp; &nbsp;__builtin_coro_suspend(bool final);</span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">bool&nbsp; &nbsp;__builtin_coro_param(void *original, void *copy);</span>
+          </p>
+          <p>
+            <br />
+          </p>
+        </div>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(165,173,186);">Other coroutine builtins are either for internal clang use or for use during development of the coroutine feature. See&nbsp;<a class="reference external" style="text-align: justify;" href="https://llvm.org/docs/Coroutines.html#intrinsics"><span style="color: rgb(165,173,186);">Coroutines in LLVM</span></a>&nbsp;for more information on their semantics. Note that builtins matching the intrinsics that take token as the first parameter (llvm.coro.begin, llvm.coro.alloc, llvm.coro.free and llvm.coro.suspend) omit the token parameter and fill it to an appropriate value during the emission.</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p>
+          <span style="color: rgb(165,173,186);">Note that there is no builtin matching the&nbsp;<cite style="text-align: justify;">llvm.coro.save</cite>&nbsp;intrinsic. LLVM automatically will insert one if the first argument to&nbsp;<cite style="text-align: justify;">llvm.coro.suspend</cite>&nbsp;is token&nbsp;<cite style="text-align: justify;">none</cite>. If a user calls&nbsp;<cite style="text-align: justify;">__builin_suspend</cite>, clang will insert&nbsp;<cite style="text-align: justify;">token none</cite>&nbsp;as the first argument to the intrinsic.</span>
+        </p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Green">Needs Clang 9 or newer</span>
+              <br />
+            </span>
+          </p>
+          <p>const char *__builtin_FILE()</p>
+          <p>const char *__builtin_FUNCTION()</p>
+          <p>unsigned __builtin_LINE()</p>
+          <p>
+            <span style="color: rgb(165,173,186);">unsigned __builtin_COLUMN()<br /></span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <p>Clang provides experimental builtins to support C++ standard library implementation of&nbsp;<code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">std::experimental::source_location</span></code>&nbsp;as specified in&nbsp;<a style="text-align: justify;" href="http://wg21.link/N4600">http://wg21.link/N4600</a>. With the exception of&nbsp;<code class="docutils literal notranslate" style="text-align: justify;"><span class="pre">__builtin_COLUMN</span></code>, these builtins are also implemented by GCC.</p>
+        <p>
+          <br />
+        </p>
+        <p>
+          <br />
+        </p>
+      </td>
+      <td>
+        <pre>
+          <br />
+          <br />
+        </pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+  <br />
+</p>
+<h2 id="Anchor_768705906_h2_2">GCC Built-in Functions</h2>
+<h3 id="Anchor_768705906_h3_1">Atomic Memory Access</h3>
+<p>The following builtins are intended to be compatible with those described in the&nbsp;<cite>Intel Itanium Processor-specific Application Binary Interface</cite>, section 7.4. As such, they depart from the normal GCC practice of using the &ldquo;__builtin_&rdquo; prefix, and further that they are overloaded such that they work on multiple types.</p>
+<p>The definition given in the Intel documentation allows only for the use of the types&nbsp;<code>int</code>,&nbsp;<code>long</code>,&nbsp;<code>long long</code>&nbsp;as well as their unsigned counterparts. GCC will allow any integral scalar or pointer type that is 1, 2, 4 or 8 bytes in length.</p>
+<p>Not all operations are supported by all target processors. If a particular operation cannot be implemented on the target processor, a warning will be generated and a call an external function will be generated. The external function will carry the same name as the builtin, with an additional suffix `<samp><span class="samp">_</span>n</samp>' where&nbsp;n&nbsp;is the size of the data type.</p>
+<p>In most cases, these builtins are considered a&nbsp;full barrier. That is, no memory operand will be moved across the operation, either forward or backward. Further, instructions will be issued as necessary to prevent the processor from speculating loads across the operation and from queuing stores after the operation.</p>
+<p>
+  <br />
+</p>
+<p>
+  <a href="https://gcc.gnu.org/onlinedocs/gcc-4.3.4/gcc/Atomic-Builtins.html#Atomic-Builtins">https://gcc.gnu.org/onlinedocs/gcc-4.3.4/gcc/Atomic-Builtins.html#Atomic-Builtins</a>
+</p>
+<table class="relative-table wrapped" style="width: 75.1953%;">
+  <colgroup>
+    <col style="width: 28.59%;" />
+    <col style="width: 61.1436%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <p>Builtin Function</p>
+      </th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <p>type<code>&nbsp;__sync_fetch_and_add (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+        <p>type<code>&nbsp;__sync_fetch_and_sub (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+        <p>type<code>&nbsp;__sync_fetch_and_or (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+        <p>type<code>&nbsp;__sync_fetch_and_and (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+        <p>type<code>&nbsp;__sync_fetch_and_xor (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+        <p>type<code>&nbsp;__sync_fetch_and_nand (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+      </td>
+      <td>These builtins perform the operation suggested by the name, and returns the value that had previously been in memory. That is,<pre class="smallexample">          { tmp = *ptr; *ptr op= value; return tmp; }
+          { tmp = *ptr; *ptr = ~tmp &amp; value; return tmp; }   // nand</pre></td>
+    </tr>
+    <tr>
+      <td>
+        <p>type<code>&nbsp;__sync_add_and_fetch (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+        <p>type<code>&nbsp;__sync_sub_and_fetch (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+        <p>type<code>&nbsp;__sync_or_and_fetch (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+        <p>type<code>&nbsp;__sync_and_and_fetch (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+        <p>type<code>&nbsp;__sync_xor_and_fetch (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+        <p>type<code>&nbsp;__sync_nand_and_fetch (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></p>
+      </td>
+      <td>These builtins perform the operation suggested by the name, and return the new value. That is,<pre class="smallexample">          { *ptr op= value; return *ptr; }
+          { *ptr = ~*ptr &amp; value; return *ptr; }   // nand</pre></td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>bool __sync_bool_compare_and_swap (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;oldval&nbsp;</code>type<code>&nbsp;newval, ...)</code></p>
+        <p>type<code>&nbsp;__sync_val_compare_and_swap (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;oldval&nbsp;</code>type<code>&nbsp;newval, ...)</code></p>
+      </td>
+      <td>
+        <p>These builtins perform an atomic compare and swap. That is, if the current value of&nbsp;<code>*</code>ptr&nbsp;is&nbsp;oldval, then write&nbsp;newval&nbsp;into&nbsp;<code>*</code>ptr.</p>
+        <p>The &ldquo;bool&rdquo; version returns true if the comparison is successful and&nbsp;newval&nbsp;was written. The &ldquo;val&rdquo; version returns the contents of&nbsp;<code>*</code>ptr&nbsp;before the operation.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>__sync_synchronize (...)</td>
+      <td>This builtin issues a full memory barrier.</td>
+    </tr>
+    <tr>
+      <td>type<code>&nbsp;__sync_lock_test_and_set (</code>type<code>&nbsp;*ptr,&nbsp;</code>type<code>&nbsp;value, ...)</code></td>
+      <td>
+        <p>This builtin, as described by Intel, is not a traditional test-and-set operation, but rather an atomic exchange operation. It writes&nbsp;value&nbsp;into&nbsp;<code>*</code>ptr, and returns the previous contents of&nbsp;<code>*</code>ptr.</p>
+        <p>
+          <br />
+        </p>
+        <p>Many targets have only minimal support for such locks, and do not support a full exchange operation. In this case, a target may support reduced functionality here by which the&nbsp;<em>only</em>&nbsp;valid value to store is the immediate constant 1. The exact value actually stored in&nbsp;<code>*</code>ptr&nbsp;is implementation defined.</p>
+        <p>
+          <br />
+        </p>
+        <p>This builtin is not a full barrier, but rather an&nbsp;acquire barrier. This means that references after the builtin cannot move to (or be speculated to) before the builtin, but previous memory stores may not be globally visible yet, and previous memory loads may not yet be satisfied.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>void __sync_lock_release (</code>type<code>&nbsp;*ptr, ...)</code></td>
+      <td>
+        <p>This builtin releases the lock acquired by&nbsp;<code>__sync_lock_test_and_set</code>. Normally this means writing the constant 0 to&nbsp;<code>*</code>ptr.</p>
+        <p>
+          <br />
+        </p>
+        <p>This builtin is not a full barrier, but rather a&nbsp;release barrier. This means that all previous memory stores are globally visible, and all previous memory loads have been satisfied, but following memory reads are not prevented from being speculated to before the barrier.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_768705906_h3_2">Built-ins for Optimization</h3>
+<p>GCC includes built-in versions of many of the functions in the standard C library. The versions prefixed with&nbsp;<code>__builtin_</code>&nbsp;will always be treated as having the same meaning as the C library function.&nbsp;Many of these functions are only optimized in certain cases; if they are not optimized in a particular case, a call to the library function will be emitted.</p>
+<p>Functions in<span style="color: rgb(165,173,186);"><strong>&nbsp;Gray</strong>&nbsp;</span>are&nbsp;<strong>not supported</strong>&nbsp;in NX.<br /></p>
+<table class="relative-table wrapped" style="width: 97.6368%;">
+  <colgroup>
+    <col style="width: 20.905%;" />
+    <col style="width: 36.9025%;" />
+    <col style="width: 37.3486%;" />
+    <col style="width: 4.84385%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Built-in Function</th>
+      <th>
+        <div class="content-wrapper">
+          <p>Description</p>
+        </div>
+      </th>
+      <th>Example</th>
+      <th>NX Specific</th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <span style="color: rgb(165,173,186);">__builtin__exit</span>
+          <br />__builtin_alloca<br />__builtin_bcmp<br />__builtin_bzero<br /><span style="color: rgb(165,173,186);">__builtin_dcgettext</span><br /><span style="color: rgb(165,173,186);">__builtin_dgettext</span><br /><span style="color: rgb(165,173,186);">__builtin_dremf</span><br /><span style="color: rgb(165,173,186);">__builtin_dreml</span><br /><span style="color: rgb(165,173,186);">__builtin_drem</span><br /><span style="color: rgb(165,173,186);">__builtin_exp10f</span><br /><span style="color: rgb(165,173,186);">__builtin_exp10l</span><br /><span style="color: rgb(165,173,186);">__builtin_exp10</span><br />__builtin_ffsll<br />__builtin_ffsl<br />__builtin_ffs<br /><span style="color: rgb(165,173,186);">__builtin_fprintf_unlocked</span><br /><span style="color: rgb(165,173,186);">__builtin_fputs_unlocked</span><br /><span style="color: rgb(165,173,186);">__builtin_gammaf</span><br /><span style="color: rgb(165,173,186);">__builtin_gammal</span><br /><span style="color: rgb(165,173,186);">__builtin_gamma</span><br /><span style="color: rgb(165,173,186);">__builtin_gammaf_r</span><br /><span style="color: rgb(165,173,186);">__builtin_gammal_r</span><br /><span style="color: rgb(165,173,186);">__builtin_gamma_r</span><br /><span style="color: rgb(165,173,186);">__builtin_gettext</span><br />__builtin_index<br /><span style="color: rgb(165,173,186);">__builtin_isascii</span><br /><span style="color: rgb(165,173,186);">__builtin_j0f</span><br /><span style="color: rgb(165,173,186);">__builtin_j0l</span><br /><span style="color: rgb(165,173,186);">__builtin_j0</span><br /><span style="color: rgb(165,173,186);">__builtin_j1f</span><br /><span style="color: rgb(165,173,186);">__builtin_j1l</span><br /><span style="color: rgb(165,173,186);">__builtin_j1</span><br /><span style="color: rgb(165,173,186);">__builtin_jnf</span><br /><span style="color: rgb(165,173,186);">__builtin_jnl</span><br /><span style="color: rgb(165,173,186);">__builtin_jn</span><br /><span style="color: rgb(165,173,186);">__builtin_lgammaf_r</span><br /><span style="color: rgb(165,173,186);">__builtin_lgammal_r</span><br /><span style="color: rgb(165,173,186);">__builtin_lgamma_r</span><br />__builtin_mempcpy<br /><span style="color: rgb(165,173,186);">__builtin_pow10f</span><br /><span style="color: rgb(165,173,186);">__builtin_pow10l</span><br /><span style="color: rgb(165,173,186);">__builtin_pow10</span><br /><span style="color: rgb(165,173,186);">__builtin_printf_unlocked</span><br />__builtin_rindex<br /><span style="color: rgb(165,173,186);">__builtin_scalbf</span><br /><span style="color: rgb(165,173,186);">__builtin_scalbl</span><br /><span style="color: rgb(165,173,186);">__builtin_scalb</span><br />__builtin_signbit<br />__builtin_signbitf<br />__builtin_signbitl<br /><span style="color: rgb(165,173,186);">__builtin_signbitd32</span><br /><span style="color: rgb(165,173,186);">__builtin_signbitd64</span><br /><span style="color: rgb(165,173,186);">__builtin_signbitd128</span><br /><span style="color: rgb(165,173,186);">__builtin_significandf</span><br /><span style="color: rgb(165,173,186);">__builtin_significandl</span><br /><span style="color: rgb(165,173,186);">__builtin_significand</span><br /><span style="color: rgb(165,173,186);">__builtin_sincosf</span><br /><span style="color: rgb(165,173,186);">__builtin_sincosl</span><br /><span style="color: rgb(165,173,186);">__builtin_sincos</span><br />__builtin_stpcpy<br />__builtin_stpncpy<br />__builtin_strcasecmp<br />__builtin_strdup<br /><span style="color: rgb(165,173,186);">__builtin_strfmon</span><br />__builtin_strncasecmp<br />__builtin_strndup<br /><span style="color: rgb(165,173,186);">__builtin_toascii</span><br /><span style="color: rgb(165,173,186);">__builtin_y0f</span><br /><span style="color: rgb(165,173,186);">__builtin_y0l</span><br /><span style="color: rgb(165,173,186);">__builtin_y0</span><br /><span style="color: rgb(165,173,186);">__builtin_y1f</span><br /><span style="color: rgb(165,173,186);">__builtin_y1l</span><br /><span style="color: rgb(165,173,186);">__builtin_y1</span><br /><span style="color: rgb(165,173,186);">__builtin_ynf</span><br /><span style="color: rgb(165,173,186);">__builtin_ynl</span><br /><span style="color: rgb(165,173,186);">__builtin_yn</span></p>
+      </td>
+      <td>These functions have the same prototypes and meanings as in the C library. They can be used even in strict C89 mode (<samp><span class="option">-ansi</span></samp>,&nbsp;<samp><span class="option">-std=c89</span></samp>&nbsp;or&nbsp;<samp><span class="option">-std=c99)</span></samp>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <span style="color: rgb(165,173,186);">__builtin__Exit</span>
+          <br />__builtin_acoshf<br />__builtin_acoshl<br />__builtin_acosh<br />__builtin_asinhf<br />__builtin_asinhl<br />__builtin_asinh<br />__builtin_atanhf<br />__builtin_atanhl<br />__builtin_atanh<br />__builtin_cabsf<br />__builtin_cabsl<br />__builtin_cabs<br />__builtin_cacosf<br />__builtin_cacoshf<br />__builtin_cacoshl<br />__builtin_cacosh<br />__builtin_cacosl<br />__builtin_cacos<br />__builtin_cargf<br />__builtin_cargl<br />__builtin_carg<br />__builtin_casinf<br />__builtin_casinhf<br />__builtin_casinhl<br />__builtin_casinh<br />__builtin_casinl<br />__builtin_casin<br />__builtin_catanf<br />__builtin_catanhf<br />__builtin_catanhl<br />__builtin_catanh<br />__builtin_catanl<br />__builtin_catan<br />__builtin_cbrtf<br />__builtin_cbrtl<br />__builtin_cbrt<br />__builtin_ccosf<br />__builtin_ccoshf<br />__builtin_ccoshl<br />__builtin_ccosh<br />__builtin_ccosl<br />__builtin_ccos<br />__builtin_cexpf<br />__builtin_cexpl<br />__builtin_cexp<br />__builtin_cimagf<br />__builtin_cimagl<br />__builtin_cimag<br />__builtin_clogf<br />__builtin_clogl<br />__builtin_clog<br />__builtin_conjf<br />__builtin_conjl<br />__builtin_conj<br />__builtin_copysignf<br />__builtin_copysignl<br />__builtin_copysign<br />__builtin_cpowf<br />__builtin_cpowl<br />__builtin_cpow<br />__builtin_cprojf<br />__builtin_cprojl<br />__builtin_cproj<br />__builtin_crealf<br />__builtin_creall<br />__builtin_creal<br />__builtin_csinf<br />__builtin_csinhf<br />__builtin_csinhl<br />__builtin_csinh<br />__builtin_csinl<br />__builtin_csin<br />__builtin_csqrtf<br />__builtin_csqrtl<br />__builtin_csqrt<br />__builtin_ctanf<br />__builtin_ctanhf<br />__builtin_ctanhl<br />__builtin_ctanh<br />__builtin_ctanl<br />__builtin_ctan<br />__builtin_erfcf<br />__builtin_erfcl<br />__builtin_erfc<br />__builtin_erff<br />__builtin_erfl<br />__builtin_erf<br />__builtin_exp2f<br />__builtin_exp2l<br />__builtin_exp2<br />__builtin_expm1f<br />__builtin_expm1l<br />__builtin_expm1<br />__builtin_fdimf<br />__builtin_fdiml<br />__builtin_fdim<br />__builtin_fmaf<br />__builtin_fmal<br />__builtin_fmaxf<br />__builtin_fmaxl<br />__builtin_fmax<br />__builtin_fma<br />__builtin_fminf<br />__builtin_fminl<br />__builtin_fmin<br />__builtin_hypotf<br />__builtin_hypotl<br />__builtin_hypot<br />__builtin_ilogbf<br />__builtin_ilogbl<br />__builtin_ilogb<br /><span style="color: rgb(165,173,186);">__builtin_imaxabs</span><br /><span style="color: rgb(165,173,186);">__builtin_isblank</span><br /><span style="color: rgb(165,173,186);">__builtin_iswblank</span><br />__builtin_lgammaf<br />__builtin_lgammal<br />__builtin_lgamma<br />__builtin_llabs<br />__builtin_llrintf<br />__builtin_llrintl<br />__builtin_llrint<br />__builtin_llroundf<br />__builtin_llroundl<br />__builtin_llround<br />__builtin_log1pf<br />__builtin_log1pl<br />__builtin_log1p<br />__builtin_log2f<br />__builtin_log2l<br />__builtin_log2<br />__builtin_logbf<br />__builtin_logbl<br />__builtin_logb<br />__builtin_lrintf<br />__builtin_lrintl<br />__builtin_lrint<br />__builtin_lroundf<br />__builtin_lroundl<br />__builtin_lround<br />__builtin_nearbyintf<br />__builtin_nearbyintl<br />__builtin_nearbyint<br />__builtin_nextafterf<br />__builtin_nextafterl<br />__builtin_nextafter<br />__builtin_nexttowardf<br />__builtin_nexttowardl<br />__builtin_nexttoward<br />__builtin_remainderf<br />__builtin_remainderl<br />__builtin_remainder<br />__builtin_remquof<br />__builtin_remquol<br />__builtin_remquo<br />__builtin_rintf<br />__builtin_rintl<br />__builtin_rint<br />__builtin_roundf<br />__builtin_roundl (use hardware fp in 32bit)<br />__builtin_round<br />__builtin_scalblnf<br />__builtin_scalblnl<br />__builtin_scalbln<br />__builtin_scalbnf<br />__builtin_scalbnl<br />__builtin_scalbn<br />__builtin_snprintf<br />__builtin_tgammaf<br />__builtin_tgammal<br />__builtin_tgamma<br />__builtin_truncf<br />__builtin_truncl (use hardware fp in 32bit)<br />__builtin_trunc<br /><span style="color: rgb(165,173,186);">__builtin_vfscanf</span><br /><span style="color: rgb(165,173,186);">__builtin_vscanf</span></p>
+        <p>__builtin_vsnprintf<br /><span style="color: rgb(165,173,186);">__builtin_vsscanf</span></p>
+        <p>__builtin_acosf<br />__builtin_acosl<br />__builtin_asinf<br />__builtin_asinl<br />__builtin_atan2f<br />__builtin_atan2l<br />__builtin_atanf<br />__builtin_atanl<br />__builtin_ceilf<br />__builtin_ceill (use hardware fp in 32bit)<br />__builtin_cosf<br />__builtin_coshf<br />__builtin_coshl<br />__builtin_cosl<br />__builtin_expf<br />__builtin_expl<br />__builtin_fabsf<br />__builtin_fabsl<br />__builtin_floorf<br />__builtin_floorl (use hardware fp in 32bit)<br />__builtin_fmodf<br />__builtin_fmodl<br />__builtin_frexpf<br />__builtin_frexpl<br />__builtin_ldexpf<br />__builtin_ldexpl<br />__builtin_log10f<br />__builtin_log10l<br />__builtin_logf<br />__builtin_logl<br />__builtin_modfl<br />__builtin_modf<br />__builtin_powf<br />__builtin_powl<br />__builtin_sinf<br />__builtin_sinhf<br />__builtin_sinhl<br />__builtin_sinl<br />__builtin_sqrtf<br />__builtin_sqrtl<br />__builtin_tanf<br />__builtin_tanhf<br />__builtin_tanhl<br />__builtin_tanl</p>
+      </td>
+      <td>This is the list of the ISO C99 functions that has built-in version.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">__builtin_iswalnum</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_iswalpha</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_iswcntrl</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_iswdigit</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_iswgraph</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_iswlower</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_iswprint</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_iswpunct</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_iswspace</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_iswupper</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_iswxdigit</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_towlower</span>
+            <br />
+            <span style="color: rgb(165,173,186);">__builtin_towupper</span>
+          </p>
+        </div>
+      </td>
+      <td>This is the list of C94 built-in functions that are supported in GCC, but none of them is supported in NX.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <span style="color: rgb(165,173,186);">__builtinabort</span>
+          <br />__builtin_abs<br />__builtin_acos<br />__builtin_asin<br />__builtin_atan2<br />__builtin_atan<br /><span style="color: rgb(165,173,186);">__builtin_calloc</span><br />__builtin_ceil<br />__builtin_cosh<br />__builtin_cos<br /><span style="color: rgb(165,173,186);">__builtin_exit</span><br />__builtin_exp<br />__builtin_fabs<br />__builtin_floor<br />__builtin_fmod<br />__builtin_fprintf<br /><span style="color: rgb(165,173,186);">__builtin_fputs</span><br />__builtin_frexp<br /><span style="color: rgb(165,173,186);">__builtin_fscanf</span><br /><span style="color: rgb(165,173,186);">__builtin_isalnum</span><br /><span style="color: rgb(165,173,186);">__builtin_isalpha</span><br /><span style="color: rgb(165,173,186);">__builtin_iscntrl</span><br /><span style="color: rgb(165,173,186);">__builtin_isdigit</span><br /><span style="color: rgb(165,173,186);">__builtin_isgraph</span><br /><span style="color: rgb(165,173,186);">__builtin_islower</span><br /><span style="color: rgb(165,173,186);">__builtin_isprint</span><br /><span style="color: rgb(165,173,186);">__builtin_ispunct</span><br /><span style="color: rgb(165,173,186);">__builtin_isspace</span><br /><span style="color: rgb(165,173,186);">__builtin_isupper</span><br /><span style="color: rgb(165,173,186);">__builtin_isxdigit</span><br /><span style="color: rgb(165,173,186);">__builtin_tolower</span><br /><span style="color: rgb(165,173,186);">__builtin_toupper</span><br />__builtin_labs<br />__builtin_ldexp<br />__builtin_log10<br />__builtin_log<br /><span style="color: rgb(165,173,186);">__builtin_malloc</span><br />__builtin_memchr<br />__builtin_memcmp<br />__builtin_memcpy<br />__builtin_memset<br />__builtin_modf<br />__builtin_pow<br />__builtin_printf<br /><span style="color: rgb(165,173,186);">__builtin_putchar</span><br /><span style="color: rgb(165,173,186);">__builtin_puts</span><br /><span style="color: rgb(165,173,186);">__builtin_scanf</span><br />__builtin_sinh<br />__builtin_sin<br />__builtin_snprintf<br /><span style="color: rgb(165,173,186);">__builtin_sprintf</span><br />__builtin_sqrt<br /><span style="color: rgb(165,173,186);">__builtin_sscanf</span><br />__builtin_strcat<br />__builtin_strchr<br />__builtin_strcmp<br />__builtin_strcpy<br />__builtin_strcspn<br />__builtin_strlen<br />__builtin_strncat<br />__builtin_strncmp<br />__builtin_strncpy<br />__builtin_strpbrk<br />__builtin_strrchr<br />__builtin_strspn<br />__builtin_strstr<br />__builtin_tanh<br />__builtin_tan<br /><span style="color: rgb(165,173,186);">__builtin_vfprintf</span><br /><span style="color: rgb(165,173,186);">__builtin_vprintf</span><br />__builtin_vsprintf</p>
+      </td>
+      <td>This is the list of C90 built-in functions that has built-in versions.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>__builtin_isgreater<br />__builtin_isgreaterequal<br />__builtin_isless<br />__builtin_islessequal<br />__builtin_islessgreater<br />__builtin_isunordered<br />__builtin_isfinite<br />__builtin_isnormal</p>
+      </td>
+      <td>GCC provides built-in versions of the ISO C99 floating point comparison macros that avoid raising exceptions for unordered operands. They have the same names as the standard macros with&nbsp;<code>__builtin_</code>&nbsp;prefixed.&nbsp;</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>int&nbsp;<strong>__builtin_types_compatible_p</strong>&nbsp;(type1, type2)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(165,173,186);">You can use the built-in function&nbsp;<code>__builtin_types_compatible_p</code>&nbsp;to determine whether two types are the same.</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p>
+          <span style="color: rgb(165,173,186);">This built-in function returns 1 if the unqualified versions of the types&nbsp;type1&nbsp;and&nbsp;type2&nbsp;(which are types, not expressions) are compatible, 0 otherwise. The result of this built-in function can be used in integer constant expressions.</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p>
+          <span style="color: rgb(165,173,186);">This built-in function ignores top level qualifiers (e.g.,&nbsp;<code>const</code>,&nbsp;<code>volatile</code>). For example,&nbsp;<code>int</code>&nbsp;is equivalent to&nbsp;<code>const int</code>.</span>
+        </p>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(165,173,186);">You would typically use this function in code whose execution varies depending on the arguments' types. For example:</span>
+        </p>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">#define foo(x) \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">({ \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> typeof (x) tmp = (x); \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> if (__builtin_types_compatible_p (typeof (x), long double)) \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> tmp = foo_long_double (tmp); \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> else if (__builtin_types_compatible_p (typeof (x), double)) \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> tmp = foo_double (tmp); \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> else if (__builtin_types_compatible_p (typeof (x), float)) \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> tmp = foo_float (tmp); \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> else \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> abort (); \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> tmp; \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">}) </span>
+        </pre>
+        <p>
+          <span style="color: rgb(165,173,186);">
+            <em>Note:</em>&nbsp;This construct is only available for C.</span>
+        </p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">type&nbsp;<strong>__builtin_choose_expr</strong>&nbsp;(const_exp, exp1, exp2)<br /></span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(165,173,186);">You can use the built-in function&nbsp;<code>__builtin_choose_expr</code>&nbsp;to evaluate code depending on the value of a constant expression. This built-in function returns&nbsp;exp1&nbsp;if&nbsp;const_exp, which is a constant expression that must be able to be determined at compile time, is nonzero. Otherwise it returns 0.</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p>
+          <span style="color: rgb(165,173,186);">This built-in function is analogous to the `<samp><span class="samp">? :</span></samp></span>
+        </p>
+        <p>
+          <span style="color: rgb(165,173,186);">' operator in C, except that the expression returned has its type unaltered by promotion rules. Also, the built-in function does not evaluate the expression that was not chosen. For example, if&nbsp;const_exp&nbsp;evaluates to true,&nbsp;exp2&nbsp;is not evaluated even if it has side-effects.</span>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p>
+          <span style="color: rgb(165,173,186);">This built-in function can return an lvalue if the chosen argument is an lvalue.</span>
+        </p>
+        <p>
+          <span style="color: rgb(165,173,186);">If&nbsp;exp1&nbsp;is returned, the return type is the same as&nbsp;exp1's type. Similarly, if&nbsp;exp2&nbsp;is returned, its return type is the same as&nbsp;exp2.</span>
+        </p>
+      </td>
+      <td>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">#define foo(x) \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">__builtin_choose_expr ( \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">__builtin_types_compatible_p (typeof (x), double), \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">foo_double (x), \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">__builtin_choose_expr ( \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">__builtin_types_compatible_p (typeof (x), float), \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">foo_float (x), \ </span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);">/* <span class="roman">The void expression results in a compile-time error</span> \</span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> <span class="roman">when assigning the result to something.</span> */ \</span>
+        </pre>
+        <pre class="smallexample">
+          <span style="color: rgb(165,173,186);"> (void)0)) </span>
+        </pre>
+        <p>
+          <br />
+        </p>
+        <p>
+          <span style="color: rgb(165,173,186);">
+            <em>Note:</em>&nbsp;This construct is only available for C. Furthermore, the unused expression (exp1&nbsp;or&nbsp;exp2&nbsp;depending on the value of&nbsp;const_exp) may still generate syntax errors. This may change in future revisions.</span>
+        </p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_constant_p</strong>&nbsp;(exp)</td>
+      <td>You can use the built-in function&nbsp;<code>__builtin_constant_p</code>&nbsp;to determine if a value is known to be constant at compile-time and hence that GCC can perform constant-folding on expressions involving that value. The argument of the function is the value to test. The function returns the integer 1 if the argument is known to be a compile-time constant and 0 if it is not known to be a compile-time constant. A return of 0 does not indicate that the value is&nbsp;<em>not</em>&nbsp;a constant, but merely that GCC cannot prove it is a constant with the specified value of the&nbsp;<samp><span class="option">-O</span></samp>&nbsp;option.</td>
+      <td>
+        <p>You would typically use this function in an embedded application where memory was a critical resource. If you have some complex calculation, you may want it to be folded if it involves constants, but need to call a function if it does not. For example:</p>
+        <pre class="smallexample">          #define Scale_Value(X)      \
+            (__builtin_constant_p (X) \
+            ? ((X) * SCALE + OFFSET) : Scale (X))
+     </pre>
+        <p>You may use this built-in function in either a macro or an inline function. However, if you use it in an inlined function and pass an argument of the function as the argument to the built-in, GCC will never return 1 when you call the inline function with a string constant or compound literal (see&nbsp;<a href="https://gcc.gnu.org/onlinedocs/gcc-4.3.4/gcc/Compound-Literals.html#Compound-Literals">Compound Literals</a>) and will not return 1 when you pass a constant numeric value to the inline function unless you specify the&nbsp;<samp><span class="option">-O</span></samp>&nbsp;option.</p>
+        <p>You may also use&nbsp;<code>__builtin_constant_p</code>&nbsp;in initializers for static data. For instance, you can write</p>
+        <pre class="smallexample">          static const int table[] = {
+             __builtin_constant_p (EXPRESSION) ? (EXPRESSION) : -1,
+             /* <span class="roman">...</span> */
+          };
+     </pre>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span style="color: rgb(0,51,102);">long&nbsp;<strong>__builtin_expect</strong>&nbsp;(long exp, long c)</span>
+      </td>
+      <td>
+        <span style="color: rgb(0,51,102);">You may use&nbsp;<code>__builtin_expect</code>&nbsp;to provide the compiler with branch prediction information. In general, you should prefer to use actual profile feedback for this (<samp><span class="option">-fprofile-arcs</span></samp>), as programmers are notoriously bad at predicting how their programs actually perform. However, there are applications in which this data is hard to collect.</span>
+      </td>
+      <td>
+        <p>
+          <span style="color: rgb(0,51,102);">The return value is the value of&nbsp;exp, which should be an integral expression. The semantics of the built-in are that it is expected that&nbsp;exp&nbsp;==&nbsp;c. For example:</span>
+        </p>
+        <pre class="smallexample">
+          <span style="color: rgb(0,51,102);"> if (__builtin_expect (x, 0)) foo (); </span>
+        </pre>
+        <p class="noindent">
+          <span style="color: rgb(0,51,102);">would indicate that we do not expect to call&nbsp;<code>foo</code>, since we expect&nbsp;<code>x</code>&nbsp;to be zero. Since you are limited to integral expressions for&nbsp;exp, you should use constructions such as</span>
+        </p>
+        <pre class="smallexample">
+          <span style="color: rgb(0,51,102);"> if (__builtin_expect (ptr != NULL, 1)) error (); </span>
+        </pre>
+        <p class="noindent">
+          <span style="color: rgb(0,51,102);">when testing pointer or floating-point values.</span>
+        </p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>void&nbsp;<strong>__builtin_trap</strong>&nbsp;(void)</td>
+      <td>This function causes the program to exit abnormally. GCC implements this function by using a target-dependent mechanism (such as intentionally executing an illegal instruction) or by calling&nbsp;<code>abort</code>. The mechanism used may vary from release to release so you should not rely on any particular implementation.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>void&nbsp;<strong>__builtin___clear_cache</strong>&nbsp;(char *begin, char *end)</td>
+      <td>This function is used to flush the processor's instruction cache for the region of memory between&nbsp;begin&nbsp;inclusive and&nbsp;end&nbsp;exclusive. Some targets require that the instruction cache be flushed, after modifying memory containing code, in order to obtain deterministic behavior.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>void&nbsp;<strong>__builtin_prefetch</strong>&nbsp;(const void *addr, ...)</td>
+      <td>
+        <p>This function is used to minimize cache-miss latency by moving data into a cache before it is accessed. You can insert calls to&nbsp;<code>__builtin_prefetch</code>&nbsp;into code for which you know addresses of data in memory that is likely to be accessed soon. If the target supports them, data prefetch instructions will be generated. If the prefetch is done early enough before the access then the data will be in the cache by the time it is accessed.</p>
+        <p>
+          <br />
+        </p>
+        <p>The value of&nbsp;addr&nbsp;is the address of the memory to prefetch. There are two optional arguments,&nbsp;rw&nbsp;and&nbsp;locality. The value of&nbsp;rw&nbsp;is a compile-time constant one or zero; one means that the prefetch is preparing for a write to the memory address and zero, the default, means that the prefetch is preparing for a read. The value&nbsp;locality&nbsp;must be a compile-time constant integer between zero and three. A value of zero means that the data has no temporal locality, so it need not be left in the cache after the access. A value of three means that the data has a high degree of temporal locality and should be left in all levels of cache possible. Values of one and two mean, respectively, a low or moderate degree of temporal locality. The default is three.</p>
+      </td>
+      <td>
+        <pre class="smallexample">for (i = 0; i &lt; n; i++)
+  {
+    a[i] = a[i] + b[i];
+    __builtin_prefetch (&amp;a[i+j], 1, 1);
+    __builtin_prefetch (&amp;b[i+j], 0, 1);
+    /* <span class="roman">...</span> */
+  }
+</pre>
+        <p>
+          <br />
+        </p>Data prefetch does not generate faults if&nbsp;addr&nbsp;is invalid, but the address expression itself must be valid. For example, a prefetch of&nbsp;<code>p-&gt;next</code>&nbsp;will not fault if&nbsp;<code>p-&gt;next</code>&nbsp;is not a valid address, but evaluation will fault if&nbsp;<code>p</code>&nbsp;is not a valid address.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>double&nbsp;<strong>__builtin_huge_val</strong>&nbsp;(void)</td>
+      <td>Returns a positive infinity, if supported by the floating-point format, else&nbsp;<code>DBL_MAX</code>. This function is suitable for implementing the ISO C macro&nbsp;<code>HUGE_VAL</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>float&nbsp;<strong>__builtin_huge_valf</strong>&nbsp;(void)</td>
+      <td>Similar to&nbsp;<code>__builtin_huge_val</code>, except the return type is&nbsp;<code>float</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>long double&nbsp;<strong>__builtin_huge_vall</strong>&nbsp;(void)</td>
+      <td>Similar to&nbsp;<code>__builtin_huge_val</code>, except the return type is&nbsp;<code>long double</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>double&nbsp;<strong>__builtin_inf</strong>&nbsp;(void)</td>
+      <td>Similar to&nbsp;<code>__builtin_huge_val</code>, except a warning is generated if the target floating-point format does not support infinities.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">_Decimal32&nbsp;<strong>__builtin_infd32</strong>&nbsp;(void)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Similar to&nbsp;<code>__builtin_inf</code>, except the return type is&nbsp;<code>_Decimal32</code>.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">_Decimal64&nbsp;<strong>__builtin_infd64</strong>&nbsp;(void)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Similar to&nbsp;<code>__builtin_inf</code>, except the return type is&nbsp;<code>_Decimal64</code>.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">_Decimal128&nbsp;<strong>__builtin_infd128</strong>&nbsp;(void)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Similar to&nbsp;<code>__builtin_inf</code>, except the return type is&nbsp;<code>_Decimal128</code>.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>float&nbsp;<strong>__builtin_inff</strong>&nbsp;(void)</td>
+      <td>Similar to&nbsp;<code>__builtin_inf</code>, except the return type is&nbsp;<code>float</code>. This function is suitable for implementing the ISO C99 macro&nbsp;<code>INFINITY</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>long double&nbsp;<strong>__builtin_infl</strong>&nbsp;(void)</td>
+      <td>Similar to&nbsp;<code>__builtin_inf</code>, except the return type is&nbsp;<code>long double</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>double&nbsp;<strong>__builtin_nan</strong>&nbsp;(const char *str)</td>
+      <td>This is an implementation of the ISO C99 function&nbsp;<code>nan</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">_Decimal32&nbsp;<strong>__builtin_nand32</strong>&nbsp;(const char *str)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Similar to&nbsp;<code>__builtin_nan</code>, except the return type is&nbsp;<code>_Decimal32</code>.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">_Decimal64&nbsp;<strong>__builtin_nand64</strong>&nbsp;(const char *str)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Similar to&nbsp;<code>__builtin_nan</code>, except the return type is&nbsp;<code>_Decimal64</code>.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">_Decimal128&nbsp;<strong>__builtin_nand128</strong>&nbsp;(const char *str)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Similar to&nbsp;<code>__builtin_nan</code>, except the return type is&nbsp;<code>_Decimal128</code>.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>float&nbsp;<strong>__builtin_nanf</strong>&nbsp;(const char *str)</td>
+      <td>Similar to&nbsp;<code>__builtin_nan</code>, except the return type is&nbsp;<code>float</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>long double&nbsp;<strong>__builtin_nanl</strong>&nbsp;(const char *str)</td>
+      <td>Similar to&nbsp;<code>__builtin_nan</code>, except the return type is&nbsp;<code>long double</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+              <br />
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">double&nbsp;<strong>__builtin_nans</strong>&nbsp;(const char *str)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Similar to&nbsp;<code>__builtin_nan</code>, except the significand is forced to be a signaling NaN. The&nbsp;<code>nans</code>&nbsp;function is proposed by&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg14/www/docs/n965.htm"><span style="color: rgb(165,173,186);">WG14 N965</span></a>.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>float&nbsp;<strong>__builtin_nansf</strong>&nbsp;(const char *str)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Similar to&nbsp;<code>__builtin_nans</code>, except the return type is&nbsp;<code>float</code>.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span style="color: rgb(165,173,186);">
+              <span class="status_macro_base status_macro_Red">Not Supported</span>
+            </span>
+          </p>
+          <p>
+            <span style="color: rgb(165,173,186);">long double&nbsp;<strong>__builtin_nansl</strong>&nbsp;(const char *str)</span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <span style="color: rgb(165,173,186);">Similar to&nbsp;<code>__builtin_nans</code>, except the return type is&nbsp;<code>long double</code>.</span>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_ffs</strong>&nbsp;(unsigned int x)</td>
+      <td>Returns one plus the index of the least significant 1-bit of&nbsp;x, or if&nbsp;x&nbsp;is zero, returns zero.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_clz</strong>&nbsp;(unsigned int x)</td>
+      <td>Returns the number of leading 0-bits in&nbsp;x, starting at the most significant bit position. If&nbsp;x&nbsp;is 0, the result is undefined.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_ctz</strong>&nbsp;(unsigned int x)</td>
+      <td>Returns the number of trailing 0-bits in&nbsp;x, starting at the least significant bit position. If&nbsp;x&nbsp;is 0, the result is undefined.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_popcount</strong>&nbsp;(unsigned int x)</td>
+      <td>Returns the number of 1-bits in&nbsp;x.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_parity</strong>&nbsp;(unsigned int x)</td>
+      <td>Returns the parity of&nbsp;x, i.e. the number of 1-bits in&nbsp;x&nbsp;modulo 2.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_ffsl</strong>&nbsp;(unsigned long)</td>
+      <td>Similar to&nbsp;<code>__builtin_ffs</code>, except the argument type is&nbsp;<code>unsigned long</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_clzl</strong>&nbsp;(unsigned long)</td>
+      <td>Similar to&nbsp;<code>__builtin_clz</code>, except the argument type is&nbsp;<code>unsigned long</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_ctzl</strong>&nbsp;(unsigned long)</td>
+      <td>Similar to&nbsp;<code>__builtin_ctz</code>, except the argument type is&nbsp;<code>unsigned long</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_popcountl</strong>&nbsp;(unsigned long)</td>
+      <td>Similar to&nbsp;<code>__builtin_popcount</code>, except the argument type is&nbsp;<code>unsigned long</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_parityl</strong>&nbsp;(unsigned long)</td>
+      <td>Similar to&nbsp;<code>__builtin_parity</code>, except the argument type is&nbsp;<code>unsigned long</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_ffsll</strong>&nbsp;(unsigned long long)</td>
+      <td>Similar to&nbsp;<code>__builtin_ffs</code>, except the argument type is&nbsp;<code>unsigned long long</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_clzll</strong>&nbsp;(unsigned long long)</td>
+      <td>Similar to&nbsp;<code>__builtin_clz</code>, except the argument type is&nbsp;<code>unsigned long long</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_ctzll</strong>&nbsp;(unsigned long long)</td>
+      <td>Similar to&nbsp;<code>__builtin_ctz</code>, except the argument type is&nbsp;<code>unsigned long long</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_popcountll</strong>&nbsp;(unsigned long long)</td>
+      <td>Similar to&nbsp;<code>__builtin_popcount</code>, except the argument type is&nbsp;<code>unsigned long long</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int&nbsp;<strong>__builtin_parityll</strong>&nbsp;(unsigned long long)</td>
+      <td>Similar to&nbsp;<code>__builtin_parity</code>, except the argument type is&nbsp;<code>unsigned long long</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>double&nbsp;<strong>__builtin_powi</strong>&nbsp;(double, int)</td>
+      <td>Returns the first argument raised to the power of the second. Unlike the&nbsp;<code>pow</code>&nbsp;function no guarantees about precision and rounding are made.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>float&nbsp;<strong>__builtin_powif</strong>&nbsp;(float, int)</td>
+      <td>Similar to&nbsp;<code>__builtin_powi</code>, except the argument and return types are&nbsp;<code>float</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>long double&nbsp;<strong>__builtin_powil</strong>&nbsp;(long double, int)</td>
+      <td>Similar to&nbsp;<code>__builtin_powi</code>, except the argument and return types are&nbsp;<code>long double</code>.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int32_t&nbsp;<strong>__builtin_bswap32</strong>&nbsp;(int32_t x)</td>
+      <td>Returns&nbsp;x&nbsp;with the order of the bytes reversed; for example,&nbsp;<code>0xaabbccdd</code>&nbsp;becomes&nbsp;<code>0xddccbbaa</code>. Byte here always means exactly 8 bits.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>int64_t&nbsp;<strong>__builtin_bswap64</strong>&nbsp;(int64_t x)</td>
+      <td>Similar to&nbsp;<code>__builtin_bswap32</code>, except the argument and return types are 64-bit.</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__GetSystemTick', '../../../Api/HtmlNX/namespacenn_1_1os.html#a79e29821bfb2b0c3a5c222488e90cc89' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

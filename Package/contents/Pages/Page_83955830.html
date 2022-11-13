@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Number of Sound Instances | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Number of Sound Instances -->
+<div class="pagetitle" id="PageId_83955830">Number of Sound Instances</div>
+<div class="text_separate">
+<h1 id="Anchor_83955830_h1_1">Number of Sound Instances</h1>
+<p>This section describes the roles played in the <code>Atk</code> library by the following values, all of which can be set in SoundMaker in <strong>Project</strong> &gt; <strong>Project Settings</strong> &gt; <strong>Sound Archive</strong> &gt; <strong>Sound Archive Player</strong>.</p>
+<ul>
+  <li>Sequence sounds</li>
+  <li>Sequence tracks</li>
+  <li>Stream sounds</li>
+  <li>The number of stream channels.</li>
+  <li>The number of wave sounds.</li>
+</ul>
+<h2 id="Anchor_83955830_h2_1">Relation to Memory Size</h2>
+<p>These five values are held internally by the <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code> object that is linked to the relevant sound archive (BFSAR file), and they are related to the number of instances of sequence sounds, sequence tracks, and so on.</p>
+<p>When these numbers are set larger, the corresponding <code>SoundArchivePlayer</code> can hold that many more instances, enabling more of each type of sound to be played simultaneously. However, this also increases the amount of memory as required by the <code>SoundArchivePlayer</code> class member functions <code>GetRequiredMemSize</code> and <code>GetRequiredStreamBufferSize</code>.</p>
+<p>Specifically, the <code>GetRequiredMemSize</code> function requires more memory when there are large numbers of any of the following sounds.</p>
+<ul>
+  <li>Sequence sounds</li>
+  <li>Sequence tracks</li>
+  <li>Stream sounds</li>
+  <li>Wave sounds</li>
+</ul>
+<p>Also, when the following number is large, the <code>GetRequiredStreamBufferSize</code> function requires more memory.</p>
+<ul>
+  <li>Stream channels<br /><br /></li>
+</ul>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <strong>Note:</strong> To reiterate, these five values affect the amount of memory that <code>SoundArchivePlayer</code> requires. To control memory size, set the value as low as possible by considering how many of each type of sound can be expected to be played at the same time in the application.</div>
+</div>
+<h2 id="Anchor_83955830_h2_2">Number of Sounds</h2>
+<p>Sounds (stream sounds, sequence sounds, and wave sounds) are played using the instances allocated in <code>SoundArchivePlayer</code> (stream sound instances, sequence sound instances, and wave sound instances). The allocation of sound instances is determined by the settings for the following.</p>
+<ul>
+  <li>The number of sequence sounds</li>
+  <li>The number of stream sounds</li>
+  <li>Wave sounds</li>
+</ul>
+<p>Only that number of instances are allocated for each sound, so if you try to play more sounds than this number, a warning like the following is displayed and the sound with the lowest priority is stopped.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>atk_SoundInstanceManager.h: [warning] Sound (id:0x%08x) is stopped for not enough seq sound instance.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955830_h3_1">Comparison of Player Sound Limit</h3>
+<p>A player sound limit is for determining the maximum playback number regardless of the sound type (whether it is stream sound, sequence sound, or wave sound). However, as described previously, &quot;number of sounds&quot; can be taken as a value to determined the maximum playback number for each sound type.</p>
+<p>Consider, for example, a player used for the sounds for enemy characters, which we will call PLAYER_ENEMY. When the sound limit for this player is set to 8, then only eight enemy sounds can be played simultaneously with PLAYER_ENEMY, regardless of the sound type.</p>
+<p>The sound limit for a player is also referenced when the player heap is allocated. The player heap is allocated internally by the SoundArchivePlayer::Initialize function for only <em>number of the sound limit</em> * <em>heap size</em>. This size is also applied to the <code>SoundArchivePlayer::GetRequiredMemSize</code> function.</p>
+<h2 id="Anchor_83955830_h2_3">Sequence Tracks</h2>
+<p>A sequence sound plays a sound using one or more sequence tracks. You can see how many sequence tracks are used by the sequence sound by checking the argument of the <code>alloctrack</code> command in the text sequence file.</p>
+<p> </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>opentrack_seq:
+&nbsp;&nbsp;&nbsp;&nbsp;alloctrack TRACK_1 | TRACK_2 | TRACK_3</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>In this example, four tracks are allocated with the <code>alloctrack</code> command (the one track that is allocated even without calling the <code>alloctrack</code> command, plus the three tracks TRACK_1, TRACK_2, and TRACK_3).</p>
+<p>When allocating a sequence sound instance succeeds, the sequence sound attempts to allocate a sequence track instance that is required by the next appropriate sequence. The sequence track instance is allocated in the SoundArchivePlayer for only the &quot;sequence track number&quot; set with SoundMaker.</p>
+<p>If the allocation of the sequence track instance fails, a warning message like the following is displayed, and the sequence sound stops. (The <code>StartSound</code> function of the sequence sound returns success, but it stops immediately.)</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>atk_SequenceSoundPlayer.cpp: [warning] Failed to start sequence sound for not enough sequence track instance.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Here is an example.</p>
+<ul>
+  <li>Number of sequence sounds = 2</li>
+  <li>Number of  sequence tracks = 6</li>
+</ul>
+<p>In this example, when attempting to simultaneously play two of <code>opentrack_seq</code>, the first plays successfully, but the second does not have enough sequence tracks. (It requires four tracks, but because the first uses four tracks for playback, the remaining two tracks are insufficient.) As a result, the sequence track instance is not allocated, and the second sequence sound stops immediately. However, to successfully allocate a sequence sound instance, the StartSound function returns success.</p>
+<h2 id="Anchor_83955830_h2_4">Number of Stream Channels</h2>
+<p>The behavior related to the number of stream channels resembles the behavior related to the &quot;number of sequence tracks&quot; described previously.</p>
+<p>A stream sound plays a sound using one or more stream channels. The number of stream channels that a stream sound uses is the total of the number of channels of the waveform of each stream track that is set with SoundMaker.</p>
+<p>For example, a stream sound with one configured stream sound track needs two stream sound channels when it references a stereo waveform file. And a stream sound with three configured stream sound tracks needs three stream sound channels when these tracks each reference a monaural waveform file.</p>
+<p>When a stream sound instance is successfully allocated, the system acts to allocate the stream channels that will be required by the next pertinent stream sound. Stream channels are allocated in the <code>SoundArchivePlayer</code> according to the &quot;number of stream channels&quot; set with SoundMaker.</p>
+<p>If the allocation of the stream channel fails, a warning like the following one is displayed, and the stream sound is stopped (the <code>StartSound</code> function of the stream sound returns success, but it stops immediately).</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>atk_StreamSoundPlayer.cpp: [warning] Failed to start stream sound for not enough stream channel instance.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Here is an example.</p>
+<ul>
+  <li>Number of stream sounds = 2</li>
+  <li>Number of stream channels = 4</li>
+</ul>
+<p>In this example, when you attempt to simultaneously play two of <code>STRM_MULTI_TRACK</code>, the first plays successfully but the second does not have enough stream channels. (It requires three channels, but because the first already uses three channels for playback, the remaining one channel is insufficient.). As a result, the stream channels fail to be allocated and the second stream sound stops immediately. However, to successfully allocate a stream sound instance, the <code>StartSound</code> function returns success.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

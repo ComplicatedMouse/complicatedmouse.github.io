@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Changing the character count changes the curve of characters set with the Per-Character Transformation feature. | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Changing the character count changes the curve of characters set with the Per-Character Transformation feature. -->
+<div class="pagetitle" id="PageId_227101410">Changing the character count changes the curve of characters set with the Per-Character Transformation feature.</div>
+<div class="text_separate">
+<h1 id="Anchor_227101410_h1_1">Changing the character count changes the curve of characters set with the Per-Character Transformation feature.</h1>
+<p>
+  <span class="status_macro_base status_macro_Green">Question</span>
+</p>
+<p>When characters have been placed along a curved line using the <strong>Per-character transformation</strong> feature, the curve shape changes when I replace the text for some purpose like localization and change the number of characters as a result.</p>
+<p>How can I place those characters along the original curve?</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Answer</span>
+</p>
+<p>To place the characters along the original curve, adjust the <strong>Kerning</strong> or the <strong>Duration</strong>.</p>
+<p>These settings can be adjusted in LayoutEditor, but by automatically adjusting them based on the text length in your program, you can freely replace text along a curve without changing the layout data.</p>
+<p>This section describes how to make the adjustments in LayoutEditor, and how to make the adjustments automatically in the program.</p>
+<p>
+  <br />
+</p>
+<p>By way of example, assume that the data in the following figure has been created and there is a plan to replace the text.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955988/244373639.png" width="440" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>A text string of 20 characters was set in the preceding figure. If you replace this text with a string of 10 characters, the curve changes as follows.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955988/244373647.png" width="440" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>To place these characters along the original curve, widen the kerning so the overall width of the text is the same as the original.</p>
+<p>This places the characters along the full length of the original curve, as shown in the following figure.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955988/244373653.png" width="440" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>Alternatively, you could adjust the offset and the duration. For the 20 characters, the offset was 0 and the duration was 100. Because the number of characters was decreased to 10, you could adjust the offset to 25 and the duration to 50.</p>
+<p>This places the characters along a portion of the original curve.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955988/244373595.png" width="167" class="embedded-image" />
+  </span>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955988/244373657.png" width="440" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>To align the text to the left, set the offset to 0 and the duration to 50.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955988/244373597.png" width="167" class="embedded-image" />
+  </span>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955988/244373659.png" width="440" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>To automate this adjustment process in the program, get the length of the string from the text box and then adjust the <strong>Kerning</strong> or <strong>Duration</strong> based on that length.</p>
+<p>An example follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// Get the length of the string in the text box.
+nn::ui2d::TextBox* pTextBox = static_cast&lt;nn::ui2d::TextBox*&gt;(g_pLayout-&gt;GetRootPane()-&gt;FindPaneByName(&quot;TextBoxName&quot;));
+uint16_t length = pTextBox-&gt;GetStringLength();
+
+// If changing the kerning:
+// Subtract the width for all characters from the width of the text box, and evenly divide the resulting blank space.
+float spaceWidth = (pTextBox-&gt;GetSize().width - pTextBox-&gt;GetFontSize().width * length) / (length - 1);
+pTextBox-&gt;SetCharSpace(spaceWidth);
+
+// If changing the offset and duration:
+const float maxWidth = 100.0f; // The offset when the number of characters is at the maximum.
+const int maxCharCount = 20; // The number of characters at the maximum.
+float width = maxWidth / maxCharCount * length; // Calculate the duration according to the number of characters.
+float offset = (maxWidth - width) / 2.0f; // Calculate the offset according to the number of characters. (Treat as 0 when aligning to the left.)
+pTextBox-&gt;SetPerCharacterTransform(nn::ui2d::AnimTargetPerCharacterTransform_EvalTypeOffset, offset);
+pTextBox-&gt;SetPerCharacterTransform(nn::ui2d::AnimTargetPerCharacterTransform_EvalTypeWidth, width);
+</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,536 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Access Log Output Feature | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Access Log Output Feature -->
+<div class="pagetitle" id="PageId_391843305">Access Log Output Feature</div>
+<div class="text_separate">
+<h1 id="Anchor_391843305_h1_1">Overview</h1>
+<p>The access log output feature saves a history of the application's access to the file system (FS).<br /> It can be used for purposes like the following.</p>
+<ul>
+  <li>Checking whether applications comply to guidelines stipulated for protecting storage media (<a href="../Pages/Page_174228221.html">Checking the Frequency of Access</a>)</li>
+  <li>Checking whether an application performs FS access according to the design</li>
+  <li>Investigating whether FS access can be reduced to improve performance</li>
+  <li>Narrowing down the cause of a bug using FS access until the bug occurred</li>
+</ul>
+<h1 id="Anchor_391843305_h1_2">Access Log Output Settings</h1>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Use development hardware initialized with NintendoSDK Firmware for NX 2.0.0-3 or later.</p>
+  </div>
+</div>
+<p>Select the <strong>Debug</strong> tab in <a href="../Pages/Page_107328771.html">DevMenu</a> and change <strong>FS Access Log Mode</strong> to either <strong>Log, SdCard</strong>, or <strong>Log+SdCard</strong>.</p>
+<p>Access logs are saved for applications started on or after <strong>FS Access Log Mode</strong> is set to a value other than <strong>Off</strong>. The setting reverts to <strong>Off</strong> when you restart the development hardware.</p>
+<p>If the mode is set to <strong>Log</strong> or <strong>Log+SdCard</strong>, the application build type must be <strong>Develop</strong> because Log will use the debug log output. If the mode is set to <strong>SdCard</strong> or <strong>Log+SdCard</strong>, the SD card output can be obtained, regardless of the build type.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_391843305/985563576.png" height="400" class="embedded-image" />
+  </span>
+</p>
+<p>In NX Add-On 1.1.0, you can also use DevMenuCommand to get and change the settings. For more information about using DevMenuCommand, see <a href="../Pages/Page_325711330.html">Development Support Features</a>.</p>
+<h1 id="Anchor_391843305_h1_3">Getting the Access Log</h1>
+<h2 id="Anchor_391843305_h2_1">Getting the Access Log With the Setting Configured to SD Card</h2>
+<p>Set <strong>FS Access Log Mode</strong> to either <strong>SdCard</strong> or <strong>Log+SdCard</strong>, insert an SD card in the development hardware, and then start the application.<br />The access log is saved to a file named <code>FsAccessLog.txt</code> in the root directory of the SD card.<br />Writing multiple consecutive access logs to the SD card can slow down the application, so the access logs are written to the SD card when the internal fs buffer is about to overflow and at the following times.</p>
+<ul>
+  <li>Shutdown</li>
+  <li>Sleep</li>
+  <li>End of application (if the development hardware being used was initialized with NintendoSDK SystemUpdater for NX 11.0.0-3 or later)</li>
+</ul>
+<p>
+  <strong>Wait to remove the SD card until after one of these events has occurred.</strong> The access log becomes corrupted if the development hardware is reset or you remove the SD card before one of these events has taken place.<br />Note that with versions earlier than NintendoSDK SystemUpdater for NX 11.0.0-3, the access log is saved to the SD card by simply exiting the application.</p>
+<p>An access log like the following is output to the <code>FsAccessLog.txt</code> file under the SD card root directory.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>FS_ACCESS: { start_tag: true }
+(0x0000000000000062) FS_ACCESS: { application_info_tag: { launch_type: Application, application_id: 0x01004B9000490000, release_version: 0x0000 } }
+(0x0000000000000089) FS_ACCESS: { sdk_version: 11.4.0, spec: NX }
+(0x0000000000000089) FS_ACCESS: { default_global_file_data_cache_size: 33554432 }
+(0x0000000000000089) FS_ACCESS: { start:  18885605, end:  18885613, result: 0x00000000, handle: 0x0000000000000000, priority: Normal, function: &quot;QueryMountRomCacheSize&quot;, size: 120 }
+(0x0000000000000089) FS_ACCESS: { start:  18885614, end:  18885620, result: 0x00000000, handle: 0x0000000000000000, priority: Normal, function: &quot;MountRom&quot;, name: &quot;rom&quot;, size: 120 }
+(0x0000000000000089) FS_ACCESS: { start:  18885620, end:  18885620, result: 0x00000000, handle: 0x0000000131092000, priority: Normal, function: &quot;OpenFile&quot;, path: &quot;rom:/test/testdata&quot;, open_mode: 0x1 }
+(0x0000000000000089) FS_ACCESS: { start:  18885621, end:  18885621, result: 0x00000000, handle: 0x0000000131092000, priority: Normal, function: &quot;ReadFile&quot;, offset: 0, size: 1024, read_size: 16, fetched: [{ offset: 0, size: 16 }] }
+(0x0000000000000089) FS_ACCESS: { start:  18885621, end:  18885621, result: 0x00000000, handle: 0x0000000131092000, priority: Normal, function: &quot;CloseFile&quot; }
+(0x0000000000000089) FS_ACCESS: { start:  18885622, end:  18885622, result: 0x00000000, handle: 0x0000000000000000, priority: Normal, function: &quot;Unmount&quot;, name: &quot;rom&quot; }
+FS_ACCESS: { end_tag: true }</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_391843305_h2_2">Getting the Access Log With the Setting Configured to Log</h2>
+<p>Start <a href="../Pages/Page_163415826.html">Log Viewer</a> on the host PC, and download the logs from the development hardware.</p>
+<p>From the menu in Log Viewer, select <strong>Save Log as plain text</strong>. This option configures the setting to save the log as a text file.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_391843305/985563809.png" height="400" class="embedded-image" />
+  </span>
+</p>
+<p>Set <strong>FS Access Log Mode</strong> to either <strong>SdCard</strong> or <strong>Log+SdCard</strong> in this state, and start the application with a <strong>Develop</strong> build type.</p>
+<p>An access log like the following is output alongside the debugging log for files that are set to <strong>Save Log as plain text</strong> in Log Viewer.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Mount Rom
+FS_ACCESS: { sdk_version: 11.4.0, spec: NX }
+FS_ACCESS: { default_global_file_data_cache_size: 33554432 }
+FS_ACCESS: { start:  22379905, end:  22379915, result: 0x00000000, handle: 0x0000000000000000, priority: Normal, function: &quot;QueryMountRomCacheSize&quot;, size: 120 }
+FS_ACCESS: { start:  22379915, end:  22379924, result: 0x00000000, handle: 0x0000000000000000, priority: Normal, function: &quot;MountRom&quot;, name: &quot;rom&quot;, size: 120 }
+FS_ACCESS: { start:  22379925, end:  22379925, result: 0x00000000, handle: 0x0000006ebc092000, priority: Normal, function: &quot;OpenFile&quot;, path: &quot;rom:/test/testdata&quot;, open_mode: 0x1 }
+Read    rom:/test/testdata
+FS_ACCESS: { start:  22379925, end:  22379925, result: 0x00000000, handle: 0x0000006ebc092000, priority: Normal, function: &quot;ReadFile&quot;, offset: 0, size: 1024, read_size: 16, fetched: [{ offset: 0, size: 16 }] }
+&nbsp;&nbsp;&nbsp;&nbsp;size: 16
+&nbsp;&nbsp;&nbsp;&nbsp;data: 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 
+FS_ACCESS: { start:  22379926, end:  22379926, result: 0x00000000, handle: 0x0000006ebc092000, priority: Normal, function: &quot;CloseFile&quot; }
+Unmount Rom
+
+FS_ACCESS: { start:  22379926, end:  22379926, result: 0x00000000, handle: 0x0000000000000000, priority: Normal, function: &quot;Unmount&quot;, name: &quot;rom&quot; }</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Access logs set to <strong>Log</strong> do not output multi-program and application information.</p>
+<h1 id="Anchor_391843305_h1_4">Access Log Format</h1>
+<p>The following table describes each item.</p>
+<table class="wrapped relative-table" style="width: 95.6843%;">
+  <colgroup> <col style="width: 10.3325%;" /> <col style="width: 20.7245%;" /> <col style="width: 68.943%;" /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>start_tag</td>
+      <td>The log output start tag.</td>
+      <td>Appended to access logs obtained using <code>SdCard</code>. Not appended to access logs obtained using <code>log</code>.</td>
+    </tr>
+    <tr>
+      <td>end_tag</td>
+      <td>The log output end tag.</td>
+      <td>
+        <p>Appended to access logs obtained using <code>SdCard</code>. Not appended to access logs obtained using <code>log</code>.</p>
+        <p>If the SD card is removed before log output is finished, you will have a <code>start_tag</code> but no <code>end_tag</code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>multi_program_tag</td>
+      <td>Multi-program tag.</td>
+      <td>
+        <p>This tag indicates that a multi-program application has been executed.</p>
+        <p>It is appended to access logs obtained using SdCard, when the application or patch is started. Not appended to access logs obtained using <code>log</code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>application_info_tag</td>
+      <td>Application information tag.</td>
+      <td>
+        <p>It is appended to access logs obtained using SdCard, when the application or patch is started. Not appended to access logs obtained using <code>log</code>.</p>
+        <p>For <code>application_id</code> and <code>release_version</code>, the output includes the <a href="../Pages/Page_166503043.html">nmeta</a> settings values for <code>ApplicationId</code> and <code>ReleaseVersion</code>.</p>
+        <p>Included in NintendoSDK Firmware for NX 11.0.0-1 and later.<br /></p>
+      </td>
+    </tr>
+    <tr>
+      <td>The first <code>0x%016llX</code> in the log.</td>
+      <td>The process ID from the access source.</td>
+      <td>Appended to access logs obtained using <code>SdCard</code>. Not appended to access logs obtained using <code>log</code>.</td>
+    </tr>
+    <tr>
+      <td>sdk_version</td>
+      <td>The NintendoSDK version.</td>
+      <td>The NintendoSDK version used to build the accessing program.</td>
+    </tr>
+    <tr>
+      <td>spec</td>
+      <td>Environment.</td>
+      <td>Fixed to <code>NX</code>.</td>
+    </tr>
+    <tr>
+      <td>program_index</td>
+      <td>Program index.</td>
+      <td>The ID for identifying the multi-program application program.</td>
+    </tr>
+    <tr>
+      <td>default_global_file_data_cache_size</td>
+      <td>Default global file data cache size.</td>
+      <td>For more information, see <a href="../Pages/Page_331387591.html">File Data Cache</a>.</td>
+    </tr>
+    <tr>
+      <td>start</td>
+      <td>The time, in milliseconds, when access began.</td>
+      <td>The number of milliseconds, based on a system check, for the time that access began.</td>
+    </tr>
+    <tr>
+      <td>end</td>
+      <td>The time, in milliseconds, when access ended.</td>
+      <td>
+        <p>The number of milliseconds, based on a system check, for the time that access ended.</p>
+        <p>This time can be slower than the actual access time because there can be a delay in getting the time when access completes as a result of an application's thread structure.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>result</td>
+      <td>Access result.</td>
+      <td>Search using the <span class="ApiLink_ResultFinder">result value search</span> that corresponds to <code><span class="ApiLink_nn__Result">nn::Result</span></code>.</td>
+    </tr>
+    <tr>
+      <td>handle</td>
+      <td>Handles.</td>
+      <td>
+        <p>Displays the output value for accesses that take handle values as output, such as <code><span class="ApiLink_Result_nn__fs__OpenFile(FileHandle_*outValue|_const_char_*path|_int_mode)_NN_NOEXCEPT">nn::fs::OpenFile</span>()</code>. It can also display the input value for accesses that specify handle values as input, such as <code><span class="ApiLink_Result_nn__fs__ReadFile(FileHandle_handle|_int64_t_offset|_void_*buffer|_size_t_size|_const_ReadOption_&option)_NN_NOEXCEPT">nn::fs::ReadFile</span>()</code>.</p>
+        <p>Without a handle for input or output, 0 appears when accessing, as with <code><span class="ApiLink_Result_nn__fs__MountRom(const_char_*name|_void_*pFileSystemCacheBuffer|_size_t_fileSystemCacheBufferSize)_NN_NOEXCEPT">nn::fs::MountRom</span>()</code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>priority</td>
+      <td>Access priority.</td>
+      <td>Generated in NX Add-On 5.1.0 and later.</td>
+    </tr>
+    <tr>
+      <td>function</td>
+      <td>Function name.</td>
+      <td>Does not include the namespace or class name.</td>
+    </tr>
+    <tr>
+      <td>name</td>
+      <td>The mount name.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>path</td>
+      <td>Path.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>offset</td>
+      <td>Offset.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>size</td>
+      <td>Size.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>read_size</td>
+      <td>The byte size of the data that has been read.</td>
+      <td>Output in NX Add-On 10.2.0 and later.</td>
+    </tr>
+    <tr>
+      <td>open_mode</td>
+      <td>The mode when open.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>write_option</td>
+      <td>The write option.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>new_path</td>
+      <td>Renamed path.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>entry_buffer_count</td>
+      <td>The number of <code>entryBuffer</code> elements.</td>
+      <td>Output in NX Add-On 10.2.0 and later.</td>
+    </tr>
+    <tr>
+      <td>entry_count</td>
+      <td>The number of child entries.</td>
+      <td>Output in NX Add-On 10.2.0 and later.</td>
+    </tr>
+    <tr>
+      <td>entry_type</td>
+      <td>The entry type.</td>
+      <td>Output in NX Add-On 10.2.0 and later.</td>
+    </tr>
+    <tr>
+      <td>index</td>
+      <td>The index.</td>
+      <td>The index of the target downloadable content, or the cache storage index.</td>
+    </tr>
+    <tr>
+      <td>userid</td>
+      <td>The save data user ID.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>save_data_size</td>
+      <td>The size of the data save area.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>save_data_journal_size</td>
+      <td>The size of the journaling area.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>name_array</td>
+      <td>Mount name array specified with multicommit.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>name_count</td>
+      <td>Number of mount names specified with multicommit.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>cachestoragelist_handle</td>
+      <td>Cache storage list handling.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>infobuffercount</td>
+      <td>Maximum cache storage information to read.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>cache_storage_count</td>
+      <td>The number of cache storages.</td>
+      <td>Output in NX Add-On 10.2.0 and later.</td>
+    </tr>
+    <tr>
+      <td>mount_host_option</td>
+      <td>Mount options.</td>
+      <td>Mount options for <code><span class="ApiLink_Result_nn__fs__MountHost(const_char_*name|_const_char_*rootPath|_const_MountHostOption_&option)_NN_NOEXCEPT">nn::fs::MountHost</span>()</code> and <code><span class="ApiLink_Result_nn__fs__MountHostRoot(const_MountHostOption_&option)_NN_NOEXCEPT">nn::fs::MountHostRoot</span>()</code>.</td>
+    </tr>
+    <tr>
+      <td>root_path</td>
+      <td>The path on the host PC.</td>
+      <td>Output in NX Add-On 10.2.0 and later.</td>
+    </tr>
+    <tr>
+      <td>buffer_size</td>
+      <td>Cache buffer size.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>file_size</td>
+      <td>Cache file size.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>fetched</td>
+      <td>The region of the file actually read from storage when file data cache is valid.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>fetch_exceeded</td>
+      <td>A flag indicating that not all of the regions of the file that were actually read from storage could be displayed in <code>fetched</code>.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>is_mounted</td>
+      <td>Mount status.</td>
+      <td>The value returned from <span class="ApiLink_bool_nn__fs__IsMounted(const_char_*name)_NN_NOEXCEPT">nn::fs::IsMounted()</span>. Included in NX Add-On 11.0.0 and later.</td>
+    </tr>
+    <tr>
+      <td>class_name</td>
+      <td>Class name.</td>
+      <td>Appears when the class name is either <span class="ApiLink_nn__bcat__DeliveryCacheFile"><code>nn::bcat::DeliveryCacheFile</code></span> or <span class="ApiLink_nn__bcat__DeliveryCacheDirectory"><code>nn::bcat::DeliveryCacheDirectory</code></span>.</td>
+    </tr>
+    <tr>
+      <td>image_data_size</td>
+      <td>The screenshot size.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>width</td>
+      <td>The screenshot width.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>height</td>
+      <td>The screenshot height.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>image_orientation</td>
+      <td>The screenshot orientation.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>album_report_option</td>
+      <td>The screenshot notification option.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>name_space</td>
+      <td>The namespace.</td>
+      <td>Appears when the API is <span class="ApiLink_nn__nfp"><code>nn::nfp</code></span>.</td>
+    </tr>
+    <tr>
+      <td>model_type</td>
+      <td>The model type of the tag being mounted.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>nfp_mount_target</td>
+      <td>The region in the tag being mounted.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>access_id</td>
+      <td>The ID to use for accessing the application-specific area.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>data_size</td>
+      <td>The initialized data size in the application-specific area.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_391843305_h1_5">Troubleshooting</h1>
+<p>See <a href="../Pages/Page_104492354.html">Troubleshooting (NX Add-On)</a>.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_ResultFinder', '../../../Api/HtmlNX/_result_finder.html' )
+SetUrl( 'ApiLink_nn__Result', '../../../Api/HtmlNX/classnn_1_1_result.html' )
+SetUrl( 'ApiLink_Result_nn__fs__OpenFile(FileHandle_*outValue|_const_char_*path|_int_mode)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a0f2b5b30657b1ffaf1dec49bfb36462b' )
+SetUrl( 'ApiLink_Result_nn__fs__ReadFile(FileHandle_handle|_int64_t_offset|_void_*buffer|_size_t_size|_const_ReadOption_&option)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a81801a404563984f8c6cc1483cc6d730' )
+SetUrl( 'ApiLink_Result_nn__fs__MountRom(const_char_*name|_void_*pFileSystemCacheBuffer|_size_t_fileSystemCacheBufferSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2e453fe1fbf8f818dc45bbd2897105cd' )
+SetUrl( 'ApiLink_Result_nn__fs__MountHost(const_char_*name|_const_char_*rootPath|_const_MountHostOption_&option)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a3debd540f8e0207460e0a7a31edac92d' )
+SetUrl( 'ApiLink_Result_nn__fs__MountHostRoot(const_MountHostOption_&option)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a591fb29e0966ef5f550d4110a5aa4866' )
+SetUrl( 'ApiLink_bool_nn__fs__IsMounted(const_char_*name)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a3759f457229862688d05fe6caeae0367' )
+SetUrl( 'ApiLink_nn__bcat__DeliveryCacheFile', '../../../Api/HtmlNX/classnn_1_1bcat_1_1_delivery_cache_file.html' )
+SetUrl( 'ApiLink_nn__bcat__DeliveryCacheDirectory', '../../../Api/HtmlNX/classnn_1_1bcat_1_1_delivery_cache_directory.html' )
+SetUrl( 'ApiLink_nn__nfp', '../../../Api/HtmlNX/namespacenn_1_1nfp.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

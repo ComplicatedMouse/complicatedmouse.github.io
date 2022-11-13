@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Normal Map Filter Plug-In | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Normal Map Filter Plug-In -->
+<div class="pagetitle" id="PageId_83956005">Normal Map Filter Plug-In</div>
+<div class="text_separate">
+<h1 id="Anchor_83956005_h1_1">Normal Map Filter Plug-In</h1>
+<p>This section describes the use and features of the Normal Map Filter plug-in.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83956005_h2_1">How to Use</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956005_h3_1">Convert from Height Map</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956005_h3_2">Scale Slope</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956005_h3_3">Combine</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956005_h3_4">Combine Layer</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_83956005_h2_2">Notes</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956005_h3_5">Image Mode</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956005_h3_6">Alpha Channel</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956005_h3_7">Layers</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_83956005_h2_3">Usage Example</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956005_h3_8">Adding Irregularities to an Existing Tangent Map</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_83956005_h2_4">Related Links</a>
+    </li>
+  </ul>
+</p>
+<h2 id="Anchor_83956005_h2_1">How to Use</h2>
+<p>Select the RGB channel of the layer you want to process and then select <strong>Filter</strong> &gt; <strong>Nintendo</strong> &gt; <strong>Nintendo Normal Map Filter</strong>.</p>
+<p>Use tabs to select the type of filtering.<br />(For NintendoSDK 13.1.0 and earlier versions, select the type of filtering from the Operation options.)</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Filtering</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">
+        <strong>Convert from Height Map</strong>
+      </td>
+      <td>Treats brightness in an image as height and creates a normal map from those differences in elevation.<br />Converts transparent (semi-transparent) pixels after blending the opacity of the pixels with a gray background (RGB = 128).</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>Normalize</strong>
+      </td>
+      <td>Normalizes the normal for each pixel in the normal map.</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>Scale Slope</strong>
+      </td>
+      <td>Scales the angle between the normal of each pixel in the tangent space normal map and vector (0, 0, 1).<br />It is used to adjust the intensity of normal map effects.</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>Combine</strong>
+      </td>
+      <td>Combines a tangent space normal map with another file's tangent space normal map.<br />It is used when combining a normal map with low-frequency variations with a normal map with high-frequency variations.</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>Combine Layer</strong>
+      </td>
+      <td>
+        <p>Combines the tangent space normal maps of multiple layers. Up to 20 layers can be combined.<br />(The maximum was 5 layers in NintendoSDK 13.1.0 and earlier.)<br />The combined result is stored in the layer that is selected in the Layer panel.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Enable <strong>Positive Z</strong> to adjust the z-component to have greater than and equal to 0 values when processing normals. Disable this option if negative z components are allowed. Enable this option if calculating z components using a pixel shader when using a texture format such as snorm_bc5 that only has xy components.</p>
+<p>Click <strong>OK</strong> to run the filter.</p>
+<p>To zoom in or out on the preview image, click the <strong>+</strong> or <strong>-</strong> button, or use the mouse wheel.<br /><strong>Lighting</strong> Select this option to preview an image under lit conditions.<br />During preview, you can change the direction of lighting by clicking (dragging) the preview image with the right mouse button. Select <strong>Rotate Light</strong> to automatically rotate the light around the direction of the Z axis.</p>
+<h3 id="Anchor_83956005_h3_1">Convert from Height Map</h3>
+<ul>
+  <li>
+    <strong>Height Scale<br /></strong>The scale by which to multiply height values in the height map, specified as a percent. Increasing this value emphasizes bumps and depressions.</li>
+  <li>
+    <strong>Filter Type<br /></strong>Specifies the range to be sampled when calculating normals based on a height map. The larger the value, the greater the range sampled.</li>
+  <li>
+    <strong>Edge Wrap<br /></strong>Select this option to process edge pixels to repeat the height map image.<br />Disable this option if edge pixels of the image are being extended.</li>
+  <li>
+    <strong>Multiply Alpha<br /></strong>Select this option to calculate normals by multiplying the alpha channel value by the height values in the height map.</li>
+</ul>
+<h3 id="Anchor_83956005_h3_2">Scale Slope</h3>
+<ul>
+  <li>
+    <strong>Slope Scale<br /></strong>The scale by which to multiply the angle between the normal and the (0, 0, 1) vector, specified as a percent. The larger the value, the greater the normal map effect.</li>
+</ul>
+<h3 id="Anchor_83956005_h3_3">Combine</h3>
+<ul>
+  <li>
+    <strong>Other Normal Map<br /></strong>Specifies the absolute path or the path including the environment variable to the other tangent space normal map (PSD or TGA file) to combine with. Describe the environment variable in the <code>%NAME%</code> format (environment variables are supported in NintendoSDK 12.1.0 and later).<br />If an image with a lower width and height than the open image is specified, the normal maps are combined by repeating the smaller image horizontally and vertically.<br />For the PSD file, specify a file saved using RGB color, 8 bits per channel, and <strong>prioritize compatibility</strong> enabled. If the PSD file includes multiple layers, combine all layers and then combine the image.</li>
+  <li>
+    <strong>Combine Scale</strong>
+    <br />The strength of influence of the other tangent space normal map to be combined, specified as a percentage.<br />The value specified by this option is multiplied by the opacity of the pixel to yield the final strength of influence.</li>
+</ul>
+<h3 id="Anchor_83956005_h3_4">Combine Layer</h3>
+<p>Options for 10 layers are displayed in the Options dialog box.<br />If you click the <strong>Layer 10-19</strong> button on the lower left, the options for Layer 10 through Layer 19 are displayed, and the button on the lower left changes to a <strong>Layer 0-9</strong> button.</p>
+<ul>
+  <li>
+    <strong>Layer 0<br /></strong>Selects the tangent space normal map layer that will serve as the base.<br />If <code>&lt;Active&gt;</code>, the layer selected in the Layer panel is used.<br />If multiple layers have the same name, the uppermost visible layer is used preferentially.</li>
+  <li>
+    <strong>Layer 1 / Layer 2 / Layer 3 / ... / Layer 19</strong>
+    <br />Selects the tangent space normal map layers to combine. Empty layers are not combined.<br />If <code>&lt;Active&gt;</code>, the layer selected in the Layer panel is used.<br />If multiple layers have the same name, the uppermost visible layer is used preferentially.<br />While layers are combined in order from Layer 1, you do not need to specify filling in gaps.<br />For example, you can leave Layer 1 blank and only specify Layer 2 and Layer 3 (the combination result is the same even if you specify a blank layer in the middle).</li>
+  <li>
+    <strong>Scale 1 / Scale 2 / Scale 3 / ... / Scale 19</strong>
+    <br />Th strength of influence of each layer to combine, specified as percentages.<br />The value specified by this option is multiplied by the opacity of the pixel to yield the final strength of influence.</li>
+</ul>
+<p>Use the <strong>+</strong> button to the right of each layer option to insert a blank layer specification (the layer specification moves one space up).<br />Use the <strong>X</strong> button to delete one layer specification and move the rest forward.<br />Use the <strong>Clear</strong> button to clear all layer specifications.</p>
+<h2 id="Anchor_83956005_h2_2">Notes</h2>
+<p>These notes pertain to the use of the Normal Map Filter plug-in.</p>
+<h3 id="Anchor_83956005_h3_5">Image Mode</h3>
+<p>This option cannot be executed on files with an image mode other than RGB color or that do not use 8 bits per channel.</p>
+<h3 id="Anchor_83956005_h3_6">Alpha Channel</h3>
+<p>If there are two or more alpha channels, only the alpha channel at the top of the list in the Channel window is referenced for <strong>Convert from Height Map</strong> filtering.</p>
+<h3 id="Anchor_83956005_h3_7">Layers</h3>
+<p>When a height map is converted to a tangent map in a layer with transparent (semi-transparent) pixels, only pixels whose tangent is not in the (0,0,1) direction are changed to opaque.<span style="color: rgb(51,51,51);"> This makes it easier to discern the position when the tangent map is combined with the tangent maps of lower layers. To use tangent maps without combining them, fill the transparent pixels with the color RGB = (128, 128, 255).</span></p>
+<p>
+  <span style="color: rgb(51,51,51);">You cannot combine layer groups when combining the tangent maps of multiple layers. To combine layer groups, convert them to smart objects.<br /></span>
+</p>
+<h2 id="Anchor_83956005_h2_3">Usage Example</h2>
+<h3 id="Anchor_83956005_h3_8">Adding Irregularities to an Existing Tangent Map</h3>
+<p>Use a procedure like the following to change the parameters any number of times.</p>
+<ol>
+  <li>Open the tangent map that will serve as the base (named Background in this example).</li>
+  <li>Create a new layer (Layer 1).</li>
+  <li>In Layer 1, use black to render the parts you want make convex, and use white to render the parts you want to make convex.</li>
+  <li>Select Layer 1 and then select <strong>Filters</strong> &gt; <strong>Convert for use as smart filter</strong>.</li>
+  <li>Select Layer 1 and run the tangent map filter to convert the height map to a tangent map.<br />Filtering is <strong>Convert from Height Map</strong>.</li>
+  <li>Create a new layer (Layer 2).</li>
+  <li>Select Layer 2 and then select <strong>Filters</strong> &gt; <strong>Convert for use as smart filter</strong>.</li>
+  <li>Select Layer 2 and run the tangent map filter to combine tangent maps.<br />Filtering is <strong>Combine Layer</strong>.<br />The Layer 1 option is <strong>Layer </strong>.<br />The Layer 0 option is <strong>Background</strong>.</li>
+</ol>
+<h2 id="Anchor_83956005_h2_4">Related Links</h2>
+<p>
+  <a href="../Pages/Page_83956012.html">Photoshop Plug-In</a>
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

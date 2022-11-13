@@ -1,0 +1,1324 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Drawing the Model | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Drawing the Model -->
+<div class="pagetitle" id="PageId_204215072">Drawing the Model</div>
+<div class="text_separate">
+<h1 id="Anchor_204215072_h1_1">Overview</h1>
+<p>This section describes the typical process flow for model rendering using the NintendoWare 3D runtime library (the <code>g3d</code> library), together with code examples for each process. The sample code is excerpted from the <code>Simple</code> scene of <code>G3dDemo</code>. Accordingly, it cannot be be used without modification. For more information, see the <code>Simple</code> scene of <code>G3dDemo</code>.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The code used in this description is included in the NintendoSDK NX Add-On 4.0.0 package and later versions.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_204215072_h1_2">Overall Process Flow</h1>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_204215072/flowchart_1.svg" />
+</div>
+<h2 style="text-align: left;" id="Anchor_204215072_h2_1">Initializing the Shader Archive</h2>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_204215072/flowchart_2.svg" />
+</div>
+<p>
+  <a name="Anchor_204215072_fileload"></a>
+</p>
+<h5 id="Anchor_204215072_h5_1">Loading Files</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">size_t</span> <span class="n">alignment</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">GetFileAlignment</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">pFile</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">LoadFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">alignment</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>An alignment is required for the memory area to which the shader archive (BFSHA) files are loaded. The shader archive file contains <code><span class="ApiLink_nn__util__BinaryFileHeader">nn::util::BinaryFileHeader</span></code> in the file header, and <code><span class="ApiLink_size_t_nn__util__BinaryFileHeader__GetAlignment()_const_NN_NOEXCEPT">nn::util::BinaryFileHeader::GetAlignment()</span></code> can be used to get this alignment. The code loads the <code><span class="ApiLink_nn__util__BinaryFileHeader">nn::util::BinaryFileHeader</span></code> in the file header and gets the alignment, and then loads the file according to this alignment.</p>
+<h5 id="Anchor_204215072_h5_2">Initializing the Shader Archive</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Convert to ResShaderFile.
+</span><span class="nn">nn::g3d::</span><span class="n">ResShaderFile</span><span class="o">*</span> <span class="n">pResShaderFile</span> <span class="o">=</span> <span class="nn">nn::g3d::ResShaderFile::</span><span class="n">ResCast</span><span class="p">(</span><span class="n">pShaderFile</span><span class="p">);</span>
+<span class="n">pResShaderFile</span><span class="o">-&gt;</span><span class="n">GetResShaderArchive</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">Setup</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The loaded shader archive file must be converted to a usable <code><span class="ApiLink_static_ResShaderFile_*_nn__g3d__ResShaderFile__ResCast(void_*ptr)_NN_NOEXCEPT">nn::g3d::ResShaderFile</span></code> using the <code><span class="ApiLink_nn__g3d__ResShaderFile">nn::g3d::ResShaderFile::ResCast()</span></code> function. The shader archive can then be initialized using the <code><span class="ApiLink_void_nn__g3d__ResShaderArchive__Setup(nn__gfx__Device_*pDevice)_NN_NOEXCEPT">nn::g3d::ResShaderArchive::Setup()</span></code> function.</p>
+<h2 id="Anchor_204215072_h2_2">Initializing Models</h2>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_204215072/flowchart_3.svg" />
+</div>
+<p>
+  <br />
+</p>
+<h5 id="Anchor_204215072_h5_3">Loading Files</h5>
+<p>Load the model resource (BFRES) file in the same way described for <a href="#Anchor_204215072_fileload">loading files</a> for shader archive initialization.</p>
+<h5 id="Anchor_204215072_h5_4">Initializing Model Resources</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27<br />
+28<br />
+29<br />
+30<br />
+31<br />
+32<br />
+33<br />
+34<br />
+35<br />
+36<br />
+37</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Convert to ResFile.
+</span><span class="nn">nn::g3d::</span><span class="n">ResFile</span><span class="o">*</span> <span class="n">pResFile</span> <span class="o">=</span> <span class="nn">nn::g3d::ResFile::</span><span class="n">ResCast</span><span class="p">(</span><span class="n">pModelFile</span><span class="p">);</span>
+<span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">Setup</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+
+<span class="c1">// Extract the texture file.
+</span><span class="nn">nn::g3d::</span><span class="n">ResExternalFile</span><span class="o">*</span> <span class="n">pExternalFile</span> <span class="o">=</span> <span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">GetExternalFile</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="nn">nn::gfx::</span><span class="n">ResTextureFile</span><span class="o">*</span> <span class="n">pTextureFile</span> <span class="o">=</span> <span class="nn">nn::gfx::ResTextureFile::</span><span class="n">ResCast</span><span class="p">(</span><span class="n">pExternalFile</span><span class="o">-&gt;</span><span class="n">GetData</span><span class="p">());</span>
+
+<span class="c1">// Initialize textures.
+</span><span class="n">pTextureFile</span><span class="o">-&gt;</span><span class="n">Initialize</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">textureCount</span> <span class="o">=</span> <span class="n">pTextureFile</span><span class="o">-&gt;</span><span class="n">GetTextureDic</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetCount</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">textureIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">textureIndex</span> <span class="o">&lt;</span> <span class="n">textureCount</span><span class="p">;</span> <span class="o">++</span><span class="n">textureIndex</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">ResTexture</span><span class="o">*</span> <span class="n">pResTexture</span> <span class="o">=</span> <span class="n">pTextureFile</span><span class="o">-&gt;</span><span class="n">GetResTexture</span><span class="p">(</span><span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResTexture</span><span class="o">-&gt;</span><span class="n">Initialize</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Register textures in the descriptor pool.
+</span><span class="nn">g3ddemo::</span><span class="n">RegisterTextureFileToDescriptorPool</span><span class="p">(</span><span class="n">pTextureFile</span><span class="p">);</span>
+<span class="c1">// Bind textures to models.
+</span><span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">BindTexture</span><span class="p">(</span><span class="n">TextureBindCallback</span><span class="p">,</span> <span class="n">pTextureFile</span><span class="p">);</span>
+
+<span class="c1">// Register the sampler in the descriptor pool.
+</span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">modelIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">modelIndex</span> <span class="o">&lt;</span> <span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">GetModelCount</span><span class="p">();</span> <span class="o">++</span><span class="n">modelIndex</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">ResModel</span><span class="o">*</span> <span class="n">pResModel</span> <span class="o">=</span> <span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">GetModel</span><span class="p">(</span><span class="n">modelIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">materialIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">materialIndex</span> <span class="o">&lt;</span> <span class="n">pResModel</span><span class="o">-&gt;</span><span class="n">GetMaterialCount</span><span class="p">();</span> <span class="o">++</span><span class="n">materialIndex</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">ResMaterial</span><span class="o">*</span> <span class="n">pResMaterial</span> <span class="o">=</span> <span class="n">pResModel</span><span class="o">-&gt;</span><span class="n">GetMaterial</span><span class="p">(</span><span class="n">materialIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">samplerIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">samplerIndex</span> <span class="o">&lt;</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetSamplerCount</span><span class="p">();</span> <span class="o">++</span><span class="n">samplerIndex</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">Sampler</span><span class="o">*</span> <span class="n">pSampler</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetSampler</span><span class="p">(</span><span class="n">samplerIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">DescriptorSlot</span> <span class="n">descriptorSlot</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">RegisterSamplerToDescriptorPool</span><span class="p">(</span><span class="n">pSampler</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">SetSamplerDescriptorSlot</span><span class="p">(</span><span class="n">samplerIndex</span><span class="p">,</span> <span class="n">descriptorSlot</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Search the texture resources for the texture with the specified 'name' and return the texture view and descriptor slot for that texture.
+</span><span class="nn">nn::g3d::</span><span class="n">TextureRef</span> <span class="n">TextureBindCallback</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">pUserData</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">TextureRef</span> <span class="n">textureRef</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">ResTextureFile</span><span class="o">*</span> <span class="n">pTextureFile</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">ResTextureFile</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">pUserData</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::util::</span><span class="n">ResDic</span><span class="o">*</span> <span class="n">pDic</span> <span class="o">=</span> <span class="n">pTextureFile</span><span class="o">-&gt;</span><span class="n">GetTextureDic</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">pDic</span><span class="o">-&gt;</span><span class="n">FindIndex</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="o">==</span> <span class="nn">nn::util::ResDic::</span><span class="n">Npos</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="n">textureRef</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">ResTexture</span><span class="o">*</span> <span class="n">pResTexture</span> <span class="o">=</span> <span class="n">pTextureFile</span><span class="o">-&gt;</span><span class="n">GetResTexture</span><span class="p">(</span><span class="n">index</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">DescriptorSlot</span> <span class="n">descriptorSlot</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResTexture</span><span class="o">-&gt;</span><span class="n">GetUserDescriptorSlot</span><span class="p">(</span><span class="o">&amp;</span><span class="n">descriptorSlot</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">textureRef</span><span class="p">.</span><span class="n">SetTextureView</span><span class="p">(</span><span class="n">pResTexture</span><span class="o">-&gt;</span><span class="n">GetTextureView</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">textureRef</span><span class="p">.</span><span class="n">SetDescriptorSlot</span><span class="p">(</span><span class="n">descriptorSlot</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="n">textureRef</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>The loaded model resource file must be converted to a usable <code><span class="ApiLink_static_ResFile_*_nn__g3d__ResFile__ResCast(void_*ptr)_NN_NOEXCEPT">nn::g3d::ResFile</span></code> using the <code><span class="ApiLink_nn__g3d__ResFile">nn::g3d::ResFile::ResCast()</span></code> function. The model resources can then be initialized using the <code><span class="ApiLink_void_nn__g3d__ResFile__Setup(nn__gfx__Device_*pDevice)_NN_NOEXCEPT">nn::g3d::ResFile::Setup()</span></code> function.</p>
+<p>The code then initializes the textures that are required for rendering the model, attached to the model resources as external files, and registers them in the descriptor pool. The descriptor slots of the registered textures are required for rendering, so they are recorded in the model resources when binding the texture and model.</p>
+<p>The samplers in the model sources are similarly registered in the descriptor pool, and their descriptor slots recorded in the model resources.</p>
+<h5 id="Anchor_204215072_h5_5">Applying the Shader Parameter Information to the Material</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">materialCount</span> <span class="o">=</span> <span class="n">pResModel</span><span class="o">-&gt;</span><span class="n">GetMaterialCount</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">materialIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">materialIndex</span> <span class="o">&lt;</span> <span class="n">materialCount</span><span class="p">;</span> <span class="o">++</span><span class="n">materialIndex</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">ResMaterial</span><span class="o">*</span> <span class="n">pResMaterial</span> <span class="o">=</span> <span class="n">pResModel</span><span class="o">-&gt;</span><span class="n">GetMaterial</span><span class="p">(</span><span class="n">materialIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderAssign</span><span class="o">*</span> <span class="n">pResShaderAssign</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetShaderAssign</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShadingModel</span><span class="o">*</span> <span class="n">pResShadingModel</span> <span class="o">=</span> <span class="n">pResShaderArchive</span><span class="o">-&gt;</span><span class="n">FindShadingModel</span><span class="p">(</span><span class="n">pResShaderAssign</span><span class="o">-&gt;</span><span class="n">GetShadingModelName</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::ShaderUtility::</span><span class="n">BindShaderParam</span><span class="p">(</span><span class="n">pResMaterial</span><span class="p">,</span> <span class="n">pResShadingModel</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Search for the shading models linked to the material, and apply the shader parameter information (such as offset and size) of the shading model to <code><span class="ApiLink_nn__g3d__ResMaterial">nn::g3d::ResMaterial</span></code> using the <code><span class="ApiLink_nn__g3d__ShaderUtility__BindShaderParam">nn::g3d::ShaderUtility::BindShaderParam</span>()</code> function. The material uniform block size or various parameter offsets in the material uniform block, are not specified for <code><span class="ApiLink_nn__g3d__ResMaterial">nn::g3::ResMaterial</span></code> when it is first initialized. The appropriate values must be specified using <code><span class="ApiLink_nn__g3d__ShaderUtility__BindShaderParam">nn::g3d::ShaderUtility::BindShaderParam</span>()</code>, <code> <span class="ApiLink_void_nn__g3d__ResMaterial__SetRawParamSize(size_t_size)_NN_NOEXCEPT">nn::g3d::ResMaterial::SetRawParamSize()</span></code>, or <code><span class="ApiLink_void_nn__g3d__ResShaderParam__SetOffset(ptrdiff_t_offset)_NN_NOEXCEPT">nn::g3d::ResShaderParam::SetOffset()</span></code>. </p>
+<h5 id="Anchor_204215072_h5_6">Creating Model Instances</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::g3d::ModelObj::</span><span class="n">Builder</span> <span class="n">builder</span><span class="p">(</span><span class="n">pResModel</span><span class="p">);</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">CalculateMemorySize</span><span class="p">();</span>
+<span class="kt">size_t</span> <span class="n">bufferSize</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">GetWorkMemorySize</span><span class="p">();</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">pBuffer</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">,</span> <span class="nn">nn::g3d::ModelObj::</span><span class="n">Alignment_Buffer</span><span class="p">);</span>
+<span class="n">NN_ASSERT_NOT_NULL</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">);</span>
+<span class="kt">bool</span> <span class="n">success</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">Build</span><span class="p">(</span><span class="n">pModelObj</span><span class="p">,</span> <span class="n">pBuffer</span><span class="p">,</span> <span class="n">bufferSize</span><span class="p">);</span>
+<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">success</span><span class="p">);</span>
+<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">success</span><span class="p">);</span>
+
+<span class="c1">// The buffers for uniform blocks must have a prescribed alignment.
+</span><span class="kt">size_t</span> <span class="n">blockBufferSize</span> <span class="o">=</span> <span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">CalculateBlockBufferSize</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+<span class="nn">nns::gfx::GraphicsFramework::</span><span class="n">MemoryPoolType</span> <span class="n">type</span> <span class="o">=</span> <span class="nn">nns::gfx::GraphicsFramework::</span><span class="n">MemoryPoolType_ConstantBuffer</span><span class="p">;</span>
+<span class="kt">size_t</span> <span class="n">alignment</span> <span class="o">=</span> <span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">GetBlockBufferAlignment</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+<span class="kt">ptrdiff_t</span> <span class="n">blockBufferOffset</span> <span class="o">=</span> <span class="n">pGfxFramework</span><span class="o">-&gt;</span><span class="n">AllocatePoolMemory</span><span class="p">(</span><span class="n">type</span><span class="p">,</span> <span class="n">blockBufferSize</span><span class="p">,</span> <span class="n">alignment</span><span class="p">);</span>
+<span class="n">success</span> <span class="o">=</span> <span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">SetupBlockBuffer</span><span class="p">(</span><span class="n">pDevice</span><span class="p">,</span> <span class="n">pGfxFramework</span><span class="o">-&gt;</span><span class="n">GetMemoryPool</span><span class="p">(</span><span class="n">type</span><span class="p">),</span> <span class="n">blockBufferOffset</span><span class="p">,</span> <span class="n">blockBufferSize</span><span class="p">);</span>
+<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">success</span><span class="p">);</span>
+<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">success</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In <code><span class="ApiLink_nn__g3d__ModelObj__Builder">nn::g3d::ModelObj::Builder</span></code>, specify the model resources for building the model instance, and calculate the required memory size. Allocate the required memory and initialize <code><span class="ApiLink_bool_nn__g3d__ModelObj__Builder__Build(ModelObj_*pModelObj|_void_*pBuffer|_size_t_bufferSize)_const_NN_NOEXCEPT">nn::g3d::ModelObj</span></code> using the <code><span class="ApiLink_nn__g3d__ModelObj">nn::g3d::ModelObj::Builder::Build()</span></code> function. <code><span class="ApiLink_nn__g3d__ModelObj">nn::g3d::ModelObj</span></code> has uniform blocks for each skeleton, shape, and material. Allocate an area for this uniform block from the memory pool, pass the <code><span class="ApiLink_bool_nn__g3d__ModelObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT">nn::g3d::ModelObj::SetupBlockBuffer()</span></code> function, and initialize the uniform block. For more information about each uniform block, see <a href="../Pages/Page_106332818.html">Uniform Blocks</a>.</p>
+<h5 id="Anchor_204215072_h5_7">Creating Animation Instances</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::g3d::SkeletalAnimObj::</span><span class="n">Builder</span> <span class="n">builder</span><span class="p">;</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">Reserve</span><span class="p">(</span><span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">GetResource</span><span class="p">());</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">Reserve</span><span class="p">(</span><span class="n">pResSkeletalAnim</span><span class="p">);</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">CalculateMemorySize</span><span class="p">();</span>
+<span class="kt">size_t</span> <span class="n">bufferSize</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">GetWorkMemorySize</span><span class="p">();</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">pBuffer</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">,</span> <span class="nn">nn::g3d::SkeletalAnimObj::</span><span class="n">Alignment_Buffer</span><span class="p">);</span>
+<span class="n">NN_ASSERT_NOT_NULL</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">);</span>
+<span class="kt">bool</span> <span class="n">success</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">Build</span><span class="p">(</span><span class="n">pSkeletalAnimObj</span><span class="p">,</span> <span class="n">pBuffer</span><span class="p">,</span> <span class="n">bufferSize</span><span class="p">);</span>
+<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">success</span><span class="p">);</span>
+<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">success</span><span class="p">);</span>
+
+<span class="c1">// Configure resource settings. Reconfigurable.
+</span><span class="n">pSkeletalAnimObj</span><span class="o">-&gt;</span><span class="n">SetResource</span><span class="p">(</span><span class="n">pResSkeletalAnim</span><span class="p">);</span>
+<span class="c1">// Bind to model.
+</span><span class="n">pSkeletalAnimObj</span><span class="o">-&gt;</span><span class="n">Bind</span><span class="p">(</span><span class="n">pModelObj</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This example shows how to create a skeletal animation instance. Using <code><span class="ApiLink_nn__g3d__SkeletalAnimObj__Builder">nn::g3d::SkeletalAnimObj::Builder</span></code>, specify the model resources for applying the skeletal animation resources and animations to create the skeletal animation instance, and calculate the required work memory. Allocate the required memory and initialize <code><span class="ApiLink_bool_nn__g3d__SkeletalAnimObj__Builder__Build(SkeletalAnimObj_*pSkeletalAnimObj|_void_*pBuffer|_size_t_bufferSize)_const_NN_NOEXCEPT">nn::g3d::SkeletalAnimObj</span></code> using the <code><span class="ApiLink_nn__g3d__SkeletalAnimObj">nn::g3d::SkeletalAnimObj::Builder::Build()</span></code> function. At this point, only a <code><span class="ApiLink_nn__g3d__SkeletalAnimObj__Builder">nn::g3d::SkeletalAnimObj</span></code> capable of handling the resources specified by <code><span class="ApiLink_nn__g3d__SkeletalAnimObj">nn::g3d::SkeletalAnimObj::Builder</span></code> is created; the actual skeletal animation resources that it handles are not specified. For this reason, after initialization, specify the skeletal animation resource it will handle, and link the <code><span class="ApiLink_nn__g3d__ModelObj">nn::g3d::ModelObj</span></code> to which to apply the animations. You can reuse a single <code><span class="ApiLink_nn__g3d__SkeletalAnimObj">nn::g3d::SkeletalAnimObj</span></code> for multiple skeletal animation resources because you can configure which resources to use after creating the object. In this case, a reusable <code><span class="ApiLink_void_nn__g3d__SkeletalAnimObj__InitializeArgument__Reserve(const_ResModel_*pResModel)_NN_NOEXCEPT">nn::g3d::SkeletalAnimObj</span></code> can be created by using the <code><span class="ApiLink_nn__g3d__SkeletalAnimObj">nn::g3d::SkeletalAnimObj::Builder::Reserve()</span></code> function to specify all of the skeletal animation resources and model resources that you want to handle.</p>
+<h5 id="Anchor_204215072_h5_8">Creating a Shader Selector</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27<br />
+28<br />
+29<br />
+30<br />
+31<br />
+32<br />
+33<br />
+34<br />
+35<br />
+36<br />
+37<br />
+38<br />
+39<br />
+40<br />
+41<br />
+42<br />
+43<br />
+44<br />
+45<br />
+46<br />
+47<br />
+48<br />
+49<br />
+50<br />
+51<br />
+52<br />
+53<br />
+54</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">shapeCount</span> <span class="o">=</span> <span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">GetShapeCount</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">shapeIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">shapeIndex</span> <span class="o">&lt;</span> <span class="n">shapeCount</span><span class="p">;</span> <span class="o">++</span><span class="n">shapeIndex</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">materialIndex</span> <span class="o">=</span> <span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">GetShape</span><span class="p">(</span><span class="n">shapeIndex</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">GetMaterialIndex</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderAssign</span><span class="o">*</span> <span class="n">pResShaderAssign</span> <span class="o">=</span> <span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">GetMaterial</span><span class="p">(</span><span class="n">materialIndex</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">GetResource</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetShaderAssign</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShadingModel</span><span class="o">*</span> <span class="n">pResShadingModel</span> <span class="o">=</span> <span class="n">pResShaderArchive</span><span class="o">-&gt;</span><span class="n">FindShadingModel</span><span class="p">(</span><span class="n">pResShaderAssign</span><span class="o">-&gt;</span><span class="n">GetShadingModelName</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialize nn::g3d::ShadingModelObj.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">ShadingModelObj</span><span class="o">*</span> <span class="n">pShadingModelObj</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span><span class="o">&lt;</span><span class="nn">nn::g3d::</span><span class="n">ShadingModelObj</span><span class="o">&gt;</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="nn">nn::g3d::</span><span class="n">ShadingModelObj</span><span class="p">),</span> <span class="mi">8</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::ShadingModelObj::</span><span class="n">Builder</span> <span class="n">builder</span><span class="p">(</span><span class="n">pResShadingModel</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">builder</span><span class="p">.</span><span class="n">CalculateMemorySize</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">bufferSize</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">GetWorkMemorySize</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">void</span><span class="o">*</span> <span class="n">pBuffer</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">,</span> <span class="nn">nn::g3d::ShadingModelObj::</span><span class="n">Alignment_Buffer</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">bool</span> <span class="n">success</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">Build</span><span class="p">(</span><span class="n">pShadingModelObj</span><span class="p">,</span> <span class="n">pBuffer</span><span class="p">,</span> <span class="n">bufferSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">success</span> <span class="o">==</span> <span class="nb">true</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">success</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">blockBufferSize</span> <span class="o">=</span> <span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">CalculateBlockBufferSize</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">blockBufferSize</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nns::gfx::GraphicsFramework::</span><span class="n">MemoryPoolType</span> <span class="n">type</span> <span class="o">=</span> <span class="nn">nns::gfx::GraphicsFramework::</span><span class="n">MemoryPoolType_ConstantBuffer</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">alignment</span> <span class="o">=</span> <span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">GetBlockBufferAlignment</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">ptrdiff_t</span> <span class="n">blockBufferOffset</span> <span class="o">=</span> <span class="n">pGfxFramework</span><span class="o">-&gt;</span><span class="n">AllocatePoolMemory</span><span class="p">(</span><span class="n">type</span><span class="p">,</span> <span class="n">blockBufferSize</span><span class="p">,</span> <span class="n">alignment</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">success</span> <span class="o">=</span> <span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">SetupBlockBuffer</span><span class="p">(</span><span class="n">pDevice</span><span class="p">,</span> <span class="n">pGfxFramework</span><span class="o">-&gt;</span><span class="n">GetMemoryPool</span><span class="p">(</span><span class="n">type</span><span class="p">),</span> <span class="n">blockBufferOffset</span><span class="p">,</span> <span class="n">blockBufferSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">success</span> <span class="o">==</span> <span class="nb">true</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">success</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+　　　　　<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialize the shader key.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::ShaderUtility::</span><span class="n">InitializeShaderKey</span><span class="p">(</span><span class="n">pShadingModelObj</span><span class="p">,</span> <span class="n">pResShaderAssign</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Narrow the shader program selection range.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">UpdateShaderRange</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Update the option uniform block.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">CalculateOptionBlock</span><span class="p">();</span>
+
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialize nng3d::ShaderSelector.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">ShaderSelector</span><span class="o">*</span> <span class="n">pShaderSelector</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span><span class="o">&lt;</span><span class="nn">nn::g3d::</span><span class="n">ShaderSelector</span><span class="o">&gt;</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="nn">nn::g3d::</span><span class="n">ShaderSelector</span><span class="p">),</span> <span class="mi">8</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::ShaderSelector::</span><span class="n">Builder</span> <span class="n">builder</span><span class="p">(</span><span class="n">pShadingModelObj</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">builder</span><span class="p">.</span><span class="n">CalculateMemorySize</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">bufferSize</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">GetWorkMemorySize</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">void</span><span class="o">*</span> <span class="n">pBuffer</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">,</span> <span class="nn">nn::g3d::ShaderSelector::</span><span class="n">Alignment_Buffer</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">bool</span> <span class="n">success</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">Build</span><span class="p">(</span><span class="n">pShaderSelector</span><span class="p">,</span> <span class="n">pBuffer</span><span class="p">,</span> <span class="n">bufferSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">success</span> <span class="o">==</span> <span class="nb">true</span><span class="p">);</span>
+　　　　　　　<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">success</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Select the shader program.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pShaderSelector</span><span class="o">-&gt;</span><span class="n">UpdateVariation</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">ShapeObj</span><span class="o">*</span> <span class="n">pShapeObj</span> <span class="o">=</span> <span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">GetShape</span><span class="p">(</span><span class="n">shapeIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pShapeObj</span><span class="o">-&gt;</span><span class="n">SetUserPtr</span><span class="p">(</span><span class="n">pShaderSelector</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The shader selector is a feature for selecting an appropriate shader from the shader variations. In the code example, a shader selector is created in rendering units of shapes. Search for the shading model specified for the material referenced by the shape and create the <code><span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT">nn::g3d::ShadingModelObj</span></code> for handling that model. <code><span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT">nn::g3d::ShadingModelObj</span></code> contains a uniform block for shader options, and <code><span class="ApiLink_bool_nn__g3d__ShadingModelObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT">nn::g3d::ShadingModelObj::SetupBlockBuffer()</span></code> is used to initialize the uniform block. After initialization, the <a href="../Pages/Page_286721565.html#Anchor_286721565_shader_key">Shader Key</a> is specified by the <code><span class="ApiLink_nn__g3d__ShaderUtility__InitializeShaderKey">nn::g3d::ShaderUtility::InitializeShaderKey</span>()</code> function. The shader key is information for selecting shaders. There are two types of shader keys, dynamic and static. <code><span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT">nn::g3d::ShadingModelObj</span></code> handles static keys, and <code><span class="ApiLink_nn__g3d__ShaderSelector">nn::g3d::ShaderSelector</span></code> handles dynamic keys. After this setting is specified, <code><span class="ApiLink_bool_nn__g3d__ShadingModelObj__UpdateShaderRange()_NN_NOEXCEPT">nn::g3d::ShadingModelObj::UpdateShaderRange()</span></code> narrows the range of shaders to choose from, and <code><span class="ApiLink_void_nn__g3d__ShadingModelObj__CalculateOptionBlock()_NN_NOEXCEPT">nn::g3d::ShadingModelObj::CalculateOptionBlock()</span></code> applies the values of the option variables to the option uniform block. For more information about the option uniform blocks, see <a href="../Pages/Page_286721565.html#Anchor_286721565_uniform_branch">Uniform Variable Branching</a>. Next, create <code><span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT">nn::g3d::ShaderSelector</span></code> from the previously created <code><span class="ApiLink_nn__g3d__ShaderSelector">nn::g3d::ShadingModelObj</span></code>. Because the shader is not changed dynamically, call the <code><span class="ApiLink_bool_nn__g3d__ShaderSelector__UpdateVariation(nn__gfx__Device_*pDevice)_NN_NOEXCEPT">nn::g3d::ShaderSelector::UpdateVariation()</span></code> function to complete shader selection.</p>
+<h2 id="Anchor_204215072_h2_3">Initializing nn::gfx Objects</h2>
+<h5 id="Anchor_204215072_h5_9">Initializing the Vertex State</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27<br />
+28<br />
+29<br />
+30<br />
+31<br />
+32<br />
+33<br />
+34<br />
+35<br />
+36<br />
+37<br />
+38<br />
+39<br />
+40<br />
+41<br />
+42<br />
+43<br />
+44<br />
+45<br />
+46<br />
+47<br />
+48<br />
+49<br />
+50<br />
+51<br />
+52<br />
+53<br />
+54<br />
+55<br />
+56<br />
+57<br />
+58<br />
+59<br />
+60<br />
+61<br />
+62<br />
+63<br />
+64<br />
+65<br />
+66<br />
+67<br />
+68<br />
+69<br />
+70<br />
+71<br />
+72<br />
+73<br />
+74<br />
+75</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">shapeCount</span> <span class="o">=</span> <span class="n">pResModel</span><span class="o">-&gt;</span><span class="n">GetShapeCount</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">shapeIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">shapeIndex</span> <span class="o">&lt;</span> <span class="n">shapeCount</span><span class="p">;</span> <span class="o">++</span><span class="n">shapeIndex</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">ResShape</span><span class="o">*</span> <span class="n">pResShape</span> <span class="o">=</span> <span class="n">pResModel</span><span class="o">-&gt;</span><span class="n">GetShape</span><span class="p">(</span><span class="n">shapeIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResMaterial</span><span class="o">*</span> <span class="n">pResMaterial</span> <span class="o">=</span> <span class="n">pResModel</span><span class="o">-&gt;</span><span class="n">GetMaterial</span><span class="p">(</span><span class="n">pResShape</span><span class="o">-&gt;</span><span class="n">GetMaterialIndex</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderAssign</span><span class="o">*</span> <span class="n">pResShaderAssign</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetShaderAssign</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShadingModel</span><span class="o">*</span> <span class="n">pResShadingModel</span> <span class="o">=</span> <span class="n">pResShaderArchive</span><span class="o">-&gt;</span><span class="n">FindShadingModel</span><span class="p">(</span><span class="n">pResShaderAssign</span><span class="o">-&gt;</span><span class="n">GetShadingModelName</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResVertex</span><span class="o">*</span> <span class="n">pResVertex</span> <span class="o">=</span> <span class="n">pResShape</span><span class="o">-&gt;</span><span class="n">GetVertex</span><span class="p">();</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">shaderVertexAttrCount</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetAttrCount</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">attrInfoSize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="nn">nn::gfx::</span><span class="n">VertexAttributeStateInfo</span><span class="p">)</span> <span class="o">*</span> <span class="n">shaderVertexAttrCount</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">VertexAttributeStateInfo</span><span class="o">*</span> <span class="n">pVertexAttributeStateInfo</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexAttributeStateInfo</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span> <span class="o">&lt;</span><span class="nn">nn::gfx::</span><span class="n">VertexAttributeStateInfo</span><span class="o">&gt;</span><span class="p">(</span><span class="n">attrInfoSize</span><span class="p">,</span> <span class="mi">8</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">vertexBufferCount</span> <span class="o">=</span> <span class="n">pResVertex</span><span class="o">-&gt;</span><span class="n">GetVertexBufferCount</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">bufferInfoSize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="nn">nn::gfx::</span><span class="n">VertexBufferStateInfo</span><span class="p">)</span> <span class="o">*</span> <span class="n">vertexBufferCount</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">VertexBufferStateInfo</span><span class="o">*</span> <span class="n">pVertexBufferStateInfo</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexBufferStateInfo</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span><span class="o">&lt;</span><span class="nn">nn::gfx::</span><span class="n">VertexBufferStateInfo</span><span class="o">&gt;</span><span class="p">(</span><span class="n">bufferInfoSize</span><span class="p">,</span> <span class="mi">8</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Build the vertex state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">VertexStateInfo</span><span class="o">*</span> <span class="n">pVertexStateInfo</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span><span class="o">&lt;</span><span class="nn">nn::gfx::</span><span class="n">VertexStateInfo</span><span class="o">&gt;</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="nn">nn::gfx::</span><span class="n">VertexStateInfo</span><span class="p">),</span> <span class="mi">8</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexStateInfo</span><span class="o">-&gt;</span><span class="n">SetDefault</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">validIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">shaderVertexAttrIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">shaderVertexAttrIndex</span> <span class="o">&lt;</span> <span class="n">shaderVertexAttrCount</span><span class="p">;</span> <span class="o">++</span><span class="n">shaderVertexAttrIndex</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get the shader vertex attribute ID.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">id</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetAttrName</span><span class="p">(</span><span class="n">shaderVertexAttrIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Use the vertex attribute ID to get the vertex attribute name of the model.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span> <span class="o">=</span> <span class="n">pResShaderAssign</span><span class="o">-&gt;</span><span class="n">FindAttrAssign</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The vertex attributes were not linked in the tool.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">continue</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get the vertex attribute information for the model.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResVertexAttr</span><span class="o">*</span> <span class="n">pResVertexAttr</span> <span class="o">=</span> <span class="n">pResVertex</span><span class="o">-&gt;</span><span class="n">FindVertexAttr</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pResVertexAttr</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">continue</span><span class="p">;</span> <span class="c1">// Occasionally, different shapes that have the same material will not have this information.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get the vertex attribute information for the shader.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResAttrVar</span><span class="o">*</span> <span class="n">pResAttrVar</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetAttr</span><span class="p">(</span><span class="n">shaderVertexAttrIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Set the vertex attribute information.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexAttributeStateInfo</span><span class="p">[</span><span class="n">validIndex</span><span class="p">].</span><span class="n">SetDefault</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexAttributeStateInfo</span><span class="p">[</span><span class="n">validIndex</span><span class="p">].</span><span class="n">SetBufferIndex</span><span class="p">(</span><span class="n">pResVertexAttr</span><span class="o">-&gt;</span><span class="n">GetBufferIndex</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexAttributeStateInfo</span><span class="p">[</span><span class="n">validIndex</span><span class="p">].</span><span class="n">SetFormat</span><span class="p">(</span><span class="n">pResVertexAttr</span><span class="o">-&gt;</span><span class="n">GetFormat</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexAttributeStateInfo</span><span class="p">[</span><span class="n">validIndex</span><span class="p">].</span><span class="n">SetOffset</span><span class="p">(</span><span class="n">pResVertexAttr</span><span class="o">-&gt;</span><span class="n">GetOffset</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexAttributeStateInfo</span><span class="p">[</span><span class="n">validIndex</span><span class="p">].</span><span class="n">SetShaderSlot</span><span class="p">(</span><span class="n">pResAttrVar</span><span class="o">-&gt;</span><span class="n">GetLocation</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexAttributeStateInfo</span><span class="p">[</span><span class="n">validIndex</span><span class="p">].</span><span class="n">SetNamePtr</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">++</span><span class="n">validIndex</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexStateInfo</span><span class="o">-&gt;</span><span class="n">SetVertexAttributeStateInfoArray</span><span class="p">(</span><span class="n">pVertexAttributeStateInfo</span><span class="p">,</span> <span class="n">validIndex</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Set all of the buffers in ResVertex.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">vertexBufferCount</span><span class="p">;</span> <span class="o">++</span><span class="n">index</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexBufferStateInfo</span><span class="p">[</span><span class="n">index</span><span class="p">].</span><span class="n">SetDefault</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexBufferStateInfo</span><span class="p">[</span><span class="n">index</span><span class="p">].</span><span class="n">SetStride</span><span class="p">(</span><span class="n">pResVertex</span><span class="o">-&gt;</span><span class="n">GetVertexBufferStride</span><span class="p">(</span><span class="n">index</span><span class="p">));</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexStateInfo</span><span class="o">-&gt;</span><span class="n">SetVertexBufferStateInfoArray</span><span class="p">(</span><span class="n">pVertexBufferStateInfo</span><span class="p">,</span> <span class="n">vertexBufferCount</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">memorySize</span> <span class="o">=</span> <span class="nn">nn::gfx::VertexState::</span><span class="n">GetRequiredMemorySize</span><span class="p">(</span><span class="o">*</span><span class="n">pVertexStateInfo</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">void</span><span class="o">*</span> <span class="n">pVertexStateMemory</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span><span class="p">(</span><span class="n">memorySize</span><span class="p">,</span> <span class="nn">nn::gfx::VertexState::</span><span class="n">RequiredMemoryInfo_Alignment</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">VertexState</span><span class="o">*</span> <span class="n">pVertexState</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">AllocateMemory</span><span class="o">&lt;</span><span class="nn">nn::gfx::</span><span class="n">VertexState</span><span class="o">&gt;</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="nn">nn::gfx::</span><span class="n">VertexState</span><span class="p">),</span> <span class="mi">8</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexState</span><span class="o">-&gt;</span><span class="n">SetMemory</span><span class="p">(</span><span class="n">pVertexStateMemory</span><span class="p">,</span> <span class="n">memorySize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVertexState</span><span class="o">-&gt;</span><span class="n">Initialize</span><span class="p">(</span><span class="n">pDevice</span><span class="p">,</span> <span class="o">*</span><span class="n">pVertexStateInfo</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResShape</span><span class="o">-&gt;</span><span class="n">SetUserPtr</span><span class="p">(</span><span class="n">pVertexState</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">g3ddemo::</span><span class="n">FreeMemory</span><span class="p">(</span><span class="n">pVertexStateInfo</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">g3ddemo::</span><span class="n">FreeMemory</span><span class="p">(</span><span class="n">pVertexAttributeStateInfo</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">g3ddemo::</span><span class="n">FreeMemory</span><span class="p">(</span><span class="n">pVertexBufferStateInfo</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Refer to the vertex attribute information in the model that corresponds to the vertex attributes of the shading model to set the vertex attributes. The 26 to 38th rows are responsible for the processing for extracting the vertex attribute information in the model that corresponds to the vertex attributes of the shading model. <code><span class="ApiLink_nn__g3d__ResVertex">nn::g3d::ResVertex</span></code> stores all of the vertex buffers required to render the shape. All of the vertex buffers in <code><span class="ApiLink_nn__g3d__ResVertex">nn::g3d::ResVertex</span></code> are specified in the vertex buffer state.</p>
+<h5 id="Anchor_204215072_h5_10">Initializing the Blend State, Depth Stencil State, and Rasterizer State</h5>
+<p>The Simple demo performs initialization according to predetermined settings. Embedding appropriate information in <code><span class="ApiLink_nn__g3d__ResRenderInfo">nn::g3d::ResRenderInfo</span></code> allows this information to be referenced by the runtime. You can use this information to set <code><span class="ApiLink_nn__g3d__ResRenderInfo"><code>nn</code>::g3d::ResRenderInfo</span></code> for each material and change the settings for the blend state, depth stencil state, and rasterizer state.</p>
+<h2 id="Anchor_204215072_h2_4">Updating Animations</h2>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_204215072/flowchart_4.svg" />
+</div>
+<h5 id="Anchor_204215072_h5_11">Animation Calculations</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">skeletalAnimObj</span><span class="p">.</span><span class="n">Calculate</span><span class="p">();</span>
+<span class="n">skeletalAnimObj</span><span class="p">.</span><span class="n">ApplyTo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">modelObj</span><span class="p">);</span>
+<span class="n">skeletalAnimObj</span><span class="p">.</span><span class="n">GetFrameCtrl</span><span class="p">().</span><span class="n">UpdateFrame</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This example shows a skeletal animation. It calculates the skeletal animation, applies the skeletal animation to the model, and updates the animation frame.</p>
+<h5 id="Anchor_204215072_h5_12">Converting the Model to a World</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::util::</span><span class="n">Matrix4x3fType</span> <span class="n">baseMtx</span><span class="p">;</span>
+<span class="nn">nn::util::</span><span class="n">Vector3fType</span> <span class="n">rotate</span> <span class="o">=</span> <span class="n">NN_UTIL_VECTOR_3F_INITIALIZER</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span> <span class="n">counter</span><span class="o">++</span> <span class="o">*</span> <span class="mf">3.14f</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">256</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">);</span>
+<span class="n">MatrixSetRotateXyz</span><span class="p">(</span><span class="o">&amp;</span><span class="n">baseMtx</span><span class="p">,</span> <span class="n">rotate</span><span class="p">);</span>
+<span class="nn">nn::util::</span><span class="n">Vector3fType</span> <span class="n">translate</span> <span class="o">=</span> <span class="n">NN_UTIL_VECTOR_3F_INITIALIZER</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">);</span>
+<span class="n">MatrixSetAxisW</span><span class="p">(</span><span class="o">&amp;</span><span class="n">baseMtx</span><span class="p">,</span> <span class="n">translate</span><span class="p">);</span>
+
+<span class="n">modelObj</span><span class="p">.</span><span class="n">CalculateWorld</span><span class="p">(</span><span class="n">baseMtx</span><span class="p">);</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the <code><span class="ApiLink_void_nn__g3d__ModelObj__CalculateWorld(const_nn__util__Matrix4x3fType_&baseMtx)_NN_NOEXCEPT">nn::g3d::ModelObj::CalculateWorld()</span></code> function to convert the model to a world.</p>
+<h2 id="Anchor_204215072_h2_5">Updating the Buffers Referenced by the GPU</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">modelObj</span><span class="p">.</span><span class="n">CalculateSkeleton</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">modelObj</span><span class="p">.</span><span class="n">CalculateMaterial</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">modelObj</span><span class="p">.</span><span class="n">CalculateShape</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">modelObj</span><span class="p">.</span><span class="n">CalculateView</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cameraMtx</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Updates the uniform blocks managed by <code>g3d</code>. The <code><span class="ApiLink_void_nn__g3d__ModelObj__CalculateSkeleton(int_bufferIndex)_NN_NOEXCEPT">nn::g3d::ModelObj::CalculateSkeleton()</span></code> function updates the matrix palette maintained by <code><span class="ApiLink_nn__g3d__SkeletonObj">nn::g3d::SkeletonObj</span></code>. Matrices for both smooth skinning and rigid skinning are stored in the matrix palette. The <code><span class="ApiLink_void_nn__g3d__ModelObj__CalculateMaterial(int_bufferIndex)_NN_NOEXCEPT">nn::g3d::ModelObj::CalculateMaterial()</span></code> function updates the shader parameters. A dirty flag is set for shader parameters that have been changed by animations and the like, and the changes are applied in the uniform blocks by calling <code><span class="ApiLink_void_nn__g3d__ModelObj__CalculateMaterial(int_bufferIndex)_NN_NOEXCEPT">nn::g3d::ModelObj::CalculateMaterial()</span></code>. <code><span class="ApiLink_void_nn__g3d__ModelObj__CalculateShape(int_bufferIndex)_NN_NOEXCEPT">nn::g3d::ModelObj::CalculateShape()</span></code> updates the uniform blocks that are set on a per-shape basis. The <code><span class="ApiLink_void_nn__g3d__ModelObj__CalculateView(int_viewIndex|_const_nn__util__Matrix4x3fType_&cameraMtx|_int_bufferIndex)_NN_NOEXCEPT">nn::g3d::ModelObj::CalculateView()</span></code> function handles processing for billboards. The number of buffers for the uniform blocks held by materials, shapes, and skeletons can be specified when the <code><span class="ApiLink_nn__g3d__ModelObj">nn::g3d::ModelObj</span></code> objects are being created. You can execute the rendering command and buffer update in parallel by using double buffers.</p>
+<h2 id="Anchor_204215072_h2_6">Creating Draw Commands</h2>
+<p>This flowchart depicts the process for a single shape. To render the complete model you would perform the same process for all of the shapes.</p>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_204215072/flowchart_5.svg" />
+</div>
+<h5 id="Anchor_204215072_h5_13">Determining Visibility</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">m_pModelObj</span><span class="o">-&gt;</span><span class="n">IsShapeVisible</span><span class="p">(</span><span class="n">index</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Use <code><span class="ApiLink_bool_nn__g3d__ModelObj__IsShapeVisible(int_shapeIndex)_const_NN_NOEXCEPT">nn::g3d::ModelObj::IsShapeVisible()</span></code> to determine whether to draw the shape. The library does not make the determination based solely on the result in <code><span class="ApiLink_nn__g3d__ModelObj">nn::g3d::ModelObj</span></code>. The results of visibility animation and frustum culling must also be considered in the determination.</p>
+<h5 id="Anchor_204215072_h5_14">Configuring the Render State</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Set the render state.
+</span><span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetBlendState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_BlendState</span><span class="p">);</span>
+<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetDepthStencilState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_DepthStencilState</span><span class="p">);</span>
+<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetRasterizerState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_RasterizerState</span><span class="p">);</span>
+<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetVertexState</span><span class="p">(</span><span class="n">pVertexState</span><span class="p">);</span>
+
+<span class="c1">// Set the vertex buffers.
+</span><span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResVertex</span><span class="o">*</span> <span class="n">pResVertex</span> <span class="o">=</span> <span class="n">pShapeObj</span><span class="o">-&gt;</span><span class="n">GetResVertex</span><span class="p">();</span>
+<span class="kt">int</span> <span class="n">vertexBufferCount</span> <span class="o">=</span> <span class="n">pResVertex</span><span class="o">-&gt;</span><span class="n">GetVertexBufferCount</span><span class="p">();</span>
+<span class="c1">// Set all of the buffers in ResVertex.
+</span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">bufferIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">bufferIndex</span> <span class="o">&lt;</span> <span class="n">vertexBufferCount</span><span class="p">;</span> <span class="o">++</span><span class="n">bufferIndex</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">GpuAddress</span> <span class="n">gpuAddress</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResVertex</span><span class="o">-&gt;</span><span class="n">GetVertexBuffer</span><span class="p">(</span><span class="n">bufferIndex</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">GetGpuAddress</span><span class="p">(</span><span class="o">&amp;</span><span class="n">gpuAddress</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetVertexBuffer</span><span class="p">(</span><span class="n">bufferIndex</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">gpuAddress</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResVertex</span><span class="o">-&gt;</span><span class="n">GetVertexBufferStride</span><span class="p">(</span><span class="n">bufferIndex</span><span class="p">),</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResVertex</span><span class="o">-&gt;</span><span class="n">GetVertexBufferInfo</span><span class="p">(</span><span class="n">bufferIndex</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">());</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This code sets the render state, depth-stencil state, rasterizer state, and vertex state. All buffers in the <code><span class="ApiLink_nn__g3d__ResVertex">nn::g3d::ResVertex</span></code> object, referenced by the shape, are set as vertex buffers.</p>
+<h5 id="Anchor_204215072_h5_15">Loading Shaders</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ShaderSelector</span><span class="o">*</span> <span class="n">pShaderSelector</span> <span class="o">=</span> <span class="n">pShapeObj</span><span class="o">-&gt;</span><span class="n">GetUserPtr</span><span class="o">&lt;</span><span class="nn">nn::g3d::</span><span class="n">ShaderSelector</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderProgram</span><span class="o">*</span> <span class="n">pResShaderProgram</span> <span class="o">=</span> <span class="n">pShaderSelector</span><span class="o">-&gt;</span><span class="n">GetProgram</span><span class="p">();</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">pResShaderProgram</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResShaderProgram</span> <span class="o">=</span> <span class="n">pShaderSelector</span><span class="o">-&gt;</span><span class="n">GetDefaultProgram</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="n">NN_ASSERT_NOT_NULL</span><span class="p">(</span><span class="n">pResShaderProgram</span><span class="p">);</span>
+&nbsp;
+<span class="n">pResShaderProgram</span><span class="o">-&gt;</span><span class="n">Load</span><span class="p">(</span><span class="n">pCommandBuffer</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This code gets and loads the shader program selected by <code><span class="ApiLink_nn__g3d__ShaderSelector">nn::g3d::ShaderSelector</span></code>.</p>
+<h5 id="Anchor_204215072_h5_16">Sampler, Texture Settings</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShadingModel</span><span class="o">*</span> <span class="n">pResShadingModel</span> <span class="o">=</span> <span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">GetResource</span><span class="p">();</span>
+<span class="kt">int</span> <span class="n">shaderSamplerCount</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetSamplerCount</span><span class="p">();</span>
+<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResMaterial</span><span class="o">*</span> <span class="n">pResMaterial</span> <span class="o">=</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">GetResource</span><span class="p">();</span>
+<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderAssign</span><span class="o">*</span> <span class="n">pResShaderAssign</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetShaderAssign</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">shaderSamplerIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">shaderSamplerIndex</span> <span class="o">&lt;</span> <span class="n">shaderSamplerCount</span><span class="p">;</span> <span class="o">++</span><span class="n">shaderSamplerIndex</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// It is faster to forgo name lookups each time and instead record the sampler indexes that have been examined and use those.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// For ease of understanding, this code performs name lookup each time.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">id</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetSamplerName</span><span class="p">(</span><span class="n">shaderSamplerIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Find the sampler name for the model corresponding to the shader's sampler ID.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span> <span class="o">=</span> <span class="n">pResShaderAssign</span><span class="o">-&gt;</span><span class="n">FindSamplerAssign</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">name</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">modelSamplerIndex</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">FindSamplerIndex</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">SamplerRef</span> <span class="n">samplerRef</span> <span class="o">=</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">GetSampler</span><span class="p">(</span><span class="n">modelSamplerIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">TextureRef</span> <span class="n">textureRef</span> <span class="o">=</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">GetTexture</span><span class="p">(</span><span class="n">modelSamplerIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">LoadTextureSampler</span><span class="p">(</span><span class="n">pCommandBuffer</span><span class="p">,</span> <span class="n">textureRef</span><span class="p">.</span><span class="n">GetDescriptorSlot</span><span class="p">(),</span> <span class="n">samplerRef</span><span class="p">.</span><span class="n">GetDescriptorSlot</span><span class="p">(),</span> <span class="n">pResShaderProgram</span><span class="p">,</span> <span class="n">shaderSamplerIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27<br />
+28<br />
+29<br />
+30</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Set a sampler and a texture for each shader stage.
+</span><span class="kt">void</span> <span class="nf">LoadTextureSampler</span><span class="p">(</span><span class="nn">nn::gfx::</span><span class="n">CommandBuffer</span><span class="o">*</span> <span class="n">pCommandBuffer</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">DescriptorSlot</span><span class="o">&amp;</span> <span class="n">textureDescriptor</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">DescriptorSlot</span><span class="o">&amp;</span> <span class="n">samplerDescriptor</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderProgram</span><span class="o">*</span> <span class="n">pShaderProgram</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">samplerIndex</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ASSERT_NOT_NULL</span><span class="p">(</span><span class="n">pShaderProgram</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">locationVS</span> <span class="o">=</span> <span class="n">pShaderProgram</span><span class="o">-&gt;</span><span class="n">GetSamplerLocation</span><span class="p">(</span><span class="n">samplerIndex</span><span class="p">,</span> <span class="nn">nn::g3d::</span><span class="n">Stage_Vertex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">locationVS</span> <span class="o">!=</span> <span class="nn">nn::g3d::</span><span class="n">ShaderLocationNone</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetTextureAndSampler</span><span class="p">(</span><span class="n">locationVS</span><span class="p">,</span> <span class="nn">nn::gfx::</span><span class="n">ShaderStage_Vertex</span><span class="p">,</span> <span class="n">textureDescriptor</span><span class="p">,</span> <span class="n">samplerDescriptor</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">locationGS</span> <span class="o">=</span> <span class="n">pShaderProgram</span><span class="o">-&gt;</span><span class="n">GetSamplerLocation</span><span class="p">(</span><span class="n">samplerIndex</span><span class="p">,</span> <span class="nn">nn::g3d::</span><span class="n">Stage_Geometry</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">locationGS</span> <span class="o">!=</span> <span class="nn">nn::g3d::</span><span class="n">ShaderLocationNone</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetTextureAndSampler</span><span class="p">(</span><span class="n">locationGS</span><span class="p">,</span> <span class="nn">nn::gfx::</span><span class="n">ShaderStage_Geometry</span><span class="p">,</span> <span class="n">textureDescriptor</span><span class="p">,</span> <span class="n">samplerDescriptor</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">locationFS</span> <span class="o">=</span> <span class="n">pShaderProgram</span><span class="o">-&gt;</span><span class="n">GetSamplerLocation</span><span class="p">(</span><span class="n">samplerIndex</span><span class="p">,</span> <span class="nn">nn::g3d::</span><span class="n">Stage_Pixel</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">locationFS</span> <span class="o">!=</span> <span class="nn">nn::g3d::</span><span class="n">ShaderLocationNone</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetTextureAndSampler</span><span class="p">(</span><span class="n">locationFS</span><span class="p">,</span> <span class="nn">nn::gfx::</span><span class="n">ShaderStage_Pixel</span><span class="p">,</span> <span class="n">textureDescriptor</span><span class="p">,</span> <span class="n">samplerDescriptor</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">locationCS</span> <span class="o">=</span> <span class="n">pShaderProgram</span><span class="o">-&gt;</span><span class="n">GetSamplerLocation</span><span class="p">(</span><span class="n">samplerIndex</span><span class="p">,</span> <span class="nn">nn::g3d::</span><span class="n">Stage_Compute</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">locationCS</span> <span class="o">!=</span> <span class="nn">nn::g3d::</span><span class="n">ShaderLocationNone</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetTextureAndSampler</span><span class="p">(</span><span class="n">locationCS</span><span class="p">,</span> <span class="nn">nn::gfx::</span><span class="n">ShaderStage_Compute</span><span class="p">,</span> <span class="n">textureDescriptor</span><span class="p">,</span> <span class="n">samplerDescriptor</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Finds the sampler in the model corresponding to the shading model's sampler ID, and takes the sampler configured in that model in addition to the texture and sets them in the command buffer. For more information about the model's sampler and the texture settings, see <a href="#Anchor_204215072_h5_4">Initializing Model Resources</a>. In this sample code, name lookup is used to find the sampler in the model that corresponds to the shading model's sampler ID. But the process goes faster if you look for them ahead of time and use the results.</p>
+<h5 id="Anchor_204215072_h5_17">Loading Uniform Blocks</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27<br />
+28<br />
+29<br />
+30<br />
+31<br />
+32<br />
+33<br />
+34<br />
+35<br />
+36<br />
+37</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShadingModel</span><span class="o">*</span> <span class="n">pResShadingModel</span> <span class="o">=</span> <span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">GetResource</span><span class="p">();</span>
+
+<span class="c1">// Option uniform blocks.
+</span><span class="kt">int</span> <span class="n">optionUniformBlockIndex</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetSystemBlockIndex</span><span class="p">(</span><span class="nn">nn::g3d::ResUniformBlockVar::</span><span class="n">Type_Option</span><span class="p">);</span>
+<span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">Buffer</span><span class="o">*</span> <span class="n">pOptionUniformBlock</span> <span class="o">=</span> <span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">GetOptionBlock</span><span class="p">();</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">optionUniformBlockIndex</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">IsBlockBufferValid</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">GetOptionBlockSize</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">LoadUniformBlock</span><span class="p">(</span><span class="n">pCommandBuffer</span><span class="p">,</span> <span class="n">pOptionUniformBlock</span><span class="p">,</span> <span class="n">pResShaderProgram</span><span class="p">,</span> <span class="n">optionUniformBlockIndex</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Material uniform blocks.
+</span><span class="kt">int</span> <span class="n">materialUniformBlockIndex</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetSystemBlockIndex</span><span class="p">(</span><span class="nn">nn::g3d::ResUniformBlockVar::</span><span class="n">Type_Material</span><span class="p">);</span>
+<span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">Buffer</span><span class="o">*</span> <span class="n">pMaterialUniformBlock</span> <span class="o">=</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">GetMaterialBlock</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">materialUniformBlockIndex</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">IsBlockBufferValid</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">GetMaterialBlockSize</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">LoadUniformBlock</span><span class="p">(</span><span class="n">pCommandBuffer</span><span class="p">,</span> <span class="n">pMaterialUniformBlock</span><span class="p">,</span> <span class="n">pResShaderProgram</span><span class="p">,</span> <span class="n">materialUniformBlockIndex</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+<span class="p">}</span>
+&nbsp;
+<span class="c1">// Skeleton uniform blocks.
+</span><span class="kt">int</span> <span class="n">skeletonUniformBlockIndex</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetSystemBlockIndex</span><span class="p">(</span><span class="nn">nn::g3d::ResUniformBlockVar::</span><span class="n">Type_Skeleton</span><span class="p">);</span>
+<span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">Buffer</span><span class="o">*</span> <span class="n">pSkeletonUniformBlock</span> <span class="o">=</span> <span class="n">pSkeletonObj</span><span class="o">-&gt;</span><span class="n">GetMtxBlock</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">skeletonUniformBlockIndex</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">pSkeletonObj</span><span class="o">-&gt;</span><span class="n">IsBlockBufferValid</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">pSkeletonObj</span><span class="o">-&gt;</span><span class="n">GetMtxBlockSize</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">LoadUniformBlock</span><span class="p">(</span><span class="n">pCommandBuffer</span><span class="p">,</span> <span class="n">pSkeletonUniformBlock</span><span class="p">,</span> <span class="n">pResShaderProgram</span><span class="p">,</span> <span class="n">skeletonUniformBlockIndex</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Shape uniform blocks.
+</span><span class="kt">int</span> <span class="n">shapeUniformBlockIndex</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetSystemBlockIndex</span><span class="p">(</span><span class="nn">nn::g3d::ResUniformBlockVar::</span><span class="n">Type_Shape</span><span class="p">);</span>
+<span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">Buffer</span><span class="o">*</span> <span class="n">pShapeUniformBlock</span> <span class="o">=</span> <span class="n">pShapeObj</span><span class="o">-&gt;</span><span class="n">GetShapeBlock</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">shapeUniformBlockIndex</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">pShapeObj</span><span class="o">-&gt;</span><span class="n">IsBlockBufferValid</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="nn">nn::g3d::</span><span class="n">ShapeBlock</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">LoadUniformBlock</span><span class="p">(</span><span class="n">pCommandBuffer</span><span class="p">,</span> <span class="n">pShapeUniformBlock</span><span class="p">,</span> <span class="n">pResShaderProgram</span><span class="p">,</span> <span class="n">shapeUniformBlockIndex</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27<br />
+28<br />
+29<br />
+30</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Set uniform blocks for each shader stage.
+</span><span class="kt">void</span> <span class="nf">LoadUniformBlock</span><span class="p">(</span><span class="nn">nn::gfx::</span><span class="n">CommandBuffer</span><span class="o">*</span> <span class="n">pCommandBuffer</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">Buffer</span><span class="o">*</span> <span class="n">pBuffer</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderProgram</span><span class="o">*</span> <span class="n">pShaderProgram</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">blockIndex</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">GpuAddress</span> <span class="n">gpuAddress</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pBuffer</span><span class="o">-&gt;</span><span class="n">GetGpuAddress</span><span class="p">(</span><span class="o">&amp;</span><span class="n">gpuAddress</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">locationVS</span> <span class="o">=</span> <span class="n">pShaderProgram</span><span class="o">-&gt;</span><span class="n">GetUniformBlockLocation</span><span class="p">(</span><span class="n">blockIndex</span><span class="p">,</span> <span class="nn">nn::g3d::</span><span class="n">Stage_Vertex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">locationVS</span> <span class="o">!=</span> <span class="nn">nn::g3d::</span><span class="n">ShaderLocationNone</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetConstantBuffer</span><span class="p">(</span><span class="n">locationVS</span><span class="p">,</span> <span class="nn">nn::gfx::</span><span class="n">ShaderStage_Vertex</span><span class="p">,</span> <span class="n">gpuAddress</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">locationGS</span> <span class="o">=</span> <span class="n">pShaderProgram</span><span class="o">-&gt;</span><span class="n">GetUniformBlockLocation</span><span class="p">(</span><span class="n">blockIndex</span><span class="p">,</span> <span class="nn">nn::g3d::</span><span class="n">Stage_Geometry</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">locationGS</span> <span class="o">!=</span> <span class="nn">nn::g3d::</span><span class="n">ShaderLocationNone</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetConstantBuffer</span><span class="p">(</span><span class="n">locationGS</span><span class="p">,</span> <span class="nn">nn::gfx::</span><span class="n">ShaderStage_Geometry</span><span class="p">,</span> <span class="n">gpuAddress</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">locationFS</span> <span class="o">=</span> <span class="n">pShaderProgram</span><span class="o">-&gt;</span><span class="n">GetUniformBlockLocation</span><span class="p">(</span><span class="n">blockIndex</span><span class="p">,</span> <span class="nn">nn::g3d::</span><span class="n">Stage_Pixel</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">locationFS</span> <span class="o">!=</span> <span class="nn">nn::g3d::</span><span class="n">ShaderLocationNone</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetConstantBuffer</span><span class="p">(</span><span class="n">locationFS</span><span class="p">,</span> <span class="nn">nn::gfx::</span><span class="n">ShaderStage_Pixel</span><span class="p">,</span> <span class="n">gpuAddress</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">locationCS</span> <span class="o">=</span> <span class="n">pShaderProgram</span><span class="o">-&gt;</span><span class="n">GetUniformBlockLocation</span><span class="p">(</span><span class="n">blockIndex</span><span class="p">,</span> <span class="nn">nn::g3d::</span><span class="n">Stage_Compute</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">locationCS</span> <span class="o">!=</span> <span class="nn">nn::g3d::</span><span class="n">ShaderLocationNone</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetConstantBuffer</span><span class="p">(</span><span class="n">locationCS</span><span class="p">,</span> <span class="nn">nn::gfx::</span><span class="n">ShaderStage_Compute</span><span class="p">,</span> <span class="n">gpuAddress</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Configures in the command buffer the settings for the option, material, skeleton, and shape uniform buffers managed by <code>g3d</code>. For the skeleton, you can use shader storage blocks instead of uniform blocks. If necessary, you can also use uniform blocks other than those managed by <code>g3d</code>. In the <code>Simple</code> demo, the information for the camera matrix, a hemispherical light, and a directional light is set.</p>
+<h5 id="Anchor_204215072_h5_18">Draw Call</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">pShapeObj</span><span class="o">-&gt;</span><span class="n">GetResMesh</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">Draw</span><span class="p">(</span><span class="n">pCommandBuffer</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Draws a shape. In the <code>g3d</code> library, <code><span class="ApiLink_nn__g3d__ResMesh">nn::g3d::ResMesh</span></code> represents a single LOD model. You can switch LOD models by switching the meshes to draw. For more information, see <a href="../Pages/Page_187885235.html#Anchor_187885235_h3_1">Model Geometry Data Structure</a>.</p>
+<h2 id="Anchor_204215072_h2_7">Issuing Draw Commands</h2>
+<p>Use <span class="ApiLink_void_nn__gfx__TQueue__ExecuteCommand(TCommandBuffer__Target___*pCommandBuffer|_TFence__Target___*pFence)_NN_NOEXCEPT"><code>nn::gfx::Queue::ExecuteCommand()</code></span> to execute the command buffer.</p>
+<h2 id="Anchor_204215072_h2_8">Finalization</h2>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_204215072/flowchart_6.svg" />
+</div>
+<h5 id="Anchor_204215072_h5_19">Destroying the Shader Selector</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::g3d::</span><span class="n">ShadingModelObj</span><span class="o">*</span> <span class="n">pShadingModelObj</span> <span class="o">=</span> <span class="n">pShaderSelector</span><span class="o">-&gt;</span><span class="n">GetShadingModel</span><span class="p">();</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">pBuffer</span> <span class="o">=</span> <span class="n">pShaderSelector</span><span class="o">-&gt;</span><span class="n">GetBufferPtr</span><span class="p">();</span>
+<span class="nn">g3ddemo::</span><span class="n">FreeMemory</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">);</span>
+&nbsp;
+<span class="kt">ptrdiff_t</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">GetMemoryPoolOffset</span><span class="p">();</span>
+<span class="n">pGfxFramework</span><span class="o">-&gt;</span><span class="n">FreePoolMemory</span><span class="p">(</span><span class="nn">nns::gfx::GraphicsFramework::</span><span class="n">MemoryPoolType_ConstantBuffer</span><span class="p">,</span> <span class="n">offset</span><span class="p">);</span>
+
+<span class="kt">void</span><span class="o">*</span> <span class="n">pBuffer</span> <span class="o">=</span> <span class="n">pShadingModelObj</span><span class="o">-&gt;</span><span class="n">GetBufferPtr</span><span class="p">();</span>
+<span class="nn">g3ddemo::</span><span class="n">FreeMemory</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Frees the configured memory and the memory pool.</p>
+<h5 id="Anchor_204215072_h5_20">Destroying the Animation</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">pMemory</span> <span class="o">=</span> <span class="n">pSkeletalAnimObj</span><span class="o">-&gt;</span><span class="n">GetBufferPtr</span><span class="p">();</span>
+<span class="nn">g3ddemo::</span><span class="n">FreeMemory</span><span class="p">(</span><span class="n">pMemory</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This example destroys a skeletal animation. The configured memory is freed.</p>
+<h5 id="Anchor_204215072_h5_21">Destroying the Model Instance</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">pBuffer</span> <span class="o">=</span> <span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">GetBufferPtr</span><span class="p">();</span>
+<span class="kt">ptrdiff_t</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">GetMemoryPoolOffset</span><span class="p">();</span>
+<span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">CleanupBlockBuffer</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+
+<span class="nn">nns::gfx::</span><span class="n">GraphicsFramework</span><span class="o">*</span> <span class="n">pGfxFramework</span> <span class="o">=</span> <span class="nn">g3ddemo::</span><span class="n">GetGfxFramework</span><span class="p">();</span>
+<span class="n">pGfxFramework</span><span class="o">-&gt;</span><span class="n">FreePoolMemory</span><span class="p">(</span><span class="nn">nns::gfx::GraphicsFramework::</span><span class="n">MemoryPoolType_ConstantBuffer</span><span class="p">,</span> <span class="n">offset</span><span class="p">);</span>
+<span class="nn">g3ddemo::</span><span class="n">FreeMemory</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Frees the configured memory and the memory pool.</p>
+<h5 id="Anchor_204215072_h5_22">Finalizing the Model Resource</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27<br />
+28<br />
+29<br />
+30<br />
+31<br />
+32</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Extract the texture file.
+</span><span class="nn">nn::g3d::</span><span class="n">ResExternalFile</span><span class="o">*</span> <span class="n">pExternalFile</span> <span class="o">=</span> <span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">GetExternalFile</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="nn">nn::gfx::</span><span class="n">ResTextureFile</span><span class="o">*</span> <span class="n">pTextureFile</span> <span class="o">=</span> <span class="nn">nn::gfx::ResTextureFile::</span><span class="n">ResCast</span><span class="p">(</span><span class="n">pExternalFile</span><span class="o">-&gt;</span><span class="n">GetData</span><span class="p">());</span>
+
+<span class="c1">// Unregister the texture from the descriptor pool.
+</span><span class="nn">g3ddemo::</span><span class="n">UnregisterTextureFileFromDescriptorPool</span><span class="p">(</span><span class="n">pTextureFile</span><span class="p">);</span>
+
+<span class="c1">// Destroy the texture.
+</span><span class="kt">int</span> <span class="n">textureCount</span> <span class="o">=</span> <span class="n">pTextureFile</span><span class="o">-&gt;</span><span class="n">GetTextureDic</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetCount</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">textureIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">textureIndex</span> <span class="o">&lt;</span> <span class="n">textureCount</span><span class="p">;</span> <span class="o">++</span><span class="n">textureIndex</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">ResTexture</span><span class="o">*</span> <span class="n">pResTexture</span> <span class="o">=</span> <span class="n">pTextureFile</span><span class="o">-&gt;</span><span class="n">GetResTexture</span><span class="p">(</span><span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResTexture</span><span class="o">-&gt;</span><span class="n">Finalize</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">pTextureFile</span><span class="o">-&gt;</span><span class="n">Finalize</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+
+<span class="c1">// Unregister the sampler from the descriptor pool.
+</span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">modelIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">modelIndex</span> <span class="o">&lt;</span> <span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">GetModelCount</span><span class="p">();</span> <span class="o">++</span><span class="n">modelIndex</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">ResModel</span><span class="o">*</span> <span class="n">pResModel</span> <span class="o">=</span> <span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">GetModel</span><span class="p">(</span><span class="n">modelIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">materialIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">materialIndex</span> <span class="o">&lt;</span> <span class="n">pResModel</span><span class="o">-&gt;</span><span class="n">GetMaterialCount</span><span class="p">();</span> <span class="o">++</span><span class="n">materialIndex</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::g3d::</span><span class="n">ResMaterial</span><span class="o">*</span> <span class="n">pResMaterial</span> <span class="o">=</span> <span class="n">pResModel</span><span class="o">-&gt;</span><span class="n">GetMaterial</span><span class="p">(</span><span class="n">materialIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">samplerIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">samplerIndex</span> <span class="o">&lt;</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetSamplerCount</span><span class="p">();</span> <span class="o">++</span><span class="n">samplerIndex</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">Sampler</span><span class="o">*</span> <span class="n">pSampler</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetSampler</span><span class="p">(</span><span class="n">samplerIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">g3ddemo::</span><span class="n">UnregisterSamplerFromDescriptorPool</span><span class="p">(</span><span class="n">pSampler</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">Cleanup</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Finalize the used texture and unregister the texture, and the sampler ,from the descriptor pool. Finalize <code><span class="ApiLink_nn__g3d__ResFile">nn::ResFile</span></code>.</p>
+<h5 id="Anchor_204215072_h5_23">Finalizing the Shader Archive</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">pResShaderFile</span><span class="o">-&gt;</span><span class="n">GetResShaderArchive</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">Cleanup</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Finalize <code><span class="ApiLink_nn__g3d__ResShaderArchive">nn::g3d::ResShaderArchive</span></code>.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__util__BinaryFileHeader', '../../../Api/HtmlNX/structnn_1_1util_1_1_binary_file_header.html' )
+SetUrl( 'ApiLink_size_t_nn__util__BinaryFileHeader__GetAlignment()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/structnn_1_1util_1_1_binary_file_header.html#a5d08b613e5c8bb9fe95b3bcb53edb62b' )
+SetUrl( 'ApiLink_static_ResShaderFile_*_nn__g3d__ResShaderFile__ResCast(void_*ptr)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_file.html#a39a1802d90e4a26b504d97710bfdca5a' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderFile', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_file.html' )
+SetUrl( 'ApiLink_void_nn__g3d__ResShaderArchive__Setup(nn__gfx__Device_*pDevice)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_archive.html#a0bd2ecf27e62dd885eb25a1c57e29c9d' )
+SetUrl( 'ApiLink_static_ResFile_*_nn__g3d__ResFile__ResCast(void_*ptr)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_file.html#a7c75d39f3d0f2fa545758776ec85a334' )
+SetUrl( 'ApiLink_nn__g3d__ResFile', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_file.html' )
+SetUrl( 'ApiLink_void_nn__g3d__ResFile__Setup(nn__gfx__Device_*pDevice)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_file.html#afeaf3b666d229f4e30fe374ee5707909' )
+SetUrl( 'ApiLink_nn__g3d__ResMaterial', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_material.html' )
+SetUrl( 'ApiLink_nn__g3d__ShaderUtility__BindShaderParam', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_utility.html#a26b394ba1043958e5f64a6d6f25efe9b' )
+SetUrl( 'ApiLink_void_nn__g3d__ResMaterial__SetRawParamSize(size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_material.html#a3ad8388875be70cd5210f42924e1cc4a' )
+SetUrl( 'ApiLink_void_nn__g3d__ResShaderParam__SetOffset(ptrdiff_t_offset)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_param.html#a3a1cefaece9417b6a3b760c2c5a01fa7' )
+SetUrl( 'ApiLink_nn__g3d__ModelObj__Builder', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj_1_1_builder.html' )
+SetUrl( 'ApiLink_bool_nn__g3d__ModelObj__Builder__Build(ModelObj_*pModelObj|_void_*pBuffer|_size_t_bufferSize)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj_1_1_builder.html#a8c8c04d0186a6016432e9ef33b98d2fe' )
+SetUrl( 'ApiLink_nn__g3d__ModelObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html' )
+SetUrl( 'ApiLink_bool_nn__g3d__ModelObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#ac8e21089d62248d3db9d672cd1da9daf' )
+SetUrl( 'ApiLink_nn__g3d__SkeletalAnimObj__Builder', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeletal_anim_obj_1_1_builder.html' )
+SetUrl( 'ApiLink_bool_nn__g3d__SkeletalAnimObj__Builder__Build(SkeletalAnimObj_*pSkeletalAnimObj|_void_*pBuffer|_size_t_bufferSize)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeletal_anim_obj_1_1_builder.html#ae5055841393e21175faaac8cbdfaddb5' )
+SetUrl( 'ApiLink_nn__g3d__SkeletalAnimObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeletal_anim_obj.html' )
+SetUrl( 'ApiLink_void_nn__g3d__SkeletalAnimObj__InitializeArgument__Reserve(const_ResModel_*pResModel)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeletal_anim_obj_1_1_initialize_argument.html#af3a1c0317dfa5d0ee66787864446f952' )
+SetUrl( 'ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html#ad74fda291355558a5ff65c61c43a02ab' )
+SetUrl( 'ApiLink_bool_nn__g3d__ShadingModelObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html#a0211c17d76c4cc14b627ef92d456ab5f' )
+SetUrl( 'ApiLink_nn__g3d__ShaderUtility__InitializeShaderKey', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_utility.html#aec9d6bbd048eb80cc70a49dd9a084c29' )
+SetUrl( 'ApiLink_nn__g3d__ShaderSelector', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_selector.html' )
+SetUrl( 'ApiLink_bool_nn__g3d__ShadingModelObj__UpdateShaderRange()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html#a7344a8679fb60796cb12e788a215499b' )
+SetUrl( 'ApiLink_void_nn__g3d__ShadingModelObj__CalculateOptionBlock()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html#a64b7fb97ce4d006bb694c8cd5d5a57a5' )
+SetUrl( 'ApiLink_bool_nn__g3d__ShaderSelector__UpdateVariation(nn__gfx__Device_*pDevice)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_selector.html#a79873e8ffad5ccd81bc0373f11bf7a44' )
+SetUrl( 'ApiLink_nn__g3d__ResVertex', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_vertex.html' )
+SetUrl( 'ApiLink_nn__g3d__ResRenderInfo', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_render_info.html' )
+SetUrl( 'ApiLink_void_nn__g3d__ModelObj__CalculateWorld(const_nn__util__Matrix4x3fType_&baseMtx)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#ab774452bb7729bd5b964056476dec55d' )
+SetUrl( 'ApiLink_void_nn__g3d__ModelObj__CalculateSkeleton(int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#adef78f87e8b217936ccb27f0b4e1a46c' )
+SetUrl( 'ApiLink_nn__g3d__SkeletonObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeleton_obj.html' )
+SetUrl( 'ApiLink_void_nn__g3d__ModelObj__CalculateMaterial(int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#a674b6b3417778ae519cf3bc6d6f5ff65' )
+SetUrl( 'ApiLink_void_nn__g3d__ModelObj__CalculateShape(int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#a79b51e82adb59599c0ec443bd1041d55' )
+SetUrl( 'ApiLink_void_nn__g3d__ModelObj__CalculateView(int_viewIndex|_const_nn__util__Matrix4x3fType_&cameraMtx|_int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#a8be53fd1232ac0ee1ed4041f8aabd7d2' )
+SetUrl( 'ApiLink_bool_nn__g3d__ModelObj__IsShapeVisible(int_shapeIndex)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#a8088989c4e38d3f66b82910cd1c27bea' )
+SetUrl( 'ApiLink_nn__g3d__ResMesh', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_mesh.html' )
+SetUrl( 'ApiLink_void_nn__gfx__TQueue__ExecuteCommand(TCommandBuffer__Target___*pCommandBuffer|_TFence__Target___*pFence)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_queue.html#a3513accbae08380417a92fb51043f1e8' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderArchive', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_archive.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

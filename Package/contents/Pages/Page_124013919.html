@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Target Environment Variables | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Target Environment Variables -->
+<div class="pagetitle" id="PageId_124013919">Target Environment Variables</div>
+<div class="text_separate">
+<h1 id="Anchor_124013919_h1_1">Overview</h1>
+<p>Target environment variables provide a way for the NintendoSDK application to get any value that has been defined outside of the application.</p>
+<p>In addition to passing parameters for application debugging, this feature also can be used to emulate development hardware-specific environment settings (such as file system references and device IDs) for Windows applications.</p>
+<h1 id="Anchor_124013919_h1_2">Using Target Environment Variables</h1>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>There are important restrictions on the use of this feature. Make sure that you read the Restrictions section.</p>
+  </div>
+</div>
+<h2 id="Anchor_124013919_h2_1">Preparing a Target Environment Variables Definitions File</h2>
+<p>Prepare a definitions file for the target environment variables, using the following format. The filename extension is <code>.tdf</code>. (TDF refers to a target environment variables definitions file.)</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In future updates, the NintendoSDK package will include a target environment variables definitions file that defines the system target environment variables used by the various NintendoSDK libraries.<br />After that file becomes available, use is as a base and add your own optional definitions.</p>
+  </div>
+</div>
+<h3 id="Anchor_124013919_h3_1">Format</h3>
+<p>The target environment variables definitions file is an XML file. It is encoded in UTF-8 with BOM.<br />The following example defines the environment variables <code>NINTENDO_SDK_ROOT</code> (<code>C:/Sdk</code>), <code>NINTENDO_SDK_SAMPLE_DIR</code> (<code>C:/Sdk/Sample</code>), and <code>MY_VALUE</code> (<code>128</code>).</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot;? &gt;
+<span class="nt">&lt;TargetEnvironmentVariables&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;SystemVariables&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Variable</span> <span class="na">Name=</span><span class="s">&quot;NINTENDO_SDK_ROOT&quot;</span> <span class="na">ValueType=</span><span class="s">&quot;string&quot;</span><span class="nt">&gt;</span>C:/Sdk<span class="nt">&lt;/Variable&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Variable</span> <span class="na">Name=</span><span class="s">&quot;NINTENDO_SDK_SAMPLE_DIR&quot;</span> <span class="na">ValueType=</span><span class="s">&quot;string&quot;</span><span class="nt">&gt;</span>%NINTENDO_SDK_ROOT%/Sample<span class="nt">&lt;/Variable&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;/SystemVariables&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;UserVariables&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Variable</span> <span class="na">Name=</span><span class="s">&quot;MY_VALUE&quot;</span> <span class="na">ValueType=</span><span class="s">&quot;string&quot;</span><span class="nt">&gt;</span>128<span class="nt">&lt;/Variable&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;/UserVariables&gt;</span>
+<span class="nt">&lt;/TargetEnvironmentVariables&gt;</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The elements are as follows.</p>
+<ul>
+  <li>The root element is <code>TargetEnvironmentVariables</code>.</li>
+  <li>Target environment variable definitions.<br /><ul><li>Variable definitions are denoted within the <code>Variable</code> element, which is a child element of either the <code>SystemVariables</code> or <code>UserVariables</code> element.<ul><li>The element below <code>SystemVariables</code> defines a value used inside the NintendoSDK libraries. Generally speaking, no additional variable definitions are necessary.</li></ul></li><li>Specify the variable name using the <code>Name</code> attribute. You can use any string, up to 64 characters in length.</li><li>The <code>ValueType</code> attribute specifies the type of the value. If the <code>ValueType</code> attribute is not specified, the value of the element is treated as a string.<ul><li>The element value is currently treated as a string, and the only specification supported is <code>string</code>.</li></ul></li><li>The value describes the value of the element.<ul><li>For string types, you can use strings up to 2048 bytes long, including the null terminator.</li></ul></li></ul></li>
+  <li>When a string-type value for a variable is specified as a string enclosed in percentage symbols (%), that value is replaced just that once by the value of the target environment variable whose name is that string.<br /><ul><li>If there is no defined target environment variable with that %-enclosed string as its name, the value becomes the string that has been described in the definitions file.</li><li>If the target environment variable with that %-enclosed string as its name already contains a %-enclosed string as its value, subsequent values will not be replaced.</li><li>The value of a Windows environment variable with the %-enclosed string as its name is not replaced.</li></ul></li>
+</ul>
+<h3 id="Anchor_124013919_h3_2">Predefined Variables</h3>
+<p>These are <code>SystemVariables</code> definitions that the system will use.<br />There are other predefined variables besides those listed here. For more information, see the documentation for each variable.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Name</th>
+      <th>ValueType</th>
+      <th>Description</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>
+        <pre>SDK_HTC_WIN_SERIAL_NUMBER</pre>
+      </td>
+      <td>string</td>
+      <td>
+        <p>If this value is set, the specified string will be set for the serial number when the Windows application is registered to Target Manager 2 (Nintendo SDK Daemon).</p>
+        <p>You can set up to 23 alphanumeric characters for this string (A-Z, a-z, 0-9). If the specified string does not satisfy this condition, it will not be set and the default value will be used instead.</p>
+      </td>
+      <td>Available in NintendoSDK 12.3.2 and later.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_124013919_h2_2">Specifying the Target Environment Variables Definitions File and Running the Application</h2>
+<p>For the application to reference the defined target environment variables, you must specify the target environment variables definitions file when you run the application.</p>
+<h3 id="Anchor_124013919_h3_3">Running a Windows Application</h3>
+<p>If the application is a Windows application, it searches for a target environment variables definitions file in the following search order and uses the first one found.</p>
+<ol>
+  <li>Searches for a file with the <code>.tdf</code> extension in the same directory as the application executable file.<ol><li>If the directory contains more than one target environment variables definitions file, the application selects one of the files to use, but the one it chooses is undefined.</li></ol></li>
+  <li>Searches for the file indicated by the absolute path set for the Windows environment variable <code>NINTENDO_SDK_TARGETENV_DEF_FILE_PATH</code>.</li>
+</ol>
+<p>If a target environment variables definitions file has been specified by either of these methods, the running application can get the values for target environment variables using functions like <code><span class="ApiLink_nn__htc__GetTargetEnvironmentVariableLength">nn::htc::GetTargetEnvironmentVariableLength</span>()</code> and <code><span class="ApiLink_nn__htc__GetTargetEnvironmentVariable">nn::htc::GetTargetEnvironmentVariable</span>()</code>.</p>
+<h3 id="Anchor_124013919_h3_4">Running an Application With VSI</h3>
+<p>Use the preceding method for running a Windows application and configure the project for your application so that the appropriate target environment variables definitions file is set in the project.</p>
+<h1 id="Anchor_124013919_h1_3">Restrictions</h1>
+<ul>
+  <li>The maximum size for the target environment variables definitions file is 6 KB.<ul><li>If a larger file is specified when the application runs, the functions that get target environment variables will return the <code><span class="ApiLink_nn__htc__ResultConnectionFailure">nn::htc::ResultConnectionFailure</span></code> error.</li></ul></li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__htc__GetTargetEnvironmentVariableLength', '../../../Api/HtmlNX/namespacenn_1_1htc.html#aedc86f477847dbb9e16702cb55bb2cad' )
+SetUrl( 'ApiLink_nn__htc__GetTargetEnvironmentVariable', '../../../Api/HtmlNX/namespacenn_1_1htc.html#ab726cd51bb570d3bb6fdf6b943113ef9' )
+SetUrl( 'ApiLink_nn__htc__ResultConnectionFailure', '../../../Api/HtmlNX/classnn_1_1htc_1_1_result_connection_failure.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

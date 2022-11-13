@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Shape Animation | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Shape Animation -->
+<div class="pagetitle" id="PageId_348344512">Shape Animation</div>
+<div class="text_separate">
+<h1 id="Anchor_348344512_h1_1">Overview</h1>
+<p>Describes the NintendoWare 3D shape animation feature. For more information about how to create an animation, see the relevant sections in the pages for <a href="../Pages/Page_83956026.html">the various plug-ins</a>.</p>
+<p>Shape animation is a type of animation that blends multiple key shapes (basic shapes).</p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_348344512/349446339.gif" class="embedded-image" />
+  </span>IsShapeAnimCalculationEnabled</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_348344512_h1_2">How to Use</h1>
+<p>1. Before building a model instance, set the dynamic vertex buffer to include vertex attributes applied to the shape animation. Then build the model instance.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::g3d::</span><span class="n">ResModel</span><span class="o">*</span> <span class="n">pResModel</span><span class="p">;</span>
+<span class="n">pResModel</span><span class="o">-&gt;</span><span class="n">ActivateDynamicVertexAttrForShapeAnim</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>2. Call <code><span class="ApiLink_nn__g3d__ModelObj__SetShapeAnimCalculationEnabled">nn::g3d::ModelObj::SetShapeAnimCalculationEnabled</span>()</code> to enable settings to apply the results of calculating shape animation.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">modelObj</span><span class="p">.</span><span class="n">SetShapeAnimCalculationEnabled</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Calling this function makes it so that shape animation calculation results are dynamically applied to the vertex buffer in CPU calculations.</p>
+    <p>Implementations in the application, such as shaders that apply shape animation calculation results to the vertex buffer, make it possible to perform high-speed blending computation without calling this function.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>3. Get shape animation resources from the already set up <code><span class="ApiLink_nn__g3d__ResFile">nn::g3d::ResFile</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::g3d::</span><span class="n">ResFile</span><span class="o">*</span> <span class="n">pResFile</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">shapeAnimName</span> <span class="o">=</span> <span class="s">&quot;shape_anim&quot;</span><span class="p">;</span>
+&nbsp;
+<span class="c1">// Get the animation resources.
+</span><span class="nn">nn::g3d::</span><span class="n">ResSkeletalAnim</span><span class="o">*</span> <span class="n">pResShapeAnim</span> <span class="o">=</span> <span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">FindShapeAnim</span><span class="p">(</span><span class="n">shapeAnimName</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Obtained from <code><span class="ApiLink_nn__g3d__ResFile__GetShapeAnim">nn::g3d::ResFile::GetShapeAnim</span>()</code>.</p>
+  </div>
+</div>
+<p>4. Use <code><span class="ApiLink_nn__g3d__ShapeAnimObj__Builder">nn::g3d::ShapeAnimObj::Builder</span></code> to build <code><span class="ApiLink_nn__g3d__ShapeAnimObj">nn::g3d::ShapeAnimObj</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::mem::</span><span class="n">StandardAllocator</span> <span class="n">standardAllocator</span><span class="p">;</span>   <span class="c1">// The allocator. 
+</span><span class="nn">nn::g3d::</span><span class="n">ShapeAnimObj</span> <span class="n">shapeAnimObj</span><span class="p">;</span>      <span class="c1">// The shape animation instance.
+</span>&nbsp;
+<span class="c1">//----------------------------------------------------------------------------------------------------------------------------------
+</span>&nbsp;
+<span class="nn">nn::g3d::ShapeAnimObj::</span><span class="n">Builder</span> <span class="n">builder</span><span class="p">;</span>      <span class="c1">// The variable for building the shape animation instance.
+</span>&nbsp;
+<span class="c1">// Set up the resource.
+// Set the parameters required to run the animation.
+</span><span class="n">builder</span><span class="p">.</span><span class="n">Reserve</span><span class="p">(</span><span class="n">modelObj</span><span class="p">.</span><span class="n">GetResource</span><span class="p">());</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">Reserve</span><span class="p">(</span><span class="n">pResShapeAnim</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Calculate the memory size required to build the instance.
+</span><span class="n">builder</span><span class="p">.</span><span class="n">CalculateMemorySize</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// Get the memory size required to build the instance.
+</span><span class="kt">size_t</span> <span class="n">workMemorySize</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">GetWorkMemorySize</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// Reserve the memory required to build the instance.
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">pWorkMemory</span> <span class="o">=</span> <span class="n">standardAllocator</span><span class="p">.</span><span class="n">Allocate</span><span class="p">(</span><span class="n">workMemorySize</span><span class="p">,</span> <span class="nn">nn::g3d::ShapeAnimObj::</span><span class="n">Alignment_Buffer</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Build the instance.
+</span><span class="kt">bool</span> <span class="n">suceeded</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">Build</span><span class="p">(</span><span class="o">&amp;</span><span class="n">shapeAnimObj</span><span class="p">,</span> <span class="n">pWorkMemory</span><span class="p">,</span> <span class="n">workMemoySize</span><span class="p">);</span>
+<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">suceeded</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>5. Bind the animation resources and model to the <code><span class="ApiLink_nn__g3d__SkeletalAnimObj">nn::g3d::SkeletalAnimObj</span></code> that was built.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Set the animation resource.
+</span><span class="n">shapeAnimObj</span><span class="p">.</span><span class="n">SetResource</span><span class="p">(</span><span class="n">pResShapeAnim</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Bind it to the model.
+</span><span class="n">shapeAnimObj</span><span class="p">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">modelObj</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If <code><span class="ApiLink_nn__g3d__ShapeAnimObj__IsAcceptable">nn::g3d::ShapeAnimObj::IsAcceptable</span>()</code> returns <code>true</code>, it is possible to switch the animation played by calling these functions.</p>
+    <p>There is no requirment to rebuild <code><span class="ApiLink_nn__g3d__ShapeAnimObj">nn::g3d::ShapeAnimObj</span></code> from <code><span class="ApiLink_nn__g3d__ShapeAnimObj__Builder">nn::g3d::ShapeAnimObj::Builder</span></code>.</p>
+  </div>
+</div>
+<p>
+  <br />6. Update <code><span class="ApiLink_nn__g3d__ShapeAnimObj">nn::g3d::ShapeAnimObj</span></code> and apply it to the model instance.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Calculate animation results.
+</span><span class="n">shapeAnimObj</span><span class="p">.</span><span class="n">Calculate</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// Apply the animation results to the model instance.
+</span><span class="n">shapeAnimObj</span><span class="p">.</span><span class="n">ApplyTo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">modelObj</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Update frame.
+</span><span class="n">shapeAnimObj</span><span class="p">.</span><span class="n">GetFrameCtrl</span><span class="p">().</span><span class="n">UpdateFrame</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>7. Update the shape of the model instance.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">modelObj</span><span class="p">.</span><span class="n">CalculateShape</span><span class="p">(</span><span class="n">bufferIndex</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p> If the <code><span class="ApiLink_nn__g3d__ShapeObj__IsShapeAnimCalculationEnabled">nn::g3d::ShapeObj::IsShapeAnimCalculationEnabled</span>()</code> function returns <code>true</code>, shape blending is run by this function.</p>
+    <p>Use the <code><span class="ApiLink_nn__g3d__ShapeObj__GetDynamicVertexBuffer">nn::g3d::ShapeObj::GetDynamicVertexBuffer</span>()</code> function to get the vertex buffer that is storing the blending result.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_348344512_h1_3">
+  <span style="color: rgb(117,117,117);">Features</span>
+</h1>
+<p>
+  <br />
+</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_823379641.html">Blending</a>
+      </td>
+      <td>This feature enables multiple shape animations to be simultaneously applied to a model.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_348344512_h1_4">Restrictions</h1>
+<ul style="list-style-type: square;">
+  <li>Processing to apply calculation results to the vertex buffer, by means of the <code>g3d</code> library, is only supported for CPU calculations.<br /><ul style="list-style-type: square;"><li>Implementations in the application, such as shaders that apply shape animation calculation results to the vertex buffer, make it possible to perform high-speed blending computation.</li></ul></li>
+</ul>
+<div>
+  <br />
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__ModelObj__SetShapeAnimCalculationEnabled', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#af8edfe8be76fd1460ed6db03ed53dfd7' )
+SetUrl( 'ApiLink_nn__g3d__ResFile', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_file.html' )
+SetUrl( 'ApiLink_nn__g3d__ResFile__GetShapeAnim', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_file.html#ad56cb11ce677a13364b1b482978e6f8f' )
+SetUrl( 'ApiLink_nn__g3d__ShapeAnimObj__Builder', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_anim_obj_1_1_builder.html' )
+SetUrl( 'ApiLink_nn__g3d__ShapeAnimObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_anim_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__SkeletalAnimObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeletal_anim_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__ShapeAnimObj__IsAcceptable', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_anim_obj.html#ae1a6a17c4564f25761f463e489e04294' )
+SetUrl( 'ApiLink_nn__g3d__ShapeObj__IsShapeAnimCalculationEnabled', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html#ab9ab340a171e3e6a865fd488a1286ab8' )
+SetUrl( 'ApiLink_nn__g3d__ShapeObj__GetDynamicVertexBuffer', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html#a153dbe394d39548d8336b3d3ba87652e' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

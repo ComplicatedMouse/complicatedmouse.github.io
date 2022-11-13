@@ -1,0 +1,556 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Stream Sounds | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Stream Sounds -->
+<div class="pagetitle" id="PageId_200573824">Stream Sounds</div>
+<div class="text_separate">
+<h1 id="Anchor_200573824_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_200573824_h2_1">Stream Sounds</a>
+    </li>
+    <li>
+      <a href="#Anchor_200573824_h2_2">Stream Sound Operations</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_200573824_h3_1">Stream buffer</a>
+      </li>
+      <li>
+        <a href="#Anchor_200573824_h3_2">Task Thread</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_200573824_h2_3">Adding Stream Sounds</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_200573824_h3_3">File Read Cache Settings</a>
+      </li>
+      <li>
+        <a href="#Anchor_200573824_h3_4">Prefetching Feature</a>
+      </li>
+      <li>
+        <a href="#Anchor_200573824_h3_5">Stream Jumps</a>
+      </li>
+      <li>
+        <a href="#Anchor_200573824_h3_6">Opus Playback</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h2 id="Anchor_200573824_h2_1">Stream Sounds</h2>
+<p>The stream sound feature makes it possible to play back sound data as it is loaded into memory.<br />This offers several advantages over loading all sound data into memory in advance, such as the ability to play back sound data using less memory and the ability to reduce the required loading time before playback begins.</p>
+<p>However, there are also several disadvantages. For example, there can be playback delays, skipping, or noise when loading from the file is not fast enough to keep up with sound data playback.<br />This page describes how stream sounds work and describes various other convenient features for working with stream sounds.</p>
+<h2 id="Anchor_200573824_h2_2">Stream Sound Operations</h2>
+<p>Describes the basic behavior of stream sounds.</p>
+<h3 id="Anchor_200573824_h3_1">Stream buffer</h3>
+<p>Stream sounds are played by sequentially loading only the necessary portions of the binary stream sound data into a buffer known as the <em>stream buffer</em>.<br />The loaded binary data is destroyed as soon as it has been played, and then the buffer is reused to load the next set of data.<br />This section describes the stream buffer in more detail.</p>
+<h4 id="Anchor_200573824_h4_1">Stream Buffer Configuration</h4>
+<p>As shown below, the stream buffer passed to <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code> is managed as a pool of smaller stream buffers.<br />This stream buffer pool is divided into as many buffers as there are stream channels, and the stream buffer for each channel is further divided into blocks.<br />During stream sound playback, waveform data is loaded and played from the overall binary stream sound data in units of these blocks.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_200573824/213601695.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>The number of stream channels is the value specified by the user in SoundMaker, and the number of blocks for each channel is calculated according to the compression format specified for the stream sound.<br />(For more information about configuring this setting using SoundMaker, in <a href="../Pages/Page_83956179.html">Option Settings</a>, see Project Settings Dialog Box &gt; Using the Project Settings Dialog Box &gt; Sound Archive Settings.</p>
+<p>The <code><span class="ApiLink_nn__atk__SoundArchivePlayer__GetRequiredStreamBufferSize">nn::atk::SoundArchivePlayer::GetRequiredStreamBufferSize</span>()</code> function gets the number of stream channels for the specified sound archive and (when the PCM16 or ADPCM compression formats are used) returns a size large enough to divide each buffer into five blocks.<br /></p>
+<h4 id="Anchor_200573824_h4_2">Stream Sound Playback Workflow</h4>
+<p>After a request to play a stream sound is sent, the system starts by retrieving several stream buffers equal to the total number of waveform channels for all tracks configured in that stream sound from the stream buffer pool.<br />The following figure shows an example in which the stream sound includes a single-track stereo waveform.<br /><br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_200573824/213601705.png" height="250" class="embedded-image" /></span><br /><br />After the stream buffers have been allocated, segments of data are loaded from the binary stream sound data to the buffers in units of blocks and in order, starting from the beginning of the stream sound.<br />Playback of the stream sound begins when all of the blocks in the stream buffers have been filled with data. As the data in each block finishes being played, the data in the next block is played while simultaneously loading the next segment of data into the old block, and so on.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_200573824/213601706.png" height="250" class="embedded-image" />
+  </span>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_200573824/213601707.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>In addition, if the process for loading new data into the blocks is delayed for some reason, the system suspends playback after all of the current blocks have been played and then waits until the blocks are all filled again to resume playback.</p>
+<h3 id="Anchor_200573824_h3_2">Task Thread</h3>
+<p>The loading to the stream buffer, mentioned earlier, occurs in a thread generated and managed by the <code>atk</code> library, called the <em>task thread</em>.</p>
+<p>For more information about task threads, see <a href="../Pages/Page_162560000.html">Threads</a> in the Programming Guide.</p>
+<h2 id="Anchor_200573824_h2_3">Adding Stream Sounds</h2>
+<p>Describes the ability to add stream sounds, which makes it easier to use them.</p>
+<h3 id="Anchor_200573824_h3_3">File Read Cache Settings</h3>
+<p>This functionality improves file access efficiency by separately preparing in advance a large buffer for file loading, which increases the amount of data that can be loaded at one time.<br />It also reduces the risk of audio skipping when read delays occur because you can continue to play data as long as it exists in the buffer.</p>
+<h4 id="Anchor_200573824_h4_3">File Read Cache Characteristics</h4>
+<p>Stream sounds place sound data in the stream buffer. Sound data is loaded and placed in the buffer in a repeating cycle when a certain amount of playback completes.</p>
+<p>As a result, loading occurs at a certain frequency. In certain environments, however, it might be more efficient to load a larger amount of data at one time than to repeat multiple smaller loads.<br /></p>
+<p>The file read cache is used to load sound data to a separately prepared larger buffer all at one time. This functionality is designed to improve file access efficiency by placing sound data in the stream buffer from that larger buffer after a certain amount of playback completes.<br /></p>
+<p>However, sometimes it takes time to load a certain amount of data when loading for the first time or when reloading data after all buffer data has been used.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_200573824/224958549.png" class="embedded-image" />
+  </span>
+</p>
+<h4 id="Anchor_200573824_h4_4">Using the File Read Cache</h4>
+<p>The file read cache buffer is configured when the <code><span class="ApiLink_nn__atk__SoundArchivePlayer__Initialize">nn::atk::SoundArchivePlayer::Initialize</span></code> function is called.<br />The file read cache is used automatically when playing back stream sounds after the buffer has been configured. </p>
+<h5 id="Anchor_200573824_h5_1">Getting the Buffer Size</h5>
+<p>Start by determining the size of a buffer for a single stream sound.<br />You can configure any size for the buffer. Use the following guidelines for sizes. The larger the size, the greater the amount of data that can be loaded at one time.</p>
+<ul>
+  <li>A multiple of 8 KB when only using monaural stream sounds.</li>
+  <li>A multiple of 16 KB when using stereo or multitrack stream sounds.</li>
+</ul>
+<p>You can get the total required buffer size after the buffer size per stream sound is determined. Pass that value to <code><em>cacheSizePerSound</em></code> for <code><span class="ApiLink_nn__atk__SoundArchivePlayer__GetRequiredStreamCacheSize">nn::atk::SoundArchivePlayer::GetRequiredStreamCacheSize</span></code> and the number of stream sound instances configured using SoundMaker will be taken into consideration.<br /><br /></p>
+<h5 id="Anchor_200573824_h5_2">Buffer Settings</h5>
+<p>Configure the obtained buffer size to <code><span class="ApiLink_nn__atk__SoundArchivePlayer__InitializeParam__streamCacheSize">nn::atk::SoundArchivePlayer::InitializeParam::streamCacheSize</span></code> and the allocated buffer to <code><span class="ApiLink_nn__atk__SoundArchivePlayer__InitializeParam__pStreamCacheBuffer">nn::atk::SoundArchivePlayer::InitializeParam::pStreamCacheBuffer</span></code>, and then call <code><span class="ApiLink_nn__atk__SoundArchivePlayer__Initialize">nn::atk::SoundArchivePlayer::Initialize</span></code>.<br /><br />(Buffers must be aligned using <code><span class="ApiLink_nn__atk__FsSoundArchive__BufferAlignSize">nn::atk::FsSoundArchive::BufferAlignSize</span></code>.)</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::atk::SoundArchivePlayer::</span><span class="n">InitializeParam</span> <span class="n">initializeParam</span><span class="p">;</span>
+<span class="p">...</span>
+<span class="c1">// Buffer Settings Used for the File Read Cache
+</span><span class="k">const</span> <span class="kt">int</span> <span class="n">CacheBufferSize</span> <span class="o">=</span> <span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>
+<span class="nn">std::</span><span class="kt">size_t</span> <span class="n">memSizeForStreamCacheBuffer</span> <span class="o">=</span> <span class="n">soundArchivePlayer</span><span class="p">.</span><span class="n">GetRequiredStreamCacheSize</span><span class="p">(</span> <span class="n">m_pSoundArchive</span><span class="p">,</span> <span class="n">CacheBufferSize</span> <span class="p">);</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">pMemoryForStreamCacheBuffer</span> <span class="o">=</span> <span class="n">Allocate</span><span class="p">(</span> <span class="n">memSizeForStreamCacheBuffer</span><span class="p">,</span> <span class="nn">nn::atk::FsSoundArchive::</span><span class="n">BufferAlignSize</span> <span class="p">);</span>
+<span class="n">initializeParam</span><span class="p">.</span><span class="n">pStreamCacheBuffer</span> <span class="o">=</span> <span class="n">pMemoryForStreamCacheBuffer</span><span class="p">;</span>
+<span class="n">initializeParam</span><span class="p">.</span><span class="n">streamCacheSize</span> <span class="o">=</span> <span class="n">memSizeForStreamCacheBuffer</span><span class="p">;</span>
+<span class="p">...</span>
+<span class="n">soundArchivePlayer</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span> <span class="n">initializeParam</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<!--Remove-->
+<h3 id="Anchor_200573824_h3_4">Prefetching Feature</h3>
+<p>The prefetching feature pre-loads the data at the beginning of stream sounds into memory to eliminate the loading wait time when the stream sound is played.</p>
+<h4 id="Anchor_200573824_h4_5">Preparing Prefetched Data</h4>
+<p>Before you can use prefetching functionality, you must first enable prefetching for stream sounds by using SoundMaker, which will include prefetch data as a BFSTP file in a sound archive.<br />For more information about settings, see <a href="../Pages/Page_83956090.html">Stream Sounds</a> in the SoundMaker manual.</p>
+<h4 id="Anchor_200573824_h4_6">Loading Prefetched Data</h4>
+<p>To use prefetching, you must load prefetched data into memory before playback begins.<br />The load method for prefetched data depends on the following.</p>
+<ul>
+  <li>Sound archive type</li>
+  <li>Type of groups included in the stream sound</li>
+</ul>
+<h5 id="Anchor_200573824_h5_3">Using a Sound Archive as a MemorySoundArchive</h5>
+<p>There is no need to explicitly load prefetched data when the sound archive itself is loaded to memory if you want to use that sound archive as an <code><span class="ApiLink_nn__atk__MemorySoundArchive">nn::atk::MemorySoundArchive</span></code> resource.<br />Prefetching will be applied automatically when playing back target stream sounds.</p>
+<h5 id="Anchor_200573824_h5_4">Using a Sound Archive as an FsSoundArchive</h5>
+<p>You must load the prefetched data included in a sound archive to use that sound archive as a <code><span class="ApiLink_nn__atk__FsSoundArchive">nn::atk::FsSoundArchive</span></code> resource.<br />Prefetching is applied when playing back target stream sounds after loading them. </p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Playback without prefetching will occur if you play stream sounds without loading any prefetched data.<br />The following warnings will appear in debug and develop builds when you play back sound data with prefetching enabled and you are not using that prefetch functionality.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>[atk] atk_StreamSoundRuntime.cpp:649 Warning: [atk] [ID:XXXXXXXX] Prefetch data is not loaded,
+so play without prefetch data.[atk] (nn::atk::detail::StreamSoundRuntime::PrepareImpl</pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p>The method for loading prefetched data depends on the group that the stream sound is included in.<br />The reason for this is that prefetched data is included in groups that include stream sounds.</p>
+<h6 id="Anchor_200573824_h6_1">When Stream Sounds Are Included in Ring or Embedded Groups</h6>
+<p>Use <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code> to load ring or embedded groups that include stream sounds.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_SoundDataManager</span><span class="p">.</span><span class="n">LoadData</span><span class="p">(</span> <span class="n">GROUP_ALL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_SoundHeap</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h6 id="Anchor_200573824_h6_2">When Stream Sounds Are Included in User Managed Groups</h6>
+<p>Directly load the group BFGRP file for the user-managed group that includes stream sounds, and then configure the address where that BFGRP file was loaded to <code><span class="ApiLink_nn__atk__SoundDataManager__SetFileAddressInGroupFile">nn::atk::SoundDataManager::SetFileAddressInGroupFile</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_SoundDataManager</span><span class="p">.</span><span class="n">SetFileAddressInGroupFile</span><span class="p">(</span> <span class="n">g_pMemoryForGroupFile</span><span class="p">,</span> <span class="n">g_GroupFileSize</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h6 id="Anchor_200573824_h6_3">When Stream Sounds Are Not Included in Groups</h6>
+<p>Load stream sounds using <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code>, like you would wave and sequence sounds that are not included in groups.<br />This load method is demonstrated in the AtkSimple sample. See the <span class="ApiLink_PageSampleAtkSimple">AtkSimple Sample</span> backgrounder for that sample.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_SoundDataManager</span><span class="p">.</span><span class="n">LoadData</span><span class="p">(</span> <span class="n">STRM_MARIOKART_PREFETCH</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_SoundHeap</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>When playing stream sounds, you must load prefetched data using a different method, that is, by specifying their path to StartInfo.</p>
+    <p>To play stream sounds that use <code><span class="ApiLink_nn__atk__SoundStartable__StartInfo__StreamSoundInfo__externalPath">nn::atk::SoundStartable::StartInfo::StreamSoundInfo::externalPath</span></code>, load the BFSTP file directly in the program, and then specify the address to which the BFSTP file was loaded to the <code><span class="ApiLink_nn__atk__SoundStartable__StartInfo__StreamSoundInfo__prefetchData">nn::atk::SoundStartable::StartInfo::StreamSoundInfo::prefetchData</span></code> function.<br /></p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::atk::SoundStartable::</span><span class="n">StartInfo</span> <span class="n">info</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">enableFlag</span> <span class="o">|=</span> <span class="nn">nn::atk::SoundStartable::StartInfo::</span><span class="n">EnableFlagBit_StreamSoundInfo</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">streamSoundInfo</span><span class="p">.</span><span class="n">externalPath</span> <span class="o">=</span> <span class="s">&quot;content:/stream/kart_title.48.dspadpcm.bfstm&quot;</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">streamSoundInfo</span><span class="p">.</span><span class="n">prefetchData</span> <span class="o">=</span> <span class="n">m_pMemoryForExternalBfstpFile</span><span class="p">;</span>
+<span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_SoundArchivePlayer</span><span class="p">.</span><span class="n">StartSound</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SoundHandle</span><span class="p">,</span> <span class="n">STRM_MARIOKART</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">info</span> <span class="p">).</span><span class="n">IsSuccess</span><span class="p">();</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<!--Remove-->
+<p>
+  <br />
+</p>
+<h3 id="Anchor_200573824_h3_5">Stream Jumps</h3>
+<p>The stream jump feature makes it possible to jump between predefined regions of a waveform.<br />This section describes how to get started using the stream jump feature.</p>
+<p>
+  <span style="color: rgb(255,0,0);">This feature is available in NintendoSDK NX Add-On 3.0.0 and later. </span>
+</p>
+<h4 id="Anchor_200573824_h4_7">Using the Stream Jump Feature</h4>
+<p>The procedure for using the stream jump feature is as follows.</p>
+<ul>
+  <li>Prepare region information.</li>
+  <li>Define region callbacks.</li>
+  <li>Change the playback method.</li>
+</ul>
+<h5 id="Anchor_200573824_h5_5">Preparing Region Information</h5>
+<p>Before using the stream jump feature, you must embed region information in the waveform and add the waveform as a stream sound in SoundMaker.<br />For more information, see the Stream Jumps section of the <a href="../Pages/Page_198952031.html">Stream Sound documentation</a>.</p>
+<h5 id="Anchor_200573824_h5_6">Defining Region Callbacks</h5>
+<p>To specify the next region to jump to, specify a region index for the <code><span class="ApiLink_nn__atk__StreamRegionCallbackParam__regionNo">nn::atk::StreamRegionCallbackParam::regionNo</span></code> parameter of the region callback function.<br />Also, you can use the return value from the region callback function (<code><span class="ApiLink_nn__atk__StreamRegionCallbackResult">nn::atk::StreamRegionCallbackResult</span></code>) to determine whether playback ended within the current region.<br />The following example shows an implementation of a region callback function.<br />In this example, <code>RegionIntro</code> is played once, <code>RegionA</code> is played twice, <code>RegionB</code> is played once, and then playback is stopped. </p>
+<p>
+  <br />
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">enum</span> <span class="n">Region</span> <span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">RegionIntro</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">RegionA</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">RegionB</span>
+<span class="p">};</span>
+
+<span class="kt">uint32_t</span> <span class="n">g_RegionList</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">RegionIntro</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">RegionA</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">RegionA</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">RegionB</span>
+<span class="p">};</span>
+&nbsp;
+<span class="kt">uint32_t</span> <span class="n">g_RegionListIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;
+<span class="nn">nn::atk::</span><span class="n">StreamRegionCallbackResult</span> <span class="n">StreamRegionCallback</span><span class="p">(</span> <span class="nn">nn::atk::</span><span class="n">StreamRegionCallbackParam</span><span class="o">*</span> <span class="n">param</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="cm">/*arg*/</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span> <span class="n">g_RegionListIndex</span> <span class="o">&gt;=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">g_RegionList</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">g_RegionList</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="nn">nn::atk::</span><span class="n">StreamRegionCallbackResult_Finish</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">param</span><span class="o">-&gt;</span><span class="n">regionNo</span> <span class="o">=</span> <span class="n">g_RegionList</span><span class="p">[</span><span class="n">g_RegionListIndex</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ASSERT_LESS</span><span class="p">(</span><span class="n">param</span><span class="o">-&gt;</span><span class="n">regionNo</span><span class="p">,</span> <span class="n">param</span><span class="o">-&gt;</span><span class="n">regionCount</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_RegionListIndex</span><span class="o">++</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="nn">nn::atk::</span><span class="n">StreamRegionCallbackResult_Continue</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h5 id="Anchor_200573824_h5_7">Changing the Playback Method</h5>
+<p>To use the stream jump feature, specify one of the defined region callback functions using <code><span class="ApiLink_nn__atk__SoundStartable__StartInfo">nn::atk::SoundStartable::StartInfo</span></code> when calling <code><span class="ApiLink_nn__atk__SoundStartable__StartSound">nn::atk::SoundStartable::StartSound</span>()</code> to play a sound.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::atk::SoundStartable::</span><span class="n">StartInfo</span> <span class="n">info</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">enableFlag</span> <span class="o">|=</span> <span class="nn">nn::atk::SoundStartable::StartInfo::</span><span class="n">EnableFlagBit_StreamSoundInfo</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">streamSoundInfo</span><span class="p">.</span><span class="n">regionCallback</span> <span class="o">=</span> <span class="n">StreamRegionCallback</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">streamSoundInfo</span><span class="p">.</span><span class="n">regionCallbackArg</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+<span class="n">g_SoundArchivePlayer</span><span class="p">.</span><span class="n">StartSound</span><span class="p">(</span> <span class="n">g_SoundHandle</span><span class="p">,</span> <span class="n">STRM_REGION_JUMP</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">info</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_200573824_h4_8">Region Callback Function Call Timing</h4>
+<p>Region callback functions are called at the following two times. You can jump back and forth between regions by including a process that determines the next region in the callback functions.</p>
+<ul>
+  <li>When the stream sound header loading process is complete (called exactly <strong>once</strong> when playback begins)</li>
+  <li>Each time the stream sound data block loading process completes, if that data block contains a region terminator</li>
+</ul>
+<p>The following figure illustrates the callback function call timing for the latter case.<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_200573824/213614450.png" height="400" class="embedded-image" /></span> </p>
+<p>For this example, focus on the timing at which data finishes being loaded into block 2 while playing the buffer in block 1 that was loaded from Region1.<br />Here, if block 2 includes a region terminator, the callback function is called from the task thread as soon as the data finishes being loaded into block 2.<br />In addition, assume that the callback function specifies Region4 as the next region to jump to.<br />After Region4 is specified as the next region to jump to, the system continues to load data into block 3 starting from the beginning of Region4. After this, the normal stream sound playback process continues until the next region terminator is encountered. <br /><br />Calling the callback function at this time (that is, when loading is complete rather than when playback is complete) ensures that the data to be played next is already loaded by the time the next region actually starts playing.<br />This makes it possible to seamlessly transition to the next region.  </p>
+<h4 id="Anchor_200573824_h4_9">Specifying Regions by Region Name</h4>
+<p>In the preceding example, the next region was specified using the region index. When using this approach, if the structure of the regions within the waveform must be changed at some later point, the indices can potentially get shifted.<br />For this reason, the program must be updated each time the region structure is changed.</p>
+<p>There are two ways to solve this problem.<br />First, you can explicitly specify the region indices to prevent them from being assigned automatically.<br />For example, you can specify <code>[NW]RegionA#1</code> and simply make sure that the index of RegionA is always 1 regardless of whether additional regions are added later.</p>
+<p>Alternatively, you can specify the regions by name. The following example shows how to specify regions by region name.  </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::atk::</span><span class="n">StreamRegionCallbackResult</span> <span class="n">StreamNamedRegionCallback</span><span class="p">(</span> <span class="nn">nn::atk::</span><span class="n">StreamRegionCallbackParam</span><span class="o">*</span> <span class="n">param</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="cm">/*arg*/</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">param</span><span class="o">-&gt;</span><span class="n">isRegionNameEnabled</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">std::</span><span class="n">strncpy</span><span class="p">(</span><span class="n">param</span><span class="o">-&gt;</span><span class="n">regionName</span><span class="p">,</span> <span class="s">&quot;RegionA&quot;</span><span class="p">,</span> <span class="nn">nn::atk::</span><span class="n">RegionNameLengthMax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="nn">nn::atk::</span><span class="n">StreamRegionCallbackResult_Continue</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Although specifying regions by region name simplifies region management because you no longer have to worry about the indices, it also results in a higher processing load than when specifying regions directly by region index because the library still internally searches for the regions by region index. </p>
+<h4 id="Anchor_200573824_h4_10">Notes When Using With StartOffset</h4>
+<p>Care is required when using this together with the stream jump feature on a playing stream that used <code>StartOffset</code>. The way of calling the callback can change, depending on the extent of the offset.</p>
+<p>If it is a small offset and you will not straddle regions while processing the offset, then there is no need to be careful. However, if the offset is large and you do straddle regions while processing the offset, then the callback can be called there as well, and playback might not start from the intended offset position.<br /></p>
+<div class="expand-container" id="expander-200573824-1">
+  <div class="expand-control" id="expander-control-200573824-1">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Difference in the Jump Process Depending on the Amount of Offset</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-200573824-1">
+    <h5 id="Anchor_200573824_h5_8">If the Offset Amount Does Not Straddle Regions</h5>
+    <p>In this case, the callback is called one time when the header is loaded.</p>
+    <h6 id="Anchor_200573824_h6_4">If there was no jump when the header was loaded:</h6>
+    <p>Playback commences at the position that is the amount of the offset away from the start.</p>
+    <p>
+      <img src="../Attachments/Attach_200573824/259771693.png"></img>
+    </p>
+    <h6 id="Anchor_200573824_h6_5">If there was a jump when the header was loaded:</h6>
+    <p>Playback commences at the position that is the amount of the offset away from the position after the jump.</p>
+    <p>
+      <img src="../Attachments/Attach_200573824/259771711.png"></img>
+    </p>
+    <h5 id="Anchor_200573824_h5_9">If the Offset Amount Straddles Regions</h5>
+    <p>In this case, the callback is called one time when the header is loaded and each time the end of a region is reached during the processing of the offset.</p>
+    <h6 id="Anchor_200573824_h6_6">If there was no jump when the header was loaded or at the end of a region:</h6>
+    <p>Playback commences at the position that is the amount of the offset away from the start.</p>
+    <p>
+      <img src="../Attachments/Attach_200573824/259771683.png"></img>
+    </p>
+    <h6 id="Anchor_200573824_h6_7">If there was a jump when the header was loaded or at the end of a region:</h6>
+    <p>If some offset remains after the jump, playback commences at the position that is the remaining amount of the offset away from the position after the jump.<br />If another jump occurs while the remaining offset is being processed, the jump and the processing of the offset after the jump are conducted in the same way.</p>
+    <p>
+      <img src="../Attachments/Attach_200573824/259771672.png"></img>
+    </p>
+    <div class="warn_new">
+      <div class="warn_new_left">Warning</div>
+      <div class="warn_new_right">
+        <p>You need to take into account both the jump and the offset, which can be complicated. We recommend adjusting where the jump lands, when conducted when the header is loading, so the offset amount does not straddle regions.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<h5 id="Anchor_200573824_h5_10">
+  <br />Limitations</h5>
+<ul>
+  <li>This setting cannot be used together with looping. Using the stream jump feature during playback of waveforms for which loop information has been configured causes the library to stop on an assertion failure.</li>
+  <li>Only the PCM16 and ADPCM sound compression formats are supported. This feature is not compatible with other audio compression formats such as Opus.</li>
+</ul>
+<h3 id="Anchor_200573824_h3_6">Opus Playback</h3>
+<p>
+  <code>atk</code> supports streaming playback of Opus, one type of compressed audio.</p>
+<p>For information about creating Opus data using SoundMaker, see the separate <a href="../Pages/Page_83956177.html">Compressed Audio</a> page.</p>
+<h4 id="Anchor_200573824_h4_11">Opus Playback Using the Hardware Accelerator</h4>
+<p>Decoding in Opus playback is normally performed by the CPU,<br />but you can specify parameters during playback to have the hardware accelerator perform decoding and play back Opus.</p>
+<p>To do this, <code><span class="ApiLink_nn__codec__HardwareOpusDecoder">nn::codec::HardwareOpusDecoder</span></code> is used as the hardware accelerator.</p>
+<p>
+  <span style="color: rgb(255,0,0);">This feature is available in NintendoSDK NX Add-On 3.0.0 and later. </span>
+</p>
+<p>The playback method is as follows.</p>
+<ul>
+  <li>Initialize <code>HardwareOpusDecoder</code></li>
+  <li>Change the decoding method during playback (in SoundMaker).</li>
+</ul>
+<p>In NintendoSDK NX Add-On 4.0.0 and later, you can configure SoundMaker to perform Opus playback using the hardware accelerator.<br />For more information, see the section on using the hardware accelerator in <a href="../Pages/Page_83956177.html">Compressed Audio</a>.<br />When you configure this setting, you do not need to change the decoding method during playback.</p>
+<h5 id="Anchor_200573824_h5_11">Initialize <code>HardwareOpusDecoder</code></h5>
+<p>First, initialize <code>HardwareOpusDecoder</code>.</p>
+<p>Because one <code>HardwareOpusDecoder</code> is used per stream sound playback (including preparation),<br />configure <code>HardwareOpusDecoder</code> so that the same number of decoders is prepared as the maximum Opus stream sounds to be played back at the same time.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">decoderCount</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="nn">std::</span><span class="kt">size_t</span> <span class="n">memSizeForHardwareOpusDecoder</span> <span class="o">=</span> <span class="nn">nn::atk::</span><span class="n">GetRequiredHardwareOpusDecoderBufferSize</span><span class="p">(</span><span class="n">decoderCount</span><span class="p">);</span>
+<span class="n">g_pMemoryForHardwareOpusDecoder</span> <span class="o">=</span> <span class="nn">nns::atk::</span><span class="n">Allocate</span><span class="p">(</span><span class="n">memSizeForHardwareOpusDecoder</span><span class="p">);</span>
+<span class="nn">nn::atk::</span><span class="n">InitializeHardwareOpusDecoder</span><span class="p">(</span><span class="n">g_pMemoryForHardwareOpusDecoder</span><span class="p">,</span> <span class="n">memSizeForHardwareOpusDecoder</span><span class="p">,</span> <span class="n">decoderCount</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h5 id="Anchor_200573824_h5_12">Changing the Decoding Format During Playback</h5>
+<p>When playing back Opus stream sounds with <code><span class="ApiLink_nn__atk__SoundStartable__StartSound">nn::atk::SoundStartable::StartSound</span>()</code>,<br />configure <code><span class="ApiLink_nn__atk__SoundStartable__StartInfo">nn::atk::SoundStartable::StartInfo</span></code> and overwrite the decoding settings.<br />This allows you to play back Opus using the hardware accelerator.</p>
+<p>This is not necessary when configuring the settings to use the hardware accelerator in SoundMaker.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::atk::SoundStartable::</span><span class="n">StartInfo</span> <span class="n">info</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">enableFlag</span> <span class="o">|=</span> <span class="nn">nn::atk::SoundStartable::StartInfo::</span><span class="n">EnableFlagBit_StreamSoundMetaInfo</span><span class="p">;</span>
+<span class="k">const</span> <span class="nn">nn::atk::</span><span class="n">SoundArchive</span><span class="o">&amp;</span> <span class="n">archive</span> <span class="o">=</span> <span class="n">g_SoundArchivePlayer</span><span class="p">.</span><span class="n">GetSoundArchive</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// Copies the metadata of the label for Opus playback using the hardware accelerator.
+</span><span class="n">archive</span><span class="p">.</span><span class="n">ReadStreamSoundInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">info</span><span class="p">.</span><span class="n">streamSoundMetaInfo</span><span class="p">,</span> <span class="n">STRM_MARIOKART_OPUS</span><span class="p">);</span>
+<span class="c1">// Changes the decoding format to Opus (playback by the hardware accelerator).
+</span><span class="n">info</span><span class="p">.</span><span class="n">streamSoundMetaInfo</span><span class="p">.</span><span class="n">decodeMode</span> <span class="o">=</span> <span class="nn">nn::atk::SoundArchive::</span><span class="n">DecodeMode_Accelerator</span><span class="p">;</span>
+&nbsp;
+<span class="n">g_SoundArchivePlayer</span><span class="p">.</span><span class="n">StartSound</span><span class="p">(</span> <span class="n">g_SoundHandle</span><span class="p">,</span> <span class="n">STRM_MARIOKART_OPUS</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">info</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer__GetRequiredStreamBufferSize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html#a778f7f63b34d09e5241e7f18aef3f227' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer__Initialize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html#aa2de65567087f698294d36e91fd9b9f9' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer__GetRequiredStreamCacheSize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html#af70074367d02753c1eae455bff0fb570' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer__InitializeParam__streamCacheSize', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_archive_player_1_1_initialize_param.html#a188c0f1a6575af182787bee6766b9393' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer__InitializeParam__pStreamCacheBuffer', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_archive_player_1_1_initialize_param.html#a7bbfaa74a6ae6fc146bfd7249fa24e88' )
+SetUrl( 'ApiLink_nn__atk__FsSoundArchive__BufferAlignSize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_fs_sound_archive.html#a8aed39dcd230826f39f1bfba791126c6' )
+SetUrl( 'ApiLink_nn__atk__MemorySoundArchive', '../../../Api/HtmlNX/classnn_1_1atk_1_1_memory_sound_archive.html' )
+SetUrl( 'ApiLink_nn__atk__FsSoundArchive', '../../../Api/HtmlNX/classnn_1_1atk_1_1_fs_sound_archive.html' )
+SetUrl( 'ApiLink_nn__atk__SoundDataManager__LoadData', '../../../Api/HtmlNX/classnn_1_1atk_1_1detail_1_1_sound_archive_loader.html#a3c8676a9807a4940a79a5c39546ab4f0' )
+SetUrl( 'ApiLink_nn__atk__SoundDataManager__SetFileAddressInGroupFile', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_data_manager.html#ae0d5197b5f263c5b17fa4455bfaa0674' )
+SetUrl( 'ApiLink_PageSampleAtkSimple', '../../../Api/HtmlNX/_page_sample_atk_simple.html' )
+SetUrl( 'ApiLink_nn__atk__SoundStartable__StartInfo__StreamSoundInfo__externalPath', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_startable_1_1_start_info_1_1_stream_sound_info.html#af555cd6b9f0c6cd9fd1efa5b590584ff' )
+SetUrl( 'ApiLink_nn__atk__SoundStartable__StartInfo__StreamSoundInfo__prefetchData', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_startable_1_1_start_info_1_1_stream_sound_info.html#a4da451c63ee5ac2c83dd9f3ba9ceca7a' )
+SetUrl( 'ApiLink_nn__atk__StreamRegionCallbackParam__regionNo', '../../../Api/HtmlNX/structnn_1_1atk_1_1_stream_region_callback_param.html#a13f38585e656a7af6ee6c0312ddabd88' )
+SetUrl( 'ApiLink_nn__atk__StreamRegionCallbackResult', '../../../Api/HtmlNX/namespacenn_1_1atk.html#a0eb683cd6e49bf351eaa7429287eb2e4' )
+SetUrl( 'ApiLink_nn__atk__SoundStartable__StartInfo', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_startable_1_1_start_info.html' )
+SetUrl( 'ApiLink_nn__atk__SoundStartable__StartSound', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_startable.html#a9a075bc1dea627defdc533d514e50c33' )
+SetUrl( 'ApiLink_nn__codec__HardwareOpusDecoder', '../../../Api/HtmlNX/classnn_1_1codec_1_1_hardware_opus_decoder.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

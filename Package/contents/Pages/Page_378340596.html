@@ -1,0 +1,227 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Overview | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Overview -->
+<div class="pagetitle" id="PageId_378340596">Overview</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_378340596_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_378340596_h1_2">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_378340596_h1_3">Knowledge Required for Using the Consumable Service Items Client Library</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_378340596_h2_1">License Information</a>
+      </li>
+      <li>
+        <a href="#Anchor_378340596_h2_2">Serialized License Information Is Stored in Save Data</a>
+      </li>
+      <li>
+        <a href="#Anchor_378340596_h2_3">Item ID</a>
+      </li>
+      <li>
+        <a href="#Anchor_378340596_h2_4">Consumable Service Item Manager</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_378340596_h3_1">Transferring License Information From the Shop Server</a>
+        </li>
+        <li>
+          <a href="#Anchor_378340596_h3_2">Converting License Information to Value for the User</a>
+        </li>
+        <li>
+          <a href="#Anchor_378340596_h3_3">Protecting Against Power Interruptions by Converting License Information to a Format That Can Be Stored in Save Data</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_378340596_h1_4">User Save Data Controlled Method Process Using the Consumable Service Items Client Library</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_378340596_h2_5">Generating and Initializing a Consumable Service Item Manager</a>
+      </li>
+      <li>
+        <a href="#Anchor_378340596_h2_6">Transferring License Information From the Shop Server</a>
+      </li>
+      <li>
+        <a href="#Anchor_378340596_h2_7">Marking License Information as Having Been Provided, and Providing Value to the User</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_378340596_h1_5">Feature for Getting a Random Number That Serves as a Hint to Fix the Provided Value</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_378340596_h1_1">Introduction</h1>
+<p>This document describes information required for game developers to implement the consumable service items client library.</p>
+<p>
+  <span style="color: rgb(23,43,77);">For more information about user save data controlled methods and what can be implemented with the consumable service items client library, see Nintendo Switch E-Commerce Guide &gt; User Save Data Controlled Method.</span>
+</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>This feature was released in NX Add-On 5.6.0 and in NX Add-On 6.3.0 and later. It is not available in earlier SDK versions.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_378340596_h1_2">Overview</h1>
+<p>The consumable service items client library provides functionality necessary for implementing the user save data controlled method.</p>
+<p>In broad terms, the functionality provided is as follows.</p>
+<ul style="list-style-type: square;">
+  <li>Functionality to get license information from the shop server</li>
+  <li>Functionality to convert license information to value for the user</li>
+  <li>Functionality to protect license information in case of power interruption</li>
+  <li>Functionality to prevent the same license information from being used by multiple clients</li>
+</ul>
+<p> </p>
+<p>This document provides a detailed description of this functionality.</p>
+<h1 id="Anchor_378340596_h1_3">Knowledge Required for Using the Consumable Service Items Client Library</h1>
+<p>This section describes the knowledge required by application developers for using the consumable service items client library.</p>
+<h2 id="Anchor_378340596_h2_1">License Information</h2>
+<p>For the consumable service items client library, <em>license information</em> refers to the user's right to receive the value of a purchased consumable service item. The main roles of the client library are for handling license information in the following ways.</p>
+<ul style="list-style-type: square;">
+  <li>Transferring it from the shop server to the client</li>
+  <li>Converting it to value for the user on the client</li>
+  <li>Protecting it from being lost, even in the event of a power interruption</li>
+  <li>Preventing use of license information on multiple clients at the same time</li>
+</ul>
+<p> </p>
+<h2 id="Anchor_378340596_h2_2">Serialized License Information Is Stored in Save Data</h2>
+<p>
+  <em>Serialized license information</em> refers to license information on the client that has been converted to a format that can be stored in user save data. With the user save data controlled method, to prevent loss of license information in cases where there is a power interruption on the client while processing, the license information must be stored in save data. This step enables the application to avoid handling the license information itself, and instead get the serialized license information from the library and save it.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The application must not overwrite the serialized license information. If the information is overwritten, it will no longer be valid. In that case, the user cannot receive the value of the consumable service item they purchased.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_378340596_h2_3">Item ID</h2>
+<p>
+  <em>Item ID</em> refers to an ID configured specifically for the application for identifying the content of a consumable service item. <span style="color: rgb(23,43,77);">The application developer defines these item IDs when registering sales information for consumable service items. For more information about IDs, see Nintendo Switch E-Commerce Guide &gt; Consumable Service Items &gt; Overview &gt; Selling Consumable Service Items on Nintendo eShop.</span></p>
+<p>The item ID is included in the license information. The application can get the item ID for the license information after completing license transfer, as described in the next section.</p>
+<h2 id="Anchor_378340596_h2_4">Consumable Service Item Manager</h2>
+<p>In the consumable service items client library, license information on the client is managed by the consumable service item manager class. The manager class hides the license information from the application, but performs operations on the license information through APIs provided by the library. The following overview described the APIs that are provided.</p>
+<h3 id="Anchor_378340596_h3_1">Transferring License Information From the Shop Server</h3>
+<ul style="list-style-type: square;">
+  <li>The manager class gets license information from the shop server.</li>
+  <li>The library consumes license information stored by the manager class from the shop server.</li>
+  <li>It restores the license information on the client when an inconsistency with the shop server occurs, due to multiple clients consuming the license or a power interruption.</li>
+</ul>
+<h3 id="Anchor_378340596_h3_2">Converting License Information to Value for the User</h3>
+<ul style="list-style-type: square;">
+  <li>The library gets the item ID of the transferred license information from the manager class.</li>
+  <li>By specifying the item ID, it marks the license information that is stored by the consumable service item manager as having been provided.</li>
+</ul>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p> After the number of held license information reaches the maximum limit (100) in the consumable service item manager, no more license information can be obtained. At this point, consumable service items that are newly purchased by the user can no longer be obtained by the client from the eShop server. To avoid this problem, convert license information to a value as soon as the value can be provided. </p>
+    <p>For example, consider a game in which the user can purchase a consumable service item for five herbs. We recommend, after license information is transferred to the client, immediately converting the license information for the five herbs to five herb items within the game. Do not store unconverted license information after being transferred to the client, and only convert it to five herb items within the game when the user wants to use the herbs. </p>
+  </div>
+</div>
+<h3 id="Anchor_378340596_h3_3">
+  <br />Protecting Against Power Interruptions by Converting License Information to a Format That Can Be Stored in Save Data</h3>
+<ul style="list-style-type: square;">
+  <li>The library converts the license information held by the manager class to a format that can be stored in save data.</li>
+  <li>It provides the license information stored in save data to the manager class and initializes the class.</li>
+</ul>
+<h1 id="Anchor_378340596_h1_4">User Save Data Controlled Method Process Using the Consumable Service Items Client Library</h1>
+<p>To implement the user save data controlled method, complete the following general procedure.</p>
+<ol>
+  <li>Generate and initialize a consumable service item manager.</li>
+  <li>Transfer license information from the shop server.</li>
+  <li>On the client, mark the license information as having been provided, and provide the value to the user.</li>
+</ol>
+<h2 id="Anchor_378340596_h2_5">Generating and Initializing a Consumable Service Item Manager</h2>
+<p>Generates and initializes a consumable service item manager. If the license information was serialized and then saved during processing, and is still in save data, use it as input to initialize the manager class.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Only serialized license information can be used as input for the consumable service item manager. If any other type of data is provided, it is treated as not valid and an error is returned.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_378340596_h2_6">Transferring License Information From the Shop Server</h2>
+<p>The series of processes performed in this phase is called<em> license transfer</em>. For more information, see <a href="../Pages/Page_373509225.html">License Transfer From the Shop Server</a>.</p>
+<h2 id="Anchor_378340596_h2_7">Marking License Information as Having Been Provided, and Providing Value to the User</h2>
+<p>With the consumable service items client library, license information is converted to value for the user by marking the license information as provided, and at the same time, having the application itself provide the value to the user. The following conversion process is used.</p>
+<ol>
+  <li>Get the number of item IDs that can provide value.</li>
+  <li>Get the item IDs that can provide value.</li>
+  <li>Mark those item IDs as already provided.</li>
+  <li>Provide value to users corresponding to the item IDs.</li>
+  <li>As a result of providing value, simultaneously store and commit the license information and the value provided to the user in save data.</li>
+</ol>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Mark services as already provided and provide value to users inseparably, using the commit feature for user save data. If only one of these states is persistent, the value purchased by the user may be unfairly lost or receive duplicates.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_378340596_h1_5">Feature for Getting a Random Number That Serves as a Hint to Fix the Provided Value</h1>
+<p>License information provided with this library can be stored in save data in a state where the value can still be provided. By using the save data cloud backup service, the user can return to a state prior to when the value was provided. If items change each time value is provided to users, it is possible to select a higher value by repeatedly rolling back to an unprovided state.</p>
+<p>To avoid this situation, there is a feature for getting a random number that can be used as a hint to fix the value when the corresponding item ID is provided. This random number remains the same when providing the same item, even if save data is rolled back.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>OpenSSL | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- OpenSSL -->
+<div class="pagetitle" id="PageId_959414738">OpenSSL</div>
+<div class="text_separate">
+<h1 id="Anchor_959414738_h1_1">Overview</h1>
+<p>Nintendo provides a version of OpenSSL library which has been adapted for use within the Nintendo SDK.</p>
+<ul>
+  <li>The source for OpenSSL was retrieved from&nbsp;<a href="https://www.openssl.org/">www.openssl.org</a>. In SDK versions prior to 14.1.0, our version was based on&nbsp;version 1.1.1c. Starting in SDK 14.1.0, our version is based on version 1.1.1l.</li>
+  <li>See&nbsp;<a href="https://www.openssl.org/news/openssl-1.1.1-notes.html">www.openssl.org/news/openssl-1.1.1-notes</a>&nbsp;for more details about this specific version.</li>
+  <li>In addition to the documentation presented below, please also see&nbsp;<a href="https://www.openssl.org/docs/man1.1.1/">www.openssl.org/docs/man1.1.1/</a>.</li>
+</ul>
+<p>Nintendo attempted to minimize changes while porting the OpenSSL library to the Nintendo SDK. Most of the changes were related to threading, memory allocation and use of standard streams and file I/O. However, a custom initialization function has been added and is documented below.</p>
+<h2 id="Anchor_959414738_h2_1">Library Names</h2>
+<p>Nintendo provides three different versions of OpenSSL users may link to when creating their application.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>libopenssl
+libopenssl_libcrypto
+libopenssl_libssl</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Users who only need access to the&nbsp;<code>crypto</code>&nbsp;library may link to&nbsp;<code>libopenssl_libcrypto</code>.&nbsp; Linking to both&nbsp;<code>libopenssl_libcrypto</code>&nbsp;and&nbsp;<code>libopenssl_libssl</code>&nbsp;is the same as linking to only&nbsp;<code>libopenssl</code>.</p>
+<h2 id="Anchor_959414738_h2_2">Supported Features</h2>
+<p>Openssl is built with the following options:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>no-afalgeng no-ssl3 no-idea no-shared no-hw no-engine no-threads no-dso no-weak-ssl-ciphers no-rc2 no-rc4 no-rc5 no-md2 no-md4 no-async no-capieng no-dynamic-engine -DOPENSSL_USE_IPV6=0</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For details on Openssl's build options, see the &quot;Configure Options&quot; section at&nbsp;<a href="https://wiki.openssl.org/index.php/Compilation_and_Installation">https://wiki.openssl.org/index.php/Compilation_and_Installation</a></p>
+<h2 id="Anchor_959414738_h2_3">Initialization Considerations</h2>
+<p>Nintendo provides an extra initialization function,&nbsp;<code>SSL_library_nnsdk_init()</code>, which is required for using file operations such as loading certificates (built-in or user-provided) or CRLs.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>typedef struct ossl_nnsdk_config
+{
+&nbsp;&nbsp;&nbsp;&nbsp;const char* pMountPath;
+&nbsp;&nbsp;&nbsp;&nbsp;int         mountPathLength;
+&nbsp;&nbsp;&nbsp;&nbsp;int         useBuiltinCertificates;
+&nbsp;&nbsp;&nbsp;&nbsp;void*       pPrivate;
+} ossl_nnsdk_config;
+
+int SSL_library_nnsdk_init(ossl_nnsdk_config config);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="margin-left: 0.5em;" id="Anchor_959414738_h3_1">
+  <br />Nintendo Built-in Certificates</h3>
+<p>The&nbsp;<code>useBuiltinCertificates</code>&nbsp;member should be set to 1 to have OpenSSL automatically load Nintendo's built-in certificate list, and set to 0 to skip that step.&nbsp; If the built-in certificates are loaded, an additional 960KB of memory will be consumed to accommodate the extra certificates.</p>
+<p>The&nbsp;<code>pPrivate</code>&nbsp;member&nbsp;is for internal use only.</p>
+<p>
+  <code>SSL_library_nnsdk_init()</code>&nbsp;is not a replacement for the normal OpenSSL initialization process.&nbsp; It can be called either before or after initializing the OpenSSL library, but must be called before OpenSSL can use any file operations.</p>
+<p>
+  <code>SSL_library_nnsdk_init()</code>&nbsp;can be omitted if no file operations are needed.</p>
+<h3 style="margin-left: 0.5em;" id="Anchor_959414738_h3_2">Dealing with files</h3>
+<p>OpenSSL users may sometimes wish to read files, such as when loading a CA certificate bundle file.&nbsp; In order to read files using OpenSSL, users must mount the file system to a specific mount point by using the&nbsp;<code><span class="ApiLink_nn__fs">nn::fs</span></code>&nbsp;library.&nbsp; Please refer to the documentation of&nbsp;<code><span class="ApiLink_nn__fs">nn::fs</span></code>&nbsp;for further information about the filesystem in the Nintendo SDK.</p>
+<p>After the filesystem is mounted, users must set the path string prefix appropriate for their platform in the&nbsp;<code>pMountPath</code>&nbsp;member&nbsp;of&nbsp;<code>ossl_nnsdk_config</code>&nbsp;and pass it into&nbsp;<code>SSL_library_nnsdk_init()</code>.&nbsp; For example, users loading files from ROM may need to set the prefix&nbsp;<code>&quot;rom:&quot;</code>.</p>
+<p>When users do not need to read files, mounting the file system is not necessary.&nbsp; File writes are not supported.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs', '../../../Api/HtmlNX/namespacenn_1_1fs.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

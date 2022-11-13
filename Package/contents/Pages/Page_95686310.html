@@ -1,0 +1,1110 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>NintendoWare Graphics Guide for the NX Environment | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- NintendoWare Graphics Guide for the NX Environment -->
+<div class="pagetitle" id="PageId_95686310">NintendoWare Graphics Guide for the NX Environment</div>
+<div class="text_separate">
+<p>The following information is for developers of applications for the NX.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_95686310_h1_1">Operating Environment</a>
+    </li>
+    <li>
+      <a href="#Anchor_95686310_h1_2">For Developers ()</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_95686310_h2_1">Putting Binary Data in Memory Pools</a>
+      </li>
+      <li>
+        <a href="#Anchor_95686310_h2_2">Differences in Initialization Time Due to How Resources Are Initialized</a>
+      </li>
+      <li>
+        <a href="#Anchor_95686310_h2_3">Shader Scratch Memory</a>
+      </li>
+      <li>
+        <a href="#Anchor_95686310_h2_4">Binary Converter</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_95686310_h1_3">3D Plug-In Tools</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_95686310_h2_5">Maya Plug-In, 3dsMax Plug-In</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_95686310_h1_4">3D Command-Line Tools</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_95686310_h2_6">Intermediate File Optimizer</a>
+      </li>
+      <li>
+        <a href="#Anchor_95686310_h2_7">3D Shader Converter</a>
+      </li>
+      <li>
+        <a href="#Anchor_95686310_h2_8">3D Texture Converter</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_95686310_h1_5">Notes About Using Ui2d</a>
+    </li>
+    <li>
+      <a href="#Anchor_95686310_h1_6">Notes About Using Font</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_95686310_h2_9">Using the font Library With the NX System Fonts</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_95686310_h1_7">Notes About Using VFX</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_95686310_h1_1">Operating Environment</h1>
+<p>In NintendoWare graphics modules for the NX environment, the following two runtimes are added to Windows OpenGL runtime.</p>
+<ul>
+  <li>NX hardware runtime</li>
+  <li>Windows NVN runtime</li>
+</ul>
+<p>Both runtimes use the NVN API to render graphics.<br />The NVN runtime is a graphics API for the NX that operates on the two platforms of the NX hardware and Windows.</p>
+<h3 id="Anchor_95686310_h3_1">Selecting a Low-level Graphics API for Windows Environments</h3>
+<p>Currently, you can use OpenGL or the NVN API as the low-level graphics API to run modules in a Windows environment. With OpenGL, you can run modules in most environments, providing you meet the video card and driver version requirements of the NintendoSDK operating environment. However, with the NVN API, modules only run on the supported GPUs. For more information about selecting the low-level graphics API, see <a href="../Pages/Page_83956178.html">Selecting Low-Level Graphics API</a>. By default, NVN  is chosen for NX builds, and OpenGL is chosen for builds not designed for any particular environment.<br />Most of the gfx library features are abstracted, so you can use the same coding with either NVN or OpenGL as the low-level graphics API. <br />One advantage of using the NVN API in a Windows environment is that it is designed at a lower hardware abstraction layer than OpenGL, so it operates faster. For example, when rendering a scene with 2048 of the same material object, CPU processing is around 10 times faster with the NVN API than with OpenGL.<br />Another advantage is that the NX hardware also uses NVN as the low-level graphics API, so you can use Windows to emulate the behavior of an operating model closer to that of the NX hardware. This allows you to cut down on problems that first come up when your application runs on the NX hardware.<br />Note that the code you use for directly calling NintendoWare, the gfx library's NX features, and the NVN API for optimization and NX-specific expressions and controls can be used without modification on the PC.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th colspan="2">
+        <p>CPU Processing Cost When Rendering the Same 2048 Material Objects</p>
+        <p>(CPU: Intel&reg; Xeon&reg; CPU-E5-1620 v3 @ 3.5 GHz)</p>
+      </th>
+    </tr>
+    <tr>
+      <td>OpenGL</td>
+      <td>0.9 milliseconds</td>
+    </tr>
+    <tr>
+      <td>NVN API</td>
+      <td>0.08 milliseconds</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_97640247.html">Operating Environment</a>
+      </th>
+      <td>
+        <p>Describes the operating environment required to run the Windows OpenGL runtime.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_87937845.html">nvn Library</a>
+      </th>
+      <td>
+        <p>Link to the NVN API documentation.</p>
+        <p>Video card and driver information required to run the NVN API on Windows.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_95686310_h1_2">For Developers ()</h1>
+<p>This supplemental information is for developers of NX applications. <a href="../Pages/Page_95684546.html"> <br />For more information, see the GFX for NX Guide</a>.</p>
+<h2 id="Anchor_95686310_h2_1">Putting Binary Data in Memory Pools</h2>
+<p>The NX version can store textures, vertex data, and shader binaries in the same memory pool.</p>
+<h2 id="Anchor_95686310_h2_2">Differences in Initialization Time Due to How Resources Are Initialized</h2>
+<p>The <code>g3d</code> library provides two methods for initializing resources: a method in which a memory pool is created internally during initialization and a method in which an external memory pool is passed in during initialization. You can select which initialization method is used by calling the <code><span class="ApiLink_nn__g3d__ResFile__Setup">nn::g3d::ResFile::Setup</span>()</code> and <code><span class="ApiLink_nn__g3d__ResShaderArchive__Setup">nn::g3d::ResShaderArchive::Setup</span>()</code> functions. The method of passing in an external memory pool during initialization is faster. The following table provides some reference initialization times for each method.</p>
+<p>Target BFRES file (resource file): <code>bg_WhiteTown.bfres</code> <br />The town model used in the Town demo in G3dDemo. Size: approximately 13.5MB</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Initialization Method</th>
+      <th>Initialization Time</th>
+    </tr>
+    <tr>
+      <td>Create internal memory pool</td>
+      <td>Approximately 2000&nbsp;&mu;sec</td>
+    </tr>
+    <tr>
+      <td>Pass external memory pool</td>
+      <td>Approximately 140&nbsp;&mu;sec</td>
+    </tr>
+  </tbody>
+</table>
+<p>Target BFSHA file (shader archive file): <code>demo.bfsha</code><br />The G3dDemo shader archive. This shader archive includes three shading models.<br />Each shading model has the following number of variations.<br />basic: 1536<br />legacy: 1536<br />env: 1</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Initialization Method</th>
+      <th>Initialization Time</th>
+    </tr>
+    <tr>
+      <td>Create internal memory pool</td>
+      <td>Approximately 2000&nbsp;&mu;sec</td>
+    </tr>
+    <tr>
+      <td>Pass external memory pool</td>
+      <td>Approximately 650&nbsp;&mu;sec</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_95686310_h2_3">Shader Scratch Memory</h2>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Module</th>
+      <th>
+        <br />
+      </th>
+    </tr>
+    <tr>
+      <td>G3d</td>
+      <td>Depends on the user&rsquo;s shader code.</td>
+    </tr>
+    <tr>
+      <td>Ui2d / Font</td>
+      <td>Shader scratch memory is not required.</td>
+    </tr>
+    <tr>
+      <td>Vfx</td>
+      <td>Shader scratch memory is not required for standard shaders. For user-created custom shaders, however, shader scratch memory might be required in some cases.<br /><br />The <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> objects returned by the <code><span class="ApiLink_nn__vfx__Resource__GetResShaderFile">nn::vfx::Resource::GetResShaderFile</span></code> function can be used to determine whether shader scratch memory is required.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_95686310_h2_4">Binary Converter</h2>
+<p>This section describes the command-line options to specify when you output the binary for NX.<br />Converter options specified for  3D, Ui2d, Font, and Vfx conform to the converter options of the tools called by each converter.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th rowspan="2">
+        <br />
+      </th>
+      <td class="highlight-grey" style="text-align: center;" colspan="2">
+        <strong>ShaderConverter </strong>
+      </td>
+      <td class="highlight-grey" style="text-align: center;">
+        <strong>3dTextureConverter</strong>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: center;">--api-type</th>
+      <th style="text-align: center;">--code-type</th>
+      <th style="text-align: center;">--tile-mode</th>
+    </tr>
+    <tr>
+      <th>NX version - NX64</th>
+      <td style="text-align: center;">
+        <strong>Nvn</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Binary</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>NX</strong>
+      </td>
+    </tr>
+    <tr>
+      <th>NX version - x64</th>
+      <td style="text-align: center;">
+        <strong>Nvn</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Binary_Ir</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>NX</strong>
+      </td>
+    </tr>
+    <tr>
+      <th>NX version - NX32</th>
+      <td style="text-align: center;">
+        <strong>Nvn</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Binary</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>NX</strong>
+      </td>
+    </tr>
+    <tr>
+      <th>NX version - Win32</th>
+      <td style="text-align: center;">
+        <strong>Nvn</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Binary_Ir</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>NX</strong>
+      </td>
+    </tr>
+    <tr>
+      <th>Windows version - x64</th>
+      <td style="text-align: center;">
+        <strong>Gl</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Binary_Source</strong> or <strong>Source</strong></td>
+      <td style="text-align: center;">
+        <strong>linear</strong>
+      </td>
+    </tr>
+    <tr>
+      <th>Windows version - Win32</th>
+      <td style="text-align: center;">
+        <strong>Gl</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Binary_Source</strong> or <strong>Source</strong></td>
+      <td style="text-align: center;">
+        <strong>linear</strong>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The converter options that must be set for each converter are different.<br />Both <code>ShaderConverter</code> and <code>3dTextureConverter</code> are called by EffectMaker internally, so you must specify the converter options to pass to them.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th style="text-align: center;">--api-type</th>
+      <th style="text-align: center;">--code-type</th>
+      <th style="text-align: center;">--tile-mode</th>
+    </tr>
+    <tr>
+      <th>3dShaderConverter</th>
+      <td style="text-align: center;">
+        <strong>Specify</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Specify</strong>
+      </td>
+      <td style="text-align: center;">Not Specified</td>
+    </tr>
+    <tr>
+      <th>LayoutConverter</th>
+      <td style="text-align: center;">Not Specified</td>
+      <td style="text-align: center;">Not Specified</td>
+      <td style="text-align: center;">Not Specified</td>
+    </tr>
+    <tr>
+      <th>LayoutArchiver</th>
+      <td style="text-align: center;">
+        <strong>Specify</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Specify</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Specify</strong>
+      </td>
+    </tr>
+    <tr>
+      <th>FontConverterConsole</th>
+      <td style="text-align: center;">Not Specified</td>
+      <td style="text-align: center;">Not Specified</td>
+      <td style="text-align: center;">
+        <strong>Specify</strong>
+      </td>
+    </tr>
+    <tr>
+      <th>EffectMaker</th>
+      <td style="text-align: center;">
+        <strong>Specify</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Specify</strong>
+      </td>
+      <td style="text-align: center;">
+        <strong>Specify</strong>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <ul>
+      <li>Specifying <code>Binary_Ir</code> for the <code>--code-type</code> option when converting binary files for the NX version makes it possible to generate a shader binary that runs both on the NX development hardware and on NX Windows. However, the total binary size increases by the amount corresponding to <code>Ir</code>.</li>
+      <li>Specifying <code>Binary_Source</code> for the <code>--code-type</code> option when converting binary files for the Windows version makes it possible to reduce shader compiling times when loading resources. However, the generated binary is dependent on the video card and graphics drivers present in the PC environment that is used for the conversion.</li>
+      <li>For <code>3dShaderConverter</code>, use the EXE file that matches the number of bits for the runtime environment, only when specifying <code>--api-type GI</code>. You can suppress warnings when loading the shader program.</li>
+    </ul>
+  </div>
+</div>
+<h3 id="Anchor_95686310_h3_2">Specifying Options Using the Old -p Option</h3>
+<p>In LayoutConverter, LayoutArchiver, FontConverterConsole, and EffectMaker prior to NintendoSDK 0.10.0, converter option <code>-p</code> was supported. This option will be deprecated in the future, however, so switch to <code>gfx</code> converter formats. In NintendoSDK 0.11.0, binary conversion using <code>-p</code> works without any problems.</p>
+<h4 id="Anchor_95686310_h4_1">LayoutConverter</h4>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th style="text-align: center;">-p</th>
+      <th>Converter Options</th>
+    </tr>
+    <tr>
+      <th>NX version - NX64</th>
+      <td style="text-align: center;" rowspan="4">
+        <br />NX</td>
+      <td rowspan="4">
+        <p>
+          <br />
+        </p>
+        <p>--api-type <strong>Nvn</strong> --code-type <strong>Binary_Ir</strong></p>
+      </td>
+    </tr>
+    <tr>
+      <th>NX version - x64</th>
+    </tr>
+    <tr>
+      <th>NX version - NX32</th>
+    </tr>
+    <tr>
+      <th>NX version - Win32</th>
+    </tr>
+    <tr>
+      <th>Windows version - x64</th>
+      <td style="text-align: center;" rowspan="2">Win (Win32)</td>
+      <td rowspan="2">api-type <strong>Gl</strong> --code-type <strong>Source</strong></td>
+    </tr>
+    <tr>
+      <th>
+        <p>Windows version - Win32</p>
+      </th>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_95686310_h4_2">LayoutArchiver, FontConverterConsole</h4>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th style="text-align: center;">-p</th>
+      <th>Converter Options</th>
+    </tr>
+    <tr>
+      <th>NX version - NX64</th>
+      <td style="text-align: center;" rowspan="4">
+        <br />NX</td>
+      <td rowspan="4">
+        <p>
+          <br />
+        </p>
+        <p>--tile-mode <strong>NX</strong></p>
+      </td>
+    </tr>
+    <tr>
+      <th>NX version - x64</th>
+    </tr>
+    <tr>
+      <th>NX version - NX32</th>
+    </tr>
+    <tr>
+      <th>NX version - Win32</th>
+    </tr>
+    <tr>
+      <th>Windows version - x64</th>
+      <td style="text-align: center;" rowspan="2">Win (Win32)</td>
+      <td rowspan="2">
+        <p>
+          <br />
+        </p>
+        <p>--tile-mode <strong>Linear</strong></p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>Windows version - Win32</p>
+      </th>
+    </tr>
+  </tbody>
+</table>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>For FontConverterConsole, this option is <code>-tile-mode</code> rather than <code>--tile-mode</code>. (Only a single leading hyphen (-).)</p>
+  </div>
+</div>
+<h4 id="Anchor_95686310_h4_3">EffectMaker</h4>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th style="text-align: center;">-p</th>
+      <th>Converter Options</th>
+    </tr>
+    <tr>
+      <th>NX version - NX64</th>
+      <td style="text-align: center;" rowspan="2">
+        <br />NX</td>
+      <td rowspan="2">
+        <p>
+          <br />
+        </p>
+        <p>--api-type <strong>Nvn</strong> --code-type <strong>Binary_Ir</strong> --tile-mode <strong>NX</strong></p>
+      </td>
+    </tr>
+    <tr>
+      <th>NX version - x64</th>
+    </tr>
+    <tr>
+      <th>NX version - NX32</th>
+      <td style="text-align: center;" rowspan="2">
+        <br />NX32</td>
+      <td rowspan="2">
+        <p>
+          <br />
+        </p>
+        <p>--api-type <strong>Nvn</strong> --code-type <strong>Binary_Ir</strong> --tile-mode <strong>NX</strong></p>
+      </td>
+    </tr>
+    <tr>
+      <th>NX version - Win32</th>
+    </tr>
+    <tr>
+      <th>Windows version - x64</th>
+      <td style="text-align: center;">Win (Windows is also OK)</td>
+      <td rowspan="2">
+        <p>
+          <br />
+        </p>
+        <p>--api-type <strong>Gl</strong> --code-type <strong>Binary_Source</strong> --tile-mode <strong>linear</strong></p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>Windows version - Win32</p>
+      </th>
+      <td style="text-align: center;">Win32 (Windows32 is also OK)</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_95686310_h1_3">3D Plug-In Tools</h1>
+<h2 id="Anchor_95686310_h2_5">Maya Plug-In, 3dsMax Plug-In</h2>
+<p>To optimize primitives for NX, specify <code>forsyth</code> for the <code>optimize_primitive</code> keyword in the config file.</p>
+<h1 id="Anchor_95686310_h1_4">3D Command-Line Tools</h1>
+<h2 id="Anchor_95686310_h2_6">Intermediate File Optimizer</h2>
+<p>For the NX, the following option has been added to the sub-options for primitive optimization. This algorithm was introduced in Maxwell best practice 2.8.1 Optimize your index-buffer.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Command-Line Options</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>--mode Forsyth</td>
+      <td>
+        <p>Primitive optimization for the NX.</p>
+        <p>(Example:<code> --optimize-primitive --optimize-primitive-options &quot;--mode Forsyth&quot;</code></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_95686310_h2_7">3D Shader Converter</h2>
+<h3 id="Anchor_95686310_h3_3">Available Options</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Command-Line Options</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>--decompose-binary</td>
+      <td>
+        <p>Analyzes the shader binary and optimizes the binary size.</p>
+        <p>The size may be decreased significantly, but on the other hand it may also increase.<br />For more information, see <a href="../Pages/Page_95684546.html">gfx for NX Guide</a>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>--glslc-option-flags</td>
+      <td>
+        <p>Option flags can be specified for the NVN low-level compiler GLSLC.</p>
+        <p>Specifies a member of <code>GLSLCoptionFlags</code> in the sub-options.</p>
+        <p>For more information, see <a href="../Pages/Page_95684546.html">gfx Library &gt; GFX for NX Guide</a>.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_95686310_h3_4">Dump Information</h3>
+<p>If you specify the <code>--dump-shader-source</code> option, the following information is output to the specified directory when the shaders are compiled for NVN. Note, however, that the index number for the filename that is output is different from the index used when you call <code><span class="ApiLink_ResShaderProgram_*_nn__g3d__ResShadingModel__GetShaderProgram(int_elemIndex)_NN_NOEXCEPT">nn::g3d::ResShadingModel::GetShaderProgram(index)</span></code> in the runtime to get <code>ShaderProgram</code>.</p>
+<table class="relative-table wrapped" style="width: 94.5145%;">
+  <colgroup>
+    <col style="width: 25.6098%;" />
+    <col style="width: 32.5203%;" />
+    <col style="width: 23.2288%;" />
+    <col style="width: 18.6411%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <p>Dump Content</p>
+      </th>
+      <th>Filename</th>
+      <th>Dump Content</th>
+      <th>Number</th>
+    </tr>
+    <tr>
+      <th>Compilation information</th>
+      <td>&lt;name of shading model&gt;_&lt;index number&gt;_&lt;name of shader stage&gt;.txt</td>
+      <td>
+        <ul>
+          <li>The compiled source code</li>
+          <li>The compilation result assembly</li>
+          <li>The option flags passed to GLSLC</li>
+          <li>Shader information, including the amount of scratch memory used</li>
+          <li>
+            <code>GLSLCperfStatsData</code> structure information</li>
+        </ul>
+      </td>
+      <td>
+        <p>(Number of variations) x (Number of shader stages)</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Statistical information</th>
+      <td>&lt;name of shading model&gt;_&lt;index number&gt;_&lt;name of shader stage&gt;.xml</td>
+      <td>
+        <code>GLSLCperfStatsData</code> structure information</td>
+      <td>(Number of variations) x (Number of shader stages)</td>
+    </tr>
+    <tr>
+      <th>Shader variation files</th>
+      <td>&lt;name of shading model&gt;_&lt;index number&gt;_key.fsva</td>
+      <td>Shader variation files</td>
+      <td>Number of variations</td>
+    </tr>
+    <tr>
+      <th>Reflection information.</th>
+      <td>&lt;<em>name of shading model</em>&gt;_&lt;<em>index number</em>&gt;_reflection.txt</td>
+      <td>Reflection information.</td>
+      <td>Number of variations</td>
+    </tr>
+    <tr>
+      <th>Mask information for shader keys corresponding to shader option information</th>
+      <td>&lt;name of shading model&gt;_key.csv</td>
+      <td>
+        <ul>
+          <li>List of shader options<br /><ul><li>Information for <code>branch</code>, <code>type</code>, <code>default</code>, and <code>choice</code></li></ul></li>
+          <li>Shader key information corresponding to shader option<ul><li>Information for mask, length, position, and the like</li></ul></li>
+        </ul>
+      </td>
+      <td>Number of shading models</td>
+    </tr>
+    <tr>
+      <th>Correspondence table of dump index numbers and shader keys</th>
+      <td>&lt;name of shading model&gt;_shader_key.csv</td>
+      <td>List of shader keys corresponding to dump index numbers</td>
+      <td>Number of shading models</td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_95686310_h4_4">Statistical Information (&lt;name of shading model&gt;_&lt;index number&gt;_&lt;name of shader stage&gt;.xml)</h4>
+<p>The XML file places &lt;shader_debug_dump_information&gt; as the root element and the &lt;structure name&gt; displaying the structure as a child element.<br />The &lt;structure member variable name&gt; is placed in the &lt;structure name&gt; child element, and the value corresponding to the member variable is stored in its contents.</p>
+<p>The following is an example of an XML file that is output.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot;? &gt;
+<span class="nt">&lt;shader_debug_dump_information&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;GLSLCperfStatsData&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;latency&gt;</span>1413<span class="nt">&lt;/latency&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;spillMem&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;numLmemSpillBytes&gt;</span>0<span class="nt">&lt;/numLmemSpillBytes&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;numLmemRefillBytes&gt;</span>0<span class="nt">&lt;/numLmemRefillBytes&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;numSmemSpillBytes&gt;</span>0<span class="nt">&lt;/numSmemSpillBytes&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;numSmemRefillBytes&gt;</span>0<span class="nt">&lt;/numSmemRefillBytes&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;size&gt;</span>0<span class="nt">&lt;/size&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/spillMem&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;nonSpillLMem&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;loadBytes&gt;</span>0<span class="nt">&lt;/loadBytes&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;storeBytes&gt;</span>0<span class="nt">&lt;/storeBytes&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;size&gt;</span>0<span class="nt">&lt;/size&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/nonSpillLMem&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;occupancy&gt;</span>1.000000<span class="nt">&lt;/occupancy&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;numDivergentBranches&gt;</span>0<span class="nt">&lt;/numDivergentBranches&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;attributeMemUsage&gt;</span>80<span class="nt">&lt;/attributeMemUsage&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;programSize&gt;</span>1856<span class="nt">&lt;/programSize&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;requiresGlobalLoadUniformEmulation&gt;</span>false<span class="nt">&lt;/requiresGlobalLoadUniformEmulation&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;throughputLimiter&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;issue&gt;</span>0.025157<span class="nt">&lt;/issue&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;fp&gt;</span>0.032787<span class="nt">&lt;/fp&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;half&gt;</span>0.000000<span class="nt">&lt;/half&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;trancedental&gt;</span>0.111111<span class="nt">&lt;/trancedental&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ipa&gt;</span>0.050000<span class="nt">&lt;/ipa&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;shared&gt;</span>0.000000<span class="nt">&lt;/shared&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;controlFlow&gt;</span>0.222222<span class="nt">&lt;/controlFlow&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;texLoadStore&gt;</span>0.062500<span class="nt">&lt;/texLoadStore&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;reg&gt;</span>0.090587<span class="nt">&lt;/reg&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;warp&gt;</span>0.090587<span class="nt">&lt;/warp&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/throughputLimiter&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;loopData&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;partiallyUnrolled&gt;</span>0<span class="nt">&lt;/partiallyUnrolled&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;nonUnrolled&gt;</span>0<span class="nt">&lt;/nonUnrolled&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/loopData&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/GLSLCperfStatsData&gt;</span>
+<span class="nt">&lt;/shader_debug_dump_information&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_95686310_h4_5">Shader Variation File</h4>
+<p>The shader variation file in which the values for option variables, corresponding to shader variations, are written. You can use this file to check the values of the option variables. If you input this dumped shader variation file when you use 3dShaderConverter to create the BFSHA file, you can create a shader binary that contains only these variations.</p>
+<h4 id="Anchor_95686310_h4_6">Mask Information for Shader Keys Corresponding to Shader Option Information (&lt;shading model name&gt;_key.csv)</h4>
+<p>An example of the output is presented in the following table.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 54.0pt;" /> <col /><col /><col /><col /><col /><col /><col /><col /></colgroup>
+  <tbody>
+    <tr>
+      <th>id</th>
+      <th>branch</th>
+      <th>type</th>
+      <th>key_block</th>
+      <th>key_pos</th>
+      <th>key_width</th>
+      <th>key_mask</th>
+      <th>default</th>
+      <th>choice</th>
+    </tr>
+    <tr>
+      <th>enable_vertex_color</th>
+      <td>TRUE</td>
+      <td>static</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>_80000000_ </td>
+      <td>0</td>
+      <td>0,1</td>
+    </tr>
+    <tr>
+      <th>enable_albedo</th>
+      <td>TRUE</td>
+      <td>static</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>_40000000_ </td>
+      <td>1</td>
+      <td>0,1</td>
+    </tr>
+    <tr>
+      <th>enable_bake_texture</th>
+      <td>TRUE</td>
+      <td>static</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>_20000000_ </td>
+      <td>0</td>
+      <td>0,1</td>
+    </tr>
+    <tr>
+      <th>enable_normal_map</th>
+      <td>TRUE</td>
+      <td>static</td>
+      <td>0</td>
+      <td>3.</td>
+      <td>1</td>
+      <td>_10000000_ </td>
+      <td>0</td>
+      <td>0,1</td>
+    </tr>
+    <tr>
+      <th>enable_specular_mask</th>
+      <td>TRUE</td>
+      <td>static</td>
+      <td>0</td>
+      <td>4</td>
+      <td>1</td>
+      <td>_08000000_ </td>
+      <td>0</td>
+      <td>0,1</td>
+    </tr>
+    <tr>
+      <th>skinning</th>
+      <td>TRUE</td>
+      <td>dynamic</td>
+      <td>1</td>
+      <td>0</td>
+      <td>3.</td>
+      <td>_E0000000_ </td>
+      <td>0</td>
+      <td>0,1,2,3,4,5</td>
+    </tr>
+    <tr>
+      <th>water_world</th>
+      <td>FALSE</td>
+      <td>dynamic</td>
+      <td>1</td>
+      <td>3.</td>
+      <td>1</td>
+      <td>_10000000_ </td>
+      <td>0</td>
+      <td>0,1</td>
+    </tr>
+    <tr>
+      <th>ice_world</th>
+      <td>FALSE</td>
+      <td>dynamic</td>
+      <td>1</td>
+      <td>4</td>
+      <td>1</td>
+      <td>_08000000_ </td>
+      <td>0</td>
+      <td>0,1</td>
+    </tr>
+  </tbody>
+</table>
+<p>You can use this to check <code>branch</code>, <code>type</code>, <code>default</code>, and <code>choice</code> for each shader option. You can also check the mask, length, and position of the shader key corresponding to a particular shader option. By using this information of the correspondence between shader options and shader keys, you can calculate the shader key from any shader option value. For more information about shader keys, see the Shader Keys section of <a href="../Pages/Page_286721565.html">Shader Variations</a>.</p>
+<p>
+  <code>key_block</code> indicates the position from the top block when the shader key is divided into 32-bit blocks. <code>key_pos</code> indicates the position from the high-order bit in the pertinent block of the shader key, and <code>key_width</code> indicates the bit length. By ANDing the <code>key_mask</code> values of shader keys, you can get the <code>choice</code> values for the corresponding shader option. Conversely, based on the <code>choice</code> values, you can use <code>key_mask</code> values to create shader keys. </p>
+<h4 id="Anchor_95686310_h4_7">Correspondence Table of Dump Index Numbers and Shader Keys (&lt;shading model name&gt;_shader_key.csv)</h4>
+<p>An example of the output is presented in the following table.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 72.0px;" /> <col style="width: 97.0px;" /><col style="width: 64.0px;" /></colgroup>
+  <tbody>
+    <tr>
+      <th>Number</th>
+      <th colspan="2">key</th>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td colspan="2">5c140000_80000000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td colspan="2">5c140000_80800000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td colspan="2">5c140000_81000000</td>
+    </tr>
+    <tr>
+      <th>3.</th>
+      <td colspan="2">5c140000_81800000</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td colspan="2">5c140000_84000000</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td colspan="2">5c140000_84800000</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td colspan="2">5c140000_85000000</td>
+    </tr>
+  </tbody>
+</table>
+<p>You can check the list of shader keys corresponding to the index numbers (compilation information, statistical information, and shader variation file) of the dumped files. Note, however, that these differ from the indexes specified for the parameter when they are obtained using <code><span class="ApiLink_ResShaderProgram_*_nn__g3d__ResShadingModel__GetShaderProgram(int_elemIndex)_NN_NOEXCEPT">nn::g3d::ResShadingModel::GetShaderProgram(index)</span></code> in the runtime.</p>
+<h2 id="Anchor_95686310_h2_8">3D Texture Converter</h2>
+<ul>
+  <li>Specify NX by using the <code>--tile-mode</code> option to output texture binary files for NX (BNTX files) (<code>--tile-mode=Nx</code>).<br />The <code>--tile-mode</code> option is not required to output a texture intermediate file such as the FTXB and FTXA files.<br />The texture intermediate file is not platform dependent.</li>
+  <li>Other notes are the same as in <a href="../Pages/Page_95684546.html#Anchor_95684546_h2_11">GFX Texture Converter</a>.</li>
+</ul>
+<h1 id="Anchor_95686310_h1_5">Notes About Using Ui2d</h1>
+<h3 id="Anchor_95686310_h3_5">Building Shader Binaries and Run-Time Binaries</h3>
+<p>Users must create the built-in shader binaries and build the run-time libraries.</p>
+<ul>
+  <li>Sources/Libraries/font/libnn_font/libnn_font_rebuild-spec.NX.vcxproj</li>
+  <li>Sources/Libraries/ui2d/libnn_ui2d/libnn_ui2d_rebuild-spec.NX.vcxproj</li>
+</ul>
+<p>Building these projects generates the shader binaries and builds the run-time libraries. </p>
+<p>After the shader binary is created, take the following directory:</p>
+<p>
+  <code>Programs/Iris/Resources/Ui2dShaders/nx</code>
+</p>
+<p>and manually copy it to overwrite the following directory:</p>
+<p>
+  <code>Tools/Graphics/LayoutTools/shaders/nx</code>
+</p>
+<p>You manually write over and copy.</p>
+<p>You cannot use <code>Tools/Graphics/ShaderConvertScripts/*.bat</code> to create shader binaries for NX.</p>
+<h3 id="Anchor_95686310_h3_6">LayoutEditor</h3>
+<p>No special settings need to be configured.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the NX environment has been properly installed, <strong>NX</strong> will display in the title bar.</p>
+  </div>
+</div>
+<h1 id="Anchor_95686310_h1_6">Notes About Using Font</h1>
+<h3 id="Anchor_95686310_h3_7">Maximum Texture Size for the Texture Cache</h3>
+<p>The maximum NX texture size is dependent on the runtime environment. Get the size while running using the following NVN functions.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nvnDeviceGetInteger(pNvnDevice, NVN_DEVICE_INFO_MAX_TEXTURE_SIZE, &amp;size);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_95686310_h3_8">Stack Consumption for nn::font::TextureCache::UpdateTextureCache</h3>
+<p>The following results bring together measurements that used the following code on Nintendo Switch production devices for <code><span class="ApiLink_nn__font__TextureCache__UpdateTextureCache">nn::font::TextureCache::UpdateTextureCache</span></code> stack consumption.</p>
+<p>The results must indicate that 20 KB and 15 KB, for debug and release builds respectively, are appropriate targets for maximum stack consumption.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>static nn::os::FiberType* Fiber(void* param)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;NN_UNUSED(param);
+
+&nbsp;&nbsp;&nbsp;&nbsp;// Perform glyph rendering for the CPU memory.
+&nbsp;&nbsp;&nbsp;&nbsp;g_TextureCache.UpdateTextureCache();
+
+&nbsp;&nbsp;&nbsp;&nbsp;return NULL;
+}
+
+nn::os::FiberType fiberType;
+const size_t stackSize = 64 * 1024 * 1024;
+NN_ALIGNAS(nn::os::ThreadStackAlignment) static uint8_t stack[stackSize];
+memset(stack, 0xcd, stackSize);
+nn::os::InitializeFiber(&amp;fiberType, Fiber, NULL, stack, stackSize, nn::os::FiberFlag_NoStackGuard);
+nn::os::SwitchToFiber(&amp;fiberType);
+nn::os::FinalizeFiber(&amp;fiberType);
+for (int i = 0; i &lt; static_cast&lt;int&gt;(stackSize); i++)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;if (stack[i] != 0xcd)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NN_LOG(&quot;%d byte of stack memory was used.\n&quot;, static_cast&lt;int&gt;(stackSize) - i);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Stack consumption when plotting all characters in the encoding range from <code>0x0000</code> to <code>0xFFFF</code>, combining six different Nintendo Switch system fonts.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Font Size</th>
+      <th>Debug Consumption</th>
+      <th>Release Consumption</th>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>18712</td>
+      <td>12976</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>18480</td>
+      <td>13356</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>19456</td>
+      <td>14268</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>19796</td>
+      <td>14268</td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td>19456</td>
+      <td>14268</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>19456</td>
+      <td>14268</td>
+    </tr>
+  </tbody>
+</table>
+<p>Consumption when only plotting characters in the ASCII encoding range from <code>0x0000</code> to <code>0x007F</code>.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Font Size</th>
+      <th>Debug Consumption</th>
+      <th>Release Consumption</th>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>10816</td>
+      <td>6832</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>9816</td>
+      <td>6076</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>6348</td>
+      <td>2840</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td>6348</td>
+      <td>2840</td>
+    </tr>
+    <tr>
+      <td>100</td>
+      <td>6348</td>
+      <td>2840</td>
+    </tr>
+    <tr>
+      <td>200</td>
+      <td>6348</td>
+      <td>2840</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_95686310_h2_9">Using the font Library With the NX System Fonts</h2>
+<p>For more information about using the <code>font</code> library with the NX system fonts, see <a href="../Pages/Page_281460330.html">Using the font Library With the NX System Fonts</a>.</p>
+<h1 id="Anchor_95686310_h1_7">Notes About Using VFX</h1>
+<h3 id="Anchor_95686310_h3_9">Note About Creating Assets Using EffectMaker</h3>
+<p>You must configure the following settings to use EffectMaker to create and edit data for NX and to use EffectViewer to preview the edited data.</p>
+<ul>
+  <li>On EffectMaker, select <strong>NX</strong> as the platform.<br /> <br /> <span class="embedded-file-wrapper "><img src="../Attachments/Attach_95686310/94711441.png" class="embedded-image" /></span></li>
+</ul>
+<ul>
+  <li>Use EffectViewer for NX.<br /><br />Tools/Graphics/EffectViewer/NXOnWin32/EffectViewerGfx.exe<br />Start the viewer from the viewer startup icon in EffectMaker to start the viewer conforming to the specified platform.</li>
+</ul>
+<p>
+  <br />
+</p>
+<!--Remove-->
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__ResFile__Setup', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_file.html#afeaf3b666d229f4e30fe374ee5707909' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderArchive__Setup', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_archive.html#a0bd2ecf27e62dd885eb25a1c57e29c9d' )
+SetUrl( 'ApiLink_nn__gfx__ResShaderFile', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_res_shader_file.html' )
+SetUrl( 'ApiLink_nn__vfx__Resource__GetResShaderFile', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_resource.html#ad593c402edb381e498f21cd69c819294' )
+SetUrl( 'ApiLink_ResShaderProgram_*_nn__g3d__ResShadingModel__GetShaderProgram(int_elemIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shading_model.html#a479ac33b23065e8ef76cd359c122f871' )
+SetUrl( 'ApiLink_nn__font__TextureCache__UpdateTextureCache', '../../../Api/HtmlNX/classnn_1_1font_1_1_texture_cache.html#a38485f200ad82b11f7fd710ec7aa27b5' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

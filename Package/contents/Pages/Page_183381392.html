@@ -1,0 +1,306 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Creating the Network | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Creating the Network -->
+<div class="pagetitle" id="PageId_183381392">Creating the Network</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_183381392_h1_1">Creating the Network</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_183381392_h2_1">Starting With Access Point</a>
+      </li>
+      <li>
+        <a href="#Anchor_183381392_h2_2">Creating the Network</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_183381392_h3_1">Network Settings</a>
+        </li>
+        <li>
+          <a href="#Anchor_183381392_h3_2">Security Settings</a>
+        </li>
+        <li>
+          <a href="#Anchor_183381392_h3_3">User Settings</a>
+        </li>
+        <li>
+          <a href="#Anchor_183381392_h3_4">Creating the Network</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_183381392_h2_3">Destroying the Network</a>
+      </li>
+      <li>
+        <a href="#Anchor_183381392_h2_4">Closing the Access Point</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_183381392_h1_1">Creating the Network</h1>
+<h2 id="Anchor_183381392_h2_1">Starting With Access Point</h2>
+<p>To participate in local communication, each system must select whether it will play the role of an access point or a station. To create a network, the system must operate as an access point, so after you have initialized the <code>ldn</code> library, call the <code><span class="ApiLink_Result_nn__ldn__OpenAccessPoint()_NN_NOEXCEPT">nn::ldn::OpenAccessPoint()</span></code> function and explicitly select the role of access point for the system.</p>
+<p>If the process succeeds, the state obtained by the <code><span class="ApiLink_State_nn__ldn__GetState()_NN_NOEXCEPT">nn::ldn::GetState()</span></code> function transitions from <code><span class="ApiLink_nn__ldn__State_Initialized">nn::ldn::State_Initialized</span></code> to <code><span class="ApiLink_nn__ldn__State_AccessPoint">nn::ldn::State_AccessPoint</span></code>.</p>
+<h2 id="Anchor_183381392_h2_2">Creating the Network</h2>
+<h3 id="Anchor_183381392_h3_1">Network Settings</h3>
+<p>For more information about the network created by the access point, see the reference for the <code><span class="ApiLink_nn__ldn__NetworkConfig">nn::ldn::NetworkConfig</span></code> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cm">/**
+&nbsp;* @brief         Settings information for the local network being created by the access point.
+&nbsp;*/</span>
+<span class="k">struct</span> <span class="n">NetworkConfig</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//! Identifier indicating that this is intended for a local network.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IntentId</span>            <span class="n">intentId</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//! The wireless channel. Selected automatically if @ref AutoChannel is specified.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int16_t</span>             <span class="n">channel</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//! The maximum number of nodes that can connect to the network.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int8_t</span>              <span class="n">nodeCountMax</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Bit8</span>                <span class="n">_reserved1</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//! The local communication version.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int16_t</span>             <span class="n">localCommunicationVersion</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Bit8</span>                <span class="n">_reserved2</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+<span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <span class="ApiLink_nn__ldn__IntentId">nn::ldn::IntentId</span> is specified for <code><em>intentId</em></code> to indicate that this is for a local network. For more information, see <a href="../Pages/Page_183381273.html">Network Identifiers</a>.</p>
+<p>
+  <code>
+    <em>channel</em>
+  </code> specifies the wireless channel. The <code>ldn</code> libary can use channels 1, 6, and 11 in the 2.4-GHz band and channels 36, 40, 44, and 48 in the 5-GHz band. The specified channel automatically determines the frequency band. If there is no need to specify a particular wireless channel, give <code><span class="ApiLink_nn__ldn__AutoChannel">nn::ldn::AutoChannel</span></code> to this parameter to have the system select the most appropriate channel from among the three channels 1, 6, and 11 in the 2.4-GHz band. This procedure of selecting a wireless channel is enabled only on the development hardware. In the retail unit, this specification is ignored and the system always determines which wireless channel to use.</p>
+<p>
+  <code>
+    <em>nodeCountMax</em>
+  </code> specifies the maximum number of systems that can connect to the network. This number includes the access point itself, so you can specify any value in the range from <code>1</code> to <code><span class="ApiLink_nn__ldn__NodeCountMax">nn::ldn::NodeCountMax</span></code>.</p>
+<p>
+  <code>
+    <em>localCommunicationVersion</em>
+  </code> is the local communication version. If the communication specification is changed by an application patch or in another way, you can increment the local communication version to indicate a break in communication compatibility. For the local communication version,specify a value in the range from <span class="ApiLink_nn__ldn__LocalCommunicationVersionMin"><code>nn::ldn::LocalCommunicationVersionMin</code></span> to <span class="ApiLink_nn__ldn__LocalCommunicationVersionMax"><code>nn::ldn::LocalCommunicationVersionMax</code></span>.</p>
+<h3 id="Anchor_183381392_h3_2">Security Settings</h3>
+<p>Settings for communication encryption are configured in the <code><span class="ApiLink_nn__ldn__SecurityConfig">nn::ldn::SecurityConfig</span></code> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cm">/**
+&nbsp;* @brief         Security information for the local network being created by the access point.
+&nbsp;*/</span>
+<span class="k">struct</span> <span class="n">SecurityConfig</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//! The security mode for local communication. Specify any @ref SecurityMode.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Bit16</span>               <span class="n">securityMode</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//! The byte length of the passphrase required to connect to the access point.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">uint16_t</span>            <span class="n">passphraseSize</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//! The passphrase required for connecting to the access point.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Bit8</span>                <span class="n">passphrase</span><span class="p">[</span><span class="n">PassphraseSizeMax</span><span class="p">];</span>
+<span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>
+    <em>securityMode</em>
+  </code> specifies the encryption setting. To encrypt all communications, specify <code><span class="ApiLink_nn__ldn__SecurityMode_Product">nn::ldn::SecurityMode_Product</span></code> for the system. If you specify <span class="ApiLink_nn__ldn__SecurityMode_Debug"><code>nn::ldn::SecurityMode_Debug</code></span>, encryption is turned off. Use this setting when you want to capture and parse packets. In the retail unit, all communications are encrypted no matter what has been specified for this parameter.</p>
+<p>
+  <code>
+    <em>passphraseSize</em>
+  </code> is the byte length of the <code><em>passphrase</em></code> parameter. It must be set to a value between <span class="ApiLink_nn__ldn__PassphraseSizeMin"><code>nn::ldn::PassphraseSizeMin</code></span> and <span class="ApiLink_nn__ldn__PassphraseSizeMax"><code>nn::ldn::PassphraseSizeMax</code></span>.</p>
+<p>
+  <code>
+    <em>passphrase</em>
+  </code> is the passphrase that will be used to generate the encryption key. You can use any binary data for the passphrase; it does not need to be a string. Just make sure that you use a passphrase of sufficient length that is hard to guess. Even if the passphrase is the same, the retail unit and the development hardware will generate different encryption keys.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>There is no assurance that the encryption done by the <code>ldn</code> library will be absolutely secure. Do not use local communication for sending and receiving sensitive information.</p>
+  </div>
+</div>
+<h3 id="Anchor_183381392_h3_3">User Settings</h3>
+<p>User information is set in the <code><span class="ApiLink_nn__ldn__UserConfig">nn::ldn::UserConfig</span></code> structure. The specified user information can be obtained by other systems by calling <span class="ApiLink_Result_nn__ldn__Scan(NetworkInfo_*outBuffer|_int_*pOutCount|_int_bufferCount|_const_ScanFilter_&filter|_int_channel)_NN_NOEXCEPT"><code>nn::ldn::Scan()</code></span> and <span class="ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork|_NodeLatestUpdate_*pOutUpdates|_int_bufferCount)_NN_NOEXCEPT"><code>nn::ldn::GetNetworkInfo()</code></span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cm">/**
+&nbsp;* @brief         Settings for the user participating in the network.
+&nbsp;*/</span>
+<span class="k">struct</span> <span class="n">UserConfig</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//! The user name. Use UTF-8 for this specification.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span>                <span class="n">userName</span><span class="p">[</span><span class="n">UserNameBytesMax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  A reserved region.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Bit8</span>                <span class="n">_reserved</span><span class="p">[</span><span class="mi">15</span><span class="p">];</span>
+<span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For <code><em>userName</em></code>, specify the name of the user in UTF-8 format. The user name must be no larger than <code><span class="ApiLink_nn__ldn__UserNameBytesMax">nn::ldn::UserNameBytesMax</span></code> bytes and no more than <code><span class="ApiLink_nn__ldn__UserNameLengthMax">nn::ldn::UserNameLengthMax</span></code> characters. These restrictions are in place to conform with the restrictions on account nicknames. It is all right to use the account nickname as the user name for local communication, but it is not a requirement and any user name can be used.</p>
+<h3 id="Anchor_183381392_h3_4">Creating the Network</h3>
+<p>Use the <code><span class="ApiLink_Result_nn__ldn__CreateNetwork(const_NetworkConfig_&network|_const_SecurityConfig_&security|_const_UserConfig_&user)_NN_NOEXCEPT">nn::ldn::CreateNetwork()</span></code> function to create the network. For the parameters, specify <span class="ApiLink_nn__ldn__NetworkConfig"><code>nn::ldn::NetworkConfig</code></span>, <span class="ApiLink_nn__ldn__SecurityConfig"><code>nn::ldn::SecurityConfig</code></span>, and <span class="ApiLink_nn__ldn__UserConfig"><code>nn::ldn::UserConfig</code></span>. Control will not return from this function until the creation of the network has completed, which takes around 500 milliseconds. If <code><span class="ApiLink_nn__ldn__AutoChannel">nn::ldn::AutoChannel</span></code> has not been specified for the wireless channel, the process may complete a little faster because there is no need to check the surrounding communication conditions. If the process succeeds, the state obtained by the <code><span class="ApiLink_State_nn__ldn__GetState()_NN_NOEXCEPT">nn::ldn::GetState()</span></code> function transitions from <code><span class="ApiLink_nn__ldn__State_AccessPoint">nn::ldn::State_AccessPoint</span></code> to <code><span class="ApiLink_nn__ldn__State_AccessPointCreated">nn::ldn::State_AccessPointCreated</span></code>.</p>
+<p>The following code is an example of using the <code><span class="ApiLink_Result_nn__ldn__CreateNetwork(const_NetworkConfig_&network|_const_SecurityConfig_&security|_const_UserConfig_&user)_NN_NOEXCEPT">nn::ldn::CreateNetwork()</span></code> function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::ldn::</span><span class="n">NetworkConfig</span> <span class="n">network</span><span class="p">;</span>
+<span class="n">network</span><span class="p">.</span><span class="n">intentId</span> <span class="o">=</span> <span class="nn">nn::ldn::</span><span class="n">MakeIntentId</span><span class="p">(</span><span class="n">localCommunicationId</span><span class="p">,</span> <span class="n">sceneId</span><span class="p">);</span>
+<span class="n">network</span><span class="p">.</span><span class="n">channel</span> <span class="o">=</span> <span class="nn">nn::ldn::</span><span class="n">AutoChannel</span><span class="p">;</span>
+<span class="n">network</span><span class="p">.</span><span class="n">nodeCountMax</span> <span class="o">=</span> <span class="nn">nn::ldn::</span><span class="n">NodeCountMax</span><span class="p">;</span>
+<span class="n">network</span><span class="p">.</span><span class="n">localCommunicationVersion</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;
+<span class="nn">nn::ldn::</span><span class="n">SecurityConfig</span> <span class="n">security</span><span class="p">;</span>
+<span class="n">security</span><span class="p">.</span><span class="n">securityMode</span> <span class="o">=</span> <span class="nn">nn::ldn::</span><span class="n">SecurityMode_Product</span><span class="p">;</span>
+<span class="n">security</span><span class="p">.</span><span class="n">passphraseSize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">passphrase</span><span class="p">);</span>
+<span class="nn">std::</span><span class="n">memcpy</span><span class="p">(</span><span class="n">security</span><span class="p">.</span><span class="n">passphrase</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">passphrase</span><span class="p">));</span>
+&nbsp;
+<span class="nn">nn::ldn::</span><span class="n">UserConfig</span> <span class="n">user</span><span class="p">;</span>
+<span class="nn">std::</span><span class="n">strncpy</span><span class="p">(</span><span class="n">user</span><span class="p">.</span><span class="n">userName</span><span class="p">,</span> <span class="n">userName</span><span class="p">,</span> <span class="nn">nn::ldn::</span><span class="n">UserNameBytesMax</span><span class="p">);</span>
+&nbsp;
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::ldn::</span><span class="n">CreateNetwork</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">security</span><span class="p">,</span> <span class="n">user</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultNodeCountLimitation::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::err::</span><span class="n">ShowError</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultDeviceNotAvailable::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::err::</span><span class="n">ShowError</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For more information about handling <code><span class="ApiLink_Result_nn__ldn__CreateNetwork(const_NetworkConfig_&network|_const_SecurityConfig_&security|_const_UserConfig_&user)_NN_NOEXCEPT">nn::ldn::CreateNetwork()</span></code> errors, see <a href="../Pages/Page_202548476.html">Error Handling</a>.</p>
+<h2 id="Anchor_183381392_h2_3">Destroying the Network</h2>
+<p>Use the <code><span class="ApiLink_Result_nn__ldn__DestroyNetwork()_NN_NOEXCEPT">nn::ldn::DestroyNetwork()</span></code> function to destroy the network. When that function runs, all stations connected to the network are automatically disconnected.</p>
+<p>If the process succeeds, the state obtained by the <code><span class="ApiLink_State_nn__ldn__GetState()_NN_NOEXCEPT">nn::ldn::GetState()</span></code> function transitions from <code><span class="ApiLink_nn__ldn__State_AccessPointCreated">nn::ldn::State_AccessPointCreated</span></code> to <code><span class="ApiLink_nn__ldn__State_AccessPoint">nn::ldn::State_AccessPoint</span></code>.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>Immediately after a network is built or destroyed, communication with the wireless controller may become temporarily unstable. Avoid implementations in which networks are built and destroyed more times than necessary.</p>
+  </div>
+</div>
+<h2 id="Anchor_183381392_h2_4">Closing the Access Point</h2>
+<p>Use the <code><span class="ApiLink_Result_nn__ldn__CloseAccessPoint()_NN_NOEXCEPT">nn::ldn::CloseAccessPoint()</span></code> function to end the system's role as an access point. If the network is in the created state at this time, it is automatically destroyed.</p>
+<p>If the process succeeds, the state obtained by the <span class="ApiLink_Result_nn__ldn__OpenStation()_NN_NOEXCEPT"><code>nn::ldn::GetState()</code></span> function transitions to <code><span class="ApiLink_State_nn__ldn__GetState()_NN_NOEXCEPT">nn::ldn::State_Initialized</span></code>, and the <span class="ApiLink_nn__ldn__State_Initialized"><code>nn::ldn::OpenAccessPoint()</code></span> and <span class="ApiLink_Result_nn__ldn__OpenAccessPoint()_NN_NOEXCEPT"><code>nn::ldn::OpenStation()</code></span> functions enter usable states.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_Result_nn__ldn__OpenAccessPoint()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#abd2dc6aa5708bb991b291fbe2342dd0b' )
+SetUrl( 'ApiLink_State_nn__ldn__GetState()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#aa3a87fd89984ca1365ed31e3ebd0d6a5' )
+SetUrl( 'ApiLink_nn__ldn__State_Initialized', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#abc1339e71c5817f213faea9b89d46a77a8b39f6b0ef4c69b3cb8475bde8ed8385' )
+SetUrl( 'ApiLink_nn__ldn__State_AccessPoint', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#abc1339e71c5817f213faea9b89d46a77a69df6cc798c1d401cf383785f5a57df9' )
+SetUrl( 'ApiLink_nn__ldn__NetworkConfig', '../../../Api/HtmlNX/structnn_1_1ldn_1_1_network_config.html' )
+SetUrl( 'ApiLink_nn__ldn__IntentId', '../../../Api/HtmlNX/structnn_1_1ldn_1_1_intent_id.html' )
+SetUrl( 'ApiLink_nn__ldn__AutoChannel', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#aab9761c065620e355fbd0eb71c1aeced' )
+SetUrl( 'ApiLink_nn__ldn__NodeCountMax', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a6cfb7390d698143d5d62820a74f2a8b5' )
+SetUrl( 'ApiLink_nn__ldn__LocalCommunicationVersionMin', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#aa9e76a2f0084fc520d740e8168e1ece6' )
+SetUrl( 'ApiLink_nn__ldn__LocalCommunicationVersionMax', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a988e78f592641f761889614e9a8a1667' )
+SetUrl( 'ApiLink_nn__ldn__SecurityConfig', '../../../Api/HtmlNX/structnn_1_1ldn_1_1_security_config.html' )
+SetUrl( 'ApiLink_nn__ldn__SecurityMode_Product', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a6e08a98c905d752202b86cd38a74749eae6158b43aebfcb6a7831d7503615f63c' )
+SetUrl( 'ApiLink_nn__ldn__SecurityMode_Debug', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a6e08a98c905d752202b86cd38a74749ea747faffa2a737d3e70fcb623d7722e1c' )
+SetUrl( 'ApiLink_nn__ldn__PassphraseSizeMin', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a26f3f636c0e7a33d0891f24c7d9f4630' )
+SetUrl( 'ApiLink_nn__ldn__PassphraseSizeMax', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#ae86035508c158189079d47e242d1ee6e' )
+SetUrl( 'ApiLink_nn__ldn__UserConfig', '../../../Api/HtmlNX/structnn_1_1ldn_1_1_user_config.html' )
+SetUrl( 'ApiLink_Result_nn__ldn__Scan(NetworkInfo_*outBuffer|_int_*pOutCount|_int_bufferCount|_const_ScanFilter_&filter|_int_channel)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a4fb84c7a11193d330f25503a7fdd3441' )
+SetUrl( 'ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork|_NodeLatestUpdate_*pOutUpdates|_int_bufferCount)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a3d7236430d0f89d87e6b64827ed8fb0c' )
+SetUrl( 'ApiLink_nn__ldn__UserNameBytesMax', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a1adb8ab92a9544d368755777cc8777d3' )
+SetUrl( 'ApiLink_nn__ldn__UserNameLengthMax', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a3cb11784180b694e0278ad021e150bb7' )
+SetUrl( 'ApiLink_Result_nn__ldn__CreateNetwork(const_NetworkConfig_&network|_const_SecurityConfig_&security|_const_UserConfig_&user)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#aedf31f08dc77928ff2943dd1042153f5' )
+SetUrl( 'ApiLink_nn__ldn__State_AccessPointCreated', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#abc1339e71c5817f213faea9b89d46a77aa69ec0e3820b19c8c03d53afe9638a9f' )
+SetUrl( 'ApiLink_Result_nn__ldn__DestroyNetwork()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a595a376742ed5d2968d24ee4e6158721' )
+SetUrl( 'ApiLink_Result_nn__ldn__CloseAccessPoint()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#aac06c6603a0860866e6c9f5466e387af' )
+SetUrl( 'ApiLink_Result_nn__ldn__OpenStation()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#ad296900d9a6018c664dc29de81bfcbae' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

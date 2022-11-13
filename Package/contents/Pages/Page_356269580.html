@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>User Account | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- User Account -->
+<div class="pagetitle" id="PageId_356269580">User Account</div>
+<div class="text_separate">
+<h1 id="Anchor_356269580_h1_1">Opening User Accounts</h1>
+<p>When a user is using the application, the application must change the target user account to open status while it is in use.<br />In addition, change the state of the user&rsquo;s account to Closed when they are not using the application, or when the user using the application is undefined.</p>
+<h2 id="Anchor_356269580_h2_1">Restrictions on Opening User Accounts (SDK Version 6.2.0 and Later)</h2>
+<p>The system does not allow the user to use the application in the following situations.</p>
+<ul style="list-style-type: square;">
+  <li>When the user attempts to use an application that they have not purchased, and the application is run on the basis of only being available to the purchasing user</li>
+</ul>
+<p>User accounts with permissions to use an application are <em>qualified</em> accounts and user accounts without permissions to use an application are <em>unqualified</em> accounts.</p>
+<p>Applications must not change the state of an unqualified user account to Open.<br />Specifically, the application must display a list of qualified user accounts when selecting the user accounts to open, and change the selected account to Open status.</p>
+<ul style="list-style-type: square;">
+  <li>When the application independently shows the scene for selecting users to change to Open status:<ol><li>Call the <code><span class="ApiLink_nn__account__ListQualifiedUsers">nn::account::ListQualifiedUsers</span>()</code> function to get a list of qualified user accounts.</li><li>Display a list of qualified user accounts to choose from.<ul style="list-style-type: square;"><li>Hide or dim unqualified user accounts.</li></ul></li><li>Change the state of the selected user account to Open.</li></ol></li>
+  <li>When using the account management applet:<ol><li>Confirm that the <code><em>isUnqualifiedUserSelectable</em></code> member variable in <code><span class="ApiLink_nn__account__UserSelectionSettings">nn::account::UserSelectionSettings</span></code> is <code>false</code>.</li><li>Call <code><span class="ApiLink_nn__account__ShowUserSelector">nn::account::ShowUserSelector</span>()</code>.</li><li>Change the state of the selected user account to Open.</li></ol></li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Allow any user account to be selected in situations where that user is not actually using the application (such as when choosing the recipient of a message or item, or looking up a rival's score).<br />In this case, use <code><span class="ApiLink_nn__account__ListAllUsers">nn::account::ListAllUsers</span>()</code> as before to get a list of user accounts to present as options.</p>
+  </div>
+</div>
+<h2 id="Anchor_356269580_h2_2">Relaxation of User Account Restrictions (SDK 13.3.2 and Later)</h2>
+<p>In SDK 13.3.2 and earlier, the restriction status of each user account (Qualified or Unqualified) was determined when the application started, and did not change until the application was closed. Even for user accounts that can be opened with no restrictions after closing the application, it was not possible to open the user account while the application was running. This means that, while running on the &quot;application only available to the purchaser&quot; license, you could not change the open user account from within the application, and could not have multiple user accounts open simultaneously for multiplayer.</p>
+<p>These restrictions have been relaxed in SDK 13.3.2 and later, so even when running an application that uses the &quot;application only available to the purchaser&quot; license, there are no restrictions on multiple users, and the application can select which user account to open. You must explicitly configure settings in the NMETA file to select this option. For more information about how to configure the option, see Policy Setting for Changes to Available Content at <a href="../Pages/Page_166503043.html">Writing the NMETA File</a>.</p>
+<p>We recommend using this setting for applications that switch between user accounts while the application is running, or that open multiple accounts for simultaneous play.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <span style="color: rgb(23,43,77);">In SDK 14.1.0 and later</span>, the relaxed state is selected as the NMETA default value. If you want the behavior to match the previous specifications, you must explicitly select the setting.</p>
+  </div>
+</div>
+<p>If you select the relaxed state, the following behaviors differ from before.</p>
+<ul>
+  <li>The restrictions for unopened user accounts change while the application is running.<ul><li>Due to the user account licenses changing in the background, the existence of restrictions also changes.</li><li>User accounts that have been verified to not be subject to restrictions can still be opened even if they are changed to being restricted.<ul><li>This feature is for the purpose of avoiding problems when the restrictions are changed in between when the application verifies that the account is not restricted and when the account is actually opened. As a general principle, verify that the user account is not restricted before opening it.</li><li>Accordingly, the prerequisite that the user account must be Qualified no longer applies to <code><span class="ApiLink_nn__account__OpenUser">nn::account::OpenUser</span>()</code> in the relaxed state.</li></ul></li></ul></li>
+  <li>Available DLC changes when user accounts are opened and closed.<ul><li>For more information, see <a href="../Pages/Page_1232514108.html">Policy Setting for Changes to Available Content</a>.</li></ul></li>
+  <li>You can promote a restricted user account to an unrestricted user account.<ul><li>If the account management applet requires the selection of an unrestricted user account (the <code>isUnqualifiedUserSelectable</code> member variable in <code><span class="ApiLink_nn__account__UserSelectionSettings">nn::account::UserSelectionSettings</span></code> is called as <code>false</code>), the account management applet automatically performs promotion.</li><li>If you have implemented your own user selection tool and it requires promotion, call <code><span class="ApiLink_nn__account__PromoteQualification">nn::account::PromoteQualification</span>()</code>. Use the <code><span class="ApiLink_nn__account__ListQualifiedUsers">nn::account::ListQualifiedUsers</span>()</code> function to check whether the account was actually promoted.</li></ul></li>
+</ul>
+<p>Restrictions do not change for open user accounts. For this reason, the application does not have to be concerned with the restrictions for open user accounts.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>While the restrictions might theoretically change, the application stops if the account becomes restricted. To resume an application that has stopped, the user account must be made unrestricted, and this is handled by the system. As a result, the account is always seen as unrestricted by the application.</p>
+  </div>
+</div>
+<p>In addition, at least one unrestricted account is always guaranteed to exist while the application is running. (However, this does not apply to situations in the development environment when no user accounts have been created.)</p>
+<h3 id="Anchor_356269580_h3_1">Features Used for Testing</h3>
+<p>Use the <code>debug</code> command in DevMenuCommand to create restrictions on a user account's Open state in your local environment.<br />For more information, see <a href="../Pages/Page_325711330.html">Development Support Features</a> &gt; <code>debug enable-account-restricted-rights-mode</code>.</p>
+<p>Use the <code>account</code> command in DevMenuCommand to emulate restrictions on user accounts on the development hardware.<br />For more information, see <a href="../Pages/Page_424117455.html">Managing User Accounts</a> &gt; Features Related to Whether There Are Restrictions on Each User Account.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__account__ListQualifiedUsers', '../../../Api/HtmlNX/namespacenn_1_1account.html#a00ff6287a526dcdb7d596fa34b5a9d2b' )
+SetUrl( 'ApiLink_nn__account__UserSelectionSettings', '../../../Api/HtmlNX/structnn_1_1account_1_1_user_selection_settings.html' )
+SetUrl( 'ApiLink_nn__account__ShowUserSelector', '../../../Api/HtmlNX/namespacenn_1_1account.html#a4361809245aa7ba31faebc3686f8aaea' )
+SetUrl( 'ApiLink_nn__account__ListAllUsers', '../../../Api/HtmlNX/namespacenn_1_1account.html#a456d8bfd2e6389402878af77bc7ecf95' )
+SetUrl( 'ApiLink_nn__account__OpenUser', '../../../Api/HtmlNX/namespacenn_1_1account.html#a06fd27c776fbc31c918ea0a84ddb1f41' )
+SetUrl( 'ApiLink_nn__account__PromoteQualification', '../../../Api/HtmlNX/namespacenn_1_1account.html#abc177826dbe4c44de797c0c23fe4b472' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

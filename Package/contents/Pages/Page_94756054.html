@@ -1,0 +1,368 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Changes to NintendoWare Audio | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Changes to NintendoWare Audio -->
+<div class="pagetitle" id="PageId_94756054">Changes to NintendoWare Audio</div>
+<div class="text_separate">
+<!--Remove-->
+<h1 id="Anchor_94756054_h1_1">Changes to NintendoWare Audio</h1>
+<p>This section describes the differences between the <code><span class="ApiLink_nn__atk">nn::atk</span></code> NintendoWare Audio development environment and the conventional <code>nw::snd</code> environment.</p>
+<p>For more information about the changes from NW4F, see the <a href="../Pages/Page_83955840.html">NintendoSDK Migration Guide for NintendoWare Sound</a>.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_94756054_h2_1">Changes to the Runtime Libraries</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_94756054_h3_1">Namespace</a>
+      </li>
+      <li>
+        <a href="#Anchor_94756054_h3_2">Change in Low-Layer Audio Library</a>
+      </li>
+      <li>
+        <a href="#Anchor_94756054_h3_3">Renamed APIs and Member Functions</a>
+      </li>
+      <li>
+        <a href="#Anchor_94756054_h3_4">Notes When Adding Effects to SoundSystem</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_94756054_h2_2">Changes to Tools</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_94756054_h3_5">SoundMaker and the Various Command-Line Tools</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_94756054_h2_3">Changes to the Preview Tool</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_94756054_h3_6">About the Bundled Preview Tool</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_94756054_h2_4">Comparison of nw::snd and nn::atk</a>
+    </li>
+  </ul>
+</p>
+<h2 id="Anchor_94756054_h2_1">Changes to the Runtime Libraries</h2>
+<h3 id="Anchor_94756054_h3_1">Namespace</h3>
+<p>In NintendoSDK 0.7.0, the NintendoWare Audio libraries were transitioned from the <code>nw</code> namespace to the <code>nn</code> namespace.<br />In step with this transition to the <code>nn</code> namespace, the namespace names were reviewed and integrated.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <th class="highlight-blue">Old Audio Modules</th>
+      <th class="highlight-blue">New Audio Modules</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__atk">nn::atk</span>
+      </td>
+      <td>nw::snd</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__atk__viewer">nn::atk::viewer</span>
+      </td>
+      <td>
+        <p>nw::snd::edit</p>
+        <p>nw::snd::ctrl</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The <code><span class="ApiLink_nn__atk">nn::atk</span></code> library is the main library. It is based on <code>nw::snd</code>, but its interface and specifications have been adjusted for NintendoSDK. In the future, it will support new features added to the low-level <code><span class="ApiLink_nn__audio">nn::audio</span></code> library, and more features will be added to <code><span class="ApiLink_nn__atk">nn::atk</span></code> itself.<br />The <code>nw::snd</code> library is designed for the migration of Wii U applications, and retaining as much compatibility as possible with the NW4F interface is a subject currently under review.</p>
+<p>
+  <strong>Note</strong>: The period of availability of the <code>nw::snd</code> interface is to be determined.</p>
+<h3 id="Anchor_94756054_h3_2">Change in Low-Layer Audio Library</h3>
+<p>Previously NintendoWare Audio libraries used WinExt as the low-layer audio library. This has been changed for <code><span class="ApiLink_nn__atk">nn::atk</span></code>, which uses the <code><span class="ApiLink_nn__audio">nn::audio</span></code> library. </p>
+<h3 id="Anchor_94756054_h3_3">Renamed APIs and Member Functions</h3>
+<p>Various APIs and member functions in the <code><span class="ApiLink_nn__atk">nn::atk</span></code> library have been renamed to make NintendoSDK more consistent.</p>
+<h3 id="Anchor_94756054_h3_4">Notes When Adding Effects to SoundSystem</h3>
+<p>Note that the channel settings and some other parameters cannot be changed after <code>SoundSystem::AppendEffect</code> is called. You must configure these parameters beforehand.</p>
+<p>The following table lists functions that can only change parameters before <code>SoundSystem::AppendEffect</code>, and functions that can change parameters at any time.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>
+        <p>Effect</p>
+      </th>
+      <th>Can Only Be Changed Before SoundSystem::AppendEffect</th>
+      <th>Makes Changes at Any Time</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__atk__EffectDelay">nn::atk::EffectDelay</span>
+      </td>
+      <td>
+        <ul>
+          <li>SetChannelMode</li>
+          <li>SetSampleRate</li>
+          <li>SetDelayTimeMax</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>SetDelayTime</li>
+          <li>SetInGain</li>
+          <li>SetFeedbackGain</li>
+          <li>SetDryGain</li>
+          <li>SetLowPassAmount</li>
+          <li>SetChannelSpread</li>
+          <li>SetEnabled</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__atk__EffectReverb">nn::atk::EffectReverb</span>
+      </td>
+      <td>
+        <ul>
+          <li>SetChannelMode</li>
+          <li>SetSampleRate</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>SetEarlyMode</li>
+          <li>SetEarlyGain</li>
+          <li>SetPredelayTime</li>
+          <li>SetLateMode</li>
+          <li>SetLateGain</li>
+          <li>SetDecayTime</li>
+          <li>SetHighFrequencyDecayRatio</li>
+          <li>SetColoration</li>
+          <li>SetReverbGain</li>
+          <li>SetDryGain</li>
+          <li>SetEnabled</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The values for effect parameters obtained by the <code>Get</code> function immediately after they have been set by the <code>Set</code> function are the values that were set by that function.<br />However, those parameter values are not actually applied to the effect until the sound thread is updated.<br />As a result, the parameters obtained by the <code>Get</code> function may not necessarily match the parameters currently being applied to the effect.</p>
+  </div>
+</div>
+<h2 id="Anchor_94756054_h2_2">Changes to Tools</h2>
+<h3 id="Anchor_94756054_h3_5">SoundMaker and the Various Command-Line Tools</h3>
+<p>SoundMaker and the various command-line tools use the components common to <code>nw::snd</code> and <code><span class="ApiLink_nn__atk">nn::atk</span></code>.</p>
+<p>However, note the following points.</p>
+<ul>
+  <li>SoundMaker for NW4F and the various command-line tools for NW4F cannot be used with NintendoSDK.<br />Use the tools that came bundled with NintendoSDK. </li>
+  <li>New features will be added only to <code><span class="ApiLink_nn__atk">nn::atk</span></code>, and if you use those new features with SoundMaker or these other  tools, the binary resource files that get output may not be usable with <code>nw::snd</code>.</li>
+  <li>NintendoSDK no longer provides AnimSoundMaker and animation sound features.</li>
+</ul>
+<h2 id="Anchor_94756054_h2_3">Changes to the Preview Tool</h2>
+<h3 id="Anchor_94756054_h3_6">About the Bundled Preview Tool</h3>
+<p>Until now, NintendoSDK was bundled with the SoundPlayer preview tool (<code>nw::snd SoundPlayer</code>), which uses the <code>nw::snd</code> library.<br />Effective from NintendoSDK 0.8.0, the preview tool has been changed to AtkPlayer, which uses the <code><span class="ApiLink_nn__atk">nn::atk</span></code> library.</p>
+<p>AtkPlayer has the same features as SoundPlayer and also supports the added features of the <code><span class="ApiLink_nn__atk">nn::atk</span></code> library.<br />For more information about using this tool, see <a href="../Pages/Page_100906335.html">AtkPlayer</a>.</p>
+<h2 id="Anchor_94756054_h2_4">Comparison of nw::snd and nn::atk</h2>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>nw::snd</th>
+      <th>
+        <span class="ApiLink_nn__atk">nn::atk</span>
+      </th>
+    </tr>
+    <tr>
+      <td>Main Features</td>
+      <td>
+        <ul>
+          <li>Easy migration of Wii U applications.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>Supports the new features of <code><span class="ApiLink_nn__audio">nn::audio</span></code>.</li>
+          <li>
+            <code>
+              <span class="ApiLink_nn__atk">nn::atk</span>
+            </code> is the main library.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Low-layer</td>
+      <td>
+        <ul>
+          <li>WinExt</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>
+            <span class="ApiLink_nn__audio">nn::audio</span>
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Compatibility</p>
+      </td>
+      <td>
+        <ul>
+          <li>Retains as much compatibility as possible with the NWF4 interface.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>Based on <code>nw::snd</code>, with the interface and specifications adjusted for NintendoSDK.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Plan for additional features</td>
+      <td>
+        <ul>
+          <li>No such plans.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>New features will be added.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Editor</td>
+      <td colspan="2">
+        <ul>
+          <li>SoundMaker</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Converters</td>
+      <td colspan="2">
+        <ul>
+          <li>SoundProjectConverter</li>
+          <li>SoundProjectWaveExporter</li>
+          <li>WaveConverter</li>
+          <li>SequenceSoundConverter</li>
+          <li>SmfConverter</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Viewer tool</td>
+      <td>
+        <ul>
+          <li>nw::snd SoundPlayer</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>
+            <span class="ApiLink_nn__atk">nn::atk</span> AtkPlayer</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Binary resource files</td>
+      <td colspan="2">
+        <ul>
+          <li>NW4F-comparable files (little-endian).</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Note</strong>: The period of availability of the <code>nw::snd</code> interface is to be determined.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk', '../../../Api/HtmlNX/namespacenn_1_1atk.html' )
+SetUrl( 'ApiLink_nn__atk__viewer', '../../../Api/HtmlNX/namespacenn_1_1atk_1_1viewer.html' )
+SetUrl( 'ApiLink_nn__audio', '../../../Api/HtmlNX/namespacenn_1_1audio.html' )
+SetUrl( 'ApiLink_nn__atk__EffectDelay', '../../../Api/HtmlNX/classnn_1_1atk_1_1_effect_delay.html' )
+SetUrl( 'ApiLink_nn__atk__EffectReverb', '../../../Api/HtmlNX/classnn_1_1atk_1_1_effect_reverb.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

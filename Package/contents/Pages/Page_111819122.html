@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Font Pairs and Multiple Scalable Fonts | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Font Pairs and Multiple Scalable Fonts -->
+<div class="pagetitle" id="PageId_111819122">Font Pairs and Multiple Scalable Fonts</div>
+<div class="text_separate">
+<h1 id="Anchor_111819122_h1_1">Introduction</h1>
+<p>This page describes font pairs and multiple scalable fonts, which are features to handle multiple fonts together as one font.</p>
+<p>The font pair feature can combine two fonts, such as a bitmap font and a scalable font, and handle them as one font.</p>
+<p>The multiple scalable font feature builds multiple scalable fonts as one FontFace in <code>TextureCache</code>.</p>
+<p>If you are only combining scalable fonts, use the multiple scalable font feature. If you are combining fonts that are not all scalable fonts, use the font pair feature.</p>
+<h1 id="Anchor_111819122_h1_2">Shared Specifications</h1>
+<p>This section describes the shared specifications of the font pair and scalable font features.</p>
+<p>Both the font pair and scalable font features set the order of priority of multiple fonts and combine them. When rendering a font, the features reference the font with the highest order of priority. If the relevant characters are not included, they reference the subsequent fonts in order of priority. Accordingly, for example if you want to switch fonts with alphanumeric characters and kanji characters, set the font for alphanumeric characters only that does not contain kanji characters as the first priority and the font that contains kanji characters as the second priority.</p>
+<p>Information including the height, ascent, and descent uses the font with the largest height.</p>
+<h1 id="Anchor_111819122_h1_3">Font Pairs</h1>
+<p>Font pairs is a feature to combine two fonts that uses the <code><span class="ApiLink_nn__font__PairFont">nn::font::PairFont</span></code> class. If you are combining three or more fonts, construct multiple font pairs in a tree format.</p>
+<p>In the SetFont method to register fonts as font pairs, the font set as the first argument is preferentially rendered over the font set as the second argument.</p>
+<h1 id="Anchor_111819122_h1_4">Multiple Scalable Fonts</h1>
+<p>Multiple scalable fonts is a feature to build two or more fonts in <code>TextureCache</code> as one FontFace. All you have to do is specify multiple fonts with <code>InitializeArg</code>, which is passed during initialization of <code>TextureCache</code>.</p>
+<p>
+  <code>TextureCache</code> can register multiple fonts as one FontFace, in addition to registering multiple FontFaces. When multiple fonts are registered in one FontFace, the priority of the fonts is in ascending order from the array's smallest element number. In other words, the font set in the zero element is rendered as the first priority.</p>
+<p>More information can be found in the FontSimple sample program. <code>InitializeArg</code> passes the following values.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Member Name</th>
+      <th>Type</th>
+      <th>Overview</th>
+      <th>Program Example</th>
+    </tr>
+    <tr>
+      <td>fontCount</td>
+      <td>uint32_t</td>
+      <td>Number of FontFaces (maximum of 32)</td>
+      <td>
+        <p>// When there are two FontFaces:</p>
+        <p>arg.fontCount = 2;</p>
+      </td>
+    </tr>
+    <tr>
+      <td>fontListCount</td>
+      <td>uint32_t[]</td>
+      <td>Number of fonts of each FontFace (maximum of 8)</td>
+      <td>
+        <p>// When two fonts are set in the first FontFace and one font is set in the second FontFace:</p>
+        <p>arg.fontListCount[0] = 2;</p>
+        <p>arg.fontListCount[1] = 1;</p>
+      </td>
+    </tr>
+    <tr>
+      <td>pFontDatas</td>
+      <td>void*[][]</td>
+      <td>Font binary</td>
+      <td>
+        <p>// When pFontBinary0, pFontBinary1 are set as the first FontFace, and pFontBinary2 is set as the second FontFace:</p>
+        <p>arg.pFontDatas[0][0] = pFontBinary0;</p>
+        <p>arg.pFontDatas[0][1] = pFontBinary1;</p>
+        <p>arg.pFontDatas[1][0] = pFontBinary2;</p>
+      </td>
+    </tr>
+    <tr>
+      <td>pFontDataSizes</td>
+      <td>size_t[][]</td>
+      <td>Font binary size</td>
+      <td>
+        <p>// When fontBinarySize0, fontBinarySize1 are set as the first FontFace, and fontBinarySize2  is set as the second FontFace:</p>
+        <p>arg.pFontDataSizes[0][0] = fontBinarySize0;</p>
+        <p>arg.pFontDataSizes[0][1] = fontBinarySize1;</p>
+        <p>arg.pFontDataSizes[1][0] = fontBinarySize2;</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_111819122_h1_5">Sample Programs</h1>
+<p>For sample programs for font pairs and multiple scalable fonts, see FontSimple.</p>
+<p>If you set the line <code>&quot;static SampleMode g_SampleMode = SampleMode_Simple;&quot;</code> in <code>SampleMode_PairFont</code>, it becomes a font pair sample. If you set the line in <code>SampleMode_ScalableFont</code>, it becomes a multiple scalable font sample.</p>
+<p>The font pair sample switches between different bitmap fonts for alphanumeric characters and Japanese. Because fonts with gradations do not contain Japanese characters, the flow skips this font for Japanese characters and a white font is rendered.</p>
+<p>For multiple scalable font samples, if you replace <code>&quot;static const char* const DemoScalableFontFileName[ScalableFontFileCount] =&quot;</code> with a font satisfying the requirements listed in the comments, you can check that the font is switched according to the characters.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__font__PairFont', '../../../Api/HtmlNX/classnn_1_1font_1_1_pair_font.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

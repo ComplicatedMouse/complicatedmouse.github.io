@@ -1,0 +1,255 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Changes for Developers | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Changes for Developers -->
+<div class="pagetitle" id="PageId_166501274">Changes for Developers</div>
+<div class="text_separate">
+<h1 id="Anchor_166501274_h1_1"> Changes to Graphics for Developers</h1>
+<p>This section describes the changes made to NintendoWare Graphics for developers in NintendoSDK 0.15.0.<br />&ldquo;NintendoWare Graphics&rdquo; refers to the <code><span class="ApiLink_nn__g3d">nn::g3d</span></code>, <code><span class="ApiLink_nn__ui2d">nn::ui2d</span></code>, <code><span class="ApiLink_nn__font">nn::font</span></code>, and <code><span class="ApiLink_nn__vfx">nn::vfx</span></code> modules.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_166501274_h1_1"> Changes to Graphics for Developers</a>
+    </li>
+    <li>
+      <a href="#Anchor_166501274_h1_2">Updated the version for 3D intermediate files and graphics intermediate files to 3.7.0.</a>
+    </li>
+    <li>
+      <a href="#Anchor_166501274_h1_3">nn::g3d News</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_166501274_h2_1">Prepared an exclusion mechanism for shader initialization.</a>
+      </li>
+      <li>
+        <a href="#Anchor_166501274_h2_2">Each LOD model now has bounding information.</a>
+      </li>
+      <li>
+        <a href="#Anchor_166501274_h2_3">Improved the polygon reduction feature.</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_166501274_h1_4">nn::vfx News</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_166501274_h2_4">Switched to nn::g3d model binary for particle shape binary data.</a>
+      </li>
+      <li>
+        <a href="#Anchor_166501274_h2_5">Added a feature to delay shader setup.</a>
+      </li>
+      <li>
+        <a href="#Anchor_166501274_h2_6">Added EffectMakerBridge.</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_166501274_h1_5">nn::ui2d News</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_166501274_h2_7">Changed the binary resource version.</a>
+      </li>
+      <li>
+        <a href="#Anchor_166501274_h2_8">Enhanced LayoutConverter's check for invalid data in window panes.</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_166501274_h1_2">Updated the version for 3D intermediate files and graphics intermediate files to 3.7.0.</h1>
+<p>The version for 3D intermediate files and graphics intermediate files has been updated to 3.7.0.<br />Use the <a href="../Pages/Page_83956125.html">intermediate file updater</a> tool to update the version of your existing intermediate files.<br />For more information about version updates, see the<a href="../IntermediateFileFormat/Html/3d/html/history.html"> revision history for the Intermediate File Specification Manual</a>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>You must also update the texture files (FTXB) and primitive files (FMDB) referenced from EffectMaker (VFX).</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_166501274_h1_3">nn::g3d News</h1>
+<h2 id="Anchor_166501274_h2_1">Prepared an exclusion mechanism for shader initialization.</h2>
+<p>Shaders are not initialized when the shader archive is initialized. Instead, shader initialization is delayed until just before the shader is actually used. More specifically, shaders are initialized when selected by the <code><span class="ApiLink_nn__g3d__ShaderSelector__UpdateVariation">nn::g3d::ShaderSelector::UpdateVariation</span>()</code> function. This optimization was previously causing shader initialization to fail if the same shading model was used from several threads because there was no locking mechanism. For this reason, we implemented a locking mechanism for the shader initialization process to prevent this problem from happening. <br /><br /> To enable this locking mechanism, call the corresponding <code><span class="ApiLink_nn__g3d__ResShaderArchive__Setup">nn::g3d::ResShaderArchive::Setup</span>()</code> function and initialize the shader archive. Note that this also updates the format of the shader archive.</p>
+<h2 id="Anchor_166501274_h2_2">Each LOD model now has bounding information.</h2>
+<p>Each individual LOD model now has information about the bounding sphere and the bounding box. The version of the resource data has been updated accordingly. The following functions can be used to calculate the bounding sphere and the bounding box. <br /><br /> void <span class="ApiLink_nn__g3d__ModelObj__CalculateBounding">nn::g3d::ModelObj::CalculateBounding</span>(int lodLevel) <br /> void <span class="ApiLink_nn__g3d__ShapeObj__CalculateSubMeshBounding">nn::g3d::ShapeObj::CalculateSubMeshBounding</span>(const SkeletonObj* pSkeleton, int meshIndex) <br /><br /> The intersection with the view volume is determined using the following function. <br /><br /> bool <span class="ApiLink_nn__g3d__ShapeObj__TestSubMeshIntersection">nn::g3d::ShapeObj::TestSubMeshIntersection</span>(CullingContext* pCtx, const ViewVolume&amp; volume, int meshIndex)</p>
+<p>In addition, you can now use the <a href="../Pages/Page_83955705.html">intermediate file optimizer</a> to combine the LOD levels for submesh-divided models.</p>
+<p>In this way, models (aside from the base model) to which submesh division has been applied, can be treated as LOD models.</p>
+<h2 id="Anchor_166501274_h2_3">Improved the polygon reduction feature.</h2>
+<p>Improved the polygon reduction feature of the <a href="../Pages/Page_83955705.html">intermediate file optimizer</a>. In particular, improved the UV quality after polygon reduction.</p>
+<p>There is now less of a tendency of a UV breakdown when <strong>OptimalOnSpace</strong> or <strong>OptimalOnFace</strong> is specified for <code>--optimize-position-policy</code>.</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_166501274_h1_4">nn::vfx News</h1>
+<h2 id="Anchor_166501274_h2_4">Switched to nn::g3d model binary for particle shape binary data.</h2>
+<p>With the introduction of NintendoSDK 0.15.0, the particle shape data that is the input for the FMDB file has been switched from the <code>vfx</code> proprietary format to <code><span class="ApiLink_nn__g3d">nn::g3d</span></code> model binary, and it is included in the effect binary. The <code><span class="ApiLink_nn__g3d">nn::g3d</span></code> model binary is being used with the following intentions.</p>
+<ul>
+  <li>For better compatibility with <code><span class="ApiLink_nn__g3d">nn::g3d</span></code>.</li>
+  <li>For separate output of primitive binary using the <code>g3d</code> file format.</li>
+  <li>To implement particle shape morphing and shape-switching animations.</li>
+  <li>For particle shape LOD.</li>
+</ul>
+<p>
+  <span class="status-macro aui-lozenge aui-lozenge-complete">Related Links</span>
+</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <td class="highlight-grey">
+        <strong>
+          <a href="../Pages/Page_166051158.html">Effect Binary</a>
+        </strong>
+      </td>
+      <td>Describes the structure of effect binaries.</td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_164722471.html">Memory Pools</a>
+      </th>
+      <td>Describes the placement of <code>g3dResFile</code> binary in memory pools.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 title="クリックすると編集できます" id="Anchor_166501274_h2_5">Added a feature to delay shader setup.</h2>
+<p>A parameter now exists for selecting whether to delay the shader setup when registering effect binaries via the <code><span class="ApiLink_nn__vfx__System__EntryResource">nn::vfx::System::EntryResource</span> </code>member function. When the delay is enabled, the shader setup is conducted when the emitter set is created. This can shorten the time that the <code><span class="ApiLink_nn__vfx__System__EntryResource">nn::vfx::System::EntryResource</span> </code>function locks.</p>
+<p>
+  <u>
+    <code>EntryResource</code> processing time for effect binary with 158 shader variations (measured for the Windows version)</u>
+</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <td>Delay setup OFF</td>
+      <td>1,568,158 microseconds</td>
+    </tr>
+    <tr>
+      <td>Delay setup ON</td>
+      <td>58,563 microseconds</td>
+    </tr>
+  </tbody>
+</table>
+<h2 title="クリックすると編集できます" id="Anchor_166501274_h2_6">Added EffectMakerBridge.</h2>
+<p>Released EffectMakerBridge, which is a command-line tool for linking EffectMaker with other external tools.</p>
+<p>
+  <span class="status-macro aui-lozenge aui-lozenge-complete">Related Links</span>
+</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <td class="highlight-grey">
+        <strong>
+          <a href="../Pages/Page_83955996.html">Useful EffectMaker Features</a>
+        </strong>
+      </td>
+      <td>Describes how to use EffectMakerBridge.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_166501274_h1_5">nn::ui2d News</h1>
+<p>News for developers about changes to <code><span class="ApiLink_nn__ui2d">nn::ui2d</span></code> in NintendoSDK 0.15.0.</p>
+<h2 id="Anchor_166501274_h2_7">Changed the binary resource version.</h2>
+<p>The binary resource version has been changed. Reconvert your resources using LayoutConverter.</p>
+<h2 id="Anchor_166501274_h2_8">Enhanced LayoutConverter's check for invalid data in window panes.</h2>
+<p>LayoutConverter now generates an error if material sharing has been enabled for the Window pane (in all directions) and the number of textures does not match between frames.</p>
+<p>If an error is generated for previous data, fix that data.</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d', '../../../Api/HtmlNX/namespacenn_1_1g3d.html' )
+SetUrl( 'ApiLink_nn__ui2d', '../../../Api/HtmlNX/namespacenn_1_1ui2d.html' )
+SetUrl( 'ApiLink_nn__font', '../../../Api/HtmlNX/namespacenn_1_1font.html' )
+SetUrl( 'ApiLink_nn__vfx', '../../../Api/HtmlNX/namespacenn_1_1vfx.html' )
+SetUrl( 'ApiLink_nn__g3d__ShaderSelector__UpdateVariation', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_selector.html#a79873e8ffad5ccd81bc0373f11bf7a44' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderArchive__Setup', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_archive.html#a0bd2ecf27e62dd885eb25a1c57e29c9d' )
+SetUrl( 'ApiLink_nn__g3d__ModelObj__CalculateBounding', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#a6f3166b11d49e99e1d173f27063f3d77' )
+SetUrl( 'ApiLink_nn__g3d__ShapeObj__CalculateSubMeshBounding', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html#ad3875fc401453548f6e5fdf3928abdee' )
+SetUrl( 'ApiLink_nn__g3d__ShapeObj__TestSubMeshIntersection', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html#a25c0526e70aef8f5ac9512196c1f5d14' )
+SetUrl( 'ApiLink_nn__vfx__System__EntryResource', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_system.html#a0418cc91c6dceab635cb5117b6aaf5e2' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

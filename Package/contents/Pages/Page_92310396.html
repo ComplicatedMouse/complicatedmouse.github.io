@@ -1,0 +1,395 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Starting and Initializing Programs | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Starting and Initializing Programs -->
+<div class="pagetitle" id="PageId_92310396">Starting and Initializing Programs</div>
+<div class="text_separate">
+<div>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_92310396_h1_1">Starting an Application</a>
+    </li>
+    <li>
+      <a href="#Anchor_92310396_h1_2">Calling the nninitStartup Function</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_92310396_h2_1">Default nninitStartup() Function</a>
+      </li>
+      <li>
+        <a href="#Anchor_92310396_h2_2">Replacing nninitStartup()</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_92310396_h1_3">C++ Global Static Object Constructor</a>
+    </li>
+    <li>
+      <a href="#Anchor_92310396_h1_4">Calling nnMain</a>
+    </li>
+    <li>
+      <a href="#Anchor_92310396_h1_5">About malloc() and Other Functions That Get Memory</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_92310396_h2_3">Using Virtual Address Memory Management Feature With Memory Capture Features Like malloc()</a>
+      </li>
+    </ul>
+  </ul>
+  <h1 id="Anchor_92310396_h1_1">Starting an Application</h1>
+  <p>An application starts from an entry point defined by NintendoSDK. NintendoSDK supports address space layout randomization (ASLR), so the actual address of this entry point will differ every time the application runs. (The following section provides additional information.) .</p>
+  <p>From the entry point, initialization proceeds in the following order of processes. The order of the initialization processes cannot be altered by the application.</p>
+  <ol>
+    <li>  Clear the ZI section to zero.</li>
+    <li>  Initialize the runtime library. (Pass 0, during which components not dependent on NintendoSDK are initialized.)</li>
+    <li>  Initialize the <code>os</code> library.</li>
+    <li>  Initialize the runtime library. (Pass 1, during which components dependent on the <code>os</code> library are initialized.)</li>
+    <li>  Call the <code>nninitStartup</code> function (★).</li>
+    <li>  Initialize the runtime library. (Pass 2, during which components dependent on NintendoSDK are initialized.)</li>
+    <li>  Call the C++ global static object constructor (★).</li>
+    <li>  Call the <code>nnMain</code> function (★).</li>
+  </ol>
+  <p>Steps 5, 7, and 8 can be performed using application-specific processes (steps with ★). The following sections of this document describe how to design application-specific processes.</p>
+  <div class="info_new">
+    <div class="info_new_left">Info</div>
+    <div class="info_new_right">
+      <p>Although ASLR is always applied when starting applications in the production environment, starting applications using the following methods disables ASLR on development hardware.</p>
+      <ul>
+        <li>Running from <a href="../Pages/Page_927760575.html">VSI (Visual Studio Integration)</a></li>
+        <li>Running from <a href="../Pages/Page_93359711.html">Target Manager</a></li>
+        <li>Using the <code>--disable-aslr</code> option with <a href="../Pages/Page_107320466.html">RunOnTarget</a> before running.</li>
+      </ul>
+      <p>If the application is started using one of these methods, the following location addresses are fixed.</p>
+      <ul>
+        <li>Location address of the program</li>
+        <li>Memory heaps</li>
+        <li>Stack region of <code>nnMain()</code><br /></li>
+      </ul>
+      <p>ASLR is applied in the following cases regardless of the startup method described earlier.</p>
+      <ul>
+        <li>Stack region for threads other than <code>nnMain()</code></li>
+        <li>Location address for loadable modules</li>
+      </ul>
+    </div>
+  </div>
+  <h1 id="Anchor_92310396_h1_2">
+    <a name="Anchor_92310396_call_nninitStartup"></a>Calling the nninitStartup Function</h1>
+  <p>The <code><span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span></code> function is automatically called before running the C++ global static object constructor so that the application initializes the memory management features.</p>
+  <p>If a <span class="ApiLink_void_nninitStartup(void)"><code>nninitStartup()</code></span> function specific to the application has not been defined, the default <code>nninitStartup()</code> function (described in the next section) is called. If a <span class="ApiLink_void_nninitStartup(void)"><code>nninitStartup()</code></span> function specific to the application has been defined, that function is called. You can use the function to write the initialization of memory management features for your application.</p>
+  <h2 id="Anchor_92310396_h2_1">Default nninitStartup() Function</h2>
+  <p>In NintendoSDK, the default <span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span> is defined in the <a href="../Pages/Page_107780149.html">init Library</a>. The default <span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span> function performs initialization for memory management, which allows language-standard memory acquisition methods like <code>malloc</code> and <code>new</code> to be used right away in C++ static object global constructors.</p>
+  <div class="platform_nx">
+    <p>In addition, in NX Add-On 10.0.0 and later, some of the memory is assigned to <a href="../Pages/Page_313329665.html">global file data caching</a> in the <code>fs</code> library.</p>
+    <p>In the NX32 and NX64 development hardware environments, the default <span class="ApiLink_void_nninitStartup(void)"><code>nninitStartup()</code></span> performs the following action.</p>
+    <div class="expand-container" id="expander-92310396-1">
+      <div class="expand-control" id="expander-control-92310396-1">
+        <span class="expand-control-icon collapsed-icon"> </span>
+        <span class="expand-control-text">NX Add-On 10.0.0 or Later</span>
+      </div>
+      <div class="expand-content expand-hidden" id="expander-content-92310396-1">
+        <ol>
+          <li>Allocates only the memory heap that can be allocated at the maximum size set by the <code><span class="ApiLink_nn__Result_nn__os__SetMemoryHeapSize(size_t_size)_NN_NOEXCEPT">nn::os::SetMemoryHeapSize()</span></code> function.<ul><li>If allocating the memory heap fails, or the allocated memory heap is 32 MiB or less, the application aborts in the default <span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span>.</li></ul></li>
+          <li> If a memory heap of X MiB is allocated in step 1, you can use the <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">nn::os::AllocateMemoryBlock()</span> function to get a memory block of (X - 32) MiB from the memory heap.</li>
+          <li>Uses the <code><span class="ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT">nn::init::InitializeAllocator()</span></code> function to assign the memory block obtained in step 2, for use with the C language standard functions for getting memory.<br /><ul><li>After this step is performed, functions such as <code>malloc()</code> for getting memory can be used. For more information, see <a href="#Anchor_92310396_FunctionToAllocateMemory">About <code>malloc()</code> and Other Functions That Get Memory</a>, later in this document.</li></ul></li>
+          <li>Use <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">nn::os::AllocateMemoryBlock()</span> to get a 32 MiB memory block from the memory heap allocated in step 1.</li>
+          <li>Use the memory block obtained in step 4 to enable global file data caching.<ul><li>Going forward, the data from some of the file systems accessed by the application is automatically cached by the <code>fs</code> library. For more information, see <a href="../Pages/Page_313329665.html">Global File Data Cache</a>.</li></ul></li>
+        </ol>
+        <p>When expressed in C ++ code, it is as follows.</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre><span class="cp">#include &lt;cstdlib&gt;
+#include &lt;nn/nn_Abort.h&gt;
+#include &lt;nn/nn_Common.h&gt;
+#include &lt;nn/fs.h&gt;
+#include &lt;nn/init.h&gt;
+#include &lt;nn/os.h&gt;
+#include &lt;nn/util/util_BitUtil.h&gt;
+</span>&nbsp;
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nninitStartup</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="c1">// Only initialize memory management feature in environments for NX32 and NX64 development hardware.
+// This function should be empty in the Windows environment.
+</span><span class="cp">#if defined(NN_BUILD_TARGET_PLATFORM_OS_NN)
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Calculates the maximum memory heap size that can be set.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">memoryHeapSize</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">MemoryInfo</span> <span class="n">memInfo</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">QueryMemoryInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">memInfo</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">allocatableSize</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">memInfo</span><span class="p">.</span><span class="n">totalAvailableMemorySize</span><span class="p">)</span> <span class="o">-</span> <span class="n">memInfo</span><span class="p">.</span><span class="n">totalUsedMemorySize</span><span class="p">;</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Rounds allocatableSize down to an integer multiple of nn::os::MemoryBlockUnitSize accordingly with nn::os::SetMemoryHeapSize() preconditions.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memoryHeapSize</span> <span class="o">=</span> <span class="nn">nn::util::</span><span class="n">align_down</span><span class="p">(</span><span class="n">allocatableSize</span> <span class="p">,</span> <span class="nn">nn::os::</span><span class="n">MemoryBlockUnitSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Sets the memory heap size.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span><span class="nn">nn::os::</span><span class="n">SetMemoryHeapSize</span><span class="p">(</span><span class="n">memoryHeapSize</span><span class="p">));</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Defines the memory size for the global file data cache.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Memory size is an integer multiple of nn::os::MemoryBlockUnitSize accordingly with nn::os::AllocateMemoryBlock() preconditions.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">size_t</span> <span class="n">DefaultGlobalFileDataCacheSize</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">static_assert</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">DefaultGlobalFileDataCacheSize</span> <span class="o">%</span> <span class="nn">nn::os::</span><span class="n">MemoryBlockUnitSize</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">&quot;Memory size must be an integer multiple of nn::os::MemoryBlockUnitSize.&quot;</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Memory size for malloc() is the value obtained by subtracting the global file data cache memory size from the memory heap size.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS</span><span class="p">(</span><span class="n">memoryHeapSize</span> <span class="o">&gt;</span> <span class="n">DefaultGlobalFileDataCacheSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">allocatorSize</span> <span class="o">=</span> <span class="n">memoryHeapSize</span> <span class="o">-</span> <span class="n">DefaultGlobalFileDataCacheSize</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">fileDataCacheSize</span> <span class="o">=</span> <span class="n">DefaultGlobalFileDataCacheSize</span><span class="p">;</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Configure the memory region for malloc().
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">uintptr_t</span> <span class="n">p</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span><span class="nn">nn::os::</span><span class="n">AllocateMemoryBlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">,</span> <span class="n">allocatorSize</span><span class="p">));</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::init::</span><span class="n">InitializeAllocator</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">allocatorSize</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Registers the memory allocator used for implementing the thread_local specifier.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">SetMemoryAllocatorForThreadLocal</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">[](</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="kt">size_t</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nn">std::</span><span class="n">malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span> <span class="p">},</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">[](</span><span class="kt">void</span><span class="o">*</span> <span class="n">ptr</span><span class="p">,</span> <span class="kt">size_t</span><span class="p">)</span> <span class="p">{</span> <span class="nn">std::</span><span class="n">free</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span> <span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Enables the global file data cache.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">uintptr_t</span> <span class="n">p</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span><span class="nn">nn::os::</span><span class="n">AllocateMemoryBlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">,</span> <span class="n">fileDataCacheSize</span><span class="p">));</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::fs::</span><span class="n">EnableGlobalFileDataCache</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">fileDataCacheSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+<span class="cp">#endif </span><span class="c1">// defined(NN_BUILD_TARGET_PLATFORM_OS_NN)
+</span><span class="p">}</span></pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="expand-container" id="expander-92310396-2">
+      <div class="expand-control" id="expander-control-92310396-2">
+        <span class="expand-control-icon collapsed-icon"> </span>
+        <span class="expand-control-text">For NX Add-On 9.x.x and Earlier</span>
+      </div>
+      <div class="expand-content expand-hidden" id="expander-content-92310396-2">
+        <ol>
+          <li>Allocates only the memory heap that can be allocated at the maximum size set by the <code><span class="ApiLink_nn__Result_nn__os__SetMemoryHeapSize(size_t_size)_NN_NOEXCEPT">nn::os::SetMemoryHeapSize()</span></code> function.<br /><ul><li>If the allocation fails, allocates a 32-MiB memory heap.</li><li>If this fails to allocate a memory heap, an abort occurs in the default <span class="ApiLink_void_nninitStartup(void)"><code>nninitStartup()</code></span>.</li></ul></li>
+          <li>Uses the <code><span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">nn::os::AllocateMemoryBlock()</span></code> function to get a block of memory of the same size as the heap allocated in step 1.</li>
+          <li>Uses the <code><span class="ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT">nn::init::InitializeAllocator()</span></code> function to assign the memory block obtained in step 2, for use with the C language standard functions for getting memory.<br /><ul><li>After this step is performed, functions such as <code>malloc()</code> for getting memory can be used. For more information, see <a href="#Anchor_92310396_FunctionToAllocateMemory">About <code>malloc()</code> and Other Functions That Get Memory</a>, later in this document.</li></ul></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <p>Note that when you use the default <span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span>, all memory heap is obtained first and assigned to language-standard memory acquisition features. That is, if you want the application to use memory heap for other purposes, define a custom <span class="ApiLink_void_nninitStartup(void)"><code>nninitStartup()</code></span>function as shown in the following section.</p>
+</div>
+<p>In the Win environment, the default <span class="ApiLink_void_nninitStartup(void)"><code>nninitStartup()</code></span> performs nothing. As a result, the memory heap remains at 0 bytes and is not used. For more information about <code>malloc()</code> and other functions that get memory, see <a href="#Anchor_92310396_FunctionToAllocateMemory">About <code>malloc</code> and Other Functions That Get Memory</a>.</p>
+<h2 id="Anchor_92310396_h2_2">Replacing nninitStartup()</h2>
+<p>The application can define a custom <span class="ApiLink_void_nninitStartup(void)"><code>nninitStartup()</code></span> function and replace the default <span class="ApiLink_void_nninitStartup(void)"><code>nninitStartup()</code></span> without applying it. In particular, you must define an independent <span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span> function for applications that use the following.</p>
+<ul>
+  <li>If you want to specify the memory region used or size for standard memory allocation features, such as <code>malloc()</code> or <code>new</code>, for the language.</li>
+  <li>(NX Add-On 10.0.0 and later) If you do not use the global file data cache that is automatically enabled, or use it with the parameters changed.</li>
+</ul>
+<p>The default <span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span> function is defined within the <code>libnn_init</code> library. When you define a function with the same name in your application, the <code><span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span></code> defined in the application will be linked to with a higher preference than the default <code><span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span></code> function. If you are writing C++ code, the <code><span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span></code> function must have C-linkage. (See the following example.) The <span class="ApiLink_void_nninitStartup(void)"><code>nninitStartup()</code></span> function is run before the C++ static object global constructors, so code cannot be written with an assumption of execution of these constructors.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/init.h&gt;
+#include &lt;nn/os.h&gt;
+</span>
+<span class="c1">// Application-specific process (sample implementation)
+</span><span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nninitStartup</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="k">auto</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">2ull</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span> <span class="nn">nn::os::</span><span class="n">SetMemoryHeapSize</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">uintptr_t</span> <span class="n">p</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span> <span class="nn">nn::os::</span><span class="n">AllocateMemoryBlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::init::</span><span class="n">InitializeAllocator</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">size</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>We recommend that your <code><span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span></code> function do nothing other than initialize the memory-management features.</p>
+<p>By using the <code><span class="ApiLink_void_nninitStartup(void)">nn::init::InitializeAllocator()</span></code> function in your substitute <code><span class="ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT">nninitStartup()</span></code> function, you can freely specify the size and location of the memory that will be used by <code>malloc()</code> and the other functions as indicated later in <a href="#Anchor_92310396_FunctionToAllocateMemory">About <code>malloc()</code> and Other Functions That Get Memory</a>. For an example of calling these functions inside an application-specific <code><span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span></code> function, see <span class="ApiLink_PageSampleInitStartup"><code>nninitStartup()</code> Sample Program 1</span>.</p>
+<p>If the <code><span class="ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT">nn::init::InitializeAllocator()</span></code> function is not called, then no memory will be allocated for use by <code>malloc</code> and the other functions that get memory, and as a result, you will not be able to use these functions to get memory.</p>
+<p>On the other hand, the application itself can define <code>malloc</code> and the other functions and substitute those. For more information, see <a href="#Anchor_92310396_FunctionToAllocateMemory">About <code><code>malloc</code>()</code> and Other Functions That Get Memory</a>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In the Windows Visual C++ build environment, sometimes a LNK2005 link error occurs if you build immediately after adding the definition for an application-specific <code>nninitStartup()</code> function.</p>
+    <p>In addition, as described in <a href="../Pages/Page_94754958.html">Important Implementation Information</a>, running a <strong>Build</strong> or <strong>Rebuild</strong> again will resolve issues.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In the NX32 and NX64 environments, when the thread local storage variable is employed using a compiler identifier like <code>thread_local</code>, call the <code><span class="ApiLink_nn__os__SetMemoryAllocatorForThreadLocal">nn::os::SetMemoryAllocatorForThreadLocal</span>()</code> function inside the <code>nninitStartup()</code> function. The compiler will register a memory allocator and deallocator to allocate a region for the thread local storage variables (in NX Add-On 6.4 and later).</p>
+  </div>
+</div>
+<h1 id="Anchor_92310396_h1_3">C++ Global Static Object Constructor</h1>
+<p>The C++ global static object constructor is one of the initialization processes defined in the C++ language specification. In NintendoSDK, when you write code that calls C++ global static object constructors, they are called automatically after the <code><span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span></code> function has finished processing.</p>
+<p>During processing, C++ global static object constructors might explicitly call <code>new</code> and get memory. In addition, the action to get memory may be implicit, and not explicit. For this reason, you must enable memory-management features before invoking the C++ global static object constructor.</p>
+<p>For more information about the order in which <code><span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span></code> and the C++ global static object constructors are called, see the description in <span class="ApiLink_PageSampleInitStartup"><code>nninitStartup()</code> Sample Program 1</span>.</p>
+<h1 id="Anchor_92310396_h1_4">Calling nnMain</h1>
+<p>In NintendoSDK, the <code>nnMain()</code> function is the main function for applications. The main function describes processes specific to the application. If <code>nnMain</code> is not defined, an error will occur at link time. If you are coding in C++, <code>nnMain</code> must have C-linkage. Explicitly specify C-linkage, as follows.</p>
+<div>
+  <p>
+    <br />
+  </p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The main process of the application.
+</span><span class="p">}</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>For the processing that you must perform at the start of <code>nnMain()</code>, see <a href="../Pages/Page_105383443.html">nnMain() and Library Initialization</a>.</p>
+</div>
+<h1 id="Anchor_92310396_h1_5">
+  <a name="Anchor_92310396_FunctionToAllocateMemory"></a>About malloc() and Other Functions That Get Memory</h1>
+<p>The following functions for getting memory can be used with the NintendoSDK.</p>
+<ul>
+  <li>malloc()</li>
+  <li>free()</li>
+  <li>calloc()</li>
+  <li>realloc()</li>
+  <li>aligned_alloc()</li>
+  <li>malloc_usable_size()</li>
+  <li>
+    <code>operator new</code> at global scope</li>
+  <li>
+    <code>operator delete</code> at global scope</li>
+</ul>
+<p>In the NX development hardware environment, the memory region used by these functions is configured by using the <code><span class="ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT">nn::init::InitializeAllocator()</span></code> function. If the setting is not configured, these functions for getting memory cannot be used. If you are using the default <code><span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span></code> function, the <code><span class="ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT">nn::init::InitializeAllocator()</span></code> function is called internally and these functions become available implicitly. These functions also become available if <code><span class="ApiLink_void_nninitStartup(void)">nn::init::InitializeAllocator()</span></code> has been called inside the application-defined <code><span class="ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT">nninitStartup()</span></code> function. For specific usage instructions, see <span class="ApiLink_PageSampleInitStartup"><code>nninitStartup</code> Sample Program 1</span>.</p>
+<p>In the NX development hardware environment, you can also independently define the individual functions for getting memory. If you perform this, do not call <span class="ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT"><code>nn::init::InitializeAllocator()</code></span>. Instead, independently define and implement the functions for getting memory in the application. At a minimum, the six functions <code>malloc()</code>, <code>free()</code>, <code>calloc()</code>, <code>realloc</code>(), <code>aligned_alloc()</code>, and <code>malloc_usable_size()</code> must be simultaneously defined. For specific methods, see <span class="ApiLink_PageSampleInitStartupWithMalloc"><code>nninitStartup</code> Sample Program 2</span>. When you are using the functions that you have independently defined, if the code for calling <code><span class="ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT">nn::init::InitializeAllocator()</span></code> and <code><span class="ApiLink_nn__mem__StandardAllocator_*_nn__init__GetAllocator()_NN_NOEXCEPT">nn::init::GetAllocator()</span></code> is still there, or if some functions that must be defined are not, a duplicate symbol linker error occurs.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In the Windows environment, use <code>malloc()</code> and the other standard functions as is. In other words, take note of the following.</p>
+    <ul>
+      <li>Because of the way the <code><span class="ApiLink_nn__init__InitializeAllocator">nn::init::InitializeAllocator</span>()</code> function is implemented, it returns having done nothing. As a result, there is no need to call it. (And it is not called from the default <code>nninitStartup()</code> function.)</li>
+      <li>Do not independently define <code>malloc()</code> and the other functions.</li>
+      <li>The <span class="ApiLink_PageSampleInitStartupWithMalloc"><code>nninitStartup</code> Sample Program 2</span> build environment is not included in the Windows environment SDK release package.</li>
+    </ul>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <code>std::aligned_alloc()</code> is a specification defined from C++17, whereas <code>aligned_alloc()</code> is a specification defined from C11, so depending on the environment, they may or may not be available to use. As a result, its use must be differentiated as in the following.</p>
+    <ul>
+      <li>In the NX development hardware environment, <code>aligned_alloc()</code> and <code>std::aligned_alloc()</code> can be used. Use them according to the C11 and C++17 standard references.</li>
+      <li>In a Windows environment, use may not be possible depending on the Visual Studio version. There are cases of a separate API providing a replacement function. For more information, see MSDN.</li>
+    </ul>
+  </div>
+</div>
+<div class="platform_nx">
+  <h2 id="Anchor_92310396_h2_3">Using Virtual Address Memory Management Feature With Memory Capture Features Like malloc()</h2>
+  <p>In the NX development environment, if you want to have virtual address memory management be used in memory allocation routines like <code>malloc()</code>, you can change the arguments passed to <span class="ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT">nn::init::InitializeAllocator()</span> in <span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span>.</p>
+  <p>For more information, see <a href="../Pages/Page_107780149.html#Anchor_107780149_h4_1">Initializing a Memory Allocator With the Feature for Managing Virtual Address Memory Enabled</a> in <a href="../Pages/Page_107780149.html">init Library</a>.</p>
+</div>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nninitStartup(void)', '../../../Api/HtmlNX/init___startup_8h.html#ac781c07f35d3d9e7a71d21ad25e25f8f' )
+SetUrl( 'ApiLink_nn__Result_nn__os__SetMemoryHeapSize(size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2be8bac50d8d37a91f866d9e0c55886e' )
+SetUrl( 'ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a875bf6b3129f06654e641513c63017dd' )
+SetUrl( 'ApiLink_void_nn__init__InitializeAllocator(void_*address|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1init.html#a216ae7a5ca53a1c1e6dc0514f7283974' )
+SetUrl( 'ApiLink_PageSampleInitStartup', '../../../Api/HtmlNX/_page_sample_init_startup.html' )
+SetUrl( 'ApiLink_nn__os__SetMemoryAllocatorForThreadLocal', '../../../Api/HtmlNX/namespacenn_1_1os.html#a347a69381452967e4a51b3c18aae7807' )
+SetUrl( 'ApiLink_PageSampleInitStartupWithMalloc', '../../../Api/HtmlNX/_page_sample_init_startup_with_malloc.html' )
+SetUrl( 'ApiLink_nn__mem__StandardAllocator_*_nn__init__GetAllocator()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1init.html#a95c73ba643ccecff08a67b2940595dbd' )
+SetUrl( 'ApiLink_nn__init__InitializeAllocator', '../../../Api/HtmlNX/namespacenn_1_1init.html#a216ae7a5ca53a1c1e6dc0514f7283974' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

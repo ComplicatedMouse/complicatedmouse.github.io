@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Descriptor Pool | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Descriptor Pool -->
+<div class="pagetitle" id="PageId_108531266">Descriptor Pool</div>
+<div class="text_separate">
+<h1 id="Anchor_108531266_h1_1">Handling the Descriptor Pool in the ui2d and font Runtimes</h1>
+<p>This section describes how to handle the descriptor pool in the <code>ui2d</code> and <code>font</code> runtimes.</p>
+<p>Texture objects and sampler objects can be used after registering them to the descriptor pool and getting a descriptor slot.<br />For objects created in the runtime, you must inform the application about the created object using a callback function, register that object to the descriptor pool in the application, and get a descriptor slot.</p>
+<h3 id="Anchor_108531266_h3_1">Sample Code</h3>
+<p>The following example uses <code>font</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// Callback that registers a texture to the descriptor pool.
+bool RegisterTextureForDescriptorPool( nn::gfx::DescriptorSlot* dstSlot, const nn::gfx::TextureView&amp; textureView )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;・・・・
+}
+// Callback that unregisters a texture from the descriptor pool.
+bool UnregisterTextureFromDescriptorPool( nn::gfx::DescriptorSlot* dstSlot, const nn::gfx::TextureView&amp; textureView )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;・・・・
+}
+// Callback that registers a sampler to the descriptor pool.
+bool RegisterSamplerForDescriptorPool( nn::gfx::DescriptorSlot* dstSlot, const nn::gfx::Sampler* sampler )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;・・・・
+}
+// Callback that unregisters a sampler from the descriptor pool.
+bool UnregisterSamplerFromDescriptorPool( nn::gfx::DescriptorSlot* dstSlot, const nn::gfx::Sampler* sampler )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;・・・・
+}
+
+nn::font::RectDrawer rectDrawer;
+nn::font::ResFont resFont;
+
+// Initializes RectDrawer.
+rectDrawer.Initialize( &amp;gfxDevice, rectDrawerWorkBuf, CharMax );
+
+// Registers a sampler created inside RectDrawer to the descriptor pool.
+rectDrawer.RegisterSamplerToDescriptorPool( RegisterSamplerForDescriptorPool );
+
+// Sets the font resource.
+resFont.SetResource( &amp;gfxDevice, pFontResource );
+
+// Registers a texture contained in the configured resource to the descriptor pool.
+resFont.RegisterTextureViewToDescriptorPool( RegisterTextureForDescriptorPool );
+
+
+// Unregisters the registered texture contained in the font resource from the descriptor pool.
+resFont.UnregisterTextureViewFromDescriptorPool( UnregisterTextureFromDescriptorPool );
+
+// Unregisters a sampler created inside RectDrawer from the descriptor pool.
+rectDrawer.UnregisterSamplerFromDescriptorPool( UnregisterSamplerFromDescriptorPool );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In summary, objects must be registered to the descriptor pool when graphics resources are created inside a module, and they must be unregistered when they are freed.</p>
+<h3 id="Anchor_108531266_h3_2">Functions for Registering to the Descriptor Pool</h3>
+<table class="wrapped">
+  <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Module</th>
+      <th>Type</th>
+      <th>Member Function　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　</th>
+      <th>Timing of Call</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__font">nn::font</span>
+      </td>
+      <td>Sampler</td>
+      <td>
+        <p>
+          <span class="ApiLink_nn__font__RectDrawer__RegisterSamplerToDescriptorPool">nn::font::RectDrawer::RegisterSamplerToDescriptorPool</span>
+        </p>
+      </td>
+      <td>
+        <p>After the call to <code><span class="ApiLink_nn__font__RectDrawer__Initialize">nn::font::RectDrawer::Initialize</span>()</code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>Texture</td>
+      <td>
+        <p>
+          <span class="ApiLink_nn__font__TextureCache__RegisterTextureViewToDescriptorPool">nn::font::TextureCache::RegisterTextureViewToDescriptorPool</span>
+        </p>
+      </td>
+      <td>
+        <p>Before calling <code><span class="ApiLink_nn__font__TextureCache__Initialize">nn::font::TextureCache::Initialize</span>()</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>Texture</td>
+      <td>
+        <p>
+          <span class="ApiLink_nn__font__ResFont__RegisterTextureViewToDescriptorPool">nn::font::ResFont::RegisterTextureViewToDescriptorPool</span>
+        </p>
+      </td>
+      <td>
+        <p>After the call to <code><span class="ApiLink_nn__font__ResFont__SetResource">nn::font::ResFont::SetResource</span>()</code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__ui2d">nn::ui2d</span>
+      </td>
+      <td>Texture</td>
+      <td>
+        <span class="ApiLink_nn__ui2d__ResourceAccessor__RegisterTextureViewToDescriptorPool">nn::ui2d::ResourceAccessor::RegisterTextureViewToDescriptorPool</span>
+      </td>
+      <td>After the layout set from <code>ResourceAccessor</code> has been built and <code>CreateGroupAnimator()</code> has ended.<br />(To initialize the texture slot used with the texture pattern animation.)</td>
+    </tr>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>Sampler</td>
+      <td>
+        <span class="ApiLink_nn__ui2d__GraphicsResource__RegisterCommonSamplerSlot">nn::ui2d::GraphicsResource::RegisterCommonSamplerSlot</span>
+      </td>
+      <td>After the call to <code><span class="ApiLink_nn__ui2d__GraphicsResource__Setup">nn::ui2d::GraphicsResource::Setup</span>()</code>.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If multiple registration member functions are called, the descriptor slot stored inside the module is overwritten.</p>
+  </div>
+</div>
+<h3 id="Anchor_108531266_h3_3">Functions for Unregistering From the Descriptor Pool</h3>
+<table class="wrapped">
+  <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Module</th>
+      <th>Type</th>
+      <th>Member Function　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　</th>
+      <th>Timing of Call</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__font">nn::font</span>
+      </td>
+      <td>Texture</td>
+      <td>
+        <p>
+          <span class="ApiLink_nn__font__ResFont__UnregisterTextureViewFromDescriptorPool">nn::font::ResFont::UnregisterTextureViewFromDescriptorPool</span>
+        </p>
+      </td>
+      <td>
+        <p>Before the call to <code><span class="ApiLink_nn__font__ResFont__Finalize">nn::font::ResFont::Finalize</span></code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>Texture</td>
+      <td>
+        <p>
+          <span class="ApiLink_nn__font__TextureCache__UnregisterTextureViewFromDescriptorPool">nn::font::TextureCache::UnregisterTextureViewFromDescriptorPool</span>
+        </p>
+      </td>
+      <td>
+        <p>Before the call to <code><span class="ApiLink_nn__font__TextureCache__Finalize">nn::font::TextureCache::Finalize</span></code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>Sampler</td>
+      <td>
+        <span class="ApiLink_nn__font__RectDrawer__UnregisterSamplerFromDescriptorPool">nn::font::RectDrawer::UnregisterSamplerFromDescriptorPool</span>
+      </td>
+      <td>
+        <p>Before the call to <code><span class="ApiLink_nn__font__RectDrawer__Finalize">nn::font::RectDrawer::Finalize</span></code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__ui2d">nn::ui2d</span>
+      </td>
+      <td>Texture</td>
+      <td>
+        <span class="ApiLink_nn__ui2d__ResourceAccessor__UnregisterTextureViewFromDescriptorPool">nn::ui2d::ResourceAccessor::UnregisterTextureViewFromDescriptorPool</span>
+      </td>
+      <td>Before the call to <code><span class="ApiLink_nn__ui2d__ResourceAccessor__Finalize">nn::ui2d::ResourceAccessor::Finalize</span>()</code>.</td>
+    </tr>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>Sampler</td>
+      <td>
+        <span class="ApiLink_nn__ui2d__GraphicsResource__UnregisterCommonSamplerSlot">nn::ui2d::GraphicsResource::UnregisterCommonSamplerSlot</span>
+      </td>
+      <td>Before the call to <code><span class="ApiLink_nn__ui2d__GraphicsResource__Finalize">nn::ui2d::GraphicsResource::Finalize</span>()</code>.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>These unregistration member functions do not need to be called if unregistration from the descriptor pool is not being managed by the user.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__font', '../../../Api/HtmlNX/namespacenn_1_1font.html' )
+SetUrl( 'ApiLink_nn__font__RectDrawer__RegisterSamplerToDescriptorPool', '../../../Api/HtmlNX/classnn_1_1font_1_1_rect_drawer.html#a2b2a693ea12416940b4f948d90cb35b8' )
+SetUrl( 'ApiLink_nn__font__RectDrawer__Initialize', '../../../Api/HtmlNX/classnn_1_1font_1_1_rect_drawer.html#a9583fcd58c7e2cd856dff98cfb65d6f4' )
+SetUrl( 'ApiLink_nn__font__TextureCache__RegisterTextureViewToDescriptorPool', '../../../Api/HtmlNX/classnn_1_1font_1_1_texture_cache.html#a07742ce32d73dd83441dbcc698e3d680' )
+SetUrl( 'ApiLink_nn__font__TextureCache__Initialize', '../../../Api/HtmlNX/classnn_1_1font_1_1_texture_cache.html#a2f6d759bd8b3bdfd9077e25936ee40af' )
+SetUrl( 'ApiLink_nn__font__ResFont__RegisterTextureViewToDescriptorPool', '../../../Api/HtmlNX/classnn_1_1font_1_1_res_font_base.html#a9875091bb1e3b2c70ec1beece9121640' )
+SetUrl( 'ApiLink_nn__font__ResFont__SetResource', '../../../Api/HtmlNX/classnn_1_1font_1_1_res_font.html#ad12a6d532e5d298927cc5fc5839bf737' )
+SetUrl( 'ApiLink_nn__ui2d', '../../../Api/HtmlNX/namespacenn_1_1ui2d.html' )
+SetUrl( 'ApiLink_nn__ui2d__ResourceAccessor__RegisterTextureViewToDescriptorPool', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_resource_accessor.html#ac404c5cfd5f6782c38d12717cc1b0dc3' )
+SetUrl( 'ApiLink_nn__ui2d__GraphicsResource__RegisterCommonSamplerSlot', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_graphics_resource.html#add2f5ca7f39765b0dcc618dfa8653933' )
+SetUrl( 'ApiLink_nn__ui2d__GraphicsResource__Setup', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_graphics_resource.html#abf174973a19b5e84a0bfa17e733a4f05' )
+SetUrl( 'ApiLink_nn__font__ResFont__UnregisterTextureViewFromDescriptorPool', '../../../Api/HtmlNX/classnn_1_1font_1_1_res_font_base.html#af962fa7d8a1f51dfd8fea4c02c4802f4' )
+SetUrl( 'ApiLink_nn__font__ResFont__Finalize', '../../../Api/HtmlNX/classnn_1_1font_1_1_res_font.html#a014049eb4e5a05607e1ced12c459f502' )
+SetUrl( 'ApiLink_nn__font__TextureCache__UnregisterTextureViewFromDescriptorPool', '../../../Api/HtmlNX/classnn_1_1font_1_1_texture_cache.html#a1e287617bd5eb9425fb4c11191e7c478' )
+SetUrl( 'ApiLink_nn__font__TextureCache__Finalize', '../../../Api/HtmlNX/classnn_1_1font_1_1_texture_cache.html#a4b319c6d9716c27fc48c56204cc101da' )
+SetUrl( 'ApiLink_nn__font__RectDrawer__UnregisterSamplerFromDescriptorPool', '../../../Api/HtmlNX/classnn_1_1font_1_1_rect_drawer.html#a9c6cfe2d3c5d05b65d00ba583a593ace' )
+SetUrl( 'ApiLink_nn__font__RectDrawer__Finalize', '../../../Api/HtmlNX/classnn_1_1font_1_1_rect_drawer.html#ababb8dc2432bb310842dfe2d32fddc44' )
+SetUrl( 'ApiLink_nn__ui2d__ResourceAccessor__UnregisterTextureViewFromDescriptorPool', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_resource_accessor.html#a7ed435daa287702d94769b8f91ddb176' )
+SetUrl( 'ApiLink_nn__ui2d__ResourceAccessor__Finalize', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_resource_accessor.html#a98b6b75b2bddbd946f89f2d0dd83e20c' )
+SetUrl( 'ApiLink_nn__ui2d__GraphicsResource__UnregisterCommonSamplerSlot', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_graphics_resource.html#a51b31de04c9e99e14e4fa95235daa9e3' )
+SetUrl( 'ApiLink_nn__ui2d__GraphicsResource__Finalize', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_graphics_resource.html#a5817d0c752874afbfd6340e26b8be46a' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

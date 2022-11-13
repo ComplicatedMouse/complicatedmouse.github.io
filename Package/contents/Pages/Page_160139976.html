@@ -1,0 +1,267 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Headwear | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Headwear -->
+<div class="pagetitle" id="PageId_160139976">Headwear</div>
+<div class="text_separate">
+<h1 id="Anchor_160139976_h1_1">Headwear</h1>
+<p>This section describes how to create headwear.</p>
+<h2 id="Anchor_160139976_h2_1">Verifications Before Creating Headwear</h2>
+<p>To display a Mii character wearing headwear, you must first display a face model for headwear that only shows the face itself.</p>
+<p>The developer displays the face model for headwear using the Face library. For more information, see the face model types section in the <a href="../Pages/Page_126552992.html">Mii Face Model Composition</a> page.</p>
+<p>The following example shows a face model for headwear.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_161296499/161417249.png" width="300" class="embedded-image" />
+  </span>
+</p>
+<p>The created headwear is assumed to be shared for all face models for headwear. For the headwear to be made shareable, no part of the face outline must protrude from the headwear. Based on these factors, we have prepared samples of all Mii face outline models. There are twelve kinds of face outline models, and they have all been saved in <code>Faceline_sample</code>.</p>
+<p>Each face outline model has a <code>Null</code> value called <code>set_hair</code> that indicates the position of the hair model. <code>set_hair</code> has a parent-child relationship with the hair model. The headwear is loaded to this <code>set_hair</code> position.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_161296499/161417248.png" width="300" class="embedded-image" />
+  </span>
+</p>
+<p>The following example shows headwear attached with <code>set_hair</code>.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Bear Hood</th>
+      <th style="text-align: center;">Helmet</th>
+      <th style="text-align: center;">Full Face Helmet</th>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_161296499/161417257.png" width="200" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_161296499/161417259.png" width="200" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_161296499/161417258.png" width="200" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_160139976_h2_2">Creating Headwear</h2>
+<p>This section describes the procedure for creating headwear.</p>
+<p>We will first describe the process where the designer creates a model of the headwear, and the developer implements it.</p>
+<h3 id="Anchor_160139976_h3_1">Creating the Headwear Model Data (Designer Job)</h3>
+<p>The headwear must not protrude from the face when it is attached to each type of face outline. Create the headwear while matching the pivot point of the headwear to the origin point, and referencing <code>Faceline_sample</code>.</p>
+<p>There is a <code>Headwear_sample</code> for reference. The following list describes three of the <code>Headwear_sample</code> layers. If you create headwear that is larger than these layers, all areas of the face outline will be contained in the headwear.</p>
+<ul>
+  <li>Headgear<br />Sample bear-themed headwear. Protrusion will not occur when this sample is fitted to any of the face outlines.</li>
+  <li>Helmet<br />Sample helmet. Protrusion will not occur when this sample is fitted to any of the face outlines.</li>
+  <li>Fullface<br />Sample full face helmet. Protrusion will not occur when this sample is fitted to any of the face outlines. In addition, if using a feature to control the height of the nose, the nose will also not protrude.</li>
+</ul>
+<p>Having all of the face outlines not protruding from the headwear may not be possible depending on the shape of the headwear. In so, it is possible for the application developer to prepare separate headwear for each face outline model.</p>
+<p>The Face library has a feature for getting the number of the face outline, so you can use this feature to display different headwear for each face outline. You can get the face outline number by using <code><span class="ApiLink_nn__mii__CharInfoAccessor__GetFacelineType">nn::mii::CharInfoAccessor::GetFacelineType</span>()</code>.</p>
+<p>Consider the following important information.</p>
+<ul>
+  <li>If the headwear is too small when compared to <code>Hair_Sample</code>, which is the sample of a close-cropped hairstyle, the head of the Mii character may look like it is caved in.<br /><code>Hair_Sample</code> is the smallest shape of all the Mii heads, so use this for reference.</li>
+  <li>For headwear like helmets, the hair on the back of the head may be visible when viewed from below.<br />As it is not possible to get the hair color of the hair model that is used in combination, we recommend using shadow-like coloring.<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_161296499/161417251.png" width="300" class="embedded-image" /></span></li>
+  <li>Headwear that covers the face needs to be adjusted so that the nose does not protrude. For more information, see <a href="#Anchor_160139976_warning">How to Cover the Face With Headwear Without the Nose Sticking Out</a>.</li>
+</ul>
+<h3 id="Anchor_160139976_h3_2">Displaying the Headwear Model (Programmer Task)</h3>
+<p>Use the Face library to display the Mii face model, and display the headwear to match the face model.</p>
+<p>The headwear is attached to the face model for headwear, which only contains the face itself. To create a face model for headwear, set <code><span class="ApiLink_nn__mii__CreateFlag_FaceOnly">nn::mii::CreateFlag_FaceOnly</span></code> in the<code> <span class="ApiLink_nn__mii__CharModelInfo">nn::mii::CharModelInfo</span></code> flag that is passed during initialization of <code>n::mii::CharModel</code>. You can get the parameters used to display a face model, that includes only the face part, by specifying <code><span class="ApiLink_nn__mii__CreateModelType_FaceOnly">nn::mii::CreateModelType_FaceOnly</span></code> for <code><span class="ApiLink_nn__mii__CreateModelType">nn::mii::CreateModelType</span></code> in <code><span class="ApiLink_nn__mii__CharModel__GetDrawParam">nn::mii::CharModel::GetDrawParam</span>()</code>.</p>
+<p>Headwear is attached using the <code>Null</code> value <code>set_hair</code> in the face outline model. <code>set_hair</code> is the <code>Null</code> value indicating the position of the hair model. Use the <code><span class="ApiLink_nn__mii__CharModel__GetHatPartsTranslate">nn::mii::CharModel::GetHatPartsTranslate</span>()</code> function to get the translation information.</p>
+<p>Headwear that covers the face needs to be adjusted so that the nose cannot protrude. For more information, see <a href="#Anchor_160139976_warning">How to Cover the Face With Headwear Without the Nose Sticking Out</a>.</p>
+<h2 id="Anchor_160139976_h2_3">Verification After Creating Headwear</h2>
+<p>Attach the headwear to all of the Mii face models in the application and verify that there are no problems.</p>
+<h2 id="Anchor_160139976_h2_4">How to Cover the Face With Headwear Without the Nose Sticking Out<a name="Anchor_160139976_warning"></a></h2>
+<p>Headwear that covers the face, like full face helmets, may cause the nose to stick out depending on the size and location of the headwear. If so, lower the nose so that it does not protrude from the headwear.</p>
+<p>The following example shows using the <code>Headgear_Sample</code> layer <code>nose_limit</code> to control the height of the nose when headwear is attached.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Before Limiting Nose Height</th>
+      <th style="text-align: center;">After Limiting Nose Height</th>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_161296499/161417260.png" width="300" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_161296499/161417261.png" width="300" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The Face library provides features for creating a face model with a limited height nose. For more information, see <a href="#Anchor_160139976_NoseModelProgram">Displaying Face Models with Limited Nose Height (Programmer Task)</a>.</p>
+<p>If you use the feature to limit the nose height, the nose will not stick out beyond a certain surface in front of the face. Verify that there are no problems with displaying the Mii with limited nose height.</p>
+<p>In addition, there is a sample for limiting the height of the largest nose. The sample is the <code>Headgear_Sample</code> layer <code>Nose_max</code>. Three different nose locations positioned in the same layer. Reference these as well if the nose height is limited.</p>
+<p>The following figures show each of the three types of noses in the layer <code>Nose_max</code>.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">
+        <p style="text-align: center;">nose_max_top</p>
+        <p style="text-align: center;">(When the nose is moved to the topmost position)</p>
+      </th>
+      <th style="text-align: center;">
+        <p>nose_max_default</p>
+        <p style="text-align: center;">(When the nose is in its default position)</p>
+      </th>
+      <th style="text-align: center;">
+        <p>nose_max_bottom</p>
+        <p>(When the nose is moved to the bottommost position)</p>
+      </th>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_161296499/161417244.png" width="200" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_161296499/161417263.png" width="200" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_161296499/161417262.png" width="200" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_160139976_h3_3">Displaying Face Models with Limited Nose Height (Programmer Task)<a name="Anchor_160139976_NoseModelProgram"></a></h3>
+<p>To create a face model with limited nose height, specify <code><span class="ApiLink_nn__mii__CreateFlag_NoseFlatten">nn::mii::CreateFlag_NoseFlatten</span></code> for <code>CreateFlag</code>, which is passed when initializing <code><span class="ApiLink_nn__mii__CharModel">nn::mii::CharModel</span></code>.</p>
+<p>You can get the parameters for displaying face models with limited nose height by setting <code><span class="ApiLink_nn__mii__CreateNoseType">nn::mii::CreateNoseType</span></code> in <code><span class="ApiLink_nn__mii__CharModel__GetDrawParam">nn::mii::CharModel::GetDrawParam</span>()</code> to <code><span class="ApiLink_nn__mii__CreateNoseType_Flatten">nn::mii::CreateNoseType_Flatten</span></code>.</p>
+<p>For more information about face models and nose height, also reference the face model types page in the <a href="../Pages/Page_126552992.html">Mii Face Model Composition, Mii Face Models</a> page.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__mii__CharInfoAccessor__GetFacelineType', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_info_accessor.html#abb009943072f00e4c40bb7ac6c5b2437' )
+SetUrl( 'ApiLink_nn__mii__CreateFlag_FaceOnly', '../../../Api/HtmlNX/namespacenn_1_1mii.html#add180c32040f53f60d61b8e71f3a20d9af3192dd68cdf25ecf6aa59cb116b3647' )
+SetUrl( 'ApiLink_nn__mii__CharModelInfo', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model_info.html' )
+SetUrl( 'ApiLink_nn__mii__CreateModelType_FaceOnly', '../../../Api/HtmlNX/namespacenn_1_1mii.html#a19f550cb89b2b095417f135888953bb3abfabdee6846db8001b6f6937f0fbdaf5' )
+SetUrl( 'ApiLink_nn__mii__CreateModelType', '../../../Api/HtmlNX/namespacenn_1_1mii.html#a19f550cb89b2b095417f135888953bb3' )
+SetUrl( 'ApiLink_nn__mii__CharModel__GetDrawParam', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model.html#afe79d1d6e4ad8519ea8a55af0259044e' )
+SetUrl( 'ApiLink_nn__mii__CharModel__GetHatPartsTranslate', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model.html#ae2ccc81856b78790420c250726c5353b' )
+SetUrl( 'ApiLink_nn__mii__CreateFlag_NoseFlatten', '../../../Api/HtmlNX/namespacenn_1_1mii.html#add180c32040f53f60d61b8e71f3a20d9a9b828651aefa5161b86909bf054a9996' )
+SetUrl( 'ApiLink_nn__mii__CharModel', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model.html' )
+SetUrl( 'ApiLink_nn__mii__CreateNoseType', '../../../Api/HtmlNX/namespacenn_1_1mii.html#ab1d08064d4a8b9788b5b123bd6a22b21' )
+SetUrl( 'ApiLink_nn__mii__CreateNoseType_Flatten', '../../../Api/HtmlNX/namespacenn_1_1mii.html#ab1d08064d4a8b9788b5b123bd6a22b21aa4be938946bcd3e75b17d676f4f9c206' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

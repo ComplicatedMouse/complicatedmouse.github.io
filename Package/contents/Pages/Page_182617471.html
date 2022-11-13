@@ -1,0 +1,275 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Light Events | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Light Events -->
+<div class="pagetitle" id="PageId_182617471">Light Events</div>
+<div class="text_separate">
+<p>
+  <br />
+</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_182617471_h1_1">Light Event Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_182617471_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_182617471_h3_1">Event Functionality Differences</a>
+        </li>
+        <li>
+          <a href="#Anchor_182617471_h3_2">Auto-Clear Mode</a>
+        </li>
+        <li>
+          <a href="#Anchor_182617471_h3_3">Manual Clear Mode</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_182617471_h2_2">Using Lightweight Events</a>
+      </li>
+      <li>
+        <a href="#Anchor_182617471_h2_3">Specific Example of Using a Light Event</a>
+      </li>
+      <li>
+        <a href="#Anchor_182617471_h2_4">Light Event API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_182617471_h2_5">Notes About Using Lightweight Events</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_182617471_h3_4">Waiting For Multiple Events</a>
+        </li>
+        <li>
+          <a href="#Anchor_182617471_h3_5">Auto­Clear Mode</a>
+        </li>
+        <li>
+          <a href="#Anchor_182617471_h3_6">Manual­Clear Mode</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_182617471_h1_1">Light Event Feature</h1>
+<h2 id="Anchor_182617471_h2_1">Feature Overview</h2>
+<p>The lightweight event feature uses a 1-bit binary value representing the signaled and non-signaled states as a way to synchronize threads.</p>
+<h3 id="Anchor_182617471_h3_1">Event Functionality Differences</h3>
+<p>Functionally, lightweight events are similar to those in <a href="../Pages/Page_83955790.html">os Library &gt; Manual &gt; Events</a>, but with the following differences.</p>
+<ul>
+  <li>
+    <code>os::SignalLightEvent()</code> is not blocked by <code>os::WaitLightEvent()</code> or other lightweight event functions.</li>
+  <li>Cannot be specified for <a href="../Pages/Page_83955865.html">multiple waits</a>.</li>
+</ul>
+<p>Lightweight events are unique in that they are extremely simple, one-off event synchronization processes; the expectation is that the processing load is lighter compared to normal events.</p>
+<h3 id="Anchor_182617471_h3_2">Auto-Clear Mode</h3>
+<p>Specify <span class="ApiLink_void_nn__os__InitializeLightEvent(LightEventType_*event|_bool_initiallySignaled|_EventClearMode_clearMode)_NN_NOEXCEPT">nn::os::EventClearMode_AutoClear</span> when calling the <span class="ApiLink_nn__os__EventClearMode_AutoClear">nn::os::InitializeLightEvent()</span> function to enable auto-clear mode for that event.</p>
+<p>When auto-clear mode is enabled, if <span class="ApiLink_void_nn__os__WaitLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::WaitLightEvent()</span> is called while the event is in a signaled state, the calling thread continues to execute without waiting for the event. At this time, the event is automatically cleared to a non-signaled state. If the event is in the non-signaled state when <span class="ApiLink_void_nn__os__WaitLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::WaitLightEvent()</span> is called, the thread waits for the event.</p>
+<p>If <span class="ApiLink_void_nn__os__SignalLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::SignalLightEvent()</span> is called on an event for which one or more threads are waiting, only one of the waiting threads wakes up, and at the same time the event is automatically cleared to a non-signaled state. If there are no waiting threads, the event enters a signaled state.</p>
+<p>When auto-clear mode is enabled, there is never a case where multiple threads stop waiting at the same time.</p>
+<h3 id="Anchor_182617471_h3_3">Manual Clear Mode</h3>
+<p>Specify <span class="ApiLink_void_nn__os__InitializeLightEvent(LightEventType_*event|_bool_initiallySignaled|_EventClearMode_clearMode)_NN_NOEXCEPT">nn::os::EventClearMode_ManualClear</span> when calling the <span class="ApiLink_nn__os__EventClearMode_ManualClear">nn::os::InitializeLightEvent()</span> function to enable manual-clear mode for that event.</p>
+<p>When manual-clear mode is enabled, if <span class="ApiLink_void_nn__os__WaitLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::WaitLightEvent()</span> is called while the event is in the signaled state, the calling thread continues to execute without waiting for the event. At this time, the event maintains its signaled state. If the event is in the non-signaled state when <span class="ApiLink_void_nn__os__WaitLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::WaitLightEvent()</span> is called, the thread waits for the event.</p>
+<p>If <span class="ApiLink_void_nn__os__SignalLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::SignalLightEvent()</span> is called on the event while one or more threads are waiting, all of the waiting threads wake up. The event also maintains its signaled state after the threads wake up.</p>
+<p>Call the <span class="ApiLink_void_nn__os__ClearLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::ClearLightEvent()</span> function to clear the event to a non-signaled state.</p>
+<h2 id="Anchor_182617471_h2_2">Using Lightweight Events</h2>
+<p>To use a lightweight event, prepare an <span class="ApiLink_nn__os__LightEventType">nn::os::LightEventType</span> structure object like the one shown below.<br />There are no restrictions on where the object can be defined.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="nn">nn::os::</span><span class="n">LightEventType</span>    <span class="n">g_LightEvent</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Use the defined object according to the following procedure.</p>
+<ol>
+  <li>
+    <p>The light event must be initialized before it can be used.<br />Specify the initial state of the event in the second parameter and the clear mode in the third parameter.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeLightEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_LightEvent</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">EventClearMode_AutoClear</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Wait for the light event as necessary.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">WaitLightEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_LightEvent</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Set (signal) the light event as necessary.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">SignalLightEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_LightEvent</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>After you have finished using the light event, free it.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FinalizeLightEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_LightEvent</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_182617471_h2_3">Specific Example of Using a Light Event</h2>
+<p>There is no sample program for lightweight events, but the <span class="ApiLink_PageSampleOsEvent">event feature sample program</span> is functionally similar. To use this as a sample program for a lightweight event, change <span class="ApiLink_nn__os__EventType">nn::os::EventType</span> to <span class="ApiLink_nn__os__LightEventType">nn::os::LightEventType</span>, and change the API resources from <code>Event</code> to <code>LightEvent</code>.</p>
+<h2 id="Anchor_182617471_h2_4">Light Event API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeLightEvent(LightEventType_*event|_bool_initiallySignaled|_EventClearMode_clearMode)_NN_NOEXCEPT">nn::os::InitializeLightEvent()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::FinalizeLightEvent()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__WaitLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::WaitLightEvent()</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryWaitLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::TryWaitLightEvent()</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TimedWaitLightEvent(LightEventType_*event|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedWaitLightEvent()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SignalLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::SignalLightEvent()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__ClearLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::ClearLightEvent()</span>
+  </li>
+</ul>
+<h2 id="Anchor_182617471_h2_5">Notes About Using Lightweight Events</h2>
+<h3 id="Anchor_182617471_h3_4">Waiting For Multiple Events</h3>
+<p>It is not possible to wait for multiple light events. If you want to wait for multiple events, use the features of <a href="../Pages/Page_83955790.html">Event</a>.</p>
+<h3 id="Anchor_182617471_h3_5">Auto&shy;Clear Mode</h3>
+<p>When you use auto-clear mode (<span class="ApiLink_nn__os__EventClearMode_AutoClear">nn::os::EventClearMode_AutoClear</span>), you normally need to be careful to not use <span class="ApiLink_void_nn__os__ClearLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::ClearLightEvent()</span> more than necessary to control synchronization.</p>
+<p>In auto-clear mode, if the <span class="ApiLink_void_nn__os__SignalLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::SignalLightEvent()</span> function wakes a thread and <span class="ApiLink_void_nn__os__ClearLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::ClearLightEvent()</span> is called before the thread gets CPU execution rights, the thread goes back to waiting for signaling when it becomes operational because the target event is now in the non-signaled state. When using auto-clear mode, events are automatically cleared when a function such as <span class="ApiLink_void_nn__os__WaitLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::WaitLightEvent()</span> starts a new thread, so normally you do not need to manually call the <span class="ApiLink_void_nn__os__ClearLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::ClearLightEvent()</span> function.</p>
+<h3 id="Anchor_182617471_h3_6">Manual&shy;Clear Mode</h3>
+<p>You must be also careful about using the <span class="ApiLink_nn__os__EventClearMode_ManualClear">nn::os::ClearLightEvent()</span> function in manual clear mode (<span class="ApiLink_void_nn__os__ClearLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::EventClearMode_ManualClear</span>).</p>
+<p>Specifically, make sure that <span class="ApiLink_void_nn__os__WaitLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::ClearLightEvent()</span> is not called at approximately the same time as calls to <span class="ApiLink_void_nn__os__SignalLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::WaitLightEvent()</span> or <span class="ApiLink_void_nn__os__ClearLightEvent(LightEventType_*event)_NN_NOEXCEPT">nn::os::SignalLightEvent()</span> on other threads. In those kinds of situations, the order of operation in the threads is undefined, and there is no assurance that events will be waited for, set, and cleared in that order.</p>
+<p>If this kind of situation arises, reconsider your design and its use of the event feature.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__os__InitializeLightEvent(LightEventType_*event|_bool_initiallySignaled|_EventClearMode_clearMode)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#af5900620f2a25ffdd500d7fbcba5fe26' )
+SetUrl( 'ApiLink_nn__os__EventClearMode_AutoClear', '../../../Api/HtmlNX/namespacenn_1_1os.html#a11ab71d44973a4135958c420e5682452a31f6133098296b3ddb7e14da3dc695cc' )
+SetUrl( 'ApiLink_void_nn__os__WaitLightEvent(LightEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a148036d27d59d8b674c3f1b7579aa5c9' )
+SetUrl( 'ApiLink_void_nn__os__SignalLightEvent(LightEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a07e40a45392d6eb98e2ca635bc0c3506' )
+SetUrl( 'ApiLink_nn__os__EventClearMode_ManualClear', '../../../Api/HtmlNX/namespacenn_1_1os.html#a11ab71d44973a4135958c420e5682452a8b702480f5120eeeb01e7102227285da' )
+SetUrl( 'ApiLink_void_nn__os__ClearLightEvent(LightEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ab236036e46ae861732a4c6418b63ec01' )
+SetUrl( 'ApiLink_nn__os__LightEventType', '../../../Api/HtmlNX/structnn_1_1os_1_1_light_event_type.html' )
+SetUrl( 'ApiLink_PageSampleOsEvent', '../../../Api/HtmlNX/_page_sample_os_event.html' )
+SetUrl( 'ApiLink_nn__os__EventType', '../../../Api/HtmlNX/structnn_1_1os_1_1_event_type.html' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeLightEvent(LightEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a88b4a0191e818ad124b28b818349f072' )
+SetUrl( 'ApiLink_bool_nn__os__TryWaitLightEvent(LightEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ae1d2d9367d6312b284cd9e205a69adab' )
+SetUrl( 'ApiLink_bool_nn__os__TimedWaitLightEvent(LightEventType_*event|_TimeSpan_timeout)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a6aeea3ec3d35c57cd757b4a3d2ff7273' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

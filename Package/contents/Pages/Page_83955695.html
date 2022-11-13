@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Polygons | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Polygons -->
+<div class="pagetitle" id="PageId_83955695">Polygons</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955695_h1_1">Polygon Shapes</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955695_h1_2">Vertex</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955695_h1_3">Vertex color</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955695_h1_4">Instances</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955695_h1_5">Proxy Shapes</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955695_h1_6">Number of Valid Mesh Nodes</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_83955695_h1_1">Polygon Shapes</h1>
+<p>Polygons with more than four sides are subdivided into triangles (triangulated) for export to the intermediate file.<br />By default, the strategy when subdividing the polygons for the start frame (or in the bind pose if you are using skinning) is to make the smallest angle of the triangle as large as possible.<br />In this case, the following types of polygons cannot be exported correctly, so conduct triangulation in Maya and then export.</p>
+<ol>
+  <li>Polygons where all vertices do not lie in the same plane</li>
+  <li>Concave polygons (polygons that have internal angles of 180 degrees or more)</li>
+  <li>Polygons with holes in them</li>
+</ol>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955695/83080963.png" class="embedded-image" />
+  </span>
+</p>
+<p>When polygons end up in these shapes as a result of skinning or blend shape transformations, divide them into appropriate triangles in Maya and then export them.</p>
+<p>You can use the <a href="../Pages/Page_83956186.html#Anchor_83956186_optimize_triangulation">config file</a> to divide them into triangles in the same pattern as in Maya. (This feature is available in NintendoSDK 11.3.0 and later.)<br />In this case, export works correctly even if the start frame (bind pose) is in the preceding state.<br />However, for polygons for which skinning and shape blending transformation results are 1 or 2, first divide them into appropriate triangles in Maya before export. (They are converted to triangles in Maya based on the transformation results, but the triangle conversion pattern is fixed when exporting models in NintendoWare.)</p>
+<h1 id="Anchor_83955695_h1_2">Vertex</h1>
+<p>The number of vertices that can be exported to an intermediate file is sometimes greater than the number or vertices that can be used in Maya. Although this differs depending on the mesh structure, it can be three times the maximum number of triangular polygons.</p>
+<p>In addition, even if there are other vertices in Maya, if all vertex attributes are identical, they are exported to the intermediate file as the same vertices. However, vertices of objects for which blend shapes has been configured are exported as different vertices.<br />For example, if an object without skinning does not use either vertex color or UV, the vertex attributes consist only of the vertex coordinates and normals, and the vertex position or normals have to be changed slightly in Maya to export them as separate vertices.</p>
+<h1 id="Anchor_83955695_h1_3">
+  <a name="Anchor_83955695_vertex_color"></a>Vertex color</h1>
+<p>By default, only the vertex color for the current color set is exported to <code>color0</code> in the intermediate file. To export it, however, you must configure a vertex color.<br />However, if the name of the current color set begins with &quot;<code>nw_ignore</code>&quot;, vertex color will not be output for <code>color0</code>, even if vertex color has been set.</p>
+<p>To export several vertex colors (multi-vertex color), prepare color sets like the following ones, with the names <strong>nw4f_color<em>N</em></strong> (where <em>N</em> is an integer greater than 0 and less than 7).</p>
+<p>
+  <strong>nw4f_color0</strong> &rarr; exports to color0<br /><strong>nw4f_color1</strong> &rarr; exports to color1<br /><strong>nw4f_color2</strong> &rarr; exports to color2<br />　......<br /><strong>nw4f_color7</strong> &rarr; exports to color7</p>
+<p>(Up to 8 colors can be exported for each vertex.)</p>
+<p>If there is no color set with the name <strong>nw4f_color0</strong>, then the current color set will be exported to <code>color0</code>. (If the name of the current color set is <strong>nw4f_colorN</strong>, then the alphabetically first valid color set that is not <strong>nw4f_colorN</strong> will be exported to <code>color0</code>.</p>
+<p>The type of the vertex color value is defined by the ending of the color set name: If the name ends in <strong>_i</strong>, the type is an integer. The type is an unsigned integer if the name ends in <strong>_u</strong>, and it is a real number if the name ends in <strong>_f</strong>. If nothing has been specified, the type is a real number. <strong>The characters indicating the value type cannot be omitted when specifying output components with numerical values (described later).</strong><br />So, for example, if you want to export color1 as an integer, name the color set as <code>nw4f_color1_i</code>.<br />When the values are specified as integers and unsigned integers, Maya rounds up the real number for export. If you want to set values other than 0 and 1, disable the <strong>Clamped</strong> option when creating color sets.</p>
+<p>You can specify the output vertex color components by inserting a numeral (1, 2, 3, 4, or 5) <strong>before the letter that designates the value type</strong> at the end of the color set name.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Numerical Values</th>
+      <th>Output Components</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Only 1 component of R</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Only 2 components of RG</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Only 3 components of RGB</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>4 components of RGBA</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Only 2 components of RA</td>
+    </tr>
+  </tbody>
+</table>
+<p>For example, specify values such as <code>nw4f_color0_1i</code> (integer for one R component) and <code>nw4f_color0_3u</code> (unsigned integer for three RGB components). If you want to export <code>color3</code> as two components (RG) that are real number values, name the color set <code>nw4f_color3_2f</code>.</p>
+<p>If the specific output components have not been specified in the name, three components (RGB) will be exported for an RGB-type color set, and four components (RGBA) will be exported for an RGBA-type and A-type color set. (If the component type of the color set is A, 0 will be exported for R, G, and B.)</p>
+<h1 id="Anchor_83955695_h1_4">Instances</h1>
+<p>If instances are used, they are exported in the same state as instantiated instances.<br />However, the plug-in does not support instances of models for which skin has been configured.</p>
+<h1 id="Anchor_83955695_h1_5">Proxy Shapes</h1>
+<p>Transformed animations that use proxy shapes created with <strong>Subdiv Proxy</strong> (such as skinning) cannot be exported.</p>
+<h1 id="Anchor_83955695_h1_6">Number of Valid Mesh Nodes</h1>
+<p>Place only one valid mesh node with the <strong>Intermediate Object</strong> attribute set to off under any one transform node. Normally there is only one valid mesh node in any event, but in some cases there is more than one valid mesh node, such as after selecting <strong>Deform</strong> &gt; <strong>Deformers</strong> &gt; <strong>Display Intermediate Objects</strong>.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1243 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    ignoreClass: ".*",
+    processClass: "math-(display|inline)",
+    processEscapes: false,
+    processRefs: false
+  },
+  "HTML-CSS": {
+    imageFont: null
+  }
+});
+</script>
+<script type="text/javascript" src="../template/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG"></script>
+<title>Polygon Reduction | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Polygon Reduction -->
+<div class="pagetitle" id="PageId_162186377">Polygon Reduction</div>
+<div class="text_separate">
+<h1 id="Anchor_162186377_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_162186377_h1_1">Contents</a>
+    </li>
+    <li>
+      <a href="#Anchor_162186377_h1_2">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_162186377_h1_3">Terminology</a>
+    </li>
+    <li>
+      <a href="#Anchor_162186377_h1_4">What Is Mesh Simplification (Polygon Reduction)?</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_162186377_h2_1">Edge Based Simplification</a>
+      </li>
+      <li>
+        <a href="#Anchor_162186377_h2_2">Calculating the Cost of Deleting Edges</a>
+      </li>
+      <li>
+        <a href="#Anchor_162186377_h2_3">Calculating Optimization Position</a>
+      </li>
+      <li>
+        <a href="#Anchor_162186377_h2_4">Simplification Algorithm Behavior</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_162186377_h1_5">Description of Parameters and Features</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_162186377_h2_5">Simplification Rate</a>
+      </li>
+      <li>
+        <a href="#Anchor_162186377_h2_6">Simplification Quality</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_162186377_h3_1">Algorithm Overview</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_162186377_h2_7">Simplification With Properties</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_162186377_h3_2">Parameter Settings</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_162186377_h2_8">Protecting Edges</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_162186377_h3_3">Open Edges and Protection Angle</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_162186377_h4_1">Open Edges</a>
+          </li>
+          <li>
+            <a href="#Anchor_162186377_h4_2">UV Space and UV Atlases</a>
+          </li>
+          <li>
+            <a href="#Anchor_162186377_h4_3">UV Hard Edges and Open Edges in UV Space</a>
+          </li>
+          <li>
+            <a href="#Anchor_162186377_h4_4">Edge Protection Angle</a>
+          </li>
+        </ul>
+        <li>
+          <a href="#Anchor_162186377_h3_4">Parameter Settings: Protect Open Edges</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_162186377_h4_5">Open Edge Detection</a>
+          </li>
+        </ul>
+        <li>
+          <a href="#Anchor_162186377_h3_5">Parameter Settings: Protect UV Hard Edges</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_162186377_h2_9">Simplification With UV Coordinate Protection</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_162186377_h3_6">Relationship Between UV Space (2D Space) and Mesh Space (3D Space)</a>
+        </li>
+        <li>
+          <a href="#Anchor_162186377_h3_7">UV Edge Deletion Cost 1 - Deletion Cost of Non-Hard Edges</a>
+        </li>
+        <li>
+          <a href="#Anchor_162186377_h3_8">UV Edge Deletion Cost 2 - Deletion Cost of Hard Edges</a>
+        </li>
+        <li>
+          <a href="#Anchor_162186377_h3_9">UV Weighting: Simplification Using Both UV Cost and Mesh Cost</a>
+        </li>
+        <li>
+          <a href="#Anchor_162186377_h3_10">Parameter Settings: UV Weight</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_162186377_h2_10">Simplification With Normal Protection</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_162186377_h3_11">Calculating Normal Cost</a>
+        </li>
+        <li>
+          <a href="#Anchor_162186377_h3_12">Parameter Settings</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_162186377_h2_11">Simplification With Motion Protection</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_162186377_h3_13">Calculating Weights</a>
+        </li>
+        <li>
+          <a href="#Anchor_162186377_h3_14">Parameter Settings</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_162186377_h2_12">Parameters for Controlling Simplification</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_162186377_h3_15">Setting Post-Simplification Positions</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_162186377_h4_6">Submesh Boundaries</a>
+          </li>
+        </ul>
+        <li>
+          <a href="#Anchor_162186377_h3_16">Controlling the Shapes and Areas of Faces Created During Simplification</a>
+        </li>
+        <li>
+          <a href="#Anchor_162186377_h3_17">Applying a Height Offset</a>
+        </li>
+        <li>
+          <a href="#Anchor_162186377_h3_18">Simplification Without Cost Accumulation: Smoothing Options</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_162186377_h2_13">Mesh Preprocessing</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_162186377_h1_6">Past Issues and FAQ</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_162186377_h2_14">Holes appear in the ground data.</a>
+      </li>
+      <li>
+        <a href="#Anchor_162186377_h2_15">The mesh gets broken in UV space.</a>
+      </li>
+      <li>
+        <a href="#Anchor_162186377_h2_16">Characteristic vertices get moved.</a>
+      </li>
+      <li>
+        <a href="#Anchor_162186377_h2_17">I can’t reduce the polygon count as much as I expected.</a>
+      </li>
+      <li>
+        <a href="#Anchor_162186377_h2_18">Shape compression results in excessive polygon reduction.</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_162186377_h1_7">Simplified Table of Options by Intended End Result</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_162186377_h1_2">Overview</h1>
+<p>This document describes how to use the polygon reduction feature included in the intermediate file optimizer. This document is intended for developers responsible for maintaining this program and for people who will actually be using the polygon reduction feature and anyone else who may need additional implementation details about the feature.</p>
+<p>
+  <a href="../Pages/Page_161295697.html">3D &gt; Tutorial &gt; Polygon Reduction</a>
+</p>
+<p>The method for introducing this feature is described in the preceding section.</p>
+<p> </p>
+<p>To simplify,</p>
+<p>1) Merge data such as vertices and shapes that are currently split up into many separate entities to make the data easier to work with and convert it to a state in which further optimizations are possible.</p>
+<p>2) Build references to texture coordinate space and shape space.</p>
+<p>3) Apply the reduction process.</p>
+<p>4) Reconvert the data to a state in which it can be converted to binary data.</p>
+<p>These four processes comprise polygon reduction. The reduction process includes the following features.</p>
+<ul style="list-style-type: square;">
+  <li>Basic shape reduction</li>
+  <li>Minimizing loss in texture coordinates by evaluating texture coordinates in UV space</li>
+  <li>Using blend weights to ensure that models are still suitable for animation after the reduction process</li>
+  <li>Protecting characteristic shapes using normals</li>
+  <li>Reducing output data size by sharing vertices with the original mesh</li>
+  <li>Options for selecting reduction faces according to parameters such as face area and face shape</li>
+</ul>
+<p>Each section and sub-section includes a technical description of the corresponding feature and a description of how to use the feature. This document is intended to make the development process easier and more intuitive by providing additional technical details for developers and detailed descriptions of the various parameters available to designers who will be actually using the program.</p>
+<p> </p>
+<p>Feel free to contact Nintendo with any questions or comments that may arise while using this document.</p>
+<h1 id="Anchor_162186377_h1_3">Terminology</h1>
+<p>This section provides a brief description of the terminology used in this document.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Term</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Mesh</td>
+      <td>A portion of a shape or an entire shape that defines a 3D geometry.</td>
+    </tr>
+    <tr>
+      <td>Shape</td>
+      <td>A shape as used in the model intermediate file format.</td>
+    </tr>
+    <tr>
+      <td>Model</td>
+      <td>A collection of shapes, or the model intermediate file itself.</td>
+    </tr>
+    <tr>
+      <td>Submesh</td>
+      <td>Portions of a shape or an entire shape as defined in the model intermediate file.</td>
+    </tr>
+    <tr>
+      <td>Face</td>
+      <td>The polygons that create a mesh, or a single triangle in the mesh.</td>
+    </tr>
+    <tr>
+      <td>UV space</td>
+      <td>A 2D space defined in terms of UV coordinates (such as the UV window in Maya, for example).</td>
+    </tr>
+    <tr>
+      <td>UV atlas</td>
+      <td>A closed shape defined in UV space using UV coordinates.</td>
+    </tr>
+    <tr>
+      <td>Open edge</td>
+      <td>A side defined in space that only contacts one face.</td>
+    </tr>
+    <tr>
+      <td>Hard edge</td>
+      <td>An open edge with additional properties. In this plug-in, a UV hard edge is simply an open edge in UV space.</td>
+    </tr>
+    <tr>
+      <td>Cost</td>
+      <td>The amount of shape data lost when changes are applied to the shape.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Symbol Definitions</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Symbol</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>e(i,j)</td>
+      <td>An edge in a mesh between a vertex i and a vertex j.</td>
+    </tr>
+    <tr>
+      <td>ue(i,j)</td>
+      <td>An edge in UV space between a vertex i and a vertex j.</td>
+    </tr>
+    <tr>
+      <td>Q(v)</td>
+      <td>A value that expresses the amount of change in a shape at a particular vertex position v due to the reduction process.</td>
+    </tr>
+    <tr>
+      <td>&Delta;(a,b,c)</td>
+      <td>A triangle defined by vertices a, b, and c.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_162186377_edge-based-simplification"></a>
+</p>
+<h1 id="Anchor_162186377_h1_4">What Is Mesh Simplification (Polygon Reduction)?</h1>
+<p>This section provides a basic introduction and overview of the polygon reduction process. Reading this section will provide a basic background on polygon reduction and improve your understanding of each sub-process.</p>
+<p>Polygon reduction is a process in which some vertices, edges, or faces of an input mesh of an arbitrary size are selectively deleted to reduce the overall number of faces in the mesh. The vertices, edges, or faces selected for deletion are selected such that the pre-reduction mesh and the post-reduction mesh are kept as similar as possible. Polygon reduction is an active field of research, with research results being announced regularly. Some of the existing results of polygon reduction research are described in detail in literature such as Polygon Mesh Processing by Mario Botsch et al. (ISBN-10: 1568814267). However, this document only covers the technologies relevant to this plug-in.</p>
+<h2 id="Anchor_162186377_h2_1">Edge Based Simplification</h2>
+<div>
+  <p>Set the Lagrange multipliers described previously. This library is built on an edge based simplification strategy. As illustrated in the following figures, in this strategy, deletable edges are selected, the vertices at either end of the edges are merged together into a single vertex, and then the old edge is deleted. The edges that are deleted are typically selected based on the change in mesh volume that would result from deleting the edge. A representative algorithm is quadric error metrics. The common characteristic of these algorithms is how the edges to be deleted are selected. The amount of change in a mesh resulting from deleting an edge is calculated as a cost value. These algorithms implement a greedy simplification process in which the edges with the smallest cost are selected for deletion. This process minimizes the net change in the shape of a mesh due to the simplification process.</p>
+  <p>
+    <span class="embedded-file-wrapper image-center-wrapper">
+      <img src="../Attachments/Attach_162186377/161426969.png" class="embedded-image image-center" />
+    </span>
+  </p>
+  <p style="text-align: center;">Figure 1. Polygon Reduction by Edge Deletion When an edge e(i,j) with vertices Vi and Vj is deleted, the two faces f1 and f2 on either side of the edge disappear, and the two vertices are merged together into a single vertex Vi&rsquo; to reduce the total number of faces by 2 (and reduce the total number of vertices by 1).</p>
+</div>
+<h2 id="Anchor_162186377_h2_2">Calculating the Cost of Deleting Edges</h2>
+<p style="text-align: center;">
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_162186377/161426968.png" class="embedded-image" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 2. Overview of Cost Calculation Using Quadric Error Metrics </p>
+<p style="text-align: left;">Edges to be deleted are selected using a greedy algorithm that prioritizes edges with the lowest cost. This section provides more information about the concept of edge deletion cost. Although the library includes several additional optimizations, edge deletion cost is essentially calculated using quadric error metrics (QEM). For this reason, this section focuses on QEM cost calculation. The basic concepts behind QEM are extremely simple. As shown in Figure 2, the cost is calculated by squaring the distance between a vertex v and a face f and then adding up these distances for the set {S} of all of the faces adjacent to the vertex v1. The reason for squaring the distances is so that changes in the sign of the calculated amounts of change due to protrusions and recesses in the shape do not cancel each other out.</p>
+<p style="text-align: left;">Taking <code>Q(v)</code> as cost...</p>
+<p style="text-align: left;">
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426967.png" width="500" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: left;">This equation is the result. v is the vertex coordinates, and the face is determined by n&middot;x&nbsp;+&nbsp;d&nbsp;=&nbsp;0. In addition, saving the results of calculating the squares of the distances as sets of operators {A,b,c} that do not depend on the vertex coordinates v makes it possible to calculate the cost more easily.</p>
+<h2 style="text-align: left;" id="Anchor_162186377_h2_3">Calculating Optimization Position</h2>
+<div class="math-display">\[ v^T(n \cdot n^T)v + 2dn^T \cdot v + d^2 \]</div>
+<p style="text-align: left;">The formula for calculating the cost is a strictly convex quadratic function. The optimal solutions to non-linear quadratic programming problems are often obtained using an optimization method such as Newton's method. However, as is well known, the following equation provides the optimal solution to a strictly convex quadratic function.</p>
+<div class="math-display">\[ {\nabla}Q=2Av_{min} + 2b = 0 \]</div>
+<p style="text-align: left;">  You can expand this equation as follows:</p>
+<div class="math-display">\[ v_{min} = A^{-1}b \]</div>
+<p>This equation shows that simply solving this system of equations yields the optimization position. You can use a method such as Gauss-Jordan elimination or LU decomposition to solve the system of equations directly, or you can get an inverse matrix to find the optimization position more quickly. However, if the matrix A is singular (that is, if the determinant of the matrix is equal to 0), this inverse matrix cannot be obtained, and so the optimal solution cannot be obtained either. In addition, in some cases accumulation of calculation errors causes the method of the calculating the inverse matrix to yield a poor result. For this reason, using Gauss-Jordan elimination to solve the system of equations is usually the best choice even though the amount of calculations involved is three times greater than when using standard LU decomposition.</p>
+<p> </p>
+<h2 id="Anchor_162186377_h2_4">Simplification Algorithm Behavior</h2>
+<p>This section provides more information about the cost value described in the preceding section and the simplification algorithm in which the characteristic information for calculating that cost (the quadric error metric (Q)) is used.</p>
+<ol>
+  <li>Calculate <code>Q<sub>v</sub></code> for all vertices <code>v</code> in a mesh <code>M</code> (that is, for <code>v&isin;M</code>).</li>
+  <li>Calculate the cost <code>C&nbsp;</code>=<code>&nbsp;Q<sub>v1</sub>(newV)&nbsp;+&nbsp;Q<sub>v2</sub>(newV)</code> for all edges <code>e(v1,v2)</code> in the mesh <code>M</code> (that is, for <code>e(v1,v2)&isin;M</code>). <code>newV</code> is a new vertex coordinate.</li>
+  <li>Store the calculated costs for all of the edges in the heap.</li>
+  <li>Get the edges with the smallest cost from the heap, and delete those edges. After that step, update the operator for the new vertex to <code>Q<sub>newV</sub>&nbsp;</code>=<code>&nbsp;Q<sub>v1</sub>&nbsp;+&nbsp;Q<sub>v2</sub></code>.</li>
+  <li>Calculate the costs for the edges that have the new vertex <code>newV</code> at one end, and add those costs to the heap.</li>
+  <li>If the desired number of reduced polygon has been achieved, end the process. Otherwise, return to step 4.</li>
+</ol>
+<p>The simplification process includes steps 1 to 6.</p>
+<p>In this library, the Q value used to calculate the cost can be weighted according to various schemes to determine the priority of edges to be deleted as necessary. For this reason, considering the basic behavior of the algorithm described in this section will likely make working with and maintaining the library easier.</p>
+<h1 id="Anchor_162186377_h1_5">Description of Parameters and Features</h1>
+<p>This section provides specific information about using the available parameters, what these parameters do, and how to calculate them. The description for each parameter includes how to configure the parameter and additional technical information intended for developers.</p>
+<h2 id="Anchor_162186377_h2_5">Simplification Rate</h2>
+<ul>
+  <li>Regular parameter: <code>--target-rate-lod-level*&lt;rate&gt;</code></li>
+</ul>
+<p>Specify a number from 1 to 9 for <code>*</code>. For <code>&lt;rate&gt;</code>, specify a value from 0 to 1.0. For example, <code>--target-rate-lod-level1</code> would be LOD level 1. In this way, you can create versions of the shape at LODs of 1 to 9. The algorithm attempts to reduce polygons until the specified reduction rate is achieved. However, the reduction process may end earlier than expected in some cases if there are no more faces that can be removed.</p>
+<p>[Parameter] <code>rate</code>. Decimal number from 0 to 1.　For example, specify <code>0.25</code> to reduce the number of polygons by 25%.</p>
+<p>Example: <code>3dIntermediateFileOptimizer human.fmdb --polygon-reduction --polygon-reduction-options &quot;--target-rate-lod-level1 0.3&quot;</code></p>
+<p>Figure 3 shows the original model and the model after polygon reduction.</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426960.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 3. Simplification Results: Original - 2,103 Polygons (Left), Simplified - 630 Polygons (Right)</p>
+<p style="text-align: left;"> </p>
+<h2 id="Anchor_162186377_h2_6">Simplification Quality</h2>
+<ul>
+  <li>Regular parameter: <code>--quality=&lt;quality&gt;</code></li>
+</ul>
+<p>Only delete edges that result in, at most, an <em>x</em> percentage change in the initially calculated cost to ensure that the mesh does not undergo any drastic changes. In other words, only edges for which the cost is less than or equal to the maximum cost&times;X% are deleted. This makes it possible to prevent significant shape changes. However, in some cases it may not be possible to achieve the desired reduction in polygon count. In addition, specifying a value of 1.0 results in the maximum number of deletions, without regard for whether this causes surfaces to turn inside out.</p>
+<p>Particularly for objects such as mechanical objects that have a well-defined shape and an extremely large maximum cost value, this feature may not do anything unless you specify a very small value.</p>
+<p>[Parameter] <code>quality</code>. Decimal number from 0 to 1. Default value: 0.99.</p>
+<p>Example: <code>3dIntermediateFileOptimizer human.fmdb --polygon-reduction --polygon-reduction-options &quot;--target-rate-lod-level1 0.3 --quality 0.004&quot;</code></p>
+<p>The following image shows an example of using this option. This image was created by applying the <code>--quality</code> option to the output results shown in Figure 3. Compare the differences between this image and Figure 3. Specifying to only delete edges with a maximum cost of less than or equal to 0.4 percent makes it easy to preserve the details in characteristic locations such as the eyes and the mouth but results in a large number of polygons being left over.</p>
+<p>If your mesh includes any open edges (described in the next section), it will have a high maximum cost. As a result, this option will not do anything unless you specify a very small value. In addition, the cost of moving open edges is significantly larger than the cost of moving internal edges in the mesh, so open edges tend to be very difficult to move.</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426959.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 4. Simplification Results: Original - 2,103 Polygons (Left), Simplified - 865 Polygons (Right)</p>
+<h3 style="text-align: left;" id="Anchor_162186377_h3_1">Algorithm Overview</h3>
+<p>The <code>--quality</code> parameter provides a way to limit the change in the volume of a mesh relative to its original volume. When using the <code>--quality</code> parameter, only edges for which the cost x satisfies x&nbsp;&le;&nbsp;R*M (where M is the maximum cost for all of the edges and R is the specified reduction rate) are deleted. In addition, specifying a value of 1.0 for R results in the maximum number of deletions, without regard for whether this causes surfaces to turn inside out.</p>
+<p>
+  <a name="Anchor_162186377_property-flag"></a>
+  <br />
+</p>
+<h2 id="Anchor_162186377_h2_7">Simplification With Properties</h2>
+<p>This section describes how to apply the simplification process with additional properties in place. The library can simplify models while keeping the values of the specified model properties as natural as possible.</p>
+<h3 style="text-align: left;" id="Anchor_162186377_h3_2">Parameter Settings</h3>
+<ul>
+  <li>Regular parameter: <code>--property-flag &lt;flag&gt;</code></li>
+</ul>
+<p>This parameter specifies the properties that are considered during polygon reduction.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Position //Consider the positions of vertices.
+Normal //Consider the vertex normals.        
+UV //Consider the UV texture coordinates.            
+BlendWeight //Consider the motion.
+All</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Specifies the properties that are considered during polygon reduction. The strings defining the properties can be combined, or they can be added by configuring them separately.</p>
+<p>Consider this example:</p>
+<p>--property-flag Position|Normal</p>
+<p>(In this example the strings have been spliced together using the pipe character (|).)</p>
+<p>--property-flag Position --property-flag Normal</p>
+<p>(Here the properties are specified by making multiple calls.)</p>
+<p>
+  <br />When the properties are specified in either of the preceding ways, the polygon reduction process takes vertices, normals, and UV coordinates into consideration.<br />Default: Position</p>
+<p>
+  <strong>The behavior of the algorithm when protecting UV coordinates, normals, and blend weights will be described separately in different sections. This section just shows how to configure the parameter.</strong>
+</p>
+<p>
+  <a name="Anchor_162186377_protection_angle"></a>
+  <br />
+</p>
+<h2 id="Anchor_162186377_h2_8">Protecting Edges</h2>
+<p>This section provides a brief description of the terminology and concepts required to understand how to configure the edge protection parameter and how it works. The actual method for configuring the parameter will be described afterwards.</p>
+<h3 id="Anchor_162186377_h3_3">Open Edges and Protection Angle</h3>
+<p>This section introduces the concepts of open edges and protection angles.</p>
+<h4 id="Anchor_162186377_h4_1">Open Edges</h4>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426956.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 5. Open Edges</p>
+<p>The term <em>open edge</em> refers to edges such as the red edges in Figure 5. For the blue edges, there are faces on both the left and right sides of the edge, but for the red edges, there is only a face on one side of the edge. In other words, open edges are edges where the mesh is not closed on one side.</p>
+<h4 id="Anchor_162186377_h4_2">UV Space and UV Atlases</h4>
+<p>As illustrated in Figure 7, when a texture is applied to a model, there is a shape that is defined in UV coordinates and is separate from the model shape.</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426958.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p> </p>
+<p style="text-align: center;">Figure 7. Dragon Model (46,568 Polygons) and UV Coordinates for the Model</p>
+<p>The closed shapes on the right side of Figure 7 are created in UV space and are known as UV atlases. If these closed shapes are not protected during the simplification process, textures may in some cases look very bad when applied to the model after the simplification process is complete. In particular, if open edges (described in more detail later) in the UV atlas cannot be protected, any textures applied to the simplified model tend to look quite bad when rendered. For these reasons, this library prioritizes protection of UV hard edges unless you explicitly specify to do otherwise.</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426957.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 8. Example of Breaking Hard Edges In this version of the library, issues of this type almost never happen.</p>
+<h4 style="text-align: left;" id="Anchor_162186377_h4_3">UV Hard Edges and Open Edges in UV Space</h4>
+<p style="text-align: left;">
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426953.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 9. UV Hard Edges</p>
+<p>As illustrated in Figure 9, a hexagonal mesh includes six vertices {v0, ... ,v6}. If the UV atlases shown in blue and orange are assigned to this mesh, the vertices {v3, v4, v5} will have different indices in UV space and may sometimes have different values entirely. In this case, the edges e(4,5) and e(3,4) are known as hard edges.</p>
+<p style="text-align: left;">
+  <strong>As per the intermediate file specifications, hard edges are not determined according to differences in indices but rather according to distances. For this reason, make sure that vertices that you want to be connected by a hard edge are separated from each other by a distance of at least 0.00001 in UV coordinates.</strong>
+</p>
+<h4 id="Anchor_162186377_h4_4">Edge Protection Angle</h4>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426955.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 6. Edge Protection Angle</p>
+<p>Assume that the solid bold lines in Figure 6 are open edges. The angle between each set of two connected edges is theta. It is indicated by &Theta; on both the left and right sides of the figure, regardless of orientation. In other words, the protection angle theta is defined as a value between 0&deg; and 90&deg;.</p>
+<p>Assume that this condition is true throughout this document unless specifically noted otherwise.</p>
+<p style="text-align: left;">
+  <br />
+</p>
+<h3 style="text-align: left;" id="Anchor_162186377_h3_4">Parameter Settings: Protect Open Edges</h3>
+<ul>
+  <li style="text-align: left;">Regular parameter: <code>--open-edge-lock-angle &lt;theta&gt;</code></li>
+</ul>
+<p>Sets a protection angle between open edges. Specify a value between 0&deg; and 90&deg;. Edges connected by an angle less than or equal to the specified angle will be treated as movable. Specify the desired protection angle for <code>&lt;theta&gt;</code>.</p>
+<p style="text-align: left;">[Parameter] <code>theta</code>. An angle from 0&deg; to 90&deg; (do not specify in radians). Default value: 90.0.</p>
+<p style="text-align: left;">Example: <code>3dIntermediateFileOptimizer human.fmdb --polygon-reduction --polygon-reduction-options &quot;--target-rate-lod-level1 0.25 --open-edge-lock-angle XX&quot;</code></p>
+<p style="text-align: left;">
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426954.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 9. Original - 2,576 Polygons (Left). Protection Angle=90&deg; - 643 Polygons (Center). Protection Angle=0&deg; - 644 Polygons (Right)</p>
+<p style="text-align: left;">Figure 9 shows the results of setting a protection angle. The original mesh is shown on the left. For the mesh in the center, the protection angle was set to 90&deg; (no protection). For the mesh on the right, the protection angle was set to 0&deg; (do not move any boundaries). The final polygon count is essentially the same in both cases. However, the results near the open edges are completely different.</p>
+<h4 style="text-align: left;" id="Anchor_162186377_h4_5">Open Edge Detection</h4>
+<p>Open edges are detected using a winged edge structure. The winged edge structure continues to be used to update the mesh when edges are deleted until the process is complete.</p>
+<h3 style="text-align: left;" id="Anchor_162186377_h3_5">Parameter Settings: Protect UV Hard Edges</h3>
+<ul>
+  <li>Regular parameter: <code>--lock-uv-hard-edge &lt;theta&gt;</code></li>
+</ul>
+<p>[Parameter] <code>theta</code>. Specify an angle from 0&deg; to 90&deg;. Specify 90&deg; for this parameter to disable hard edge protection. Default value: 90.</p>
+<p>Example: <code>3dIntermediateFileOptimizer human.fmdb --polygon-reduction --polygon-reduction-options &quot;--target-rate-lod-level1 0.125 --property-flag Position|UV --lock-uv-hard-edge 90&quot;</code></p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426952.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 10. 5,820 Polygons If hard edge protection is not enabled, the shape is maintained to the extent that UV boundaries are moved.</p>
+<p style="text-align: left;">Example: <code>3dIntermediateFileOptimizer human.fmdb --polygon-reduction --polygon-reduction-options &quot;--target-rate-lod-level1 0.125 --property-flag Position|UV --lock-uv-hard-edge 0&quot;</code></p>
+<p style="text-align: center;">
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_162186377/161426951.png" class="embedded-image" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 11. 5,820 Polygons If hard edges are not moved at all, no UV boundaries are moved, but it becomes much more difficult to preserve the original shape.</p>
+<p style="text-align: left;">Figures 10 and 11 show the hard edge protection results. Figure 10 corresponds to when UV hard edge protection is not enabled, and Figure 11 corresponds to when all UV hard edges are protected. As illustrated in the figures, UV hard edge protection tends to have an extremely prominent effect on the shape of a mesh. Meanwhile, when boundary protection is not enabled for low polygon count meshes that have a large number of UV atlases, the mesh tends to look bad when a UV texture is applied. In this case, you can use this parameter to prevent the model from looking bad when a UV texture is applied and rendered.</p>
+<h2 style="text-align: left;" id="Anchor_162186377_h2_9">Simplification With UV Coordinate Protection</h2>
+<p>This section describes how polygon reduction works <strong>when the UV coordinates flag is specified for the <code>--property-flag</code> parameter</strong>, in addition to how to configure the UV weight parameter. Note that simply enabling the UV coordinates flag may not necessarily be enough to ensure good results from the simplification process. It is important to also configure the UV weight parameter appropriately.</p>
+<h3 id="Anchor_162186377_h3_6">Relationship Between UV Space (2D Space) and Mesh Space (3D Space)</h3>
+<p>Figure 7 shows a mesh and the UV atlases for that mesh. For a particular edge e(i,j) between a vertex i and a vertex j in mesh space, there exists a corresponding edge ue(k,l) between a vertex k and a vertex l with UV coordinates in UV space. When such an edge is deleted in mesh space, the corresponding edge in UV space must also be deleted.</p>
+<p>In Figure 12, for example, when the edge e(4,5) in the mesh is deleted, the two edges ue(4,5) in UV space are also deleted. Figure 13 shows the result of deleting the edges.</p>
+<p style="text-align: center;">
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_162186377/161426949.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 12. Before Deletion</p>
+<p style="text-align: center;">
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_162186377/161426940.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 13. After Deletion</p>
+<p style="text-align: left;">As shown in Figure 12 and Figure 13, there is a defined relationship between edges in mesh space and edges in UV space. For this reason, any deletion of edges must account for this relationship correctly. The concept of calculating cost as part of the mesh simplification process was described earlier in this document. Edges in UV space must be selected for deletion using a similar process. The following section describes how UV edge deletion cost is calculated as part of the UV simplification process. A good understanding of this process is required to understand how mesh simplification works when UV coordinate protection enabled.</p>
+<h3 style="text-align: left;" id="Anchor_162186377_h3_7">UV Edge Deletion Cost 1 - Deletion Cost of Non-Hard Edges</h3>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426947.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 14. UV Edge Deletion Cost</p>
+<p style="text-align: left;">Figure 14 illustrates how UV edge deletion cost is calculated for UV edges that are not boundary edges. As described earlier, in mesh space, cost is calculated in terms of distance from a plane. Simplifying this concept to two dimensions, it would be natural to assume that cost would be calculated in terms of distance to an edge prior to deleting that edge. However, you can simplify this further and calculate essentially the same quantity as distances from vertices. As a result, you can use the maximum value of the distances from the vertices of an edge as the cost. Based on this definition of cost, the algorithm attempts to minimize the change in the UV coordinates of each vertex.</p>
+<h3 style="text-align: left;" id="Anchor_162186377_h3_8">UV Edge Deletion Cost 2 - Deletion Cost of Hard Edges</h3>
+<p style="text-align: left;">
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426946.png" width="500" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 15. UV Hard Edge Deletion Cost</p>
+<p style="text-align: left;">When deleting a UV boundary, simply calculating distance is not usually sufficient to provide an accurate evaluation of deletion cost. For this reason, as illustrated in Figure 15, when a hard edge is deleted, deletion cost is evaluated using the areas of triangles that connect the vertices on the hard edge with the new vertex created after edge deletion. In the figure, &Delta;(v0',v0,v2) and &Delta;(v0',v1,v3) represent a positive change in area, while &Delta;(v0',v0,v1) represents a negative change in area. The sum of these areas is used as the deletion cost for the hard edge.</p>
+<p style="text-align: left;">
+  <a name="Anchor_162186377_uv-wait"></a>
+  <br />
+</p>
+<h3 style="text-align: left;" id="Anchor_162186377_h3_9">UV Weighting: Simplification Using Both UV Cost and Mesh Cost</h3>
+<p>In methods where UV space is projected onto mesh space, the cost in each space can be combined linearly. In other words, the costs can simply be added together. However, in modern mesh simplification methods, the formulas for calculating cost in each space are non-linear, and costs cannot simply be added together. For this reason, techniques such as cost weighting are often used to provide a more useful cost evaluation. This library uses the costs in each space as follows.</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426945.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p>First, the library constructs a heap that contains the change in mesh volume that would result from deleting an edge for all of the edges in a mesh. From this heap, edges are extracted in order from lowest cost to highest cost according to the user-specified UV weight value. The UV costs for the UV edges corresponding to the selected edges are then calculated to build a UV cost heap. Finally, the edges with the smallest cost in the UV heap are selected and deleted.</p>
+<p>To put this more simply, the edges that result in the lowest R% of shape change in a mesh when deleted are all treated as being the same, and then of those edges, those that result in the smallest change in UV coordinates when deleted are selected for deletion.</p>
+<h3 id="Anchor_162186377_h3_10">Parameter Settings: UV Weight</h3>
+<p>To use UV weights, you must set the UV coordinates protection flag using the <code>--property-flag</code> option.</p>
+<ul>
+  <li>Regular parameter: <code>--uv-weight &lt;value&gt;</code></li>
+</ul>
+<p>[Parameter] <code>value</code>. A value from 0 to 1 (inclusive). Specifying 0 makes the algorithm work as if this protection property was not enabled. Default value: 0.05.</p>
+<p>
+  <strong>
+    <span style="color: rgb(255,0,0);">Specifying a value of 0.001, for example, indicates the lowest 0.1 % of edges in terms of mesh cost. In other words, if there are 10,000 edges, the 10 edges with the lowest cost are treated as being the same. Meanwhile, specifying a value of 0.1 would result in the 100 edges with the lowest cost being treated as the same.</span>
+  </strong>
+</p>
+<p>
+  <span style="color: rgb(255,0,0);">For this reason, this setting tends to have a quite prominent effect on mesh simplification results.</span>
+</p>
+<p>For mechanical shapes that have mostly flat faces, this option does not have a significant effect even when set to a relatively high value. In contrast, for shapes that have pronounced protrusions and recesses, the higher the value set for this parameter, the more difficult it becomes to maintain the original shape. For this reason, it is usually best to set the value for this parameter according to the specific mesh you are working on. It can also be effective to set an initial value for this parameter according to the mesh&rsquo;s polygon count and then adjust the value as necessary if you get poor mesh simplification results.</p>
+<p>Example: <code>3dIntermediateFileOptimizer human.fmdb --polygon-reduction --polygon-reduction-options &quot;--target-rate-lod-level1 0.125 --property-flag Position|UV --lock-uv-hard-edge 90 --uv-weight 0.0&quot;</code></p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426952.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 16. Result (5,821 Polygons)</p>
+<p>Example: <code>3dIntermediateFileOptimizer human.fmdb --polygon-reduction --polygon-reduction-options &quot;--target-rate-lod-level1 0.125 --property-flag Position|UV --lock-uv-hard-edge 90 --uv-weight 0.001&quot;</code></p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426944.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 17. Result (5,821 Polygons)</p>
+<p>Example: <code>3dIntermediateFileOptimizer human.fmdb --polygon-reduction --polygon-reduction-options &quot;--target-rate-lod-level1 0.125 --property-flag Position|UV --lock-uv-hard-edge 90 --uv-weight 0.005&quot;</code></p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426943.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 18. Result (5,821 Polygons)</p>
+<p>Example: <code>3dIntermediateFileOptimizer human.fmdb --polygon-reduction --polygon-reduction-options &quot;--target-rate-lod-level1 0.125 --property-flag Position|UV --lock-uv-hard-edge 90 --uv-weight 0.05&quot;</code></p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426941.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 19. Result (5,821 Polygons)</p>
+<p>In these three examples, the UV weight is gradually increased. With the 5% UV weight, the 3,500 lowest-cost edges of the approximately 70,000 edges in the original mesh are treated as being the same. The number of edges that are treated as being the same decreases as the simplification process proceeds and the total number of edges in the mesh decreases. However, Figure 19 shows that setting a UV weight of 5% results in overly aggressive mesh simplification in this case. For this particular model, the UV weight used in Figure 17 is probably sufficient. However, <span style="color: rgb(255,0,0);">in most cases the best strategy is to set the UV weight according to the number of edges in the original mesh</span>.</p>
+<p>
+  <a name="Anchor_162186377_--normal-weight"></a>
+  <br />
+</p>
+<h2 id="Anchor_162186377_h2_10">Simplification With Normal Protection</h2>
+<p>The normal protection flag must be set using the <code>--property-flag</code> option to enable simplification with normal protection. Mesh simplification with normal protection enabled and a normal weight set makes it possible to preserve the characteristic edges of a mesh.</p>
+<h3 id="Anchor_162186377_h3_11">Calculating Normal Cost</h3>
+<p>Characteristic shapes can be protected by evaluating the approximate amount of change (differential) in curved surfaces. Use the following method.</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426939.png" width="500" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 20. Protecting Characteristic Vertices</p>
+<p style="text-align: left;">Figure 20 illustrates an example of deleting an edge from a 2D shape. To best maintain the original shape when deleting the red edge in Figure 20, we recommend achieving the result shown in the lower right corner of Figure 20. Achieving this result requires an algorithm that can calculate it as the optimal solution.</p>
+<p style="text-align: left;">The normal vectors of each vertex can be used for this purpose.</p>
+<p style="text-align: left;">
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426938.png" width="500" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: left;">After getting the normals for each vertex as illustrated in the figure, you can calculate the cost of deleting the red edge in Figure 20 using the following formulas.<span class="math-inline">\( gp0 \cdot v_{new} + d_{vol}=0 \)</span><span class="math-inline">\( gp1 \cdot v_{new} + d_{vol}=0 \)</span> v<sub>new</sub> is the new vertex position created at (2,2) and d<sub>vol</sub> is a parameter in the formula that represents a plane that goes through (2,2) and takes the corresponding vertex normal as its own normal vector. These equations yield the distance from the plane that takes the vertex normal as its own geometric normal vector to the new vertex. These distances are squared to make the signs positive and then added to the total shape cost. This process makes it possible to express the cost of moving a characteristic vertex in an intuitive manner.</p>
+<p style="text-align: left;">
+  <span class="math-inline">\( (gp0 \cdot v_{new} + d_{vol})^2 \)</span>
+</p>
+<p style="text-align: left;">This equation is also the same equation used to calculate the amount of change in the shape, <span class="math-inline">\( (n^T \cdot v_{new} + d)^2 \)</span>, enabling them to be combined linearly. For this reason, you can use the following equation to get the new optimization position.</p>
+<p style="text-align: left;">
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426934.png" width="300" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: left;"> The value of &gamma;, which is a Lagrange multiplier, is set according to the desired normal weight.</p>
+<h3 style="text-align: left;" id="Anchor_162186377_h3_12">Parameter Settings</h3>
+<p>Specify the desired value for the Lagrange multiplier using the <code>--normal-weight</code> option.</p>
+<ul>
+  <li>Normal parameter: <code>--normal-weight &lt;value&gt;</code></li>
+</ul>
+<p>[Parameter] <code>value</code>. A value from 0 to 1 (inclusive). Specifying 0 makes the algorithm work as if this protection property was not enabled. Default value: 0.05.</p>
+<p>
+  <a name="Anchor_162186377_blendweight-property-flag"></a>
+</p>
+<h2 style="text-align: left;" id="Anchor_162186377_h2_11">Simplification With Motion Protection</h2>
+<p>This technique is relatively simple, but you can also perform mesh simplification with blend weights enabled. Make sure that you set the blend weights flag using <code>--property-flag</code> to enable this feature.</p>
+<h3 id="Anchor_162186377_h3_13">Calculating Weights</h3>
+<p>For BlendWeight <span class="math-inline">\( b= \{x0,x1,x2,x3 \in R \mid 0 \leq x0 \leq 1.0, \leq x1 \leq 1.0, \leq x2 \leq 1.0, \leq x3 \leq 1.0, x0+ x1+ x2+ x3 = 1.0 \} \)</span>, consider a weighting scheme in which in the preceding equation, x0&nbsp;=&nbsp;x1&nbsp;=&nbsp;x2&nbsp;=&nbsp;x3&nbsp;=0.25 at maximum and x0&nbsp;=&nbsp;1, x1&nbsp;=&nbsp;x2&nbsp;=&nbsp;x3&nbsp;=&nbsp;0 at minimum. In this case, for variance <code>v</code>, the average <code>w</code> is calculated by <span class="math-inline">\( v  =  \frac{((x0 &ndash; w)^2 + (x1 &ndash; w)^2 + (x2 &ndash; w)^2 + (x3 &ndash; w)^2)}{4} , 1e-4 \leq v \leq 1e4 \)</span> as <span class="math-inline">\( w = \frac{x0 + x1 + x2 + x3}{4} \)</span>, and the weight is<span class="math-inline">\( pow( basenum, \frac{1.0}{v} ) \)</span>.</p>
+<p>
+  <br />
+</p>
+<p>
+  <code>
+    <em>basenum</em>
+  </code> is a user-defined variable that satisfies <code>0</code>&nbsp;&lt;&nbsp;<code><em>basenum</em></code>&nbsp;&le;&nbsp;<code>e</code> (Napier&rsquo;s constant).</p>
+<p>If only two blend weights are set, the other two are automatically set to <code>0</code>.</p>
+<p>In this way, vertices with a maximum of four blend weights are treated as being weighted most heavily.</p>
+<p> The goal of this calculation is that for values greater than 1, vertices to which values are assigned uniformly have more weight. In addtion, for values less than 1, vertices with only one value have more weight. Finally, for a value equal to 1, no blend weights are applied.</p>
+<h3 id="Anchor_162186377_h3_14">Parameter Settings</h3>
+<ul>
+  <li>Regular parameter: <code>--anim-blend-weight=&lt;value&gt;</code></li>
+</ul>
+<p>[Parameter] <code>value</code>. A decimal number in the range from 0 to Napier&rsquo;s constant. Default value: 1.</p>
+<p>The base number for calculating vertex weights based on animation blend weights. With the default value of 1, no blend weights are applied.</p>
+<p>Example: <code>3dIntermediateFileOptimizer human.fmdb --polygon-reduction --polygon-reduction-options &quot;--target-rate-lod-level1 0.3 --property-flag Position|BlendWeight &ndash;optimize-position-policy 3 --anim-blend-weight 2.0&quot;</code></p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426932.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 22. Blending Results: No Blend Weights (Left) With Blend Weights (Right)</p>
+<p style="text-align: left;">The blending results are shown in Figure 22. When blend weights are enabled, the mesh is left alone near the joints of the model. However, it is generally difficult to predict how models will appear when in motion just from the blend weights, so model motion behavior will not be covered.</p>
+<h2 style="text-align: left;" id="Anchor_162186377_h2_12">Parameters for Controlling Simplification</h2>
+<p>This section provides an overview of the other parameters available for controlling the behavior of the mesh simplification algorithm.</p>
+<p>
+  <a name="Anchor_162186377_optimize-position-policy"></a>
+</p>
+<h3 id="Anchor_162186377_h3_15">Setting Post-Simplification Positions</h3>
+<p>This section describes an option that can be used to configure how positions are determined after polygon reduction.</p>
+<ul>
+  <li>Regular parameter: <code>--optimize-position-policy &lt;mode&gt;</code></li>
+</ul>
+<p>Specify the number corresponding to the desired mode for <code>&lt;mode&gt;</code>. Two types of modes are available: modes that use vertex sharing and modes that do not use vertex sharing.</p>
+<p>[Parameter] <code>mode</code>. One of the following values.　Default: OptimalOnEdge </p>
+<ul>
+  <li>
+    <code>SharedPosition</code>: Run in shared vertex mode.</li>
+  <li>
+    <code>OptimalOnEdge</code>: Move to any point on the edge.</li>
+  <li>
+    <code>OptimalOnSpace</code>: Perform optimization calculations.</li>
+  <li>
+    <code>OptimalOnFace</code>: Move to the optimum position using centroid coordinates within faces with edges on both sides.</li>
+</ul>
+<p>In vertex sharing mode, the mesh is simplified using the same vertex stream for each LOD level. As a result, while although the size of the data after simplification tends to be small, the resulting meshes meshes tend to suffer a pronounced loss in characteristic details. In other words, vertex sharing mode can be helpful when you want to reduce the size of data that includes multiple LOD levels.</p>
+<p>
+  <code>OptimalOnEdge</code> is the safest parameter when you are not using shared vertices. In <code>OptimalOnEdge</code> mode, vertices are moved to the point along an edge that results in the smallest possible change in shape. <code>OptimalOnEdge</code> mode usually makes it easy to get good results both with models such as mechanical shapes and buildings and with smooth models such as animals and characters.</p>
+<p>In <code>OptimalOnFace</code> mode, the algorithm searches for a good position within a centroid coordinate system within faces with edges on both sides. This mode works similar to <code>OptimalOnEdge</code> mode and typically yields good results; however, the drawback is that this mode also requires the most computation time of the modes described in this documentation.</p>
+<p>In <code>OptimalOnSpace</code> mode, the algorithm always searches for the position with the smallest effect on shape according to the calculations performed. This mode usually yields good results for smooth models such as animals and character. However, for objects with a large number of open edges or models such as machines and buildings, this mode typically results in large vertex relocations that negatively affect the original model&rsquo;s shape.</p>
+<p> </p>
+<p>
+  <strong>
+    <span style="color: rgb(255,0,0);">Generally speaking, it is better to use either <code>OptimalOnSpace</code> or <code>OptimalOnEdge</code>.</span>
+  </strong>
+</p>
+<p>Examples</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426930.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 24: SharedPosition Mode (Used With Shared Vertices) This mode tends to produce very small triangles.</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426929.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 25: OptimalOnEdge Mode (Returns the Safest Results) Also good for very angular objects such as machines.</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426928.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 26. OptimalOnFace Mode. Requires extremely long computation times because the optimal positions in centroid coordinates in UV space also have to be found.</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_162186377/161426927.png" class="embedded-image image-center" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 27: OptimalOnSpace Mode. Finds the optimal position, using calculations. Usually makes it easiest to get the best results.</p>
+<h4 style="text-align: left;" id="Anchor_162186377_h4_6">Submesh Boundaries</h4>
+<p>In some cases, you may want to change the LOD level used in certain portions of an LOD model according to the level of detail required on the screen. Submeshes can be be used for this purpose to change the level of details used for different portions of the same model. For more information, see the related documentation.<br />The feature always protects submesh boundaries.</p>
+<h3 style="text-align: left;" id="Anchor_162186377_h3_16">
+  <a name="Anchor_162186377_polyred-poly-weights"></a>Controlling the Shapes and Areas of Faces Created During Simplification</h3>
+<p>Mesh simplification sometimes produces polygons that are very long and thin or a certain bias in the shapes or sizes of faces.</p>
+<p>This section describes a parameter for dealing with these issues in addition to how to use it.</p>
+<ul>
+  <li>Regular parameter: <code>--policy &lt;mode&gt;</code></li>
+</ul>
+<p>Determines the method used to evaluate faces during polygon reduction. Using this parameter makes it possible to achieve more control over the simplification process by setting how difficult or easy each face is to delete.</p>
+<p>[Parameter] mode. Select from one of the following. The default value is <code>Default</code>.</p>
+<ul>
+  <li>
+    <code>AreaBased</code>: Puts emphasis on the area.</li>
+  <li>
+    <code>AngleBased</code>: Prioritizes angles and the shapes of faces.</li>
+  <li>
+    <code>Default</code>: Does not apply a particular weighting policy (default value).</li>
+  <li>
+    <code>AreaAngleBased</code>: Prioritizes both angles and areas.</li>
+</ul>
+<p>In Default mode, no particular weighting policy is applied, but this mode typically makes it easy to get good results as far as shapes are concerned. In AreaBased mode, faces with small areas are prioritized for deletion. In AngleBased mode, the algorithm attempts to make the angles at the vertices of each face the same.</p>
+<p>Examples</p>
+<table style="margin-left: auto; margin-right: auto;" class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="embedded-file-wrapper image-center-wrapper">
+          <img src="../Attachments/Attach_162186377/161426926.png" width="500" class="embedded-image image-center" />
+        </span>
+      </th>
+      <th>
+        <span class="embedded-file-wrapper image-center-wrapper">
+          <img src="../Attachments/Attach_162186377/161426925.png" width="500" class="embedded-image image-center" />
+        </span>
+      </th>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Figure 28. Default Mode Easiest to get good results with.</td>
+      <td>
+        <p>Figure 29. AreaBased Mode</p>
+        <p>Polygons that have small areas are prioritized for deletion, resulting in loss of characteristic details of the mesh.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="embedded-file-wrapper image-center-wrapper">
+          <img src="../Attachments/Attach_162186377/161426923.png" width="500" class="embedded-image image-center" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper image-center-wrapper">
+          <img src="../Attachments/Attach_162186377/161426924.png" width="500" class="embedded-image image-center" />
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Figure 31. AreaAngleBased Mode</p>
+        <p>Both area and shape are used to prioritize polygon deletion.</p>
+        <p>This mode makes it easier to protect equilateral triangles and make the size of polygons uniform than in the other modes.</p>
+      </td>
+      <td>
+        <p>Figure 30. AngleBased Mode</p>
+        <p>The shapes of faces are prioritized during the simplification process. The more different a polygon is than an equilateral triangle in shape, the higher its priority for deletion.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In most cases, the Default mode is easiest to use and provides the best general-purpose shape evaluation results. Use the other options if you are working with requirements that call for uniform polygon area or uniform triangle shape.</p>
+<p>
+  <a name="Anchor_162186377_distance-offset"></a>
+</p>
+<h3 id="Anchor_162186377_h3_17">Applying a Height Offset</h3>
+<p>Due to the way the algorithm works, shape change cost cannot be evaluated for portions of a model that lie on the same plane (because the distance is zero). In this type of situation, a small offset can be applied so that cost can be calculated along a plane.</p>
+<p>
+  <strong>When using this parameter, positions are moved by an amount corresponding to the specified offset. For this reason, always use this parameter in combination with <code>--optimize-position-policy OptimalOnSpace</code>.</strong>
+</p>
+<ul>
+  <li>Regular parameter: <code>--distance-offset &lt;value&gt;</code></li>
+</ul>
+<p>This parameter is not needed for mechanical objects that have a large number of flat portions but also have protrusions and recesses. <strong>Only use this parameter when you need to apply mesh simplification to a 2D surface.</strong></p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_162186377/161426920.png" width="500" class="embedded-image" />
+        </span>
+      </th>
+      <th>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_162186377/161426921.png" width="500" class="embedded-image" />
+        </span>
+      </th>
+      <th>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_162186377/161426922.png" width="500" class="embedded-image" />
+        </span>
+      </th>
+    </tr>
+    <tr>
+      <td>Original mesh (UV atlases projected into mesh space).</td>
+      <td>Figure 32. Without Offset</td>
+      <td>Figure 33. With Offset</td>
+    </tr>
+  </tbody>
+</table>
+<p>Figure 33 shows the results when an offset is applied. Figure 32 shows the results when an offset is not applied. These figures show that applying the offset ensures that triangle area get evaluated in the mesh simplification process.</p>
+<h3 id="Anchor_162186377_h3_18">
+  <a name="Anchor_162186377_polyred-smoothing"></a>Simplification Without Cost Accumulation: Smoothing Options</h3>
+<p style="text-align: center;">
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_162186377/161426918.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p style="text-align: center;">Figure 34. Cost Accumulation</p>
+<p style="text-align: left;">Figure 34 illustrates the concept of cost accumulation. In Figure 34, the black point v0 indicates the original position of a vertex, which is moved to the positions v1 to v4 as part of the simplification process and finally ends up at the orange point v5. The blue line indicates the procedure followed by the simplification algorithm. During normal cost calculation, when the vertex is moved from v4 to v5, the lengths of the green lines (arrows) from the points v0 to v5 to the center are added up to calculate the cost. When mesh simplification causes the area around a point to fluctuate, all of the movement distances get accumulated. When this happens, the simplification algorithm determines that a large shape change will occur even when the actual change in shape from the original mesh may not be especially large. This option prevents this kind of case from occurring. In the preceding example, enabling this option would ensure that only the green line between v5 and the center is used to evaluate cost.</p>
+<ul>
+  <li style="text-align: left;">Regular parameter: <code>--smoothing</code></li>
+</ul>
+<p style="text-align: left;">This option makes it easy to retain the characteristic shapes of objects and is well-suited for use with models such as buildings and mechanical objects. In addition, because calculation errors are not accumulated, this option also makes it possible to prevent unexpected mesh simplification behavior when simplifying shapes that include extremely small faces.</p>
+<p style="text-align: left;">Although this option usually does a good job of preserving the overall characteristic shape of a mesh, smaller details tend to get lost.</p>
+<table style="margin-left: auto; margin-right: auto;" class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_162186377/161426915.png" width="500" class="embedded-image" />
+        </span>
+      </th>
+      <th>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_162186377/161426914.png" width="500" class="embedded-image" />
+        </span>
+      </th>
+    </tr>
+    <tr>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_162186377/161426912.png" width="500" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_162186377/161426913.png" width="500" class="embedded-image" />
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Without smoothing.</td>
+      <td>With smoothing.</td>
+    </tr>
+    <tr>
+      <td>Distances are allowed to accumulate, which leaves most fine details intact.</td>
+      <td>Distances are not allowed to accumulate, so only the higher-level characteristics are preserved.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_162186377_polyred-merge-shape"></a>
+</p>
+<h2 id="Anchor_162186377_h2_13">Mesh Preprocessing</h2>
+<p>
+  <span style="color: rgb(255,0,0);">What would have originally been just one mesh when working in Maya is saved in a format within the intermediate model file where multiple shapes are parsed.</span> The reason for this is that intermediate model files have a restriction for a single shape per material.</p>
+<p> The boundaries between these shapes are treated as open edges, and if the model or object has not yet been simplified, all of the shapes are treated as completely separate meshes during the simplification process. As a result, in some cases the polygon count may not decrease by as much as expected, or the simplification process may yield poor results. To avoid these types of problems, you can merge the divided shapes into a single mesh prior to the simplification process (when possible), such that the simplification process acts on a single mesh as a whole.</p>
+<p>After the simplification process, the simplified mesh can be split back up into the original shapes to maintain shape continuity before and after the process.</p>
+<p>Shape merges are applied in the standard way. Merging can be disabled: <code>--disable-merge-shape</code>.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_162186377/161426917.png" class="embedded-image" />
+        </span>
+      </th>
+      <th>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_162186377/161426916.png" class="embedded-image" />
+        </span>
+      </th>
+    </tr>
+    <tr>
+      <td>Figure 35. With Shape Merging</td>
+      <td>Figure 36. Without Shape Merging</td>
+    </tr>
+  </tbody>
+</table>
+<p>Figure 36 shows the results of the simplification process without shape merging enabled. Holes appear in various locations, and the results of the process are rather poor overall. Figure 35 shows the results of the simplification process with shape merging enabled. In the figure, no holes appear in any of the shapes.</p>
+<h1 id="Anchor_162186377_h1_6">Past Issues and FAQ</h1>
+<p>This section describes several issues that have come up in the past and the solutions to those issues. If you encounter any other difficulties while using this tool, please contact the Nintendo support team for assistance. Most issues can be resolved quickly.</p>
+<h2 id="Anchor_162186377_h2_14">Holes appear in the ground data.</h2>
+<p>The shape merge process may not be merging vertices correctly if holes are appearing. Vertices that are separated by at least 0.00001 (the default cutoff value) are treated as two separate vertices even if they appear to be in essentially the same position. Also, if the ground contains any contains any bones, calculation error during the export process may cause some vertices to be treated as non-matching, which results in the distance between the vertices being increased.</p>
+<h2 id="Anchor_162186377_h2_15">The mesh gets broken in UV space.</h2>
+<p>Have you tried setting a UV hard edge protection angle?</p>
+<p>Setting an appropriate angle usually makes meshes much more resistant to this type of problem in UV space. Try changing your protection angle and UV weight settings and check whether this resolves the problem.</p>
+<h2 id="Anchor_162186377_h2_16">Characteristic vertices get moved.</h2>
+<p>Try enabling normal protection. Also, try setting a protection angle for the characteristic edges.</p>
+<h2 id="Anchor_162186377_h2_17">I can&rsquo;t reduce the polygon count as much as I expected.</h2>
+<p>When you have strict protection conditions in place, such as if you have a large number of UV atlases or the protection angle for UV hard edges is set to a small value, the simplification process may stop before the desired reduction in polygon count is achieved. If you cannot achieve the desired reduction in polygon count, try setting a larger protection angle or disabling texture protection and running the simplification process again.</p>
+<p>Unexpectedly low reductions in polygon count also tend to occur when shape merging is disabled and when the open edge protection angle is set to a small value.</p>
+<h2 id="Anchor_162186377_h2_18">Shape compression results in excessive polygon reduction.</h2>
+<p>Polygon reduction is executed on a per-shape basis, so enabling shape compression tends to yield very different results than when shape compression is not enabled. Shape compression is also affected by bone compression, and as a result enabling bone compression further affects the shape compression results and the overall polygon reduction results. Currently, there is no way to reduce the extent of the shape changes caused by shape compression. If some shapes change too much, you can use the <code>--target-rate-per-shapes</code> option to set a lower limit on the polygon reduction rate for the specified shapes, or you can use the <code>--exclude-shapes</code> option to exclude those shapes from polygon reduction entirely.</p>
+<h1 id="Anchor_162186377_h1_7">Simplified Table of Options by Intended End Result</h1>
+<p>The following table list options that can be used to reduce polygon deletion when running polygon reductions. The options are sorted according to the intended end result.</p>
+<p>For more information about polygon reduction, see the Polygon Reduction section of the <a href="../Pages/Page_83955705.html#Anchor_83955705_polygon_reduction">Intermediate File Optimizer documentation</a>.</p>
+<table style="margin-left: 1.5em;" class="table">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Objective</th>
+      <th>Details</th>
+      <th>Command</th>
+      <th>Default Value</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <th rowspan="4">
+        <p>Reduce deletion of polygons</p>
+        <br />
+        <br />
+        <br />
+      </th>
+      <td>
+        <p>Reduce deletion of open edges.</p>
+      </td>
+      <td>
+        <strong>--open-edge-lock-angle &lt;arg&gt;</strong>
+      </td>
+      <td>
+        <strong>90.0</strong>
+      </td>
+      <td>Set a smaller value (in the range from <code>0.0</code> to <code>90.0</code>).</td>
+    </tr>
+    <tr>
+      <td>Reduce breaks on characteristic vertices.</td>
+      <td>
+        <strong>--feature-angle</strong>
+      </td>
+      <td>
+        <strong>80.0</strong>
+      </td>
+      <td>Set a smaller value (in the range from <code>0.0</code> to <code>180.0</code>).</td>
+    </tr>
+    <tr>
+      <td>
+        <p>Reduce polygon deletion by decreasing excessive polygon reduction.</p>
+      </td>
+      <td>
+        <strong>--disable-merge-shape</strong>
+      </td>
+      <td>
+        <strong>Disabled</strong>
+      </td>
+      <td>
+        <p>The shapes in the file will not be merged during polygon reduction.</p>
+        <p>Also, vertices will not be merged across shapes.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Keep some shapes as is.</p>
+      </td>
+      <td>
+        <strong>--exclude-shapes &quot;&quot;</strong>
+      </td>
+      <td> </td>
+      <td>Excludes the specified shapes from the polygon reduction process.</td>
+    </tr>
+    <tr>
+      <th rowspan="2">Reduce deletion of normals</th>
+      <td>Reduce polygon deletion by prioritizing vertex position.</td>
+      <td>
+        <p>
+          <strong>--property-flag &lt;arg&gt;</strong>
+        </p>
+        <p> </p>
+      </td>
+      <td>
+        <strong>Position</strong>
+      </td>
+      <td>
+        <p>
+          <code>Normal</code>: Prioritize vertex position.</p>
+        <p>Multiple settings can be enabled simultaneously.</p>
+        <p>(Normal, UV, BlendWeight, All)</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Reduce polygon deletion by prioritizing vertex normal weighting.</td>
+      <td>
+        <p>
+          <strong>--normal-weight &quot;&quot;</strong>
+        </p>
+        <p>(Only available when <code>--property-flag Normal</code> is specified.)</p>
+      </td>
+      <td>
+        <strong>1.0</strong>
+      </td>
+      <td>Set a larger value (<code>0.0</code> to <code>DoubleMax</code>).</td>
+    </tr>
+    <tr>
+      <th rowspan="3">
+        <p>Reduce UV deletion</p>
+        <br />
+        <br />
+        <br />
+        <br />
+      </th>
+      <td>Reduce polygon deletion by prioritizing UV coordinates (texture coordinates).</td>
+      <td>
+        <strong>--property-flag &lt;arg&gt;</strong>
+      </td>
+      <td>
+        <strong>Position</strong>
+      </td>
+      <td>
+        <p>
+          <code>UV</code>: Prioritize UV coordinates.</p>
+        <p>Multiple settings can be enabled simultaneously.</p>
+        <p>(Normal, UV, BlendWeight, All)</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Reduce polygon deletion by prioritizing angles between UV hard edges.</td>
+      <td>
+        <p>
+          <strong>--lock-uv-hard-edge &lt;arg&gt;</strong>
+        </p>
+        <p>(Only available when <code>--property-flag UV</code> is specified.)</p>
+      </td>
+      <td>
+        <strong>90.0</strong>
+      </td>
+      <td>Set a smaller value (in the range from <code>0.0</code> to <code>90.0</code>).</td>
+    </tr>
+    <tr>
+      <td>Reduce polygon deletion by increasing UV weighting.</td>
+      <td>
+        <p>
+          <strong>--uv-weight &quot;&quot;</strong>
+        </p>
+        <p>(Only available when <code>--property-flag UV</code> is specified.)</p>
+      </td>
+      <td>
+        <strong>0.05</strong>
+      </td>
+      <td>Set a larger value (in the range from <code>0.0</code> to <code>1.0</code>).</td>
+    </tr>
+    <tr>
+      <th rowspan="9">Reduce deletion of polygons (other)<br /><br /><br /> <br /><br /><br /><br /></th>
+      <td rowspan="4">Reduce polygon deletion by changing the polygon reduction algorithm.<br /><br /><br /></td>
+      <td rowspan="4">
+        <strong>--optimize-position-policy &lt;arg&gt;</strong>
+        <br />
+        <br />
+        <br />
+      </td>
+      <td rowspan="4">
+        <strong>OptimalOnEdge</strong>
+        <br />
+        <br />
+        <br />
+      </td>
+      <td>
+        <p>
+          <code>SharedPosition</code>:</p>
+        <p>Use one of the vertices, and also share the vertex with the base model.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>OptimalOnEdge</code>:</p>
+        <p>Get and use the position with the optimal position on the edge.</p>
+        <p>Best for angular shapes such as machines and buildings.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>OptimalOnSpace</code>:</p>
+        <p>Calculate the position after reduction, and then find the optimal position in space.</p>
+        <p>Best for smoother shapes such as animals and people.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>OptimalOnFace</code>:</p>
+        <p>The position will be some arbitrary point on one of the two planes sharing the edge after deleting the edge.</p>
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="3">Reduce polygon deletion by prioritizing face area and shape.<br /><br /><br /><br /></td>
+      <td rowspan="3">
+        <strong>--policy &lt;arg&gt;</strong>
+        <br />
+        <br />
+        <br />
+        <br />
+      </td>
+      <td rowspan="3">
+        <strong>Weighting Method</strong>
+        <br />
+        <br />
+        <br />
+        <br />
+      </td>
+      <td>
+        <code>AreaBased</code>: Prioritize area.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>AngleBased</code>: Prioritize shape.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>AreaAngleBased</code>: Prioritize both area and shape.</td>
+    </tr>
+    <tr>
+      <td>Reduce polygon deletion by prioritizing motion.</td>
+      <td>
+        <strong>--property-flag &lt;arg&gt;</strong>
+      </td>
+      <td>
+        <strong>Position</strong>
+      </td>
+      <td>
+        <p>
+          <code>BlendWeight</code>: Prioritize motion.</p>
+        <p>Multiple settings can be enabled simultaneously.</p>
+        <p>(Normal, UV, BlendWeight, All)</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Reduce polygon deletion by prioritizing vertex weighting according to <strong>Animation Blend Weight</strong>.</td>
+      <td>
+        <p> <strong>--anim-blend-weight &quot;&quot;</strong></p>
+        <p>(Only available when <code>--property-flag BlendWeight</code> is specified.)</p>
+      </td>
+      <td>
+        <strong>1.0</strong>
+      </td>
+      <td>Set a larger value (in the range from <code>0.0</code> to <code><em>e</em></code> (Napier&rsquo;s constant)).</td>
+    </tr>
+  </tbody>
+</table>
+<p class="auto-cursor-target">
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <ul>
+      <li>Adjusting this value to reduce polygon deletion tends to increase the total polygon count.</li>
+    </ul>
+    <ul>
+      <li>Additional settings are available that are not included in this table. For more information, see the Polygon Reduction section in the <a href="../Pages/Page_83955705.html#Anchor_83955705_polygon_reduction">Intermediate File Optimizer documentation</a>.</li>
+    </ul>
+  </div>
+</div>
+<p class="auto-cursor-target">
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

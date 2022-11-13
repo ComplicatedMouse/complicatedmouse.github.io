@@ -1,0 +1,641 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>3D Texture Preset Converter | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- 3D Texture Preset Converter -->
+<div class="pagetitle" id="PageId_101843946">3D Texture Preset Converter</div>
+<div class="text_separate">
+<p>This section describes how to use the 3D texture preset converter (<code>%NINTENDO_SDK_ROOT%\Tools\Graphics\3dTools\3dTexturePresetConverter.bat</code>), together with notes about the tool.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_101843946_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_101843946_h1_2">Command-Line Options</a>
+    </li>
+    <li>
+      <a href="#Anchor_101843946_h1_3">Usage Examples</a>
+    </li>
+    <li>
+      <a href="#Anchor_101843946_h1_4">Preset File Specification</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_101843946_h2_1">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_101843946_h2_2">Constituent Elements</a>
+      </li>
+      <li>
+        <a href="#Anchor_101843946_h2_3">Environment Variables Usable in Preset Files</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_101843946_h1_5">Sample Preset Files</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_101843946_h2_4">Examples of Using Each Element</a>
+      </li>
+      <li>
+        <a href="#Anchor_101843946_h2_5">Example of Conversion to Multiple Texture Intermediate Files From a Single Input File</a>
+      </li>
+      <li>
+        <a href="#Anchor_101843946_h2_6">Example of Combining Multiple Input File Channels Into One Output File</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_101843946_h1_1">Overview</h1>
+<p>The 3D texture preset converter is a command-line tool that uses the options defined in an XML-format preset (NTCP) file to convert image (TGA, PNG, DDS, EXR) files to texture intermediate (FTXB) files.<br />The 3D texture preset converter is a utility that internally calls the 3D texture converter. </p>
+<p>The preset file describes the output folder, global options, preset definitions, preset overwrite, and preset assignments.<br />You can also import a preset file into another preset file and use the definitions of the imported preset file.<br />In addition, user-specified commands can be set to run before and after the conversion process. </p>
+<h1 id="Anchor_101843946_h1_2">Command-Line Options</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTexturePresetConverter.bat [image file|input folder]... [--args-file &quot;&quot;] [--version] [-h] [-s]
+[--continue-on-error] [--preset-file &quot;&quot;]... [--output-job-list &quot;&quot;]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Image File|Input Folder</strong>
+</p>
+<p>Specify the path to an image (TGA, PNG, DDS, EXR) file or to a folder containing image files.<br />If a folder is specified, all image files in that folder and its subfolders are converted.<br />You can specify multiple image files and folders by separating them with spaces.</p>
+<p>As a special method, you can specify and reconvert texture intermediate files instead of image files.<br />However, if a folder containing texture intermediate files is specified as the input folder, those files are not reconverted.<br />This limitation prevents unnecessary conversion when the specified folder contains both an image file folder and a texture intermediate file folder.<br />To reconvert all of the texture intermediate files in the specified folder and its subfolders, use a batch script such as the following.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>type nul &gt; args.txt
+for /r &quot;%~1&quot; %%I in (*.ftxb) do echo %%I &gt;&gt; args.txt
+call 3dTexturePresetConverter.bat --args-file args.txt --preset-file preset1.ntcp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>--args-file &quot;&quot;</strong>
+</p>
+<p>You can use the contents in the parameter file to specify arguments.<br />The parameter file allows you to specify each option over several lines.<br />Lines starting with a number sign (#) are treated as comments.<br />Newline characters cannot be included in escape sequences used in option specifications that appear between quotation marks (&quot;).</p>
+<p>
+  <strong>--version</strong>
+</p>
+<p>Displays version information.</p>
+<p>
+  <strong>-h --help</strong>
+</p>
+<p>Displays Help.</p>
+<p>
+  <strong>-s --silent</strong>
+</p>
+<p>Suppresses the display of messages during processing.<br />It also controls the standard output for the commands to execute before and after conversion.</p>
+<p>
+  <strong>--continue-on-error</strong>
+</p>
+<p>Processing continues even if errors occur in a portion of image conversions. (Available in NintendoSDK 9.1.0 and later)<br />However, conversion is suspended in the following cases.</p>
+<ul>
+  <li>The preset file is invalid.</li>
+  <li>The <code>pre_convert_command</code> fails.</li>
+  <li>Texture intermediate files are exported multiple times to the same path.</li>
+</ul>
+<p>
+  <strong> --preset-file &quot;&quot; </strong>
+</p>
+<p>Specifies the preset file (NTCP file) with the presets to apply. You can specify this option multiple times.<br />When this option is specified multiple times, the combined definitions of all the preset files are applied.<br />If multiple definitions have the same name, the one in the preset file that was specified last takes precedence. </p>
+<p>
+  <strong>--output-job-list &quot;&quot;</strong>
+</p>
+<p>Specifies a text file (job list file) for saving 3D texture converter arguments when converting.<br />Used in situations such as when investigating the relationships between image files and texture intermediate files.<br />If this option is specified, the usual conversion is not performed, a texture intermediate file is not saved, and <code>&lt;pre_convert_command&gt;</code> and <code>&lt;post_convert_command&gt;</code> are not executed.<br />The job list file is in a format that can be specified in the <code>--job-list</code> option of a 3D texture converter.<br />The job list file uses an ANSI encoding (Shift-JIS in Japanese environments).</p>
+<h1 id="Anchor_101843946_h1_3">Usage Examples</h1>
+<p>Converts one image file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTexturePresetConverter.bat inputAlb.tga --preset-file preset1.ntcp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>All image files in the specified folder and its subfolders are converted.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTexturePresetConverter.bat D:\data\sourceimages --preset-file preset1.ntcp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Saves the arguments for the 3D Texture Converter to a text file, if converting without actually doing the conversion.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTexturePresetConverter.bat D:\data\sourceimages --preset-file preset1.ntcp --output-job-list jobs.txt</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_101843946_h1_4">Preset File Specification</h1>
+<h2 id="Anchor_101843946_h2_1">Overview</h2>
+<p>The preset file is an XML file that defines a combination of 3D texture converter options to apply when converting the image files.<br />The extension is <code>.ntcp</code> (Nintendo Texture Converter Preset, or NTCP).</p>
+<h2 id="Anchor_101843946_h2_2">Constituent Elements</h2>
+<p>The value in the square brackets indicates the number of times that the element appears.</p>
+<p>
+  <a href="#Anchor_101843946_texture_convert_preset_elem">&lt;texture_convert_preset&gt;</a>
+</p>
+<p style="margin-left: 60.0px;">
+  <a href="#Anchor_101843946_import_elem">&lt;import&gt;</a>
+</p>
+<p style="margin-left: 60.0px;">
+  <a href="#Anchor_101843946_output_folder_elem">&lt;output_folder&gt;</a>
+</p>
+<p style="margin-left: 60.0px;">
+  <a href="#Anchor_101843946_global_option_elem">&lt;global_option&gt;</a>
+</p>
+<p style="margin-left: 60.0px;">
+  <a href="#Anchor_101843946_presets_elem">&lt;presets&gt;</a>
+</p>
+<p style="margin-left: 90.0px;">
+  <a href="#Anchor_101843946_preset_elem">&lt;preset&gt;</a>
+</p>
+<p style="margin-left: 60.0px;">
+  <a href="#Anchor_101843946_preset_overrides_elem">&lt;preset_overrides&gt;</a>
+</p>
+<p style="margin-left: 90.0px;">
+  <a href="#Anchor_101843946_preset_override_elem">&lt;preset_override&gt;</a>
+</p>
+<p style="margin-left: 60.0px;">
+  <a href="#Anchor_101843946_preset_assigns_elem">&lt;preset_assigns&gt;</a>
+</p>
+<p style="margin-left: 90.0px;">
+  <a href="#Anchor_101843946_preset_assign_elem">&lt;preset_assign&gt;</a>
+</p>
+<p style="margin-left: 60.0px;">
+  <a href="#Anchor_101843946_pre_convert_command_elem">&lt;pre_convert_command&gt;</a>
+</p>
+<p style="margin-left: 60.0px;">
+  <a href="#Anchor_101843946_post_convert_command_elem">&lt;post_convert_command&gt;</a>
+</p>
+<p>
+  <br />
+</p>
+<ul>
+  <li>
+    <p>  <a name="Anchor_101843946_texture_convert_preset_elem"></a> <strong>&lt;texture_convert_preset&gt;</strong>[1]  <br />The root element.<br />  </p>
+    <table class="relative-table wrapped" style="width: 95.6522%;">
+      <colgroup> <col style="width: 14.2515%;" /> <col style="width: 85.7485%;" /> </colgroup>
+      <tbody>
+        <tr>
+          <th>Attribute Name</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>version</td>
+          <td>
+            <p>The version of the preset file.</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> <br /></p>
+  </li>
+  <li>
+    <p>    <a name="Anchor_101843946_import_elem"></a> <strong>&lt;import&gt;</strong> [0 and greater] (Can be specified multiple times.)<br />References an external preset file. <br />If <code>&lt;output_folder&gt;</code>, <code>&lt;preset&gt;</code> with the same <code>name</code>, <code>&lt;preset_override&gt;</code> with the same <code>name</code>, or <code>&lt;preset_assign&gt;</code> with the same <code>file_name</code> elements exist after the <code>&lt;import&gt;</code> element, the element that is described last gets first priority.<br />If <code>&lt;global_option&gt;</code> elements are present after the <code>&lt;import&gt;</code> element, the <code>&lt;global_option&gt;</code> elements are combined and the resulting options are applied. If there are redundant options, the values specified later take precedence.</p>
+    <p>
+      <br />
+    </p>
+    <table class="relative-table wrapped" style="width: 95.6522%;">
+      <colgroup> <col style="width: 14.7305%;" /> <col style="width: 85.2695%;" /> </colgroup>
+      <tbody>
+        <tr>
+          <th>Attribute Name</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>path</td>
+          <td>
+            <p>Specifies an absolute path to the preset file to reference, or the relative path from the imported folder containing the preset file.<br />This path may include environment variables surrounded by percent signs (%).</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>      <a name="Anchor_101843946_output_folder_elem"></a> <strong>&lt;output_folder&gt;</strong> [0 to 1] <br />Specifies the path of the output folder. <br />If this element not specified, the data is saved to the same folder that contains the input files. <br />      </p>
+    <table class="relative-table wrapped" style="width: 95.6522%;">
+      <colgroup> <col style="width: 14.6108%;" /> <col style="width: 85.3892%;" /> </colgroup>
+      <tbody>
+        <tr>
+          <th>Attribute Name</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>path</td>
+          <td>
+            <p>Specifies the absolute path of the output folder, or a relative path from the folder with the input files.<br />This path may include environment variables surrounded by percent signs (%).<br />$1, $2, ... is replaced by strings that match the regular expression specified by <code>search_input</code>.</p>
+          </td>
+        </tr>
+        <tr>
+          <td>search_input</td>
+          <td>
+            <p>When using the string found from searching for the input file folder path for the output folder path, specify the search string as a regular expression. (This feature is available in NintendoSDK 10.4.0 and later.)<br />The $1, $2, ... in the path attributes are replaced by strings that match the regular expression, surrounded by parentheses.<br />(They are not replaced if the <code>search_input</code> attribute is omitted.)<br />Use a slash (/) as the character for separating folders.<br />This path may include environment variables surrounded by percent signs (%).<br />The input file folder to search is the absolute path with a slash (/) at the end.</p>
+            <p> <strong> <span style="color: rgb(255,0,0);">If there is no match to the regular expression, the conversion of this input file is skipped.</span> </strong>  <br />(The conversion process is also skipped if any of $1, $2, ... is not replaced.)</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The following example is for when you want to export image files from a different folder hierarchy into a folder with the same hierarchy depth.</p>
+    <div style="border-width: 1px;" class="preformatted panel">
+      <div class="preformattedContent panelContent">
+        <pre>D:/data/ProjectA/sourceimages/texA1.png
+D:/data/ProjectA/sourceimages/sub/texA2.png
+D:/data/ProjectB/sourceimages/texB3.png</pre>
+      </div>
+    </div>
+    <p>&darr;</p>
+    <div style="border-width: 1px;" class="preformatted panel">
+      <div class="preformattedContent panelContent">
+        <pre>D:/data/ProjectA/output/textures/texA1.ftxb
+D:/data/ProjectA/output/textures/texA2.ftxb
+D:/data/ProjectB/output/textures/texB3.ftxb</pre>
+      </div>
+    </div>
+    <p>Because you cannot handle this with a common relative path, specify the path as follows.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nt">&lt;output_folder</span> <span class="na">path=</span><span class="s">&quot;$1/output/textures&quot;</span> <span class="na">search_input=</span><span class="s">&quot;(.*?) /sourceimages/&quot;</span> <span class="nt">/&gt;</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<div>
+  <ul>
+    <li>
+      <p>
+        <a name="Anchor_101843946_global_option_elem"></a> <strong> &lt;global_option&gt; </strong> [0 to 1] <br />Defines global options.<br />The global options are a group of options that are passed to the 3D texture converter by all of the presets.<br />This element does not need to be described if there are not any options that you want to apply in all the presets.<br />If the same option is described in both <code>&lt;global_option&gt;</code> and a <code>&lt;preset&gt;</code> element, the one in <code>&lt;preset&gt;</code> takes precedence.<br />If an option with no parameters is specified in the <code>&lt;global_option&gt;</code> element, it can be negated by specifying the <code>none</code> attribute in a <code>&lt;preset&gt;</code> element.<br />For example, if <code>disable_file_info=&quot;none&quot; </code> is specified, <code>--disable-file-info</code> is not specified by that preset.<br />If the <code>&lt;global_option&gt;</code> element is present in multiple preset files, the contents of the elements are combined and the resulting options are applied.<br />If there are redundant options, the ones specified in the later preset file take precedence.</p>
+      <table class="relative-table wrapped" style="width: 95.6522%;">
+        <colgroup> <col /> <col /> </colgroup>
+        <tbody>
+          <tr>
+            <th>Attribute Name</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>3D texture converter options</td>
+            <td>Describes using the same format used for the 3D texture converter options in the <code>&lt;preset&gt;</code> element.</td>
+          </tr>
+          <tr>
+            <td>alternative_format_???</td>
+            <td>Describes in a format similar to the <code>&lt;preset&gt;</code> element.</td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+    <li> <a name="Anchor_101843946_presets_elem"></a> <strong>&lt;presets&gt;</strong> [0 to 1]  <br />The parent element for the <code>&lt;preset&gt;</code> elements.<br /> <br /></li>
+    <li>
+      <p>  <a name="Anchor_101843946_preset_elem"></a> <strong>&lt;preset&gt;</strong> [0 and greater] <br />Defines presets for the 3D texture converter settings. <br />The preset definitions are a group of options (such as format and hint information) that are passed to the 3D texture converter.<br />   <code>&lt;preset&gt;</code> elements are described under the <code>&lt;presets&gt;</code> element.<br />If multiple preset definitions have the same name, the one defined last takes precedence.</p>
+      <table class="relative-table wrapped" style="width: 95.6522%;">
+        <colgroup> <col style="width: 25.8683%;" /> <col style="width: 74.1317%;" /> </colgroup>
+        <tbody>
+          <tr>
+            <th>Attribute Name</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>name</td>
+            <td>Specifies the name of the preset definition.</td>
+          </tr>
+          <tr>
+            <td>base_name</td>
+            <td>
+              <p>Specifies the name of the preset definition from the inheritance source when inheriting other presets.<br />The options specified for the inheritance source are all inherited.<br />The options can be added to or changed for the inherited preset.<br />If an option with no parameters is specified in the inheritance source, it can be negated by specifying <code>none</code> for the attribute value in the inherited preset.<br />It is possible to inherit additional presets that were inherited from another preset.<br />This attribute does not need to be described if inheritance is unnecessary.</p>
+            </td>
+          </tr>
+          <tr>
+            <td>3D texture converter options</td>
+            <td>
+              <p>Specify 3D texture converter options in the following format: delete the two hyphens (<code>--</code>) found at the start of long-name options, and replace the single hyphen (<code>-</code>) with an underscore (<code>_</code>).<br />For example, the 3D texture converter option <code>--comp-sel=&quot;rgba&quot;</code> would be defined as <code>comp_sel=&quot;rgba&quot;</code> in a <code>&lt;preset&gt;</code> element.</p>
+              <p>For options that do not have any parameters, use the null character for the attribute, as in <code>disable_file_info=&quot;&quot;</code>.</p>
+              <p>The 3D texture converter's default values are used for options that are not specified.</p>
+              <p>If the path specified for <code>output</code> is not an absolute path, it is treated as a relative path from the folder specified in the <code>&lt;output_folder&gt;</code> element.</p>
+              <p>If an absolute path is not specified for options such as <code>merge</code> and <code>replace_r/g/b/a</code>, the paths are handled as relative paths from the folder containing the input file.</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="content-wrapper">
+                <p>alternative_format_???</p>
+                <!--Remove-->
+              </div>
+            </td>
+            <td>
+              <div class="content-wrapper">
+                <p>Specifies an alternative format and selected components if you are exporting the image file in a changed format but some or all of the channel replacement files specified by the <code>replace_r/g/b/a</code> attributes do not exist.<br />If this attribute is not described, an error occurs if the replacement file or any part of it does not exist.  <br />The string after <code>alternative_format_</code> represents the channels that have replacement files.<br />For example, <code>alternative_format_rg</code> specifies the alternative format when replacement files exist only for the R and G components (see <a href="#Anchor_101843946_h2_6">Example of Combining Multiple Input File Channels Into One Output File</a>). <br />The string after <code>alternative_format_</code> must be described in rgba order.<br />Use <code>alternative_format_none</code> to specify a replacement format even when there are no replacement files.</p>
+                <p>This attribute takes the form &ldquo;<strong>alternative format</strong>, <strong>selected components</strong>, <strong>hint information</strong>, <strong>linear conversion</strong>, <strong>which channels to replace</strong>.&rdquo;</p>
+                <p>(<strong>Hint information</strong> and <strong>linear conversion</strong> can be specified in NintendoSDK 8.0.0 and later.)<br />(Which channels to replace can be specified in NintendoSDK 9.0.0 and later.)</p>
+                <p>When omitting the component selection, the value specified by the <code>comp_sel</code> attribute is used.</p>
+                <p>When omitting hint information, the value specified by the <code>hint</code> attribute is used.<br />For linear conversion, specify the value passed to the <code>--linear</code> option for the 3D texture converter. When omitting linear conversion, the value specified by the <code>linear</code> attribute is used.</p>
+                <p>When changing which channels to replace, specify the channels being replaced in RGBA order, specifying <code>r / g / b / a</code> as the targets of the replacement files. Specify the hyphen (<code>-</code>) for channels that are not being replaced.</p>
+                <div class="info_new">
+                  <div class="info_new_left">Info</div>
+                  <div class="info_new_right">
+                    <p>If you specify <code>rb--</code>, the G channel is replaced by the image file specified by <code>replace_b</code>. <br />If you specify <code>bg--</code>, the R channel will be replaced by the image file specified by <code>replace_b</code>. <br />If you specify <code>rga-</code>, the B channel will be replaced by the image file specified by <code>replace_a</code>.</p>
+                  </div>
+                </div>
+                <p> <br /></p>
+                <p>If only the images files specified by <code>replace_r</code> and <code>replace_b</code> exist, specify the attribute in the following way to use the BC5 format.<br />alternative_format_rb=&quot;unorm_bc5,<strong>r0g1</strong>,,,<strong>rb--</strong>&quot;</p>
+                <p>When combining channels and converting the image to ASTC format, you might achieve higher quality by using <strong>which channels to replace</strong> to make the format Luminance + Alpha (for example, rrrg / rrrb / gggb).<br /></p>
+                <p>
+                  <br />
+                </p>
+                <p>Use the normal <code>format</code>, <code>comp_sel</code>, <code>hint</code>, and <code>linear</code> attributes to specify values when all replacement files are present. Do not write <code>alternative_format_???</code> when replacement files all exist (an error will occur). <br /></p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p>  <br /> </p>
+    </li>
+    <li> <a name="Anchor_101843946_preset_overrides_elem"></a> <strong>&lt;preset_overrides&gt;</strong> [0 to 1]  <br />The parent element for the <code>&lt;preset_override&gt;</code> elements.<br /> <br /></li>
+    <li>
+      <p>  <a name="Anchor_101843946_preset_override_elem"></a><strong>&lt;preset_override&gt;</strong> [0 and greater] <br />  Defines the preset overwrite.<br />Specify this element when partially overwriting the <code>&lt;preset&gt;</code> element options.<br />Additional options that were not previously specified with the <code>&lt;preset&gt;</code> element can be specified.<br />These options are included as <code>&lt;preset_override&gt;</code> elements under the <code>&lt;preset_overrides&gt;</code> element.<br />An error occurs if the <code>&lt;preset&gt;</code> with the name specified in <code>&lt;preset_override&gt;</code> does not exist.<br />If an option with no parameters is specified in the <code>&lt;preset&gt;</code> element, it can be negated by specifying <code>none</code> for the attribute value.<br />To negate the <code>resize_w、resize_h</code> setting in <code>&lt;preset&gt;</code>, specify <code>resize_w=&quot;100%&quot; resize_h=&quot;100%&quot;</code>.<br />If multiple <code>&lt;preset_override&gt;</code> elements have the same name, only the last element is applied.<br />When inheriting preset definitions, the <code>&lt;preset_override&gt;</code> for the inheritance source is also applied in the inherited presets.</p>
+      <table class="relative-table wrapped" style="width: 93.9359%;">
+        <colgroup> <col style="width: 25.9756%;" /> <col style="width: 74.0244%;" /> </colgroup>
+        <tbody>
+          <tr>
+            <th>Attribute Name</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>name</td>
+            <td>Specifies the name of the preset definition to overwrite.</td>
+          </tr>
+          <tr>
+            <td>3D texture converter options</td>
+            <td>Uses the same format as the 3D texture converter options in the <code>&lt;preset&gt;</code> element.</td>
+          </tr>
+          <tr>
+            <td>alternative_format_???</td>
+            <td>Describes in a format similar to the <code>&lt;preset&gt;</code> element. </td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+    <li> <a name="Anchor_101843946_preset_assigns_elem"></a><strong>&lt;preset_assigns&gt;</strong> [0 to 1] <br />The parent element for the <code>&lt;preset_assign&gt; </code> elements.<br /> <br /> </li>
+    <li>  <a name="Anchor_101843946_preset_assign_elem"></a> <strong>&lt;preset_assign&gt;</strong> [0 and greater] <br />  Defines preset assignments.<br />Preset assignments are the rules that describe which presets to apply to image files with particular names.<br />They are included as <code>&lt;preset_assign&gt;</code> elements under the <code>&lt;preset_assigns&gt;</code> element.<p>For example, to apply the preset definition named Albedo1 to files with names ending in Alb (such as <code>imageAlb.tga</code>), you would use code like the following.<br />file_name=&quot;.*Alb&quot; preset_name=&quot;Albedo1&quot;</p><p>If the input file matches the <code>file_name</code> attribute of multiple <code>&lt;preset_assign&gt;</code> elements, the last one defined takes precedence.<br />An error occurs if the input file does not match the <code>file_name</code> attribute of any of the <code>&lt;preset_assign&gt;</code> elements.</p><table class="wrapped"><colgroup> <col /> <col /> </colgroup><tbody><tr><th>Attribute Name</th><th>Description</th></tr><tr><td>file_name</td><td>Specifies the filename (not including the filename extension) for sorting through the presets. You can use regular expressions.</td></tr><tr><td>extension</td><td><p>Specifies the filename extension (not including the dot) of the image files to which the preset is applied. (Available in NintendoSDK 10.0.0 and later.)<br />You can specify multiple extensions by separating them by commas.<br />If the <code>extension</code> attribute is not specified or if the null character has been specified, the preset is applied to image files of all extensions.<br />Note that if you code a <code>&lt;preset_assign&gt;</code> element with specified extensions followed by a <code>&lt;preset_assign&gt;</code> element that has the same <code>file_name</code> attribute but no specified extensions, only this latter element is valid.</p></td></tr><tr><td>preset_name</td><td><p>Specifies the name of the preset definition to apply.</p><p>If the <code>preset_name</code> attribute is the null character, that image file is not converted.</p><p><br /></p><p>If multiple preset definition names are specified and separated by commas, all of the presets are applied. (For more information, see <a href="#Anchor_101843946_h2_5">Example of Conversion to Multiple Texture Intermediate Files From a Single Input File</a>.)<br />When applying multiple presets, specify the <code>output</code> option in the preset definitions to prevent files in the same path from being exported multiple times.</p></td></tr><tr><td>channel_packing</td><td><p>When converting multiple input files into a single output file, set <code>true</code> to convert once for merging channels, and <code>false</code> to display an error.<br />If this attribute is omitted, the default value is <code>false</code>.<br />Even if <code>true</code> is specified, an error occurs if multiple input files with different presets are included in a single output file.<br />When <code>true</code> is specified, the file specified by the <code>replace_?</code> attribute of the <code>&lt;preset&gt;</code> element is the original file (<code>src_path</code> attribute of the <code>&lt;create&gt;</code> element) for the texture intermediate file. (If multiple <code>replace_?</code> attributes are specified, the order of priority is <code>replace_r</code> &gt; <code>replace_g</code> &gt; <code>replace_b</code> &gt; <code>replace_a</code>).</p></td></tr><tr><td>minimum_number_only</td><td><p>If the same preset is being applied and multiple input files all have the same filename prefix, specify <code>true</code> to convert only the file whose filename ends with the smallest number, or <code>false</code> to convert all of the files. (This feature is in Nintendo SDK 9.1.0 and later.)<br />Use this attribute when converting images to 3D textures or array textures and the number for the first file is not fixed.<br />You cannot specify <code>true</code> for both the <code>minimum_number_only</code> attribute and the <code>channel_packing</code> attribute.</p></td></tr></tbody></table></li>
+    <li>
+      <p>  <a name="Anchor_101843946_pre_convert_command_elem"></a> <a name="Anchor_101843946_post_convert_command_elem"></a> <strong>&lt;pre_convert_command&gt;</strong> [0 to 1]   <br /> <strong>&lt;post_convert_command&gt;</strong> [0 to 1]<br />  These elements contain the settings for commands executed before and after conversion.<br />The path to the text file that describes the output file paths in each row (output list file) (UTF-8 BOM) is passed as the argument to the specified command.<br />If commands are defined in multiple preset files, only the command that was defined last is executed.</p>
+      <table class="relative-table wrapped" style="width: 95.6522%;">
+        <colgroup> <col style="width: 16.8862%;" /> <col style="width: 83.1138%;" /> </colgroup>
+        <tbody>
+          <tr>
+            <th>Attribute Name</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>path</td>
+            <td>
+              <p>Specifies the file path to the command to run before or after conversion.</p>
+              <p>This path may include environment variables surrounded by percent signs (%).</p>
+            </td>
+          </tr>
+          <tr>
+            <td>arguments_before</td>
+            <td>
+              <p>Specifies any arguments to be inserted before the path to the output list file in the command argument.<br />Multiple arguments can be specified when separated by spaces.</p>
+              <p>This attribute does not need to be described if there are no arguments to insert.</p>
+            </td>
+          </tr>
+          <tr>
+            <td>arguments_after</td>
+            <td>Specifies any arguments to be added after the path to the output list file in the command argument.<p>Multiple arguments can be specified when separated by spaces.</p>This attribute does not need to be described if there are no arguments to add.</td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+  </ul>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_101843946_h2_3">Environment Variables Usable in Preset Files</h2>
+<p>In addition to user-defined environment variables, the following environment variables also can be used for attribute values in the <code>&lt;output_folder&gt;</code>, <code>&lt;preset&gt;</code>, <code>&lt;preset_override&gt;</code> and <code>&lt;global_option&gt;</code> elements.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Environment Variables</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>%INPUT_FILE_PATH%</td>
+      <td>The absolute path for the input file.</td>
+    </tr>
+    <tr>
+      <td>%INPUT_FILE_NAME%</td>
+      <td>The input filename, excluding a filename extension.</td>
+    </tr>
+    <tr>
+      <td>%INPUT_FILE_EXT%</td>
+      <td>The extension for the input file.</td>
+    </tr>
+    <tr>
+      <td>%INPUT_FILE_FOLDER%</td>
+      <td>The absolute path to the folder containing the input file.</td>
+    </tr>
+    <tr>
+      <td>%INPUT_FILE_FOLDER_NAME%</td>
+      <td>The name of the folder containing the input file.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>%INPUT_FILE_DEPTH%</p>
+      </td>
+      <td>
+        <p>The number of files, if the name of the input file ends with a serialized number.</p>
+        <p>For example, if the input file is named <code>image1.tga</code> but the same folder also contains files named <code>image2.tga</code> and <code>image3.tga</code>, <code>%INPUT_FILE_DEPTH%</code> would be set to <code>3</code>.</p>
+        <p>To convert image files to 2D array textures, specify <code>dimension=&quot;2d_array&quot; depth=&quot;%INPUT_FILE_DEPTH%&quot;</code> in the <code>&lt;preset&gt;</code> element.<br />If the value of the <code>discrete_number</code> attribute of the <code>&lt;preset&gt;</code> element is <code>true</code>, the value of this environment variable is taken as the number of files that have the same prefix as the input filename and that end in numbers greater than or equal to the input file. (The numbers at the end are counted even if they are not in numerical sequence.) (This feature is in Nintendo SDK 9.1.0 and later.)</p>
+      </td>
+    </tr>
+    <tr>
+      <td>%OUTPUT_FILE_PATH%</td>
+      <td>The absolute path for the output file.</td>
+    </tr>
+    <tr>
+      <td>%OUTPUT_FILE_NAME%</td>
+      <td>The output filename, excluding a filename extension.</td>
+    </tr>
+    <tr>
+      <td>%OUTPUT_FILE_EXT%</td>
+      <td> The filename extension for the output file.</td>
+    </tr>
+    <tr>
+      <td>%OUTPUT_FILE_FOLDER%</td>
+      <td>The absolute path for the folder storing the output file. </td>
+    </tr>
+    <tr>
+      <td>%OUTPUT_FILE_FOLDER_NAME%</td>
+      <td>The name of the folder storing the output file.</td>
+    </tr>
+    <tr>
+      <td>%MATCH_1%</td>
+      <td>
+        <p>If you are using regular expressions enclosed in parentheses in the <code>file_name</code> attribute of the <code>&lt;preset_assign&gt;</code> element, this is the string that matches the first of those regular expressions. </p>
+        <p>For example, to export FTX files with names obtained by deleting the suffixes from the input filenames, you could specify <code>file_name=&quot;(.*)Alb&quot;</code> in the <code>&lt;preset_assign&gt;</code> element and specify <code>output=&quot;%MATCH_1%.ftxb&quot;</code> in the <code>&lt;preset&gt;</code> element. </p>
+      </td>
+    </tr>
+    <tr>
+      <td>%MATCH_2%</td>
+      <td>
+        <p>If you are using regular expressions enclosed in parentheses in the <code>file_name</code> attribute of the <code>&lt;preset_assign&gt;</code> element, this is the string that matches the second of those regular expressions.</p>
+        <p> <span style="color: rgb(51,51,51);">Same for <code>%MATCH_3%</code> and so on.</span> <br /></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>These environment variables related to the output file can only be used in the <code>&lt;preset&gt;</code> element.</p>
+<h1 id="Anchor_101843946_h1_5">Sample Preset Files</h1>
+<h2 id="Anchor_101843946_h2_4">Examples of Using Each Element</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;texture_convert_preset</span> <span class="na">version=</span><span class="s">&quot;1.0.0&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;import</span> <span class="na">path=</span><span class="s">&quot;%COMMON_PRESETS%/common.ntcp&quot;</span> <span class="nt">/&gt;</span> <span class="cm">&lt;!-- COMMON_PRESETS is a user-defined environment variable. --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;output_folder</span> <span class="na">path=</span><span class="s">&quot;../textures&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;pre_convert_command</span> <span class="na">path=</span><span class="s">&quot;%SCRIPTS%/PreConvert.bat&quot;</span> <span class="nt">/&gt;</span> <span class="cm">&lt;!-- SCRIPTS is a user-defined environment variable. --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;post_convert_command</span> <span class="na">path=</span><span class="s">&quot;%SCRIPTS%/PostConvert.bat&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;global_option</span> <span class="na">weighted_compress=</span><span class="s">&quot;false&quot;</span> <span class="na">mip_gen_filter=</span><span class="s">&quot;linear&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;presets&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset</span> <span class="na">name=</span><span class="s">&quot;Albedo1&quot;</span> <span class="na">format=</span><span class="s">&quot;srgb_bc1&quot;</span> <span class="na">comp_sel=</span><span class="s">&quot;rgba&quot;</span> <span class="na">hint=</span><span class="s">&quot;albedo&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset</span> <span class="na">name=</span><span class="s">&quot;Normal1&quot;</span> <span class="na">format=</span><span class="s">&quot;unorm_bc5&quot;</span> <span class="na">comp_sel=</span><span class="s">&quot;rg01&quot;</span> <span class="na">hint=</span><span class="s">&quot;normal&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset</span> <span class="na">name=</span><span class="s">&quot;Mixed1&quot;</span> <span class="na">format=</span><span class="s">&quot;srgb_bc3&quot;</span> <span class="na">comp_sel=</span><span class="s">&quot;rgba&quot;</span> <span class="na">hint=</span><span class="s">&quot;mixed&quot;</span> <span class="na">replace_a=</span><span class="s">&quot;%INPUT_FILE_NAME%.A.%INPUT_FILE_EXT%&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset</span> <span class="na">name=</span><span class="s">&quot;EmissionHdr1&quot;</span> <span class="na">format=</span><span class="s">&quot;ufloat_bc6&quot;</span> <span class="na">hint=</span><span class="s">&quot;emission&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset</span> <span class="na">name=</span><span class="s">&quot;Test1&quot;</span> <span class="na">format=</span><span class="s">&quot;unorm_bc4&quot;</span> <span class="na">hint=</span><span class="s">&quot;test1&quot;</span> <span class="na">output=</span><span class="s">&quot;%MATCH_1%.ftxb&quot;</span> <span class="nt">/&gt;</span> <span class="cm">&lt;!-- Export with the name obtained from deleting the suffix. --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/presets&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_overrides&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_override</span> <span class="na">name=</span><span class="s">&quot;Normal1&quot;</span> <span class="na">resize_w=</span><span class="s">&quot;50%&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/preset_overrides&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assigns&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assign</span> <span class="na">file_name=</span><span class="s">&quot;.*Alb&quot;</span> <span class="na">preset_name=</span><span class="s">&quot;Albedo1&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assign</span> <span class="na">file_name=</span><span class="s">&quot;.*Nrm&quot;</span> <span class="na">preset_name=</span><span class="s">&quot;Normal1&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assign</span> <span class="na">file_name=</span><span class="s">&quot;.*Mix&quot;</span> <span class="na">preset_name=</span><span class="s">&quot;Mixed1&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assign</span> <span class="na">file_name=</span><span class="s">&quot;.*\.[RGBA]&quot;</span> <span class="na">preset_name=</span><span class="s">&quot;&quot;</span> <span class="nt">/&gt;</span> <span class="cm">&lt;!-- Suppress conversion of files for switching the channels --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assign</span> <span class="na">file_name=</span><span class="s">&quot;.*Ems&quot;</span> <span class="na">extension=</span><span class="s">&quot;exr&quot;</span> <span class="na">preset_name=</span><span class="s">&quot;EmissionHdr1&quot;</span> <span class="nt">/&gt;</span> <span class="cm">&lt;!-- Apply preset only to EXR files. --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assign</span> <span class="na">file_name=</span><span class="s">&quot;(.*)Test1&quot;</span> <span class="na">preset_name=</span><span class="s">&quot;Test1&quot;</span> <span class="nt">/&gt;</span> <span class="cm">&lt;!--Use regular expression surrounded by parentheses. --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/preset_assigns&gt;</span>
+
+<span class="nt">&lt;/texture_convert_preset&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_101843946_h2_5">Example of Conversion to Multiple Texture Intermediate Files From a Single Input File</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;texture_convert_preset</span> <span class="na">version=</span><span class="s">&quot;1.0.0&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;output_folder</span> <span class="na">path=</span><span class="s">&quot;../textures&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;presets&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset</span> <span class="na">name=</span><span class="s">&quot;Albedo_L&quot;</span> <span class="na">format=</span><span class="s">&quot;srgb_bc7&quot;</span> <span class="na">hint=</span><span class="s">&quot;albedo&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset</span> <span class="na">name=</span><span class="s">&quot;Albedo_M&quot;</span> <span class="na">base_name=</span><span class="s">&quot;Albedo_L&quot;</span> <span class="na">resize_w=</span><span class="s">&quot;50%&quot;</span> <span class="na">output=</span><span class="s">&quot;%INPUT_FILE_NAME%_M.ftxb&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset</span> <span class="na">name=</span><span class="s">&quot;Albedo_S&quot;</span> <span class="na">base_name=</span><span class="s">&quot;Albedo_L&quot;</span> <span class="na">resize_w=</span><span class="s">&quot;25%&quot;</span> <span class="na">output=</span><span class="s">&quot;%INPUT_FILE_NAME%_S.ftxb&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Albedo_M and Albedo_S inherit the format and hint of Albedo_L. --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/presets&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assigns&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Changes the resolution and creates multiple texture intermediate files. --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assign</span> <span class="na">file_name=</span><span class="s">&quot;.*Alb&quot;</span> <span class="na">preset_name=</span><span class="s">&quot;Albedo_L,Albedo_M,Albedo_S&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/preset_assigns&gt;</span>
+<span class="nt">&lt;/texture_convert_preset&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_101843946_channel_packing_elem"></a>
+</p>
+<h2 id="Anchor_101843946_h2_6">Example of Combining Multiple Input File Channels Into One Output File</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;texture_convert_preset</span> <span class="na">version=</span><span class="s">&quot;1.0.0&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;output_folder</span> <span class="na">path=</span><span class="s">&quot;../textures&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;presets&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset</span> <span class="na">name=</span><span class="s">&quot;Packed1&quot;</span> <span class="na">format=</span><span class="s">&quot;unorm_bc7&quot;</span> <span class="na">comp_sel=</span><span class="s">&quot;rgba&quot;</span> <span class="na">hint=</span><span class="s">&quot;packed&quot;</span> <span class="na">output=</span><span class="s">&quot;%MATCH_1%.ftxb&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">alternative_format_rgb=</span><span class="s">&quot;unorm_bc1,rgb1&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">alternative_format_rg=</span><span class="s">&quot;unorm_bc5,rg01&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">alternative_format_rb=</span><span class="s">&quot;unorm_bc5,r0g1,,,rb--&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">alternative_format_r=</span><span class="s">&quot;unorm_bc4,rrr1&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">replace_r=</span><span class="s">&quot;%MATCH_1%.R.%INPUT_FILE_EXT%&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">replace_g=</span><span class="s">&quot;%MATCH_1%.G.%INPUT_FILE_EXT%&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">replace_b=</span><span class="s">&quot;%MATCH_1%.B.%INPUT_FILE_EXT%&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">replace_a=</span><span class="s">&quot;%MATCH_1%.A.%INPUT_FILE_EXT%&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/presets&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assigns&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;preset_assign</span> <span class="na">file_name=</span><span class="s">&quot;(.*)\.(R|G|B|A)&quot;</span> <span class="na">preset_name=</span><span class="s">&quot;Packed1&quot;</span> <span class="na">channel_packing=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/preset_assigns&gt;</span>
+<span class="nt">&lt;/texture_convert_preset&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The RGBA channels are all replaced, so a <code>image1.ftxb</code> (<code>unorm_bc7 format</code>) file with the same content is saved even if <code>image1.R.tga</code>, <code>image1.G.tga</code>, <code>image1.B.tga</code>, or <code>image1.A.tga</code> is specified for the argument in <code>3dTexturePresetConverter.bat</code>.<br />If both <code>image1.R.tga</code> and <code>image1.G.tga</code> are specified, an error occurs unless the <code>channel_packing</code> attribute of the <code>&lt;preset_assign&gt;</code> element is <code>true</code><br />If <code>image1.A.tga</code> does not exist, the output uses the <code>unorm_bc1</code> format specified by the <code>alternative_format_rgb</code> attribute.<br />If <code>image1.R.tga</code> does not exist, the <code>alternative_format_gba</code> attribute is not written and an error occurs.<br />If <code>image1.G.tga</code> and <code>image1.A.tga</code> do not exist, the <code>alternative_format_rb</code> attribute is written with <code>rb--</code> specified for which channels to replace. So the channel that will be replaced by <code>image1.B.tga</code> is changed to the G channel. Then, by specifying <code>r0g1</code> for the selected components, the G channel is applied to the B channel.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

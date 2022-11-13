@@ -1,0 +1,317 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Condition Variables | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Condition Variables -->
+<div class="pagetitle" id="PageId_83955531">Condition Variables</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955531_h1_1">Condition Variables</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955531_h2_1">Feature Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955531_h2_2">Using a Condition Variable</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955531_h2_3">Example of Using Condition Variables</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955531_h2_4">Condition Variable API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955531_h2_5">Notes About Using Condition Variables</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955531_h3_1">Spurious Wakeups</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955531_h3_2">Avoiding Missed Signals</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83955531_h1_1">Condition Variables</h1>
+<h2 id="Anchor_83955531_h2_1">Feature Overview</h2>
+<p style="color: rgb(51,51,51);">A condition variable is a synchronization object used to make <a href="../Pages/Page_83955697.html">threads</a> wait until a condition is satisfied for a resource that multiple threads are sharing.   To wait on a condition variable, use a locked <a href="../Pages/Page_83955800.html">mutex</a> that mutually excludes access to the shared resource.</p>
+<p>First call the <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">LockMutex()</span> function to lock the mutex for mutual exclusion of the shared resource. Next check the content of the shared resource, and if it is not in the anticipated state, call the <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionVariable()</span> function to transition to wait for the condition variable. Specify the corresponding mutex at that same time, and simultaneously wait for the condition variable and unlock the mutex.</p>
+<p>When the specific condition is satisfied for a shared resource that is being controlled by another thread, the threads waiting for the condition variable are awakened by the <span class="ApiLink_void_nn__os__SignalConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">SignalConditionVariable()</span> function or the <span class="ApiLink_void_nn__os__BroadcastConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">BroadcastConditionVariable()</span> function.</p>
+<p>When a thread put into waiting by the <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionVariable()</span> function is awakened, the mutex that was unlocked when waiting is locked again automatically. For this reason, even if multiple threads are awakened by the <span class="ApiLink_void_nn__os__BroadcastConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">BroadcastConditionVariable()</span> function, only one thread can actually run.</p>
+<p>Because an awakened thread runs after it has relocked the mutex, safe access of the shared resource is assured. Check the shared resource again when it is in this state, and if the value is not as anticipated, transition back to wait on the condition variable with the <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionVariable()</span> function. On the other hand, if the shared resource is in the anticipated state, run the necessary process and then release the lock using the <span class="ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT">UnlockMutex()</span> function.</p>
+<p>This kind of procedure is used to make threads wait on the condition variable with the <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionVariable()</span> function while the mutex is locked.</p>
+<p> </p>
+<h2 id="Anchor_83955531_h2_2">Using a Condition Variable</h2>
+<p>To use a condition variable, make use of a <span class="ApiLink_nn__os__ConditionVariableType">nn::os::ConditionVariableType</span> structure object as follows.<br />There are no restrictions on where the object can be defined.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="nn">nn::os::</span><span class="n">MutexType</span>               <span class="n">g_Mutex</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">ConditionVariableType</span>   <span class="n">g_Cond</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>For thread A that is waiting on a condition variable, use a procedure like the following.</p>
+<ol>
+  <li>
+    <p>First initialize the mutex and the condition variable.<br />The mutex must be set to <code>recursive == false</code>.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="mi">0</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">InitializeConditionVariable</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Cond</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To check the shared resource, first lock the mutex.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">LockMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Build a loop to check the state of the shared resource, and wait on the condition variable.<br />Check the state of the shared resource when awakened, because it might have been a <strong>spurious wakeup</strong>, and continue to wait on the condition variable until it becomes the anticipated value.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="k">while</span> <span class="p">(</span><span class="n">sharedResource</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">WaitConditionVariable</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Cond</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span>
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>When the shared resource becomes the anticipated value, leave this loop, perform the necessary process, and then unlock the mutex.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">UnlockMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>After all processing is finished, free the mutex and the condition variable.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FinalizeConditionVariable</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Cond</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">FinalizeMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<p> </p>
+<p>For thread B that is signaling a condition variable, use a procedure like the following.</p>
+<ol>
+  <li>Thread B performs none of the subsequent processes until after thread A is finished initializing the mutex and the condition variable.</li>
+  <li>
+    <p>In the main process of thread B, the mutex for the shared resource is locked and thread B has control.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">LockMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span>
+
+<span class="c1">// Controls the shared resource.
+</span><span class="n">sharedResource</span> <span class="o">=</span> <span class="n">GetNextStateOfSharedResource</span><span class="p">();</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>If the state of the shared resource satisfies the condition, signal the condition variable to the waiting threads.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="k">if</span> <span class="p">(</span><span class="n">sharedResource</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Signals the condition variable.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">SignalConditionVariable</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Cond</span> <span class="p">);</span>
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>As the final step, unlock the mutex.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">UnlockMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<p> </p>
+<p> </p>
+<h2 id="Anchor_83955531_h2_3">Example of Using Condition Variables</h2>
+<p>For an actual example of using condition variables, see the <span class="ApiLink_PageSampleOsConditionVariable">Condition Variable Sample Program</span>.</p>
+<p> </p>
+<h2 id="Anchor_83955531_h2_4">Condition Variable API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">nn::os::InitializeConditionVariable</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">nn::os::FinalizeConditionVariable</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">nn::os::WaitConditionVariable</span>
+  </li>
+  <li>
+    <span class="ApiLink_ConditionVariableStatus_nn__os__TimedWaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedWaitConditionVariable</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SignalConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">nn::os::SignalConditionVariable</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__BroadcastConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">nn::os::BroadcastConditionVariable</span>
+  </li>
+  <li> <span class="ApiLink_NN_OS_CONDITION_VARIABLE_INITIALIZER">NN_OS_CONDITION_VARIABLE_INITIALIZER</span> (macro)</li>
+</ul>
+<p> </p>
+<h2 id="Anchor_83955531_h2_5">Notes About Using Condition Variables</h2>
+<h3 id="Anchor_83955531_h3_1">Spurious Wakeups</h3>
+<p>A spurious wakeup occurs if a thread that is waiting on a condition variable by the <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionVariable()</span> function becomes released from the wait state even though it has not received a condition variable signal from another thread. This occurs due to factors that are out of the control of the internal implementation of the operating system library and the synchronization primitives.</p>
+<p>To implement correct control over resources even when this kind of unexpected release occurs, you must design your process in the following way when you use a condition variable.</p>
+<ul>
+  <li>Upon returning from the <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionVariable()</span> function, you must check the state of the shared resource again and verify that it is in the anticipated state.</li>
+  <li>If the shared resource is not in the anticipated state, go back to waiting with the <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionVariable()</span> function.</li>
+</ul>
+<p>For an actual implementation, see the <span class="ApiLink_PageSampleOsConditionVariable">Condition Variable Sample Program</span>.</p>
+<p> </p>
+<h3 id="Anchor_83955531_h3_2">Avoiding Missed Signals</h3>
+<p>If <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">SignalConditionVariable()</span> or <span class="ApiLink_void_nn__os__SignalConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">BroadcastConditionVariable()</span> is called for a thread that is waiting with the <span class="ApiLink_void_nn__os__BroadcastConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">WaitConditionVariable()</span> function, there is a risk that the signal will be missed if a lock segment for these processes is not built for the mutex of that <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionVariable()</span>.</p>
+<p>The following situation can occur. Say that thread A checks on the state of a shared resource after calling the <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">LockMutex()</span> function, and before it can call <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionvariable()</span>, thread B calls the <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">SignalConditionVariable()</span> function without calling <span class="ApiLink_void_nn__os__SignalConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">LockMutex()</span>. That signal is a pulse, so thread A fails to recognize it and transitions back to waiting for the condition variable.</p>
+<p>In the same way, the signal can be missed if thread A wakes due to a spurious wakeup, returns from <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionVariable()</span>, checks the state of the shared resource, and before it can again call <span class="ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT">WaitConditionVariable()</span>, thread B calls the <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">SignalConditionVariable()</span> function without calling <span class="ApiLink_void_nn__os__SignalConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">LockMutex()</span>.</p>
+<p>To avoid this risk of missing a signal, build a lock segment around <span class="ApiLink_void_nn__os__SignalConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">SignalConditionVariable()</span> by calling <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">LockMutex()</span> and <span class="ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT">UnlockMutex()</span> for that mutex.</p>
+<p>This situation of missing a signal can happen for <span class="ApiLink_void_nn__os__SignalConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">BroadcastConditionVariable()</span> as well as <span class="ApiLink_void_nn__os__BroadcastConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT">SignalConditionVariable()</span>.</p>
+<p> </p>
+<p> </p>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8d4678856d87c3faea21f47ced342bb6' )
+SetUrl( 'ApiLink_void_nn__os__WaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a69a1e2e570d09ebd7cdbaa9da2d7b187' )
+SetUrl( 'ApiLink_void_nn__os__SignalConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ae609d8150763b000d77f75d27fd44ac2' )
+SetUrl( 'ApiLink_void_nn__os__BroadcastConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a1588e76fa05096006c0dcba27f9c95bf' )
+SetUrl( 'ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#aa661a7036a18c378a694ad67941cd75e' )
+SetUrl( 'ApiLink_nn__os__ConditionVariableType', '../../../Api/HtmlNX/structnn_1_1os_1_1_condition_variable_type.html' )
+SetUrl( 'ApiLink_PageSampleOsConditionVariable', '../../../Api/HtmlNX/_page_sample_os_condition_variable.html' )
+SetUrl( 'ApiLink_void_nn__os__InitializeConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a1ea1d7b36ec1844ed9e05729e832f6c3' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeConditionVariable(ConditionVariableType_*conditionVariable)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a817379cd29b11b49b185d0dc6afdc5c6' )
+SetUrl( 'ApiLink_ConditionVariableStatus_nn__os__TimedWaitConditionVariable(ConditionVariableType_*conditionVariable|_MutexType_*mutex|_TimeSpan_timeout)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2643c34ccfd738890fdd0c546b61c7a8' )
+SetUrl( 'ApiLink_NN_OS_CONDITION_VARIABLE_INITIALIZER', '../../../Api/HtmlNX/os___condition_variable_api_8h.html#aa662896cf5af9d678aadcc17399c55e1' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

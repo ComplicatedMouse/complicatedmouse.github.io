@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Notes About Character Codes | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Notes About Character Codes -->
+<div class="pagetitle" id="PageId_121799605">Notes About Character Codes</div>
+<div class="text_separate">
+<h1 id="Anchor_121799605_h1_1">Notes About Character Codes</h1>
+<h2 id="Anchor_121799605_h2_1">Overview</h2>
+<p>In the NintendoSDK, logs and assertion macros use UTF-8 as the standard character encoding.</p>
+<p>For this reason, the DebugFontTextWriter input strings are assumed to be UTF-8.</p>
+<p>Passing non-UTF-8 strings to the draw functions may result in garbled text</p>
+<p>
+  <br />
+</p>
+<p>Note that in builds for Windows, the character encoding for string literals is not UTF-8 even if the source code is written in UTF-8.</p>
+<p>The character encoding for string literals is locale-dependent. In Japanese environments it is CP932.</p>
+<p>For this reason, the following code may cause garbled characters in Windows builds.</p>
+<!--Remove-->
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>#include &lt;nn/gfx/util/gfx_DebugFontTextWriter.h&gt;
+
+void nnMain() {
+&nbsp;&nbsp;&nbsp;&nbsp;nn::gfx::util::DebugFontTextWriter writer;
+&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;writer.Print(&quot;こんにちは&quot;); // Text appears garbled.
+&nbsp;&nbsp;&nbsp;&nbsp;...
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>This page introduces the following two workarounds.</p>
+<ul>
+  <li>Using UTF-8 string literal in Windows builds</li>
+  <li>Using the <code><span class="ApiLink_NN_GFX_UTIL_DEBUGFONT_USE_DEFAULT_LOCALE_CHARSET">NN_GFX_UTIL_DEBUGFONT_USE_DEFAULT_LOCALE_CHARSET</span></code> macro to convert the character codes for the strings input to the draw functions.</li>
+</ul>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_121799605_h2_2">Using UTF-8 String Literal in Windows Builds</h2>
+<p>The method of using UTF-8 string literal in Windows builds differs depending on the version of Visual Studio.</p>
+<h3 id="Anchor_121799605_h3_1">For Visual Studio 2012</h3>
+<p>There is no way to use UTF-8 string literals.</p>
+<h3 id="Anchor_121799605_h3_2">Writing the execution_character_set Pragma (for Visual Studio 2013, 2015, and 2017)</h3>
+<p>The following pragma is described in the source file that changes encoding to UTF-8.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>#pragma execution_character_set(&quot;utf-8&quot;)</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Although support for this pragma is touted even in Visual Studio 2012, it is buggy and unusable.</p>
+  </div>
+</div>
+<h3 id="Anchor_121799605_h3_3">Using the u8 Prefix (for Visual Studio 2015 and 2017)</h3>
+<p>Add the <code>u8</code> prefix to string literals. We recommend this method, because the development hardware also supports the <code>u8</code> prefix, meaning Windows and the development hardware can use code in common.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>auto str = u8&quot;Hello&quot;;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_121799605_h2_3">NN_GFX_UTIL_DEBUGFONT_USE_DEFAULT_LOCALE_CHARSET Macro</h2>
+<p>Define the <code><span class="ApiLink_NN_GFX_UTIL_DEBUGFONT_USE_DEFAULT_LOCALE_CHARSET">NN_GFX_UTIL_DEBUGFONT_USE_DEFAULT_LOCALE_CHARSET</span></code> macro before you include the NintendoSDK header files. You can then convert the character codes input to the lightweight font rendering library for debugging into the Windows locale default (which for Japanese is CP932).</p>
+<h3 id="Anchor_121799605_h3_4">Usage Examples</h3>
+<!--Remove-->
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>#define NN_GFX_UTIL_DEBUGFONT_USE_DEFAULT_LOCALE_CHARSET
+#include &lt;nn/gfx/util/gfx_DebugFontTextWriter.h&gt;
+
+void nnMain() {
+&nbsp;&nbsp;&nbsp;&nbsp;nn::gfx::util::DebugFontTextWriter writer;
+&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;writer.Print(&quot;こんにちは&quot;); // Text does not display garbled.
+&nbsp;&nbsp;&nbsp;&nbsp;...
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>If you enter a character that is not in the encoding of the Windows locale (for example, the &euro; symbol that does not exist in CP932), some characters will be garbled even if this method is used. In such cases, garbled characters can be avoided by using the aforementioned U8 prefix.<br />However, because the <code>U8</code> prefix and <code><span class="ApiLink_NN_GFX_UTIL_DEBUGFONT_USE_DEFAULT_LOCALE_CHARSET">NN_GFX_UTIL_DEBUGFONT_USE_DEFAULT_LOCALE_CHARSET</span></code> macro cannot be used at the same time, pick either one for use.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+// ApiLink_NN_GFX_UTIL_DEBUGFONT_USE_DEFAULT_LOCALE_CHARSET
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

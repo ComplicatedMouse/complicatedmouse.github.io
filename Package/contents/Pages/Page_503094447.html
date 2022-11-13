@@ -1,0 +1,313 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>CPU Boost Functionality | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- CPU Boost Functionality -->
+<div class="pagetitle" id="PageId_503094447">CPU Boost Functionality</div>
+<div class="text_separate">
+<h1 id="Anchor_503094447_h1_1">CPU Boost Functionality</h1>
+<h2 id="Anchor_503094447_h2_1">Feature Overview</h2>
+<p>The CPU boost feature lowers GPU processing capacity in exchange for temporarily boosting CPU processing capacity. As a result, file systems load faster and objects are initialized faster. The feature is designed for shortening wait times when changing scenes within applications or immediately after starting an application, and can be used by simply calling dedicated functions at the start and end of a CPU boost.</p>
+<p>You can expect the CPU to operate with higher than average processing capacity when using the CPU boost feature, but the following restrictions are applied to keep the retail product from overheating.</p>
+<ul>
+  <li>The processing capacity of the GPU is restricted (lowered) when using the CPU boost feature.</li>
+  <li>Even when using the CPU boost feature, the CPU may still sometimes operate at standard processing capability.</li>
+</ul>
+<p>This section describes these features in greater detail.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <span style="color: rgb(23,43,77);">CPU boost functionality is a feature that differs from the boost mode performance mode.</span>
+      <br />
+      <strong>
+        <span style="color: rgb(23,43,77);">It can be used regardless of whether Switch is docked or undocked.</span>
+      </strong>
+    </p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The CPU boost feature is available in NX Add-On 7.5 and NX Add-On 8.2 and later.</p>
+  </div>
+</div>
+<h2 id="Anchor_503094447_h2_2">API Specifications and Usage</h2>
+<p> To use the following functions in your program, include one of the following <code>oe</code> library headers.<br /> </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>#include &lt;nn/oe.h&gt;
+or
+#include &lt;nn/oe/oe_CpuBoostMode.h&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This enables programs to switch into CPU boost mode by calling <code><span class="ApiLink_nn__oe__SetCpuBoostMode">nn::oe::SetCpuBoostMode</span>()</code> with the following enumerators specified. Specify a mode other than <code><span class="ApiLink_nn__oe__CpuBoostMode_Normal">nn::oe::CpuBoostMode_Normal</span></code> to use the CPU boost feature.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Enumerator</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <code>
+          <span class="ApiLink_nn__oe__CpuBoostMode_Normal">nn::oe::CpuBoostMode_Normal</span>
+        </code>
+      </td>
+      <td>
+        <p>Normal operation mode (the default when the program starts).</p>
+        <p>The CPU operates with the performance set by the <code><span class="ApiLink_nn__oe__SetPerformanceConfiguration">nn::oe::SetPerformanceConfiguration</span>()</code> function.</p>
+        <p>For more information, see <a href="../Pages/Page_107339250.html">Selecting Performance Configurations</a>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>
+          <span class="ApiLink_nn__oe__CpuBoostMode_FastLoad">nn::oe::CpuBoostMode_FastLoad</span>
+        </code>
+      </td>
+      <td>
+        <p>CPU boost mode, appropriate for loading files.<br />The CPU operates with the performance shown later in Feature Description, regardless of the performance set by <code><span class="ApiLink_nn__oe__SetPerformanceConfiguration">nn::oe::SetPerformanceConfiguration</span>()</code>.</p>
+        <p />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Have the program issue functions like the following when starting and ending CPU boost feature.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>When starting the CPU boost feature in CpuBoostMode_FastLoad mode.
+&nbsp;&nbsp;&nbsp;&nbsp;nn::oe::SetCpuBoostMode( nn::oe::CpuBoostMode_FastLoad );
+
+When ending the CPU boost feature.
+&nbsp;&nbsp;&nbsp;&nbsp;nn::oe::SetCpuBoostMode( nn::oe::CpuBoostMode_Normal );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can verify the changes in CPU and GPU processing capacity using <a href="../Pages/Page_241559062.html">DevMenuOverlay</a> &gt; ClockRateGraph.</p>
+<h2 id="Anchor_503094447_h2_3">Feature Description</h2>
+<h3 id="Anchor_503094447_h3_1">CPU and GPU Processing Capacities</h3>
+<p>Normally, the CPU and GPU operate with the processing capacities described in <a href="../Pages/Page_124020222.html">Relationship Between the NX Hardware Specifications and the SDK</a>. The following table shows the processing capacities for typical performance configurations when the mode is <code><span class="ApiLink_nn__oe__CpuBoostMode_Normal">nn::oe::CpuBoostMode_Normal</span></code>. For more information about performance configurations, see <a href="../Pages/Page_107339250.html">Selecting Performance Configurations</a>.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Applied Performance Configuration<br />(<span class="ApiLink_nn__oe__PerformanceConfiguration">nn::oe::PerformanceConfiguration</span>)</th>
+      <th style="text-align: center;">CPU Processing Capacity<br />(Clock Rate)</th>
+      <th style="text-align: center;">GPU Processing Capacity<br />(Maximum Usage Limit)</th>
+    </tr>
+    <tr>
+      <td class="highlight-blue">
+        <span class="ApiLink_nn__oe__PerformanceConfiguration_Cpu1020MhzGpu307MhzEmc1331Mhz">nn::oe::PerformanceConfiguration_Cpu1020MhzGpu307MhzEmc1331Mhz</span>
+      </td>
+      <td style="text-align: center;">1,020 MHz</td>
+      <td style="text-align: center;">
+        <p>97% of the time operating at 307.2 MHz</p>
+      </td>
+    </tr>
+    <tr>
+      <td class="highlight-blue">
+        <span class="ApiLink_nn__oe__PerformanceConfiguration_Cpu1020MhzGpu384MhzEmc1331Mhz">nn::oe::PerformanceConfiguration_Cpu1020MhzGpu384MhzEmc1331Mhz</span>
+      </td>
+      <td style="text-align: center;">1,020 MHz</td>
+      <td style="text-align: center;">97% of the time operating at 384 MHz</td>
+    </tr>
+    <tr>
+      <td class="highlight-blue">
+        <span class="ApiLink_nn__oe__PerformanceConfiguration_Cpu1020MhzGpu768MhzEmc1600Mhz">nn::oe::PerformanceConfiguration_Cpu1020MhzGpu768MhzEmc1600Mhz</span>
+      </td>
+      <td style="text-align: center;">1,020 MHz</td>
+      <td style="text-align: center;">
+        <p>97% of the time operating at 768 MHz</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The CPU processing capabilities are based on the settings configured by the <code><span class="ApiLink_nn__oe__SetCpuBoostMode">nn::oe::SetCpuBoostMode</span>()</code> function, as described below. When it is time to cancel CPU boost mode, do so by specifying <code><span class="ApiLink_nn__oe__CpuBoostMode_Normal">nn::oe::CpuBoostMode_Normal</span></code>.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Specified CPU Boost Mode<br />(<span class="ApiLink_nn__oe__CpuBoostMode">nn::oe::CpuBoostMode</span>）</th>
+      <th style="text-align: center;">CPU Processing Capability<br />(Clock Rate)</th>
+      <th style="text-align: center;">GPU Processing Capability<br />(Maximum Usage Limit)</th>
+    </tr>
+    <tr>
+      <td class="highlight-blue">
+        <code>
+          <span class="ApiLink_nn__oe__CpuBoostMode_FastLoad">nn::oe::CpuBoostMode_FastLoad</span>
+        </code>
+      </td>
+      <td style="text-align: center;">1,020 MHz to 1,785 MHz (see Note)</td>
+      <td style="text-align: center;">
+        <p>Approximately 20% of GPU capacity when operating at 307.2 MHz</p>
+      </td>
+    </tr>
+    <tr>
+      <td class="highlight-blue">
+        <code>
+          <span class="ApiLink_nn__oe__CpuBoostMode_Normal">nn::oe::CpuBoostMode_Normal</span>
+        </code>
+      </td>
+      <td colspan="2">
+        <p>Cancels CPU boost mode.</p>
+        <p>The performance set by the <code><span class="ApiLink_nn__oe__SetPerformanceConfiguration">nn::oe::SetPerformanceConfiguration</span>()</code> function is applied to the chips.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <span style="color: rgb(255,0,0);">
+    <strong>Note:</strong> 1,785 MHz is the value in the FW8.0.0-4.0 version of NX Add-On 8.2.x. This value may differ depending on the firmware version.</span>
+</p>
+<p>As indicated in the table, the GPU processing capacity is restricted and the CPU processing capacity is boosted to its highest possible level. (However, under the conditions described later, there may be intervals when the CPU processing capacity is throttled back to normal levels). You can expect this boost to speed up processing at times when the GPU has a relatively light load, like right after the program starts and when files are being loaded during scene changes, and in scenes where large numbers of objects are initialized. However, because the GPU processing capacity is restricted, this boost feature is not meant to be used in the normal game scenes in most programs where the GPU has a heavy processing load.</p>
+<h3 id="Anchor_503094447_h3_2">Automatic Control by Focus</h3>
+<p>The system automatically controls the CPU and GPU processing capacities based on factors such as the focus state of the program.</p>
+<p>The CPU boost mode settings are only applied when that program is in focus. Even if you set CPU boost mode, the CPU boost mode settings are ignored when the program is not in-focus, and the CPU and GPU processing is controlled to be equivalent to standard processing.</p>
+<p>The application does not need to include programming to enable and disable CPU boost mode based on the focus state.</p>
+<h3 id="Anchor_503094447_h3_3">Interval Period</h3>
+<p>If the system determines the status to be one of the following, it may enter an interval period.</p>
+<ul style="list-style-type: square;">
+  <li>When CPU boost mode is set by a method other than <code><span class="ApiLink_nn__oe__CpuBoostMode_Normal">nn::oe::CpuBoostMode_Normal</span></code>, and actual CPU boost is executed for an extended period of time</li>
+  <li>When switching between multiple CPU boost modes frequently</li>
+  <li>In other situations when continuing to operate in CPU boost mode would create system safety issues</li>
+</ul>
+<p>During the interval period, the CPU processing capabilities are automatically reduced to standard levels to cool down and suppress overheating of the console. There are system definitions for the conditions for entering the interval period, its length, and the specific algorithms for determining processing capacities, all of which are subject to change based on firmware updates and other factors. (However, the performance of the CPU and GPU is kept within the performance ranges shown in the preceding table.) Also note that other algorithms may also impose restrictions.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>For example, in firmware version 8.0.0-4.0 for NX Add-On 8.2.x, the CPU boost can continue for a maximum of 60 seconds, after which the system automatically inserts a 15 second interval period. If the CPU boost time is less than 60 seconds, an interval period appropriate for the duration of the boost is inserted.</p>
+  </div>
+</div>
+<h2 id="Anchor_503094447_h2_4">Testing the CPU Boost Feature</h2>
+<h3 id="Anchor_503094447_h3_4">Assuring Program Operation</h3>
+<p>You must implement your program so it will run correctly in the face of these system-initiated changes to processing capacity. In other words, you want your game to proceed in ways that do not seem strange to the user even if the CPU and GPU processing capacities fluctuate while using CPU boost mode. For this reason, consider the following information when implementing the program.</p>
+<ul>
+  <li>Only use the CPU boost feature in scenes where it is required, and return to normal mode (<code><span class="ApiLink_nn__oe__CpuBoostMode_Normal">nn::oe::CpuBoostMode_Normal</span></code>) when leaving these scenes.</li>
+  <li>Use the CPU boost debug feature (described in the next section) to check the operation of the program during the times when processing equivalent to the interval period is applied while the CPU boost is active.</li>
+</ul>
+<h3 id="Anchor_503094447_h3_5">CPU Boost Debug Feature</h3>
+<p>As described earlier, when using the CPU boost feature, CPU processing capacity is sometimes boosted, and then the system throttles the CPU processing capacity back to normal levels during interval periods. The timing of this switching and the length of each period are defined by the system, and cannot be freely controlled by the program.</p>
+<p>CPU boost debug mode is provided as a testing feature to verify whether the program works correctly during the interval periods. You can enable and disable CPU boost debug mode using DevMenuCommand, as described in this section. If you enable CPU boost debug mode, the system always operates with processing capacity equivalent to the preceding interval period while the program is requesting use of the CPU boost feature.</p>
+<p>When the program starts, the system determines whether to enable or disable CPU boost debug mode, and this state cannot be changed while the program is running. Note that enabling or disabling this feature when the program is running does not immediately apply the change. <span style="color: rgb(255,0,0);">To enable or disable the feature while the program is running, first exit the program and then restart it.</span></p>
+<p>The following example shows how to enable and disable CPU boost debug mode in DevMenuCommand. This enable/disable setting is retained when the system is restarted.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Check whether the current CPU boost debug mode is enabled (true) or disabled (false).
+$ Tools\CommandLineTools\RunOnTarget.exe TargetTools\NX-NXFP2-a64\DevMenuCommand\Release\DevMenuCommand.nsp -- debug get-cpu-boost-debug-mode-enabled
+cpu-boost-debug-mode-enabled = false
+[SUCCESS]
+Exit( Result: Success, ExitKind: ExitProgram )
+
+# Change the boost debug mode to enabled (true) or disabled (false).
+$ Tools\CommandLineTools\RunOnTarget.exe TargetTools\NX-NXFP2-a64\DevMenuCommand\Release\DevMenuCommand.nsp -- debug set-cpu-boost-debug-mode-enabled true
+set cpu-boost-debug-mode-enabled = true
+To apply this change, restart the running application (if it is running).
+[SUCCESS]
+Exit( Result: Success, ExitKind: ExitProgram )</pre>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__oe__SetCpuBoostMode', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a217121fe4c4dcf327efa7059c33c88c3' )
+SetUrl( 'ApiLink_nn__oe__CpuBoostMode_Normal', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a9a4c06113b2d2e39157e21fd9d33c874a68b6ac86a64960519ad1bc96e5630653' )
+SetUrl( 'ApiLink_nn__oe__SetPerformanceConfiguration', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a96857d895190ae992969542cb28b0399' )
+SetUrl( 'ApiLink_nn__oe__CpuBoostMode_FastLoad', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a9a4c06113b2d2e39157e21fd9d33c874a56d0c008e285dc2c80ab2f33c225e4c6' )
+SetUrl( 'ApiLink_nn__oe__PerformanceConfiguration', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a096139fd9b2ff830679916e5dc7af4ad' )
+SetUrl( 'ApiLink_nn__oe__PerformanceConfiguration_Cpu1020MhzGpu307MhzEmc1331Mhz', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ae6b0bdb08dc359246714ed330d9c9fc2' )
+SetUrl( 'ApiLink_nn__oe__PerformanceConfiguration_Cpu1020MhzGpu384MhzEmc1331Mhz', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a83f27046d163ac822146c9656bec5dd2' )
+SetUrl( 'ApiLink_nn__oe__PerformanceConfiguration_Cpu1020MhzGpu768MhzEmc1600Mhz', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a5c1524584a301940dfd00923197e0037' )
+SetUrl( 'ApiLink_nn__oe__CpuBoostMode', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a9a4c06113b2d2e39157e21fd9d33c874' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

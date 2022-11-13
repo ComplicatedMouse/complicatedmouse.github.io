@@ -1,0 +1,315 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Build Procedure: Creating an Application Program | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Build Procedure: Creating an Application Program -->
+<div class="pagetitle" id="PageId_170694365">Build Procedure: Creating an Application Program</div>
+<div class="text_separate">
+<h1 id="Anchor_170694365_h1_1">Creating an Application Program</h1>
+<h2 id="Anchor_170694365_h2_1">Creating the NSS File<a name="Anchor_170694365_create-nss"></a></h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_170694365/171383534.png" class="embedded-image" />
+  </span>
+</p>
+<p>Using <code>clang++</code>, you can create a common library file from object files and static library files. NintendoSDK uses <code>.nss</code> for the filename extension generated at this time.</p>
+<p>For more information about the restrictions on linker options, see <a href="#Anchor_170694365_linker-option-restriction">Restrictions on Linker Options</a>.</p>
+<p>For more information about the NintendoSDK library directory, see <a href="#Anchor_170694365_library-directories">here</a>.</p>
+<p>For a list of the libraries in the NintendoSDK, see <a href="../Pages/Page_95685382.html">How the Libraries Are Provided and How to Use Them</a>.</p>
+<p>The following example shows a simple linking method for creating 64-bit applications in the NintendoSDK.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>clang++
+&nbsp;&nbsp;&nbsp;&nbsp;-nostartfiles
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--gc-sections
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--build-id=sha1
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,-init=_init,-fini=_fini
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,-pie
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--export-dynamic,-z,combreloc,-z,relro,--enable-new-dtags
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,-T %NINTENDO_SDK_ROOT%\Resources\SpecFiles\Application.aarch64.lp64.ldscript
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--start-group
+&nbsp;&nbsp;&nbsp;&nbsp;%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\rocrt.o
+&nbsp;&nbsp;&nbsp;&nbsp;%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\nnApplication.o
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Object file&gt;...
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Static library used by the application&gt;.a ...
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--end-group
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Dynamic modules used by the application&gt;.nrs ...
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--start-group
+&nbsp;&nbsp;&nbsp;&nbsp;%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\&lt;Additional shared library used by the application&gt;.nss ...
+&nbsp;&nbsp;&nbsp;&nbsp;%NINTENDO_SDK_ROOT%\Libraries&lt;BuildTarget&gt;\&lt;BuildType&gt;\nnSdk.nss
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--end-group
+&nbsp;&nbsp;&nbsp;&nbsp;%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\crtend.o
+&nbsp;&nbsp;&nbsp;&nbsp;-fuse-ld=lld.exe
+&nbsp;&nbsp;&nbsp;&nbsp;-o &lt;OUTPUT_FILE&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The NSS file is referenced when the VSI debugger gets debug information for the application.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The linker options are different from what is used in <a href="../Pages/Page_170694375.html">Creating a Dynamic Module</a>.</p>
+  </div>
+</div>
+<h2 id="Anchor_170694365_h2_2">Creating the NSO File</h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_170694365/171383537.png" class="embedded-image" />
+  </span>
+</p>
+<p>The NSO file is a shared library file for NintendoSDK. The NSO file is created from the NSS file using <code>MakeNso</code>.</p>
+<p>Use MakeNso, in the following way, to create the NSO file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>MakeNso
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;input file&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;output file&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The NSO file must be stored in the code region directory using the <a href="../Pages/Page_170694395.html">Creating an Application Image</a> procedure.</p>
+  </div>
+</div>
+<h1 id="Anchor_170694365_h1_2">Restrictions on Linker Options<a name="Anchor_170694365_linker-option-restriction"></a></h1>
+<!--Remove-->
+<h2 id="Anchor_170694365_h2_3">Required.</h2>
+<p>Make sure that you specify the following linker options when you link.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-nostartfiles
+-Wl,--gc-sections
+-Wl,-init=_init,-fini=_fini
+-Wl,-pie
+-Wl,-z,combreloc,-z,relro,--enable-new-dtags</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Make sure that you specify the following linker options when creating 32-bit applications.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-mabi=aapcs-linux
+-mcpu=cortex-a57
+-mfloat-abi=hard
+-mfpu=crypto-neon-fp-armv8
+-Wl,--target2=got-rel</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Make sure that you specify the following linker options when creating 64-bit applications.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-mcpu=cortex-a57+fp+simd+crypto+crc</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_170694365_h2_4">Link Script Files</h2>
+<p>Use the following linker options to specify the linker script file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-Wl,-T &lt;linker script file&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the following linker script files appropriate to the application you are building as provided in the NintendoSDK, without any modifications.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>32-bit applications</th>
+      <td>
+        <pre>%NINTENDO_SDK_ROOT%\Resources\SpecFiles\Application.arm.ilp32.ldscript</pre>
+      </td>
+    </tr>
+    <tr>
+      <th>64-bit applications</th>
+      <td>
+        <pre>%NINTENDO_SDK_ROOT%\Resources\SpecFiles\Application.aarch64.lp64.ldscript</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_170694365_h2_5">Linker</h2>
+<p>Specify the following linker option to use the fast lld linker. For more information, see <a href="../Pages/Page_92338149.html">Toolchain for NX</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-fuse-ld=lld.exe</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_170694365_h2_6">Build ID</h2>
+<p>Specify the following linker options and assign a build ID to the NSS file. If an ID is not assigned, the debugging information cannot be used in VSI.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-Wl,--build-id=sha1</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the SHA1 hash value is used for the build ID, the same binary NSS file is always generated for the same input file. We recommend using the SHA1 hash value when building release products. <br /> In addition to the SHA1 hash value, you can also use the <span style="color: rgb(51,51,51);">MD5 hash</span> or the UUID, which is a randomly generated unique value, for the build ID. Use the UUID to reduce the time it takes to generate a build ID. <br /> For more information, see <a href="../Pages/Page_92338149.html">Toolchain for NX</a>.</p>
+  </div>
+</div>
+<h2 id="Anchor_170694365_h2_7">Export to Dynamic Symbol Table</h2>
+<p>The application must export the symbols browsed from shared library files to a dynamic symbol table. For this reason, export the symbols by adding either of the following linker options.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Export all symbols</th>
+      <td>
+        <pre>-Wl,--export-dynamic</pre>
+      </td>
+    </tr>
+    <tr>
+      <th>Export only the required symbols</th>
+      <td>
+        <pre>-Wl,--dynamic-list=%NINTENDO_SDK_ROOT%\Resources\SpecFiles\ExportDynamicSymbol.lst</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <ul>
+      <li>It is possible to reduce the size of the generated NSS file by exporting only the necessary symbols.</li>
+      <li>When exporting only the required symbols, if symbol browsing may take place later from locations other than NRS files added as links when creating the NSS file, you must make it so that those symbols are also exported.</li>
+    </ul>
+  </div>
+</div>
+<h2 id="Anchor_170694365_h2_8">Mandatory Input File</h2>
+<p>Make sure to add the following files as link targets. Also see the specification examples in <a href="#Anchor_170694365_create-nss">Creating the NSS File</a>. For more information about build targets and build types, see <a href="../Pages/Page_106361459.html">Build Targets and Build Types</a>.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Object File<br />Static Library File</th>
+      <td>
+        <ul>
+          <li>
+            <pre>%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\rocrt.o</pre>
+          </li>
+          <li>
+            <pre>%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\nnApplication.o</pre>
+          </li>
+          <li>
+            <pre>%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\crtend.o</pre>
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>Common Library File</th>
+      <td>
+        <ul>
+          <li>
+            <pre>&lt;Dynamic modules used by the application&gt;.nrs</pre>
+          </li>
+          <li>
+            <pre>%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\&lt;Additional shared library used by the application&gt;.nss</pre>
+          </li>
+          <li>
+            <pre>%NINTENDO_SDK_ROOT%\Libraries&lt;BuildTarget&gt;\&lt;BuildType&gt;\nnSdk.nss</pre>
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <ul>
+      <li>Make sure that you specify <code>crtend.o</code> after all other object files, static library files, and common library files.</li>
+      <li>Only specify <code>&lt;<em>Dynamic modules used by the application</em>&gt;.nrs</code> when using dynamic modules using the <code>ro</code> library.</li>
+      <li>Only specify <code>&lt;<em>Additional shared library used by the application</em>&gt;.nss</code> when using common library files (NSO files) provided by the NintendoSDK. Specify the NSS file with the same name as the NSO file.</li>
+    </ul>
+  </div>
+</div>
+<h1 id="Anchor_170694365_h1_3">SDK Library Directories<a name="Anchor_170694365_library-directories"></a></h1>
+<p>The NintendoSDK library directories are found in the following locations.</p>
+<ul>
+  <li>%NINTENDO_SDK_ROOT%\Libraries\&lt;<em>BuildTarget</em>&gt;\&lt;<em>BuildType</em>&gt;</li>
+</ul>
+<p>For more information about build targets and build types, see <a href="../Pages/Page_106361459.html">Build Targets and Build Types</a>.</p>
+<p>For a list of the libraries in the NintendoSDK, see <a href="../Pages/Page_95685382.html">How the Libraries Are Provided and How to Use Them</a>.</p>
+<h1 id="Anchor_170694365_h1_4">Next Procedure</h1>
+<ul>
+  <li>
+    <a href="../Pages/Page_170694395.html">Creating an Application Image</a>
+  </li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

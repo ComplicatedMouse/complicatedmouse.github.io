@@ -1,0 +1,520 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>3D Sound | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- 3D Sound -->
+<div class="pagetitle" id="PageId_83956042">3D Sound</div>
+<div class="text_separate">
+<h1 id="Anchor_83956042_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83956042_h2_1">3D Sound</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956042_h2_2">3D Sound Program</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956042_h2_3">Doppler Effect</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956042_h2_4">Multi-Listeners</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956042_h2_5">3D Sound Customization</a>
+    </li>
+  </ul>
+</p>
+<h2 id="Anchor_83956042_h2_1">3D Sound</h2>
+<p>This section describes how to use 3D sounds, which are sounds for which the volume and pan change according to the location of the sound source in 3D space coordinates.</p>
+<p>Configuring 3D Sounds</p>
+<p>3D sounds are configured from the following three classes.</p>
+<ul>
+  <li>3D Sound Manager (<code><span class="ApiLink_nn__atk__Sound3DManager">nn::atk::Sound3DManager</span></code>)</li>
+  <li>3D Sound Actor (<code><span class="ApiLink_nn__atk__Sound3DActor">nn::atk::Sound3DActor</span></code>)</li>
+  <li>3D Sound Listener (<code><span class="ApiLink_nn__atk__Sound3DListener">nn::atk::Sound3DListener</span></code>)</li>
+</ul>
+<h3 id="Anchor_83956042_h3_1">3D Sound Manager (nn::atk::Sound3DManager)</h3>
+<p>The 3D sound manager instance calculates and manages 3D sound parameters. In general, only one instance is generated and used.</p>
+<h3 id="Anchor_83956042_h3_2">3D Sound Actor (nn::atk::Sound3DActor)</h3>
+<p>The 3D sound actor instance represents a single sound source. It sets the 3D space coordinates and manages the sound played by the sound source.</p>
+<p>When you play a sound in 3D space, you use a 3D sound actor instead of a sound archive player (<code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code>) .</p>
+<p>The <code>Sound3DActor</code> class inherits the <code>SoundActor</code> class.</p>
+<h3 id="Anchor_83956042_h3_3">3D Sound Listener (nn::atk::Sound3DListener)</h3>
+<p>The 3D sound listener represents a microphone or human ear. To set the listener position and orientation, a transformation matrix called the listener matrix is used.</p>
+<h2 id="Anchor_83956042_h2_2">3D Sound Program</h2>
+<p>This section describes the sound program using examples of source code.</p>
+<p>The source code is the <code>main.cpp</code> file located in the <code>\Samples\Applications\Nw4f\snd\AtkSound3D</code> directory.</p>
+<h3 id="Anchor_83956042_h3_4">Creating Instances</h3>
+<p>The following sample shows how to create instances of the three classes that were just described.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::atk::</span><span class="n">Sound3DManager</span>     <span class="n">g_Sound3DManager</span><span class="p">;</span>
+<span class="nn">nn::atk::</span><span class="n">Sound3DActor</span>       <span class="n">g_Sound3DActor</span><span class="p">;</span>
+<span class="nn">nn::atk::</span><span class="n">Sound3DListener</span>    <span class="n">g_Sound3DListener</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Normally, you create only one instance each of <code><span class="ApiLink_nn__atk__Sound3DManager">nn::atk::Sound3DManager</span></code> and <code><span class="ApiLink_nn__atk__Sound3DListener">nn::atk::Sound3DListener</span></code>, but as many instances of  <code><span class="ApiLink_nn__atk__Sound3DActor">nn::atk::Sound3DActor</span></code> as there are sound sources.</p>
+<h3 id="Anchor_83956042_h3_5">Initializing 3D Sound Manager</h3>
+<p>Initialize <code><span class="ApiLink_nn__atk__Sound3DManager">nn::atk::Sound3DManager</span></code> as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Initializes Sound3DManager.
+</span><span class="nn">std::</span><span class="kt">size_t</span> <span class="n">memSizeForSound3DManager</span> <span class="o">=</span> <span class="n">g_Sound3DManager</span><span class="p">.</span><span class="n">GetRequiredMemSize</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SoundArchive</span> <span class="p">);</span>
+
+<span class="n">g_pMemoryForSound3DManager</span> <span class="o">=</span> <span class="nn">nns::atk::</span><span class="n">Allocate</span><span class="p">(</span> <span class="n">memSizeForSound3DManager</span> <span class="p">);</span>
+<span class="n">g_Sound3DManager</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SoundArchive</span><span class="p">,</span> <span class="n">g_pMemoryForSound3DManager</span><span class="p">,</span> <span class="n">memSizeForSound3DManager</span> <span class="p">);</span>
+<span class="n">g_Sound3DManager</span><span class="p">.</span><span class="n">SetMaxPriorityReduction</span><span class="p">(</span> <span class="mi">32</span> <span class="p">);</span>
+<span class="n">g_Sound3DManager</span><span class="p">.</span><span class="n">SetSonicVelocity</span><span class="p">(</span> <span class="mf">340.0f</span> <span class="o">/</span> <span class="mf">60.0f</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For more information about the <code><span class="ApiLink_nn__atk__Sound3DManager__SetSonicVelocity">nn::atk::Sound3DManager::SetSonicVelocity</span></code> function, see <a href="#Anchor_83956042_DOPPLER_EFFECTS">3D Sound - Doppler Effect</a>.</p>
+<h4 id="Anchor_83956042_h4_1">Initialization</h4>
+<p>Initialize the 3D sound manager instance by using the <code><span class="ApiLink_nn__atk__Sound3DManager__Initialize">nn::atk::Sound3DManager::Initialize</span></code> function.</p>
+<p>The arguments take a pointer to the sound archive being used and the memory region required for initialization. Get the required memory size by using the <code><span class="ApiLink_nn__atk__Sound3DManager__GetRequiredMemSize">nn::atk::Sound3DManager::GetRequiredMemSize</span></code> function.</p>
+<h4 id="Anchor_83956042_h4_2">Maximum Priority Reduction</h4>
+<p>Set the maximum reduction in priority by using the <code><span class="ApiLink_nn__atk__Sound3DManager__SetMaxPriorityReduction">nn::atk::Sound3DManager::SetMaxPriorityReduction</span></code> function.</p>
+<p>The player priority of a sound being played in 3D space normally declines as the volume decreases.</p>
+<p>The maximum priority reduction represents the maximum extent to which the player priority declines when the volume drops to 0.</p>
+<p>Figure 5. Decline in Player Priority</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956042/83080913.png" class="embedded-image" />
+  </span>
+</p>
+<h3 id="Anchor_83956042_h3_6">Initializing the Listener</h3>
+<p>Initialize <code><span class="ApiLink_nn__atk__Sound3DListener">nn::atk::Sound3DListener</span></code> as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Initializes Sound3DListener.
+</span><span class="n">g_Sound3DListener</span><span class="p">.</span><span class="n">SetMatrix</span><span class="p">(</span> <span class="n">listenerMtx</span> <span class="p">);</span>
+
+<span class="n">g_Sound3DListener</span><span class="p">.</span><span class="n">SetVelocity</span><span class="p">(</span> <span class="n">zeroVelocity</span> <span class="p">);</span>
+<span class="n">g_Sound3DListener</span><span class="p">.</span><span class="n">SetMaxVolumeDistance</span><span class="p">(</span> <span class="mf">5.0f</span> <span class="p">);</span>
+<span class="n">g_Sound3DListener</span><span class="p">.</span><span class="n">SetUnitDistance</span><span class="p">(</span> <span class="mf">5.0f</span> <span class="p">);</span>
+<span class="n">g_Sound3DListener</span><span class="p">.</span><span class="n">SetInteriorSize</span><span class="p">(</span> <span class="mf">5.0f</span> <span class="p">);</span>
+<span class="n">g_Sound3DManager</span><span class="p">.</span><span class="n">AddListener</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Sound3DListener</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_83956042_h4_3">Registering the Listener</h4>
+<p>Register the listener to the 3D sound manager by using the <code><span class="ApiLink_nn__atk__Sound3DManager__AddListener">nn::atk::Sound3DManager::AddListener</span></code> function.</p>
+<p>Multiple listeners can also be registered in a single 3D sound manager. For more information, see <a href="#Anchor_83956042_MULTI_LISTENER">3D Sound - Multi-Listeners</a>.</p>
+<h4 id="Anchor_83956042_h4_4">Listener Matrix</h4>
+<p>Set the listener matrix using the <code><span class="ApiLink_nn__atk__Sound3DListener__SetMatrix">nn::atk::Sound3DListener::SetMatrix</span></code> function.</p>
+<!--Remove-->
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span> <span class="nf">CalcListenerMatrix</span><span class="p">(</span> <span class="nn">nn::util::</span><span class="n">Matrix4x3fType</span><span class="o">*</span> <span class="n">mtx</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Listener's position.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">Vector3f</span> <span class="n">pos</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">VectorSet</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">pos</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.0f</span> <span class="p">);</span>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Listener's up vector.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">Vector3f</span> <span class="n">upVec</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">VectorSet</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">upVec</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">,</span> <span class="mf">0.0f</span> <span class="p">);</span>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Listener's directional vector.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">Vector3f</span> <span class="n">direction</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">directionSin</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">directionCos</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">SinCosEst</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">directionSin</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">directionCos</span><span class="p">,</span> <span class="mf">0.0f</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">VectorSet</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">direction</span><span class="p">,</span> <span class="o">-</span><span class="n">directionSin</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="o">-</span><span class="n">directionCos</span> <span class="p">);</span>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Generates the listener matrix.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">Vector3f</span> <span class="n">target</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">VectorAdd</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">target</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">direction</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">MatrixLookAtRightHanded</span><span class="p">(</span> <span class="n">mtx</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">upVec</span> <span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_83956042_h4_5">Maximum Volume Distance</h4>
+<p>Set the maximum volume distance using the <code><span class="ApiLink_nn__atk__Sound3DListener__SetMaxVolumeDistance">nn::atk::Sound3DListener::SetMaxVolumeDistance</span></code> function.<br />The maximum volume distance is the distance within which the volume remains at its maximum level, even if the position changes. It is specified as a distance from the listener position.</p>
+<p>Figure 6. Maximum Volume Distance</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956042/83080914.png" class="embedded-image" />
+  </span>
+</p>
+<p>By setting the maximum volume distance, you can prevent the volume from changing dramatically when an actor&rsquo;s position changes near the listener.</p>
+<h4 id="Anchor_83956042_h4_6">Attenuation Unit Distance</h4>
+<p>Set the attenuation unit distance using the <code><span class="ApiLink_nn__atk__Sound3DListener__SetUnitDistance">nn::atk::Sound3DListener::SetUnitDistance</span></code> function.</p>
+<p>The attenuation unit distance indicates the distance at which the volume falls to approximately half its value. Because the maximum volume distance is not included in this distance, the volume falls to half when the actor moves to a distance from the listener that is (maximum volume distance) + (attenuation unit distance).</p>
+<p>Although volume falls to half at the attenuation unit distance by default, the volume attenuation rate at the attenuation unit distance can be changed separately for each sound by manipulating the sound data.</p>
+<p>Figure 7. Attenuation Unit Distance</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956042/83080915.png" class="embedded-image" />
+  </span>
+</p>
+<h4 id="Anchor_83956042_h4_7">Interior Size</h4>
+<p>Set the interior size by using the <code><span class="ApiLink_nn__atk__Sound3DListener__SetInteriorSize">nn::atk::Sound3DListener::SetInteriorSize</span></code> function.</p>
+<p>The interior size is the size of the area in which the pan and surround pan vary. It is set as a (radial) distance from the listener&rsquo;s position.<br />If the interior size is large, pan changes become smooth. Conversely, if the interior size is small, pan changes become sudden.</p>
+<p>Although sound volume is attenuated as the distance from the listener increases, the amount of attenuation depends on the settings made for the maximum sound volume range (described previously).</p>
+<h4 id="Anchor_83956042_h4_8">Initializing Actors</h4>
+<p>Initialize <code><span class="ApiLink_nn__atk__Sound3DActor">nn::atk::Sound3DActor</span></code> as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Initializes Sound3DActor.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Sound3DActor</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SoundArchivePlayer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_Sound3DManager</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">VectorSet</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_ActorPos</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="mf">0.0f</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Sound3DActor</span><span class="p">.</span><span class="n">SetPosition</span><span class="p">(</span> <span class="n">g_ActorPos</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Sound3DActor</span><span class="p">.</span><span class="n">SetVelocity</span><span class="p">(</span> <span class="n">zeroVelocity</span> <span class="p">);</span>
+
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For its parameters, the <code><span class="ApiLink_nn__atk__Sound3DActor__Initialize">nn::atk::Sound3DActor::Initialize</span></code> function takes references to a sound archive player (<code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code>) and a 3D sound manager (<code><span class="ApiLink_nn__atk__Sound3DManager">nn::atk::Sound3DManager</span></code>).<br />When a sound is played using <code><span class="ApiLink_nn__atk__Sound3DActor">nn::atk::Sound3DActor</span></code>, it is played using the <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code> passed here.</p>
+<p>The 3D sound parameters for the sound are calculated using the passed <code><span class="ApiLink_nn__atk__Sound3DManager">nn::atk::Sound3DManager</span></code>.</p>
+<h4 id="Anchor_83956042_h4_9">Actor Coordinates</h4>
+<p>Set the actor coordinates using the <code><span class="ApiLink_nn__atk__Sound3DActor__SetPosition">nn::atk::Sound3DActor::SetPosition</span></code> function.</p>
+<h3 id="Anchor_83956042_h3_7">Playing 3D Sounds</h3>
+<p>3D sounds are played using <code><span class="ApiLink_nn__atk__Sound3DActor">nn::atk::Sound3DActor</span></code> instead of <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code>.</p>
+<p>The <code><span class="ApiLink_nn__atk__Sound3DActor">nn::atk::Sound3DActor</span></code> class has functions for playing sounds, just like <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_Sound3DActor</span><span class="p">.</span><span class="n">StartSound</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SoundHandle</span><span class="p">,</span> <span class="n">soundId</span> <span class="p">).</span><span class="n">IsSuccess</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>Sound3DActor</code> inherits <code>SoundActor</code>. You can use the same method described in <a href="../Pages/Page_83956039.html#Anchor_83956039_SND_ID_DynamicChange">SoundActor - Dynamically Changing the Sound ID</a> for purposes such as changing the footstep sound ID to play different kinds of sounds depending on the surface the character is walking on.</p>
+<h3 id="Anchor_83956042_h3_8">Updating the Actor&rsquo;s Coordinates</h3>
+<p>Updating the actor&rsquo;s coordinates as needed also updates the 3D parameters of the sound being played.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">g_Sound3DActor</span><span class="p">.</span><span class="n">SetPosition</span><span class="p">(</span> <span class="n">g_ActorPos</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The listener matrix can be updated using the same method as the actor&rsquo;s coordinates.</p>
+<h3 id="Anchor_83956042_h3_9">Life Spans of Actors and Sounds</h3>
+<p>Even if the <code><span class="ApiLink_nn__atk__Sound3DActor">nn::atk::Sound3DActor</span></code> instance is freed (for example, when an actor disappears), the sound played by the actor continues to play.</p>
+<p>Because the position information is stored in the sound, the 3D sound parameters are calculated correctly and the sound plays at the position where the actor disappeared, even if the listener matrix gets updated.</p>
+<p>The developer does not need to worry about the life span of the <code><span class="ApiLink_nn__atk__Sound3DActor">nn::atk::Sound3DActor</span></code> instance.</p>
+<p>In fact, if position data is not being updated continuously, the <code><span class="ApiLink_nn__atk__Sound3DActor">nn::atk::Sound3DActor</span></code> instance can be freed right after the sound has played.</p>
+<h2 id="Anchor_83956042_h2_3">
+  <a name="Anchor_83956042_DOPPLER_EFFECTS"></a>Doppler Effect</h2>
+<p>The following describes the method of representing the Doppler effect, where the pitch of a sound depends on the relative velocity of the object producing the sound and the person hearing it.</p>
+<p>Figure 8. Doppler Effect</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956042/83080910.png" class="embedded-image" />
+  </span>
+</p>
+<p>The AtkSound3D sample demo is provided as a reference for the Doppler effect.<br /></p>
+<h3 id="Anchor_83956042_h3_10">Doppler Effect Parameters</h3>
+<p>The following two parameters must be set to apply the Doppler effect.</p>
+<ul>
+  <li>Speed of sound</li>
+  <li>Doppler Factor</li>
+</ul>
+<h4 id="Anchor_83956042_h4_10">Speed of Sound</h4>
+<p>The speed of sound must be set to calculate the Doppler effect.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">g_Sound3DManager</span><span class="p">.</span><span class="n">SetSonicVelocity</span><span class="p">(</span> <span class="mf">340.0f</span> <span class="o">/</span> <span class="mi">60</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The default value is <code>0.0f</code>, meaning the Doppler effect is not applied.</p>
+<p>The unit for the value is the speed of sound per frame.</p>
+<p>The speed of sound is approximately 340 meters per second. So if <code>1.0f</code> is equal to one meter for the coordinates set by the <code>Sound3DActor::SetPosition</code> function, set the value to <code>340.0f / 60</code> if the <code>SoundArchivePlayer::Update</code> function is being called with coordinates updated at a rate of 60 frames per second.</p>
+<h4 id="Anchor_83956042_h4_11">Doppler Factor</h4>
+<p>The Doppler factor is a parameter to adjust the amount of Doppler effect to apply.</p>
+<p>The Doppler factor is set as a parameter for each sound in the sound data.<br />The default value is <code>0</code>, but this value can be increased to <code>127</code> to apply the Doppler effect. A standard value is <code>32</code>.</p>
+<p>This can also be set using the <strong>Doppler Effect</strong> column in the SoundMaker program.</p>
+<h3 id="Anchor_83956042_h3_11">Changing the Pitch</h3>
+<p>When the two preceding parameters are set, the Doppler effect is automatically applied.</p>
+<p>The <code>Sound3DActor::SetPosition</code> and <code>Sound3DListener::SetMatrix</code> functions operate internally to calculate the speed based on the difference since the last time they were called, and the result is applied to the Doppler effect, so the application does not need to set the speed.</p>
+<p>Figure 9. Automatic Calculation of Speed</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956042/83080911.png" class="embedded-image" />
+  </span>
+</p>
+<h3 id="Anchor_83956042_h3_12">Explicitly Specifying Speed</h3>
+<p>As described previously, speed is automatically calculated. But in some cases, speed must be explicitly set by the application.</p>
+<p>For example, if the camera jumps to another position that is far away, the speed as calculated from the change in distance might be interpreted as extremely fast, resulting in a sudden steep change in pitch. In this kind of situation, you must explicitly specify the speed by using the <code>Sound3DListener::SetVelocity</code> function after the <code>Sound3DListener::SetMatrix</code> function is called.</p>
+<p>You must also explicitly specify the speed when an instance of <code>Sound3DActor</code> is created and it has a velocity element.</p>
+<h3 id="Anchor_83956042_h3_13">Formula for Pitch Change</h3>
+<p>The amount that pitch is changed is found by using the following formula.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956109/83080130.gif" class="embedded-image" />
+  </span>
+</p>
+<p class="a5" style="margin-left: 60.0px;">
+  <em>pitch</em>: Ratio of change in pitch</p>
+<p class="a5" style="margin-left: 60.0px;">
+  <em>Vs</em>: Velocity (speed) of sound</p>
+<p class="a5" style="margin-left: 60.0px;">
+  <em>Vl</em>: Velocity of the listener</p>
+<p class="a5" style="margin-left: 60.0px;">
+  <em>Va</em>: Velocity of the actor</p>
+<p class="a5" style="margin-left: 60.0px;">
+  <em>F</em>: Doppler factor &divide; 32</p>
+<h2 id="Anchor_83956042_h2_4">
+  <a name="Anchor_83956042_MULTI_LISTENER"></a>Multi-Listeners</h2>
+<p>Multiple listeners can be registered in a single 3D sound manager.</p>
+<p>The operational specifications are different for one listener and for multiple listeners, so to distinguish between the two, a single listener is called a single listener and multiple listeners are called multi-listeners.</p>
+<p>Multi-listeners are used when the game screen is divided and displayed in several sections. When the screen is divided, several cameras come into existence, so multi-listeners must also be registered.</p>
+<h3 id="Anchor_83956042_h3_14">Differences Compared to a Single Listener</h3>
+<p>A multi-listener differs in the following ways from a single listener.</p>
+<ul>
+  <li>The volume takes the maximum value of the results calculated for each listener.</li>
+  <li>The player priority is the highest priority value of the results calculated for each listener.</li>
+  <li>Pan and surround pan are not changed.</li>
+  <li>The Doppler effect cannot be applied.</li>
+</ul>
+<h2 id="Anchor_83956042_h2_5">3D Sound Customization</h2>
+<p>Up to this point, the standard operations of 3D sound have been described, but many of them can be freely customized.</p>
+<p>For example, the volume attenuation curve due to distance can be either logarithmic or linear, but it can be customized to any curve.</p>
+<h3 id="Anchor_83956042_h3_15">3D Sound Engines (Sound3DEngine)</h3>
+<p>3D sound calculations are performed by a 3D sound engine. One 3D sound engine is allocated to the 3D sound manager.</p>
+<p>The 3D sound engine implements a default 3D sound calculation process, but a proprietary 3D sound calculation process can be performed by customizing it.</p>
+<h3 id="Anchor_83956042_h3_16">Creating a 3D Sound Engine</h3>
+<p>To create a proprietary 3D sound engine, create a class that inherits the <code>Sound3DEngine</code> class.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">class</span> <span class="nc">MySound3DEngine</span> <span class="o">:</span> <span class="k">public</span> <span class="nn">nn::atk::</span><span class="n">Sound3DEngine</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p class="a2">The created <code>MySound3DEngine</code> class instance is registered in <code>Sound3DManager</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">MySound3DEngine</span> <span class="n">g_MySound3DEngine</span><span class="p">;</span>
+
+
+<span class="n">g_Sound3DManger</span><span class="p">.</span><span class="n">SetEngine</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MySound3DEngine</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83956042_h3_17">Implementing the 3D Sound Calculation Process</h3>
+<p>To implement the 3D sound calculation process, override the <code>Sound3DEngine::UpdateAmbientParam</code> function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">class</span> <span class="nc">MySound3DEngine</span> <span class="o">:</span> <span class="k">public</span> <span class="nn">nn::atk::</span><span class="n">Sound3DEngine</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">virtual</span> <span class="kt">void</span> <span class="n">UpdateAmbientParam</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::atk::</span><span class="n">SoundAmbientParam</span><span class="o">*</span> <span class="n">pOutValue</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::atk::</span><span class="n">Sound3DManager</span><span class="o">*</span> <span class="n">manager</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::atk::</span><span class="n">Sound3DParam</span><span class="o">*</span> <span class="n">actorParam</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">uint32_t</span> <span class="n">soundId</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">uint32_t</span> <span class="n">updateFlag</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This function is periodically called to update the 3D sound parameters.</p>
+<p>After the function has been called, update the content of the <code>SoundAmbientParam</code> structure (the function's last argument) as needed.</p>
+<p>Each argument is described in the following sections.</p>
+<h4 id="Anchor_83956042_h4_12">Sound3DManager</h4>
+<p>The registered listener list can be obtained from <code>Sound3DManager</code>. 3D sound calculation is based on this listener information.</p>
+<h4 id="Anchor_83956042_h4_13">Sound3DParam</h4>
+<p>The <code>Sound3DParam</code> structure stores the <code>Sound3DActor</code> coordinates and the 3D sound related parameters set for each sound. These parameters must be applied when the 3D sound is calculated.</p>
+<h4 id="Anchor_83956042_h4_14">Sound ID</h4>
+<p>The Sound ID can be used as a hint for 3D sound calculation. It can be ignored if it is not needed.</p>
+<h4 id="Anchor_83956042_h4_15">Update Flags</h4>
+<p>Bit flags indicating which parameters to update. Only parameters whose bits are enabled are updated.</p>
+<h4 id="Anchor_83956042_h4_16">SoundAmbientParam</h4>
+<p>The <code>SoundAmbientParam</code> class includes the following members.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">class</span> <span class="nc">SoundAmbientParam</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">m_Volume</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">m_Pitch</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">m_Lpf</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">m_BiquadFilterValue</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">m_BiquadFilterType</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">m_Priority</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">uint32_t</span> <span class="n">m_UserData</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>These structure members are updated based on the data from the four arguments described in the preceding section.</p>
+<h3 id="Anchor_83956042_h3_18">Sound3DCalculator</h3>
+<p>Because 3D sound calculations are complex, the <code>Sound3DCalculator</code> utility class has been prepared to allow for easier customization.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">class</span> <span class="nc">Sound3DCalculator</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">static</span> <span class="kt">void</span> <span class="n">CalculateVolumeAndPriority</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span><span class="o">*</span> <span class="n">pOutVolume</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span><span class="o">*</span> <span class="n">pOutPriority</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">Sound3DManager</span><span class="o">&amp;</span> <span class="n">manager</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">Sound3DListener</span><span class="o">&amp;</span> <span class="n">listener</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">Sound3DParam</span><span class="o">&amp;</span> <span class="n">actorParam</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span>  <span class="n">actorDistance</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">static</span> <span class="kt">void</span> <span class="nf">CalculatePan</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span><span class="o">*</span> <span class="n">pOutPan</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span><span class="o">*</span> <span class="n">pOutSPan</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">Sound3DManager</span><span class="o">&amp;</span> <span class="n">manager</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">Sound3DListener</span><span class="o">&amp;</span> <span class="n">listener</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">Sound3DParam</span><span class="o">&amp;</span> <span class="n">actorParam</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">CalcPanParam</span><span class="o">&amp;</span> <span class="n">calcPanParam</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">)</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">static</span> <span class="kt">void</span> <span class="nf">CalculatePitch</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span><span class="o">*</span> <span class="n">pOutValue</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">Sound3DManager</span><span class="o">&amp;</span> <span class="n">manager</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">Sound3DListener</span><span class="o">&amp;</span> <span class="n">listener</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">Sound3DParam</span><span class="o">&amp;</span> <span class="n">actorParam</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">)</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">...</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If you use the <code>Sound3DCalculator</code> class, you can calculate the 3D sound parameters using the <code>UpdateAmbientParam</code> function arguments almost without modification.</p>
+<p>For more information about customization, see the implementation code of the <code>Sound3DCalculator</code> class.</p>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk__Sound3DManager', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_manager.html' )
+SetUrl( 'ApiLink_nn__atk__Sound3DActor', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_actor.html' )
+SetUrl( 'ApiLink_nn__atk__Sound3DListener', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_listener.html' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html' )
+SetUrl( 'ApiLink_nn__atk__Sound3DManager__SetSonicVelocity', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_manager.html#a7449552339d15c87b9074f4a06d0bf8a' )
+SetUrl( 'ApiLink_nn__atk__Sound3DManager__Initialize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_manager.html#aba7437e7d1ef1dbc9ecbf24b4ffee824' )
+SetUrl( 'ApiLink_nn__atk__Sound3DManager__GetRequiredMemSize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_manager.html#a70738cda83fa20591f5b33b407dd4955' )
+SetUrl( 'ApiLink_nn__atk__Sound3DManager__SetMaxPriorityReduction', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_manager.html#a1bcb7c53ca7a7841e5ba79c0732c413d' )
+SetUrl( 'ApiLink_nn__atk__Sound3DManager__AddListener', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_manager.html#a30bea64423549fb5d752d08e8259b73c' )
+SetUrl( 'ApiLink_nn__atk__Sound3DListener__SetMatrix', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_listener.html#a105dbf0766630796216b7b40e14ab8bf' )
+SetUrl( 'ApiLink_nn__atk__Sound3DListener__SetMaxVolumeDistance', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_listener.html#a48c6bd9bee30fb40d073905f28703034' )
+SetUrl( 'ApiLink_nn__atk__Sound3DListener__SetUnitDistance', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_listener.html#ae45ef219537203902e4a7ba7a34e39c2' )
+SetUrl( 'ApiLink_nn__atk__Sound3DListener__SetInteriorSize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_listener.html#af4dfe6f1fef292b755362cc3857aad35' )
+SetUrl( 'ApiLink_nn__atk__Sound3DActor__Initialize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_actor.html#a3b46f68338df4085c32facb22a78628f' )
+SetUrl( 'ApiLink_nn__atk__Sound3DActor__SetPosition', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_actor.html#a2aac639be4f9e4cb9318a98a806e2127' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

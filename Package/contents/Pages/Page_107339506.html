@@ -1,0 +1,985 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>HID Shell | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- HID Shell -->
+<div class="pagetitle" id="PageId_107339506">HID Shell</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_107339506_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_107339506_h1_2">How to Use</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_107339506_h2_1">Logging</a>
+      </li>
+      <li>
+        <a href="#Anchor_107339506_h2_2">Playback</a>
+      </li>
+      <li>
+        <a href="#Anchor_107339506_h2_3">Autopilot</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_107339506_h1_3">Specifying the Development Hardware</a>
+    </li>
+    <li>
+      <a href="#Anchor_107339506_h1_4">Device</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_107339506_h2_4">Switch Pro Controller</a>
+      </li>
+      <li>
+        <a href="#Anchor_107339506_h2_5">Joy-Con</a>
+      </li>
+      <li>
+        <a href="#Anchor_107339506_h2_6">DebugPad</a>
+      </li>
+      <li>
+        <a href="#Anchor_107339506_h2_7">HOME</a>
+      </li>
+      <li>
+        <a href="#Anchor_107339506_h2_8">Capture Button</a>
+      </li>
+      <li>
+        <a href="#Anchor_107339506_h2_9">Keyboard</a>
+      </li>
+      <li>
+        <a href="#Anchor_107339506_h2_10">Mouse</a>
+      </li>
+      <li>
+        <a href="#Anchor_107339506_h2_11">TouchScreen</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_107339506_h1_1">Introduction</h1>
+<p>HID Shell can perform the following operations from the PC on those devices that can be handled from the HID library.</p>
+<ul style="list-style-type: square;">
+  <li>Logging</li>
+  <li>Playback</li>
+  <li>Autopilot</li>
+</ul>
+<h1 id="Anchor_107339506_h1_2">How to Use</h1>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>To use this on an application running on the development hardware, the <a href="../Pages/Page_107320681.html">Input Director</a> tool must be running.</p>
+  </div>
+</div>
+<h2 id="Anchor_107339506_h2_1">Logging</h2>
+<p>Use the following command to get a live log of input events.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/CommandLineTools/Hid/HidShell.exe get-event</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This live log is output in a format like the following.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># The format is as follows.
+# [&lt;Elapsed time (in seconds) since the dump began&gt;] &lt;Type of device&gt; &lt;Device identifier&gt; &lt;Type of event&gt; [&lt;Event parameter&gt;...]
+#
+# Anything after &quot;#&quot; is skipped as a comment. In addition, blank lines are skipped.
+ 
+[      0.908] ProController        0          ButtonDown A
+[      1.278] ProController        0          StickMove L P00032 M01926
+[      1.282] ProController        0          StickMove L P01385 M01926
+[      2.914] ProController        0          ButtonUp A</pre>
+  </div>
+</div>
+<p>Use code like the following to put a restriction of which devices are logged.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/CommandLineTools/Hid/HidShell.exe get-event ProController</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can also limit the capture to just the device that is already connected to a specific port.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/CommandLineTools/Hid/HidShell.exe get-event ProController 0</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_107339506_h2_2">Playback</h2>
+<p>The following command will play a recorded live log.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/CommandLineTools/Hid/HidShell.exe send-event --file &lt;Live log path&gt;
+
+# Specifying the file-repeat option enables the live log to be generated repeatedly (NintendoSDK 5.3.0 and later).
+Tools/CommandLineTools/Hid/HidShell.exe send-event --file &lt;path for live log&gt; --file-repeat &lt;number of times to repeat&gt;.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following code sample shows how to use the command.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/CommandLineTools/Hid/HidShell.exe get-event &gt; event.log
+Tools/CommandLineTools/Hid/HidShell.exe send-event --file event.log</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_107339506_h2_3">Autopilot</h2>
+<p>The following command sends an event that triggers autopilot synchronized to some process.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/CommandLineTools/Hid/HidShell.exe send-event &lt;Device type&gt; &lt;Device identifier&gt; &lt;Event type&gt; [&lt;Event parameter&gt;...]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For the parameter, you can use the raw output of the live log. However, the time stamp is removed.</p>
+<p>Also, if you have NintendoSDK 5.3.0 or later, you can specify many commands together by separating them with strings of two hyphens (&quot; -- &quot;).</p>
+<p>The specified commands are evaluated, in order, from the start. At this time, you can use the <code>wait</code> command to control the interval between event triggers.</p>
+<p>The following example shows the code for an operation where the A and B Buttons of the DebugPad are pressed simultaneously and then, after a wait of 1000 milliseconds, are released simultaneously.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/CommandLineTools/Hid/HidShell.exe \
+send-event DebugPad 0 ButtonDown A -- send-event DebugPad 0 ButtonDown B -- \
+wait 1000 -- \
+send-event DebugPad 0 ButtonUp   A -- send-event DebugPad 0 ButtonUp   B</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_107339506_h1_3">
+  <span style="color: rgb(117,117,117);">Specifying the Development Hardware</span>
+</h1>
+<p>You can use the <code>target</code> option with either command to explicitly specify the development hardware, as shown below. For the name of the development hardware, use the value used by <a href="../Pages/Page_93359711.html">Target Manager</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/CommandLineTools/Hid/HidShell.exe get-event --target &lt;development hardware name&gt; ProController
+Tools/CommandLineTools/Hid/HidShell.exe send-event --target &lt;development hardware name&gt; --file event.log</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If you have explicitly specified the development hardware this way, you can use the <code>timeout</code> option to wait for communication to be established with that hardware. In the example below, the wait time is set to 30 seconds.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/CommandLineTools/Hid/HidShell.exe get-event --target  &lt;development hardware name&gt; --timeout 30</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_107339506_h1_4">Device</h1>
+<h2 id="Anchor_107339506_h2_4">Switch Pro Controller</h2>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Available in NintendoSDK 6.0.0 and later.</p>
+  </div>
+</div>
+<p>Operates the Nintendo Switch Pro Controller.</p>
+<h3 id="Anchor_107339506_h3_1">Device Type</h3>
+<p>The string indicating device type is <code>ProController</code>.</p>
+<h3 id="Anchor_107339506_h3_2">Device Identifiers </h3>
+<p>Use any of the following device identifiers.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Device Identifier</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td>0, 1, 2, 3, 4, 5, 6, 7</td>
+      <td>Switch Pro Controller</td>
+    </tr>
+  </tbody>
+</table>
+<p>The Switch Pro Controller device identifier does not have any abilities other than identifying connected devices at a certain point in time.</p>
+<p>Specifically, it cannot be used to support enumerated order for player numbers or devices.</p>
+<p>In addition, you cannot use playback or autopilot to make the state of the connected devices appear to change.</p>
+<p>If you perform logging for the <code>0</code> device identifier and perform playback in that state, it will appear as though an additional Switch Pro Controller was connected and the same operation was performed.</p>
+<p>The device identifier space is shared with the Joy-Con. The Switch Pro Controller and Joy-Con cannot use device identifiers simultaneously.</p>
+<h3 id="Anchor_107339506_h3_3">Event Type</h3>
+<p>Use any of the following event types.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Event Type</th>
+      <th style="text-align: center;">Description</th>
+      <th style="text-align: center;">Parameter #1</th>
+      <th style="text-align: center;">Parameter #2</th>
+      <th style="text-align: center;">Parameter #3</th>
+    </tr>
+    <tr>
+      <td>PowerState</td>
+      <td>Triggered when the state of the power supply changes.</td>
+      <td>
+        <p>The state of the power supply. Takes any of the following values.</p>
+        <p>Disconnected, OnBattery, Charging, Charged</p>
+        <p>
+          <code>OnBattery</code> indicates the running state of the battery connected via Bluetooth.</p>
+        <p>
+          <code>Charging</code> indicates that the battery is charging via USB connection.</p>
+        <p>
+          <code>Charged</code> indicates that the battery has completed charging via USB connection.</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>BatteryLevel</td>
+      <td>Triggered when the remaining battery level changes.</td>
+      <td>
+        <p>Remaining battery level. Takes any of the following values.</p>
+        <p>CriticalLow, Low, Medium, High</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>ButtonDown</td>
+      <td> Triggered when a button is pressed.</td>
+      <td>
+        <p>The button identifier. Takes any of the following values.</p>
+        <p>A, B, X, Y, StickL, StickR, L, R, ZL, ZR, Start, Select, Left, Up, Right, Down</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>ButtonUp</td>
+      <td> Triggered when a button is released.</td>
+      <td>
+        <p>The button identifier. Takes any of the following values.</p>
+        <p>A, B, X, Y, StickL, StickR, L, R, ZL, ZR, Start, Select, Left, Up, Right, Down</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>StickMove</td>
+      <td>Triggered when the stick coordinates change.</td>
+      <td>
+        <p>The stick identifier. Takes any of the following values.</p>
+        <p>L, R</p>
+      </td>
+      <td>
+        <p>The x-coordinate value. Encoded as follows:</p>
+        <p>
+          <code>123 &rarr; P00123</code>
+        </p>
+        <p>
+          <code>-45 &rarr; M00045</code>
+        </p>
+      </td>
+      <td>
+        <p>The y-coordinate value. Encoded as follows:</p>
+        <p>
+          <code>123 &rarr; P00123</code>
+        </p>
+        <p>
+          <code>-45 &rarr; M00045</code>
+        </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_107339506_h2_5">
+  <span style="color: rgb(117,117,117);">Joy-Con</span>
+</h2>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Available in NintendoSDK 6.0.0 and later.</p>
+  </div>
+</div>
+<p>Operates the Joy-Con.</p>
+<h3 id="Anchor_107339506_h3_4">Device Type</h3>
+<p>The string that represents the left Joy-Con is <code>JoyConL</code>, and the string that represents the right Joy-Con is <code>JoyConR</code>.</p>
+<h3 id="Anchor_107339506_h3_5">Device Identifiers</h3>
+<p>Use any of the following device identifiers. The device identifier space is shared by the left Joy-Con and the right Joy-Con.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Device Identifiers</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td>0, 1, 2, 3, 4, 5, 6, 7</td>
+      <td>Joy-Con</td>
+    </tr>
+  </tbody>
+</table>
+<p>The Joy-Con device identifier does not have any abilities other than identifying the connected devices at a certain point in time.</p>
+<p>Specifically, it cannot be used to support enumerated order for player numbers or devices.</p>
+<p>In addition, you cannot use playback or autopilot to make the state of the connected devices appear to change.</p>
+<p>If you perform logging for the <code>0</code> device identifier and perform playback in that state, it will appear as though an additional Joy-Con was connected and the same operation was performed.</p>
+<p>This is an issue when performing Joy-Con playback or autopilot that explicitly shows the connection to the rails.</p>
+<p>In this case, physically detach the Joy-Con controllers from the rails in advance.</p>
+<p>The device identifier space is shared with the Switch Pro Controller. The Switch Pro Controller and Joy-Con cannot use device identifiers simultaneously.</p>
+<h3 id="Anchor_107339506_h3_6">Event Type</h3>
+<p>Use any of the following event types.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Event Type</th>
+      <th style="text-align: center;">Description</th>
+      <th style="text-align: center;">Parameter #1</th>
+      <th style="text-align: center;">Parameter #2</th>
+      <th style="text-align: center;">Parameter #3</th>
+    </tr>
+    <tr>
+      <td>PowerState</td>
+      <td>Triggered when the state of the power supply changes.</td>
+      <td>
+        <p>The state of the power supply. Takes any of the following values.</p>
+        <p>Disconnected, OnBattery, Charging, Charged</p>
+        <p>
+          <code>OnBattery</code> indicates the running state of the battery connected via Bluetooth.</p>
+        <p>
+          <code>Charging</code> indicates that the battery is charging via connection to the rails.</p>
+        <p>
+          <code>Charged</code> indicates that the battery has completed charging via connection to the rails.</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>BatteryLevel</td>
+      <td>Triggered when the remaining battery level changes.</td>
+      <td>
+        <p>Remaining battery level. Takes any of the following values.</p>
+        <p>CriticalLow, Low, Medium, High</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>ButtonDown</td>
+      <td>Triggered when a button is pressed.</td>
+      <td>
+        <p>The button identifier. Takes any of the following values.</p>
+        <p>A, B, X, Y, StickL, StickR, L, R, ZL, ZR, Start, Select, Left, Up, Right, Down, SL, SR</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>ButtonUp</td>
+      <td>Triggered when a button is released.</td>
+      <td>
+        <p>The button identifier. Takes any of the following values.</p>
+        <p>A, B, X, Y, StickL, StickR, L, R, ZL, ZR, Start, Select, Left, Up, Right, Down, SL, SR</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>StickMove</td>
+      <td>Triggered when the stick coordinates change.</td>
+      <td>
+        <p>The stick identifier. Takes any of the following values.</p>
+        <p>L, R</p>
+      </td>
+      <td>
+        <p>The x-coordinate value. Encoded as follows:</p>
+        <p>
+          <code>123 &rarr; P00123</code>
+        </p>
+        <p>
+          <code>-45 &rarr; M00045</code>
+        </p>
+      </td>
+      <td>
+        <p>The y-coordinate value. Encoded as follows:</p>
+        <p>
+          <code>123 &rarr; P00123</code>
+        </p>
+        <p>
+          <code>-45 &rarr; M00045</code>
+        </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_107339506_h2_6">
+  <span style="color: rgb(117,117,117);">DebugPad</span>
+</h2>
+<p>Operates devices handled as a <a href="../Pages/Page_83955511.html"><code>DebugPad</code></a> object.</p>
+<h3 id="Anchor_107339506_h3_7">Device Type</h3>
+<p>The string representing the device type is DebugPad.</p>
+<h3 id="Anchor_107339506_h3_8">Device Identifier</h3>
+<p>Use any of the following device identifiers.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Device Identifier</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>DebugPad</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_107339506_h3_9">Event Type</h3>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Event Type</th>
+      <th style="text-align: center;">Description</th>
+      <th style="text-align: center;">Parameter #1</th>
+      <th style="text-align: center;">Parameter #2</th>
+      <th style="text-align: center;">Parameter #3</th>
+    </tr>
+    <tr>
+      <td>Connected</td>
+      <td>Triggered when the device connects.</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>Disconnected</td>
+      <td>Triggered when the device disconnects.</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>ButtonDown</td>
+      <td>Triggered when a button is pressed.</td>
+      <td>
+        <p>The button identifier. Takes any of the following values.</p>
+        <p>A, B, X, Y, StickL, StickR, L, R, ZL, ZR, Start, Select, Left, Up, Right, Down</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>ButtonUp</td>
+      <td>Triggered when a button is released.</td>
+      <td>
+        <p>The button identifier. Takes any of the following values.</p>
+        <p>A, B, X, Y, StickL, StickR, L, R, ZL, ZR, Start, Select, Left, Up, Right, Down</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>StickMove</td>
+      <td>Triggered when the stick coordinates change.</td>
+      <td>
+        <p>The stick identifier. Takes any of the following values.</p>
+        <p>L, R</p>
+      </td>
+      <td>
+        <p>The x-coordinate value. Encoded as follows:</p>
+        <p>
+          <code>123 &rarr; P00123</code>
+        </p>
+        <p>
+          <code>-45 &rarr; M00045</code>
+        </p>
+      </td>
+      <td>
+        <p>The y-coordinate value. Encoded as follows:</p>
+        <p>
+          <code>123 &rarr; P00123</code>
+        </p>
+        <p>
+          <code>-45 &rarr; M00045</code>
+        </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_107339506_h2_7">HOME</h2>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The HOME Button does not currently support logging.</p>
+  </div>
+</div>
+<p>Operate the HOME Button.</p>
+<h3 id="Anchor_107339506_h3_10">Device Type</h3>
+<p>The string that indicates the device type is <code>HomeButton</code>.</p>
+<h3 id="Anchor_107339506_h3_11">Device Identifier</h3>
+<p>Use any of the following device identifiers.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Device Identifier</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>HOME</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_107339506_h3_12">Event Type</h3>
+<p>Use any of the following event types.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Event Type</th>
+      <th style="text-align: center;">Description</th>
+      <th style="text-align: center;">Parameter #1</th>
+    </tr>
+    <tr>
+      <td>ButtonDown</td>
+      <td>Triggered when a button is pressed.</td>
+      <td>
+        <p style="text-align: center;">-</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ButtonUp</td>
+      <td>Triggered when a button is released.</td>
+      <td>
+        <p style="text-align: center;">-</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_107339506_h2_8">Capture Button</h2>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The Capture Button does not currently support logging.</p>
+  </div>
+</div>
+<p>Operates the Capture Button.</p>
+<h3 id="Anchor_107339506_h3_13">Device Type</h3>
+<p>The string indicating the device type is <code>CaptureButton</code>.</p>
+<h3 id="Anchor_107339506_h3_14">Device Identifier</h3>
+<p>Use any of the following device identifiers.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Device Identifier</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Capture Button</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_107339506_h3_15">Event Type</h3>
+<p>Use any of the following event types.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Event Type</th>
+      <th style="text-align: center;">Description</th>
+      <th style="text-align: center;">Parameter #1</th>
+    </tr>
+    <tr>
+      <td>ButtonDown</td>
+      <td>Triggered when a button is pressed.</td>
+      <td>
+        <p style="text-align: center;">-</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ButtonUp</td>
+      <td>Triggered when a button is released.</td>
+      <td>
+        <p style="text-align: center;">-</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_107339506_h2_9">Keyboard</h2>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Available in NintendoSDK 10.4.1 and later.</p>
+    <p>Logging is not currently supported for keyboards.</p>
+  </div>
+</div>
+<p>Operates devices handled as a <a href="../Pages/Page_124008837.html">Keyboard</a> object.</p>
+<h3 id="Anchor_107339506_h3_16">Device Type</h3>
+<p>The string indicating the device type is <code>Keyboard</code>.</p>
+<h3 id="Anchor_107339506_h3_17">Device Identifier</h3>
+<p>Use any of the following device identifiers.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Device Identifier</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Keyboard</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_107339506_h3_18">Event Type</h3>
+<p>Use any of the following event types.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Event Type</th>
+      <th style="text-align: center;">Description</th>
+      <th style="text-align: center;">Parameter #1</th>
+    </tr>
+    <tr>
+      <td>KeyDown</td>
+      <td>Triggered when a key is pressed.</td>
+      <td>
+        <p>The button identifier.</p>
+        <p>Takes a value defined in <span class="ApiLink_nn__hid__KeyboardKey">nn::hid::KeyboardKey</span>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>KeyUp</td>
+      <td>Triggered when a key is released.</td>
+      <td>
+        <p>The button identifier.</p>
+        <p>Takes a value defined in <span class="ApiLink_nn__hid__KeyboardKey">nn::hid::KeyboardKey</span>.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_107339506_h2_10">Mouse</h2>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Available in NintendoSDK 10.4.1 and later.</p>
+    <p>Logging is not currently supported for computer mice.</p>
+  </div>
+</div>
+<p>Operates devices handled as a <a href="../Pages/Page_124008842.html">Mouse</a> object.</p>
+<h3 id="Anchor_107339506_h3_19">Device Type</h3>
+<p>The string indicating the device type is <code>Mouse</code>.</p>
+<h3 id="Anchor_107339506_h3_20">Device Identifier</h3>
+<p>Use any of the following device identifiers.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Device Identifier</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Mouse</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_107339506_h3_21">Event Type</h3>
+<p>Use any of the following event types.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Event Type</th>
+      <th style="text-align: center;">Description</th>
+      <th style="text-align: center;">Parameter #1</th>
+      <th style="text-align: center;">Parameter #2</th>
+    </tr>
+    <tr>
+      <td>CursorMove</td>
+      <td>Triggered when the cursor moves.</td>
+      <td>
+        <p>The x-coordinate value.</p>
+        <p>An integer value of 0 or higher.</p>
+      </td>
+      <td>
+        <p>The y-coordinate value.</p>
+        <p>An integer value of 0 or higher.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ButtonDown</td>
+      <td>Triggered when a button is pressed.</td>
+      <td>
+        <p>The button identifier. Takes any of the following values.</p>
+        <p>Left, Right, Middle, Forward, Back</p>
+      </td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>ButtonUp</td>
+      <td>Triggered when a button is released.</td>
+      <td>
+        <p>The button identifier. Takes any of the following values.</p>
+        <p>Left, Right, Middle, Forward, Back</p>
+      </td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>WheelDelta</td>
+      <td>Triggered when the wheel is operated.</td>
+      <td>
+        <p>The rotation difference of the wheel. Encoded as follows:</p>
+        <p>
+          <code>120 &rarr; P00120</code>
+        </p>
+        <p>
+          <code>-120 &rarr; M00120</code>
+        </p>
+      </td>
+      <td style="text-align: center;">-</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_107339506_h2_11">TouchScreen</h2>
+<p>Operates devices handled as a <a href="../Pages/Page_89128938.html"><code>TouchScreen</code></a> object.</p>
+<h3 id="Anchor_107339506_h3_22">Device Type</h3>
+<p>The string that represents the device type is set to <code>TouchScreen</code>.</p>
+<h3 id="Anchor_107339506_h3_23">Device Identifier</h3>
+<p>Use any of the following device identifiers.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Device Identifier</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>Built-in touch screen.</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_107339506_h3_24">Event Type</h3>
+<p>Use any of the following event types.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Event Type</th>
+      <th style="text-align: center;">Description</th>
+      <th style="text-align: center;">Parameter #1</th>
+      <th style="text-align: center;">Parameter #2</th>
+      <th style="text-align: center;">Parameter #3</th>
+    </tr>
+    <tr>
+      <td>TouchBegan</td>
+      <td>Issued when the touch or tap begins.</td>
+      <td>
+        <p>The touch identifier.</p>
+        <p>An integer value of 0 or higher.</p>
+      </td>
+      <td>
+        <p>The x-coordinate value.</p>
+        <p>An integer value of 0 or higher.</p>
+      </td>
+      <td>
+        <p>The y-coordinate value.</p>
+        <p>An integer value of 0 or higher.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>TouchMoved</td>
+      <td>Issued when the touch moves.</td>
+      <td>
+        <p>The touch identifier.</p>
+        <p>An integer value of 0 or higher.</p>
+      </td>
+      <td>
+        <p>The x-coordinate value.</p>
+        <p>An integer value of 0 or higher.</p>
+      </td>
+      <td>
+        <p>The y-coordinate value.</p>
+        <p>An integer value of 0 or higher.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>TouchEnded</td>
+      <td>Issued when the touch ends.</td>
+      <td>
+        <p>The touch identifier.</p>
+        <p>An integer value of 0 or higher.</p>
+      </td>
+      <td>
+        <p style="text-align: center;">-</p>
+      </td>
+      <td>
+        <p style="text-align: center;">-</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__KeyboardKey', '../../../Api/HtmlNX/structnn_1_1hid_1_1_keyboard_key.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

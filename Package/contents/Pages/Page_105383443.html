@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>nnMain() and Library Initialization | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- nnMain() and Library Initialization -->
+<div class="pagetitle" id="PageId_105383443">nnMain() and Library Initialization</div>
+<div class="text_separate">
+<p>
+  <br />
+</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_105383443_h1_1">nnMain() Function and Initializing the Libraries</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_105383443_h2_1">Program Operating Environment Library</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_105383443_h3_1">Initializing the Program Operating Environment Library</a>
+        </li>
+        <li>
+          <a href="#Anchor_105383443_h3_2">Automatically Starting the System Thread</a>
+        </li>
+        <li>
+          <a href="#Anchor_105383443_h3_3">Other Initialization</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_105383443_h1_1">nnMain() Function and Initializing the Libraries</h1>
+<p>In NintendoSDK, the main function of the program is defined by <code>nnMain()</code>.</p>
+<p>The first action of the main function is to initialize the various libraries that the program will use. This section describes the initialization of a typical library.</p>
+<p>While the program exits if <code>nnMain()</code> is removed, normally do not exit voluntarily until explicitly notified with a termination request. For more information, see <a href="../Pages/Page_162179114.html">Exiting the Program</a>.</p>
+<h2 id="Anchor_105383443_h2_1">Program Operating Environment Library</h2>
+<p>The program operating environment library (<a href="../Pages/Page_107339118.html">oe library</a> provides features for changing the state of the system, the focus of the application itself, and the operating performance of the program.</p>
+<p>These features are controlled using the APIs in the <code><span class="ApiLink_nn__oe">nn::oe</span></code> namespace.</p>
+<h3 id="Anchor_105383443_h3_1">Initializing the Program Operating Environment Library</h3>
+<p>The program operating environment library is initialized by the <code><span class="ApiLink_nn__oe__Initialize">nn::oe::Initialize</span>()</code> function, which is called implicitly before the application reaches the <code>nnMain()</code> function. For this reason, you do not need to explicitly call this function (although it is all right to do so).</p>
+<p>Various features in the <code><span class="ApiLink_nn__oe">nn::oe</span></code> namespace become available after this initialization.</p>
+<p>For more information about the features in the <code><span class="ApiLink_nn__oe">nn::oe</span></code> namespace for receiving various state change notifications, see <a href="../Pages/Page_166065886.html">Notifications For Programs</a> For more information about other features, see the <a href="../Pages/Page_107339118.html">oe Library</a> page.</p>
+<h3 id="Anchor_105383443_h3_2">Automatically Starting the System Thread</h3>
+<p>A <em>system thread</em> is a thread that is created as a result of SDK or system circumstances. A single system thread is created when <code><span class="ApiLink_nn__oe__Initialize">nn::oe::Initialize</span>()</code> is run, and begins operating implicitly, in NX Add-On 8.1 and later. In NX32 and NX64 environments, this system thread operates under the following criteria.</p>
+<ul>
+  <li>It consumes one thread that can be created programmatically (see <a href="../Pages/Page_83955697.html">Threads</a> for the thread count).</li>
+  <li>The thread priority is <span class="ApiLink_nn__os__HighestThreadPriority">nn::os::HighestThreadPriority</span>.</li>
+  <li>
+    <code>0x04</code> is configured as the thread's CPU core mask; only core 2 is used.</li>
+  <li>The 4,096-byte ZI section is allocated as the stack region for use by the thread.</li>
+  <li>
+    <code>NxSystemThread</code> is configured as the thread name, which can be referenced from the VSI debugger thread list.</li>
+  <li>No method is available for this thread to be accessed from any program.</li>
+</ul>
+<p>For NX Add-On 8.1. this thread only performs the following processes.</p>
+<ul>
+  <li>This thread automatically calls <code><span class="ApiLink_NN_ABORT">NN_ABORT</span>()</code> after waiting only for the amount of time specified for <code><span class="ApiLink_nn__oe__SetDelayTimeToAbortOnGpuError">nn::oe::SetDelayTimeToAbortOnGpuError</span>()</code> when the application results in a GPU error, and that forcibly terminates the program abnormally.</li>
+</ul>
+<p>Under normal circumstances, such an error is anticipated indefinitely as a system event; as a result, this thread does not consume any application CPU resources.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <code>
+        <span class="ApiLink_nn__oe__SetDelayTimeToAbortOnGpuError">nn::oe::SetDelayTimeToAbortOnGpuError</span>()</code> was added in NX Add-On 11.2.0. In previous SDK versions where this function was added, <code><span class="ApiLink_NN_ABORT">NN_ABORT</span>()</code> is called immediately after a GPU error occurs, and the program is ended abnormally.</p>
+  </div>
+</div>
+<h3 id="Anchor_105383443_h3_3">Other Initialization</h3>
+<p>Other than initializing various libraries, it is also possible to specify, for example, the computation precision of floating points (rounding method). Specify these as required.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The Subnormal Number Flush-To-Zero Mode can be enabled using the following command in the NintendoSDK development hardware environment for NX64 builds. Disabled by default.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">std::</span><span class="n">fesetround</span><span class="p">(</span> <span class="n">FE_SET_FTZ</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>When this mode is enabled, if the absolute value of the computation results is a value smaller than the minimum normalized value that can be expressed in the runtime environment, it will be rounded to zero. This makes it possible to increase the computation speed when handling these types of values, although strict computational precision is lost.</p>
+    <p>FPU settings have setting values for each thread context. In addition, if the thread was created with <code><span class="ApiLink_nn__os__CreateThread">nn::os::CreateThread</span>()</code>, the generated thread will inherit the FPU settings values of the calling thread.</p>
+    <p>
+      <code>FE_SET_FTZ</code> specification can be used in NX Add-On 1.1.0 and later.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__oe', '../../../Api/HtmlNX/namespacenn_1_1oe.html' )
+SetUrl( 'ApiLink_nn__oe__Initialize', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a9671d51dfedf9f18144ea1d73419fcfd' )
+SetUrl( 'ApiLink_nn__os__HighestThreadPriority', '../../../Api/HtmlNX/namespacenn_1_1os.html#a44ed3b4dddf9ebfb69bc33167369b816' )
+SetUrl( 'ApiLink_NN_ABORT', '../../../Api/HtmlNX/nn___abort_8h.html#a205eaac89c47d49cb982bf136e113de2' )
+SetUrl( 'ApiLink_nn__oe__SetDelayTimeToAbortOnGpuError', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a90d84da3a6bd52551630d21138435ee2' )
+SetUrl( 'ApiLink_nn__os__CreateThread', '../../../Api/HtmlNX/namespacenn_1_1os.html#a1e7db66d31e254873b613d4eadd0d716' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

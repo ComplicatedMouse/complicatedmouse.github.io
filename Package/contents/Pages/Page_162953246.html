@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Mix | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Mix -->
+<div class="pagetitle" id="PageId_162953246">Mix</div>
+<div class="text_separate">
+<h1 id="Anchor_162953246_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_162953246_h2_1">Specifying Volume</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_162953246_h3_1">Panning</a>
+      </li>
+      <li>
+        <a href="#Anchor_162953246_h3_2">Directly Specifying the Volume for Each Channel</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_162953246_h2_2">Output Mode</a>
+    </li>
+    <li>
+      <a href="#Anchor_162953246_h2_3">Downmix Processing</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_162953246_h1_2">Mix</h1>
+<p>The direction sound is perceived to be coming from depends on how much volume is being played from each of the multiple speakers.<br />The atk library determines which sounds are output at what volumes from which speakers, and calculates the mix of sounds<br />using parameters such as panning.</p>
+<p>Similarly, the output mode of the <code>atk</code> sound system also affects how the mix is calculated.</p>
+<p>This section describes the calculation of the ultimate output for each sound.</p>
+<h2 id="Anchor_162953246_h2_1">Specifying Volume</h2>
+<p>There are two ways to specify volume from <code><span class="ApiLink_nn__atk__SoundHandle">nn::atk::SoundHandle</span></code>: specifying panning and specifying the volume for each channel.</p>
+<h3 id="Anchor_162953246_h3_1">Panning</h3>
+<p>There are two types of panning settings: pan for left&ndash;right panning, and surround pan for front&ndash;back panning.<br />You can specify these two types of panning using classes such as <code>SoundHandle</code>, and this setting is performed independently.</p>
+<p>Use the <code>SetPan()</code> function to specify the pan for left&ndash;right panning.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Set panning in the left-right direction.
+</span><span class="n">g_SoundHandle</span><span class="p">.</span><span class="n">SetPan</span><span class="p">(</span><span class="o">-</span><span class="mf">0.3f</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In addition, use the <code>SetSurroundPan()</code> function to specify surround panning for the front&ndash;back direction.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Set panning in the front-back direction.
+</span><span class="n">g_SoundHandle</span><span class="p">.</span><span class="n">SetSurroundPan</span><span class="p">(</span><span class="mf">1.0f</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The values specified in these functions are overlaid with the values specified in (for example) <code>SoundMaker</code>, and implemented as the final parameters.<br />For the pan settings that can be configured in <code>SoundMaker</code>, see <a href="../Pages/Page_83955834.html">Pan Operations</a>.<br />In addition, for information about overlaying panning parameters, see the sound parameter types and processing methods section of <a href="../Pages/Page_83955829.html">Sound Parameter Control Operations</a>.</p>
+<h4 id="Anchor_162953246_h4_1">Left-Right Direction Panning</h4>
+<p>You can use the <code>SetPan()</code> function to specify left-right direction panning.<br />The following three different types of panning are calculated according to the sound settings created in SoundMaker.</p>
+<ul>
+  <li>Whether the input waveform is monaural</li>
+  <li>Whether the input waveform is stereo and the pan mode is dual pan</li>
+  <li>Whether the input waveform is stereo and the pan mode is balance pan</li>
+</ul>
+<p>For more information, see the API reference for <span class="ApiLink_void_nn__atk__SoundHandle__SetPan(float_pan)_NN_NOEXCEPT">nn::atk::SoundHandle::SetPan()</span>.</p>
+<h4 id="Anchor_162953246_h4_2">Front-Back Direction Panning</h4>
+<p>You can use the <code>SetSurroundPan()</code> function to set front-back direction panning.</p>
+<p>For more information, see the API reference for <span class="ApiLink_void_nn__atk__SoundHandle__SetSurroundPan(float_surroundPan)_NN_NOEXCEPT">nn::atk::SoundHandle::SetSurroundPan()</span>.</p>
+<h3 id="Anchor_162953246_h3_2">Directly Specifying the Volume for Each Channel</h3>
+<p>You can directly set the volume for each channel without using the volume calculated from panning.</p>
+<p>To perform this action, call the <code><span class="ApiLink_nn__atk__SoundHandle__SetMixMode">nn::atk::SoundHandle::SetMixMode</span></code> function and specify <code><span class="ApiLink_nn__atk__MixMode_MixVolume">nn::atk::MixMode_MixVolume</span></code>.<br />The pan and surround pan values are ignored, and the volume specified by the <code><span class="ApiLink_nn__atk__MixVolume">nn::atk::MixVolume</span></code> object configured by <code><span class="ApiLink_nn__atk__SoundHandle__SetMixVolume">nn::atk::SoundHandle::SetMixVolume</span></code> are used.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">g_SoundHandle</span><span class="p">.</span><span class="n">SetMixMode</span><span class="p">(</span><span class="nn">nn::atk::</span><span class="n">MixMode_MixVolume</span><span class="p">);</span>
+<span class="nn">nn::atk::</span><span class="n">MixVolume</span> <span class="n">g_MixVolume</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nn">nn::atk::</span><span class="n">ChannelIndex_Count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_MixVolume</span><span class="p">.</span><span class="n">channel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0f</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">g_SoundHandle</span><span class="p">.</span><span class="n">SetMixVolume</span><span class="p">(</span><span class="n">g_MixVolume</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_162953246/174067637.png" width="438" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>To return to calculating volume from panning and surround panning, call the <code><span class="ApiLink_nn__atk__SoundHandle__SetMixMode">nn::atk::SoundHandle::SetMixMode</span></code> function again and specify <code><span class="ApiLink_nn__atk__MixMode_Pan">nn::atk::MixMode_Pan</span></code>.</p>
+<p>For more information about using the <code><span class="ApiLink_nn__atk__MixVolume">nn::atk::MixVolume</span></code> object, see the <span class="ApiLink_PageSampleAtkMixMode">AtkMixMode sample</span>.</p>
+<h4 id="Anchor_162953246_h4_3">Specifying the Volume of Stereo Waveforms</h4>
+<p>When using stereo waveform sounds, you can specify the volume for the stereo waveform for each channel by passing the channel number of the waveform as a parameter when calling the <code><span class="ApiLink_nn__atk__SoundHandle__SetMixVolume">nn::atk::SoundHandle::SetMixVolume</span></code> function.<br /><br /></p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">g_SoundHandle</span><span class="p">.</span><span class="n">SetMixVolume</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">g_MixVolumeLeftChannel</span><span class="p">);</span>
+<span class="n">g_SoundHandle</span><span class="p">.</span><span class="n">SetMixVolume</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">g_MixVolumeRightChannel</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_162953246_h4_4">Specifying the Volume of Sounds That Have Tracks</h4>
+<p>When working with sounds that have tracks (such as stream sounds and sequence sounds), you can use the <code><span class="ApiLink_nn__atk__StreamSoundHandle__SetTrackMixVolume">nn::atk::StreamSoundHandle::SetTrackMixVolume</span></code> and <code><span class="ApiLink_nn__atk__SequenceSoundHandle__SetTrackMixVolume">nn::atk::SequenceSoundHandle::SetTrackMixVolume</span></code> functions to set the volume for each track.<br /><br /></p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::atk::StreamSoundHandle::</span><span class="n">TrackBitFlagSet</span> <span class="n">streamBitFlag</span><span class="p">;</span>
+<span class="n">streamBitFlag</span><span class="p">.</span><span class="n">Reset</span><span class="p">();</span>
+<span class="n">streamBitFlag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<span class="n">g_StreamSoundHandle</span><span class="p">.</span><span class="n">SetTrackMixVolume</span><span class="p">(</span><span class="n">streamBitFlag</span><span class="p">,</span> <span class="n">g_MixVolume</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>However, the volumes specified for each track are handled separately from the volume specified for all tracks with the <code><span class="ApiLink_nn__atk__SoundHandle__SetMixVolume">nn::atk::SoundHandle::SetMixVolume</span></code> function. The final volume for each track is the product of these two values.<br /> </p>
+<h2 id="Anchor_162953246_h2_2">Output Mode</h2>
+<p>Use <code><span class="ApiLink_nn__atk__SoundSystem__SetOutputMode">nn::atk::SoundSystem::SetOutputMode</span>()</code> to change the calculation method for the final audio output.</p>
+<p>Mixing calculations is performed for the following four channels based on changes to the panning and output mode.</p>
+<ul>
+  <li>Front left channel (Front Left)</li>
+  <li>Front right channel (Front Right)</li>
+  <li>Back left channel (Rear Left)</li>
+  <li>Back right channel (Rear Right)</li>
+</ul>
+<p>Some or all of the panning parameters are used to calculate volume according to the output mode specified by <code><span class="ApiLink_nn__atk__SoundSystem__SetOutputMode">nn::atk::SoundSystem::SetOutputMode</span>()</code>, producing a final volume calculation.</p>
+<p>For more information about calculating volume, see the API reference for <span class="ApiLink_static_void_nn__atk__SoundSystem__SetOutputMode(OutputMode_mode|_OutputDevice_device=OutputDevice_Main)_NN_NOEXCEPT">nn::atk::SoundSystem::SetOutputMode()</span>.</p>
+<h2 id="Anchor_162953246_h2_3">Downmix Processing</h2>
+<p>After performing this processing and determining the volume specified for each channel,<br /><span class="ApiLink_nn__audio">nn::audio</span> downmix processing will be performed according to the final number of speaker outputs.</p>
+<p>For more information about the downmix processing, see <a href="../Pages/Page_89991492.html">Audio Renderer</a> &gt; Sink.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Note that currently if you specify <code>OutputMode_Surround</code> with <code><span class="ApiLink_nn__atk__SoundSystem__SetOutputMode">nn::atk::SoundSystem::SetOutputMode</span>()</code> in a PC environment,<br />  and the final number of speaker outputs is two channels, Front Left and Front Right output will become the left and right channel speaker output as is,<br />while output from other channels such as Rear Left and Rear Right will not be applied to the speaker output at all.  <br /> </p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk__SoundHandle', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_handle.html' )
+SetUrl( 'ApiLink_void_nn__atk__SoundHandle__SetPan(float_pan)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_handle.html#a9e082a1f9e6366fac69033de78b7badb' )
+SetUrl( 'ApiLink_void_nn__atk__SoundHandle__SetSurroundPan(float_surroundPan)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_handle.html#a0efc2bd0b95f44d7f14fed34979550a9' )
+SetUrl( 'ApiLink_nn__atk__SoundHandle__SetMixMode', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_handle.html#a13f5158280bd300a8e50b1c69aed632d' )
+SetUrl( 'ApiLink_nn__atk__MixMode_MixVolume', '../../../Api/HtmlNX/namespacenn_1_1atk.html#a20ba8af46c11f2d64a05c75062113f82a592436d3e1abfc3e415ca0f478a7edbd' )
+SetUrl( 'ApiLink_nn__atk__MixVolume', '../../../Api/HtmlNX/structnn_1_1atk_1_1_mix_volume.html' )
+SetUrl( 'ApiLink_nn__atk__SoundHandle__SetMixVolume', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_handle.html#a8e2e125605de4d8cc0504cafffd9ff85' )
+SetUrl( 'ApiLink_nn__atk__MixMode_Pan', '../../../Api/HtmlNX/namespacenn_1_1atk.html#a20ba8af46c11f2d64a05c75062113f82a7992eb9f0c3140dbdc52a8a533b6dc8c' )
+SetUrl( 'ApiLink_PageSampleAtkMixMode', '../../../Api/HtmlNX/_page_sample_atk_mix_mode.html' )
+SetUrl( 'ApiLink_nn__atk__StreamSoundHandle__SetTrackMixVolume', '../../../Api/HtmlNX/classnn_1_1atk_1_1_stream_sound_handle.html#ab4870ab7df34ced16b83a264d408d146' )
+SetUrl( 'ApiLink_nn__atk__SequenceSoundHandle__SetTrackMixVolume', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sequence_sound_handle.html#a76c5d2187206633ebeb85b0d4086db6b' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem__SetOutputMode', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html#a5ceed4da0556ace46c5be4bd55dd5c8c' )
+SetUrl( 'ApiLink_static_void_nn__atk__SoundSystem__SetOutputMode(OutputMode_mode|_OutputDevice_device=OutputDevice_Main)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html#a5ceed4da0556ace46c5be4bd55dd5c8c' )
+SetUrl( 'ApiLink_nn__audio', '../../../Api/HtmlNX/namespacenn_1_1audio.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Htcs.dll | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Htcs.dll -->
+<div class="pagetitle" id="PageId_83955799">Htcs.dll</div>
+<div class="text_separate">
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>
+      <code>Htcs.dll</code> was deprecated in NX Add-On 9.0.0 and later. Use the libraries installed under <code>C:\Program Files\Nintendo\Oasis\lib\</code>.</p>
+    <p>For more information about this library, see <a href="../Pages/Page_242387866.html">tm Library</a>. </p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_83955799_h1_1">Overview</h1>
+<p>To connect a host application to an HTCS port where a target application is open, you must get the port number of the corresponding TCP socket.<br />To get the port number, you must parse the text protocol sent from the port opened by Target Manager.<br />A DLL sample that conducts port parsing is found in <code>NintendoSDK/Samples/Sources/Applications/Htcs/Htcsdll</code>.</p>
+<p>This page describes the sample using <code>Htcs.dll</code>.<br />For examples, see <code>NintendoSDK/Samples/Sources/Applications/Htcs/HtcsHostApp</code>.</p>
+<h2 id="Anchor_83955799_h2_1">HtcsCommunicator</h2>
+<p>This class receives communication with Target Manager.</p>
+<p>This class is used to get port-mapping lists and register ports.</p>
+<h2 id="Anchor_83955799_h2_2">Target</h2>
+<p>A pair consisting of the target hardware and information about the hardware.</p>
+<h3 id="Anchor_83955799_h3_1">
+  <code>HtcsPeerName</code>
+</h3>
+<p>The target name.</p>
+<h3 id="Anchor_83955799_h3_2">
+  <code>PeerType</code>
+</h3>
+<p>This string represents the target type indicated by <code>HtcsPeerName</code>.<br />The platform name is specified. </p>
+<h2 id="Anchor_83955799_h2_3">PortMapItem</h2>
+<p>A pair consisting of an HTCS port name and the corresponding TCP port information.</p>
+<h3 id="Anchor_83955799_h3_3">IPEndPoint</h3>
+<p>The TCP port bound to the HTCS port.</p>
+<h3 id="Anchor_83955799_h3_4">HtcsPortDescriptor </h3>
+<p>Represents the HTCS port information.</p>
+<h3 id="Anchor_83955799_h3_5">
+  <code>HtcsPeerName</code>
+</h3>
+<p>The name of the target that has opened this HTCS port.</p>
+<h3 id="Anchor_83955799_h3_6"> <code>HtcsPortName</code></h3>
+<p>The name of the HTCS port.</p>
+<h2 id="Anchor_83955799_h2_4">PortMap</h2>
+<p>A <code>PortMapItem</code> list.</p>
+<h1 id="Anchor_83955799_h1_2">Usage Procedures</h1>
+<h2 id="Anchor_83955799_h2_5">Starting <code>HtcsCommunicator</code></h2>
+<ol>
+  <li>Create a <code>HostAppLib.HtcsCommunicator</code> instance.</li>
+  <li>Call <code>HtcsCommunicator.Start()</code> and try to connect to Target Manager.<ol><li>It will return <code>false</code> upon failure; if this happens, call <code>Start</code> again to establish a connection.</li></ol></li>
+</ol>
+<h2 id="Anchor_83955799_h2_6">Getting Ports Registered With Target Manager</h2>
+<p>If the host application is a client, you must get a list of open ports from Target Manager.</p>
+<p>Register <code>HtcsCommunicator.PortMapUpdated</code> with callback functions to be invoked when the port mapping has been updated.<br />These functions are called when a new port is registered with Target Manager or when a registered port is deleted.</p>
+<p>The current <code>PortMap</code> is passed as an argument to the callback functions.<br />Search within the <code>PortMap</code> for the <code>PortMapItem</code> that has the HTCS port name you want to connect to, and connect based on the information in <code>IPEndPoint</code>.</p>
+<h2 id="Anchor_83955799_h2_7">Registering Ports to Target Manager</h2>
+<p>If the host application is a server, you must register to Target Manager both the TCP port opened by the application and the corresponding name of the binding HTCS port.</p>
+<ol>
+  <li>Create a socket for the server.</li>
+  <li>Create a <code>PortMapItem</code> instance.<ol><li>For <code>IPEndPoint</code>, specify the address of the socket you opened in step 1.</li><li>Set <code>HtcsPortDescriptor.HtcsPeerName</code> to <code>HtcsPeerName.Any</code>, and set <code>HtcsPortName</code> to the name of the HTCS port.</li></ol></li>
+  <li>Call <code>HtcsCommunicator.RegisterPort</code>, specifying the <code>PortMapItem</code> you created in step 2 as an argument.<ol><li>This function is blocked until registration with Target Manager is complete.</li><li>If successful, the return value is <code>0</code>.</li></ol></li>
+</ol>
+<h2 id="Anchor_83955799_h2_8">Deleting Ports Registered With Target Manager</h2>
+<p>Use the following procedure to delete a port that has been registered.</p>
+<ol>
+  <li>Call <code>HtcsCommunicator.UnregisterPort</code>, specifying the <code>HtcsPortDescriptor</code> you used during registration as an argument.<br /><ol><li>This function is blocked until deletion with Target Manager is complete.</li><li>If successful, the return value is <code>0</code>.</li></ol></li>
+</ol>
+<h2 id="Anchor_83955799_h2_9">Terminating HtcsCommunicator</h2>
+<p>Call <code>HtcsCommunicator.Stop</code>.</p>
+<p>This deletes all ports that had previously been registered via this <code>HtcsCommunicator</code>. <br /></p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

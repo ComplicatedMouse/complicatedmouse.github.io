@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Managing Save Data | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Managing Save Data -->
+<div class="pagetitle" id="PageId_424117446">Managing Save Data</div>
+<div class="text_separate">
+<p>Use the <code>savedata</code> command.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_424117446_h1_1">Listing Save Data</a>
+    </li>
+    <li>
+      <a href="#Anchor_424117446_h1_2">Listing Save Data That Can Be Imported</a>
+    </li>
+    <li>
+      <a href="#Anchor_424117446_h1_3">Deleting Save Data</a>
+    </li>
+    <li>
+      <a href="#Anchor_424117446_h1_4">Deleting All Save Data</a>
+    </li>
+    <li>
+      <a href="#Anchor_424117446_h1_5">Restoring Save Data</a>
+    </li>
+    <li>
+      <a href="#Anchor_424117446_h1_6">Backing Up Save Data</a>
+    </li>
+    <li>
+      <a href="#Anchor_424117446_h1_7">Save Data Batch Backup</a>
+    </li>
+  </ul>
+</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe DevMenuCommand.nsp -- savedata --help
+usage: DevMenuCommand savedata list
+       DevMenuCommand savedata list-importable-savedata [--host-directory &lt;absolute_host_dir_path&gt;]
+       DevMenuCommand savedata delete &lt;savedata_id&gt;
+       DevMenuCommand savedata delete --savedata-id &lt;savedata_id&gt;
+       DevMenuCommand savedata delete --application-id &lt;application_id&gt;
+       DevMenuCommand savedata delete all
+       DevMenuCommand savedata import --index-importable-savedata &lt;index&gt; [--user-index &lt;index, 0..7&gt;] [--target-location &lt;system|sdcard&gt;]
+       DevMenuCommand savedata import --input &lt;absolute_host_dir_path&gt; [--user-index &lt;index, 0..7&gt;] [--target-location &lt;system|sdcard&gt;]
+       DevMenuCommand savedata export --savedata-id &lt;savedata_id&gt; [--output &lt;absolute_host_dir_path&gt;]
+       DevMenuCommand savedata export --application-id &lt;application_id&gt; --user-index &lt;index, 0..7&gt; [--output &lt;absolute_host_dir_path&gt;]
+       DevMenuCommand savedata export --application-id &lt;application_id&gt; --cache-storage-index &lt;index&gt; [--output &lt;absolute_host_dir_path&gt;]
+       DevMenuCommand savedata export --application-id &lt;application_id&gt; --bcat [--output &lt;absolute_host_dir_path&gt;]
+       DevMenuCommand savedata export-all --application-id &lt;application_id&gt; [--include-cache-storage] [--output &lt;absolute_host_dir_path&gt;]
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424117446_h1_1">Listing Save Data</h1>
+<p>For more information about creating save data, see <a href="../Pages/Page_107320205.html">Save Data</a> and the <code>fs</code> library reference materials.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe DevMenuCommand.nsp -- savedata list
+savedata_id: 0x0000000000000001, application_id: 0x01004b9000490000, type: Account(User)
+savedata_id: 0x0000000000000002, application_id: 0x01004b9000490000, type: Bcat
+savedata_id: 0x0000000000000003, application_id: 0x01004b9000490000, type: Cache Storage (index 0, System Memory)
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424117446_h1_2">Listing Save Data That Can Be Imported</h1>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Files in NSAVE format are not shown in the list in NintendoSDK Firmware for NX 9.0.0-5.0 and later. To display a list of save data in NSAVE format, use DevMenuApp.<br />If the full export path for files in NSAVE format is 260 characters or more, the save data exported becomes an archive file.</p>
+  </div>
+</div>
+<p>Displays the backed up save data that can be imported.<br />If the <code>--host-directory</code> option is not specified, the list displays the save data in the <code>sd:\NintendoSDK\BackupSaveData</code> folder of the microSD card that can be imported.<br />When importing save data, you can specify and run the <code>import</code> command on the index displayed by the same command. For more information about usage, see Importing Save Data.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># List of save data in sd:\NintendoSDK\BackupSaveData that can be imported.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata list-importable-savedata
+index: 0, date: 20180101_001500, application_id: 0x01004b9000490000, type: Account(User)
+index: 1, date: 20180101_001501, application_id: 0x01004b9000490000, type: Cache Storage (index 0, System Memory)
+[SUCCESS]</pre>
+  </div>
+</div>
+<p class="auto-cursor-target">Specify the <code>--host-directory</code> option to display a list of save data in a specified directory on the host PC that can be imported.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># List of save data on the host PC that can be imported.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata list-importable-savedata --host-directory D:\ExportDirectory
+directory_name: 20180101000000_01004b9000490000, application_id: 0x01004b9000490000, type: Account(User)
+directory_name: 20180101000001_01004b9000490000, application_id: 0x0100000000010000, type: Cache Storage (index 0, System Memory)
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424117446_h1_3">Deleting Save Data</h1>
+<p>Delete save data by specifying an application ID or a save data ID. If an application ID is specified, the save data for all save data IDs associated with that application will be deleted.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Deletes save data by specifying an application ID.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata delete --application-id 0x01004b9000490000
+[SUCCESS]
+
+# Deletes save data by specifying a save data ID.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata delete --savedata-id 0x0000000000000001
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424117446_h1_4">Deleting All Save Data</h1>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe DevMenuCommand.nsp -- savedata delete all
+deleted id: 0x0000000000000001
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424117446_h1_5">Restoring Save Data</h1>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Save data files in NSAVE format cannot be restored using the DevMenuCommand in NintendoSDK Firmware for NX 9.0.0-5.0 or later. To restore save data files in NSAVE format, use DevMenuApp.<br />Save data files in NSAVE format are archives created when the backup destination full path is 260 characters or more.</p>
+  </div>
+</div>
+<p>Restore save data by specifying an index listed by the <code>list-importable-savedata</code> subcommand, or by specifying a directory on the host PC.<br />If the <code>--input</code> option is not specified, the save data in the <code>sd:\NintendoSDK\BackupSaveData</code> directory on the microSD card is restored.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Specifies an index and restores account save data.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata import --index-importable-savedata 0 --user-index 0
+Copy &quot;sd:/NintendoSDK/BackupSaveData/20180101000000_01004b9000490000/user/01004b9000490000/0001&quot; to &quot;save:/&quot;
+Copy of __BackupSaveDataInfo.xml has been skipped.
+[SUCCESS]
+
+# Specifies an index and restores cache storage to the SD card.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata import --index-importable-savedata 1 --target-location sdcard
+Copy &quot;sd:/NintendoSDK/BackupSaveData/20180101000000_01004b9000490000/cache/01004b9000490000/0001&quot; to &quot;save:/&quot;
+Copy of __BackupSaveDataInfo.xml has been skipped.
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>Specify the <code>--input</code> option to restore save data from a specified directory of the host PC.<br />When specifying a directory, specify the absolute path to the directory that was created during backup in <code>&lt;<em>yyyymmddhhmmss</em>&gt;_&lt;<em>applicationId</em>&gt;</code> format.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Specifies a directory on the host PC and restores the cache storage to system memory.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata import --input C:\20180101000000_01004b9000490000 --target-location system
+Copy &quot;host:/20180101000000_01004b9000490000/cache/01004b9000490000/0001&quot; to &quot;save:/&quot;
+Copy of __BackupSaveDataInfo.xml has been skipped.
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>
+  <span style="letter-spacing: 0.0px;">Not specifying the <code>--user-index</code> option allows for restore from debug save data.<br /></span>
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Available in NintendoSDK SystemUpdater for NX 11.0.0-1.0 and later.<br />For more information about debug save data, see <a href="../Pages/Page_107782148.html">fs Library &gt; Manual &gt; Save Data &gt; Save Data (NX Add-On)</a>.</p>
+  </div>
+</div>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Restores debug save data without specifying the user index.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata import --index-importable-savedata 0
+Copy &quot;sd:/NintendoSDK/BackupSaveData/20180101000000_01004b9000490000/user/01004b9000490000/0001&quot; to &quot;save:/&quot;
+Copy of __BackupSaveDataInfo.xml has been skipped.
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424117446_h1_6">
+  <span style="color: rgb(117,117,117);">Backing Up Save Data</span>
+</h1>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>If there is a file or directory in the save data that would have a full path of 260 characters or longer in the backup destination storage, that save data cannot be backed up using DevMenuCommand in NintendoSDK Firmware for NX 9.0.0-5.0 or later.<br />To back up such save data, use DevMenuApp.</p>
+  </div>
+</div>
+<p>Specify an application ID or save data ID and back up the save data.<br />If the <code>--output</code> option is not specified, the save data is backed up to the <code>sd:/NintendoSDK/BackupSaveData</code> directory on the microSD card.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Specifies a save data ID and backs up save data.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata export --savedata-id 0x0000000000000001
+Copy &quot;save:/&quot; to &quot;sd:/NintendoSDK/BackupSaveData/20180101000000_01004b9000490000/user/01004b9000490000/0001&quot;
+[SUCCESS]
+
+# Specifies an application ID and backs up user account save data.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata export --application-id 0x01004b9000490000 --user-index 0
+Copy &quot;save:/&quot; to &quot;sd:/NintendoSDK/BackupSaveData/20180101000000_01004b9000490000/user/01004b9000490000/0001&quot;
+[SUCCESS]
+
+# Specifies an application ID and backs up BCAT save data.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata export --application-id 0x01004b9000490000 --bcat
+Copy &quot;save:/&quot; to &quot;sd:/NintendoSDK/BackupSaveData/20180101000000_01004b9000490000/bcat/01004b9000490000/0001&quot;
+[SUCCESS]
+
+# Specifies an application ID and backs up cache storage.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata export --application-id 0x01004b9000490000 --cache-storage-index 0
+Copy &quot;save:/&quot; to &quot;sd:/NintendoSDK/BackupSaveData/20180101000000_01004b9000490000/cache/01004b9000490000/0001&quot;
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>Use the <code>--output</code> option to <span style="color: rgb(23,43,77);">back up</span> to a specified directory on the host PC.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Specifies the C:\ExportDirectory directory on the host PC as the backup destination and then backs up.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata export --savedata-id 0x0000000000000001 --output C:\ExportDirectory
+Copy &quot;save:/&quot; to &quot;host:/20180101000000_01004b9000490000/user/01004b9000490000/0001&quot;
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424117446_h1_7">Save Data Batch Backup</h1>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Available in NintendoSDK Firmware for NX 9.1.0-1.0 and later.</p>
+  </div>
+</div>
+<p>
+  <span style="color: rgb(23,43,77);">This procedure backs up save data associated with a specified application ID in a batch.</span>
+  <br />
+  <span style="color: rgb(23,43,77);">If the <code>--include-cache-storage</code> option is specified, it performs a batch backup including the cache storage.</span>
+  <br />
+  <span style="color: rgb(23,43,77);">You can use the <code>&ndash;output</code> option to specify an absolute path for the output destination. If an output destination is not specified, the save data is backed up to the <code>sd:/NintendoSDK/BackupSaveData</code> directory on the microSD card.</span>
+</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Specifies an application ID and performs a batch backup.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata export-all --application-id 0x01004b9000490000
+Copy &quot;save:/&quot; to &quot;sd:/20191201000000_01004b9000490000/user/01004b9000490000/0001&quot;
+Copy &quot;save:/&quot; to &quot;sd:/20191201000000_01004b9000490000/bcat/01004b9000490000/0001&quot;
+[SUCCESS]
+
+# Batch backups including cache storage.
+$ RunOnTarget.exe DevMenuCommand.nsp -- savedata export-all --application-id 0x01004b9000490000 --include-cache-storage
+Copy &quot;save:/&quot; to &quot;sd:/20191201000000_01004b9000490000/user/01004b9000490000/0001&quot;
+Copy &quot;save:/&quot; to &quot;sd:/20191201000000_01004b9000490000/bcat/01004b9000490000/0001&quot;
+Copy &quot;save:/&quot; to &quot;sd:/20191201000000_01004b9000490000/cache/01004b9000490000/0001&quot;
+[SUCCESS]</pre>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

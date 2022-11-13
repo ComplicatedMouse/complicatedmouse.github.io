@@ -1,0 +1,223 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Semaphores | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Semaphores -->
+<div class="pagetitle" id="PageId_83955700">Semaphores</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955700_h1_1">Semaphore Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955700_h2_1">Feature Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955700_h2_2">Using Semaphores</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955700_h2_3">Specific Example of Using a Semaphore</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955700_h2_4">Semaphore API Reference</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83955700_h1_1">Semaphore Feature</h1>
+<h2 id="Anchor_83955700_h2_1">Feature Overview</h2>
+<p>A semaphore is a synchronization feature that uses a counter to control exclusive access to a common resource from multiple <a href="../Pages/Page_83955697.html">threads</a>.</p>
+<p>The number of common resources must be set when the semaphore is initialized. From this point, the application can use the <span class="ApiLink_void_nn__os__AcquireSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT">AcquireSemaphore()</span> function to acquire the semaphore until there are no more common resources available. If the <span class="ApiLink_void_nn__os__AcquireSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT">AcquireSemaphore()</span> function is called when the number of available resources is zero, the calling thread waits to acquire the semaphore.</p>
+<p>Meanwhile, when a common resource acquired from the semaphore is no longer required, call the <span class="ApiLink_void_nn__os__ReleaseSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT">ReleaseSemaphore()</span> function to release it. If any <a href="../Pages/Page_83955697.html">threads</a> are waiting for a resource at this time, the <a href="../Pages/Page_83955697.html">threads</a> wake up.</p>
+<p>You cannot release more semaphores with <span class="ApiLink_void_nn__os__InitializeSemaphore(SemaphoreType_*semaphore|_int_initialCount|_int_maxCount)_NN_NOEXCEPT">ReleaseSemaphore()</span> than were specified when <span class="ApiLink_void_nn__os__ReleaseSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT">InitializeSemaphore()</span> was called.</p>
+<p> </p>
+<h2 id="Anchor_83955700_h2_2">Using Semaphores</h2>
+<p>To use semaphores, you must prepare an <span class="ApiLink_nn__os__SemaphoreType">nn::os::ThreadType</span> structure object as follows.<br />There are no restrictions on where the object can be defined.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="nn">nn::os::</span><span class="n">SemaphoreType</span>    <span class="n">g_Semaphore</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>Use the defined object according to the following procedure.</p>
+<ol>
+  <li>
+    <p>You must start the semaphore before use.<br />Specify the initial semaphore counter value in the second parameter and the maximum semaphore counter value in the third parameter.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeSemaphore</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Semaphore</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Acquire the semaphore as required.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">AcquireSemaphore</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Semaphore</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Release the semaphore as required.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">ReleaseSemaphore</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Semaphore</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>When you have finished using the semaphore, free the object.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FinalizeSemaphore</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Semaphore</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_83955700_h2_3">Specific Example of Using a Semaphore</h2>
+<p>For a specific example of using a semaphore, see the <span class="ApiLink_PageSampleOsSemaphore">Semaphore Feature Sample Program</span>.</p>
+<p> </p>
+<h2 id="Anchor_83955700_h2_4">Semaphore API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeSemaphore(SemaphoreType_*semaphore|_int_initialCount|_int_maxCount)_NN_NOEXCEPT">nn::os::InitializeSemaphore</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT">nn::os::FinalizeSemaphore</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__AcquireSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT">nn::os::AcquireSemaphore</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryAcquireSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT">nn::os::TryAcquireSemaphore</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TimedAcquireSemaphore(SemaphoreType_*semaphore|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedAcquireSemaphore</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__ReleaseSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT">nn::os::ReleaseSemaphore (release 1 unit)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__ReleaseSemaphore(SemaphoreType_*semaphore|_int_count)_NN_NOEXCEPT">nn::os::ReleaseSemaphore (release multiple units)</span>
+  </li>
+  <li>
+    <span class="ApiLink_int_nn__os__GetCurrentSemaphoreCount(const_SemaphoreType_*semaphore)_NN_NOEXCEPT">nn::os::GetCurrentSemaphoreCount</span>
+  </li>
+</ul>
+<p> </p>
+<p> </p>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__os__AcquireSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ac9e1d42bdb0279e887dc1caef45fcff1' )
+SetUrl( 'ApiLink_void_nn__os__ReleaseSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#acf2cbceb4266858d27387ff2cb29a5ae' )
+SetUrl( 'ApiLink_void_nn__os__InitializeSemaphore(SemaphoreType_*semaphore|_int_initialCount|_int_maxCount)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#af76bc96a9333f18ed5d7bead209eb4f3' )
+SetUrl( 'ApiLink_nn__os__SemaphoreType', '../../../Api/HtmlNX/structnn_1_1os_1_1_semaphore_type.html' )
+SetUrl( 'ApiLink_PageSampleOsSemaphore', '../../../Api/HtmlNX/_page_sample_os_semaphore.html' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a201a00464d5606e40bef1798cba2ace8' )
+SetUrl( 'ApiLink_bool_nn__os__TryAcquireSemaphore(SemaphoreType_*semaphore)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#af5fa41594b3b3072d78735f366bdb7ce' )
+SetUrl( 'ApiLink_bool_nn__os__TimedAcquireSemaphore(SemaphoreType_*semaphore|_TimeSpan_timeout)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a54c8209e58cabbf5ab5173867dcad732' )
+SetUrl( 'ApiLink_void_nn__os__ReleaseSemaphore(SemaphoreType_*semaphore|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a40039d059051bc9970e072417ac9576d' )
+SetUrl( 'ApiLink_int_nn__os__GetCurrentSemaphoreCount(const_SemaphoreType_*semaphore)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#aa6a315a7f4822cee3e62e9912737edfa' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

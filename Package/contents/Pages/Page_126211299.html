@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Bitmap Fonts Not Dependent on the Target Platform | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Bitmap Fonts Not Dependent on the Target Platform -->
+<div class="pagetitle" id="PageId_126211299">Bitmap Fonts Not Dependent on the Target Platform</div>
+<div class="text_separate">
+<p>The following section describes the FFNT format, which is used for bitmap fonts that are not dependent on the target platform.</p>
+<h2 id="Anchor_126211299_h2_1">FFNT</h2>
+<p>The FFNT text format makes handling bitmap fonts easier when you need to create layout data for multiple platforms.</p>
+<h2 id="Anchor_126211299_h2_2">Advantages of FFNT</h2>
+<p>BFFNT, the earlier bitmap font file format, included development hardware textures and was optimized for each platform.</p>
+<p>As a result, you could not reuse data that was created for one platform on a different platform. It was difficult to handle bitmap fonts when creating layout data for multiple platforms.</p>
+<p>With FFNT, the data is managed in a form that is not platform-dependent. When it is time to convert the data to binary for reasons like previewing and the exporting of game data, the data is converted for output to BFFNT files for each platform.</p>
+<p>This enables designers to create layout data in ways that are not dependent on platforms.</p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955988/244371804.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_126211299_h2_3">Working in LayoutEditor</h2>
+<p>You can select two handling methods.</p>
+<ol>
+  <li>You can use the normal method of load files in the LayoutEditor as with BFFNT. The files are automatically converted to BFFNT files for previewing in the viewer. No particular considerations are needed.</li>
+  <li>You can also use FFNT only during previews in the viewer with BFFNT specified in the layout file. To use FFNT only when previewing in the viewer, place an FFNT file with the same name except for the extension in the same folder as the BFFNT file and write the following to the layout project file.</li>
+</ol>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&nbsp;&nbsp;&lt;AutoFilteredFontGenerationEnabled&gt;true&lt;/AutoFilteredFontGenerationEnabled&gt;
+&nbsp;&nbsp;&lt;AutoFilteredFontGenerationFromSameNameFfntEnabled&gt;true&lt;/AutoFilteredFontGenerationFromSameNameFfntEnabled&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Note that when files are displayed in LayoutEditor or previewed in LayoutViewer, XLLT filters are ignored and all text is displayed.</p>
+<h2 id="Anchor_126211299_h2_4">Creating FFNT Files</h2>
+<p>These files use the XML format. Use a text editor to enter the paths to the source bitmap files and character order (XLLT) files. FFNT files cannot yet be exported from the GUI version of FontConverter.</p>
+<h2 id="Anchor_126211299_h2_5">Converting From FFNT to BFFNT</h2>
+<p>Use FontConverter.</p>
+<p>Specify the appropriate tile mode (<code>-tile-mode</code>) for each platform.</p>
+<p>To use converted BFFNT files in a layout, make the <code>-of</code> filename the same as the <code>-if</code> filename, minus the filename extension.</p>
+<p>FontConverter caches the results from the conversion from FFNT to BFFNT, which makes subsequent identical conversions much faster. To run without using or saving a cache, specify the <code>-nocache</code> option.</p>
+<p>You can specify additional options that are not specified within the FFNT file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>FontConverterConsole.exe -i ffnt -if FontName.ffnt -o bffnt -of FontName.bffnt -tile-mode Linear</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_126211299_h2_6">Creating Layout Binaries</h2>
+<p>When you convert layout (FLYT) files to layout binary (BFLYT) files using LayoutConverter, links to FFNT files are replaced with links to BFFNT files with the same name.</p>
+<p>The layout converter does not convert FFNT files to BFFNT files.</p>
+<h2 id="Anchor_126211299_h2_7">FFNT File Format</h2>
+<p>FFNT files are in XML format. This page describes components included in FFNT files.</p>
+<h3 id="Anchor_126211299_h3_1">&lt;imageFontConvertDescription&gt;</h3>
+<p>The root element of the FFNT file. The current version is 1.0.0.</p>
+<h3 id="Anchor_126211299_h3_2">&lt;imageFilePath&gt;</h3>
+<p>Path to an image file, such as a BMP file, that you want to convert. Maps to the <code>-if</code> option in FontConverter. Specify an absolute or relative path from the FFNT file. This path may include environment variables surrounded by percent signs (%). Font files such as TTF and OTF cannot be used as input.</p>
+<h3 id="Anchor_126211299_h3_3">&lt;orderFilePath&gt;</h3>
+<p>Path to an order definition (XLOR) file. Maps to the <code>-io</code> option in FontConverter. Specify an absolute or relative path from the FFNT file. This path may include environment variables surrounded by percent signs (%).</p>
+<h3 id="Anchor_126211299_h3_4">&lt;filterFilePath&gt;</h3>
+<p>Path to the character filter (XLIT) file. Maps to the <code>-f</code> option in FontConverter. Specify an absolute or relative path from the FFNT file. This path may include environment variables surrounded by percent signs (%).</p>
+<p>This option may be omitted. If you omit it, you can then specify a character filter file using the <code>-f</code> option in FontConverter.</p>
+<h3 id="Anchor_126211299_h3_5">&lt;additionalArguments&gt;</h3>
+<p>Specify options in addition to those for the input (<code>-i</code>), the input image file (<code>-if</code>), the order definition file (<code>-io</code>), the filter file (<code>-f</code>), the tile mode (<code>-tile-mode</code>), the output file option (<code>-o</code>), and the output file path (<code>-of</code>).</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;imageFontConvertDescription  version=&quot;1.0.0&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;imageFilePath&gt;..\..\..\Applications\FontSimple\Resources\ColorFont.bmp&lt;/imageFilePath&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;orderFilePath&gt;..\..\..\Applications\FontSimple\Resources\ColorFont.xlor&lt;/orderFilePath&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;additionalArguments&gt;-ic RGBA8 -ia&lt;/additionalArguments&gt;
+&lt;/imageFontConvertDescription&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span> For more information, see the following pages.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_83955995.html">FontConverter (Console Version)</a>
+      </th>
+      <td>For the FontConverter (console version) options, see here.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

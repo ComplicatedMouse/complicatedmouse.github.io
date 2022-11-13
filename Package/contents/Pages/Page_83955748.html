@@ -1,0 +1,263 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Message Queues | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Message Queues -->
+<div class="pagetitle" id="PageId_83955748">Message Queues</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955748_h1_1">Message Queue Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955748_h2_1">Feature Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955748_h2_2">Using a Message Queue</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955748_h2_3">Specific Example of Using a Message Queue</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955748_h2_4">Message Queue API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955748_h2_5">Things to Note When Using Message Queues</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955748_h3_1">Message Queue Buffer</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83955748_h1_1">Message Queue Feature</h1>
+<h2 id="Anchor_83955748_h2_1">Feature Overview</h2>
+<p>The message queue is a synchronization feature for sending and receiving data between <a href="../Pages/Page_83955697.html">threads</a>.</p>
+<p>The individual data items that are sent and received are of the <code>uintptr_t</code> type. The size of a single data item is <code>sizeof(uintptr_t)</code>.<br />The maximum number of data items that can be queued in a single message queue and the buffer area are specified by using the <span class="ApiLink_void_nn__os__InitializeMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_*buffer|_size_t_count)_NN_NOEXCEPT">InitializeMessageQueue()</span> function.</p>
+<p>Two functions are available for sending data. The <span class="ApiLink_void_nn__os__SendMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT">SendMessageQueue()</span> function adds a data item to the end of the message queue, and the <span class="ApiLink_void_nn__os__JamMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT">JamMessageQueue()</span> function inserts a data item at the beginning of the message queue.</p>
+<p>Data is received by using the <span class="ApiLink_void_nn__os__ReceiveMessageQueue(uintptr_t_*outData|_MessageQueueType_*messageQueue)_NN_NOEXCEPT">ReceiveMessageQueue()</span> function, which pops the data item at the front of the message queue, and the <span class="ApiLink_void_nn__os__PeekMessageQueue(uintptr_t_*outData|_const_MessageQueueType_*messageQueue)_NN_NOEXCEPT">PeekMessageQueue()</span> function, which references the data item at the front of the message queue but does not remove it.<br /></p>
+<p> </p>
+<h2 id="Anchor_83955748_h2_2">Using a Message Queue</h2>
+<p>To use a message queue, you must prepare an <span class="ApiLink_nn__os__MessageQueueType">nn::os::MessageQueueType</span> structure object as follows.<br />There are no restrictions on where the object can be defined.</p>
+<p>The buffer area for the message queue must be allocated separately.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="k">const</span> <span class="kt">int</span>                  <span class="n">bufferSize</span> <span class="o">=</span> <span class="mi">32</span><span class="p">;</span>
+<span class="kt">uintptr_t</span>                  <span class="n">g_Buffer</span><span class="p">[</span> <span class="n">bufferSize</span> <span class="p">];</span>
+<span class="nn">nn::os::</span><span class="n">MessageQueueType</span>   <span class="n">g_MessageQueue</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>Use the defined object according to the following procedure.</p>
+<ol>
+  <li>
+    <p>You must initialize the message queue before use.<br />Specify the buffer area in the second parameter and the maximum number of data items that can be stored in the message queue in the third parameter.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MessageQueue</span><span class="p">,</span> <span class="n">g_Buffer</span><span class="p">,</span> <span class="n">bufferSize</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Receive data from the message queue as necessary.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">uintptr_t</span>  <span class="n">data</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">ReceiveMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_MessageQueue</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Send data to the message queue as necessary.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">uintptr_t</span>  <span class="n">data</span> <span class="o">=</span> <span class="n">GetNextDataOfSendPacket</span><span class="p">();</span>       <span class="c1">// Get the next data to send.
+</span><span class="nn">nn::os::</span><span class="n">SendMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MessageQueue</span><span class="p">,</span> <span class="n">data</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>When you have finished using the message queue, free the object.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FinalizeMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MessageQueue</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_83955748_h2_3">Specific Example of Using a Message Queue</h2>
+<p>For a specific example of using a message queue, see the <span class="ApiLink_PageSampleOsMessageQueue">Message Queue Feature Sample Program</span>.</p>
+<p> </p>
+<h2 id="Anchor_83955748_h2_4">Message Queue API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_*buffer|_size_t_count)_NN_NOEXCEPT">nn::os::InitializeMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeMessageQueue(MessageQueueType_*messageQueue)_NN_NOEXCEPT">nn::os::FinalizeMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SendMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT">nn::os::SendMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TrySendMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT">nn::os::TrySendMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TimedSendMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedSendMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__JamMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT">nn::os::JamMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryJamMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT">nn::os::TryJamMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TimedJamMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedJamMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__ReceiveMessageQueue(uintptr_t_*outData|_MessageQueueType_*messageQueue)_NN_NOEXCEPT">nn::os::ReceiveMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryReceiveMessageQueue(uintptr_t_*outData|_MessageQueueType_*messageQueue)_NN_NOEXCEPT">nn::os::TryReceiveMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TimedReceiveMessageQueue(uintptr_t_*outData|_MessageQueueType_*messageQueue|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedReceiveMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__PeekMessageQueue(uintptr_t_*outData|_const_MessageQueueType_*messageQueue)_NN_NOEXCEPT">nn::os::PeekMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryPeekMessageQueue(uintptr_t_*outData|_const_MessageQueueType_*messageQueue)_NN_NOEXCEPT">nn::os::TryPeekMessageQueue</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TimedPeekMessageQueue(uintptr_t_*outData|_const_MessageQueueType_*messageQueue|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedPeekMessageQueue</span>
+  </li>
+</ul>
+<p> </p>
+<h2 id="Anchor_83955748_h2_5">Things to Note When Using Message Queues</h2>
+<h3 id="Anchor_83955748_h3_1">Message Queue Buffer</h3>
+<p>The message queue object handles the buffer as an array of <code>uintptr_t</code> type objects.</p>
+<p>Make sure that you specify the beginning address of an array of this type in the second parameter of the <span class="ApiLink_void_nn__os__InitializeMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_*buffer|_size_t_count)_NN_NOEXCEPT">nn::os::InitializeMessageQueue</span> function.</p>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__os__InitializeMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_*buffer|_size_t_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ab7baa013ea5d9d4f9e84eb5d1afcec49' )
+SetUrl( 'ApiLink_void_nn__os__SendMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#afec9c0c3cacf43c7aa82f323da656af5' )
+SetUrl( 'ApiLink_void_nn__os__JamMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a7a47bc9d914dbdf48011deeb859cb877' )
+SetUrl( 'ApiLink_void_nn__os__ReceiveMessageQueue(uintptr_t_*outData|_MessageQueueType_*messageQueue)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ace7ad0de1da8fdeeeb01e7de7494dc87' )
+SetUrl( 'ApiLink_void_nn__os__PeekMessageQueue(uintptr_t_*outData|_const_MessageQueueType_*messageQueue)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a7fab6d997fb47451e6c9cd47ef754e99' )
+SetUrl( 'ApiLink_nn__os__MessageQueueType', '../../../Api/HtmlNX/structnn_1_1os_1_1_message_queue_type.html' )
+SetUrl( 'ApiLink_PageSampleOsMessageQueue', '../../../Api/HtmlNX/_page_sample_os_message_queue.html' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeMessageQueue(MessageQueueType_*messageQueue)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#af9c98095075b7ef0570c1a449545e392' )
+SetUrl( 'ApiLink_bool_nn__os__TrySendMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a78cd82954aa87f10f881a7e34fad596b' )
+SetUrl( 'ApiLink_bool_nn__os__TimedSendMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data|_TimeSpan_timeout)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ad5e14ae7d5a67147af209a1029991095' )
+SetUrl( 'ApiLink_bool_nn__os__TryJamMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#aa6fd916fb5a94b34c37d2b8faa43ce3c' )
+SetUrl( 'ApiLink_bool_nn__os__TimedJamMessageQueue(MessageQueueType_*messageQueue|_uintptr_t_data|_TimeSpan_timeout)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ad4cfd66c4587832586ee7a50e5fd90b0' )
+SetUrl( 'ApiLink_bool_nn__os__TryReceiveMessageQueue(uintptr_t_*outData|_MessageQueueType_*messageQueue)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a921571e9781d3e6fbf60ca8ee4a1825d' )
+SetUrl( 'ApiLink_bool_nn__os__TimedReceiveMessageQueue(uintptr_t_*outData|_MessageQueueType_*messageQueue|_TimeSpan_timeout)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ae0838f36e8391d50f81549950611aeb4' )
+SetUrl( 'ApiLink_bool_nn__os__TryPeekMessageQueue(uintptr_t_*outData|_const_MessageQueueType_*messageQueue)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a6f08aef79a422888383a8ab1d5786fe3' )
+SetUrl( 'ApiLink_bool_nn__os__TimedPeekMessageQueue(uintptr_t_*outData|_const_MessageQueueType_*messageQueue|_TimeSpan_timeout)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a0dc5fb4ad2ef7a5dfff029e0128efa55' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

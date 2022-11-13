@@ -1,0 +1,264 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>SoundProjectConverter | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- SoundProjectConverter -->
+<div class="pagetitle" id="PageId_83956139">SoundProjectConverter</div>
+<div class="text_separate">
+<h1 id="Anchor_83956139_h1_1">Introduction</h1>
+<p>The sound project converter is a command-line tool for converting NintendoWare SoundMaker project files (FSPJ files) to sound archive files (BFSAR files) that are used from the library.</p>
+<p>This document describes how to use the sound project converter and its features.</p>
+<h1 id="Anchor_83956139_h1_2">Using the Sound Project Converter</h1>
+<h2 id="Anchor_83956139_h2_1">Executing the Sound Project Converter</h2>
+<p>To run the sound project converter, enter a command line in the following format.</p>
+<p>
+  <strong>SoundProjectConverter.exe [<em>Options</em>] <em>ProjectFilePath</em></strong>
+</p>
+<p>Examples:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>SoundProjectConverter.exe sample.fspj
+SoundProjectConverter.exe -c sample/sample.fspj</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>When conversion is performed, a sound archive file with project filename extension changed to <code>.bfsar</code> is output.</p>
+<h3 id="Anchor_83956139_h3_1">Project File Path</h3>
+<p>Specifies the project file (FSPJ) path.</p>
+<h3 id="Anchor_83956139_h3_2">Command-Line Options</h3>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 202.0px;" />
+    <col style="width: 843.0px;" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>
+        <p>Options</p>
+      </th>
+      <th>
+        <p>Description</p>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <p>-c</p>
+      </td>
+      <td>
+        <p>Converts all files regardless of when the file was updated.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>-j, --jobs &lt;conversion-count-max&gt;</p>
+      </td>
+      <td>
+        <p>Sets the maximum number of parallel conversions. &lt;0 - 99&gt;　[default value: 0]</p>
+        <p>If 0 is specified for this value, this is automatically set to be the same as the number of CPU cores in the PC.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>-o, --output &lt;output-dirpath&gt;</td>
+      <td>
+        <p>Specifies the output directory for the conversion results.</p>
+        <p>The value specified here has priority over the output directory configured in the project file.</p>
+        <p>When you use this option to switch where the converted project is saved, files like BFSAR, BFSTM, and BFGRP that are output directly rather than via the cache directory are treated as reconverted files.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>-s, --silent</p>
+      </td>
+      <td>
+        <p>This function suppresses the log output.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>-v, --verbose</code>
+        </p>
+      </td>
+      <td>
+        <p>Exports a detailed log.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>--ignore-pre-convert-commands</p>
+      </td>
+      <td>
+        <p>The pre-conversion user commands are not executed.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>--ignore-post-convert-commands</p>
+      </td>
+      <td>
+        <p>The post-conversion user commands are not executed.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>--exclude-list &lt;arg&gt;</td>
+      <td>
+        <p>If the file path of an item exclusion filter list (YAML file) is specified, this option excludes the items specified in that list from the sound archive.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>--include-list &lt;arg&gt;</td>
+      <td>
+        <p>If the file path of an item inclusion filter list (YAML file) is specified, this option includes only the items specified in that list in the sound archive.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_83956139_h1_3">Sound Project Converter Features</h1>
+<h2 id="Anchor_83956139_h2_2">File Update Time Check</h2>
+<p>By default, the sound project converter checks the date and time that files were last updated. If the generated file is newer than the source file, the file is not converted.<br />This reasoning reduces conversion time.</p>
+<p>Specifying the <code>&ndash;c</code> option converts all files without checking when the file was updated.</p>
+<h2 id="Anchor_83956139_h2_3">Sound Project Converter Internal Operations</h2>
+<p>The sound project converter performs conversion with the following procedure.</p>
+<ul>
+  <li>Execute the pre-conversion commands</li>
+  <li>Convert the sound archive</li>
+  <li>Generate the HTML sound list</li>
+  <li>Execute the post-conversion commands</li>
+</ul>
+<h3 id="Anchor_83956139_h3_3">Executing the Pre-Conversion Commands</h3>
+<p>Executes the pre-conversion commands set in the sound project.</p>
+<h3 id="Anchor_83956139_h3_4">Converting the Sound Archive</h3>
+<p>Generates a sound archive file (BFSAR file).</p>
+<p>Starts the converters in the <code>installation_directory\Tools\Audio\SoundMaker</code> folder to perform this conversion.<br />Each converter converts sound data to binary data for the runtime library and ultimately combines them into one sound archive file.</p>
+<p>You can convert non-interdependent sounds in parallel. Use the <code>-j</code> option to specify the maximum number of parallel conversion processes to start.<br />When <code>0</code> is specified, the effect is to set the number to match the number of CPU cores.<br />If this option is omitted, the default value of <code>0</code> is used.</p>
+<h3 id="Anchor_83956139_h3_5">Generating the HTML Sound List</h3>
+<p>Outputs an HTML file format sound list file based on the HTML sound list settings configured in the sound project.</p>
+<h3 id="Anchor_83956139_h3_6">Executing the Post-Conversion Commands</h3>
+<p>Executes the post-conversion commands set in the sound project.</p>
+<h2 id="Anchor_83956139_h2_4">Items Filtering During Conversion</h2>
+<p>This feature makes it possible to filter the items and bank instruments in a sound project during conversion in order to control whether they are included in the resulting sound archive.</p>
+<p>To use this feature, use the <code>--exclude-list</code> and <code>--include-list</code> options in SoundProjectConverter.<br />This feature is not available in the SoundMaker GUI.</p>
+<h3 id="Anchor_83956139_h3_7">Filter Type</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Exclusion Filter</th>
+      <td>--exclude-list</td>
+      <td>Excludes the items that match the specified regular expression from the sound archive.</td>
+    </tr>
+    <tr>
+      <th>Inclusion Filter</th>
+      <td>--include-list</td>
+      <td>Includes only the items that match the specified regular expression in the sound archive.</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83956139_h3_8">Filter List File Format</h3>
+<p>Filter lists are specified using the following YML format.</p>
+<p>The same format is used for both exclusion filters and inclusion filters.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>filters:
+&nbsp;&nbsp;&nbsp;&nbsp;# Filter the items in the specified sound project.
+&nbsp;&nbsp;&nbsp;&nbsp;- patterns:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ^STRM_MARIOKART$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ^WSDSET_VOICE
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- PLAYER_DEFAULT
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ^GROUP_PS
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ^GROUP_USER_AUTO
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ^WARC_*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ^BANK_BGM
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ^SE_IDLE
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ^SEQ_MARIOKART$
+
+&nbsp;&nbsp;&nbsp;&nbsp;# Filter the bgm_kart instrument.
+&nbsp;&nbsp;&nbsp;&nbsp;- target: bnk/bgm_kart.fbnk
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;patterns:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ^INST_00*</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Elements</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>filters</td>
+      <td>A list of filters.</td>
+    </tr>
+    <tr>
+      <td>filter/target</td>
+      <td>
+        <p>The target to which to apply the filters.</p>
+        <p>Specify the relative path of an FBNK file from the sound project to apply the filters to the specified bank.</p>
+        <p>If not specified, the filters are applied to the entire sound project (excluding banks).</p>
+      </td>
+    </tr>
+    <tr>
+      <td>filter/patterns</td>
+      <td>A list of regular expression filters.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

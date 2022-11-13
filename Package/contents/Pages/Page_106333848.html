@@ -1,0 +1,744 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Quantization | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Quantization -->
+<div class="pagetitle" id="PageId_106333848">Quantization</div>
+<div class="text_separate">
+<h1 id="Anchor_106333848_h1_1">Overview</h1>
+<p>This feature resamples vertex data and animation values created with the DCC tool under conditions set by g3d, and optimizes the data size. Quantization allows the size of the binary resources, ultimately referenced by the game application, to be smaller.</p>
+<h1 id="Anchor_106333848_h1_2">Vertex Quantization</h1>
+<p>The <a href="../Pages/Page_83955705.html">3D binary converter</a> performs vertex quantization based on the quantization type set by the <a href="../Pages/Page_83955997.html">intermediate file optimizer</a>. As shown in the following table, with the intermediate file optimizer, the quantization type is set automatically based on the vertex information. The 3D binary converter stores the quantized vertices as a interleave buffer, after rearranging them in an optimized order. The following example shows some options provided to the intermediate file optimizer.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dIntermediateFileOptimizer.exe human.fmdb --quantization-analysis</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can directly set the intermediate file Quantization Type without using the <a href="../Pages/Page_83955705.html">intermediate file optimizer</a>. However, note that the <a href="../Pages/Page_83955997.html">3D Binary Converter</a> throws an exception if the vertex information exceeds the range of the Quantization Type.</p>
+<h2 id="Anchor_106333848_h2_1">Common Quantization Conditions</h2>
+<!--Remove-->
+<p>
+  <br />For shapes determined to be contiguous shapes in the model intermediate file, their quantization types are adjusted to align with the type of the shape with the greatest quantization precision. Shapes are determined to be contiguous if any of the following conditions are satisfied.</p>
+<ul style="list-style-type: square;">
+  <li>The shapes have matching values for the <code>original_bone_name</code> attribute of <code>&lt;shape_info&gt;</code>.</li>
+  <li>When the value for the <code>name</code> attribute of <code>&lt;shape&gt;</code> is separated using an underscore (&quot;_&quot;), the shapes have matching leading strings.<ul style="list-style-type: square;"><li>This does not include cases where the value for the <code>name</code> attribute contains multiple underscores (&quot;_&quot;).</li></ul></li>
+  <li>The shapes have vertices with matching coordinates.</li>
+</ul>
+<h2 id="Anchor_106333848_h2_2">Quantization Conditions for Different Vertex Attribute Types</h2>
+<p>The following table describes the quantization conditions. Unless otherwise noted, all of the vertex streams in the LOD model are evaluated.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Vertex Attribute</th>
+      <th>Quantization Conditions</th>
+      <th>Quantization Type</th>
+      <th>Data Creation Tips</th>
+    </tr>
+    <tr>
+      <td rowspan="2">Vertex index</td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The maximum value of the vertex index is less than 2 to the power of 16.</li>
+        </ul>
+      </td>
+      <td>uint_16</td>
+      <td rowspan="2">
+        <ul style="list-style-type: square;">
+          <li>Do not unnecessarily increase the number of vertices.</li>
+          <li>Do not unnecessarily create hard edges.</li>
+          <li>Do not unnecessarily split UV.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>uint_32</td>
+    </tr>
+    <tr>
+      <td rowspan="2">Coordinates</td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The integer part of the maximum absolute value is less than 2 to the power of 15 (the precision of the partial precision floating-point decimal is assured to be 1.0).</li>
+          <li>The minimum difference (see Note 1) among all coordinates in the base model can be expressed with fractional precision when quantized to half-precision floating-point format.</li>
+          <li>The absolute error is less than 1.0 / 4096.0 when all base model coordinates are quantized to half-precision floating-point format.</li>
+        </ul>
+      </td>
+      <td>float_16_16_16_16</td>
+      <td rowspan="2">
+        <ul style="list-style-type: square;">
+          <li>Do not place polygons unnecessarily across a wide range, in the same shape.</li>
+          <li>Do not create vertices unnecessarily close in the same shape.</li>
+          <li>Set a nice round value, if possible (see Note 2).</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>float_32_32_32</td>
+    </tr>
+    <tr>
+      <td rowspan="2">Normals</td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The maximum absolute value is less than 1.0.</li>
+        </ul>
+      </td>
+      <td>snorm_10_10_10_2</td>
+      <td rowspan="2">
+        <ul style="list-style-type: square;">
+          <li>Because the value will not exceed 1.0 for the standard creation method using NintendoWare's DCC tool plug-in, there is no requirement to pay particular attention to this.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>float_32_32_32</td>
+    </tr>
+    <tr>
+      <td rowspan="2">Tangent and binormal</td>
+      <td>
+        <ul>
+          <li>The maximum absolute value is less than 1.0.</li>
+        </ul>
+      </td>
+      <td>snorm_8_8_8_8</td>
+      <td rowspan="2">
+        <ul>
+          <li>Because the value will not exceed 1.0 for the standard creation method using NintendoWare's DCC tool plug-in, there is no requirement to pay particular attention to this.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>float_32_32_32_32</td>
+    </tr>
+    <tr>
+      <td rowspan="6">Texture coordinates</td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The maximum absolute value is less than 1.0.</li>
+          <li>Does not contain negative values.</li>
+          <li>The minimum difference (see Note 1) among all texture coordinates in the base model is equal to or greater than 2 to the negative 8 power.</li>
+        </ul>
+      </td>
+      <td>unorm_8_8</td>
+      <td rowspan="6">
+        <ul style="list-style-type: square;">
+          <li>Do not create unnecessarily large texture coordinates.<ul style="list-style-type: square;"><li>As much as possible, keep texture coordinates within the range of 0.0 and 1.0.</li><li>If you must use negative values, as much as possible, keep texture coordinates within the range of &ndash;1.0 and 1.0.</li></ul></li>
+          <li>Do not create unnecessarily close texture coordinates.</li>
+          <li>Set a nice round value, if possible (see Note 2).</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The maximum absolute value is less than 1.0.</li>
+          <li>Does not contain negative values.</li>
+          <li>The minimum difference (see Note 1) among all texture coordinates in the base model is equal to or greater than 2 to the negative 16 power but less than 2 to the negative 8 power.</li>
+        </ul>
+      </td>
+      <td>unorm_16_16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The maximum absolute value is less than 1.0.</li>
+          <li>Contains negative values.</li>
+          <li>The minimum difference (see Note 1) among all texture coordinates in the base model is equal to or greater than 2 to the negative 7 power.</li>
+        </ul>
+      </td>
+      <td>snorm_8_8</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The maximum absolute value is less than 1.0.</li>
+          <li>Contains negative values.</li>
+          <li>The minimum difference (see Note 1) among all texture coordinates in the base model is equal to or greater than 2 to the negative 15 power but less than 2 to the negative 7 power.</li>
+        </ul>
+      </td>
+      <td>snorm_16_16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>Does not satisfy the quantization conditions for <code>unorm_8_8</code>, <code>unorm_16_16</code>, <code>snorm_8_8</code>, and <code>snorm_16_16</code>.</li>
+          <li>The integer part of the maximum absolute value is less than 2 to the power of 15 (the precision of the partial precision floating-point decimal is assured to be 1.0).</li>
+          <li>The absolute error is less than 1.0 / 256.0 when all base model texture coordinates are quantized to half-precision floating-point format.</li>
+        </ul>
+      </td>
+      <td>float_16_16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>float_32_32</td>
+    </tr>
+    <tr>
+      <td rowspan="3">Weight index</td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The maximum value is less than 2 to the power of 8.</li>
+        </ul>
+      </td>
+      <td>uint_8<br />uint_8_8<br />uint_8_8_8_8</td>
+      <td rowspan="3">
+        <ul>
+          <li>Do not unnecessarily increase the number of bones for skinning.<ul><li>Unless necessary, keep the number of bones for skinning below 256.</li></ul></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The maximum value is greater than 2 to the power of 8 and less than 2 to the power of 16.</li>
+        </ul>
+      </td>
+      <td>uint_16<br />uint_16_16<br />uint_16_16_16_16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>uint_32<br />uint_32_32<br />uint_32_32_32<br />uint_32_32_32_32</td>
+    </tr>
+    <tr>
+      <td rowspan="3">Weight</td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The minimum difference (see Note 1) among all weight values in the base model is equal to or greater than 2 to the negative 8 power.</li>
+        </ul>
+      </td>
+      <td>unorm_8<br />unorm_8_8<br />unorm_8_8_8_8</td>
+      <td rowspan="3">
+        <ul style="list-style-type: square;">
+          <li>Do not unnecessarily increase the number of affected bones during skinning.</li>
+          <li>Set a nice round value, if possible (see Note 2).</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The minimum difference (see Note 1) among all weight values in the base model is equal to or greater than 2 to the negative 16 power but less than 2 to the negative 8 power.</li>
+        </ul>
+      </td>
+      <td>unorm_16<br />unorm_16_16<br />unorm_16_16_16_16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>float_32<br />float_32_32<br />float_32_32_32<br />float_32_32_32_32</td>
+    </tr>
+    <tr>
+      <td rowspan="4">Color</td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The maximum absolute value is less than 1.0.</li>
+          <li>Does not contain negative values.</li>
+        </ul>
+      </td>
+      <td>unorm_8<br />unorm_8_8<br />unorm_8_8_8_8</td>
+      <td rowspan="4">
+        <ul>
+          <li>Do not set an unnecessarily large value for the vertex color.<ul><li>As much as possible, keep the vertex color value within the range of 0.0 and 1.0.</li><li>If you have to use negative numbers, as much as possible, keep the vertex color value within the range of -1.0 and 1.0.</li></ul></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The maximum absolute value is less than 1.0.</li>
+          <li>Contains negative values.</li>
+        </ul>
+      </td>
+      <td>snorm_8<br />snorm_8_8<br />snorm_8_8_8_8</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The maximum absolute value is greater than 1.0.</li>
+          <li>The integer part of the maximum absolute value is less than 2 to the power of 15 (the precision of the partial precision floating-point decimal is assured to be 1.0).</li>
+        </ul>
+      </td>
+      <td>float_16<br />float_16_16<br />float_16_16_16_16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>float_32_32_32_32</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_106333848_h2_3">Quantization Conditions When Vertex Attributes Are Merged</h2>
+<p>After merging the vertex attributes with the <a href="../Pages/Page_412412930.html">3D Vertex Attribute Packer</a>, the quantization type of the vertex attribute is set based on the vertex stream after the merge.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col style="width: 206.0px;" />
+    <col style="width: 811.0px;" />
+    <col style="width: 164.0px;" />
+    <col style="width: 421.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Vertex Attributes</th>
+      <th>Quantization Conditions</th>
+      <th>Quantization Type</th>
+      <th>Data Creation Tips</th>
+    </tr>
+    <tr>
+      <td rowspan="7">Vertex Attributes After Merging (float Type)</td>
+      <td>
+        <ul>
+          <li>The quantization type is not set (<code>=none</code>) for at least one of the vertex attributes in the merge source.</li>
+        </ul>
+      </td>
+      <td>none</td>
+      <td rowspan="11">
+        <ul>
+          <li>Try to only merge vertex attributes that have the same meaning.<ul><li>For example, avoid merging texture coordinates and color.</li></ul></li>
+          <li>Set a nice round value, if possible (see Note 2).</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The maximum absolute value is less than 1.0.</li>
+          <li>Does not contain negative values.</li>
+          <li>The minimum difference (see Note 1) among all texture coordinates in the base model is equal to or greater than 2 to the negative 8 power.</li>
+        </ul>
+      </td>
+      <td>unorm_8<br />unorm_8_8<br />unorm_8_8_8_8</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The maximum absolute value is less than 1.0.</li>
+          <li>Does not contain negative values.</li>
+          <li>The minimum difference (see Note 1) among all texture coordinates in the base model is equal to or greater than 2 to the negative 16 power but less than 2 to the negative 8 power.</li>
+        </ul>
+      </td>
+      <td>unorm_16<br />unorm_16_16<br />unorm_16_16_16_16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The maximum absolute value is less than 1.0.</li>
+          <li>Contains negative values.</li>
+          <li>The minimum difference (see Note 1) among all texture coordinates in the base model is equal to or greater than 2 to the negative 7 power.</li>
+        </ul>
+      </td>
+      <td>snorm_8<br />snorm_8_8<br />snorm_8_8_8_8</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The maximum absolute value is less than 1.0.</li>
+          <li>Contains negative values.</li>
+          <li>The minimum difference (see Note 1) among all texture coordinates in the base model is equal to or greater than 2 to the negative 15 power but less than 2 to the negative 7 power.</li>
+        </ul>
+      </td>
+      <td>snorm_16<br />snorm_16_16<br />snorm_16_16_16_16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>Does not satisfy the quantization conditions for <code>unorm_8_8</code>, <code>unorm_16_16</code>, <code>snorm_8_8</code>, and <code>snorm_16_16</code>.</li>
+          <li>The integer part of the maximum absolute value is less than 2 to the power of 15 (the precision of the partial precision floating-point decimal is assured to be 1.0).</li>
+          <li>The absolute error is less than 1.0 / 256.0 when all base model texture coordinates are quantized to half-precision floating-point format.</li>
+        </ul>
+      </td>
+      <td>float_16<br />float_16_16<br />float_16_16_16_16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>
+        <p>float_32<br /></p>
+        <p>float_32_32<br />float_32_32_32<br />float_32_32_32_32</p>
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="4">Vertex Attributes After Merging (int/uint Type)</td>
+      <td>
+        <ul>
+          <li>The quantization type of all vertex attributes in the merge source is <code>*_8</code>.</li>
+        </ul>
+      </td>
+      <td>
+        <p>uint_8<br />uint_8_8<br />uint_8_8_8_8</p>
+        <p>sint_8<br />sint_8_8<br />sint_8_8_8_8</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The quantization type of all vertex attributes in the merge source is <code>*_8</code>, <code>*_16</code>, or <code>*_10_10_10_2</code>.</li>
+        </ul>
+      </td>
+      <td>
+        <p>uint_16<br />uint_16_16<br />uint_16_16_16_16</p>
+        <p>sint_16<br />sint_16_16<br />sint_16_16_16_16</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>The quantization type of at least one vertex attribute in the merge source is <code>none</code>.</li>
+        </ul>
+      </td>
+      <td>none</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>
+        <p>uint_32<br />uint_32_32<br />uint_32_32_32<br />uint_32_32_32_32</p>
+        <p>sint_32<br />sint_32_32<br />sint_32_32_32<br />sint_32_32_32_32</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Note 1:</strong> All differences of less than 1.0 / 4096.0 are treated as the same value when calculating minimum differences, and so are not included.</p>
+<p>
+  <strong>Note 2:</strong> For example, setting a value like 1.000 or 1.100 yields a smaller amount of data than a value like 1.113.</p>
+<h1 id="Anchor_106333848_h1_3">
+  <a name="Anchor_106333848_anim_quantize"></a>Animation Quantization</h1>
+<p>The 3D binary converter performs animation quantization based on the quantization type set by the intermediate file optimizer or by 3DEditor. With the intermediate file optimizer or 3DEditor, you set the quantization type and the <code>scale</code> and <code>offset</code> values from the results of the calculations based on the quantization tolerance, as shown in the following table. In the runtime, <code>frame</code> and <code>key</code> are reconstructed based on <code>scale</code> and <code>offset</code>. The following example shows some options provided to the intermediate file optimizer.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dIntermediateFileOptimizer.exe human_walk.fskb --quantization-analysis</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can set the quantization tolerance using the DCC plug-in or 3DEditor. For more information, see <a href="../Pages/Page_83956167.html#Anchor_83956167_quantize_tolerance">Quantization Tolerance Settings</a> in the 3DEditor documentation, <a href="../Pages/Page_83956186.html#Anchor_83956186_animation_quantization_tolerance_options">Animation Quantization Tolerance Options</a> in the Maya plug-in documentation, or <a href="../Pages/Page_83955546.html#Anchor_83955546_animation_quantization_tolerance_options">Animation Quantization Tolerance Options</a> in the 3dsMax plug-in documentation.</p>
+<p>The setting for the quantization is based on the following criteria.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Animation Types</th>
+      <th>Animation Target</th>
+      <th>Quantization Tolerance</th>
+      <th>Quantization Conditions</th>
+      <th>Quantization Type</th>
+      <th>Data Creation Tips</th>
+    </tr>
+    <tr>
+      <td rowspan="7">Skeletal animation</td>
+      <td rowspan="3">frame</td>
+      <td rowspan="3">0.5 / frame_resolution</td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The maximum absolute error after quantization to an 8-bit unsigned integer is less than the tolerance value.</li>
+        </ul>
+      </td>
+      <td>frame8</td>
+      <td rowspan="3">
+        <ul style="list-style-type: square;">
+          <li>Set the keys to integer frame values, if at all possible.</li>
+          <li>Keep the frames to within 255, if at all possible.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>Does not satisfy the conditions for <code>frame8</code> quantization.</li>
+          <li>The maximum absolute error after quantization to half-precision floating-point is less than the threshold value.</li>
+        </ul>
+      </td>
+      <td>frame16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>frame32</td>
+    </tr>
+    <tr>
+      <td rowspan="3">
+        <p>scale</p>
+        <p>translate</p>
+      </td>
+      <td rowspan="3">
+        <p>quantize_tolerance_scale</p>
+        <p>quantize_tolerance_translate</p>
+        <p>
+          <br />
+        </p>
+      </td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The maximum relative error (see Note 1) of values sampled in units of (1.0 / <code><em>frame_resolution</em></code>) frames after 8-bit quantization is less than the threshold value.</li>
+        </ul>
+      </td>
+      <td>key8</td>
+      <td rowspan="3">
+        <ul style="list-style-type: square;">
+          <li>Do not set keys with different levels, if at all possible.</li>
+          <li>Set a nice round value, if possible (see Note 2).</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>Does not satisfy the conditions for <code>key8</code> quantization.</li>
+          <li>The maximum relative error (see Note 1) of values sampled in units of (1.0 / <code><em>frame_resolution</em></code>) frames after 16-bit quantization is less than the threshold value.</li>
+        </ul>
+      </td>
+      <td>key16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>key32</td>
+    </tr>
+    <tr>
+      <td>rotate</td>
+      <td>quantize_tolerance_rotate</td>
+      <td colspan="3">In the scale and translate conditions, not the maximum relative error, but the condition using the maximum absolute error.</td>
+    </tr>
+    <tr>
+      <td rowspan="2">Visibility animations</td>
+      <td>frame</td>
+      <td>0.5 / frame_resolution</td>
+      <td colspan="3">Same as the skeletal animation frame.</td>
+    </tr>
+    <tr>
+      <td>key</td>
+      <td>-</td>
+      <td colspan="3">No quantization.</td>
+    </tr>
+    <tr>
+      <td rowspan="8">Shader parameter animation</td>
+      <td>frame</td>
+      <td>0.5 / frame_resolution</td>
+      <td colspan="3">Same as the skeletal animation frame.</td>
+    </tr>
+    <tr>
+      <td>tex_srt_scale</td>
+      <td>quantize_tolerance_tex_scale</td>
+      <td colspan="3">Same as the skeletal animation scale.</td>
+    </tr>
+    <tr>
+      <td>tex_srt_translate</td>
+      <td>quantize_tolerance_tex_translate</td>
+      <td colspan="3">Same as the skeletal animation translate.</td>
+    </tr>
+    <tr>
+      <td>tex_srt_rotate</td>
+      <td>quantize_tolerance_tex_rotate</td>
+      <td colspan="3">Same as the skeletal animation rotate.</td>
+    </tr>
+    <tr>
+      <td rowspan="3">int type of key</td>
+      <td rowspan="3">-</td>
+      <td>
+        <ul>
+          <li>(maximum value - minimum value) is less than 2 to the power of 8.</li>
+        </ul>
+      </td>
+      <td>key8</td>
+      <td rowspan="3">
+        <ul style="list-style-type: square;">
+          <li>Set the key to make (maximum value - minimum value) for the key as small as possible.<ul style="list-style-type: square;"><li>Keep within 255.</li><li>If the value exceeds 255, keep within 65535.</li></ul></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>(maximum value - minimum value) is greater than 2 to the power of 8, and less than 2 to the power of 16.</li>
+        </ul>
+      </td>
+      <td>key16</td>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>Does not satisfy any of the quantization conditions.</li>
+        </ul>
+      </td>
+      <td>key32</td>
+    </tr>
+    <tr>
+      <td>Other types of keys</td>
+      <td>-</td>
+      <td colspan="3">No quantization.</td>
+    </tr>
+    <tr>
+      <td rowspan="2">Texture pattern animation</td>
+      <td>frame</td>
+      <td>0.5 / frame_resolution</td>
+      <td colspan="3">Same as the skeletal animation frame.</td>
+    </tr>
+    <tr>
+      <td>key</td>
+      <td>-</td>
+      <td colspan="3">
+        <p>Same as the int type key for shader parameter animation.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Shape animation</td>
+      <td>frame</td>
+      <td>0.5 / frame_resolution</td>
+      <td colspan="3">Same as the skeletal animation frame.</td>
+    </tr>
+    <tr>
+      <td rowspan="3">Camera animation</td>
+      <td>frame</td>
+      <td>0.5 / frame_resolution</td>
+      <td colspan="3">Same as the skeletal animation frame.</td>
+    </tr>
+    <tr>
+      <td>rotate</td>
+      <td>quantize_tolerance_rotate</td>
+      <td colspan="3">Same as the skeletal animation rotate.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>aim</p>
+        <p>
+          <code>position</code>
+        </p>
+      </td>
+      <td>quantize_tolerance_translate</td>
+      <td colspan="3">Same as the skeletal animation translate.</td>
+    </tr>
+    <tr>
+      <td rowspan="2">Light animation</td>
+      <td>frame</td>
+      <td>0.5 / frame_resolution</td>
+      <td colspan="3">Same as the skeletal animation frame.</td>
+    </tr>
+    <tr>
+      <td>aim, position</td>
+      <td>quantize_tolerance_translate</td>
+      <td colspan="3">Same as the skeletal animation translate.</td>
+    </tr>
+    <tr>
+      <td>Fog animation</td>
+      <td>frame</td>
+      <td>0.5 / frame_resolution</td>
+      <td colspan="3">Same as the skeletal animation frame.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Note 1:</strong> Relative error is the error found as the relative value of the range (maximum value - minimum value) of sampled values.</p>
+<p>
+  <strong>Note 2:</strong> For example, setting a value like 1.000 or 1.100 yields a smaller amount of data than a value like 1.132.</p>
+<p>
+  <br />
+  <code>
+    <em>frame_resolution</em>
+  </code>, <code><em>quantize_tolerance_scale</em></code>, and other error thresholds listed in the table, are defined in the 3D Intermediate File Specifications. For more information, see the 3D Intermediate File Specifications.</p>
+<h1 id="Anchor_106333848_h1_4">If Quantization Results in a Noticeable Decline in Quality</h1>
+<p>Quantization can degrade data quality due to quantization error. For animation, you can use the quantization tolerance to adjust the balance between data size and data quality. If the quality of vertex data is noticeably degraded, you can delete the quantization settings for specific data by using the <a href="../Pages/Page_83955970.html">intermediate file filter</a>. For more information, see <a href="../Pages/Page_83955970.html#Anchor_83955970_remove_quantize">Deleting Vertex Quantization</a>.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

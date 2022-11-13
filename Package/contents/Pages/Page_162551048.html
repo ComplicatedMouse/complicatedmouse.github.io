@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Changes for Developers | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Changes for Developers -->
+<div class="pagetitle" id="PageId_162551048">Changes for Developers</div>
+<div class="text_separate">
+<p>This section describes the changes made to NintendoWare audio (<code><span class="ApiLink_nn__atk">nn::atk</span></code>) in NintendoSDK 0.13.0.</p>
+<h2 id="Anchor_162551048_h2_1">Contents</h2>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_162551048_h2_1">Contents</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_162551048_h3_1">Revised the AtkOpus sample.</a>
+      </li>
+      <li>
+        <a href="#Anchor_162551048_h3_2">Revised the AtkSound3D sample.</a>
+      </li>
+      <li>
+        <a href="#Anchor_162551048_h3_3">Fixed a bug making nn::atk::EffectDelay unstable.</a>
+      </li>
+      <li>
+        <a href="#Anchor_162551048_h3_4">Changed the final maximum and minimum values for volume and pitch.</a>
+      </li>
+      <li>
+        <a href="#Anchor_162551048_h3_5">Revised the Programming Guide.</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h3 id="Anchor_162551048_h3_1">Revised the AtkOpus sample.</h3>
+<p>There was an issue with when finalization for the Opus decoder was called. Revised to call finalization at the correct moment because it would otherwise be possible for the AtkOpus sample to stop on an assertion during finalization.</p>
+<p>Until now, the Opus decoder finalization was occurring prior to the finalization of the <code><span class="ApiLink_nn__atk">nn::atk</span></code> library for things like <code><span class="ApiLink_nn__atk__SoundSystem">nn::atk::SoundSystem</span></code>. Changed to occur after <code><span class="ApiLink_nn__atk">nn::atk</span></code> library finalization.</p>
+<p>If your implementation is based on the earlier sample, you must change that process.</p>
+<p>Review both the AtkOpus sample and the Sample Backgrounder.</p>
+<h3 id="Anchor_162551048_h3_2">Revised the AtkSound3D sample.</h3>
+<p>Revised the sample finalization processing to fix a bug in the <code>AtkSound3D</code> sample where finalizing <code><span class="ApiLink_nn__atk__Sound3DManager">nn::atk::Sound3DManager</span></code> before <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code> would sometimes cause invalid memory access.</p>
+<p>While previously finalization processing for <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code> was performed after finalization processing for <code><span class="ApiLink_nn__atk__Sound3DManager">nn::atk::Sound3DManager</span></code>, this revision makes finalization for <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code> occur first. In addition, the initialization processing order will also change depending on the finalization order.</p>
+<p>If your implementation is based on the earlier sample, you must change that process.</p>
+<p>Review both the AtkSound3D sample and the Sample Backgrounder.</p>
+<h3 id="Anchor_162551048_h3_3">Fixed a bug making nn::atk::EffectDelay unstable.</h3>
+<p>Fixed a bug where behavior was unstable when the <code><span class="ApiLink_nn__atk__EffectDelay">nn::atk::EffectDelay</span></code> parameters <code>DelayTimeMax</code> and <code>DelayTime</code> were the same value, by fixing the <code><span class="ApiLink_nn__audio__DelayType">nn::audio::DelayType</span></code> problem.</p>
+<h3 id="Anchor_162551048_h3_4">
+  <span style="color: rgb(51,51,51);">Changed the final maximum and minimum values for volume and pitch.</span>
+</h3>
+<p>
+  <span style="color: rgb(51,51,51);">The final maximum and minimum values for the volume and pitch parameters after all multiplication processes are complete can now be set using functions in the <code><span class="ApiLink_nn__audio">nn::audio</span></code> library.</span>
+</p>
+<p>
+  <span style="color: rgb(51,51,51);">The following variables correspond to the maximum and minimum values for each parameters. </span>
+</p>
+<ul>
+  <li>
+    <span style="color: rgb(51,51,51);">Volume: <code><span class="ApiLink_nn__audio__VoiceType__GetVolumeMax">nn::audio::VoiceType::GetVolumeMax</span></code>, <code><span class="ApiLink_nn__audio__VoiceType__GetVolumeMin">nn::audio::VoiceType::GetVolumeMin</span></code></span>
+  </li>
+  <li>
+    <span style="color: rgb(51,51,51);">Pitch: <code><span class="ApiLink_nn__audio__VoiceType__GetPitchMax">nn::audio::VoiceType::GetPitchMax</span></code>, <code><span class="ApiLink_nn__audio__VoiceType__GetPitchMin">nn::audio::VoiceType::GetPitchMin</span></code></span>
+  </li>
+</ul>
+<p>
+  <span style="color: rgb(51,51,51);">The maximum volume value has been increased from the previous maximum value of <code>2.0f</code>. Adjust your new volume ranges appropriately.</span>
+</p>
+<p>
+  <span style="color: rgb(51,51,51);">For more information about calculating the final volume and pitch values, see <a href="../Pages/Page_83955829.html">Sound Parameter Control Operations</a>.</span>
+</p>
+<h3 id="Anchor_162551048_h3_5">Revised the Programming Guide.</h3>
+<p>The following items have been added.</p>
+<ul>
+  <li>Added a description of automatic detaching from the memory pool to the <a href="../Pages/Page_83956038.html">Memory Management</a> section.</li>
+  <li>Added a description of the threads used in the <code>atk</code> library (<a href="../Pages/Page_162560000.html">Thread</a>).</li>
+  <li>Added a description for the &quot;mix&quot; that determines the sound volume that is played through each channel (<a href="../Pages/Page_162953246.html">Mix</a>).</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk', '../../../Api/HtmlNX/namespacenn_1_1atk.html' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html' )
+SetUrl( 'ApiLink_nn__atk__Sound3DManager', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_manager.html' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html' )
+SetUrl( 'ApiLink_nn__atk__EffectDelay', '../../../Api/HtmlNX/classnn_1_1atk_1_1_effect_delay.html' )
+SetUrl( 'ApiLink_nn__audio__DelayType', '../../../Api/HtmlNX/structnn_1_1audio_1_1_delay_type.html' )
+SetUrl( 'ApiLink_nn__audio', '../../../Api/HtmlNX/namespacenn_1_1audio.html' )
+SetUrl( 'ApiLink_nn__audio__VoiceType__GetVolumeMax', '../../../Api/HtmlNX/structnn_1_1audio_1_1_voice_type.html#a8087b32e4c4af30cb788e4ac00653118' )
+SetUrl( 'ApiLink_nn__audio__VoiceType__GetVolumeMin', '../../../Api/HtmlNX/structnn_1_1audio_1_1_voice_type.html#a1a337fe56fabc84b42816087c9edcdb4' )
+SetUrl( 'ApiLink_nn__audio__VoiceType__GetPitchMax', '../../../Api/HtmlNX/structnn_1_1audio_1_1_voice_type.html#a19835624f119d589d36d446726786808' )
+SetUrl( 'ApiLink_nn__audio__VoiceType__GetPitchMin', '../../../Api/HtmlNX/structnn_1_1audio_1_1_voice_type.html#a81b579faf5eab1cf5296058a0ec935bd' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

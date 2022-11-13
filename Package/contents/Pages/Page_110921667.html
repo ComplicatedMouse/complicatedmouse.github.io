@@ -1,0 +1,212 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Embedding the Viewer | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Embedding the Viewer -->
+<div class="pagetitle" id="PageId_110921667">Embedding the Viewer</div>
+<div class="text_separate">
+<h1 id="Anchor_110921667_h1_1">Introduction</h1>
+<p>This section describes how to embed the <code>ui2d</code> viewer library.</p>
+<p>The <code>ui2d</code> viewer library is a runtime library to build the preview environment for data associated with LayoutEditor.<br />The anticipated uses for this library are with LayoutViewer, the standard LayoutEditor preview environment, and data previews in in-game environments.</p>
+<h1 id="Anchor_110921667_h1_2">Implementation Examples</h1>
+<p>This section describes the basic implementation to embed the viewer library in a user application.<br />For more information, see the API reference. </p>
+<h2 id="Anchor_110921667_h2_1">Sample Demo</h2>
+<p>Contains the sample demos. Please refer to it. （<code>Samples\Sources\Applications\Ui2dViewerSimple</code>）</p>
+<h3 id="Anchor_110921667_h3_1">Initialization</h3>
+<p>Initialization processing initializes the viewer library and sets each type of callback function as necessary.<br />Callback function uses are described later.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::ui2d::viewer::</span><span class="n">Viewer</span>        <span class="n">g_LayoutViewer</span><span class="p">;</span>
+
+<span class="c1">// After the ui2d library initialization process, initialize the viewer library.
+</span><span class="nn">nn::ui2d::</span><span class="n">Initialize</span><span class="p">(</span><span class="n">AllocFunction_</span><span class="p">,</span> <span class="n">FreeFunction_</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Set the default path to load data to the viewer library.
+</span><span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">SetDefaultPreviewPath</span><span class="p">(</span><span class="n">nwRootPath</span><span class="p">);</span>
+<span class="c1">// Initialize the viewer library.
+</span><span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_GraphicsResource</span><span class="p">,</span> <span class="nn">nn::ui2d::Size::</span><span class="n">Create</span><span class="p">(</span><span class="n">screenW</span><span class="p">,</span> <span class="n">screenH</span><span class="p">),</span> <span class="n">ViewerLoad_</span><span class="p">,</span> <span class="n">ViewerUnload_</span><span class="p">,</span> <span class="n">RegisterSlotForTexture_</span><span class="p">,</span> <span class="n">UnregisterSlotForTexture_</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+
+<span class="c1">// Set the callbacks to be called before and after layout data loading.
+// Perform initialization and termination processing of information necessary in rendering, such as constant buffers, in these callbacks.
+</span><span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">SetPreReloadLayoutDataCallback</span><span class="p">(</span><span class="n">PreReloadLayoutDataCallback</span><span class="p">);</span>
+<span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">SetPostReloadLayoutDataCallback</span><span class="p">(</span><span class="n">PostReloadLayoutDataCallback</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_110921667_h3_2">Processing Performed for Each Loop</h3>
+<p>The processing performed in each loop is mainly update and rendering processing of the viewer system, and update and rendering processing of the data being previewed.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Perform update processing of the viewer system.
+// Perform communication processing mainly with LayoutEditor.
+</span><span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">UpdateSystem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_Device</span><span class="p">);</span>
+<span class="c1">// Process viewer operations using the input device.
+</span><span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">UpdateInputs</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">inputDeviceState</span><span class="p">);</span>
+<span class="c1">// Update the viewer's system menu display.
+</span><span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">UpdateMenu</span><span class="p">();</span>
+<span class="c1">// Perform update processing of layout data being previewed.
+</span><span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">UpdateLayout</span><span class="p">(</span><span class="n">g_FrameIndex</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Add a command to display the layout data being previewed to CommandBuffer.
+</span><span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">DrawLayout</span><span class="p">(</span><span class="n">g_CommandBuffer</span><span class="p">);</span>
+<span class="c1">// Add a command to display what is rendered on the system side, such as the viewer menu, to CommandBuffer.
+</span><span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">DrawSystem</span><span class="p">(</span><span class="n">g_CommandBuffer</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_110921667_h3_3">Finalization</h3>
+<p>Performs termination processing of the viewer library.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Perform termination processing of the viewer library.
+</span><span class="n">g_LayoutViewer</span><span class="p">.</span><span class="n">Finalize</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_110921667_h1_3">Uses of Each Type of Callback</h1>
+<p>This section describes the uses of each type of callback to set in the viewer library.<br />Each of the following callback functions has its own purpose, and each must be set. </p>
+<h3 id="Anchor_110921667_h3_4">void* LoadFunction(const char* pDataPath, int alignment)</h3>
+<p>Set this callback function in the <code><span class="ApiLink_nn__ui2d__viewer__Viewer__Initialize">nn::ui2d::viewer::Viewer::Initialize</span>()</code> method.</p>
+<p>The viewer library calls this callback function when loading files to preview.<br />The callback function has the purpose of loading the data in the passed path into memory and passing the data to the viewer library as return values.</p>
+<h3 id="Anchor_110921667_h3_5">void UnloadFunction(void* pUnloadData)</h3>
+<p>Set this callback function in the <code><span class="ApiLink_nn__ui2d__viewer__Viewer__Initialize">nn::ui2d::viewer::Viewer::Initialize</span>()</code> method.</p>
+<p>The viewer library terminates preview and calls this callback function when freeing layout data that is no longer needed.<br />Use an appropriate method of freeing memory, because the parameter has a pointer that is applied when loaded into memory with <code>LoadFunction</code>.</p>
+<p>Because this callback function can still be used when layout data stops being referenced, it also resets processing of the descriptor slot for textures in LayoutViewer.</p>
+<h3 id="Anchor_110921667_h3_6">void PreReloadLayoutDataCallback()</h3>
+<p>This callback function is called immediately before loading the layout data to be previewed.<br /> You can set the callback function with the <code><span class="ApiLink_nn__ui2d__viewer__Viewer__SetPreReloadLayoutDataCallback">nn::ui2d::viewer::Viewer::SetPreReloadLayoutDataCallback</span></code> method.</p>
+<p>The anticipated use of this function is to perform termination processing of each type of buffer used by the layout data that was just previewed.<br />In LayoutViewer, it terminates processing of constant buffers, vertex buffers, the memory pool, and the graphics resources used by <code>ui2d</code> and <code>font</code>, and frees all resources. </p>
+<h3 id="Anchor_110921667_h3_7">void PostReloadLayoutDataCallback(DrawInfo&amp; drawInfo, BuildResultInformation&amp; buildResultInformation)</h3>
+<p>This callback function loads the layout data to be previewed in memory and is called after performing initialization processing of the layout data.<br /> You can set the callback function with the <code><span class="ApiLink_nn__ui2d__viewer__Viewer__SetPostReloadLayoutDataCallback">nn::ui2d::viewer::Viewer::SetPostReloadLayoutDataCallback</span></code> method.</p>
+<p>This callback function mainly has the purpose of performing initialization processing of each type of buffer and the graphics resources needed by the layout data in rendering.<br /><code><span class="ApiLink_nn__ui2d__BuildResultInformation">nn::ui2d::BuildResultInformation</span></code> is passed as an argument of the callback function, so create the necessary constant buffers and vertex buffers according to this information and set them in <code><em>drawInfo</em></code>.</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__ui2d__viewer__Viewer__Initialize', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1viewer_1_1_viewer.html#a67a716f68ca52549a655c7295c2b36ad' )
+SetUrl( 'ApiLink_nn__ui2d__viewer__Viewer__SetPreReloadLayoutDataCallback', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1viewer_1_1_viewer.html#a22982d15669fba1f0700b4a127eeb571' )
+SetUrl( 'ApiLink_nn__ui2d__viewer__Viewer__SetPostReloadLayoutDataCallback', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1viewer_1_1_viewer.html#a197a3fb7517a67836434e9b188b33896' )
+SetUrl( 'ApiLink_nn__ui2d__BuildResultInformation', '../../../Api/HtmlNX/structnn_1_1ui2d_1_1_build_result_information.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

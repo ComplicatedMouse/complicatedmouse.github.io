@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>VI on Windows | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- VI on Windows -->
+<div class="pagetitle" id="PageId_123995507">VI on Windows</div>
+<div class="text_separate">
+<h1 id="Anchor_123995507_h1_1">Overview</h1>
+<p>A major goal of the VI library is to minimize the differences in using display functionality when targeting Nintendo platforms. &nbsp;When there are any differences, they will be detailed here.</p>
+<p>The VI library may be used for any Generic and NX specifications. &nbsp;Both Windows and Horizon operating systems are fully supported.</p>
+<p>For any Windows implementation of the VI library, please note the following behaviors:</p>
+<ul>
+  <li>Certain functions will always succeed, but they will not appear to have any effect. &nbsp;Only the preconditions are verified in these cases. &nbsp;The following functions are not fully supported on Windows:<ul><li><span class="ApiLink_void_nn__vi__SetLayerCrop(Layer_*pLayer|_int_x|_int_y|_int_width|_int_height)_NN_NOEXCEPT">nn::vi::SetLayerCrop()</span></li><li><span class="ApiLink_nn__Result_nn__vi__GetLatestFrameNumber(std__uint64_t_*pOutFrameNumber|_const_Layer_*pLayer)_NN_NOEXCEPT">nn::vi::GetLatestFrameNumber()</span></li><li><span class="ApiLink_int_nn__vi__ListFrameHistory(FrameInfo_*pOutFrames|_int_frameCountMax|_const_Layer_*pLayer)_NN_NOEXCEPT">nn::vi::ListFrameHistory()</span></li></ul></li>
+  <li>
+    <span class="ApiLink_nn__Result_nn__vi__GetDisplayVsyncEvent(nn__os__SystemEventType_*pOutEvent|_Display_*pDisplay)_NN_NOEXCEPT">nn::vi::GetDisplayVsyncEvent()</span>
+    <ul>
+      <li>While NX only supports certain resolutions with a refresh rate of 60 Hz, the vsync event on Windows will signal according to the monitor's refresh rate. &nbsp;It will not emulate a 60 Hz signal.</li>
+      <li>Only the primary monitor's vsync is used for event signalling. &nbsp;The signal time will not be adjusted if the window is moved to a secondary monitor. &nbsp;If the primary and secondary monitors have different refresh rates, then the vsync signal and texture acquire time may be out of sync.</li>
+    </ul>
+  </li>
+</ul>
+<h2 id="Anchor_123995507_h2_1">Generic on Windows</h2>
+<ul>
+  <li>
+    <span class="ApiLink_Result_nn__vi__CreateLayer(Layer_**pOutLayer|_Display_*pDisplay|_int_width|_int_height)_NN_NOEXCEPT">nn::vi::CreateLayer()</span>
+    <ul>
+      <li>The width and height parameters are used to determine the window size.</li>
+    </ul>
+  </li>
+  <li>
+    <span class="ApiLink_nn__vi__LayerCreationSettings">nn::vi::LayerCreationSettings</span> for <span class="ApiLink_Result_nn__vi__CreateLayer(Layer_**pOutLayer|_Display_*pDisplay|_const_LayerCreationSettings_*pSettings)_NN_NOEXCEPT">nn::vi::CreateLayer()</span><ul><li>The width and height settings are used to determine the window size when&nbsp;<span class="ApiLink_void_nn__vi__LayerCreationSettings__SetFullscreen(bool_isFullscreen)_NN_NOEXCEPT">nn::vi::LayerCreationSettings::SetFullscreen()</span> is set to false.&nbsp; (This setting is false by default.)</li><li>If <span class="ApiLink_void_nn__vi__LayerCreationSettings__SetFullscreen(bool_isFullscreen)_NN_NOEXCEPT">nn::vi::LayerCreationSettings::SetFullscreen()</span> is set to true, the window is guaranteed to be borderless fullscreen on some monitor.&nbsp; The width and height settings are used to find an exact match for a monitor resolution.&nbsp; If such a monitor with that exact resolution does not exist, the window will be borderless fullscreen on the main display.</li><li>If <span class="ApiLink_void_nn__vi__LayerCreationSettings__SetVisibility(bool_isVisible)_NN_NOEXCEPT">nn::vi::LayerCreationSettings::SetVisibility()</span> is set to false, the window will be created, but not appear on any display.</li></ul></li>
+</ul>
+<h2 id="Anchor_123995507_h2_2">NX on Windows</h2>
+<ul>
+  <li>
+    <span class="ApiLink_Result_nn__vi__CreateLayer(Layer_**pOutLayer|_Display_*pDisplay|_int_width|_int_height)_NN_NOEXCEPT">nn::vi::CreateLayer()</span>
+    <ul>
+      <li>The width and height parameters are ignored.&nbsp; The client area (i.e. the portion of the window where application content is displayed) will always be 1280x720p.</li>
+    </ul>
+  </li>
+  <li>
+    <span class="ApiLink_nn__vi__LayerCreationSettings">nn::vi::LayerCreationSettings</span> for&nbsp;<span class="ApiLink_Result_nn__vi__CreateLayer(Layer_**pOutLayer|_Display_*pDisplay|_const_LayerCreationSettings_*pSettings)_NN_NOEXCEPT">nn::vi::CreateLayer()</span><br /><ul><li>The width and height settings are ignored.</li><li>The&nbsp;<span class="ApiLink_void_nn__vi__LayerCreationSettings__SetFullscreen(bool_isFullscreen)_NN_NOEXCEPT">nn::vi::LayerCreationSettings::SetFullscreen()</span>&nbsp;option is ignored and will have no effect.</li><li>The <span class="ApiLink_void_nn__vi__LayerCreationSettings__SetVisibility(bool_isVisible)_NN_NOEXCEPT">nn::vi::LayerCreationSettings::SetVisibility()</span> option is ignored and will have no effect.</li></ul></li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__vi__SetLayerCrop(Layer_*pLayer|_int_x|_int_y|_int_width|_int_height)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1vi.html#a734a8d046c2f480c2883da0c3b387c36' )
+SetUrl( 'ApiLink_nn__Result_nn__vi__GetLatestFrameNumber(std__uint64_t_*pOutFrameNumber|_const_Layer_*pLayer)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1vi.html#aa251267bb21d425b2d097d811ffaa6e7' )
+SetUrl( 'ApiLink_int_nn__vi__ListFrameHistory(FrameInfo_*pOutFrames|_int_frameCountMax|_const_Layer_*pLayer)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1vi.html#a8006a2df0e49f371d5b53a762b006b3a' )
+SetUrl( 'ApiLink_nn__Result_nn__vi__GetDisplayVsyncEvent(nn__os__SystemEventType_*pOutEvent|_Display_*pDisplay)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1vi.html#a596d171dedb65273f7aab87bc74012c6' )
+SetUrl( 'ApiLink_Result_nn__vi__CreateLayer(Layer_**pOutLayer|_Display_*pDisplay|_int_width|_int_height)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1vi.html#ac22ede64493e91a721bc942dfa164b77' )
+SetUrl( 'ApiLink_nn__vi__LayerCreationSettings', '../../../Api/HtmlNX/classnn_1_1vi_1_1_layer_creation_settings.html' )
+SetUrl( 'ApiLink_Result_nn__vi__CreateLayer(Layer_**pOutLayer|_Display_*pDisplay|_const_LayerCreationSettings_*pSettings)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1vi.html#a07f547a727bb3c11b27fb4f6d3028a46' )
+SetUrl( 'ApiLink_void_nn__vi__LayerCreationSettings__SetFullscreen(bool_isFullscreen)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1vi_1_1_layer_creation_settings.html#ae33454efc7282ac650b61d67bd3ed4d7' )
+SetUrl( 'ApiLink_void_nn__vi__LayerCreationSettings__SetVisibility(bool_isVisible)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1vi_1_1_layer_creation_settings.html#a32ea95df431b9d10ec0cd6d039a97191' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

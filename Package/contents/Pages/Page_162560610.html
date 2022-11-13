@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Description of Mii Helper Library Features | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Description of Mii Helper Library Features -->
+<div class="pagetitle" id="PageId_162560610">Description of Mii Helper Library Features</div>
+<div class="text_separate">
+<h1 id="Anchor_162560610_h1_1">Features</h1>
+<p>This section describes the features provided by the Mii Helper Library.</p>
+<h2 id="Anchor_162560610_h2_1">Features</h2>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Function</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>AssignCharModel()</td>
+      <td>The function that assigns a Mii face model to <span class="ApiLink_nn__g3d__ResFile"> nn::g3d::ResFile</span>.</td>
+    </tr>
+    <tr>
+      <td>MaterialCallback()</td>
+      <td>
+        <p>A callback function that is called by <code>AssignCharModel()</code>.</p>
+        <p>Set the values that the user needs to configure for <span class="ApiLink_nn__g3d__ResMaterial">nn::g3d::ResMaterial</span> using this callback function.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>DrawParamCallback()</td>
+      <td>
+        <p>A callback function that is called by <code>AssignCharModel()</code>.</p>
+        <p>Sets the <code><span class="ApiLink_nn__mii__DrawParam">nn::mii::DrawParam</span></code> corresponding to the shape index specified in <code>DrawParamCallback()</code> to the <code>DrawParamCallbackOutput</code> output variable of this callback function.</p>
+        <p>Sets <code>DrawParamCallbackOutput</code>, the output variable for this callback function.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>DrawParamCallbackOutput</td>
+      <td>The variable that stores the <code>DrawParamCallback()</code> processing results.</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_162560610_h3_1">AssignCharModel()</h3>
+<p>Assigns the data in <code><span class="ApiLink_nn__mii__CharModel">nn::mii::CharModel</span></code> to <span class="ApiLink_nn__g3d__ResFile">nn::g3d::ResFile</span>. Calls <code>MaterialCallback()</code> and <code>DrawParamCallback()</code> internally. It has the following behavior due to the <code>DrawParamCallback()</code> output.</p>
+<ul>
+  <li>When <code>DrawParamCallbackOutput::isMiiFace</code> == <code>false</code><br />The library will not perform anything. The intermediate file retains the written value.</li>
+  <li>When <code>DrawParamCallbackOutput::isMiiFace</code> == <code>true</code><br /><ul><li><p>When <code>DrawParamCallbackOutput::pDrawParam</code> == <code>nullptr</code><br />Make the visibility of the bones linked to the shapes invisible.</p><div class="info_new"><div class="info_new_left">Info</div><div class="info_new_right"><p>Take care because when different shapes reference a common bone, the judgment of <code>DrawParamCallbackOutput::pDrawParam</code> for the last shape to reference that bone determines the bone visibility settings. It is necessary to re-specify appropriate bone visibility settings in the runtime.</p></div></div></li><li><p>When <code>DrawParamCallbackOutput::pDrawParam</code> != <code>nullptr</code><br />Get information for the vertex buffer, etc. from <code><span class="ApiLink_nn__mii__DrawParam">nn::mii::DrawParam</span></code> and update the related value.</p><div class="info_new"><div class="info_new_left">Info</div><div class="info_new_right"><p>The Mii Helper Library will not update the <code>ResBoneData::flag</code> value and leave the value written in the intermediate file. The user sets an appropriate visibility in the runtime.</p></div></div></li></ul></li>
+</ul>
+<h3 id="Anchor_162560610_h3_2">MaterialCallback()</h3>
+<p>Set the parameters under <span class="ApiLink_nn__g3d__ResMaterial">nn::g3d::ResMaterial</span> in this callback function. Because the library does not know which Mii shader parameter to assign to which shader parameter, it waits for the user to set the value through this callback function.</p>
+<h3 id="Anchor_162560610_h3_3">DrawParamCallback()</h3>
+<p>This callback function receives <span class="ApiLink_nn__g3d__ResModel">nn::g3d::ResModel</span>, shape index, and <code><span class="ApiLink_nn__mii__CharModel">nn::mii::CharModel</span></code> as input. It outputs the processing results to <span class="ApiLink_DrawParamCallbackOutput">nn::g3d::mii::DrawParamCallbackOutput</span>. This callback function is expected to output the corresponding <code><span class="ApiLink_nn__mii__DrawParam">nn::mii::DrawParam</span></code> based on the shape name and the bone name corresponding to the shape. Reference: <span class="ApiLink_DrawParamCallbackOutput">nn::g3d::mii::DrawParamCallbackOutput</span></p>
+<h3 id="Anchor_162560610_h3_4">DrawParamCallbackOutput</h3>
+<p>
+  <code>DrawParamCallback()</code> output variable. The following table shows the members and their roles.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>DrawParamCallbackOutput Member Variables</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <code>bool isMiiFace</code>
+      </td>
+      <td>
+        <p>The flag for whether it is a part used for Mii.</p>
+        <p>Set to <code>false</code> when the shape index input to <code>DrawParamCallback()</code> is not for use with Mii.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>const <span class="ApiLink_nn__mii__DrawParam">nn::mii::DrawParam</span>* pDrawParam</code>
+      </td>
+      <td>
+        <p>Outputs the <code>DrawParam</code> corresponding to the shape.</p>
+        <p>Sets <code>nullptr</code> when a corresponding <code>DrawParam</code> does not exist.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>const <span class="ApiLink_nn__mii__BoundingBox">nn::mii::BoundingBox</span>* pBoundingBox</code>
+      </td>
+      <td>The Mii bounding box.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <ul>
+      <li>The <code><em>isMiiFace</em></code> = <code>true</code>, <code><em>pDrawParam</em></code>  = <code>nullptr</code> state exists because some parts may not exist based on the Mii model.</li>
+      <li>Under these conditions, the library sets the material visibility to <code>false</code>. That is, the visibility of the material can be used to determine whether parts exist.</li>
+      <li>All shapes have a bounding box calculated from <code><em>pBoundingBox</em></code>. This is also true for submeshes because bounding boxes cannot be calculated for individual submeshes.</li>
+    </ul>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__ResFile', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_file.html' )
+SetUrl( 'ApiLink_nn__g3d__ResMaterial', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_material.html' )
+SetUrl( 'ApiLink_nn__mii__DrawParam', '../../../Api/HtmlNX/classnn_1_1mii_1_1_draw_param.html' )
+SetUrl( 'ApiLink_nn__mii__CharModel', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model.html' )
+SetUrl( 'ApiLink_nn__g3d__ResModel', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_model.html' )
+SetUrl( 'ApiLink_DrawParamCallbackOutput', '../../../Api/HtmlNX/struct_draw_param_callback_output.html' )
+SetUrl( 'ApiLink_nn__mii__BoundingBox', '../../../Api/HtmlNX/structnn_1_1mii_1_1_bounding_box.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Save Data | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Save Data -->
+<div class="pagetitle" id="PageId_107320205">Save Data</div>
+<div class="text_separate">
+<div class="platform_nx">
+  <p>For more information about NX application save data, see <a href="../Pages/Page_227085130.html">Save Data</a> and <a href="../Pages/Page_107782148.html">Save Data (NX Add-On)</a>.</p>
+</div>
+<h1 id="Anchor_107320205_h1_1">Feature Overview</h1>
+<p>The save data feature provides features to permanently save the application's save data.</p>
+<p>Save data enables the application to have a predefined capacity in metadata, the application to freely create a file or directory within save data, and data to be read and written. </p>
+<p>Changes to save data are not finalized until the application explicitly commits and is successful. If the application is stopped, the device's power is turned off, or another suspension event occurs before changes are committed, the save data content will safely revert to the content at the time the previous changes were successfully committed. This ensures that the data is not corrupted even if the power is turned off or the application is otherwise ended during writing or committing.</p>
+<h1 id="Anchor_107320205_h1_2">Save Data Types and Mounting</h1>
+<p>This section describes the types of save data that can be used by Windows applications and how that save data is mounted.</p>
+<ul>
+  <li>Save Data for Debugging<ul><li>One set of this kind of save data can be created for each application. Mount it using the <code><span class="ApiLink_nn__fs__MountSaveDataForDebug">nn::fs::MountSaveDataForDebug</span>()</code> function. For more information, see the <span class="ApiLink_PageSampleFsSaveDataForDebug">sample program</span>.<br />This save data can be used only for debugging purposes.</li></ul></li>
+</ul>
+<h1 id="Anchor_107320205_h1_3">Creating Save Data</h1>
+<p>In the Windows environment, a set of save data is created automatically the first time save data is mounted.</p>
+<p>The timing of creating this save data is subject to change.</p>
+<h1 id="Anchor_107320205_h1_4">Save Data File Operations</h1>
+<p>As with other file systems, you can perform file operations after mounting through the <code><span class="ApiLink_nn__fs">nn::fs</span></code> namespace API.</p>
+<h1 id="Anchor_107320205_h1_5">Committing Save Data</h1>
+<p>To ensure that changes to save data are locked in, you must commit using <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code>.</p>
+<p>When you unmount without calling <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code>, or when you halt the program, you revert to the last time save data was successfully committed.<br />In the case of a program halt when <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code> is running, save data content either becomes content at the time of the previous successful commit or content that fully includes the updates. The content will not be corrupted or invalid.</p>
+<p>When committing save data, all files within save data must be closed.</p>
+<p>For versions of NX Add-On earlier than 5.1.0, use <code><span class="ApiLink_nn__fs__CommitSaveData">nn::fs::CommitSaveData</span>()</code> instead of <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code>.</p>
+<h1 id="Anchor_107320205_h1_6">Deleting Save Data</h1>
+<p>Do not directly delete the directories where save data is located (<code>bis/user/save</code> and <code>bis/system/save</code>, which are described later).</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>An official deletion method will be provided later.</p>
+  </div>
+</div>
+<h1 id="Anchor_107320205_h1_7">Save Data Limitations</h1>
+<h2 id="Anchor_107320205_h2_1">Size Limitations</h2>
+<p>The save data size is specified in advance by the application's metadata, and there are limitations on the total size of the files and directories that can be internally created.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Currently, as a provisional specification, the save data size is not restricted in the Windows environment.<br />When it becomes necessary to specify the save data size in the metadata, we plan to add size limitation features.</p>
+  </div>
+</div>
+<h2 id="Anchor_107320205_h2_2">File and Directory Name Limitations</h2>
+<p>The maximum length of file and directory names that can be placed in save data is 64 + 1 bytes, including the terminating null character.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Currently, in the Windows environment, file and directory names longer than 64 + 1 bytes can be created as a provisional measure, but we plan to limit the length in the future.</p>
+  </div>
+</div>
+<h1 id="Anchor_107320205_h1_8">
+  <span style="color: rgb(117,117,117);">Save Data Location</span>
+</h1>
+<p>In the Windows environment, save data is stored by default in the same directory as the application's executable file, as in the following example.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>＜Full path for the exe file＞/bis/user/save/0000000000000001/0/</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The location and internal directory structure are subject to change.</p>
+  </div>
+</div>
+<h2 id="Anchor_107320205_h2_3">Specifying Placement Using nn::fs::SetSaveDataRootPath()</h2>
+<p>You can specify where to place the save data by calling the <code><span class="ApiLink_nn__fs__SetSaveDataRootPath">nn::fs::SetSaveDataRootPath</span>()</code> function before you mount it. The save data is placed in a path like the following one.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>＜Path on the host PC as specified by the nn::fs::SetSaveDataRootPath() function＞/0000000000000001/0/</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_107320205_h2_4">Specifying Placement Using Target Environment Variables</h2>
+<p>The directory placement location equivalent to the <code>bis/user/save</code> directory is changed with the preceding <code><span class="ApiLink_nn__fs__SetSaveDataRootPath">nn::fs::SetSaveDataRootPath</span>()</code> function. However, the <a href="../Pages/Page_124013919.html">target environment variables</a> are used to change the placement location of the directories equivalent to the <code>bis/system</code> and <code>bis/user</code> parent directories.</p>
+<p>The procedure is described as follows.</p>
+<ol>
+  <li>
+    <p>Use <code>SDK_FS_WIN_BIS_SYSTEM_ROOT_PATH</code> and <code>SDK_FS_WIN_BIS_USER_ROOT_PATH</code> to specify the new paths for <code>bis/system</code> and <code>bis/user</code>, respectively. This will not operate as expected unless <code>SDK_FS_WIN_BIS_SYSTEM_ROOT_PATH</code> and <code>SDK_FS_WIN_BIS_USER_ROOT_PATH</code> are each set to a different location.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot;? &gt;
+<span class="nt">&lt;TargetEnvironmentVariables&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;SystemVariables&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Variable</span> <span class="na">Name=</span><span class="s">&quot;SDK_FS_WIN_BIS_SYSTEM_ROOT_PATH&quot;</span> <span class="na">ValueType=</span><span class="s">&quot;string&quot;</span><span class="nt">&gt;</span>D:/project/app0/data/system<span class="nt">&lt;/Variable&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Variable</span> <span class="na">Name=</span><span class="s">&quot;SDK_FS_WIN_BIS_USER_ROOT_PATH&quot;</span> <span class="na">ValueType=</span><span class="s">&quot;string&quot;</span><span class="nt">&gt;</span>D:/project/app0/data/user<span class="nt">&lt;/Variable&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;/SystemVariables&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;UserVariables</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/TargetEnvironmentVariables&gt;</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Runs the application in a state where the target environment variable definition file, described in step 1, can be referenced. For more information, see the Specifying the Target Environment Variables Definitions File and Running the Application section in <a href="../Pages/Page_124013919.html">Target Environment Variables</a>.</li>
+</ol>
+<h2 id="Anchor_107320205_h2_5">Accessing From Tools, Editors, and Filer Managers</h2>
+<p>On the PC, you can directly access and edit files in the <code>bis/user/save</code> directory by using various tools, editors, file managers, and so on. However, note the following issues.</p>
+<ul>
+  <li>To run the application, you must not open any of the files and directories inside the <code>save</code> directory using any tool, editor, or similar application.</li>
+  <li>When editing, edit the files in the <code>/.../0000000000000001/0/</code> directory.<ul><li>The same group of files exists in the <code>/.../0000000000000001/1/</code> directory, but these files are automatically synchronized with the content of <code>/.../0000000000000001/0/</code>. </li></ul></li>
+  <li>You can delete and backup save data by deleting, moving, or copying the entire <code>bis/user/save</code> directory. However, data consistency will be lost if you only move or copy the <code>bis/user/save</code> directory. This is because information about the existence of application save data is not stored in the <code>bis/user/save</code> directory. If you delete, move, or copy the <code>bis/usr/save</code> directory, make sure that you perform the same operation in the <code>bis/user/save</code> directory.<br /><br /></li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__MountSaveDataForDebug', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a767e38eb403bd2ebb4374c5214dc0e95' )
+SetUrl( 'ApiLink_PageSampleFsSaveDataForDebug', '../../../Api/HtmlNX/_page_sample_fs_save_data_for_debug.html' )
+SetUrl( 'ApiLink_nn__fs', '../../../Api/HtmlNX/namespacenn_1_1fs.html' )
+SetUrl( 'ApiLink_nn__fs__Commit', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac90e600c3fc51adb6823a4ef900fad3a' )
+SetUrl( 'ApiLink_nn__fs__CommitSaveData', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac2f25cffd056f24d6facfda13f977fa6' )
+SetUrl( 'ApiLink_nn__fs__SetSaveDataRootPath', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a90c27aaf70aec66968715663cd8c5415' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,455 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Building and Running a Patch | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Building and Running a Patch -->
+<div class="pagetitle" id="PageId_185135488">Building and Running a Patch</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_185135488_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_185135488_h1_2">Creating the Revised Application</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_185135488_h2_1">Revising NMETA Files</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_185135488_h1_3">Creating the Patch</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_185135488_h2_2">makepatch Command</a>
+      </li>
+      <li>
+        <a href="#Anchor_185135488_h2_3">Usage Examples</a>
+      </li>
+      <li>
+        <a href="#Anchor_185135488_h2_4">Capacity and Operating Frequency Settings for NX Cards With On-Card Patches</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_185135488_h1_4">Preparing the Initial Application</a>
+    </li>
+    <li>
+      <a href="#Anchor_185135488_h1_5">Preparing the Patch</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_185135488_h2_5">Installation</a>
+      </li>
+      <li>
+        <a href="#Anchor_185135488_h2_6">On-Card Patches</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_185135488_h1_6">Running the Patched Application</a>
+    </li>
+    <li>
+      <a href="#Anchor_185135488_h1_7">Removing Patches</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_185135488_h1_1">Overview</h1>
+<p>To build and run a patch, the following steps are required.</p>
+<ol>
+  <li>Revise the data includes in the application such as programs, resource data, and NMETA files, and create a revised version of the application.</li>
+  <li>Specify the initial application, the revised application, and the previous patch if one exists, and then create the patch.</li>
+  <li>Write the initial application to a game card, or install it in NAND memory or an SD card.</li>
+  <li>Install the patch in NAND memory or an SD card.</li>
+  <li>Run from DevMenu or DevMenuCommand.</li>
+</ol>
+<p>For more information about these steps, see the following procedures.</p>
+<h1 id="Anchor_185135488_h1_2">Creating the Revised Application</h1>
+<p>Revise the program and resource data just like you did when you created the initial application, and create a revised version of the NSP file.</p>
+<p>Depending on how the resource data is revised, the size of the patch may increase. For more information, see <a href="../Pages/Page_185135554.html">Optimization Information</a>.</p>
+<h2 id="Anchor_185135488_h2_1">Revising NMETA Files</h2>
+<p>When creating the revised NSP for the patch, you must edit the NMETA file release version and DisplayVersion. For more information about each setting, see <a href="../Pages/Page_166503043.html">Writing the NMETA File</a>.</p>
+<h3 id="Anchor_185135488_h3_1">Release Version</h3>
+<p>Set a value higher than the value of the initial application. Any value may be set during development, but when you create the final patch, you must specify the value issued from the Nintendo Developer Portal, as described in <a href="../Pages/Page_166503043.html">Writing the NMETA File</a>.</p>
+<h3 id="Anchor_185135488_h3_2">DisplayVersion</h3>
+<p>Set a different value than the value of the initial application. If you set the <strong>DisplayVersion</strong>, the application version shown in DevMenu and DevMenuCommand will change to the revised version. The same version will also be displayed if a patch created with this revised application is installed. We recommend changing this value ahead of time to make it easier to check whether the patch is installed.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Also save the revised application that was used to create the submitted patch as a patch. The revised application is required when revising the program using AuthoringEditor or another tool.</p>
+  </div>
+</div>
+<h1 id="Anchor_185135488_h1_3">Creating the Patch</h1>
+<p>Create the patch using the AuthoringTool based on the revised application and initial application. For more information about the required environment for running AuthoringTool, see <a href="../Pages/Page_107320233.html">AuthoringTool</a>.</p>
+<p>Patches can also be created by using VSI. For more information about building in VSI, see <a href="../Pages/Page_193046193.html">Creating Patches</a>. Note, however, all that you can perform on VSI is to build the patch. To install the patch and run the patched application, follow the instructions described in this document.</p>
+<p>The following section describes how to create a patch using AuthoringTool.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>
+      <span style="color: rgb(23,43,77);">To create a patch, all of the following conditions must be met. An error occurs if these conditions are not met.</span>
+    </p>
+    <p>
+      <u>
+        <span style="color: rgb(23,43,77);">Creating the Revised Application</span>
+      </u>
+    </p>
+    <ul>
+      <li>
+        <span style="color: rgb(23,43,77);">The SDK version used when making the revised application is the same version or a later version than the one used for the previous application (AuthoringToolKit 11.2.0 or later).</span>
+        <ul>
+          <li>
+            <span style="color: rgb(23,43,77);">The previous application corresponds to the initial application when making the first patch, or the previous patch when creating subsequent patches.</span>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <span style="color: rgb(23,43,77);">The major versions of the SDK and AuthoringTool used when making the revised application match (the same as when building a standard application).</span>
+        <br />
+      </li>
+    </ul>
+    <p>
+      <u>
+        <span style="color: rgb(23,43,77);">Creating the Patch</span>
+      </u>
+    </p>
+    <ul>
+      <li>
+        <span style="color: rgb(23,43,77);">AuthoringTool version X, used when making the revised application, and AuthoringTool version Y, used when making the patch, meet the following relevant conditions.</span>
+        <br />
+        <ul>
+          <li>
+            <span style="color: rgb(23,43,77);">Versions earlier than AuthoringToolKit 11.2.0:</span>
+            <ul>
+              <li>
+                <span style="color: rgb(23,43,77);">The major versions for X and Y match.</span>
+                <br />
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span style="color: rgb(23,43,77);">AuthoringToolKit 11.2.0 and later:</span>
+            <ul>
+              <li>
+                <span style="color: rgb(23,43,77);">The major versions for X and Y match.</span>
+              </li>
+              <li>
+                <span style="color: rgb(23,43,77);">Y is X or higher. (You cannot downgrade from a later minor version.)</span>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span style="color: rgb(23,43,77);">AuthoringToolKit 12.0.0 and later:</span>
+            <ul>
+              <li>
+                <span style="color: rgb(23,43,77);">For multi-program applications, supposing the AuthoringTool version used when making the included programs is Z, one or more programs meet the following conditions.</span>
+                <br />
+                <ul>
+                  <li>
+                    <span style="color: rgb(23,43,77);">The major versions for Z and Y match.</span>
+                  </li>
+                  <li>
+                    <span style="color: rgb(23,43,77);">Y is Z or later. (Must not have an earlier version than the minor version.)</span>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <div class="info_new">
+      <div class="info_new_left">Info</div>
+      <div class="info_new_right">
+        <p>If a multi-program application is made up of multiple programs with different major SDK versions, AuthoringTool 12.0.0 or later must be used.</p>
+      </div>
+    </div>
+    <div class="info_new">
+      <div class="info_new_left">Info</div>
+      <div class="info_new_right">
+        <p>There are restrictions when using AuthoringEditor to revise a patch.<br />For more information, see <a href="../Pages/Page_187698789.html"><span class="sv-ti-title-text">Creating an Application Image &gt; Tool Reference &gt; AuthoringEditor</span></a>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<h2 id="Anchor_185135488_h2_2">
+  <span style="color: rgb(117,117,117);">makepatch Command</span>
+</h2>
+<p>Use the <code>makepatch</code> command to create the patch.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&nbsp;$ AuthoringTool.exe makepatch --help
+makepatch: Create patch file from Nintendo Submission Packages.
+Usage: AuthoringTool.exe makepatch [-o &lt;outputPath&gt;] [--meta &lt;metaFilePath&gt;] [--minimum-matching-size &lt;Size KiB&gt;] [--cache-directory &lt;cacheDirPath&gt;] --desc &lt;descFilePath&gt; --original &lt;originalNspPath&gt; --current &lt;currentNspPath&gt; [--previous &lt;previousNspPath&gt;] [--error-unpublishable [--xml]]  [--do-application-compaction]
+
+Options:
+&nbsp;&nbsp;-o &lt;outputPath&gt;                      Output file or directory path. If the directory path is specified, use &lt;outputPath&gt;/output.nsp.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If omitted, output to ./output.nsp
+&nbsp;&nbsp;--meta &lt;metaFilePath&gt;                Location of the .nmeta file.
+&nbsp;&nbsp;--minimum-matching-size &lt;Size KiB&gt;   Minimum matching size to refer original. If not specified, use 32KiB.
+&nbsp;&nbsp;--cache-directory &lt;cacheDirPath&gt;     Location of directory path to output matching cache.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;With specifying this option, making patch is accelarated if appropriate cache is generated.
+&nbsp;&nbsp;--desc &lt;descFilePath&gt;                .desc file path or directory path that contains .desc files.
+&nbsp;&nbsp;--original &lt;originalNspPath&gt;         Original .nsp file path.
+&nbsp;&nbsp;--current &lt;currentNspPath&gt;           Current .nsp file path.
+&nbsp;&nbsp;--previous &lt;previousNspPath&gt;         Previous .nsp file path.
+&nbsp;&nbsp;--error-unpublishable [--xml]        Throw an exception if the Nintendo Submission Package does not meet the conditions for publication.
+&nbsp;&nbsp;--do-application-compaction          Create a compacted application file.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_185135488_h3_3">Options</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>-o</th>
+      <td>The output path. If nothing is specified, <code>output.nsp</code> is output in the current directory.</td>
+    </tr>
+    <tr>
+      <th>--meta</th>
+      <td>Specifies the NMETA file of the patch. If this is not specified, the NMETA file is automatically generated from the revised application, so it usually does not need to be specified.</td>
+    </tr>
+    <tr>
+      <th>--minimum-matching-size</th>
+      <td>
+        <p>Specifies the size of data that must be matched continually to reference the data from the first version of the application. </p>
+        <p>For more information about this size, see <a href="../Pages/Page_185135554.html">Optimization Information</a> .</p>
+        <p>
+          <br />
+        </p>
+        <p>There is no need to specify this option as long as there is no effect on performance when loading a ROM while applying a patch.</p>
+        <p>Specify a large value when there is a performance hit when patching because the file content is fragmented for the application and patch.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>--cache-directory</th>
+      <td>
+        <p>This option is available for AuthoringToolKit 4.3 and later.</p>
+        <p>Cache data, available for the creation of patches after the first time, is saved in the specified directory.</p>
+        <p>Any appropriate cache data that exists in the specified directory is also used to accelerate patch creation.</p>
+        <p>
+          <br />
+        </p>
+        <p>We recommend always specifying this option, unless a unique bug prevents doing so. Specifying this option accelerates patch creation.</p>
+        <p>
+          <br />
+        </p>
+        <p>Any created cache data can also be deleted at any time, as long as the tool is not running.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>--desc</th>
+      <td>
+        <p>The <code>desc</code> file that was specified when the revised version of the application was created. This option is required. </p>
+        <p>For AuthoringToolKit 9.6.1, AuthoringToolKit 10.6.0, and AuthoringToolKit 11.1.0 and later, you can specify the directory for the DESC file.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>--original</th>
+      <td>The initial application. This option is required.</td>
+    </tr>
+    <tr>
+      <th>--current</th>
+      <td>The revision application. This option is required.</td>
+    </tr>
+    <tr>
+      <th>--previous</th>
+      <td>The previous patch.</td>
+    </tr>
+    <tr>
+      <th>--error-unpublishable</th>
+      <td>
+        <p>This option is available in AuthoringToolKit 8.0.0 and later.</p>
+        <p>An error occurs if NSP files do not satisfy the conditions for submission to Nintendo.</p>
+        <p>For more information about the conditions for submission, see the ROM Check Errors in the Uploading Master ROMs section of the Master ROM Submission Guidelines.</p>
+        <p>For more information, see <code>get-unpublishable-error</code> in <a href="../Pages/Page_107320233.html">AuthoringTool</a>.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>--xml</th>
+      <td>
+        <p>This option is available in AuthoringToolKit 8.0.0 and later.</p>
+        <p>The <code>--error-unpublishable</code> results are exported in an XML format.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>--do-application-compaction</th>
+      <td>
+        <p>This option is available in AuthoringToolKit 10.9.5 and later, AuthoringToolKit 11.4.4 and later, and AuthoringToolKit 12.3.0.</p>
+        <p>Performs application compaction. For more information, see <a href="../Pages/Page_1058413945.html">Application Compaction</a>.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_185135488_h2_3">Usage Examples</h2>
+<p>If there is no previous patch:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ AuthoringTool.exe makepatch -o patch-v1.nsp --cache-directory d:/patch-cache --desc $NINTENDO_SDK_ROOT/Resources/SpecFiles/Application.desc --original application-v0.nsp --current application-v1.nsp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If there is a previous patch:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ AuthoringTool.exe makepatch -o patch-v3.nsp --cache-directory d:/patch-cache --desc $NINTENDO_SDK_ROOT/Resources/SpecFiles/Application.desc --original application-v0.nsp --current application-v3.nsp --previous patch-v2.nsp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_185135488_h2_4">Capacity and Operating Frequency Settings for NX Cards With On-Card Patches</h2>
+<p>For AuthoringToolKit 1.2.0 and later, a size check is performed when the patch is created with the assumption that it will be an on-card patch. A warning message may be displayed when an error occurs.<br />The value set for the generated patch can be referenced by <code>cardspec.xml</code> in the NSP file in the same manner as for the application. For more information, see  <a href="../Pages/Page_177655843.html">NX Development Card</a>. </p>
+<h3 id="Anchor_185135488_h3_4">Basic Rules</h3>
+<p>In the NSP file of the patch that was generated, specify the NX card capacity and operating frequency set for the revised application as parameters for the NX card with an on-card patch.<br />However, if the capacity value for the revised application is set automatically and it is smaller than the NX card with an on-card patch, the capacity required for the NX card with an on-card patch will be set automatically in the patch NSP.</p>
+<p>The method for specifying the NX card capacity and operating frequency manually for the application is described in the <code>CardSpec</code> of the NMETA file. For more information, see  <a href="../Pages/Page_177655843.html">NX Development Card</a>. </p>
+<h3 id="Anchor_185135488_h3_5">Cases Where Warnings Appear</h3>
+<p>In each of these cases, the warning may be ignored if there are no plans to produce NX cards with on-card patches.</p>
+<ul>
+  <li>The operating frequency set for the initial application differs from the operating frequency that is <strong>set automatically</strong> for the revised application.<ul><li>&quot;Warning: Card clock rates differ between original nsp and current nsp.&quot; is displayed.</li><li><p>To avoid the warning, manually set the operating frequency for the revised application.</p><div class="tip"><div class="tip_left">Info</div><div class="tip_right"><p>If the NX card operating frequency was different for the initial application and revised application, this may affect the behavior of the application in the NX card with an on-card patch.<br />When considering production of NX cards with on-card patches using patches with these types of settings, submit the patch after thoroughly verifying the NX development card with an on-card patch.  </p></div></div></li></ul></li>
+  <li>The size set for the initial application differs from the capacity that is <strong>set automatically</strong> for the revised application.<ul><li>&quot;Warning: Card sizes differ between original nsp and current nsp.&quot; is displayed.</li><li>To avoid the warning, manually set the capacity for the revised application.</li></ul></li>
+  <li>The value that is <strong>set automatically</strong> as the revised application capacity is smaller than the required capacity for the NX card with an on-card patch, so it was reconfigured when creating the patch.<br /><ul><li>&quot;Warning: On-card patch requires larger card than that of revised application. Card size is automatically adjusted.&quot; is displayed.</li><li>To avoid the warning, manually set the capacity for the revised application.</li></ul></li>
+</ul>
+<h3 id="Anchor_185135488_h3_6">Cases Where Errors Appear</h3>
+<p>In each case, appropriate handling is required such as revising the value or optimizing the patch size if there are plans to produce NX cards with on-card patches.<br />If there are no plans to produce NX cards with on-card patches, avoid the error by setting the revised application operating frequency automatically.</p>
+<ul>
+  <li>The value (Y) that is <strong>set manually</strong> as the revised application capacity is smaller than the required capacity (X) for the NX card with an on-card patch.<ul><li>&quot;Error: This nsp requires CardSpec/Size = X, though it is set as Y.&quot;</li></ul></li>
+  <li>The revised application capacity was <strong>set manually</strong>, but the capacity of the NX card with an on-card patch was greater than the maximum capacity of the NX card.<ul><li>&quot;Error: CardSpec/Size in nmeta is invalid value. Please remove CardSpec/Size to set the value automatically.&quot; is displayed.</li><li>The size of the patch that was created is too large and cannot be used as an on-card patch.</li></ul></li>
+</ul>
+<h1 id="Anchor_185135488_h1_4">Preparing the Initial Application</h1>
+<p>To run the patched application, the initial application must be able to run from an NX development card, or from NAND memory or an SD card.</p>
+<p>For more information about these procedures, see <a href="../Pages/Page_107779320.html">Installing Applications on Development Hardware</a> and <a href="../Pages/Page_166051528.html">Writing to NX Development Cards</a>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Although you can run the initial application on a host PC by specifying the NSP file, the patch will not be applied. You must install the application in an NX development card, or in NAND memory or an SD card.</p>
+  </div>
+</div>
+<h1 id="Anchor_185135488_h1_5">Preparing the Patch</h1>
+<p>To use the patch, you must install it in NAND memory or an SD card, or write it to an NX development card as an on-card patch.</p>
+<p>Many users use applications installed to the NAND or SD card, so basically perform debugging using this format. Operation verification is required for on-card patches if there are plans to re-produce NX cards that already have the patch applied.</p>
+<p>Also, the latest NSP patch file always contains all of the required differential information, so none of the earlier patches are required when preparing a new patch. You do not need to install earlier patches on the system either.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If you install and check the patch using the previously-described procedure, that is sufficient for the debug environment and there is no need to download and test the patch. In any event, there are no plans to provide an environment for downloading and testing patches.</p>
+  </div>
+</div>
+<h2 id="Anchor_185135488_h2_5">Installation</h2>
+<p>You can install the patch and check it using the <code>patch</code> command of DevMenuCommand.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ RunOnTarget.exe $NINTENDO_SDK_ROOT/TargetTools/NX-NXFP2-a64/DevMenuCommand/Release/DevMenuCommand.nsp -- patch --help
+usage: DevMenuCommand patch install &lt;absolute_nsp_path&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DevMenuCommand patch list
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DevMenuCommand patch uninstall &lt;application_id&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ RunOnTarget.exe $NINTENDO_SDK_ROOT/TargetTools/NX-NXFP2-a64/DevMenuCommand/Release/DevMenuCommand.nsp -- patch install absolute_patch_path/patch-v1.nsp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The patch is installed to the system NAND by default. Specify <code>sdcard</code> using the <code>-s</code> option when installing the patch to an SD card. For more information about the <code>-s</code> option, see <a href="../Pages/Page_424117421.html">DevMenuCommand</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ RunOnTarget.exe $NINTENDO_SDK_ROOT/TargetTools/NX-NXFP2-a64/DevMenuCommand/Release/DevMenuCommand.nsp -- patch install absolute_patch_path/patch-v1.nsp -s sdcard</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_185135488_h2_6">On-Card Patches</h2>
+<p>To create NX development cards with on-card patches, use the <code>gamecard</code> command in DevMenuCommand. Prepare the initial application and target patch, and write the patch by executing the following command.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ RunOnTarget.exe $NINTENDO_SDK_ROOT/TargetTools/NX-NXFP2-a64/DevMenuCommand/Release/DevMenuCommand.nsp -- gamecard write absolute_app_path/app.nsp --on-card-patch absolute_patch_path/patch-v1.nsp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_185135488_h1_6">Running the Patched Application</h1>
+<p>After you prepare the initial application and the patch, you can run the application in the patched state by starting the application from DevMenu or DevMenuCommand, just like you would for an application on a card or installed in the system.</p>
+<p>The same is true for on-card patches. Starting the application from the card starts it in the state with the patch already applied.</p>
+<p>For more information, see <a href="../Pages/Page_107779320.html">Installing Applications on Development Hardware</a> and <a href="../Pages/Page_166051528.html">Writing to NX Development Cards</a>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>After starting the application in the patched state, make sure to restart the target before using VSI or RunOnTarget to run the host application again. Otherwise, the patch will only be partially applied to the host application.</p>
+  </div>
+</div>
+<h1 id="Anchor_185135488_h1_7">Removing Patches<a name="Anchor_185135488_patch_deletion"></a></h1>
+<p>To remove a patch, use the <code>patch uninstall</code> command of DevMenuCommand.</p>
+<p>You can also remove the patch using the <code>application uninstall</code> command, but it will also remove the initial application if it is installed. To remove just the patch, use the <code>patch uninstall</code> command.</p>
+<p>However, if the preceding command is used to just delete the patch, the unpatched application cannot be started due to the required version system. The required version must also be reset to enable starting the unpatched application. Use <code>application reset-required-version</code> in DevMenuCommand to reset it.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In HomeMenu, a message is displayed when the application gets caught on the required version check and cannot start, saying that the software must be updated and the patch will be downloaded. In the development environment, you cannot download a patch even if you press the download button, so either reset the required version or install the patch.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

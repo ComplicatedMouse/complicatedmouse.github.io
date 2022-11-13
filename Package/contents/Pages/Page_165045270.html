@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Distance Fields | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Distance Fields -->
+<div class="pagetitle" id="PageId_165045270">Distance Fields</div>
+<div class="text_separate">
+<h1 id="Anchor_165045270_h1_1">Distance Fields</h1>
+<p>This section describes distance fields.<br />By using distance field textures, you can enlarge textures while maintaining their distinct edges.</p>
+<p>The following image compares how standard textures and distance field textures that have the same resolution look in the viewer.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955557/163771908.gif" width="480" height="270" class="embedded-image" />
+  </span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span style="color: rgb(255,0,0);">A</span>
+      </th>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_83956195/163772192.png" width="32" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <strong>Standard Texture</strong>
+      </td>
+      <td>With standard textures, the portions of shape outlines that include slanted lines sometimes appear jagged.</td>
+    </tr>
+    <tr>
+      <th>
+        <span style="color: rgb(255,0,0);">B</span>
+      </th>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_83956195/163772191.png" width="32" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <strong>Distance Field Texture</strong>
+      </td>
+      <td>With distance field textures, shape outlines appear smooth.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_165045270_overview"></a>
+  <br />
+</p>
+<h2 id="Anchor_165045270_h2_1">Overview</h2>
+<p>By using distance fields together with bilinear interpolation you can display textures sharply even when the resolution is lower than the size of the screen.</p>
+<p>Bilinear interpolation is a method of interpolation that compensates for insufficient information when the pixels of a texture like the following one are enlarged on the game screen.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956195/178634258.png" class="embedded-image" />
+  </span>
+  <br />
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span style="color: rgb(255,0,0);">A</span>
+      </th>
+      <td>The texture pixels in their actual resolution.</td>
+    </tr>
+    <tr>
+      <th>
+        <span style="color: rgb(255,0,0);">B</span>
+      </th>
+      <td>The pixels of <strong><span style="color: rgb(255,0,0);">A</span></strong> as displayed enlarged on the game screen.</td>
+    </tr>
+    <tr>
+      <th>
+        <span style="color: rgb(255,0,0);">C</span>
+      </th>
+      <td>
+        <span style="color: rgb(255,0,0);">The view when the insufficient information of step </span>
+        <strong>B</strong> is supplemented using bilinear interpolation.<br />The brightness of <span style="color: rgb(153,204,255);">█</span> is 0.5 and the brightness of <span style="color: rgb(51,102,255);">█</span> is 1.0.</td>
+    </tr>
+  </tbody>
+</table>
+<p>By multiplying interpolation by a factor in the shader or elsewhere, you can boost the brightness of <span style="color: rgb(255,0,0);">█ </span> to 1.0, as follows.<span style="color: rgb(153,204,255);"><br />This operation sharpens the outline of the texture.</span></p>
+<p> <span class="embedded-file-wrapper "><img src="../Attachments/Attach_83956195/178634503.png" class="embedded-image" /></span></p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span style="color: rgb(255,0,0);">A</span>
+      </th>
+      <td>Enlarged pixels subjected to bilinear interpolation.</td>
+    </tr>
+    <tr>
+      <th>
+        <span style="color: rgb(255,0,0);">B</span>
+      </th>
+      <td>The pixel brightness is boosted to 1.0 by multiplying by a factor in the shader or elsewhere.</td>
+    </tr>
+  </tbody>
+</table>
+<p>By preparing a texture image like the following one that includes data to use when the texture is enlarged, and using this image together with bilinear interpolation, the texture will look better than its true resolution when enlarged.<br />This texture image is called a <em>distance field texture</em>. In addition, the technique itself is called <em>distance field</em>.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <td>
+        <span class="embedded-file-wrapper image-center-wrapper">
+          <img src="../Attachments/Attach_83956195/163772191.png" width="440" class="embedded-image image-center" />
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td>This image shows a distance field texture.<br />The Photoshop plug-in was applied to a high-resolution image.<br />For the texture being used, an adequate resolution would be about half of the resolution when the filter is applied.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_165045270_gradeup"></a>
+</p>
+<h2 id="Anchor_165045270_h2_2">Improving the Texture Quality</h2>
+<p>You can boost the quality of the texture by creating a distance field texture with higher resolution than the actual texture being used and then reducing the size of that texture.<br />The following image compares different image resolutions when the Distance Field Filter plug-in is used.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956195/178638710.png" width="600" class="embedded-image" />
+  </span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th style="text-align: center;">
+        <span style="color: rgb(255,0,0);">A</span>
+      </th>
+      <td>A texture as it appears on the screen when the Distance Filed Filter is applied to a texture with an image resolution of 128 x 128.<br />The jagged outline is readily apparent.</td>
+    </tr>
+    <tr>
+      <th style="text-align: center;">
+        <span style="color: rgb(255,0,0);">B</span>
+      </th>
+      <td>A texture as it appears on the screen when the Distance Filed Filter is applied to a texture with an image resolution of 256 x 256 and the texture is then reduced to 128 x 128.<br />The texture resolution is the same as <strong><span style="color: rgb(255,0,0);">A</span></strong> but the outline is higher in quality.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span> For more information, see the following pages.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_83956014.html">Distance Field Filter Plug-In</a>
+      </th>
+      <td>This plug-in is a Photoshop tool for creating distance field textures.<br />This plug-in converts a duotone black and white image to a distance field image (an image in which the shortest distance from a black/white boundary is expressed in grayscale).</td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_178632214.html">Creating Distance Field Textures</a>
+      </th>
+      <td>Describes how to create distance field textures using the <span class="sv-ti-done"><span class="sv-ti-title-text">Distance Field Filter plug-in</span></span>.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

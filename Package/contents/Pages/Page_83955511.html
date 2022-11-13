@@ -1,0 +1,293 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>DebugPad | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- DebugPad -->
+<div class="pagetitle" id="PageId_83955511">DebugPad</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955511_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955511_h1_2">Structure in the Windows Environment</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955511_h2_1">XInput-Compatible Controllers</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955511_h2_2">Other HID-Compliant Game Controllers</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_83955511_h1_3">How to Use</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_83955511_h1_1">Introduction</h1>
+<p>This API is provided for operating a Classic Controller attached to a development board as a debug controller.</p>
+<p>You can get the following input states.</p>
+<ul style="list-style-type: square;">
+  <li>14 digital buttons<ul style="list-style-type: square;"><li>Up, down, left, and right on the +Control Pad</li><li>A, B, X, Y, L, R, ZL, ZR, START, SELECT</li></ul></li>
+  <li>Left and right control sticks</li>
+</ul>
+<p>Updates of the input state are performed in intervals of 10 ms or greater based on the most recent sample values at that time.</p>
+<p>Input coordinates from control sticks are positioned inside a circle with a radius of <span class="ApiLink_nn__hid__AnalogStickMax">AnalogStickMax</span> (including the boundary) and with (0, 0) as the zero point. The positive axes face up and to the right.</p>
+<p>The resolution of the input from the control sticks is defined for each platform.</p>
+<p>
+  <br />
+</p>
+<p>When using the API, you must first call <span class="ApiLink_void_nn__hid__InitializeDebugPad()_NN_NOEXCEPT">InitializeDebugPad</span> to initialize it.</p>
+<p>The <span class="ApiLink_void_nn__hid__GetDebugPadState(DebugPadState_*pOutValue)_NN_NOEXCEPT">GetDebugPadState</span> and <span class="ApiLink_int_nn__hid__GetDebugPadStates(DebugPadState_outValues[]|_int_count)_NN_NOEXCEPT">GetDebugPadStates</span> functions are available for getting the input state.</p>
+<p>Use <span class="ApiLink_void_nn__hid__GetDebugPadState(DebugPadState_*pOutValue)_NN_NOEXCEPT">GetDebugPadState</span> to get the latest input state.</p>
+<p>Use <span class="ApiLink_int_nn__hid__GetDebugPadStates(DebugPadState_outValues[]|_int_count)_NN_NOEXCEPT">GetDebugPadStates()</span> to get multiple input states retroactively from the latest input state. A maximum of <span class="ApiLink_nn__hid__DebugPadStateCountMax">DebugPadStateCountMax</span> can be retroactively obtained.</p>
+<p>
+  <span style="color: rgb(23,43,77);">Getting input states does not change the internal state. For this reason, if you call the same function repeatedly, you get the same values each time unless the input state has been updated in the interim.</span>
+</p>
+<p>The input state contains a number (<span class="ApiLink_nn__hid__DebugPadState__samplingNumber">DebugPadState::samplingNumber</span>) that increments with each update. This number can be used to determine the obtained input state.</p>
+<p>
+  <br />
+</p>
+<p>The following input states never occur.</p>
+<ul>
+  <li>Simultaneous presses of up and down on the +Control Pad</li>
+  <li>Simultaneous presses of left and right on the +Control Pad</li>
+</ul>
+<p>
+  <br />
+</p>
+<p>It is always possible to use the API, regardless of whether a debug controller is connected.</p>
+<p>If sampling fails because a debug controller is not connected or for another similar reason, the input state at this time is deemed to have no input, as though no buttons are being pressed and the coordinates of all control sticks are (0, 0).</p>
+<p>Even if the debug controller is disconnected and reconnected after the call to <span class="ApiLink_void_nn__hid__InitializeDebugPad()_NN_NOEXCEPT">InitializeDebugPad()</span>, it can continue to be used without re-initialization.</p>
+<p>If you need to determine the connection status of the debug controller, reference the <span class="ApiLink_nn__hid__DebugPadState">IsConnected</span> flag of the <span class="ApiLink_nn__hid__DebugPadState__attributes">attributes</span> member variable of the <span class="ApiLink_nn__hid__DebugPadAttribute__IsConnected">DebugPadState</span> structure.</p>
+<h1 id="Anchor_83955511_h1_2">Structure in the Windows Environment</h1>
+<p>Input is assigned to generic controllers and keyboards using the <a href="../Pages/Page_89983199.html">HID Emulation Settings</a>.</p>
+<p>Calibration is assumed to have been done in advance in Windows.</p>
+<p>If a generic controller is being used, the input states are determined by the device specifications, as described in the following sections.</p>
+<h2 id="Anchor_83955511_h2_1">XInput-Compatible Controllers</h2>
+<p>Input states are updated based on the values obtained from the <code>XInputGetState()</code> function. The <code>xinput9_1_0.dll</code> implementation is used at that time for compatibility with Windows 7.</p>
+<p>The table shows the button correspondence.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">DebugPad</th>
+      <th style="text-align: center;">XInput-Compatible Controller</th>
+    </tr>
+    <tr>
+      <td>a Button</td>
+      <td>A Button</td>
+    </tr>
+    <tr>
+      <td>b Button</td>
+      <td>B Button</td>
+    </tr>
+    <tr>
+      <td>X Button</td>
+      <td>Y Button</td>
+    </tr>
+    <tr>
+      <td>Y Button</td>
+      <td>X Button</td>
+    </tr>
+    <tr>
+      <td>L Button</td>
+      <td>LB Button</td>
+    </tr>
+    <tr>
+      <td>R Button</td>
+      <td>RB Button</td>
+    </tr>
+    <tr>
+      <td>ZL Button</td>
+      <td>Left trigger</td>
+    </tr>
+    <tr>
+      <td>ZR Button</td>
+      <td>Right trigger</td>
+    </tr>
+    <tr>
+      <td>Start Button</td>
+      <td>START</td>
+    </tr>
+    <tr>
+      <td>SELECT</td>
+      <td>BACK Button</td>
+    </tr>
+    <tr>
+      <td>+Control Pad -Left</td>
+      <td>Directional pad - Left</td>
+    </tr>
+    <tr>
+      <td>+Control Pad - Up</td>
+      <td>Directional pad - Up</td>
+    </tr>
+    <tr>
+      <td>+Control Pad - Right</td>
+      <td>Directional pad - Right</td>
+    </tr>
+    <tr>
+      <td>+Control Pad - Down</td>
+      <td>Directional pad - Down</td>
+    </tr>
+  </tbody>
+</table>
+<p>The input from the control sticks is kept within a circle of radius <span class="ApiLink_nn__hid__AnalogStickMax">AnalogStickMax</span>, with a zero point of (0,0), and with dead zone processing in a cross shape based on <code>XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE</code> and <code>XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE</code>.</p>
+<h2 id="Anchor_83955511_h2_2">Other HID-Compliant Game Controllers</h2>
+<p>In NintendoSDK 6.2.0 and later, devices are detected using the <code>GetRawInputDeviceList()</code> function and input states are updated with the parse data obtained by functions defined in <code>hidpi.h</code>.</p>
+<p>For NintendoSDK 6.1.0 and earlier, the input state was updated based on values returned by the <code>joyGetPosEx()</code> and <code>joyGetDevCaps()</code> functions.</p>
+<p>Button and coordinate-axis mapping conforms with <a href="../Pages/Page_89983199.html">HID Emulation Settings</a>.</p>
+<p>The input from the control sticks is kept within the circle of radius <span class="ApiLink_nn__hid__AnalogStickMax">AnalogStickMax</span>, with a zero point of (0,0), and with dead zone processing performed as follows, assuming you are using ELECOM JC-W01UWH or ELECOM JC-W02UWH.</p>
+<ol>
+  <li>Suppress dead zone processing using the <code>JOY_USEDEADZONE</code> flag and get the coordinates.</li>
+  <li>For the right and left control sticks, keep the coordinates values within a regular octagon, taking the maximum coordinate values of 72 / 106 as the radius.</li>
+  <li>Eliminate the dead zones on the x-axis and the y-axis for the left and right control sticks as follows.<ol><li>If the coordinate value is equal to or less than a minimum value of 15 / 106, subtract this value from the coordinate value. Otherwise, treat the coordinate value as <code>0</code>.</li><li>If the coordinate value is greater than a maximum value of 15 / 106, subtract this value from the coordinate value. Otherwise, treat the coordinate value as <code>0</code>.<br /></li></ol></li>
+  <li>Keep the coordinate codomain obtained this way inside the inscribed circle and within the coordinate values.</li>
+</ol>
+<h1 id="Anchor_83955511_h1_3">How to Use</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid.h&gt;
+</span>
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="c1">// 1. Initialize DebugPad.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">InitializeDebugPad</span><span class="p">();</span>
+
+<span class="c1">// 2. Get the input state as necessary.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">DebugPadState</span> <span class="n">state</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetDebugPadState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">buttons</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::DebugPadButton::</span><span class="n">A</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Handle presses of the A Button
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+<span class="c1">// If you want to determine the connection status, reference the IsConnected flag.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">attributes</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::DebugPadAttribute::</span><span class="n">IsConnected</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processes if connected.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">else</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processes if disconnected.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+<span class="c1">// Use GetDebugPadStates() if you want to get past input states in addition to the current input state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">DebugPadState</span> <span class="n">states</span><span class="p">[</span><span class="nn">nn::hid::</span><span class="n">DebugPadStateCountMax</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// At least one input state can be obtained.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">stateCount</span> <span class="o">=</span> <span class="nn">nn::hid::</span><span class="n">GetDebugPadStates</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">states</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]));</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Compute the average coordinate values of the right control stick for past input states (maximum of 16 samples)
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">stateCount</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">x</span> <span class="o">+=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">analogStickR</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">y</span> <span class="o">+=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">analogStickR</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">x</span> <span class="o">/=</span> <span class="n">stateCount</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">y</span> <span class="o">/=</span> <span class="n">stateCount</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__AnalogStickMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#aecbcfd620f445d9e77b0883229761326' )
+SetUrl( 'ApiLink_void_nn__hid__InitializeDebugPad()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a52f910e37e347a944be54f6860a8ed11' )
+SetUrl( 'ApiLink_void_nn__hid__GetDebugPadState(DebugPadState_*pOutValue)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#ad6819dc9ed7d781a23a0a44cd2a7f86c' )
+SetUrl( 'ApiLink_int_nn__hid__GetDebugPadStates(DebugPadState_outValues[]|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a391451a9758037697be8138805a832fd' )
+SetUrl( 'ApiLink_nn__hid__DebugPadStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#ab138f06596ba10303a4c339610572764' )
+SetUrl( 'ApiLink_nn__hid__DebugPadState__samplingNumber', '../../../Api/HtmlNX/structnn_1_1hid_1_1_debug_pad_state.html#a1ae1b69699a16a6abca85a1494e0dcc5' )
+SetUrl( 'ApiLink_nn__hid__DebugPadState', '../../../Api/HtmlNX/structnn_1_1hid_1_1_debug_pad_state.html' )
+SetUrl( 'ApiLink_nn__hid__DebugPadState__attributes', '../../../Api/HtmlNX/structnn_1_1hid_1_1_debug_pad_state.html#adbe9f407932148bfbbaf3873045c5e3f' )
+SetUrl( 'ApiLink_nn__hid__DebugPadAttribute__IsConnected', '../../../Api/HtmlNX/structnn_1_1hid_1_1_debug_pad_attribute.html#a7dceb4eb84e06889572f9e31a11faf1f' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

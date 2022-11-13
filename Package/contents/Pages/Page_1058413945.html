@@ -1,0 +1,289 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Application Compaction | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Application Compaction -->
+<div class="pagetitle" id="PageId_1058413945">Application Compaction</div>
+<div class="text_separate">
+<p>
+  <br />
+</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_1058413945_h1_1">What Is Application Compaction?</a>
+    </li>
+    <li>
+      <a href="#Anchor_1058413945_h1_2">Benefits of Application Compaction</a>
+    </li>
+    <li>
+      <a href="#Anchor_1058413945_h1_3">Using Application Compaction</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_1058413945_h2_1">Developing and Debugging the Revised Application</a>
+      </li>
+      <li>
+        <a href="#Anchor_1058413945_h2_2">Creating a Compacted Application</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_1058413945_h3_1">Usage Examples</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_1058413945_h2_3">Testing Compacted Applications</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_1058413945_h3_2">Testing POV</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_1058413945_h2_4">Creating an NSP File for Submission</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_1058413945_h3_3">Usage Examples</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_1058413945_h1_4">Compacting or Not Compacting Applications</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_1058413945_h2_5">When To Compact an Application</a>
+      </li>
+      <li>
+        <a href="#Anchor_1058413945_h2_6">When Not To Compact an Application</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_1058413945_h1_1">What Is Application Compaction?</h1>
+<p>The application compaction feature reduces the space consumed by an application by removing the unreferenced areas that accompany a patch fix.</p>
+<p>This section describes unreferenced areas in slightly more detail. The process of creating a patch from the initial version of the application and the revised version of the application includes the following actions.</p>
+<ul>
+  <li>Using binary matching to search for the matching locations</li>
+  <li>Using references to the initial application for matching locations</li>
+  <li>Creating a patch that includes data based on the locations that cannot be matched</li>
+</ul>
+<p>As a result, the revised application has the following structure due to the initial application and the patch.</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_1058413945/1081404513.png" height="400" class="embedded-image image-center" />
+  </span>
+</p>
+<p>You can see that this process results in areas in the initial application that are not referenced. Although these areas consume storage as part of the initial application, they are not used, so they are wasting storage. For example, if a video in the original application was updated with a patch, the video data in the initial application becomes an unreferenced area.</p>
+<p>The application compaction feature removes these unreferenced areas and reduces storage consumption. Application compaction is performed by providing information about the references to the initial application. An application that has been compacted is called a <em>compacted application</em>.</p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper image-center-wrapper">
+    <img src="../Attachments/Attach_1058413945/1081404514.png" height="400" class="embedded-image image-center" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_1058413945_h1_2">Benefits of Application Compaction</h1>
+<p>Application compaction can reduce the amount of storage used by the application. This has the following advantages.</p>
+<ul>
+  <li>Compared to downloading the initial application, a compacted application is smaller to download and consumes less storage.<ul><li><p>For example, if you can use application compaction to reduce the size by 2 GB, the amount of data the user has to download and the storage consumption decreases by 2 GB.</p><div class="note_new"><div class="note_new_left">Note</div><div class="note_new_right"><p>Users who have already downloaded the initial application will not have their downloaded application arbitrarily change into a compacted application. They have to re-download the compacted application.</p><p>For that reason, existing users might not save storage space when you release a compacted application.</p></div></div></li></ul></li>
+</ul>
+<ul>
+  <li>
+    <span style="letter-spacing: 0.0px;">When creating on-card patches and on-card DLC, compacted applications are smaller, and easier to fit on smaller cards.</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<p>Because this feature merely reduces the size of the application, it does not reduce storage consumption for users who use game cards to play the application. As a result, even with the application compaction feature, reducing patch size is important.</p>
+<p>For example, consider a 4 GB application, of which 2 GB is updated via a patch. In this case, you can reduce the size of the application by 2 GB with application compaction. In this case, storage consumption would be as follows.</p>
+<ul>
+  <li>Game card users<ul><li>2 GB of storage for the patch</li></ul></li>
+  <li>Users who downloaded the initial application<ul><li>4 GB for the application and 2 GB for the patch, for a total of 6 GB</li></ul></li>
+  <li>Users who download the compacted application<ul><li>2 GB for the application and 2 GB for the patch, for a total of 4 GB</li></ul></li>
+</ul>
+<p>You can see that the game card user uses storage equivalent to the size of the patch.</p>
+<p>First aim to reduce the size of the patch appropriately, and then consider using application compaction to reduce the impact on storage if there is still a large unreferenced area.</p>
+<h1 id="Anchor_1058413945_h1_3">Using Application Compaction</h1>
+<p>Developers can use the following procedure to release a compacted application.</p>
+<ol>
+  <li>Develop and debug a revised version of the application with a release version that has not yet been submitted.</li>
+  <li>Generate the patch and compacted application simultaneously.</li>
+  <li>Test the generated patch and compacted application.</li>
+  <li>Merge the compacted application and patch into a single NSP file and submit it.</li>
+</ol>
+<p>After distribution of the submitted NSP file begins, the patch and compacted application are downloaded by users who download the application for the first time.</p>
+<p>When creating an on-card patch that includes patches from the version of the application after application compaction was performed, the latest compacted application is always used. This is also the case for on-card downloadable content and multi-application cards. However, when submitting on-card downloadable content or multi-application cards, you must specify the NSP file that was submitted in step 4 as the patch NSP file used when generating the NSP file to submit. AuthoringTool returns an error if the incorrect information is entered.</p>
+<p>The following sections describe each step in detail.</p>
+<h2 id="Anchor_1058413945_h2_1">Developing and Debugging the Revised Application</h2>
+<p>When developing and debugging the revised application, you do not have to start considering application compaction yet.</p>
+<h2 id="Anchor_1058413945_h2_2">Creating a Compacted Application<a name="Anchor_1058413945_--do-application-compaction"></a></h2>
+<p>You can create a compacted application by specifying the <code>--do-application-compaction</code> option when creating a patch with the AuthoringTool <code>makepatch</code> command. For more information about creating patches, see <a href="../Pages/Page_185135488.html">Building and Running a Patch</a>.</p>
+<p>Application compaction is available regardless of the SDK version used to create the initial application.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>To submit only the patch, you must use a patch created without the <code>--do-application-compaction</code> option. An error occurs if you attempt to submit a patch created with the <code>--do-application-compaction</code> option individually, without merging it as follows.</p>
+    <p>For example, you cannot build with the <code>--do-application-compaction</code> option normally, and then also choose whether to submit only the patch or submit a compacted application. If you choose to submit only the patch, you would be submitting a patch created with the <code>--do-application-compaction</code> option without the compacted application, which produces an error during submission.</p>
+  </div>
+</div>
+<p>Although the patch NSP changes depending on whether the <code>--do-application-compaction</code> option was used to create it, its behavior does not change. For that reason, you do not have to debug patches again based on whether the <code>--do-application-compaction</code> option was used.</p>
+<h3 id="Anchor_1058413945_h3_1">Usage Examples</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ AuthoringTool.exe makepatch -o patch-v3.nsp --do-application-compaction --cache-directory d:/patch-cache --desc $NINTENDO_SDK_ROOT/Resources/SpecFiles/Application.desc --original application-v0.nsp --current application-v3.nsp --previous patch-v2.nsp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This creates a patch (<code>patch-v3.nsp</code>) and compacted application (<code>patch-v3.compacted_application.nsp</code>).</p>
+<h2 id="Anchor_1058413945_h2_3">Testing Compacted Applications</h2>
+<p>Compacted applications do not work on their own, but via applied patches. A compacted application must be ensured to work properly in combination with all patches created at that time and in the future.</p>
+<p>This means when releasing a patch, it must be tested in combination with all compacted applications released up until that time. The patch also must be, as before, applied to the initial version of the application and tested.</p>
+<p>The following table indicates the combinations of patches that need to be tested when you have already released a v1 and v2 patch, and are submitting a v3 patch, based on the combination of application compaction for v1 and v2.</p>
+<table class="relative-table wrapped">
+  <colgroup> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;" colspan="2">Release State of Compacted Application</th>
+      <th style="text-align: center;" rowspan="2">Combinations That Require Testing When Releasing the v3 Patch</th>
+    </tr>
+    <tr>
+      <td class="highlight-grey" style="text-align: center;">v1</td>
+      <td class="highlight-grey" style="text-align: center;">v2</td>
+    </tr>
+    <tr>
+      <td class="highlight-red">Not released</td>
+      <td class="highlight-red">Not released</td>
+      <td style="text-align: left;">
+        <ul>
+          <li>Initial application + v3 patch</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td class="highlight-green">Released</td>
+      <td class="highlight-red">Not released</td>
+      <td>
+        <ul>
+          <li>Initial application + v3 patch</li>
+          <li>v1 compacted application + v3 patch</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td class="highlight-red">Not released</td>
+      <td class="highlight-green">Released</td>
+      <td>
+        <ul>
+          <li>Initial application + v3 patch</li>
+          <li>v2 compacted application + v3 patch</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td class="highlight-green">Released</td>
+      <td class="highlight-green">Released</td>
+      <td>
+        <ul>
+          <li>Initial application + v3 patch</li>
+          <li>v1 compacted application + v3 patch</li>
+          <li>v2 compacted application + v3 patch</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Performing application compaction increases the number of combinations that you have to test.</p>
+<h3 id="Anchor_1058413945_h3_2">Testing POV</h3>
+<p>The difference between a compacted application and initial application is the file access speed. The access speed changes depending on the results of application compaction. However, compaction is performed in a way to minimize impact on performance, so the actual effect is minor.</p>
+<p>When testing various combinations, test that each combination works correctly, and then verify that there is no effect on performance, just in case.</p>
+<h2 id="Anchor_1058413945_h2_4">Creating an NSP File for Submission</h2>
+<p>When using application compaction, you must use the <code>mergensp</code> command in AuthoringTool to create an NSP file that merges the patch and compacted application, and then submit that NSP file.<br />At that time, the patch and compacted application must be a combination generated at the same time by <code>makepatch</code>.</p>
+<p>For more information about the submission method, see the Patch Guide (version 5 and later). (However, the patch guide will not yet be publicly available at the point when this document is published. The period when compacted applications can be submitted will also be later than the point when this document is published.)</p>
+<h3 id="Anchor_1058413945_h3_3">Usage Examples</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ AuthoringTool.exe mergensp -o merged-v3.nsp patch-v3.compacted_application.nsp patch-v3.nsp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_1058413945_h1_4">Compacting or Not Compacting Applications</h1>
+<p>Do not compact applications unless necessary, because releasing a compacted application creates more application and patch combinations to check when the patch is released.</p>
+<p>You can check the effectiveness of application compaction using the AuthoringTool <code>analyze-patch</code> command to determine if it is necessary. For more information, see the <a href="../Pages/Page_894619842.html">analyze-patch command</a>.</p>
+<h2 id="Anchor_1058413945_h2_5">When To Compact an Application</h2>
+<p>We recommend application compaction in the following cases.</p>
+<ul>
+  <li>When application compaction would be highly effective.</li>
+  <li>A created on-card patch or on-card DLC does not fit on the card, but will if the application is compacted.</li>
+</ul>
+<h2 id="Anchor_1058413945_h2_6">When Not To Compact an Application</h2>
+<p>We do not recommend application compaction in the following cases.</p>
+<ul>
+  <li>Compaction would not be very effective.</li>
+  <li>A patch that will greatly increase the efficacy of application compaction is scheduled to be released.</li>
+  <li>There is data that you do not want to include in the application, and you want to use application compaction to delete it from your distribution data.<ul><li>Application compaction does not ensure that all unreferenced data is deleted. That data may be retained from a performance standpoint.</li></ul></li>
+</ul>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

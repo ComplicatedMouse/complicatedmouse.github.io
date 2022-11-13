@@ -1,0 +1,359 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>4. Preventing Shape Changes | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- 4. Preventing Shape Changes -->
+<div class="pagetitle" id="PageId_163283770">4. Preventing Shape Changes</div>
+<div class="text_separate">
+<p>If the shape of the model changes noticeably after polygon reduction, you can make the following parameter additions and adjustments to reduce the change.</p>
+<ul>
+  <li>Change the option for determining vertex positions.</li>
+  <li>Use the option that retains characteristic shapes taking the normal into account.</li>
+  <li>Use the option to preserve characteristic vertices.</li>
+</ul>
+<p>For more information about this setting, see <a href="../Pages/Page_83955705.html#Anchor_83955705_poly-red-opt-policy">Intermediate File Optimizer</a>.</p>
+<h1 id="Anchor_163283770_h1_1">Changing the Option to Determine the Vertex Positions</h1>
+<p>To determine the positions to which vertices on edges that are selected for deletion will be moved after the polygon reduction process using linear interpolation completes, set <code>--optimize-position-policy</code> to <code>OptimalOnEdge</code>. For more information, see <a href="../Pages/Page_162186377.html#Anchor_162186377_edge-based-simplification">Polygon Reduction by Edge Deletion</a>.</p>
+<p>Using <code>OptimalOnSpace</code> for this option to calculate vertex positions after polygon reduction, while minimizing volume loss due to shape change, can sometimes result in large shape changes. <strong>In most cases, <code>OptimalOnSpace</code> is an effective option,</strong> but when topography and other features consist of square shapes as in the Town model, <code>OptimalOnEdge</code> may be effective. For more information about options to determine positions after a reduction, see <a href="../Pages/Page_162186377.html#Anchor_162186377_optimize-position-policy">Setting Positions After Reductions</a>. For more information about this parameter, see <a href="../Pages/Page_83955705.html#Anchor_83955705_poly-red-opt-policy">Intermediate File Optimizer</a>.</p>
+<p>
+  <br />
+</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelHeader" style=" border-bottom-width: 1px;">
+    <b>Parameter C2</b>
+  </div>
+  <div class="panelContent">
+    <code>3dIntermediateFileOptimizer.exe bg_WhiteTown.fmdb --polygon-reduction --polygon-reduction-options </code>
+    <span style="color: rgb(51,153,102);">
+      <code>&quot;--target-rate-lod-level1 0.5 --target-rate-lod-level2 0.25 --property-flag Position|UV --optimize-position-policy <span style="color: rgb(255,0,0);">OptimalOnEdge</span> --uv-weight 0.1&rdquo;</code>
+    </span>
+    <span style="color: rgb(51,153,102);"> </span>
+  </div>
+</div>
+<p>
+  <span class="nolink">Use the following batch file.</span>
+</p>
+<p>
+  <span class="nolink">%NINTENDO_SDK_ROOT%\Samples\Sources\Tools\3dTools\3dIntermediateFileOptimizer\PolygonReductionTutorial</span>\ExecuteParameterC2.bat</p>
+<p>
+  <br />
+</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_163283770/188831702.png" height="400" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_163283770/188831739.png" height="400" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>Figure 7-1. Results With OptimalOnSpace (34,365 Polygons)</td>
+      <td>Figure 7-2. Results With OptimalOnEdge (34,365 Polygons)</td>
+    </tr>
+  </tbody>
+</table>
+<p>As shown in Figures 7-1 and 7-2, edges are emphasized more after polygon reduction with <code>OptimalOnEdge</code> than with <code>OptimalOnSpace</code>. This tends to produce favorable results with models such as machines and buildings.</p>
+<h1 id="Anchor_163283770_h1_2">Considering Normals</h1>
+<p>Enable the consideration of normals by changing <code>--property-flag</code> to Position|UV<span style="color: rgb(255,0,0);">|Normal</span>. Performing this adds the <span style="color: rgb(255,0,0);">normals consideration flag</span>.</p>
+<p>For more information about weighting that takes normals into consideration, see <a href="../Pages/Page_162186377.html#Anchor_162186377_--normal-weight">Parameter Settings When Considering Normals</a>. Specifying a larger value results in more protection of corners and angles.</p>
+<p>The effect is not as large as with other parameters, so the result of changing this setting may not be noticeable. For more information about this parameter, see <a href="../Pages/Page_83955705.html#Anchor_83955705_poly-red-property">Intermediate File Optimizer</a>.</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelHeader" style=" border-bottom-width: 1px;">
+    <b>Parameter C3</b>
+  </div>
+  <div class="panelContent">
+    <span style="color: rgb(51,153,102);">&quot;--target-rate-lod-level1 0.5 --target-rate-lod-level2 0.25 --property-flag Position|UV<span style="color: rgb(255,0,0);">|Normal</span> --optimize-position-policy OptimalOnSpace <span style="color: rgb(51,153,102);">--uv-weight 0.1 </span><span style="color: rgb(255,0,0);">--normal-weight 0.1<span style="color: rgb(51,153,102);">&quot;</span></span></span>
+  </div>
+</div>
+<p>
+  <span class="nolink">Use the following batch file.</span>
+</p>
+<p>
+  <span class="nolink">%NINTENDO_SDK_ROOT%\Samples\Sources\Tools\3dTools\3dIntermediateFileOptimizer\PolygonReductionTutorial</span>\ExecuteParameterC3.bat</p>
+<p>
+  <br />
+</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelHeader" style=" border-bottom-width: 1px;">
+    <b>Parameter C3_1</b>
+  </div>
+  <div class="panelContent">
+    <span style="color: rgb(51,153,102);">&quot;--target-rate-lod-level1 0.5 --target-rate-lod-level2 0.25 --property-flag Position|UV<span style="color: rgb(255,0,0);">|Normal</span> --optimize-position-policy OptimalOnSpace <span style="color: rgb(51,153,102);">--uv-weight 0.1 </span><span style="color: rgb(255,0,0);">--normal-weight 0.0001</span>&quot;</span>
+    <span style="color: rgb(51,153,102);"> </span>
+  </div>
+</div>
+<p>
+  <span class="nolink">Use the following batch file.</span>
+</p>
+<p>
+  <span class="nolink">%NINTENDO_SDK_ROOT%\Samples\Sources\Tools\3dTools\3dIntermediateFileOptimizer\PolygonReductionTutorial</span>\ExecuteParameterC3_1.bat</p>
+<p>
+  <br />
+</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_163283770/188833199.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_163283770/188833210.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_163283770/188833252.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_163283770/188833354.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_163283770/188833335.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_163283770/188833314.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>Figure 8-0. Execution Results With Parameter C</td>
+      <td>Figure 8-1. Adding the Normal Option: --normal-weight 0.0001</td>
+      <td>Figure 8-2. Adding the Normal Option: --normal-weight 0.1</td>
+    </tr>
+  </tbody>
+</table>
+<p>Adding this type of normal weighting makes it possible to prioritize protection of the characteristic portions of shapes (such as corners) during polygon reduction.</p>
+<p>As shown in Figure 8-0 (upper image), translation of vertices in the UV shell in the <span style="color: rgb(255,0,0);"><strong>red box</strong></span> has been essentially eliminated, while as shown in Figures 8-1 and 8-2, the amount of change in the shapes of the UV shells has been reduced. Use the <code>--normal-weight</code> option to specify the level of normal protection. When normals are weighted more heavily, models in Town that experience large changes in normal vectors despite being small in size are preserved, which can result in pronounced changes in shape. To limit shape changes, such as in the pipes in the <strong><span style="color: rgb(255,0,0);">red box</span></strong> in Figure 8-2 (lower image), you can add another option.</p>
+<p>In addition, you can also preserve the UV shells by using the UV Hard Edge Protection option.</p>
+<h1 id="Anchor_163283770_h1_3">Enabling Open Edge Protection</h1>
+<p style="text-align: center;">
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_162186377/161426956.png" class="embedded-image" />
+  </span>
+</p>
+<p>The term <em>open edge</em> refers to edges such as the red lines in the preceding figure where the outer perimeters of the shapes do not share two faces.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_162186377/161426955.png" class="embedded-image" />
+          </span>
+        </div>
+      </th>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Figure 9. UV Hard Edge Protection Angle</td>
+    </tr>
+  </tbody>
+</table>
+<p>Specify the open edge protection in units of angular degrees, as in Figure 9. After doing this, only edges that are connected at an angle less than the specified angle are selected for deletion, and edges that are connected at an angle greater than or equal to the specified angle are protected from deletion. For example, if you specify 80 degrees, open edges that are connected at an angle of 80 degrees or less are not selected for deletion. One of the advantages of this method is that the open edge protection angle also protects small shapes, which otherwise tend to be prioritized for deletion. When using this option, specify an angle value at which the model would start to be negatively affected if edges connected by an angle greater than or equal to that value were to be deleted. For more information about this parameter, see <a href="../Pages/Page_83955705.html#Anchor_83955705_poly-red-open-edge">Intermediate File Optimizer</a>.</p>
+<p>
+  <br />
+</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelHeader" style=" border-bottom-width: 1px;">
+    <b>Parameter C4</b>
+  </div>
+  <div class="panelContent">
+    <code>3dIntermediateFileOptimizer.exe bg_WhiteTown.fmdb --polygon-reduction --polygon-reduction-options </code>
+    <span style="color: rgb(51,153,102);">
+      <code>&quot;--target-rate-lod-level1 0.5 --target-rate-lod-level2 0.25 --property-flag Position|UV --optimize-position-policy OptimalOnSpace <span style="color: rgb(255,0,0);">--lock-open-edge-angle 60</span> --uv-weight 0.1&quot;</code>
+    </span>
+    <span style="color: rgb(51,153,102);"> </span>
+  </div>
+</div>
+<p>
+  <span class="nolink">Use the following batch file.</span>
+</p>
+<p>
+  <span class="nolink">%NINTENDO_SDK_ROOT%\Samples\Sources\Tools\3dTools\3dIntermediateFileOptimizer\PolygonReductionTutorial</span>\ExecuteParameterC4.bat</p>
+<p>
+  <br />
+</p>
+<p>It is typically better to use angles that are about 60 degrees than to use larger angles such as 120 degrees, because although larger settings preserve open edges more aggressively, other areas also tend to be affected.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_163283770/270191812.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_163283770/270191792.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_163283770/270191803.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Figure 10-0. Original</p>
+      </td>
+      <td>
+        <p>Figure 10-1. Add Open Edge Protection Option: <span style="color: rgb(0,51,102);">--lock-open-edge-angle 120, LOD (34,365 Polygons)</span><br /></p>
+      </td>
+      <td>Figure 10-2. Add Open Edge Protection Option: <span style="color: rgb(0,51,102);">--lock-open-edge-angle 60, LOD (34,365 Polygons)</span><br /></td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_163283770_h1_4">Protecting Characteristic Vertices</h1>
+<p>Vertices that you do not want to be deleted during polygon reduction, can be weighted in terms of the angle between the normal vectors of the faces on either side of an edge, prior to reduction. This behavior can be configured using the <code>--feature-face-angle</code> option.</p>
+<p>Add <code>--feature-angle 89</code> to the options of Parameter C4 used for polygon reduction.</p>
+<p>
+  <br />
+</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelHeader" style=" border-bottom-width: 1px;">
+    <b>Parameter C4_1</b>
+  </div>
+  <div class="panelContent">
+    <p>3dIntermediateFileOptimizer.exe bg_WhiteTown.fmdb --polygon-reduction --polygon-reduction-options <span style="color: rgb(51,153,102);">&quot;--target-rate-lod-level1 0.5 --target-rate-lod-level2 0.25 --property-flag Position|UV --optimize-position-policy OptimalOnSpace --lock-open-edge-angle 89 --uv-weight 0.1 <span style="color: rgb(255,0,0);">--feature-face-angle 90</span>&quot;</span></p>
+  </div>
+</div>
+<p>
+  <span class="nolink">Use the following batch file.</span>
+</p>
+<p>
+  <span class="nolink">%NINTENDO_SDK_ROOT%\Samples\Sources\Tools\3dTools\3dIntermediateFileOptimizer\PolygonReductionTutorial</span>\ExecuteParameterC4_1.bat</p>
+<p>
+  <br />
+</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_163283770/188835427.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_163283770/188835452.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>Figure 11-0. Execution Results With Parameter C3_1, LOD (34,365 Polygons)</td>
+      <td>Figure 11-1. Results With --feature-face-angle 90</td>
+    </tr>
+  </tbody>
+</table>
+<p>In this example, the angles in the base portion of the fountain are weighted more heavily to prevent them from being deleted during polygon reduction. As shown in Figure 11-1, this makes it possible to limit the occurrence of a burned-in shadow effect. In summary, this option makes it possible to protect angular portions of models.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

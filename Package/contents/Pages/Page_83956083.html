@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>NintendoSDK Migration Guide for Migrating From NW4F Layout | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- NintendoSDK Migration Guide for Migrating From NW4F Layout -->
+<div class="pagetitle" id="PageId_83956083">NintendoSDK Migration Guide for Migrating From NW4F Layout</div>
+<div class="text_separate">
+<h1 id="Anchor_83956083_h1_1">
+  <span class="with-breadcrumbs">NintendoSDK Migration Guide for Migrating From NW4F Layout</span>
+</h1>
+<p>
+  <span class="with-breadcrumbs">For more information about migrating from <span class="with-breadcrumbs"><span class="with-breadcrumbs"><span class="with-breadcrumbs">NW4F</span></span> Layout </span> to NintendoSDK, see <span class="with-breadcrumbs"><span class="with-breadcrumbs"><a href="../Pages/Page_94757084.html">Changes to NintendoWare Graphics</a></span></span>.</span>
+</p>
+<p>
+  <span class="with-breadcrumbs">
+    <span class="with-breadcrumbs">The following changes require particular attention.</span>
+  </span>
+</p>
+<h1 id="Anchor_83956083_h1_2">
+  <span class="with-breadcrumbs">
+    <span class="with-breadcrumbs">Notable Changes Compared to NW4F</span>
+  </span>
+</h1>
+<h2 id="Anchor_83956083_h2_1">
+  <span class="with-breadcrumbs">
+    <span class="with-breadcrumbs">
+      <span class="with-breadcrumbs">
+        <span class="with-breadcrumbs">The TexMap class has been changed to hold a pointer to the TextureInfo class.</span>
+      </span>
+    </span>
+  </span>
+</h2>
+<p>
+  <span class="with-breadcrumbs">
+    <span class="with-breadcrumbs">
+      <span class="with-breadcrumbs">
+        <span class="with-breadcrumbs">In NW4F, the <code>TexMap</code> class held texture informationally internally, and information from <code>TextureInfo</code> was copied and held in <code>TexMap::TexMap()</code> and <code>TexMap::Set()</code>. However, in NintendoSDK, there is a simple pointer to the <code>TextureInfo</code> class, and <span class="with-breadcrumbs"><span class="with-breadcrumbs"><span class="with-breadcrumbs"><span class="with-breadcrumbs"><code>TexMap::TexMap()</code> and <code>TexMap::Set()</code> now just hold the pointer to the <code>TextureInfo</code> class that they were passed.</span></span></span></span></span>
+      </span>
+    </span>
+  </span>
+</p>
+<p>
+  <span class="with-breadcrumbs">
+    <span class="with-breadcrumbs">
+      <span class="with-breadcrumbs">
+        <span class="with-breadcrumbs"> For this reason, in NintendoSDK it is prohibited to free the <code>TextureInfo</code> class that was passed to <code>TexMap::TexMap()</code> or <code>TexMap::Set()</code> until the <code>TextMap</code> class is destroyed.</span>
+      </span>
+    </span>
+  </span>
+</p>
+<h2 id="Anchor_83956083_h2_2">
+  <span class="with-breadcrumbs">
+    <span class="with-breadcrumbs">
+      <span class="with-breadcrumbs">
+        <span class="with-breadcrumbs">The processing for Layout::CalculateMtx changed.</span>
+      </span>
+    </span>
+  </span>
+</h2>
+<p>
+  <span class="with-breadcrumbs">
+    <span class="with-breadcrumbs">
+      <span class="with-breadcrumbs">
+        <span class="with-breadcrumbs">In NW4F, calling <code>Layout::CalculateMtx</code> calculates the matrices for rendering and updates the <code>TextBox</code> pane index buffer. In NintendoSDK, calling this function also stores the render settings for each pane in a region called the constant buffer.</span>
+      </span>
+    </span>
+  </span>
+</p>
+<p>
+  <span class="with-breadcrumbs">
+    <span class="with-breadcrumbs">
+      <span class="with-breadcrumbs">
+        <span class="with-breadcrumbs">Because of this change, with NintendoSDK you must call <code>Layout::CalculateMtx</code> once in each frame.</span>
+      </span>
+    </span>
+  </span>
+</p>
+<p>
+  <span class="with-breadcrumbs">
+    <span class="with-breadcrumbs">
+      <span class="with-breadcrumbs">
+        <span class="with-breadcrumbs">In addition, make any changes to the pane before calling <code>CalculateMtx</code>, because if you perform an operation like the following one that rewrites the pane information between the calls to <code>CalculateMtx</code> and <code>Draw</code>, the pane will be displayed in the state of the frame prior to the change.<br /></span>
+      </span>
+    </span>
+  </span>
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Example of bad usage:
+
+Call Layout::CalculateMtx().
+↓
+Change the size of the pane.
+↓
+Call Layout::Draw().</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Example of good usage:
+
+Change the size of the pane.
+↓
+Call Layout::CalculateMtx().
+↓
+Call Layout::Draw().</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

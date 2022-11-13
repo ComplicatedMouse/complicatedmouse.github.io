@@ -1,0 +1,226 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Light Semaphores | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Light Semaphores -->
+<div class="pagetitle" id="PageId_1132928151">Light Semaphores</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_1132928151_h1_1">Light Semaphore Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_1132928151_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_1132928151_h3_1">Differences From the Semaphore Feature</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_1132928151_h2_2">Using Light Semaphores</a>
+      </li>
+      <li>
+        <a href="#Anchor_1132928151_h2_3">Light Semaphore API Reference</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_1132928151_h1_1">Light Semaphore Feature</h1>
+<h2 id="Anchor_1132928151_h2_1">Feature Overview</h2>
+<p>A light semaphore is a synchronization feature that uses a counter to control exclusive access to a common resource from multiple <a href="../Pages/Page_83955697.html">threads</a>.</p>
+<h3 id="Anchor_1132928151_h3_1">Differences From the Semaphore Feature</h3>
+<p>Functionally, the light semaphore is similar to the <a href="../Pages/Page_83955700.html">semaphore</a>, but with the following differences.</p>
+<ul>
+  <li>When the light semaphore counter is 1 or more in the semaphore acquisition operation (operation P), the current thread does not enter a standby state due to other light semaphore processing functions.</li>
+  <li>During the semaphore return operation (operation V), the current thread does not enter a standby state due to other lightweight semaphore processing functions.</li>
+  <li>Cannot be specified for <a href="../Pages/Page_83955865.html">multiple waits</a>.</li>
+</ul>
+<h2 id="Anchor_1132928151_h2_2">Using Light Semaphores</h2>
+<p>To use light semaphores, you must prepare an <span class="ApiLink_nn__os__LightSemaphoreType">nn::os::LightSemaphoreType</span> structure object as follows.<br />There are no restrictions on where the object can be defined.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="nn">nn::os::</span><span class="n">LightSemaphoreType</span>    <span class="n">g_Semaphore</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Use the defined object according to the following procedure.</p>
+<ol>
+  <li>
+    <p>You must initialize the light semaphore before use.<br />Specify the initial light semaphore counter value in the second parameter and the maximum light semaphore counter value in the third parameter.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeLightSemaphore</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Semaphore</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Acquire the light semaphore as required.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">AcquireLightSemaphore</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Semaphore</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Release the light semaphore as required.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">ReleaseLightSemaphore</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Semaphore</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>When you have finished using the light semaphore, free the object.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FinalizeLightSemaphore</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Semaphore</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_1132928151_h2_3">Light Semaphore API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__os__InitializeLightSemaphore">nn::os::InitializeLightSemaphore</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeLightSemaphore(LightSemaphoreType_*semaphore)_NN_NOEXCEPT">nn::os::FinalizeLightSemaphore</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__AcquireLightSemaphore">nn::os::AcquireLightSemaphore</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryAcquireLightSemaphore(LightSemaphoreType_*semaphore)_NN_NOEXCEPT">nn::os::TryAcquireLightSemaphore</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__TimedAcquireLightSemaphore">nn::os::TimedAcquireLightSemaphore</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__ReleaseLightSemaphore(LightSemaphoreType_*semaphore)_NN_NOEXCEPT">nn::os::ReleaseLightSemaphore (release 1 unit)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__ReleaseLightSemaphore(LightSemaphoreType_*semaphore|_int_count)_NN_NOEXCEPT">nn::os::ReleaseLightSemaphore (release multiple units)</span>
+  </li>
+  <li>
+    <span class="ApiLink_int_nn__os__GetCurrentLightSemaphoreCount(const_LightSemaphoreType_*semaphore)_NN_NOEXCEPT">nn::os::GetCurrentLightSemaphoreCount</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__LightSemaphoreType', '../../../Api/HtmlNX/structnn_1_1os_1_1_light_semaphore_type.html' )
+SetUrl( 'ApiLink_nn__os__InitializeLightSemaphore', '../../../Api/HtmlNX/namespacenn_1_1os.html#a5ab8dff3311a08d0718855bff6d2c297' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeLightSemaphore(LightSemaphoreType_*semaphore)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a45176bf824434fe4269db3e4d9532701' )
+SetUrl( 'ApiLink_nn__os__AcquireLightSemaphore', '../../../Api/HtmlNX/namespacenn_1_1os.html#a14ae7374f92f8bb82cd77dce0354d5d5' )
+SetUrl( 'ApiLink_bool_nn__os__TryAcquireLightSemaphore(LightSemaphoreType_*semaphore)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a91955b6e49515c4f50e2d2778d442c1b' )
+SetUrl( 'ApiLink_nn__os__TimedAcquireLightSemaphore', '../../../Api/HtmlNX/namespacenn_1_1os.html#abcdacde38f33f90323d5595c5ec2b180' )
+SetUrl( 'ApiLink_void_nn__os__ReleaseLightSemaphore(LightSemaphoreType_*semaphore)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3ceaceb7088707e07f3be60222ae4e4b' )
+SetUrl( 'ApiLink_void_nn__os__ReleaseLightSemaphore(LightSemaphoreType_*semaphore|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2090b620e107723237bc81eb23e11e63' )
+SetUrl( 'ApiLink_int_nn__os__GetCurrentLightSemaphoreCount(const_LightSemaphoreType_*semaphore)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a46089352b69aa5a45a0369e4c5b315f6' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

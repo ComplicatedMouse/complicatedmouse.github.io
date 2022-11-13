@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Implementing the Emitter Billboard | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Implementing the Emitter Billboard -->
+<div class="pagetitle" id="PageId_124941626">Implementing the Emitter Billboard</div>
+<div class="text_separate">
+<h1 id="Anchor_124941626_h1_1">Introduction</h1>
+<p>In the emitter, you can set the matrix to act like a billboard for the camera and have the entire effect billboarded for the camera. <br />You can use this for effects such as fireworks displayed in the distance.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Emitter billboard</th>
+      <th style="text-align: center;">Emitter y-axis billboard</th>
+    </tr>
+    <tr>
+      <td style="text-align: center;">
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_124941626/215217195.gif" width="270" class="embedded-image" />
+          </span>
+        </p>
+        <p>(Click to play)</p>
+      </td>
+      <td style="text-align: center;">
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_124941626/215217196.gif" width="270" class="embedded-image" />
+          </span>
+        </p>
+        <p>(Click to play)</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_124941626_h1_2">Implementation</h1>
+<p>There are two implementation methods.</p>
+<ul>
+  <li>The developer sets the billboard matrix in the emitter set</li>
+  <li>The artist uses custom actions to specify the emitter to be the emitter billboard</li>
+</ul>
+<h2 id="Anchor_124941626_h2_1">The developer sets the billboard matrix in the emitter set</h2>
+<p>Generate a matrix combining the inverse of the view matrix and the emitter set's display position and set it to the emitter set. <br />Note that the entire emitter set will be oriented toward the camera if implemented using this method.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::util::</span><span class="n">Matrix4x3fType</span> <span class="n">billboardMatrix</span><span class="p">;</span>
+<span class="nn">nn::util::</span><span class="n">MatrixInverse</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">billboardMatrix</span><span class="p">,</span> <span class="n">viewMatrix</span> <span class="p">);</span>
+<span class="nn">nn::util::</span><span class="n">Vector3fType</span> <span class="n">trans</span><span class="p">;</span>
+<span class="nn">nn::util::</span><span class="n">MatrixGetAxisW</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">trans</span><span class="p">,</span> <span class="n">drawMatrix</span> <span class="p">);</span>
+<span class="nn">nn::util::</span><span class="n">MatrixSetAxisW</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">billboardMatrix</span><span class="p">,</span> <span class="n">trans</span> <span class="p">);</span>
+<span class="n">emitterSet</span><span class="o">-&gt;</span><span class="n">SetMatrix</span><span class="p">(</span> <span class="n">billboardMatrix</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_124941626_h2_2">Using Custom Actions to Specify the Emitter for the Emitter Billboard</h2>
+<p>Use custom actions to perform emitter billboarding for the specified emitter. <br />When using custom actions, you can use a utility method to perform emitter billboarding.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Emitter matrix set callback function
+</span><span class="kt">void</span> <span class="nf">_EmitterMatrixSetCallback</span><span class="p">(</span> <span class="nn">nn::vfx::</span><span class="n">EmitterMatrixSetArg</span><span class="o">&amp;</span> <span class="n">arg</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Use a utility method to set the billboard matrix.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetEmitterBillboardMatrix</span><span class="p">(</span> <span class="n">viewMtx</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Use a tool method to set the y-axis billboard matrix.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetEmitterYAxisBillboardMatrix</span><span class="p">(</span> <span class="n">viewMtx</span> <span class="p">);</span>
+&nbsp;<span class="p">}</span>
+
+<span class="c1">// If custom action 1 is specified,
+// use the emitter matrix set callback function to perform billboarding
+</span><span class="n">callbackSet</span><span class="p">.</span><span class="n">emitterMatrixSet</span> <span class="o">=</span> <span class="n">_EmitterMatrixSetCallback</span><span class="p">;</span>
+<span class="n">vfxSystem</span><span class="o">-&gt;</span><span class="n">SetCallback</span><span class="p">(</span> <span class="nn">nn::vfx::</span><span class="n">CallbackId_CustomAction1</span><span class="p">,</span> <span class="n">callbackSet</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="with-breadcrumbs">
+          <a href="../Pages/Page_83955583.html">Custom Actions</a>
+        </span>
+      </th>
+      <td>
+        <p>This documentation is for custom actions.</p>
+        <p>For example, for information about displaying the UI to specify emitter billboard enabling and disabling in EffectMaker, see this documentation.<br /></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,237 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Optimization Information | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Optimization Information -->
+<div class="pagetitle" id="PageId_185135554">Optimization Information</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_185135554_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_185135554_h1_2">NX Patching Mechanism</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_185135554_h2_1">Fragments</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_185135554_h1_3">Conditions For Using a Partial File Patch</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_185135554_h2_2">Conditions For Binary Matching</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_185135554_h1_4">Archiving Multiple Resources in the Application</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_185135554_h2_3">Aligning the Offsets in the Resource File to 16 Bytes</a>
+      </li>
+      <li>
+        <a href="#Anchor_185135554_h2_4">Compressing in Small Units</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_185135554_h1_5">Displaying Information About Data Making Up a Large Proportion of Patches</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_185135554_h1_1">Overview</h1>
+<p>This section provides information about reducing the size of patches.</p>
+<p>To reduce patch size, you must effectively use the partial file patch ability provided by NX patches.<br />This page describes the conditions for using partial patches of files, and specific examples of how to meet those conditions.</p>
+<p>It includes notes for reducing patch size when creating the initial application.</p>
+<p>It also describes how to display information about what data a patch occupies, as you reduce its size.</p>
+<h1 id="Anchor_185135554_h1_2">NX Patching Mechanism</h1>
+<p>Conceptually, an NX patch is a mechanism for reading the unchanged data from the initial application and the changed data in the fixed version of the application from the patch.</p>
+<p>As a result, the patch consists of the portion of the file data that was changed in the fixed version of the application. The specific data included is described in Conditions For Using a Partial File Patch.</p>
+<h2 id="Anchor_185135554_h2_1">Fragments</h2>
+<p>Data referenced in patches is managed by reference segment, as fragments.</p>
+<p>Use the <code>--patched-only-in-detail</code> option of the <code>list</code> command in AuthoringTool to see the kinds of fragments included in the patch data.<br />Fragments can be checked using the fragmentation information displayed when the <code>list</code> command is run. <br />For more information about the Authoring Tool <code>list</code> command, see <a href="../Pages/Page_107320233.html">AuthoringTool</a> &gt; Displaying NCA and NSP File Content.</p>
+<h1 id="Anchor_185135554_h1_3">Conditions For Using a Partial File Patch</h1>
+<p>The conditions for using a partial file patch can be thought of as the conditions for referencing data from the initial application.</p>
+<p>This description uses the term <em>binary matching</em> to refer to the process of searching for accessible data in the initial application. Creating a patch can be thought of as the process of using the initial application and the revised application as the inputs, performing binary matching on these inputs, and making a patch that collects together all the data for which references could not be found.</p>
+<h2 id="Anchor_185135554_h2_2">Conditions For Binary Matching</h2>
+<p>When all of the following conditions are met, the process of binary matching succeeds and the data from the initial application can be referenced.</p>
+<ul>
+  <li>When the pre-revision and post-revision files are divided into 16-byte blocks, the blocks match up.</li>
+</ul>
+<p>
+  <img src="../Attachments/Attach_185135554/186060967.png"></img>
+</p>
+<ul>
+  <li>When the matching segment continues for at least 32 KiB. This size can be modified by passing <code>--minimum-matching-size</code> to <code>makepatch</code>.</li>
+</ul>
+<p>
+  <img src="../Attachments/Attach_185135554/186060990.png" width="441"></img>
+</p>
+<p>This description uses an example to make this procedure easier to understand.</p>
+<p>Where blocks in the initial file and the revised file match up at the binary level, the NX patch can reference the data of the initial application.</p>
+<p>
+  <br />
+</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Size of Matching Segment</th>
+      <th>Offset in Initial Version</th>
+      <th>Offset in Revised Version</th>
+      <th>Blocks to Reference From the Initial File</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>32KiB</td>
+      <td>16 KiB</td>
+      <td>16 KiB</td>
+      <td>The 32-KiB segment from 16 KiB</td>
+      <td>At least 32 KiB contiguous blocks, so the data can be referenced.</td>
+    </tr>
+    <tr>
+      <td>32 KiB</td>
+      <td>16 KiB</td>
+      <td>20 KiB</td>
+      <td>The 32-KiB segment from 16 KiB</td>
+      <td>Can detect offsets that deviate in units of 16 bytes in the file, so the data can be referenced.</td>
+    </tr>
+    <tr>
+      <td>32 KiB</td>
+      <td>16 KiB</td>
+      <td>0Byte</td>
+      <td>The 32-KiB segment from 16 KiB</td>
+      <td>Can detect even forward deviations, so the data can be referenced.</td>
+    </tr>
+    <tr>
+      <td>32 KiB</td>
+      <td>16 KiB</td>
+      <td>20 KiB + 8 bytes</td>
+      <td>Cannot be referenced.</td>
+      <td>If there is a deviation of 8 bytes, blocks in 16-byte segments will not match and so cannot be detected.</td>
+    </tr>
+    <tr>
+      <td>16 KiB</td>
+      <td>16 KiB</td>
+      <td>20 KiB</td>
+      <td>Cannot be referenced.</td>
+      <td>Matching blocks do not total 32 KiB, so the data cannot be referenced.</td>
+    </tr>
+    <tr>
+      <td>32 KiB</td>
+      <td>16 KiB + 8 Byte</td>
+      <td>20 KiB + 8 bytes</td>
+      <td>Cannot be referenced.</td>
+      <td>
+        <p>If the starting 8 bytes and the ending 8 bytes are considered a 16-byte block, there is no match.</p>
+        <p>As a result, the matching size is less than 32 KiB and the data cannot be referenced.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>32 KiB + 16 Byte</td>
+      <td>16 KiB + 8 bytes</td>
+      <td>20 KiB + 8 bytes</td>
+      <td>The 32-KiB segment from (16 KiB + 16 bytes)</td>
+      <td>
+        <p>In the preceding example, the matching size was less than 32 KiB so the data could not be referenced. But in the next example, with the extra matching block of 16 bytes, the data can be referenced.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>128 MiB</td>
+      <td>16MiB</td>
+      <td>20MiB</td>
+      <td>The 128-MiB segment from 16 MiB</td>
+      <td>Matching segments of more than 32 KiB are also possible.</td>
+    </tr>
+    <tr>
+      <td>128 MiB + 16 Byte</td>
+      <td>16 MiB</td>
+      <td>20MiB</td>
+      <td>The (128 MiB + 16 byte) segment from 16 MiB</td>
+      <td>The size of the segment to reference can be greater than 32 KiB and a multiple of 16 bytes.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The order of the matching segments does not need to be the same in the initial application and the revised application. As shown in the following examples, the segment either before or after the matching address can be referenced from the initial application.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Size of Matching Segment</th>
+      <th>Offset in Initial Version</th>
+      <th>Offset in Revised Version</th>
+      <th>Blocks to Reference From the Initial File</th>
+    </tr>
+    <tr>
+      <td>32 KiB</td>
+      <td>16 KiB</td>
+      <td>64 KiB</td>
+      <td>The 32-KiB segment from 16 KiB</td>
+    </tr>
+    <tr>
+      <td>32 KiB</td>
+      <td>128KiB</td>
+      <td>16 KiB</td>
+      <td>The 32-KiB segment from 128 KiB</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_185135554_h1_4">Archiving Multiple Resources in the Application</h1>
+<p>This section describes a way to reduce the size of the patch when archiving multiple resources in a single file.</p>
+<p>Consider it as a way to more easily satisfy the conditions described previously for using a partial file patch.</p>
+<h2 id="Anchor_185135554_h2_3">Aligning the Offsets in the Resource File to 16 Bytes</h2>
+<p>To enable referencing unchanged resources (of at least 32 KiB) in the initial application, we recommend aligning the offsets in the file that contains the resources to 16 bytes.</p>
+<p>If this alignment is not made, the offset in the file with the resources may deviate by more than a multiple of 16 bytes between the initial application and the revised application, and it may not be possible to reference the data from the initial application.</p>
+<h2 id="Anchor_185135554_h2_4">Compressing in Small Units</h2>
+<p>Even a slight modification to binary data will result in fundamentally different binary data after it has been compressed. The NX patch mechanism will not be able to detect the differences, and all of the revised data will end up included in the patch.</p>
+<p>By compressing the data in the smallest units possible, you can reduce the size of the patch.</p>
+<p>For example, if you compress each resource and then archive them, only the differences in the revised files will be detected. On the other hand, if you archive the files and then compress the archive, the entire region will be detected as a difference.</p>
+<h1 id="Anchor_185135554_h1_5">Displaying Information About Data Making Up a Large Proportion of Patches</h1>
+<p>To reduce patch size, it is effective to enable partial patching of files for the data making up a large proportion of the patch.</p>
+<p>You can check this using the <a href="../Pages/Page_894619842.html">analyze-patch</a> command, so also refer to that command.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

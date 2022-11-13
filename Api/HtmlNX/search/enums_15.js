@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['verifyoption_42455',['VerifyOption',['../classnn_1_1ssl_1_1_connection.html#af9b603bce2d533ca6fdd3f1d7f2f0b12',1,'nn::ssl::Connection']]],
+  ['version_42456',['Version',['../namespacenn_1_1gfx.html#a71098e64eea7578fba7af2ab7fff065d',1,'nn::gfx']]],
+  ['vertexattr_42457',['VertexAttr',['../namespacenn_1_1ui2d.html#a09b87fe359726c27a0fd356c270171df',1,'nn::ui2d']]],
+  ['vertexattrsize_42458',['VertexAttrSize',['../namespacenn_1_1ui2d.html#a1097bfe4c3ea43c361c0f11834b98d3a',1,'nn::ui2d']]],
+  ['vertexbuffer_42459',['VertexBuffer',['../classnn_1_1ui2d_1_1_graphics_resource.html#a1d12315ddaee203b3e920f866cc86c6c',1,'nn::ui2d::GraphicsResource']]],
+  ['vertexcolor_42460',['VertexColor',['../namespacenn_1_1ui2d.html#a2ce8c9aa192009cc3d74f866831b89e1',1,'nn::ui2d']]],
+  ['vertexstatetype_42461',['VertexStateType',['../classnns_1_1gfx_1_1_graphics_framework.html#a4e0cb09ec959c2be02a6cb4500d9698a',1,'nns::gfx::GraphicsFramework']]],
+  ['verticalposition_42462',['VerticalPosition',['../namespacenn_1_1ui2d.html#a57f625c689db0b6d3b40877556ec690a',1,'nn::ui2d']]],
+  ['vfxpreviewflag_42463',['VfxPreviewFlag',['../classnn_1_1vfx_1_1viewer_1_1detail_1_1_preview.html#a54eaf818ed3413b51f817fe5ec9c1205',1,'nn::vfx::viewer::detail::Preview']]],
+  ['vfxpreviewtype_42464',['VfxPreviewType',['../classnn_1_1vfx_1_1viewer_1_1detail_1_1_preview.html#ac3aad2f746c59c8d1f27a9d153607fbe',1,'nn::vfx::viewer::detail::Preview']]],
+  ['vibrationdeviceposition_42465',['VibrationDevicePosition',['../namespacenn_1_1hid.html#a0fd1eda256a2981614b26cd038f5c6ec',1,'nn::hid']]],
+  ['vibrationdevicetype_42466',['VibrationDeviceType',['../namespacenn_1_1hid.html#a9fa410c3c8fb9166daad40d757c065ba',1,'nn::hid']]],
+  ['vibrationmixmode_42467',['VibrationMixMode',['../namespacenn_1_1hid.html#adc165fa9fa37eeefe20379b2998e917d',1,'nn::hid']]],
+  ['videorecordingexitreason_42468',['VideoRecordingExitReason',['../namespacenn_1_1tm.html#a8924b817752c0fc71eeaaf38ccfde4d4',1,'nn::tm']]],
+  ['viewerresult_42469',['ViewerResult',['../namespacenn_1_1g3d_1_1viewer.html#a8f1a349f853f843452426cd1f5c7502f',1,'nn::g3d::viewer']]],
+  ['viewersystemsettings_42470',['ViewerSystemSettings',['../classnn_1_1vfx_1_1viewer_1_1_viewer_system.html#a256011c593e101041e238bfdc5c0d29a',1,'nn::vfx::viewer::ViewerSystem']]],
+  ['viewportyaxisdirection_42471',['ViewportYAxisDirection',['../namespacenns_1_1dbgui.html#a3158be9848277c5625d9b20aff7f5d10',1,'nns::dbgui']]],
+  ['viewsize_42472',['ViewSize',['../classnn_1_1ui2d_1_1viewer_1_1_viewer.html#abe7c07b108460ea5858c762c7114863a',1,'nn::ui2d::viewer::Viewer']]],
+  ['voicerenderertype_42473',['VoiceRendererType',['../namespacenn_1_1atk.html#a7b320e817aef11e4ca60149f70e2c901',1,'nn::atk']]],
+  ['voicestate_42474',['VoiceState',['../atk___global_8h.html#a9cfbbe6e34912fe1601f56d77722c64d',1,'nn::atk::detail']]],
+  ['volumethroughmodebitflag_42475',['VolumeThroughModeBitFlag',['../namespacenn_1_1atk.html#a321c27335b5890a17c9ce887fe5c9de5',1,'nn::atk']]]
+];

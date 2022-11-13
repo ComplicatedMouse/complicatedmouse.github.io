@@ -1,0 +1,538 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Bone Compression | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Bone Compression -->
+<div class="pagetitle" id="PageId_291410825">Bone Compression</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_291410825_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_291410825_h1_2">Cull Bone Compression</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_291410825_h2_1">Algorithms</a>
+      </li>
+      <li>
+        <a href="#Anchor_291410825_h2_2">If you do not want to delete a particular bone:</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_291410825_h1_3">Merge Bone Compression</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_291410825_h2_3">Algorithms</a>
+      </li>
+      <li>
+        <a href="#Anchor_291410825_h2_4">If you do not want to spare any bones:</a>
+      </li>
+      <li>
+        <a href="#Anchor_291410825_h2_5">Notes</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_291410825_h1_4">Unite Child Bone Compression</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_291410825_h2_6">Algorithms</a>
+      </li>
+      <li>
+        <a href="#Anchor_291410825_h2_7">Notes</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_291410825_h1_5">Unite Bone Compression</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_291410825_h2_8">Algorithms</a>
+      </li>
+      <li>
+        <a href="#Anchor_291410825_h2_9">Notes</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_291410825_h1_6">Unite All Bone Compression</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_291410825_h2_10">Algorithms</a>
+      </li>
+      <li>
+        <a href="#Anchor_291410825_h2_11">Notes</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_291410825_h1_7">Tips for Selecting the Bone Compression Format</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_291410825_h2_12">Format Characteristics</a>
+      </li>
+      <li>
+        <a href="#Anchor_291410825_h2_13">Flowchart for Selecting the Compression Format</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_291410825_h1_1">Overview</h1>
+<p>Bone compression is an optimization for deleting or merging unnecessary bones in rendering models. This optimization reduces the binary size and conserves the amount of memory consumed, or reduces computation costs when rendering. You can use the intermediate file optimizer to apply bone compression to model intermediate files. For more information, see <a href="../Pages/Page_83955705.html">Intermediate File Optimizer</a>.</p>
+<p>This page describes the algorithms for bone compression formats and usage notes.</p>
+<h1 id="Anchor_291410825_h1_2">Cull Bone Compression</h1>
+<p>Culls bones that are unrelated to rendering the model and are located at the end of the hierarchical bone structure, and then compresses bones. Cull bone compression is used with character models for which a non-uniform scaling (where X, Y, and Z are not the same values) has been set.</p>
+<h2 id="Anchor_291410825_h2_1">Algorithms</h2>
+<p>Bones satisfying the following conditions are deleted beginning from bones at the end of the hierarchy up to parent bones.</p>
+<ul>
+  <li>Bones without children</li>
+  <li>Bones that can be deleted (<code>compress_enable=&quot;true&quot;</code>)</li>
+  <li>Bones for which a bone matrix is not used to render the model (<code>rigid_body=&quot;false&quot;</code> <em>and</em> <code>matrix_index=&quot;&ndash;1 &ndash;1&quot;</code>)</li>
+</ul>
+<p>Shapes referencing a bone to be deleted are changed to reference the root bone. Deletes end bones repeatedly until there are no more bones that can be deleted. Finally, <code>nw4f_root</code> is deleted if the name of the root bone is of the form <code>nw4f_root</code> as applied by a DCC plug-in <em>and</em> <code>nw4f_root</code> does not have any children. Shapes referencing <code>nw4f_root</code> are changed to reference a child bone.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_1.svg" />
+          </div>
+          <p>
+            <br />
+          </p>
+          <p style="text-align: right;">The <span style="color: rgb(255,0,0);">red bones</span> are targets for deletion.</p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_2.svg" />
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: center;">Before compression</th>
+      <th style="text-align: center;">After compression</th>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_291410825_h2_2">If you do not want to delete a particular bone:</h2>
+<p>On the DCC tool, set <code>compress_enable</code> to <code>false</code> for any bones that you do not want deleted, even if the bone is not used in rendering the model. For more information about this setting, see the Help included with each DCC plug-in.</p>
+<p>To perform <code>Cull</code> bone compression, specify the <code>--compress-bone-cull</code> option for the FMD, FSK, and FVB files.</p>
+<h1 id="Anchor_291410825_h1_3">Merge Bone Compression</h1>
+<p>
+  <code>Merge</code> bone compression reduces the number of bones even further than <code>Cull</code> bone compression because, in addition to performing <code>Cull</code> bone compression, this option creates single bones within the bone configuration by merging the parent and child bones of bones that are unnecessary for rendering. With some models, animation data may increase in size. Merge bone compression is only used with character models for which uniform scaling (X, Y, and Z have the same values) has been set.</p>
+<h2 id="Anchor_291410825_h2_3">Algorithms</h2>
+<p>Performs <code>Cull</code> bone compression and deletes unnecessary bones at the end of the hierarchical structure. The bone structure is traced in order, beginning from the root bone, and any two bones meeting the following conditions are merged into one.</p>
+<ul>
+  <li>They have a parent-child relationship.</li>
+  <li>The parent bones can be deleted (<code>compress_enable=&quot;true&quot;</code>).</li>
+  <li>A parent bone matrix is not used to render models (<code>rigid_body</code>=&quot;<code>false</code>&quot; and <code>matrix_index</code>=&quot;<code>&ndash;1 &ndash;1</code>&quot;).</li>
+</ul>
+<p>Calculate new values for Scale, Rotate, and Translate based on the matrix resulting from multiplying two bone matrices when merging bones. If a parent node has multiple children, a similar process is executed on each child bone. This process repeats until there are no more bones to be deleted. Ultimately, the bone serving as the root will have only one child bone. That bone is deleted if it can be and if a matrix is not used in rendering the model. Shapes referencing bones are changed to reference child bones.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_3.svg" />
+          </div>
+          <p>
+            <br />
+          </p>
+          <p style="text-align: right;">The <span style="color: rgb(255,0,0);">red bones</span> are targets for deletion.</p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_4.svg" />
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: center;">Before compression</th>
+      <th style="text-align: center;">After compression</th>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_291410825_h2_4">If you do not want to spare any bones:</h2>
+<p>Set <code>compress_enable</code> to <code>false</code> for any bones that you do not want deleted, even if the bone is not used in rendering the model.</p>
+<h2 id="Anchor_291410825_h2_5">Notes</h2>
+<p>Bones merged during this optimization must meet the following restrictions. If this restriction is not kept, the model may not display correctly.</p>
+<ul>
+  <li>Bones that have children must have uniform scale settings (where x, y, and z scale values are the same).</li>
+  <li>
+    <code>scale_compensate</code> must be set to <code>false</code> for bones to be collected together. If <code>scale_compensate</code> is <code>true</code>, the value after uniting must be changed to <code>false</code>.</li>
+  <li>An error occurs and FSK file compression ends if the <code>&lt;bone_anim&gt;</code> attributes <code>binarize_scale</code>, <code>binarize_rotate</code>, and <code>binarize_translate</code> are <code>false</code>.</li>
+</ul>
+<p>To perform <code>Cull</code> bone compression, specify the <code>--compress-bone-cull</code> option for the FMD, FSK, and FVB files.</p>
+<h1 id="Anchor_291410825_h1_4">Unite Child Bone Compression</h1>
+<p>This method gathers together nodes that have polygons located at the end. It can be used together with <code>Cull</code> bone compression or <code>Merge</code> bone compression. Unite Child bone compression is used for character models that have rigid body parts.</p>
+<h2 id="Anchor_291410825_h2_6">Algorithms</h2>
+<p>The algorithm searches for bones for which <code>compress_enable</code> is <code>false</code>, beginning from end bones and searching up the tree toward parent bones. If a bone for which <code>compress_enable</code> is set to <code>false</code> (called Bone A) is found, and all the bones positioned in the child hierarchy under Bone A meet the following conditions, all bones under Bone A are deleted.</p>
+<ul>
+  <li>The bone can be deleted (<code>compress_enable</code>=&quot;<code>true</code>&quot;).</li>
+  <li>No skinning weight has been applied to the bone (<code>matrix_index=&quot;-1 -1&quot;</code>).</li>
+</ul>
+<p>If a shape references a bone to be deleted, that shape is changed to reference Bone A. The vertex position coordinates and normal vector vary because the coordinate system changes.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_5.svg" />
+          </div>
+          <p>
+            <br />
+          </p>
+          <p style="text-align: right;">The <span style="color: rgb(255,0,0);">red bones</span> are targets for deletion.</p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_6.svg" />
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: center;">Before compression</th>
+      <th style="text-align: center;">After compression</th>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_291410825_h3_1">When Used Together With Cull Bone Compression</h3>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_7.svg" />
+          </div>
+          <p>
+            <br />
+          </p>
+          <p style="text-align: right;">The <span style="color: rgb(255,0,0);">red bones</span> are targets for deletion.</p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_8.svg" />
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: center;">Before compression</th>
+      <th style="text-align: center;">After compression</th>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_291410825_h3_2">When Used Together With Merge Bone Compression</h3>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_9.svg" />
+          </div>
+          <p>
+            <br />
+          </p>
+          <p style="text-align: right;">The <span style="color: rgb(255,0,0);">red bones</span> are targets for deletion.</p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_10.svg" />
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: center;">Before compression</th>
+      <th style="text-align: center;">After compression</th>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_291410825_h2_7">Notes</h2>
+<ul>
+  <li>An error occurs and FSK file compression ends if the <code>&lt;bone_anim&gt;</code> attributes <code>binarize_scale</code>, <code>binarize_rotate</code>, and <code>binarize_translate</code> are <code>false</code>.</li>
+</ul>
+<p>To perform <code>Unite Child</code> bone compression, specify the <code>--compress-bone-unite-child</code> option for the FMD, FSK, and FVB files.</p>
+<h1 id="Anchor_291410825_h1_5">Unite Bone Compression</h1>
+<p>This method gathers together compressible bones.<br />Compressible bones are combined into a bone at the top of the hierarchy for which compression is prohibited. Bones for which compression is prohibited are left behind without being deleted. Skeletal animations and bone visibility animations are maintained. However, this feature cannot be used together with skinning.</p>
+<p class="note">
+  <code>Unite</code> bone compression is used for topographical data applied to some skeletal animations.</p>
+<h2 id="Anchor_291410825_h2_8">Algorithms</h2>
+<ul>
+  <li>After bone compression, only the root bone and any bones for which compression is prohibited (<code>compress_enable</code> = <code>false</code>) are left.</li>
+  <li>Shapes referencing compressible bones (<code>compress_enable</code> = <code>true</code>) are changed to reference bones for which compression is prohibited located at the top of the bone hierarchy. If there are no bones for which compression is prohibited in the top layer, they are changed to reference the root bone.</li>
+  <li>Coordinate conversions and character animations for compressible bones are merged with bones for which compression is prohibited at the bottom of the hierarchy. (The same process as <code>Merge</code> bone compression.)</li>
+  <li>Shapes referencing bones for which compression is prohibited do not change.</li>
+</ul>
+<p>
+  <br />
+</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_11.svg" />
+          </div>
+          <p>
+            <br />
+          </p>
+          <p style="text-align: right;">The <span style="color: rgb(255,0,0);">red bones</span> are targets for deletion.</p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_12.svg" />
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: center;">Before compression</th>
+      <th style="text-align: center;">After compression</th>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_291410825_h2_9">Notes</h2>
+<ul>
+  <li>This optimization cannot be used with skinning models.<ul><li>The skinning model is converted to a rigid body fixed in the bind pose and changed to reference the root bone. This conversion includes skinning models that reference bones for which compression is prohibited.</li></ul></li>
+  <li>Coordinates for the root bone remain unchanged. (They are not made into a unit matrix, unlike with <code>Unite All</code> bone compression.)</li>
+  <li>When changing a shape so it references a bone at the top of the hierarchy, vertex coordinates and normal vectors are converted to the coordinate system of the bone to be moved. The size of the vertex array may increase when multiple shapes share the same vertex array.<br />To avoid this increase in the size of the vertex array, make sure that the coordinate conversion applied to the vertex array is the same for each shape when setting bones.</li>
+  <li>An error occurs and FSK file compression ends if the <code>&lt;bone_anim&gt;</code> attributes <code>binarize_scale</code>, <code>binarize_rotate</code>, and <code>binarize_translate</code> are <code>false</code>.</li>
+</ul>
+<p>To perform <code>Unite</code> bone compression, specify the <code>--compress-bone-unite</code> option for the FMD, FSK, and FVB files.</p>
+<p class="note">
+  <br />
+</p>
+<h1 id="Anchor_291410825_h1_6">Unite All Bone Compression</h1>
+<p>This process compiles all bones comprising the model into one bone.</p>
+<p class="note">
+  <code>Unite All</code> bone compression is used for topographical data that lacks skeletal animation.</p>
+<h2 id="Anchor_291410825_h2_10">Algorithms</h2>
+<p>A single root bone results regardless of how <code>compress_enable</code>, <code>rigid_body</code>, and <code>matrix_index</code> are set.<br />Finally, the root bone matrix serves as a unit matrix. All shapes are changed to reference the root bone, and vertex position coordinates and normal vectors are converted to the global coordinate system.</p>
+<p>
+  <br />
+</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_13.svg" />
+          </div>
+          <p>
+            <br />
+          </p>
+          <p style="text-align: right;">The <span style="color: rgb(255,0,0);">red bones</span> are targets for deletion.</p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_291410825/flowchart_14.svg" />
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: center;">Before compression</th>
+      <th style="text-align: center;">After compression</th>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_291410825_h2_11">Notes</h2>
+<ul>
+  <li>Skinning models are converted to rigid bodies fixed in the bind pose.</li>
+  <li>An error occurs and FSK file compression ends if the <code>&lt;bone_anim&gt;</code> attributes <code>binarize_scale</code>, <code>binarize_rotate</code>, and <code>binarize_translate</code> are <code>false</code>.</li>
+</ul>
+<p>To perform <code>Unite All</code> bone compression, specify the <code>--compress-bone-unite-all</code> option for the FMD, FSK, and FVB files.</p>
+<h1 id="Anchor_291410825_h1_7">Tips for Selecting the Bone Compression Format</h1>
+<h2 id="Anchor_291410825_h2_12">Format Characteristics</h2>
+<table class="wrapped relative-table" style="margin-left: 1.5em; width: 86.9591%;">
+  <colgroup>
+    <col style="width: 10.8345%;" />
+    <col />
+    <col style="width: 5.65276%;" />
+    <col style="width: 10.2961%;" />
+    <col style="width: 13.0552%;" />
+    <col style="width: 10.0269%;" />
+    <col style="width: 22.0054%;" />
+    <col style="width: 14.5357%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Bone Compression Format</th>
+      <th>Simplified Description</th>
+      <th>Skinning</th>
+      <th>
+        <p>Non-Uniform Scaling of Non-Skinning Bones</p>
+      </th>
+      <th>
+        <p>Skeletal Animation of Non-Skinning Bones</p>
+      </th>
+      <th>
+        <p>Bone Visibility Animation</p>
+      </th>
+      <th>Bones for Compression</th>
+      <th>Main Applications</th>
+    </tr>
+    <tr>
+      <th>Cull</th>
+      <td>Detailed settings are not required, and the compression ratio is low.</td>
+      <td style="text-align: center;">YES</td>
+      <td style="text-align: center;">YES</td>
+      <td style="text-align: center;">YES</td>
+      <td style="text-align: center;">Some manual settings are required.</td>
+      <td style="text-align: center;">Only end points</td>
+      <td>Character models</td>
+    </tr>
+    <tr>
+      <th>Merge</th>
+      <td>Some detailed settings are required, and unnecessary bones are generally compressible.</td>
+      <td style="text-align: center;">YES</td>
+      <td style="text-align: center;">Some manual settings are required.</td>
+      <td style="text-align: center;">YES</td>
+      <td style="text-align: center;">
+        <p>Some manual settings are required.</p>
+      </td>
+      <td style="text-align: center;">
+        <p>End points + intermediate</p>
+      </td>
+      <td>Character models</td>
+    </tr>
+    <tr>
+      <th>
+        <p>Unite Child</p>
+        <p>(Usable with Cull, Merge)</p>
+      </th>
+      <td>Detailed settings are required, and if used correctly, maximize compressibility of unnecessary bones.</td>
+      <td style="text-align: center;">YES</td>
+      <td style="text-align: center;">Manual settings are required.</td>
+      <td style="text-align: center;">Manual settings are required.</td>
+      <td style="text-align: center;">Manual settings are required.</td>
+      <td style="text-align: center;">All bones under incompressible bones</td>
+      <td>Character models</td>
+    </tr>
+    <tr>
+      <th>Unite</th>
+      <td>For dynamic terrain models.</td>
+      <td style="text-align: center;">Not possible</td>
+      <td style="text-align: center;">Manual settings are required.</td>
+      <td style="text-align: center;">Manual settings are required.</td>
+      <td style="text-align: center;">Manual settings are required.</td>
+      <td style="text-align: center;">All bones except incompressible bones</td>
+      <td>Animated terrain models</td>
+    </tr>
+    <tr>
+      <th>Unite All</th>
+      <td>Static terrain models.</td>
+      <td style="text-align: center;">Not possible</td>
+      <td style="text-align: center;">Not possible</td>
+      <td style="text-align: center;">Not possible</td>
+      <td style="text-align: center;">Not possible</td>
+      <td style="text-align: center;">All bones except root bones</td>
+      <td>Non-animated terrain models</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_291410825_h2_13">Flowchart for Selecting the Compression Format</h2>
+<p>A flowchart for beginners, for selecting the compression format, is presented below. This is not the only option to select the optimal method based on the data, so use this is a reference in conjunction with the format characteristics presented above.</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_291410825/flowchart_15.svg" />
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

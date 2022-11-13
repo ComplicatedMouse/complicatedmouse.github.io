@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Example 2: Connect to a Dev Kit, Take a Profile, and Disconnect | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Example 2: Connect to a Dev Kit, Take a Profile, and Disconnect -->
+<div class="pagetitle" id="PageId_753912826">Example 2: Connect to a Dev Kit, Take a Profile, and Disconnect</div>
+<div class="text_separate">
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre># Connect to a dev kit, take a profile, and disconnect
+#   1. Set a Sync Scenario.
+#   2. Sync to the dev kit.
+#   3. Set the settings to use for the profile.
+#   4. Take the profile.
+#   5. Unsync from the dev kit.
+
+
+# 1. Set a Sync Scenario.
+$nssFile = &quot;C:/example.nss&quot;
+Profiler-NX-Scenario AttachOnLaunch -NssFile $nssFile -ProgramId &quot;0x0000000000000000&quot;
+
+# 2. Sync to the dev kit.
+Profiler-WaitFor CanSync
+$synced = Profiler-Sync
+if ($false -eq $synced)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;Write-Error &quot;Could not sync to dev kit.&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;exit
+}
+Profiler-WaitFor ReadyToProfile
+
+# 3. Set the settings to use for the profile.
+# Explicitly set every profiling setting in the UI.
+Profiler-Callstacks $true
+Profiler-NX-Cores 0 1 2
+Profiler-NX-GpuTrace $false
+Profiler-NX-PowerStats $false
+Profiler-NX-SampleMode OutOfProcess
+Profiler-NX-ThreadState $false
+Profiler-PerfCounters Disabled
+$rateSet = Profiler-Sample -Strategy Time -Rate 100
+
+if ($false -eq $rateSet)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;Write-Error &quot;Failed to set the sample strategy and rate&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;exit
+}
+
+# 4. Take the profile.
+Profiler-Start Sampled
+Profiler-Wait 2.0
+Profiler-Stop
+
+# 5. Unsync from the dev kit.
+Profiler-WaitFor ReadyToProfile
+Profiler-Unsync</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

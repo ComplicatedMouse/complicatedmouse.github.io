@@ -1,0 +1,252 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Opus Decoder | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Opus Decoder -->
+<div class="pagetitle" id="PageId_99805007">Opus Decoder</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_99805007_h1_1">Opus Decoder</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_99805007_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_99805007_h3_1"> Multistream Support</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_99805007_h2_2">Correcting Internal Latency </a>
+      </li>
+      <li>
+        <a href="#Anchor_99805007_h2_3">Usage Examples</a>
+      </li>
+      <li>
+        <a href="#Anchor_99805007_h2_4">API References</a>
+      </li>
+      <li>
+        <a href="#Anchor_99805007_h2_5">Restrictions</a>
+      </li>
+      <li>
+        <a href="#Anchor_99805007_h2_6">Important Information</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_99805007_h1_1">Opus Decoder</h1>
+<h2 id="Anchor_99805007_h2_1">Feature Overview<a name="Anchor_99805007_OpusCodecFunctionAbstract"></a></h2>
+<p>The Opus decoder provides the functionality for decoding Opus data and converting it to PCM data.</p>
+<p>The Opus decoder provided in <code><span class="ApiLink_nn__codec">nn::codec</span> </code> has been confirmed to work only on data that has been encoded by <a href="../Pages/Page_99805022.html">OpusEncoder</a> or the Opus encoding feature provided by <code>AudioCodec.dll</code>.</p>
+<p>The following two kinds of classes are provided for the Opus decoder. Both classes present the same interface, so it is easy to switch between them. (However, they have different memory requirements and restrictions.)</p>
+<table class="wrapped">
+  <colgroup> <col style="width: 247.0px;" /> <col style="width: 693.0px;" /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Class Name</th>
+      <th>Overview</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusDecoder</span>
+      </td>
+      <td>Decodes Opus audio using CPU resources.</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__codec__HardwareOpusDecoder">nn::codec::HardwareOpusDecoder</span>
+      </td>
+      <td>Performs Opus decoding using the audio DSP. (For more information about the behavior in the Windows environment, see <a href="#Anchor_99805007_h2_6">Important Information</a>.)</td>
+    </tr>
+  </tbody>
+</table>
+<p>Regardless of the class, the Opus decoder requires the user to prepare a work buffer.</p>
+<p>The following descriptions assume use of the <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusDecoder</span> class as a representative example.</p>
+<p>To get the size of the work buffer needed for decoding, use the <span class="ApiLink_virtual_size_t_nn__codec__OpusDecoder__GetWorkBufferSize(int_sampleRate|_int_channelCount)_const_noexcept_NN_OVERRIDE">nn::codec::OpusDecoder::GetWorkBufferSize()</span> function with the following parameters.</p>
+<ul>
+  <li>Sample rate</li>
+  <li>Number of channels</li>
+</ul>
+<p>This information is stored in the header information of the data encoded by <a href="../Pages/Page_99805022.html">OpusEncoder</a>. For more information, see the <span class="ApiLink_nn__codec__OpusBasicInfo">nn::codec::OpusBasicInfo</span> structure or the Opus decoder sample.</p>
+<p>By passing these parameters and the work buffer information to the <span class="ApiLink_nn__codec__OpusDecoder__Initialize">nn::codec::OpusDecoder::Initialize()</span> function, the Opus decoder is initialized and becomes available for use. After the Opus decoder has been initialized, you must not modify the work buffer until the <span class="ApiLink_nn__codec__OpusDecoder__Finalize">nn::codec::OpusDecoder::Finalize()</span> function is called.</p>
+<p>Decoding is performed with the <span class="ApiLink_virtual_OpusResult_nn__codec__OpusDecoder__DecodeInterleaved(size_t_*pOutConsumed|_int_*pOutSampleCount|_int16_t_*outputBuffer|_size_t_outputSize|_const_void_*inputBuffer|_size_t_inputSize)_noexcept_NN_OVERRIDE">nn::codec::OpusDecoder::DecodeInterleaved()</span> function. When using input and output buffers, note the following.</p>
+<ul>
+  <li>Input Buffer<br /><ul><li>If <code>--bitrate-control=cbr</code> was specified when <a href="../Pages/Page_99805022.html">OpusEncoder</a> was used, the size of the input buffer is fixed to <code><span class="ApiLink_nn__codec__OpusBasicInfo">nn::codec::OpusBasicInfo</span>::frameDataSize</code>.</li><li>If <code>--bitrate-control=vbr</code> was specified when <a href="../Pages/Page_99805022.html">OpusEncoder</a> was used, the size of the input buffer is variable.<ul><li>If <span class="ApiLink_nn__codec__OpusBasicInfo__frameDataSize">nn::codec::OpusBasicInfo::frameDataSize</span> is <code>0</code>, you can assume that the bit rate is variable.</li><li>In that case, you need as much as 1500 bytes.</li></ul></li></ul></li>
+  <li>Output Buffer<ul><li>A maximum of 960 samples can be output, so a sufficient size for the buffer is (960 &times; number_of_channels &times; sizeof(int16_t)) bytes.</li></ul></li>
+</ul>
+<p>You can determine the amount of input data actually used during decoding and the number of output samples by checking the values specified for the parameters of the <span class="ApiLink_nn__codec__OpusDecoder__DecodeInterleaved">nn::codec::OpusDecoder::DecodeInterleaved()</span> function.</p>
+<h3 id="Anchor_99805007_h3_1"> Multistream Support</h3>
+<p>The following two classes will decode multistream Opus data, in which sound sources with three of more channels have been encoded by <a href="../Pages/Page_99805022.html">OpusEncoder</a>, or the opus encoding functionality provided by <code>AudioCodec.dll</code>.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Class Name</th>
+      <th>Overview</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__codec__OpusMultiStreamDecoder">nn::codec::OpusMultiStreamDecoder</span>
+      </td>
+      <td>Decodes multistream Opus data using CPU resources.</td>
+    </tr>
+    <tr>
+      <td> <span class="ApiLink_nn__codec__HardwareOpusMultiStreamDecoder">nn::codec::HardwareOpusMultiStreamDecoder</span> </td>
+      <td>Performs multi-stream Opus decoding using the audio DSP. (For more information about the behavior in the Windows environment, see <a href="#Anchor_99805007_h2_6">Important Information</a>.)</td>
+    </tr>
+  </tbody>
+</table>
+<p>The procedure for using a multistream Opus decoder is basically the same as in the <a href="#Anchor_99805007_OpusCodecFunctionAbstract">Feature Overview</a>, but the arguments passed to the functions that get the work buffer size and initialize the decoder (<span class="ApiLink_nn__codec__OpusMultiStreamDecoder__GetWorkBufferSize">nn::codec::OpusMultiStreamDecoder::GetWorkBufferSize()</span> and <span class="ApiLink_nn__codec__OpusMultiStreamDecoder__Initialize">nn::codec::OpusMultiStreamDecoder::Initialize()</span>), differ from those passed to the comparable member functions of the <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusDecoder</span> class.</p>
+<p>To get the size of the work buffer needed for decoding, use the <span class="ApiLink_virtual_size_t_nn__codec__OpusMultiStreamDecoder__GetWorkBufferSize(int_sampleRate|_int_channelCount|_int_totalStreamCount|_int_stereoStreamCount)_const_noexcept_NN_OVERRIDE">nn::codec::OpusMultiStreamDecoder::GetWorkBufferSize()</span> function together with the following parameters.</p>
+<ul>
+  <li>Sample rate</li>
+  <li>Number of channels</li>
+  <li>Total number of streams</li>
+  <li>Number of stereo streams</li>
+</ul>
+<p>This information is stored in the header information of the data encoded by <a href="../Pages/Page_99805022.html">OpusEncoder</a>. For more information, see the <span class="ApiLink_nn__codec__OpusBasicInfo">nn::codec::OpusBasicInfo</span> structure, the <span class="ApiLink_nn__codec__OpusMultiStreamInfo">nn::codec::OpusMultiStreamInfo</span> structure, and the Opus multistream decoder sample.</p>
+<p>Pass these parameters along with the work buffer information and the number of channels to the <span class="ApiLink_nn__codec__OpusMultiStreamDecoder__Initialize">nn::codec::OpusMultiStreamDecoder::Initialize()</span> function to initialize the Opus multistream decoder and make it ready for use. After the decoder has been initialized, you must not modify the work buffer until the <span class="ApiLink_virtual_void_nn__codec__OpusMultiStreamDecoder__Finalize()_noexcept_NN_OVERRIDE">nn::codec::OpusMultiStreamDecoder::Finalize()</span> function is called.</p>
+<p>Decoding is performed with the <span class="ApiLink_virtual_OpusResult_nn__codec__OpusMultiStreamDecoder__DecodeInterleaved(size_t_*pOutConsumed|_int_*pOutSampleCount|_int16_t_*outputBuffer|_size_t_outputSize|_const_void_*inputBuffer|_size_t_inputSize)_noexcept_NN_OVERRIDE">nn::codec::OpusMultiStreamDecoder::DecodeInterleaved()</span> function. For more information about the input and output buffers, see <a href="#Anchor_99805007_OpusCodecFunctionAbstract">Feature Overview</a>.</p>
+<p>The amount of input data actually used during decoding and the number of output samples can be determined from the values specified for the parameters of the <span class="ApiLink_virtual_OpusResult_nn__codec__OpusMultiStreamDecoder__DecodeInterleaved(size_t_*pOutConsumed|_int_*pOutSampleCount|_int16_t_*outputBuffer|_size_t_outputSize|_const_void_*inputBuffer|_size_t_inputSize)_noexcept_NN_OVERRIDE">nn::codec::OpusMultiStreamDecoder::DecodeInterleaved()</span> function.</p>
+<p>The Opus data that can be decoded by <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusDecoder</span> (single stream Opus data) can also be decoded by <span class="ApiLink_nn__codec__OpusMultiStreamDecoder">nn::codec::OpusMultiStreamDecoder</span> by specifying <code>1</code> for the total number streams, and the <em>number of channels</em> - 1 for the number of stereo streams.</p>
+<p>However, you can decode with a smaller work buffer by using <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusDecoder</span>. Unless you have a specific reason to do otherwise, decode single stream Opus data by using <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusDecoder</span>.</p>
+<h2 id="Anchor_99805007_h2_2">Correcting Internal Latency<a name="Anchor_99805007_OpusCodecInternalDelayCorrection"></a> </h2>
+<p>Normal audio codecs contain internal latency elements. The Opus encoder also has internal latency.</p>
+<p>You can get the internal latency using the methods described later.</p>
+<p>You can correct the internal latency by skipping several samples equivalent to the latency samples at the beginning of the decoded results obtained from <span class="ApiLink_virtual_OpusResult_nn__codec__OpusDecoder__DecodeInterleaved(size_t_*pOutConsumed|_int_*pOutSampleCount|_int16_t_*outputBuffer|_size_t_outputSize|_const_void_*inputBuffer|_size_t_inputSize)_noexcept_NN_OVERRIDE">nn::codec::OpusDecoder::DecodeInterleaved()</span> called immediately after calling <span class="ApiLink_virtual_OpusResult_nn__codec__OpusDecoder__Initialize(int_sampleRate|_int_channelCount|_void_*buffer|_size_t_size)_noexcept_NN_OVERRIDE">nn::codec::OpusDecoder::Initialize()</span>.</p>
+<p>You can get the internal latency using the following methods.</p>
+<ul>
+  <li>
+    <span class="ApiLink_virtual_int_nn__codec__OpusEncoder__GetPreSkipSampleCount()_const_noexcept_NN_OVERRIDE">nn::codec::OpusEncoder::GetPreSkipSampleCount()</span> (When encoding using <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusEncoder</span>.)</li>
+  <li>
+    <span class="ApiLink_nn__codec__OpusBasicInfo__preSkipSampleCount">nn::codec::OpusBasicInfo::preSkipSampleCount</span> (When encoding using the OpusEncoder PC tool.)</li>
+</ul>
+<p>These values express encoder latency in number of samples (number of latency samples).</p>
+<p>For more information, see the Opus codec <a href="https://www.opus-codec.org/docs/opus_api-1.1.3/group__opus__encoderctls.html#gaf81b9e01501910adc67195ebb42b4a54">API Reference</a>.</p>
+<p>
+  <br />
+</p>
+<p>Note that the number of latency samples is the number of samples in the sample rate specified in <span class="ApiLink_virtual_OpusResult_nn__codec__OpusEncoder__Initialize(int_sampleRate|_int_channelCount|_void_*buffer|_size_t_size)_noexcept_NN_OVERRIDE">nn::codec::OpusEncoder::Initialize()</span>. </p>
+<p>If you specify a sample rate different from the setting in <span class="ApiLink_nn__codec__OpusDecoder__Initialize">nn::codec::OpusDecoder::Initialize()</span>, you must convert the number of latency samples.</p>
+<h2 id="Anchor_99805007_h2_3">Usage Examples</h2>
+<p>See the <span class="ApiLink_PageSampleCodecOpusDecoder">Opus decoder sample</span>.</p>
+<h2 id="Anchor_99805007_h2_4">API References</h2>
+<p>For more information, see the <span class="ApiLink_nn__codec">OpusDecoder class</span> in the <span class="ApiLink_nn__codec__OpusDecoder">nn::codec namespace</span>.</p>
+<h2 id="Anchor_99805007_h2_5">Restrictions</h2>
+<p>When <code><span class="ApiLink_nn__codec__HardwareOpusDecoder">nn::codec::HardwareOpusDecoder</span></code> uses system resources, there is an upper limit on the available number.</p>
+<div class="platform_nx">
+  <p>Up to 24 are available on the NX Platform. The actual number available changes depending on the usage of other modules.</p>
+</div>
+<h2 id="Anchor_99805007_h2_6">Important Information</h2>
+<ul>
+  <li>The audio DSP that processes <code><span class="ApiLink_nn__codec__HardwareOpusDecoder">nn::codec::HardwareOpusDecoder</span></code> also handles the processes of the audio renderer.<br />When the processes of the audio renderer increase, the chip may not get around to processing <code><span class="ApiLink_nn__codec__HardwareOpusDecoder">nn::codec::HardwareOpusDecoder</span></code>.</li>
+  <li>In the Windows environment, <code><span class="ApiLink_nn__codec__HardwareOpusDecoder">nn::codec::HardwareOpusDecoder</span></code> is provided to reduce branched implementations.<br />The actual processing is done by <code><span class="ApiLink_nn__codec__OpusDecoder">nn::codec::OpusDecoder</span></code>.<br />In the development hardware environment, where the hardware comes with an audio DSP, both the processing load and the require buffer size may differ for <code><span class="ApiLink_nn__codec__OpusDecoder">nn::codec::OpusDecoder</span></code>.</li>
+  <li>A brief fade occurs and noise might result when decoding an Opus data file midway instead of from the beginning, such as during random seek playback or looped playback.<br />This problem can be avoided by decoding from a frame that is 3,840 samples in advance of the decode start frame.<ul><li>The value specified for the <code>prediction</code> option during encoding determines the handling for the fade or noise. For more information, see the description of the <code>--disable-prediction</code> option at <a href="../Pages/Page_99805022.html">OpusEncoder</a>.</li></ul></li>
+  <li>When using opus data created using an encoder other than the <a href="../Pages/Page_99805022.html">OpusEncoder.exe</a> included with NintendoSDK, attaching the following 8-byte header data to the head of the opus packets makes it possible to handle them with <code><span class="ApiLink_nn__codec">nn::codec</span></code> functions.<ul><li>header<span class="error">[0:3]</span><ul><li>The data size of the opus packet (in bytes), minus the header data.</li><li>Stored as big-endian.</li></ul></li><li style="list-style-type: none;">header<span class="error">[4:7]</span><ul><li>Filled with zeros.</li></ul></li></ul></li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__codec', '../../../Api/HtmlNX/namespacenn_1_1codec.html' )
+SetUrl( 'ApiLink_nn__codec__OpusEncoder', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html' )
+SetUrl( 'ApiLink_nn__codec__HardwareOpusDecoder', '../../../Api/HtmlNX/classnn_1_1codec_1_1_hardware_opus_decoder.html' )
+SetUrl( 'ApiLink_virtual_size_t_nn__codec__OpusDecoder__GetWorkBufferSize(int_sampleRate|_int_channelCount)_const_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_decoder.html#ad2fd272c7a8f639c42537528ffe3ac7e' )
+SetUrl( 'ApiLink_nn__codec__OpusBasicInfo', '../../../Api/HtmlNX/structnn_1_1codec_1_1_opus_basic_info.html' )
+SetUrl( 'ApiLink_nn__codec__OpusDecoder__Initialize', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_decoder.html#a07947768528b08c6c40421c5119c0b6e' )
+SetUrl( 'ApiLink_nn__codec__OpusDecoder__Finalize', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_decoder.html#a34d86d9b409776d31c8fbabed79fc40c' )
+SetUrl( 'ApiLink_virtual_OpusResult_nn__codec__OpusDecoder__DecodeInterleaved(size_t_*pOutConsumed|_int_*pOutSampleCount|_int16_t_*outputBuffer|_size_t_outputSize|_const_void_*inputBuffer|_size_t_inputSize)_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_decoder.html#a63ce85f84facdd3256efc94e50b6ee4a' )
+SetUrl( 'ApiLink_nn__codec__OpusBasicInfo__frameDataSize', '../../../Api/HtmlNX/structnn_1_1codec_1_1_opus_basic_info.html#a39122791256a101728327e89e9a7b3b5' )
+SetUrl( 'ApiLink_nn__codec__OpusDecoder__DecodeInterleaved', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_decoder.html#a63ce85f84facdd3256efc94e50b6ee4a' )
+SetUrl( 'ApiLink_nn__codec__OpusMultiStreamDecoder', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_multi_stream_decoder.html' )
+SetUrl( 'ApiLink_nn__codec__HardwareOpusMultiStreamDecoder', '../../../Api/HtmlNX/classnn_1_1codec_1_1_hardware_opus_multi_stream_decoder.html' )
+SetUrl( 'ApiLink_nn__codec__OpusMultiStreamDecoder__GetWorkBufferSize', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_multi_stream_decoder.html#a47be591b65ce3c72f0261d22457bf8f7' )
+SetUrl( 'ApiLink_nn__codec__OpusMultiStreamDecoder__Initialize', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_multi_stream_decoder.html#af352fc4ff5782e87d35d7986427aeef2' )
+SetUrl( 'ApiLink_virtual_size_t_nn__codec__OpusMultiStreamDecoder__GetWorkBufferSize(int_sampleRate|_int_channelCount|_int_totalStreamCount|_int_stereoStreamCount)_const_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_multi_stream_decoder.html#a47be591b65ce3c72f0261d22457bf8f7' )
+SetUrl( 'ApiLink_nn__codec__OpusMultiStreamInfo', '../../../Api/HtmlNX/structnn_1_1codec_1_1_opus_multi_stream_info.html' )
+SetUrl( 'ApiLink_virtual_void_nn__codec__OpusMultiStreamDecoder__Finalize()_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_multi_stream_decoder.html#af56ce14ee8a6a081773c58868c8ab5fa' )
+SetUrl( 'ApiLink_virtual_OpusResult_nn__codec__OpusMultiStreamDecoder__DecodeInterleaved(size_t_*pOutConsumed|_int_*pOutSampleCount|_int16_t_*outputBuffer|_size_t_outputSize|_const_void_*inputBuffer|_size_t_inputSize)_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_multi_stream_decoder.html#ad4841ee39d8a325cc1b9fe2c3ad11a45' )
+SetUrl( 'ApiLink_virtual_OpusResult_nn__codec__OpusDecoder__Initialize(int_sampleRate|_int_channelCount|_void_*buffer|_size_t_size)_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_decoder.html#a07947768528b08c6c40421c5119c0b6e' )
+SetUrl( 'ApiLink_virtual_int_nn__codec__OpusEncoder__GetPreSkipSampleCount()_const_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#a7e64504bba6e8b626d132d459cf3afb4' )
+SetUrl( 'ApiLink_nn__codec__OpusBasicInfo__preSkipSampleCount', '../../../Api/HtmlNX/structnn_1_1codec_1_1_opus_basic_info.html#a54b2474b389f2dd25bea634bbeca57ed' )
+SetUrl( 'ApiLink_virtual_OpusResult_nn__codec__OpusEncoder__Initialize(int_sampleRate|_int_channelCount|_void_*buffer|_size_t_size)_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#adee7bf9f60139e169535f3214bdf2fc7' )
+SetUrl( 'ApiLink_PageSampleCodecOpusDecoder', '../../../Api/HtmlNX/_page_sample_codec_opus_decoder.html' )
+SetUrl( 'ApiLink_nn__codec__OpusDecoder', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_decoder.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

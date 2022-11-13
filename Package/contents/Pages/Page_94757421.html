@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Creating an Independent Build System (NX Development Hardware Environment) | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Creating an Independent Build System (NX Development Hardware Environment) -->
+<div class="pagetitle" id="PageId_94757421">Creating an Independent Build System (NX Development Hardware Environment)</div>
+<div class="text_separate">
+<!--Remove-->
+<h1 id="Anchor_94757421_h1_1">Introduction</h1>
+<h2 id="Anchor_94757421_h2_1">About This Page</h2>
+<p>This section is for developers who intend to create their own build system without using the VSI provided by NintendoSDK. It presents the information needed to create applications for the NX hardware environment.</p>
+<h2 id="Anchor_94757421_h2_2">Related Items</h2>
+<p>For more information about debugging applications that have been created using a proprietary build system, see <a href="../Pages/Page_126569850.html">Debugging a Built Program</a>. </p>
+<h2 id="Anchor_94757421_h2_3">Notation</h2>
+<p>The following command syntax is used in the descriptions of build procedures.</p>
+<ul>
+  <li>Angle brackets (&lt; &gt;) indicate that you must substitute the appropriate option value.</li>
+  <li>Square brackets ([ ]) indicate optional items.</li>
+  <li>... An ellipsis (...) indicates that multiple options are possible in the location where the ellipsis was appended.</li>
+</ul>
+<p>To improve the readability of the examples of the command-line options, line breaks have been added in places. However, the actual commands do not include these line breaks.</p>
+<h2 id="Anchor_94757421_h2_4">Important Information</h2>
+<p>This section contains information that is highly likely to change in future NintendoSDK releases. Whenever there is a new NintendoSDK release, check the change log and confirm whether related items are present.</p>
+<h1 id="Anchor_94757421_h1_2">Build Tools</h1>
+<h2 id="Anchor_94757421_h2_5">Compiler tool chains</h2>
+<p>The compiler tool chains for the NX development hardware environment are installed in the following directory.</p>
+<ul>
+  <li>%NINTENDO_SDK_ROOT%\Compilers\NX</li>
+</ul>
+<p>There are several tool chains. Use one of the following target-specific tool chains to suit the application you will create.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>Target Name</th>
+    </tr>
+    <tr>
+      <th>32-bit applications</th>
+      <td>armv7l-nintendo-nx-eabihf</td>
+    </tr>
+    <tr>
+      <th>64-bit applications</th>
+      <td>aarch64-nintendo-nx-elf</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_94757421_h2_6">Other Tools</h2>
+<p>The other build tools (the tools other than these compiler tool chains) are installed in the following directory.</p>
+<ul>
+  <li>%NINTENDO_SDK_ROOT%\Tools</li>
+</ul>
+<h1 id="Anchor_94757421_h1_3">Build Procedures</h1>
+<h2 id="Anchor_94757421_h2_7">Overview</h2>
+<p>The following describes the overall build procedure, depicting the sequence from the source files to the creation of the final image of the application.</p>
+<ol>
+  <li>
+    <a href="#Anchor_94757421_object-file">Creating the Object File</a>
+  </li>
+  <li>
+    <a href="#Anchor_94757421_static-library">Creating a Static Library</a>
+  </li>
+  <li>
+    <a href="#Anchor_94757421_dynamic-library">Creating a Dynamic Module</a>
+  </li>
+  <li>
+    <a href="#Anchor_94757421_application-program">Creating an Application Program</a>
+  </li>
+  <li>
+    <a href="#Anchor_94757421_application-image">Creating an Application Image</a>
+  </li>
+</ol>
+<p>Creating a static library and creating a dynamic module are not required for creating application images.</p>
+<p>The legend for the diagrams used in the descriptions of the build procedures is as follows.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_94757421/171995236.png" class="embedded-image" />
+  </span>
+</p>
+<p>Blue square: input file in the procedure. The developer must create this file.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_94757421/171995237.png" class="embedded-image" />
+  </span>
+</p>
+<p>Orange square: output file in the procedure. This file is required when executing other build procedures and executing the application.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_94757421/171995239.png" class="embedded-image" />
+  </span>
+</p>
+<p>Green square with hollow center: intermediate output in the procedure.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_94757421/171995240.png" class="embedded-image" />
+  </span>
+</p>
+<p>Large green square: indicates a build tool.</p>
+<h2 id="Anchor_94757421_h2_8">Creating the Object File<a name="Anchor_94757421_object-file"></a></h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_94757421/171995241.png" class="embedded-image" />
+  </span>
+</p>
+<p>Compile the source file and create the object file.</p>
+<p>For more information about the procedure, see <a href="../Pages/Page_170694349.html">Build Procedure: Creating the Object File</a>.</p>
+<h2 id="Anchor_94757421_h2_9">Creating a Static Library<a name="Anchor_94757421_static-library"></a></h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_94757421/171995242.png" class="embedded-image" />
+  </span>
+</p>
+<p>Archive object files and other static library files and create a new static library.</p>
+<p>The developer can omit this procedure if the static library does not need to be created.</p>
+<p>For more information about the procedure, see <a href="../Pages/Page_170694496.html">Build Procedure: Creating a Static Library</a>.</p>
+<h2 id="Anchor_94757421_h2_10">Creating a Dynamic Module<a name="Anchor_94757421_dynamic-library"></a></h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_94757421/171995243.png" class="embedded-image" />
+  </span>
+</p>
+<p>Create dynamic modules (common libraries) from object files and static library files that can be used by the NintendoSDK <a href="../Pages/Page_161307762.html">ro library</a>.</p>
+<p>The developer can omit this procedure if the <code>ro</code> library feature is not required.</p>
+<p>For more information about the procedure, see <a href="../Pages/Page_170694375.html">Build Procedure: Creating a Dynamic Module</a>.</p>
+<h2 id="Anchor_94757421_h2_11">Creating an Application Program<a name="Anchor_94757421_application-program"></a></h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_94757421/171995244.png" class="embedded-image" />
+  </span>
+</p>
+<p>Link object files, static library files, and the like and create an application program.</p>
+<p>For more information about the procedure, see <a href="../Pages/Page_170694365.html">Build Procedure: Creating an Application Program</a>.</p>
+<h2 id="Anchor_94757421_h2_12">Creating Application Images<a name="Anchor_94757421_application-image"></a></h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_94757421/171995245.png" class="embedded-image" />
+  </span>
+</p>
+<p>Create an application image that can run on the NX development hardware from the application program, the dynamic module files, and so on. By using VSI, you can create the image as an NSP file and in a RAW format.</p>
+<p>For more information about the procedure, see <a href="../Pages/Page_170694395.html">Build Procedure: Creating an Application Image</a>.</p>
+<h1 id="Anchor_94757421_h1_4">Compiler and Linker Options</h1>
+<p>It is assumed that several compiler options and linker options must either be specified or not specified for NintendoSDK. Not following the rules for specifying these options causes build errors and results in applications that do not run correctly. The rules for specifying options are listed on the pages describing the detailed procedures of the build flow.</p>
+<p>Compiler options and linker options may change in future releases of the NintendoSDK. If you want to implement features that are dependent on certain compilation or linker options, consult with NintendoSDK support.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

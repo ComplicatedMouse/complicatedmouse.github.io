@@ -1,0 +1,288 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Memory Consumption in the Runtime | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Memory Consumption in the Runtime -->
+<div class="pagetitle" id="PageId_91194043">Memory Consumption in the Runtime</div>
+<div class="text_separate">
+<h1 id="Anchor_91194043_h1_1">Memory Consumption in the Runtime</h1>
+<p>Broadly speaking, the effect runtime consumes memory in two ways.</p>
+<ul>
+  <li>Working memory allocated by the <code>vfx</code> system.</li>
+  <li>Working memory allocated for playing effects</li>
+</ul>
+<h1 id="Anchor_91194043_h1_2">Working Memory Allocated by the vfx System</h1>
+<p>The working memory allocated by the <code>vfx</code> system can be further classified in two broad ways.</p>
+<ul>
+  <li>Memory allocated when the <code>vfx</code> system is initialized.</li>
+  <li>Memory allocated when the effect binary is registered in the <code>vfx</code> system.</li>
+</ul>
+<h2 id="Anchor_91194043_h2_1">Working Memory Allocated When the vfx System Is Initialized</h2>
+<p>Memory is allocated for the runtime when the system is initialized. The allocated memory is freed when the system is finalized. The memory is allocated to the heap specified by the <code><span class="ApiLink_nn__vfx__Config__SetEffectHeap">nn::vfx::Config::SetEffectHeap</span></code> function. The size of the allocated memory depends on the number of emitter sets and the number of emitters specified in <code><span class="ApiLink_nn__vfx__Config">nn::vfx::Config</span></code>. The total amount of memory that is ultimately allocated is output to the log after the initialization of the effect system.</p>
+<p>The allocated memory is primarily used for the following purposes.</p>
+<ul>
+  <li>Working memory for emitter sets, emitters, and other resources</li>
+  <li>Temporary buffer</li>
+  <li>GPU buffer</li>
+  <li>Texture working memory for curl noise</li>
+  <li>Constant buffers used by emitters</li>
+</ul>
+<p>The temporary buffer and GPU buffer are used for the initialization of <code>EmitterSet</code> objects that are the generation of draw commands.</p>
+<h3 id="Anchor_91194043_h3_1">The nn::vfx::Config Class</h3>
+<p>The following values are specified in the <code><span class="ApiLink_nn__vfx__Config">nn::vfx::Config</span></code> class, and more working memory is required when these values are set higher.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__vfx__Config__SetResourceCount">nn::vfx::Config::SetResourceCount</span>
+      </th>
+      <td>Specifies the maximum number of resources that the <code>vfx</code> system will handle.</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__vfx__Config__SetEmitterSetCount">nn::vfx::Config::SetEmitterSetCount</span>
+      </th>
+      <td>Specifies the maximum number of emitter sets that the <code>vfx</code> system can play.</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__vfx__Config__SetEmitterCount">nn::vfx::Config::SetEmitterCount</span>
+      </th>
+      <td>Specifies the maximum number of emitters that the <code>vfx</code> system can play.</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__vfx__Config__SetStripeCount">nn::vfx::Config::SetStripeCount</span>
+      </th>
+      <td>Specifies the maximum number of Historical Stripe objects that the <code>vfx</code> system can play.</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__vfx__Config__SetSuperStripeCount">nn::vfx::Config::SetSuperStripeCount</span>
+      </th>
+      <td>Specifies the maximum number of Historical Stripe2 objects that the <code>vfx</code> system can play.</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__vfx__Config__SetTemporaryBufferSize">nn::vfx::Config::SetTemporaryBufferSize</span>
+      </th>
+      <td>Specifies the size of the temporary buffer that the <code>vfx</code> system will initialize.</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__vfx__Config__SetGpuBufferSize">nn::vfx::Config::SetGpuBufferSize</span>
+      </th>
+      <td>Specifies the size of the GPU buffer that the <code>vfx</code> system will initialize.</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__vfx__Config__SetParticleSortBufferCount">nn::vfx::Config::SetParticleSortBufferCount</span>
+      </th>
+      <td>Specifies the number of sortable particles that the <code>vfx</code> system will handle.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_91194043_h2_2">Working Memory Allocated When the Effect Binary Is Registered in the vfx System</h2>
+<p>When an effect binary is initialized, memory is allocated for setting up the binary. The allocated memory is freed when the effect binary is destroyed. The heap that the memory is allocated to is specified in the <code><span class="ApiLink_nn__vfx__System__EntryResource">nn::vfx::System::EntryResource</span></code> member function along with the effect binary loaded by the application. After the effect binary is initialized, you can use the <code><span class="ApiLink_nn__vfx__Resource__OutputResourceInfo">nn::vfx::Resource::OutputResourceInfo</span>()</code> member function to output a detailed breakdown of the allocated working memory to the log.</p>
+<p>The allocated memory is primarily used for the following purposes.</p>
+<ul>
+  <li>Working memory for managing assets (shaders, textures, and primitives)</li>
+  <li>Working memory for managing emitter sets and emitter parameters</li>
+  <li>Constant buffer generated from the emitter information in the resource</li>
+</ul>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_91194043_h1_3">Working Memory Allocated for Playing Effects</h1>
+<p>Working memory for playing effects is allocated from the following three buffers.</p>
+<ul>
+  <li>Dynamic heap</li>
+  <li>GPU buffer</li>
+  <li>Temporary buffer</li>
+</ul>
+<p>When working memory cannot be allocated from these buffers, the runtime outputs a warning and continues to run.<br />For more information about each buffer, see the following sections.</p>
+<h3 id="Anchor_91194043_h3_2">Dynamic Heap</h3>
+<p>The dynamic heap is used to dynamically allocate working memory necessary for playing effects.<br />Use the <code><span class="ApiLink_nn__vfx__Config__SetEffectDynamicHeap">nn::vfx::Config::SetEffectDynamicHeap</span></code> function to specify which heap to allocate to.<br />In the VFX runtime, working memory is allocated from the dynamic heap for the following purposes.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Particle data</th>
+      <td>
+        <p>Working memory for recording information about individual particles.<br />The working memory size becomes larger in proportion to the number of particles emitted by the emitter.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Working memory for managing stripe history</th>
+      <td>Working memory for managing the history of Historical Stripe and Historical Stripe2 effects.<br />The allocated size increases in proportion to the number of past samples of stripes.</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_91194043_h3_3">GPU Buffer</h3>
+<p>The GPU buffer is for placing attribute data, vertex buffers, and other data directly referenced by the GPU.<br />In the VFX runtime, working memory is allocated from this buffer for the following purposes.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Attributes for particle rendering</th>
+      <td>Allocates attributes for recording parameters such as the position, speed, rotation, and scale of individual particles.<br />The size used per particle varies depending on each particle's settings, but the minimum size per particle is 96 bytes, and the maximum is 224 bytes.</td>
+    </tr>
+    <tr>
+      <th>Vertex buffers for stripe rendering</th>
+      <td>Vertex buffers for rendering stripes.<br />Vertex buffers are allocated from the GPU buffer at the emitter level. The allocated size increases and decreases with the number of stripes to render simultaneously and the maximum length of each stripe.</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_91194043_h3_4">Temporary Buffer</h3>
+<p>This heap type is used when rendering to allocate a constant buffer referenced by an enabled GPU within that frame.<br />In the VFX runtime, working memory is allocated from this buffer for the following purposes.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>View information</th>
+      <td>
+        <p>Uses the temporary buffer each time <code><span class="ApiLink_nn__vfx__System__SetViewParam">nn::vfx::System::SetViewParam</span></code> is called.</p>
+        <p>A temporary buffer of 512 bytes including the alignment region is consumed for each instance of view information.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>Use in custom shaders</p>
+        <p>Constant buffers</p>
+      </th>
+      <td>
+        <p>The temporary buffer can be used when you want to use a user-defined constant buffer within a custom shader.<br />Basically, to split off the working memory from the temporary buffer at the emitter level, the consumed temporary buffer size increases and decreases in proportion to the number of emitters to render using custom shaders.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Stripe</th>
+      <td>
+        <p>Uses the temporary buffer for referencing rendering information at the single stripe level in the GPU.</p>
+        <p>The consumed temporary buffer size increases and decreases in proportion to the number of stripes being played back.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_91194043_h2_3">Relationship Between Emitter Sets and Buffers</h2>
+<p>When creating an emitter set, particle data is allocated from the dynamic heap, and attributes for particle rendering are allocated from the GPU buffer. During rendering, working memory is allocated from the temporary buffer during stripe rendering and emitter rendering using custom shaders. The working memory to allocate for particle data and attributes for particle rendering gets larger in proportion to the number of particles to emit from the emitter.</p>
+<p>
+  <strong>
+    <u>For Particles</u>
+  </strong>
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_91194043/205901594.png" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <strong>
+    <u>For Stripes</u>
+  </strong>
+</p>
+<p>For stripes, in addition to the working memory for particles, working memory is allocated from the dynamic heap for the buffer for managing stripe history when creating the emitter set, from the GPU buffer for the buffer for stripe rendering, and from the temporary buffer for data specific to individual stripes during rendering.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_91194043/205902382.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__vfx__Config__SetEffectHeap', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html#ac20025a5ed3c90e12a243d297fcf9c07' )
+SetUrl( 'ApiLink_nn__vfx__Config', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html' )
+SetUrl( 'ApiLink_nn__vfx__Config__SetResourceCount', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html#a005e4577856a3f28a47f4fb9f90c1ab9' )
+SetUrl( 'ApiLink_nn__vfx__Config__SetEmitterSetCount', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html#a91788b1a511965d7db5c7f0e5ae9ae21' )
+SetUrl( 'ApiLink_nn__vfx__Config__SetEmitterCount', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html#a07e32802c274fe964bd8f54f88160cb4' )
+SetUrl( 'ApiLink_nn__vfx__Config__SetStripeCount', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html#adaa234b135b5b11350c27fc52585c6e6' )
+SetUrl( 'ApiLink_nn__vfx__Config__SetSuperStripeCount', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html#a6e15292bc73a097eecb776787add7831' )
+SetUrl( 'ApiLink_nn__vfx__Config__SetTemporaryBufferSize', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html#a56214c62a8333dc7a377963e16d8914a' )
+SetUrl( 'ApiLink_nn__vfx__Config__SetGpuBufferSize', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html#a5543793ab7fcdd39d0acaaad4e1a2731' )
+SetUrl( 'ApiLink_nn__vfx__Config__SetParticleSortBufferCount', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html#a7c010598679705edea9d788780986607' )
+SetUrl( 'ApiLink_nn__vfx__System__EntryResource', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_system.html#a0418cc91c6dceab635cb5117b6aaf5e2' )
+SetUrl( 'ApiLink_nn__vfx__Resource__OutputResourceInfo', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_resource.html#a835237c4d797396c08b1951c8030f871' )
+SetUrl( 'ApiLink_nn__vfx__Config__SetEffectDynamicHeap', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_config.html#a48478372c0d3ba9e7841b64ec7e5fc17' )
+SetUrl( 'ApiLink_nn__vfx__System__SetViewParam', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_system.html#a1f488238e445ac3aa496f762c649cd16' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

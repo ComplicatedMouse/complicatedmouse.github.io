@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Inline Keyboard | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Inline Keyboard -->
+<div class="pagetitle" id="PageId_330968435">Inline Keyboard</div>
+<div class="text_separate">
+<p>The inline keyboard is a software keyboard that displays a keyboard in some parts of the application.</p>
+<p>This section describes the basic workflow through starting the software keyboard applet as the inline keyboard.</p>
+<p>The inline keyboard differs from the software keyboard applet in the following ways.</p>
+<ul>
+  <li>When using the inline keyboard, the application will not transition to the out-of-focus state.</li>
+  <li>When using the inline keyboard, the GPU time available to the application is restricted.<ul><li>In SDK 10.2.0 and earlier, about 12% of the GPU time was allocated for inline keyboard use after <code><span class="ApiLink_nn__swkbd__InlineKeyboard__Initialize">nn::swkbd::InlineKeyboard::Initialize</span>()</code> was called.</li><li>In SDK 10.3.0 and later, about 12% of GPU time is allocated for inline keyboard use while the keyboard is being displayed, after <code><span class="ApiLink_nn__swkbd__InlineKeyboard__Appear">nn::swkbd::InlineKeyboard::Appear</span>()</code> is called.</li></ul></li>
+  <li>The keyboard and footer are rendered, but not displayed on the screen.<ul><li>Get the rendering results via <code><span class="ApiLink_nn__swkbd__InlineKeyboard__GetImage">nn::swkbd::InlineKeyboard::GetImage</span>()</code> and display the results individually.</li></ul></li>
+  <li>The preview is not rendered.<ul><li>Does not include the rendering results obtained with <code><span class="ApiLink_nn__swkbd__InlineKeyboard__GetImage">nn::swkbd::InlineKeyboard::GetImage</span>()</code>.</li></ul></li>
+</ul>
+<h1 id="Anchor_330968435_h1_1">Including Header Files</h1>
+<p>Add the following code to your program.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&nbsp;<span class="cp">#include &lt;nn/swkbd/swkbd_InlineKeyboardApi.h&gt;
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_330968435_h1_2">Initialization</h1>
+<p>Make preparations to start the inline keyboard.<br />Just calling this function will not show the inline keyboard.<br />The inline keyboard is still being started up immediately after calling this function, and may not be able to accept requests such as string settings yet.<br />Call functions apart from initialization after confirming that the finished initialization callback function (<code><span class="ApiLink_nn__swkbd__FinishedInitializeCallback">nn::swkbd::FinishedInitializeCallback</span>()</code>) shown in the Callback Function Settings has been called.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">char</span> <span class="n">heapBuffer</span><span class="p">[</span><span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">];</span>
+<span class="nn">nn::mem::</span><span class="n">StandardAllocator</span> <span class="n">allocator</span><span class="p">(</span> <span class="n">heapBuffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span> <span class="n">heapBuffer</span> <span class="p">)</span> <span class="p">);</span>
+
+<span class="c1">// Create an instance for the inline keyboard.
+</span><span class="nn">nn::swkbd::</span><span class="n">InlineKeyboard</span> <span class="n">inlineKeyboard</span><span class="p">;</span>
+&nbsp;&nbsp;
+<span class="kt">void</span><span class="o">*</span> <span class="n">asyncWorkBuf</span> <span class="o">=</span> <span class="n">allocator</span><span class="p">.</span><span class="n">Allocate</span><span class="p">(</span> <span class="nn">nn::swkbd::InlineKeyboard::</span><span class="n">GetRequiredWorkBufferSize</span><span class="p">()</span> <span class="p">);</span>
+<span class="n">inlineKeyboard</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span> <span class="n">asyncWorkBuf</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_330968435_h1_3">Callback Function Settings</h1>
+<p>The inline keyboard has a feature to notify the application every time the show/hide option is changed or the characters are changed.<br />The following callback functions can be configured.<br />You can call <code><span class="ApiLink_nn__swkbd__InlineKeyboard__Calc">nn::swkbd::InlineKeyboard::Calc</span>()</code> to call these callback functions. </p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Timing of Call</th>
+      <th>Corresponding Function</th>
+    </tr>
+    <tr>
+      <td>When initialization is complete</td>
+      <td>
+        <span class="ApiLink_nn__swkbd__InlineKeyboard__SetFinishedInitializeCallback">nn::swkbd::InlineKeyboard::SetFinishedInitializeCallback</span>
+      </td>
+    </tr>
+    <tr>
+      <td>When exiting the inline keyboard</td>
+      <td>
+        <span class="ApiLink_nn__swkbd__InlineKeyboard__SetFinishedKeyboardCallback">nn::swkbd::InlineKeyboard::SetFinishedKeyboardCallback</span>
+      </td>
+    </tr>
+    <tr>
+      <td>When changing the string information</td>
+      <td>
+        <span class="ApiLink_nn__swkbd__InlineKeyboard__SetChangedStringCallback">nn::swkbd::InlineKeyboard::SetChangedStringCallback</span>
+      </td>
+    </tr>
+    <tr>
+      <td>When changing the cursor position</td>
+      <td>
+        <span class="ApiLink_nn__swkbd__InlineKeyboard__SetMovedCursorCallback">nn::swkbd::InlineKeyboard::SetMovedCursorCallback</span>
+      </td>
+    </tr>
+    <tr>
+      <td>When closing the inline keyboard with confirm</td>
+      <td>
+        <span class="ApiLink_nn__swkbd__InlineKeyboard__SetDecidedEnterCallback">nn::swkbd::InlineKeyboard::SetDecidedEnterCallback</span>
+      </td>
+    </tr>
+    <tr>
+      <td>When closing the inline keyboard with cancel</td>
+      <td>
+        <span class="ApiLink_nn__swkbd__InlineKeyboard__SetDecidedCancelCallback">nn::swkbd::InlineKeyboard::SetDecidedCancelCallback</span>
+      </td>
+    </tr>
+    <tr>
+      <td>Releasing user dictionary information</td>
+      <td>
+        <span class="ApiLink_nn__swkbd__InlineKeyboard__SetReleasedUserWordInfoCallback">nn::swkbd::InlineKeyboard::SetReleasedUserWordInfoCallback</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_330968435_h2_1">UTF-8 Version Support</h2>
+<p>By default, the inline keyboard returns the entered text in the UTF-16 encoding.<br />You can also get the input results as UTF-8 by calling the <code><span class="ApiLink_nn__swkbd__InlineKeyboard__SetUtf8Mode">nn::swkbd::InlineKeyboard::SetUtf8Mode</span>()</code> function before displaying the inline keyboard.<br />Note that at this time, the preceding callback functions must register a callback function specific to UTF-8, such as <code><span class="ApiLink_nn__swkbd__InlineKeyboard__SetChangedStringCallbackUtf8">nn::swkbd::InlineKeyboard::SetChangedStringCallbackUtf8</span>()</code>. </p>
+<h1 id="Anchor_330968435_h1_4">Display</h1>
+<p>Call the <code><span class="ApiLink_nn__swkbd__InlineKeyboard__Appear">nn::swkbd::InlineKeyboard::Appear</span>()</code> function to prepare to display the inline keyboard.<br />Even after the display preparations are performed, the rendering results of the inline keyboard are not displayed automatically.<br />Reference the code in the <strong>Getting the Inline Keyboard Rendering Results</strong> section later in this document to display the inline keyboard rendering results in the application.<br />Before calling this function, you can set the <code><span class="ApiLink_nn__swkbd__AppearArg">nn::swkbd::AppearArg</span></code> structure to be passed as an argument and specify the type of keyboard to display and restrictions on input characters.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::swkbd::</span><span class="n">AppearArg</span> <span class="n">appearArg</span><span class="p">;</span>
+<span class="n">inlineKeyboard</span><span class="p">.</span><span class="n">Appear</span><span class="p">(</span> <span class="n">appearArg</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_330968435_h1_5">Call Processing for Each Game Frame</h1>
+<p>Have the application call the <code><span class="ApiLink_nn__swkbd__InlineKeyboard__Calc">nn::swkbd::InlineKeyboard::Calc</span>()</code> function each game frame to get the inline keyboard status and determine whether a callback function has been called.<br />Callback functions such as <code><span class="ApiLink_nn__swkbd__InlineKeyboard__SetFinishedInitializeCallback">nn::swkbd::InlineKeyboard::SetFinishedInitializeCallback</span>()</code> are determined by calling the preceding function. </p>
+<h1 id="Anchor_330968435_h1_6">Getting the Inline Keyboard Rendering Results</h1>
+<p>The inline keyboard is not expected to display itself on the screen, but rather the application is expected to get the rendering result image and display it.<br />Call the <code><span class="ApiLink_nn__swkbd__InlineKeyboard__GetImage">nn::swkbd::InlineKeyboard::GetImage</span>()</code> function to get the inline keyboard rendering result image.<br />For more information, see <code>swkbd_InlineKeyboardApi.h</code>. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">size_t</span> <span class="n">imageBufferAlignment</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kt">size_t</span> <span class="n">imageBufferSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">pImageBufffer</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+<span class="n">inlineKeyboard</span><span class="p">.</span><span class="n">GetImageMemoryRequirement</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">imageBufferSize</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">imageBufferAlignment</span> <span class="p">);</span>
+<span class="n">pImageBuffer</span> <span class="o">=</span> <span class="n">allocationHeap</span><span class="p">.</span><span class="n">Allocate</span><span class="p">(</span> <span class="n">imageBufferSize</span><span class="p">,</span> <span class="n">imageBufferAlignment</span> <span class="p">);</span> 
+<span class="c1">// ... For every game frame after this point.
+</span><span class="n">inlineKeyboard</span><span class="p">.</span><span class="n">GetImage</span><span class="p">(</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span> <span class="n">pImageBuffer</span> <span class="p">),</span> <span class="n">imageBufferSize</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_330968435_h1_7">Finalization</h1>
+<p>Call the <code><span class="ApiLink_nn__swkbd__InlineKeyboard__Finalize">nn::swkbd::InlineKeyboard::Finalize</span>()</code> function to exit the inline keyboard.</p>
+<p>If you press the HOME Button while the inline keyboard is displayed, the application may briefly display one of the screens for console settings (such as the <strong>System Settings</strong> screen), before forcibly closing the screen and restarting.<br />Take appropriate measures, such as using the callback function registered with <code><span class="ApiLink_nn__swkbd__InlineKeyboard__SetFinishedKeyboardCallback">nn::swkbd::InlineKeyboard::SetFinishedKeyboardCallback</span>()</code>, and transferring the control of the controller to the application so that the user can continue to operate the application even if the inline keyboard terminates immediately after the application resumes.</p>
+<h1 id="Anchor_330968435_h1_8">Practical Examples</h1>
+<p>For more in-depth examples, see the inline keyboard startup sample programs.<br />The inline kebyoard sample programs are not provided for Windows. </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__Initialize', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#aa729876ef0df0e2cd08bfa806a092e4b' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__Appear', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#a7960333de9400e705a6ce5155f3109a5' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__GetImage', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#affa25070d6431b32f4170becde630a95' )
+SetUrl( 'ApiLink_nn__swkbd__FinishedInitializeCallback', '../../../Api/HtmlNX/namespacenn_1_1swkbd.html#a46aea1fae0e05a0ff348b87fe6d13998' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__Calc', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#a8c91a65d42cf2c4ef33cab9b28071815' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__SetFinishedInitializeCallback', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#a15db16114f277d32ecc6735a8de4ef77' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__SetFinishedKeyboardCallback', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#ab25160909fb2e5a8fabe6a70265177df' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__SetChangedStringCallback', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#a47bcfbd1c461cc272ae9582487e67103' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__SetMovedCursorCallback', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#a890eaea68e8bb1b7f7ce1eb031e1594a' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__SetDecidedEnterCallback', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#acee80582f5a3c866d912836b16cb2e33' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__SetDecidedCancelCallback', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#a6f8b7d55b5556a74520a7f4c9d9bf190' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__SetReleasedUserWordInfoCallback', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#ac51c3ee47fe94bc3f10547b2db13fe12' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__SetUtf8Mode', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#ab76b124411bdde392a1a07084ce7629f' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__SetChangedStringCallbackUtf8', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#ae3a90718f9f5553be5143710bba3af01' )
+SetUrl( 'ApiLink_nn__swkbd__AppearArg', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_appear_arg.html' )
+SetUrl( 'ApiLink_nn__swkbd__InlineKeyboard__Finalize', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_inline_keyboard.html#a64020cd80c7ee626e6b7f90751c935ee' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

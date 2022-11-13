@@ -1,0 +1,339 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Material | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Material -->
+<div class="pagetitle" id="PageId_83955689">Material</div>
+<div class="text_separate">
+<p>This section describes considerations associated with materials.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955689_h1_1">Material Names</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955689_h1_2">Material Types</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955689_h1_3">Standard Materials</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955689_h1_4">Extended Materials</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_83955689_h1_1">Material Names</h1>
+<p>In the intermediate files, one material is exported for each shading group.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If a single material is connected with multiple shading groups, the material used with the first exported node is exported with its original name, but the names of other materials are exported with an underscore and a numeral appended to them (such as &quot;_1&quot; or &quot;_2&quot;).</p>
+  </div>
+</div>
+<h1 id="Anchor_83955689_h1_2">Material Types</h1>
+<p>By default, the <strong>Lambert shader</strong>, <strong>Blinn shader</strong>, <strong>Phong shader</strong>, <strong>Phong E shader</strong>, and <strong>anisotropic shader</strong> types are supported. These are called the <strong>standard materials</strong>.</p>
+<p>You can export any type of surface material by specifying the attribute information to export in the <a href="../Pages/Page_83956186.html#Anchor_83956186_config_file">config file</a>.<br />Materials for which attribute information is specified in the config file are called <a href="#Anchor_83955689_h1_4">Extended Materials</a>.</p>
+<p>If you are not using extended materials, use the <strong>Lambert shader</strong> if specular and reflection color are not required, and one of the <strong>Blinn shader</strong>, <strong>Phong shader</strong>, <strong>Phong E shader</strong>, or <strong style="letter-spacing: 0.0px;">anisotropic shader</strong> if these properties are required.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>When using anisotropic materials, a tangent vector and binormal vector are exported even if normal mapping has not been set. (If there is a texture for color, the tangent is calculated from the UV set of the texture in the top layer.<br />If there is no texture for color, the tangent vector and binormal vector corresponding to the current UV set are exported.)</p>
+  </div>
+</div>
+<h1 id="Anchor_83955689_h1_3">Standard Materials</h1>
+<p>For standard materials, the following attributes are reflected in the intermediate file.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Color </th>
+      <td>Diffuse color</td>
+    </tr>
+    <tr>
+      <th>Transparency</th>
+      <td>Opacity</td>
+    </tr>
+    <tr>
+      <th>Ambient color</th>
+      <td>Ambient color</td>
+    </tr>
+    <tr>
+      <th>Incandescence</th>
+      <td>Emission color.</td>
+    </tr>
+    <tr>
+      <th>Specular color</th>
+      <td>Specular color</td>
+    </tr>
+  </tbody>
+</table>
+<p>Also, you can set attributes for NintendoWare by using the <a href="../Pages/Page_83956030.html">plug-in for setting material attributes</a>.<br /></p>
+<h2 id="Anchor_83955689_h2_1">If a file node is connected to the Color, Incandescence, or Specular Color attribute</h2>
+<p>The <strong>Color Gain</strong> attribute of the file node will be applied in the intermediate file.<br />The file node's <strong>Color Offset</strong> attribute is not applied.</p>
+<h2 id="Anchor_83955689_h2_2">If a layeredTexture node is connected to the Color, Incandescence, or Specular Color attribute</h2>
+<p>The <strong>Color Gain</strong> attribute of the file node connected to the top layer is applied in the intermediate file.</p>
+<h2 id="Anchor_83955689_h2_3">If a file node is connected to the Transparency attribute</h2>
+<p>The <strong>Alpha Gain</strong> attribute of the file node is applied to the alpha.<br />The <strong>Alpha Offset</strong> attribute of the file node is not applied.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The <strong>Diffuse</strong> attribute is not applied in the intermediate file.<br />If you want the brightness in Maya to be close to that displayed on the target platform, set the <strong>Diffuse</strong> attribute to <strong>1.0</strong>.</p>
+  </div>
+</div>
+<p>
+  <a name="Anchor_83955689_extended_materials"></a>
+</p>
+<h1 id="Anchor_83955689_h1_4">Extended Materials</h1>
+<p>You can export any type of surface material by specifying the attribute information to export using <code>material_attr_info_*</code> in the <a href="../Pages/Page_83956186.html#Anchor_83956186_config_file">config file</a>.</p>
+<p>For extended materials, just like for standard materials, you can also set attributes for NintendoWare by using the <a href="../Pages/Page_83956030.html">plug-in for setting material attributes</a>.</p>
+<h2 id="Anchor_83955689_h2_4">Config File Format</h2>
+<p>As in the following example, describe the attribute information of the output, separated by semicolons (the space before and after the semicolon is optional), for each material node type.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <code>material_attr_info_<strong>node type</strong>=&quot;<strong>attribute information</strong>; <strong>attribute information</strong>; ...&quot;</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Attribute information is described in the following format.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <code>Attribute name = <strong>prefix of the hint information</strong>, prefix of the sampler name, <strong>flag</strong></code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Specify the long name or short name used in Maya as the attribute name.<br />No error occurs even if a specified attribute does not exist. You can specify multiple attributes that might exist to export only those attributes that do exist.<br />The sampler name prefix and flag may be omitted.</p>
+<p>For the <code>hint</code> and <code>name</code> attributes of the sampler (texture) element of the intermediate file, a string with the specified prefix and an index starting from 0 are exported. (If <code>layeredTexture</code> nodes are used, the index is 1 or greater.)</p>
+<p>Do not index <code>hint</code> attributes in FTX files and color elements.</p>
+<p>If the sampler name prefix is omitted, the default sampler name is used.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Hint Information Prefix</th>
+      <th>Default Sampler Name Prefix</th>
+    </tr>
+    <tr>
+      <td>albedo</td>
+      <td>_a</td>
+    </tr>
+    <tr>
+      <td>opacity</td>
+      <td>_o</td>
+    </tr>
+    <tr>
+      <td>emission</td>
+      <td>_e</td>
+    </tr>
+    <tr>
+      <td>normal</td>
+      <td>_n</td>
+    </tr>
+    <tr>
+      <td>tangent</td>
+      <td>_t</td>
+    </tr>
+    <tr>
+      <td>specular</td>
+      <td>_s</td>
+    </tr>
+    <tr>
+      <td>reflection</td>
+      <td>_r</td>
+    </tr>
+    <tr>
+      <td>Other</td>
+      <td>The hint information is the same as the prefix.</td>
+    </tr>
+  </tbody>
+</table>
+<p>If the specified attribute is connected to the <code>file</code> node, the output color is the <strong>Color Gain</strong> attribute of the <code>file</code> node.<br />If the specified attribute is connected to the <code>layeredTexture</code> node, the output color is the <strong>Color Gain</strong> attribute of the <code>file</code> node connected to the top layer.</p>
+<p>You can use flags to control the export and import methods. You can specify multiple flags by using a vertical bar (|) to separate them.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Flag Type</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>no_index0</td>
+      <td>
+        <p>Do not add the 0th index to the <code>hint</code> and <code>name</code> attributes of the sampler (texture) elements.</p>
+        <p />
+      </td>
+    </tr>
+    <tr>
+      <td>no_color</td>
+      <td>Do not export color elements.</td>
+    </tr>
+    <tr>
+      <td>as_diffuse</td>
+      <td>Set <code>diffuse</code> as the <code>hint</code> attribute for the color elements.</td>
+    </tr>
+    <tr>
+      <td>invert</td>
+      <td>Use (<code>1</code> - <code>value</code>) as the output color.<br />However, do not invert if <code>alpha_gain</code> is specified and there is a texture.</td>
+    </tr>
+    <tr>
+      <td>alpha_gain</td>
+      <td>If there is texture, the output color is the alpha value gain of the <code>file</code> node.</td>
+    </tr>
+    <tr>
+      <td>export_tangent</td>
+      <td>If a texture is connected, exports the tangent and the binormal.</td>
+    </tr>
+    <tr>
+      <td>extra_default</td>
+      <td>The default connection target for a particular sampler. (Can be specified with NintendoSDK 13.3.0 or later.)<br />When importing, connect to a texture without hint information in the attribute information.<br />If multiple attributes are specified, priority goes to the attribute described earlier.</td>
+    </tr>
+    <tr>
+      <td>float1</td>
+      <td>The custom attribute is <code>float</code> type (a single value). (Can be specified with NintendoSDK 13.3.0 or later.)<br />If the corresponding attribute does not exist at import time, add a <code>float</code> type (a single value) attribute. (The default is a compound <code>float3</code> type.)<br />However, if the FMD file has neither a sampler element nor an original color element that matches the hint information, do not add the attribute.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The following hint information prefixes are considered special.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Hint Information Prefix</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>opacity</td>
+      <td>
+        <p>If connected to the same texture node as albedo, the sampler (texture) elements are not exported.</p>
+        <p />
+      </td>
+    </tr>
+    <tr>
+      <td>normal</td>
+      <td>If a texture is connected, exports the tangent and the binormal.<br />Never export color elements.</td>
+    </tr>
+    <tr>
+      <td>tangent</td>
+      <td>Never export color elements.</td>
+    </tr>
+    <tr>
+      <td>reflection</td>
+      <td>Do not export texture coordinates and <code>&lt;original_texsrt&gt;</code> elements.<br />Supports the <code>envBall</code> and <code>envCube</code> nodes.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83955689_h2_5">Config File Examples</h2>
+<p>This example shows how to export the standard surface shader (the <code>standardSurface</code> node) that was added in Maya 2020.<br /><strong><span style="color: rgb(255,0,0);">Do not use line breaks in the config file, and describe all information on one line.</span></strong></p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>material_attr_info_<strong>standardSurface</strong>=&quot;baseColor=albedo,_a,as_diffuse; opacity=opacity; emissionColor=emission; normalCamera=normal; specularColor=specular; metalness=metal,_m,no_color&quot;</td>
+    </tr>
+  </tbody>
+</table>
+<p>This example shows how to export the Arnold Ai Standard Surface (<code>aiStandardSurface</code> node).</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <p>material_attr_info_<strong>aiStandardSurface</strong>=&quot;baseColor=albedo,_a,as_diffuse; opacity=opacity; emissionColor=emission; normalCamera=normal; specularColor=specular; metalness=metal,_m,no_color&quot;</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can also change the attributes exported from a standard material.<br />For example, if you want to export the eccentricity attribute of the <code>blinn</code> node as the color, use code like the following example. (It can also be exported as a color animation.)</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <p>material_attr_info_<strong>blinn</strong>=&quot;color=albedo,_a,as_diffuse; transparency=opacity,,invert|alpha_gain; ambientColor=ambient; incandescence=emission; normalCamera=normal; specularColor=specular; reflectedColor=reflection,,no_color; <strong>eccentricity=eccentricity</strong>; translucenceDepth=extra,_x,no_color|extra_default&quot;</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the following code to export the tangent and binormal corresponding to the UV set of the texture connected to the <strong>Color</strong> attribute even if normal map is not set to the <code>lambert</code> node.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>material_attr_info_<strong>lambert</strong>=&quot;color=albedo,_a,as_diffuse|<strong>export_tangent</strong>; transparency=opacity,,invert|alpha_gain; ambientColor=ambient; incandescence=emission; normalCamera=normal; translucenceDepth=extra,_x,no_color|extra_default&quot;</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,282 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Cache Storage | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Cache Storage -->
+<div class="pagetitle" id="PageId_224957652">Cache Storage</div>
+<div class="text_separate">
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>You must apply in advance to use the cache storage feature. Contact Nintendo.</p>
+    <p>Provide the following information when contacting Nintendo.</p>
+    <ul>
+      <li>The cache storage data save area size and journaling area size</li>
+      <li>A breakdown of the size of the data save area (the content and size of each element, and the number of elements)</li>
+      <li>Is there any data that does not need to be made permanent? (Place data that does not need to be made permanent in <a href="../Pages/Page_685577216.html">RamDisk</a> or <a href="../Pages/Page_224955140.html">Temporary Storage</a>.)</li>
+      <li>Is there any data that would cause problems if the cache storage was rolled back or skipped forward?</li>
+      <li>Was the size optimized using compression or data format conversion without detracting from the gameplay?</li>
+    </ul>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The cache storage feature can be used with NX Add-On 3.1.0 and later.</p>
+  </div>
+</div>
+<div class="platform_nx">
+  <p>For more information about using more than one cache storage in an application, see <a href="../Pages/Page_276903214.html">Indexed Cache Storage</a>.</p>
+</div>
+<h1 id="Anchor_224957652_h1_1">Feature Overview</h1>
+<p>The cache storage feature provides an area for the application to store <strong>data that can be re-generated and re-obtained</strong>.<br /><strong>Content written to cache storage is perpetuated, but it is deleted when the application is archived or deleted.</strong></p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>
+      <strong>Cache storage is not an area for storing save data that is important to the user. Use cache storage only for storing data that would not disadvantage the user if it were deleted.<br />Store save data that is important to the user in <a href="../Pages/Page_107782148.html">user account save data</a>. </strong>
+    </p>
+  </div>
+</div>
+<p>There is a maximum of one cache storage area per application, and it not associated with a user account.</p>
+<p>It is intended to be used for purposes such as the following.</p>
+<ul style="list-style-type: square;">
+  <li>Storing game resource data that is frequently updated by the ROM or downloadable content and is delivered by an independent server or similar</li>
+  <li>Saving reobtainable user-generated content (UGC) that was uploaded to a server created by another user</li>
+  <li>Storing data that can be regenerated and re-obtained, and would offer a major advantage if retained for the next time the application is started</li>
+</ul>
+<p>For data that is only loaded, in addition to the cache storage feature, it can be distributed from a Nintendo-managed server in any of the following formats. Select a suitable feature, depending on the data update frequency and how it is managed.</p>
+<ul>
+  <li>
+    <a href="../Pages/Page_185134966.html">Patches</a>
+  </li>
+  <li>Downloadable content (See <a href="../Pages/Page_162954314.html">aoc Library</a>)</li>
+  <li>BCAT data delivery (See <a href="../Pages/Page_191438893.html">bcat Library</a>)</li>
+</ul>
+<p>Cache storage differs from <a href="../Pages/Page_224955140.html">temporary storage</a> in the following ways.</p>
+<ul style="list-style-type: square;">
+  <li>The content is perpetuated, even after the application closes.</li>
+  <li>
+    <strong>The content is deleted when the application is archived or deleted.</strong>
+  </li>
+  <li>There is a restriction on data protection by the journaling feature, and on the resulting write volume between commits.</li>
+</ul>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>
+      <strong>The presence and the content of cache storage is assured only while the application is running.</strong>
+      <br />A user operation (such as reorganizing data, deleting software, deleting save data, or exchanging microSD cards) can cause the cache storage to be <strong>deleted or replaced</strong> at any time.</p>
+    <p>If cache storage is deleted, the system always creates it again when the application starts, but without any content.<br />Do not design applications on the assumption that the content of cache storage will be retained.<br />Because cache storage is deleted independently of save data, <strong>do not write data to save data that is premised on the content of cache storage</strong>.</p>
+    <p>If the save data is deleted or the microSD card is exchanged, the content of cache storage may be ahead of the advancement in the game or rolled back by comparison.<br />Make sure that the game can advance even if the cache storage content is ahead of the game or behind of the game.<br /></p>
+    <p>
+      <strong>Make sure that you debug your application to verify that it runs correctly in the following situations.</strong>
+    </p>
+    <ul>
+      <li>
+        <strong>Cache storage has been deleted separately.</strong>
+        <br />
+      </li>
+      <li>
+        <strong>The content in cache storage has been rolled back.</strong>
+      </li>
+      <li>
+        <strong>The content in cache storage is ahead of the game.</strong>
+        <br />
+      </li>
+    </ul>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Use the <a href="../Pages/Page_224955140.html">temporary storage</a> feature for the purpose of temporarily storing data that does not need to be retained after the application closes.</p>
+  </div>
+</div>
+<h1 id="Anchor_224957652_h1_2">Creating Cache Storage</h1>
+<p>When you start the application with the following elements written in the NMETA file, the system automatically creates cache storage.</p>
+<p>When the application starts, cache storage will always be created.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item Name</th>
+      <th>Overview</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>NintendoSdkMeta/Application/CacheStorageSize</td>
+      <td>Size of the cache storage data save area.</td>
+      <td>Must be at least 48 KiB and a multiple of 16 KiB.</td>
+    </tr>
+    <tr>
+      <td>NintendoSdkMeta/Application/CacheStorageJournalSize</td>
+      <td>Size of the cache storage journaling area.</td>
+      <td>Must be at least 48 KiB and a multiple of 16 KiB.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The combined size of the data save area and the journaling area for cache storage must be no larger than 4000 MiB.</p>
+  </div>
+</div>
+<h2 id="Anchor_224957652_h2_1">Example Configurations</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;?xml <span class="nv">version</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span>? &gt;
+&lt;NintendoSdkMeta&gt;
+&nbsp;&nbsp;&lt;Core&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Name&gt;Application&lt;/Name&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ApplicationId&gt;0x0005000C10000000&lt;/ApplicationId&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Is64BitInstruction&gt;True&lt;/Is64BitInstruction&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ProcessAddressSpace&gt;AddressSpace64Bit&lt;/ProcessAddressSpace&gt;
+&nbsp;&nbsp;&lt;/Core&gt;
+&nbsp;&nbsp;&lt;Application&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CacheStorageSize&gt;0x0000000003F00000&lt;/CacheStorageSize&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CacheStorageJournalSize&gt;0x0000000000100000&lt;/CacheStorageJournalSize&gt;
+&nbsp;&nbsp;&lt;/Application&gt;
+&lt;/NintendoSdkMeta&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_224957652_h1_3">Mounting and File Operations</h1>
+<p>Cache storage can be mounted using the <code><span class="ApiLink_nn__fs__MountCacheStorage">nn::fs::MountCacheStorage</span>()</code> function.</p>
+<p>File operations are the same as <a href="../Pages/Page_107782148.html">Save Data (NX Add-On)</a>. Use <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code> to commit cache storage updates.</p>
+<p>For versions of NX Add-On earlier than 5.1.0, use <code><span class="ApiLink_nn__fs__CommitSaveData">nn::fs::CommitSaveData</span>()</code> instead of <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code>.</p>
+<h1 id="Anchor_224957652_h1_4">Limitations and Characteristics</h1>
+<p>Limitations and characteristics are the same as for <a href="../Pages/Page_107320205.html">Save Data</a> and <a href="../Pages/Page_107782148.html">Save Data (NX Add-On)</a>.</p>
+<h1 id="Anchor_224957652_h1_5">Deleting</h1>
+<p>You can delete cache storage just like other save data using the <a href="../Pages/Page_310878092.html">Save Data page of DevMenu</a>.</p>
+<p>In addition, cache storage will be deleted when you select <strong>System Settings</strong> &gt; <strong>Data Management</strong> &gt; <strong>Manage Software</strong> &gt; <strong>Archive Software</strong> from the HOME Menu.</p>
+<h1 id="Anchor_224957652_h1_6">Location</h1>
+<p>In most cases, cache storage is located on an SD card. However, cache storage is located in system memory when no SD card has been inserted, or when the SD card lacks sufficient space.</p>
+<p>Because the location of cache storage is not fixed to system memory, designs that depend on read/write speeds similar to system memory are prohibited.<br />The different types of storage media (system memory and SD cards) have different read/write access speeds. Even for the same media type, access speeds differ due to factors such as storage capacity and product generation, individual differences, age-related wear, and data fragmentation. For this reason, you risk introducing bugs into your application if you implement processes that depend on a particular access speed when reading and writing to cache storage. To avoid this, avoid coding in a way that depends on having a certain access speed for any storage media.</p>
+<p>If you are using the cache storage feature, test your application under the following conditions.</p>
+<ol>
+  <li>Initialize the development hardware with NintendoSDK Firmware for NX 4.0.0-2 or later.</li>
+  <li>Insert an SD card that does not support UHS-I (for example, a genuine Nintendo SD card) in the development hardware.<br />(We recommend using SD cards that support UHS-I, but some UHS-I class SD cards on the market have access speeds comparable to a non-UHS-I SD card.)</li>
+  <li>Install the application that is the target of testing (and all patches and downloadable content) to the system memory in the development hardware.</li>
+  <li>Open the Debug page of <a href="../Pages/Page_310879077.html">DevMenu</a> and set <strong>FS Speed Emulation Mode</strong> to <strong>Slower</strong>, and then play through the application that was installed in step 2.<br />(When the application starts for the first time, the cache storage is created on the inserted SD card, so you are testing the operations of the application under conditions of routinely slow access to cache storage.</li>
+  <li>Remove the SD card from the development hardware.<br /></li>
+  <li>Play through the application that was installed in step 2 twice more after changing <strong>FS Speed Emulation Mode</strong> to <strong>Faster</strong> and <strong>Random</strong> in the <strong>Debug</strong> page of <a href="../Pages/Page_310879077.html">DevMenu</a>.<br />(An SD card is not inserted in the hardware when the application starts, so the cache storage is created in system memory and you are testing the operations of the application under conditions of routinely fast access to cache storage and to randomly varying access speeds to cache storage.)</li>
+</ol>
+<h1 id="Anchor_224957652_h1_7">Cleanup</h1>
+<p>When the SD card is exchanged or the system is forcibly powered off and on again, if there is cache storage on the SD card for any application that is not registered in the system, that cache storage will be cleaned up.<br />If the application is started using RunOnTarget or VSI, there will be no record on the system, so every time the application is restarted its cache storage will be cleaned up.</p>
+<p>To avoid this process, <strong>the cleanup feature is disabled by default on the development hardware</strong>.<br />We recommend that you enable this feature when you run the application after installing it or when you run the application from a game card.<br />For more information about enabling this feature, see <a href="../Pages/Page_325711330.html">DevMenuCommand &gt; Development Support Features</a> &gt; Cleanup Restrictions for Application Cache Storage.</p>
+<h1 id="Anchor_224957652_h1_8">Size Expansion</h1>
+<p>If you update the <code>NintendoSdkMeta/Application/CacheStorageSize</code> or <code>NintendoSdkMeta/Application/CacheStorageJournalSize</code> descriptions in the <a href="../Pages/Page_166503043.html">NMETA file</a>, when cache storage already exists when an application is started after the patch is applied, the size is automatically expanded according to the NMETA file description. After the update, each of the values must be a multiple of 1 MiB.<br />When the cache storage size is expanded, the data that existed prior to expansion is preserved.</p>
+<p>Cache storage can be expanded up to a maximum of 32 times. Expand save data accordingly so that the number of times it is expanded does not exceed this number. Contact Nintendo if you are planning to expand save data more than this amount of times.</p>
+<p>An application cannot expand the cache storage size using an API call.</p>
+<p>Cache storage size reduction is not supported. Avoid expanding save data to an unnecessary large size.<br />You can migrate to indexed cache storage and delete cache storage using an API call. For more information, see <a href="../Pages/Page_276903214.html#Anchor_276903214_FromWithoutIndexToWithIndex">Migrating From Using Non-Indexed Cache Storage to Indexed</a>.</p>
+<h1 id="Anchor_224957652_h1_9">Important Information</h1>
+<p>The following is a summary of important information.</p>
+<ul style="list-style-type: square;">
+  <li>
+    <p style="margin-left: 0.2em;">If you want to use the cache storage feature, contact Nintendo in advance.</p>
+  </li>
+  <li>
+    <p style="margin-left: 0.2em;">The cache storage feature can be used with NX Add-On 3.1.0 and later.</p>
+  </li>
+  <li>
+    <p style="margin-left: 0.2em;">Do not store save data. Cache storage may be deleted or replaced through user operations such as data management, deleting software, deleting save data, or replacing the microSD card.<br />Debug your application to verify that it runs correctly in the following situations.</p>
+    <ul style="list-style-type: square;">
+      <li>Cache storage has been deleted separately.</li>
+      <li>The content in cache storage has been rolled back.</li>
+      <li>The content in cache storage is ahead of the game.</li>
+    </ul>
+  </li>
+  <li>Debug using the speed emulation feature to make sure that the application runs without issue, even if cache storage is located in slow external storage.</li>
+  <li>If cache storage of the specified size cannot be allocated, the application will not start. Be careful not to specify a size larger than necessary.</li>
+  <li>Cache storage size reduction is not supported. Be careful not to specify a size larger than necessary.</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__MountCacheStorage', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a38a958348ad64793a93e82a5a556d7b4' )
+SetUrl( 'ApiLink_nn__fs__Commit', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac90e600c3fc51adb6823a4ef900fad3a' )
+SetUrl( 'ApiLink_nn__fs__CommitSaveData', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac2f25cffd056f24d6facfda13f977fa6' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

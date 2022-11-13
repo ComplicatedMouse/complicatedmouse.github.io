@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Custom Action Implementation Example | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Custom Action Implementation Example -->
+<div class="pagetitle" id="PageId_246242951">Custom Action Implementation Example</div>
+<div class="text_separate">
+<h1 id="Anchor_246242951_h1_1">Custom Action Implementation Example</h1>
+<p>This page presents an example of a custom action embedded in an application.</p>
+<p>For an overview, see <a href="../Pages/Page_83955583.html">Custom Actions</a></p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <ul class="macro_toc">
+        <li>
+          <a href="#Anchor_246242951_h1_1">Custom Action Implementation Example</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_246242951_h2_1">User Data Definitions File</a>
+          </li>
+          <li>
+            <a href="#Anchor_246242951_h2_2">Custom Action Settings File</a>
+          </li>
+          <li>
+            <a href="#Anchor_246242951_h2_3">Registering in the Project Configuration File</a>
+          </li>
+          <li>
+            <a href="#Anchor_246242951_h2_4">Implementing the Callback in the Application</a>
+          </li>
+          <li>
+            <a href="#Anchor_246242951_h2_5">Registering the Callback in the Runtime</a>
+          </li>
+        </ul>
+      </ul>
+    </p>
+  </div>
+</div>
+<h2 id="Anchor_246242951_h2_1">User Data Definitions File</h2>
+<p>This file contains the parameter definitions that can be configured in the <strong>Custom Action</strong> tab of EffectMaker, together with the layout settings for that UI. <br />It also has a C++ header file, which is used by #including it in the application.</p>
+<p>For more information about writing and using user data definitions, see <a href="../Pages/Page_107778324.html">User Data Definitions</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#pragma once
+</span>
+<span class="cp">#include &lt;nn/util/util_MathTypes.h&gt;
+</span>
+<span class="c1">/// &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+/// &lt;UserDataDefinition Kind=&quot;CustomAction&quot;
+///                     Name=&quot;Custom Action Sample&quot;
+///                     Version=&quot;0&quot;&gt;
+</span><span class="k">struct</span> <span class="n">ResCustomActionSample</span>
+<span class="p">{</span>
+<span class="c1">/// &lt;ParameterDefinition Name=&quot;Flag&quot;
+///                      Type=&quot;CheckButtons&quot;
+///                      NeedReload=&quot;true&quot;&gt;
+///   &lt;OptionGroup&gt;
+///     &lt;Option BitIndex=&quot;0&quot;  UniqueKey=&quot;Option&quot; Value=&quot;Enable custom feature A&quot; Selected=&quot;true&quot; /&gt;
+///   &lt;/OptionGroup&gt;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">unsigned</span> <span class="kt">int</span>    <span class="n">choices</span><span class="p">;</span>
+<span class="c1">/// &lt;/ParameterDefinition&gt;
+</span><span class="p">};</span>
+
+<span class="c1">///   &lt;UILayout&gt;
+///     &lt;Group Name=&quot;Custom feature for internal use&quot;&gt;
+///       &lt;Parameter Member=&quot;choices&quot; Comment=&quot;Controls enabling and disabling a custom feature&quot; /&gt;
+///     &lt;/Group&gt;
+///   &lt;/UILayout&gt;
+/// &lt;/UserDataDefinition&gt;
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_246242951_h2_2">Custom Action Settings File</h2>
+<p>This settings file bundles the custom action settings described in  the user data definitions file so they can be registered in EffectMaker. <br />The file is added to the project configuration file.</p>
+<table style="margin-left: 1.5em;" class="table">
+  <tbody>
+    <tr>
+      <th>Attributes</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <pre>CallbackId</pre>
+      </td>
+      <td>Values from 1 to 8 can be used.</td>
+    </tr>
+    <tr>
+      <td>
+        <pre>DefinitionFile</pre>
+      </td>
+      <td>Specifies the user data definitions file.</td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
+<span class="nt">&lt;ArrayOfCustomActionSettingInfo</span> <span class="na">xmlns:xsd=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema&quot;</span> <span class="na">xmlns:xsi=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;CustomActionSettingInfo</span> <span class="na">CallbackId=</span><span class="s">&quot;1&quot;</span> <span class="na">DefinitionFile=</span><span class="s">&quot;CustomAction.h&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- If registering multiple files, add them as follows. --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!--
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CustomActionSettingInfo CallbackId=&quot;2&quot; DefinitionFile=&quot;CustomActionA.h&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CustomActionSettingInfo CallbackId=&quot;3&quot; DefinitionFile=&quot;CustomActionB.h&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;--&gt;</span>
+<span class="nt">&lt;/ArrayOfCustomActionSettingInfo&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The custom action settings file must be encoded in UTF-8.</p>
+  </div>
+</div>
+<h2 id="Anchor_246242951_h2_3">Registering in the Project Configuration File</h2>
+<p>The custom action settings file is registered in the project configuration file. For more information about the project configuration file and other settings, see <a href="../Pages/Page_83955992.html">Project Configuration File</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
+<span class="nt">&lt;EffectMakerProjectConfig&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;CustomActionPath&gt;</span>%CUSTOM_ACTION%\CustomActionList.xml<span class="nt">&lt;/CustomActionPath&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!--  Other settings have been omitted. --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- ... --&gt;</span>
+<span class="nt">&lt;/EffectMakerProjectConfig&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_246242951_h2_4">
+  <span style="color: rgb(117,117,117);">Implementing the Callback in the Application</span>
+</h2>
+<p>
+  <span style="color: rgb(117,117,117);"> </span>A variety of callbacks can be implemented in the application. For more information about the various callbacks, see <a href="../Pages/Page_83956157.html">Callbacks</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &quot;CustomAction.h&quot;
+</span>&nbsp;
+<span class="c1">// ...
+</span>&nbsp;
+<span class="c1">//  The callback when a particle is created.
+</span><span class="kt">bool</span> <span class="nf">ParticleEmitCallback</span><span class="p">(</span> <span class="nn">nn::vfx::</span><span class="n">ParticleEmitArg</span><span class="o">&amp;</span> <span class="n">arg</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// If using a standard parameter and not a user data definition,
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// include #include &lt;nn/vfx/vfx_EmitterRes.h&gt; and
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// cast using nn::vfx::detail::ResCustomActionData*.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="n">ResCustomActionSample</span><span class="o">*</span> <span class="n">res</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span> <span class="k">const</span> <span class="n">ResCustomActionSample</span><span class="o">*</span> <span class="o">&gt;</span><span class="p">(</span> <span class="n">arg</span><span class="p">.</span><span class="n">pEmitter</span><span class="o">-&gt;</span><span class="n">GetCustomActionParameter</span><span class="p">()</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span><span class="p">(</span> <span class="p">(</span> <span class="n">res</span><span class="o">-&gt;</span><span class="n">choices</span> <span class="o">&amp;</span> <span class="mh">0x1</span> <span class="p">)</span> <span class="o">==</span> <span class="mh">0x1</span> <span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// If the first bit flag has been enabled,
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// the custom process is performed here.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_246242951_h2_5">Registering the Callback in the Runtime</h2>
+<p>The custom action callback that was implemented in the previous section is registered to the runtime. Usually this is done immediately after initializing <code><span class="ApiLink_nn__vfx__System">nn::vfx::System</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14</td>
+      <td class="code">
+        <div class="codeblock"><pre>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialization of the application, etc.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialization of nn::vfx::System.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::vfx::</span><span class="n">CallbackSet</span> <span class="n">callbackSet</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">callbackSet</span><span class="p">.</span><span class="n">particleEmit</span> <span class="o">=</span> <span class="n">ParticleEmitCallback</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Registration of custom action 1 callback. (&quot;1&quot; corespondents to the CallbackId value in CustomActionList.xml.)
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pVfxSystem</span><span class="o">-&gt;</span><span class="n">SetCallback</span><span class="p">(</span> <span class="nn">nn::vfx::</span><span class="n">CallbackId_CustomAction1</span><span class="p">,</span> <span class="n">callbackSet</span> <span class="p">);</span>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__vfx__System', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_system.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

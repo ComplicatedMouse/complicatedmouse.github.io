@@ -1,0 +1,459 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Hand Analysis Mode | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Hand Analysis Mode -->
+<div class="pagetitle" id="PageId_112902387">Hand Analysis Mode</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_112902387_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_112902387_h1_2">Hand Analysis Mode</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_112902387_h2_1">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902387_h2_2">Settings</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902387_h2_3">Controlling Camera Parameters in Hand Analysis Mode</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902387_h2_4">Data Coordinate System in Hand Analysis Mode</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902387_h2_5">Output Format</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_112902387_h1_3">Using Hand Analysis Mode</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_112902387_h2_6">Hand Analysis Mode Sample</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_112902387_h1_1">Introduction</h1>
+<p>Hand Analysis mode is one of the features of the <code>irsensor</code> library.</p>
+<p>In Hand Analysis mode, the live video stream captured by the IR Motion Camera built into the bottom of the Joy-Con (R) is <strong>processed internally by the Joy-Con (R)</strong> to calculate information about such things as the outer appearance, outline, and area of captured subjects, and in particular of hands.</p>
+<p>This information is compressed and sent wirelessly to the system, where it is available for the user to use.</p>
+<p>The calculations are all done on the <strong>live video stream</strong> captured by the IR Motion Camera, and the data is compressed using a proprietary algorithm, giving users access to highly accurate information. </p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_112902387/113967744.jpg" height="150" class="embedded-image" />
+  </span>
+</p>
+<p>The preceding figure is a block diagram that shows how the data is generated and processed.</p>
+<p>Developers can handle the ultimate data without being aware of the majority of processing taking place in the background.</p>
+<p>The CPU processing that is carried out inside the Joy-Con was developed by Nintendo, so contact Nintendo if you want to add these features to your application.</p>
+<h1 id="Anchor_112902387_h1_2">Hand Analysis Mode</h1>
+<h2 id="Anchor_112902387_h2_1">Overview</h2>
+<p>Hand analysis mode supports three modes: <strong>silhouette mode</strong>, <strong>silhouette-only mode</strong>, and <strong>image mode</strong>.</p>
+<p>Silhouette mode runs at 30 FPS to 60 FPS depending on the image being captured. Silhouette-only mode and image mode run at 60 FPS, which allows the user to capture new data at that frequency.</p>
+<p>Unfortunately, these modes cannot be used at the same time due to limitations on the Joy-Con's CPU performance and the wireless bandwidth. However, there is support for a so-called <strong>silhouette-image</strong> mode, where the mode switches between silhouette mode and image mode in every frame. In this mode, the information in each of the two separate modes is updated at half of the normal frame rate.</p>
+<p>Following is a description of the information that can be obtained in hand analysis mode.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_112902387/241556571.jpg" height="250" class="embedded-image" />
+  </span>　<span class="embedded-file-wrapper "><img src="../Attachments/Attach_112902387/241556572.jpg" height="250" class="embedded-image" /></span></p>
+<ol>
+  <li>
+    <p>Silhouette Mode<br />In silhouette mode, hand-related information such as the outer appearance, outline, and area is output for the hand captured by the IR Motion Camera.</p>
+    <p>
+      <br />
+    </p>
+  </li>
+  <li>
+    <p>Silhouette Only Mode<br />In silhouette only mode, only the silhouette information captured by the IR Motion Camera is output. This mode is primarily intended to be used with objects other than hands. </p>
+    <p> <br /></p>
+  </li>
+  <li>
+    <p>Image Mode  (gets compressed 40&times;30 images in real time)<br />In image mode, image data captured by the IR Motion Camera is compressed to a size of 40&times;30 and transferred at a rate of 60 fps. <br />It can be used to guide the user's hand position, and for debugging, as a preview for developers.</p>
+  </li>
+</ol>
+<h2 id="Anchor_112902387_h2_2">Settings</h2>
+<p>The following settings are available in hand analysis mode. The mode in use can be changed.</p>
+<p>Silhouette mode, image mode, and silhouette-image mode, in which images are submitted to both modes.<br /><br /></p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+      <th>Default Value</th>
+      <th>Defined Range</th>
+    </tr>
+    <tr>
+      <td>mode</td>
+      <td>
+        <p>The mode to use.</p>
+      </td>
+      <td>
+        <p>None</p>
+      </td>
+      <td>
+        <p>1. Silhouette mode</p>
+        <p>2. Image mode</p>
+        <p>3. Silhouette image mode (alternately send these other two modes)</p>
+        <p>4. Silhouette only mode</p>
+        <p>Select one of these four options.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>These settings are stored as members of the <code><span class="ApiLink_nn__irsensor__HandAnalyzerConfig">nn::irsensor::HandAnalyzerConfig</span></code> structure.  </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">HandAnalysisConfig</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">HandAnalysisMode</span> <span class="n">mode</span><span class="p">;</span> <span class="c1">//!&lt; Hand analysis mode setting.
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_112902387_h2_3">Controlling Camera Parameters in Hand Analysis Mode</h2>
+<p>In hand analysis mode, all camera settings occur in the Joy-Con controllers, including LED brightness, exposure time, and gain.</p>
+<p>LED brightness, exposure time, and gain are diminished when the subject is closer to avoid over-saturated data. The reverse happens when the subject is farther away.</p>
+<p>We recommend image mode only for preview purposes because it is difficult to control from the application and because future bug fixes or similar may change how captured images appear.</p>
+<h2 id="Anchor_112902387_h2_4">Data Coordinate System in Hand Analysis Mode</h2>
+<p>In hand analysis mode, x- and y-positions are normalized by the camera&rsquo;s z-coordinate and represented as tangent values.</p>
+<p>Using this coordinate system will enable you to continue to handle coordinates in the same way even if the camera&rsquo;s angle of view is changed in the future.</p>
+<p>You can get x-coordinates up to tan(103.3/2 deg) = 1.25 and y-coordinates up to tan(84/2 deg) = 0.9.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_112902387/161444422.jpg" width="500" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_112902387_h2_5">Output Format</h2>
+<p>Silhouette mode output includes the following elements.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_112902387/241556571.jpg" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>1) All silhouette information in camera space is stored as points in an instance of the <code>HandAnalysisSilhouetteState::points</code> array. Connecting the points creates the silhouette of a shape (the <span style="color: rgb(0,255,0);">green line</span>). Each point is represented as an ( tan(x/z), tan(y/z) ) tuple.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3.</th>
+      <th>...</th>
+      <th>345</th>
+      <th>346</th>
+      <th>347</th>
+      <th>348</th>
+      <th>349</th>
+      <th>350</th>
+    </tr>
+    <tr>
+      <td>x</td>
+      <td>
+        <p>-0.05</p>
+      </td>
+      <td>
+        <p>-0.08</p>
+      </td>
+      <td>
+        <p>-0.10</p>
+      </td>
+      <td>
+        <p>-0.04</p>
+      </td>
+      <td>
+        <p>...</p>
+      </td>
+      <td>
+        <p>-0.42</p>
+      </td>
+      <td>
+        <p>-0.37</p>
+      </td>
+      <td>
+        <p>-0.33</p>
+      </td>
+      <td>
+        <p>-0.28</p>
+      </td>
+      <td>
+        <p>-0.22</p>
+      </td>
+      <td>
+        <p>-0.16</p>
+      </td>
+    </tr>
+    <tr>
+      <td>y</td>
+      <td>
+        <p>-0.87</p>
+      </td>
+      <td>
+        <p>-0.87</p>
+      </td>
+      <td>
+        <p>-0.91</p>
+      </td>
+      <td>
+        <p>-0.92</p>
+      </td>
+      <td>
+        <p>...</p>
+      </td>
+      <td>
+        <p>-0.79</p>
+      </td>
+      <td>
+        <p>-0.82</p>
+      </td>
+      <td>
+        <p>-0.79</p>
+      </td>
+      <td>
+        <p>-0.82</p>
+      </td>
+      <td>
+        <p>-0.79</p>
+      </td>
+      <td>
+        <p>-0.82</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>2) Finger information is stored as instances of the <code>Hand::fingers</code> member. Each finger member includes a <code>Finger::tip</code> object that indicates the position of the tip of the finger (the <span style="color: rgb(255,0,0);">red points</span>) and a <code>Finger::root</code> object that indicates the position of the base of the finger (the <span style="color: rgb(0,0,255);">blue points</span>).</p>
+<p>3) Palm information is stored in the <code>Hand::Palm</code> member. It includes <code>Palm::center</code>, the position of the center of the palm (<span style="color: rgb(0,255,0);">green point</span>), and <code>Palm::area</code>, the area (size) of the palm.</p>
+<p>4) You can get hand information from the <code>Hand::Arm</code> member. It includes the wrist position in <code>Arm::wristPosition</code> (<span style="color: rgb(128,0,128);">purple point</span>) and the area in <code>Palm::area</code>.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_112902387/241556590.jpg" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>The preceding figure provides an illustration of each member in the structure.</p>
+<p>Objects found on the screen are treated as shapes.</p>
+<p>Among these shapes, objects recognized as hands are stored as hand structures. </p>
+<p> <span style="color: rgb(51,51,51);">Hand elements consist of Finger, Palm, Arm and Protrusion.</span> </p>
+<p>2. Image Mode output is in linear format with uint16_t  40 &times; 30 resolution.  </p>
+<p> </p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Member Name</th>
+      <th>Description</th>
+      <th>Value Range</th>
+    </tr>
+    <tr>
+      <td>
+        <code>samplingNumber</code>
+      </td>
+      <td>Value that increases each time processed results are received.</td>
+      <td>0 or greater</td>
+    </tr>
+    <tr>
+      <td>
+        <code>
+          <em>ambientNoiseLevel</em>
+        </code>
+      </td>
+      <td>
+        <p>The ambient noise level.</p>
+        <p>If there is a lot of ambient light noise, you can look at this variable</p>
+        <p>and do something like guide the user to change the play environment,</p>
+        <p>or make some such notification.</p>
+        <p>For more information, see the <a href="../Pages/Page_112902609.html#Anchor_112902609_h2_7">Common Features</a> section</p>
+        <p>
+          <em>IR Motion Camera External Light Filter</em>.</p>
+      </td>
+      <td>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_Low/</code>
+        </p>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_Middle/</code>
+        </p>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_High</code>
+        </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_112902387_h1_3">Using Hand Analysis Mode</h1>
+<p>The basic workflow for using hand analysis mode is as follows.</p>
+<p> </p>
+<ol>
+  <li>
+    <p>Get the <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code> for the specified <code>Npad::Id</code>, and initialize the IR Motion Camera.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/irsensor.h&gt;
+</span>
+<span class="nn">nn::irsensor::</span><span class="n">IrCameraHandle</span> <span class="n">handle</span> <span class="o">=</span> <span class="nn">nn::irsensor::</span><span class="n">GetIrCameraHandle</span><span class="p">(</span><span class="n">npadIds</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="nn">nn::irsensor::</span><span class="n">Initialize</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Generate the initial settings for Hand Analysis Mode.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">HandAnalysisConfig</span> <span class="n">config</span><span class="p">;</span>
+<span class="c1">// Set the mode values.
+</span><span class="n">config</span><span class="p">.</span><span class="n">mode</span> <span class="o">=</span> <span class="nn">nn::irsensor::</span><span class="n">HandAnalysisMode_Silhouette</span><span class="p">;</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To start capture, call the <code><span class="ApiLink_nn__irsensor__RunHandAnalysis">nn::irsensor::RunHandAnalysis</span></code> function, and specify the retrieved <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code> as an argument.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>&nbsp;<span class="nn">nn::irsensor::</span><span class="n">RunHandAnalysis</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">config</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>When using silhouette mode, prepare the <code><span class="ApiLink_nn__irsensor__HandAnalysisSilhouetteState">nn::irsensor::HandAnalysisSilhouetteState</span></code> buffer for output and call the <code><span class="ApiLink_nn__irsensor__GetHandAnalysisSilhouetteState">nn::irsensor::GetHandAnalysisSilhouetteState</span></code> function. When using image mode, prepare the <code><span class="ApiLink_nn__irsensor__HandAnalysisImageState">nn::irsensor::HandAnalysisImageState</span></code> buffer for output and call the <code><span class="ApiLink_nn__irsensor__GetHandAnalysisImageState">nn::irsensor::GetHandAnalysisImageState</span></code> function.<br />The latest processed results as of the time the function call was made are retrieved. However, the results are updated at intervals of 15 milliseconds or less due to the restrictions on the speed of data transfer via the controller&rsquo;s Bluetooth module. As a result, we recommend practices such as polling the results to be obtained in synchronization with the game frames.<br /></p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">HandAnalysisSilhouetteState</span> <span class="n">states</span><span class="p">;</span>
+<span class="nn">nn::irsensor::</span><span class="n">GetHandAnalysisSilhouetteState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">,</span> <span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To stop Hand Analysis Mode, call the <code><span class="ApiLink_nn__irsensor__StopImageProcessor">nn::irsensor::StopImageProcessor</span></code> function, passing in the <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code> of the IR sensor you want to stop.<br />Call the <code><span class="ApiLink_nn__irsensor__Finalize">nn::irsensor::Finalize</span></code> function to finalize the IR Motion Camera.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">StopImageProcessor</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span>
+<span class="nn">nn::irsensor::</span><span class="n">Finalize</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_112902387_h2_6">Hand Analysis Mode Sample</h2>
+<p>To see how hand analysis mode works, see the sample demos located in the <code>Samples\Sources\Applications\IrSensorViewer</code> directory.</p>
+<p> <br /></p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+// ApiLink_nn__irsensor__HandAnalyzerConfig
+SetUrl( 'ApiLink_nn__irsensor__IrCameraHandle', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_ir_camera_handle.html' )
+SetUrl( 'ApiLink_nn__irsensor__RunHandAnalysis', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a51afe6cb83bd86357c696813ff5a1887' )
+SetUrl( 'ApiLink_nn__irsensor__HandAnalysisSilhouetteState', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_hand_analysis_silhouette_state.html' )
+SetUrl( 'ApiLink_nn__irsensor__GetHandAnalysisSilhouetteState', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a28072a0acab4430a22b83bac1411d1fc' )
+SetUrl( 'ApiLink_nn__irsensor__HandAnalysisImageState', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_hand_analysis_image_state.html' )
+SetUrl( 'ApiLink_nn__irsensor__GetHandAnalysisImageState', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a067ae380c70a0125d0c606bbdcc72391' )
+SetUrl( 'ApiLink_nn__irsensor__StopImageProcessor', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a3052171f2c63aafc0e4a164366ae22d7' )
+SetUrl( 'ApiLink_nn__irsensor__Finalize', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a6265f5c6e6d6fc0e67fc6882a8945284' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

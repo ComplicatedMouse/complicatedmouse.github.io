@@ -1,0 +1,741 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Multiple Waiting | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Multiple Waiting -->
+<div class="pagetitle" id="PageId_83955865">Multiple Waiting</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955865_h1_1">Multiple Wait Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955865_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955865_h3_1">nn::os::MultiWaitType Structure</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955865_h3_2">nn::os::MultiWaitHolderType Structure</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955865_h3_3">Maximum Number of os Objects Possible in Multiple Wait</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_83955865_h2_2">Using Multiple Waiting</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955865_h2_3">Specific Example of Using Multiple Wait</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955865_h2_4">Multiple Wait API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955865_h2_5">Considerations When Using Multiple Waiting</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955865_h3_4">Thread Safety</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955865_h3_5">Branching After Multiple Waiting</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_83955865_h1_2">Utilities</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955865_h2_6">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955865_h2_7">Variations</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83955865_h1_1">Multiple Wait Feature</h1>
+<h2 id="Anchor_83955865_h2_1">Feature Overview</h2>
+<p>This synchronization feature allows you to wait for any one of several synchronization objects to enter a signaled state.</p>
+<p>A &quot;signaled state of a synchronization object&quot; refers to any of the following states, and you can simultaneously wait for any of these state changes.</p>
+<ul>
+  <li>A <a href="../Pages/Page_83955697.html">thread</a> ends.</li>
+  <li>A <a href="../Pages/Page_83955700.html">semaphore</a> can be obtained.</li>
+  <li>An <a href="../Pages/Page_83955790.html">event</a> is signaled.</li>
+  <li>A <a href="../Pages/Page_83955551.html">timer event</a> is signaled.</li>
+  <li>A <a href="../Pages/Page_83955748.html">message queue</a> buffer is &quot;not empty.&quot;</li>
+  <li>A <a href="../Pages/Page_83955748.html">message queue</a> buffer is &quot;not full.&quot;</li>
+  <li>A <a href="../Pages/Page_83955843.html">system event</a> is signaled.</li>
+</ul>
+<p>Multiple waiting is performed by calling the <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny()</span> function. Even if a signaled state is detected through multiple wait, control returns to the caller without changing the state of the target object. Consequently, after control returns from <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny()</span>, operations on the target object for which a signaled state was detected must be performed separately.</p>
+<p>Alternatively, you can use the utility function to briefly describe the multiple wait.</p>
+<h3 id="Anchor_83955865_h3_1">nn::os::MultiWaitType Structure<br /></h3>
+<p>The structure object that is passed to the <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny()</span> function when waiting for multiple events.</p>
+<p>To use the feature, begin by preparing several <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> objects (described later) equivalent to the number of objects to be waited on, and link them to the <span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span> object as a list. After all of the <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> objects to be waited on are linked together in a list, pass the <span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span> object, which serves as the list header, to the <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny()</span> function to begin waiting on the objects.</p>
+<p>The <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny()</span> function returns a pointer to the <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> object for which a signaled state was detected. This returned pointer is how you can detect which synchronization object entered a signaled state.</p>
+<h3 id="Anchor_83955865_h3_2">nn::os::MultiWaitHolderType Structure</h3>
+<p>This structure is bound to one of the synchronization objects being waited for.</p>
+<p>Use the <span class="ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_EventType_*event)_NN_NOEXCEPT">nn::os::InitializeMultiWaitHolder()</span> function to bind the <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> object to the synchronization object. The structure can be bound to any of the following synchronization objects: <a href="../Pages/Page_83955697.html">thread</a>, <a href="../Pages/Page_83955700.html">semaphore</a>, <a href="../Pages/Page_83955790.html">event</a>, <a href="../Pages/Page_83955551.html">timer event</a>,<a href="../Pages/Page_83955748.html">message queue</a>, or <a href="../Pages/Page_83955843.html">system event</a>.</p>
+<p>You can wait for multiple synchronization objects by linking the bound <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> object to a list headed by the <span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span> object described earlier.</p>
+<p>The <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> structure includes functions to set and get user data. Each object can store one user data item of type <code>uintptr_t</code>. The expected use case for this feature is for branching to the proper process based on the return value of the <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny()</span> function. For more information, see Branching After Multiple Wait later in this document, or see <span class="ApiLink_PageSampleOsMultiWait">Multiple Wait Feature Sample Program</span>.</p>
+<h3 id="Anchor_83955865_h3_3">Maximum Number of os Objects Possible in Multiple Wait</h3>
+<p>The following limits are the maximum number of <code>os</code> objects that can be in multiple wait. When you run the <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn:os::WaitAny()</span> function, if more <code>os</code> objects are linked to the <span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span> object list, it terminates in the OS-API.</p>
+<ul>
+  <li>NX Development Environment: 64 objects</li>
+  <li>Windows Runtime Environment: 63 objects</li>
+</ul>
+<p>However, the following <code>os</code> objects are not counted as part of the maximum number of objects, and can be freely specified as multiple wait targets.</p>
+<ul>
+  <li>
+    <a href="../Pages/Page_83955697.html">Thread</a> (<code><span class="ApiLink_nn__os__ThreadType">nn::os::ThreadType</span></code>)</li>
+  <li>
+    <a href="../Pages/Page_83955700.html">Semaphore</a> (<code>nn:os::SemaphoreType</code>)</li>
+  <li>
+    <a href="../Pages/Page_83955790.html">Event</a> (<code>nn:os::EventType</code>)</li>
+  <li>
+    <a href="../Pages/Page_83955551.html">Timer Events</a> (<code>nn:os::TimerEventType</code>)</li>
+  <li>
+    <a href="../Pages/Page_83955748.html">Message Queues</a> (<code>nn:os::MessageQueueType</code>)<ul><li>Neither <code><span class="ApiLink_nn__os__MessageQueueWaitType_WaitForNotEmpty">nn::os::MessageQueueWaitType_WaitForNotEmpty</span></code> nor <code><span class="ApiLink_nn__os__MessageQueueWaitType_WaitForNotFull">nn::os::MessageQueueWaitType_WaitForNotFull</span></code> are counted.</li></ul></li>
+</ul>
+<h2 id="Anchor_83955865_h2_2">Using Multiple Waiting</h2>
+<p>To use multiple waiting, you must prepare an <span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span> structure object as shown in the following example. You must also create an instance of the <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> structure for every synchronization object you want to wait for. There are no restrictions on where the object can be defined.</p>
+<p>A separate <a href="../Pages/Page_83955697.html">thread</a>, <a href="../Pages/Page_83955700.html">semaphore</a>, <a href="../Pages/Page_83955790.html">event</a>, <a href="../Pages/Page_83955551.html">timer event</a>, <a href="../Pages/Page_83955748.html">message queue</a>, or similar object you want to wait for must also be initialized and prepared.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="nn">nn::os::</span><span class="n">MultiWaitType</span>        <span class="n">g_MultiWait</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span>  <span class="n">g_MultiWaitHolder1</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span>  <span class="n">g_MultiWaitHolder2</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Use the defined object according to the following procedure.</p>
+<ol>
+  <li>
+    <p>Before using the multiple wait feature, initialize the object.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeMultiWait</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWait</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Next, bind the <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> objects with the objects being waited on, and link them to the <span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span> list.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Bind with g_semaphore and link to the list.
+</span><span class="nn">nn::os::</span><span class="n">InitializeMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_Semaphore</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">LinkMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWait</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder1</span> <span class="p">);</span>
+
+<span class="c1">// Bind with g_MessageQueue and link to the list.
+</span><span class="nn">nn::os::</span><span class="n">InitializeMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_MessageQueue</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">MessageQueueWaitType_WaitForNotEmpty</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">LinkMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWait</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder2</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Begin waiting for <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny()</span> as necessary. The subsequent process is determined based on the return value.<br />The user data feature can be used for efficient branching. For more information, see the <span class="ApiLink_PageSampleOsMultiWait">Multiple Wait Feature Sample Program</span>.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span><span class="o">*</span>  <span class="n">holder</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">WaitAny</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWait</span> <span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span> <span class="n">holder</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder1</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Operations on g_Semaphore.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="n">holder</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder2</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Operations on g_MessageQueue.
+</span><span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>When you have finished using the objects for multiple wait, free them.<br />Free the bound threads, semaphores, events, message queues, and similar objects after freeing the multiple wait objects.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">UnlinkMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder1</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">UnlinkMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder2</span> <span class="p">);</span>
+
+<span class="nn">nn::os::</span><span class="n">FinalizeMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder1</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">FinalizeMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder2</span> <span class="p">);</span>
+
+<span class="nn">nn::os::</span><span class="n">FinalizeMultiWait</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWait</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_83955865_h2_3">Specific Example of Using Multiple Wait</h2>
+<p>For a specific example of using the multiple wait feature, see the <span class="ApiLink_PageSampleOsMultiWait">Multiple Wait Feature Sample Program</span>.</p>
+<p>In addition, also see <span class="ApiLink_PageSampleOsMultiWaitUtility">Sample Program Using the Multiple Wait Feature Utility</span>, which is this sample program written in a simplified manner using the utility described later in this document.</p>
+<h2 id="Anchor_83955865_h2_4">Multiple Wait API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeMultiWait(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::InitializeMultiWait</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeMultiWait(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::FinalizeMultiWait</span>
+  </li>
+  <li>
+    <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny</span>
+  </li>
+  <li>
+    <span class="ApiLink_MultiWaitHolderType_*_nn__os__TryWaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::TryWaitAny</span>
+  </li>
+  <li>
+    <span class="ApiLink_MultiWaitHolderType_*_nn__os__TimedWaitAny(MultiWaitType_*multiWait|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedWaitAny</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_ThreadType_*thread)_NN_NOEXCEPT">nn::os::InitializeMultiWaitHolder (for threads)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_SemaphoreType_*semaphore)_NN_NOEXCEPT">nn::os::InitializeMultiWaitHolder (for semaphores)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_EventType_*event)_NN_NOEXCEPT">nn::os::InitializeMultiWaitHolder (for events)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_TimerEventType_*timerEvent)_NN_NOEXCEPT">nn::os::InitializeMultiWaitHolder (for timer events)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_MessageQueueType_*messageQueue|_MessageQueueWaitType_waitType)_NN_NOEXCEPT">nn::os::InitializeMultiWaitHolder (for message queues)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_SystemEventType_*event)_NN_NOEXCEPT">nn::os::InitializeMultiWaitHolder (for system events)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder)_NN_NOEXCEPT">nn::os::FinalizeMultiWaitHolder</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__LinkMultiWaitHolder(MultiWaitType_*multiWait|_MultiWaitHolderType_*multiWaitHolder)_NN_NOEXCEPT">nn::os::LinkMultiWaitHolder</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__UnlinkMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder)_NN_NOEXCEPT">nn::os::UnlinkMultiWaitHolder</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__UnlinkAllMultiWaitHolder(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::UnlinkAllMultiWaitHolder</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__MoveAllMultiWaitHolder(MultiWaitType_*dstMultiWait|_MultiWaitType_*srcMultiWait)_NN_NOEXCEPT">nn::os::MoveAllMultiWaitHolder</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SetMultiWaitHolderUserData(MultiWaitHolderType_*multiWaitHolder|_uintptr_t_userData)_NN_NOEXCEPT">nn::os::SetMultiWaitHolderUserData</span>
+  </li>
+  <li>
+    <span class="ApiLink_uintptr_t_nn__os__GetMultiWaitHolderUserData(const_MultiWaitHolderType_*multiWaitHolder)_NN_NOEXCEPT">nn::os::GetMultiWaitHolderUserData</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955865_h2_5">Considerations When Using Multiple Waiting</h2>
+<h3 id="Anchor_83955865_h3_4">Thread Safety</h3>
+<p>Do not perform operations on <span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span> and <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> simultaneously from multiple <a href="../Pages/Page_83955697.html">threads</a>. These objects are designed for use from only a single thread.</p>
+<p>Using a single multiple wait list from two or more threads requires some extra setup and care. The following code sample shows how to use a single <a href="../Pages/Page_83955748.html">message queue</a> for management and a single <a href="../Pages/Page_83955800.html">mutex</a> to implement a multiple wait feature where a single multiple wait list is supported by multiple threads.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">MutexType</span>            <span class="n">g_Mutex</span><span class="p">;</span>                  <span class="c1">// For exclusive access to the multiple wait list.
+</span><span class="nn">nn::os::</span><span class="n">MultiWaitType</span>        <span class="n">g_MultiWait</span><span class="p">;</span>              <span class="c1">// Multiple wait list.
+</span>
+<span class="k">const</span> <span class="kt">size_t</span>                 <span class="n">g_MessageCount</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>                <span class="c1">// Adjust as required.
+</span><span class="kt">uintptr_t</span>                    <span class="n">g_MessageBuffer</span><span class="p">[</span> <span class="n">g_MessageCount</span> <span class="p">];</span>  <span class="c1">// Management message queue buffer.
+</span><span class="nn">nn::os::</span><span class="n">MessageQueueType</span>     <span class="n">g_Message</span><span class="p">;</span>                          <span class="c1">// Management message queue.
+</span><span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span>  <span class="n">g_MessageQueueHolder</span><span class="p">;</span>               <span class="c1">// Management message queue holder.
+</span>
+<span class="kt">void</span>  <span class="nf">InitializeWaitAnyThreadSafe</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">InitializeMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Message</span><span class="p">,</span> <span class="n">g_MessageBuffer</span><span class="p">,</span> <span class="n">g_MessgeCount</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">InitializeMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MessageQueueHolder</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_Message</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">MessageQueueWaitType_NotEmpty</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Link g_messageQueueHolder to multiple wait list.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">InitializeMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="mi">0</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">InitializeMultiWait</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWait</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">LinkMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWait</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_MessageQueueHolder</span> <span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span><span class="o">*</span>  <span class="n">WaitAnyThreadSafe</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span><span class="o">*</span>  <span class="n">holder</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">LockMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">while</span> <span class="p">(</span> <span class="nb">true</span> <span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">holder</span> <span class="o">=</span> <span class="n">WaitAny</span><span class="p">(</span> <span class="n">g_MultiWait</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span> <span class="n">holder</span> <span class="o">!=</span> <span class="o">&amp;</span><span class="n">g_MessageQueueHolder</span> <span class="p">)</span>                         <span class="c1">// ... (A)
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Break from loop if not g_MessageQueueHolder.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// If g_MessageQueueHolder, receive data, link to multiple wait list, and return to multiple wait.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">uintptr_t</span>  <span class="n">data</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">ReceiveMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_Message</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">LinkMultiWaitHolder</span><span class="p">(</span> <span class="n">g_MultiWait</span><span class="p">,</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="nl">nn</span><span class="p">:</span><span class="nn">os::</span><span class="n">MultiWaitHolderType</span><span class="o">*&gt;</span><span class="p">(</span> <span class="n">data</span> <span class="p">)</span> <span class="p">);</span>            
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">UnlinkMultiWaitHolder</span><span class="p">(</span> <span class="n">holder</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">UnlockMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span>  <span class="n">holder</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span>  <span class="n">RelinkWaitAnyList</span><span class="p">(</span> <span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span><span class="o">*</span> <span class="n">holder</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">SendMessageQueue</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Message</span><span class="p">,</span> <span class="n">holder</span> <span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This sample code has the following characteristics.</p>
+<ul>
+  <li>The <code>WaitAnyThreadSafe</code> function can be called from multiple threads.<ul><li>The actual waiting thread is limited to one thread by <code>g_Mutex</code>.</li></ul></li>
+  <li>The <code>WaitAnyThreadSafe()</code> function returns a pointer to the <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span>* object that was removed from the multiple wait list.<ul><li>The <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> object removed from the list is never waited for in a different thread.</li><li>If you want to re-link the object to the list, call the <code>RelinkWaitAnyList</code> function.<ul><li>The thread that was waiting receives the request, re-links the synchronization object to the multiple wait list, and begins waiting for any object in the list again.</li><li>If no thread was waiting at that time, the next thread to use the multiple wait object performs the same process.</li></ul></li></ul></li>
+</ul>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_83955865_h3_5">Branching After Multiple Waiting</h3>
+<p>The <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny()</span> function returns a pointer to an <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span>* object, so using the return value to identify the bound synchronization object is not very efficient.</p>
+<p>The following sample shows how to branch execution efficiently by using user data.</p>
+<p>Start by initializing the <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> object and setting a function entry as the user data.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">typedef</span>  <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">WorkerFunction</span><span class="p">)()</span><span class="p">;</span>
+<span class="k">extern</span> <span class="kt">void</span> <span class="nf">WorkOfSemaphore</span><span class="p">()</span><span class="p">;</span>             <span class="c1">// Function to process the semaphore multiple wait.
+</span><span class="k">extern</span> <span class="kt">void</span> <span class="nf">WorkOfMessageQueue</span><span class="p">()</span><span class="p">;</span>          <span class="c1">// Function to process the message queue multiple wait.
+</span>
+<span class="c1">// Bind to g_semaphore.
+</span><span class="nn">nn::os::</span><span class="n">InitializeMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_Semaphore</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">SetMultiWaitHolderUserData</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder1</span><span class="p">,</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">intptr_t</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">WorkOfSemaphore</span> <span class="p">)</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">LinkMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWait</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder1</span> <span class="p">);</span>
+
+<span class="c1">// Bind to g_messageQueue.
+</span><span class="nn">nn::os::</span><span class="n">InitializeMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_MessageQueue</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">MessageQueueWaitType_WaitForNotEmpty</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">SetMultiWaitHolderUserData</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder2</span><span class="p">,</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">intptr_t</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">WorkOfMessageQueue</span> <span class="p">)</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">LinkMultiWaitHolder</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWait</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_MultiWaitHolder2</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>When the preparations are complete, get the user data from the return value of the <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny()</span> function and invoke it as a function pointer.<br />This directs processing to the individual function associated with each <span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span> object, where the relevant processing can be performed.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span><span class="o">*</span>  <span class="n">holder</span> <span class="o">=</span> <span class="n">WaitAny</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_MultiWait</span> <span class="p">);</span>
+<span class="n">WorkerFunction</span>  <span class="n">func</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span> <span class="n">WorkerFunction</span> <span class="o">&gt;</span><span class="p">(</span> <span class="nn">nn::os::</span><span class="n">GetMultiWaitHolderUserData</span><span class="p">(</span> <span class="n">holder</span> <span class="p">)</span> <span class="p">);</span>
+<span class="n">func</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>The operating system library does not consider what is set in the user data. Developers are free to use the data for any purpose.</p>
+<p>Note that the <span class="ApiLink_MultiWaitHolderType_*_nn__os__TryWaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::TryWaitAny()</span> and <span class="ApiLink_MultiWaitHolderType_*_nn__os__TimedWaitAny(MultiWaitType_*multiWait|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedWaitAny()</span> functions sometimes return a null value, so make sure that you check before attempting to get the user data.</p>
+<h1 id="Anchor_83955865_h1_2">Utilities</h1>
+<h2 id="Anchor_83955865_h2_6">Overview</h2>
+<p>Utility functions are available when using the multiple wait feature. Normal functions like <span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny()</span> can only wait for waitable objects that are linked to a <span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span> structure. Utility functions enable directly waiting for objects.</p>
+<p>Consider the example of a multiple wait for the two <span class="ApiLink_nn__os__EventType">nn::os::EventType</span> objects <code>e1</code> and <code>e2</code>. If you do not use utility functions, you would code as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">MultiWaitType</span> <span class="n">multiWait</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">InitializeMultiWait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">);</span>
+&nbsp;
+<span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span> <span class="n">holder1</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span> <span class="n">holder2</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">InitializeMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">holder1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">e1</span><span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">InitializeMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">holder2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">e2</span><span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">LinkMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">holder1</span><span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">LinkMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">holder2</span><span class="p">);</span>
+&nbsp;
+<span class="nn">nn::os::</span><span class="n">MultiWaitHolderType</span><span class="o">*</span> <span class="n">signaled</span> <span class="o">=</span> <span class="n">WaitAny</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">);</span>
+&nbsp;
+<span class="k">if</span> <span class="p">(</span><span class="n">signaled</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">holder1</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// e1 has signaled.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">signaled</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">holder2</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// e2 has signaled.
+</span><span class="p">}</span>
+
+<span class="nn">nn::os::</span><span class="n">UnlinkMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">holder2</span><span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">UnlinkMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">holder1</span><span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">FinalizeMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">holder2</span><span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">FinalizeMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">holder1</span><span class="p">);</span>
+&nbsp;
+<span class="nn">nn::os::</span><span class="n">FinalizeMultiWait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>.</p>
+<p>By using utility functions, you can code as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">signaled</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">WaitAny</span><span class="p">(</span><span class="o">&amp;</span><span class="n">e1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">e2</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">signaled</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// e1 has signaled.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">signaled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// e2 has signaled.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> With the utility functions, you can directly specify waitable objects and get the indexes of signaled objects as return values.</p>
+<p>The object <em><code>x</code></em> can be specified if <code>InitializeMultiWaitHolder(<em>holder</em>, <em>x</em>);</code> can be called, with <code><em>holder</em></code> being an  <code><span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span></code> holder. The following examples show the kinds of objects that can be specified.</p>
+<ul>
+  <li>A pointer to <span class="ApiLink_nn__os__ThreadType">nn::os::ThreadType</span></li>
+  <li>A pointer to <span class="ApiLink_nn__os__SemaphoreType">nn::os::SemaphoreType</span></li>
+  <li>A pointer to <span class="ApiLink_nn__os__EventType">nn::os::EventType</span></li>
+  <li>The <code>GetBase()</code> function of <span class="ApiLink_nn__os__Semaphore">nn::os::Semaphore</span> or <span class="ApiLink_nn__os__Event">nn::os::Event</span></li>
+</ul>
+<p>The following value can be specified.</p>
+<p>In addition, <span class="ApiLink_nn__os__MessageQueueType">&amp; Utility Operator</span> has been prepared for <code><span class="ApiLink_detail__MessageQueueWaitMultiWaitHelper_nn__os__operator&(MessageQueueType_*messageQueue|_MessageQueueWaitType_waitType)_NN_NOEXCEPT">nn::os::MessageQueueType</span>* <em>pMessageQueue</em></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">signaled1</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">WaitAny</span><span class="p">(</span><span class="o">&amp;</span><span class="n">e1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">e2</span><span class="p">,</span> <span class="n">pMessageQueue</span> <span class="o">&amp;</span> <span class="nn">nn::os::</span><span class="n">MessageQueueWaitType_WaitForNotFull</span><span class="p">);</span>  <span class="c1">//  Wait for space in pMessageQueue.
+</span><span class="kt">int</span> <span class="n">signaled2</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">WaitAny</span><span class="p">(</span><span class="o">&amp;</span><span class="n">e1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">e2</span><span class="p">,</span> <span class="n">pMessageQueue</span> <span class="o">&amp;</span> <span class="nn">nn::os::</span><span class="n">MessageQueueWaitType_WaitForNotEmpty</span><span class="p">);</span> <span class="c1">// Wait for data to be queued in pMessageQueue.
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>As shown in the preceding sample, you can select the wait type by specifying <span class="ApiLink_nn__os__">nn::os::</span><span class="ApiLink_nn__os__MessageQueueWaitType">nn::os::MessageQueueWaitType</span> after the &amp; operator.</p>
+<h2 id="Anchor_83955865_h2_7">Variations</h2>
+<p>The following multiple-wait utility functions are available.</p>
+<ul>
+  <li>
+    <code>
+      <span class="ApiLink_nn__os__WaitAny">nn::os::WaitAny</span>()</code>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__os__TryWaitAny">nn::os::TryWaitAny</span>()</code>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__os__TimedWaitAny">nn::os::TimedWaitAny</span>()</code>
+  </li>
+</ul>
+<p>In all cases, you can specify the following values, in order, for the parameters.</p>
+<ul>
+  <li>Zero or one <code><span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span>*</code></li>
+  <li>Zero or more additional waitable objects</li>
+</ul>
+<p>Settings can be specified in order. If both <code><span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span></code> and waitable objects have been specified, all waitable objects included in both are targets for waiting.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th rowspan="2">
+        <br />
+      </th>
+      <th colspan="2">Existence of <span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span>* Parameter</th>
+    </tr>
+    <tr>
+      <th>Yes</th>
+      <th>None</th>
+    </tr>
+    <tr>
+      <th>Wait</th>
+      <td>
+        <span class="ApiLink_std__pair__MultiWaitHolderType_*|_int___nn__os__WaitAny(MultiWaitType_*pMultiWait|_Args_&&..._args)_NN_NOEXCEPT">WaitAny(MultiWaitType* pMultiWait, Args&amp;&amp;... args)</span>
+      </td>
+      <td>
+        <span class="ApiLink_int_nn__os__WaitAny(Args_&&..._args)_NN_NOEXCEPT">WaitAny(Args&amp;&amp;... args)</span>
+      </td>
+    </tr>
+    <tr>
+      <th>Poll</th>
+      <td>
+        <span class="ApiLink_std__pair__MultiWaitHolderType_*|_int___nn__os__TryWaitAny(MultiWaitType_*pMultiWait|_Args_&&..._args)_NN_NOEXCEPT">TryWaitAny(MultiWaitType* pMultiWait, Args&amp;&amp;... args)</span>
+      </td>
+      <td>
+        <span class="ApiLink_int_nn__os__TryWaitAny(Args_&&..._args)_NN_NOEXCEPT">TryWaitAny(Args&amp;&amp;... args)</span>
+      </td>
+    </tr>
+    <tr>
+      <th>Wait with a timeout</th>
+      <td>
+        <span class="ApiLink_std__pair__MultiWaitHolderType_*|_int___nn__os__TimedWaitAny(MultiWaitType_*pMultiWait|_TimeSpan_timeout|_Args_&&..._args)_NN_NOEXCEPT">TimedWaitAny(MultiWaitType* pMultiWait, TimeSpan timeout, Args&amp;&amp;... args)</span>
+      </td>
+      <td>
+        <span class="ApiLink_int_nn__os__TimedWaitAny(TimeSpan_timeout|_Args_&&..._args)_NN_NOEXCEPT">TimedWaitAny(TimeSpan timeout, Args&amp;&amp;... args)</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following return values correspond to the specified parameters.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th colspan="2" rowspan="2">Existence of Parameter</th>
+      <th colspan="2">Additional Waitable Objects</th>
+    </tr>
+    <tr>
+      <th>None</th>
+      <th>Yes</th>
+    </tr>
+    <tr>
+      <th rowspan="2">
+        <span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span>
+      </th>
+      <th>None</th>
+      <td>-</td>
+      <td>
+        <ul>
+          <li>Type: <code>int</code></li>
+          <li>Value: Index (starting from <code>0</code>)<ul><li>When not signaled: <code>&ndash;1</code></li></ul></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>Yes</th>
+      <td>
+        <ul>
+          <li>Type: <code><span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span>*</code></li>
+          <li>Value: Pointer to signaled holder<ul><li>When not signaled: <code>nullptr</code></li></ul></li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>Type: <code>std::pair&lt;<span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span>*, int&gt;</code></li>
+          <li>Value: Signaled or not<ul><li>The object not signaled: <code>nullptr</code> or <code>&ndash;1</code></li><li>When none signaled: <code>{ nullptr, &ndash;1 }</code></li></ul></li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following example waits for both <code><span class="ApiLink_nn__os__MultiWaitType">nn::os::MultiWaitType</span></code> objects and additional waitable objects.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">MultiWaitType</span> <span class="n">multiWait</span><span class="p">;</span>
+<span class="c1">// Link the appropriate MultiWaitHolderType to multiWait.
+</span>&nbsp;
+<span class="k">auto</span> <span class="n">signaled</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">WaitAny</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">e1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">e2</span><span class="p">);</span> <span class="c1">// std::pair&lt;nn::os::MultiWaitHolderType*, int&gt; signaled
+</span><span class="k">if</span> <span class="p">(</span><span class="n">signaled</span><span class="p">.</span><span class="n">first</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">auto</span> <span class="n">p</span> <span class="o">=</span> <span class="n">signaled</span><span class="p">.</span><span class="n">first</span><span class="p">;</span> <span class="c1">// nn::os::MultiWaitHolderType* p
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// A waitable object associated with p has signaled.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">signaled</span><span class="p">.</span><span class="n">second</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// e1 has signaled.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">signaled</span><span class="p">.</span><span class="n">second</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// e2 has signaled.
+</span><span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The process does not normally get to this point.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ASSERT</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="p">}</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The timeout value of <code><span class="ApiLink_nn__os__TimedWaitAny">nn::os::TimedWaitAny</span>()</code> is specified between the two.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">MultiWaitType</span> <span class="n">multiWait</span><span class="p">;</span>
+<span class="c1">// Link the appropriate MultiWaitHolderType to multiWait.
+</span><span class="nn">nn::</span><span class="n">TimeSpan</span> <span class="n">timeout</span> <span class="o">=</span> <span class="p">...;</span>
+&nbsp;
+<span class="k">auto</span> <span class="n">signaled</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">TimedWaitAny</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">e1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">e2</span><span class="p">);</span> <span class="c1">// std::pair&lt;nn::os::MultiWaitHolderType*, int&gt; signaled
+</span><span class="k">if</span> <span class="p">(</span><span class="n">signaled</span><span class="p">.</span><span class="n">first</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">auto</span> <span class="n">p</span> <span class="o">=</span> <span class="n">signaled</span><span class="p">.</span><span class="n">first</span><span class="p">;</span> <span class="c1">// nn::os::MultiWaitHolderType* p
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// A waitable object associated with p has signaled.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">signaled</span><span class="p">.</span><span class="n">second</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// e1 has signaled.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">signaled</span><span class="p">.</span><span class="n">second</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// e2 has signaled.
+</span><span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Timed out.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ab9b837eb53fa2c8a9610cec2b69666fd' )
+SetUrl( 'ApiLink_nn__os__MultiWaitHolderType', '../../../Api/HtmlNX/structnn_1_1os_1_1_multi_wait_holder_type.html' )
+SetUrl( 'ApiLink_nn__os__MultiWaitType', '../../../Api/HtmlNX/structnn_1_1os_1_1_multi_wait_type.html' )
+SetUrl( 'ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_EventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a4f8d998425d067cb5fec2604ae7845dc' )
+SetUrl( 'ApiLink_PageSampleOsMultiWait', '../../../Api/HtmlNX/_page_sample_os_multi_wait.html' )
+SetUrl( 'ApiLink_nn__os__ThreadType', '../../../Api/HtmlNX/structnn_1_1os_1_1_thread_type.html' )
+SetUrl( 'ApiLink_nn__os__MessageQueueWaitType_WaitForNotEmpty', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3271c9fc6c46cffdb076b966f15a80bca40a79a4dabe0233dd5c21d7c4a718eea' )
+SetUrl( 'ApiLink_nn__os__MessageQueueWaitType_WaitForNotFull', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3271c9fc6c46cffdb076b966f15a80bca0fa8f18b62354b68a7838af2bf4e6f01' )
+SetUrl( 'ApiLink_PageSampleOsMultiWaitUtility', '../../../Api/HtmlNX/_page_sample_os_multi_wait_utility.html' )
+SetUrl( 'ApiLink_void_nn__os__InitializeMultiWait(MultiWaitType_*multiWait)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a48e6662e7fdf9f78bcae79ba94d64a93' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeMultiWait(MultiWaitType_*multiWait)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a60873f9b623e014948a9ea53a611da4c' )
+SetUrl( 'ApiLink_MultiWaitHolderType_*_nn__os__TryWaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#add056696d279031175e9053145c82677' )
+SetUrl( 'ApiLink_MultiWaitHolderType_*_nn__os__TimedWaitAny(MultiWaitType_*multiWait|_TimeSpan_timeout)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a6a76f1be743cfc8791d2a139c7409470' )
+SetUrl( 'ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_ThreadType_*thread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a72d36b7ef64f2c1e82f03d895fdd5609' )
+SetUrl( 'ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_SemaphoreType_*semaphore)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a0e0b40464c9936df7d8cb77dadffcbd9' )
+SetUrl( 'ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_TimerEventType_*timerEvent)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a4083f1b95f58372c092726cfd9800054' )
+SetUrl( 'ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_MessageQueueType_*messageQueue|_MessageQueueWaitType_waitType)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a241484ed12a060d60eeb234db88484d0' )
+SetUrl( 'ApiLink_void_nn__os__InitializeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder|_SystemEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a4b03654db54c77da2e8a8c185257d250' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2de358e6bfa261b74c399b5b59c0da1d' )
+SetUrl( 'ApiLink_void_nn__os__LinkMultiWaitHolder(MultiWaitType_*multiWait|_MultiWaitHolderType_*multiWaitHolder)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a7cd9b25e14bee063959eb9e7f62a4aa8' )
+SetUrl( 'ApiLink_void_nn__os__UnlinkMultiWaitHolder(MultiWaitHolderType_*multiWaitHolder)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a07c9c7bbc51249b69dc2361957fd650b' )
+SetUrl( 'ApiLink_void_nn__os__UnlinkAllMultiWaitHolder(MultiWaitType_*multiWait)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a7bdfded3152755dfd1fadb8eeea4565e' )
+SetUrl( 'ApiLink_void_nn__os__MoveAllMultiWaitHolder(MultiWaitType_*dstMultiWait|_MultiWaitType_*srcMultiWait)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ab8fb5f6b288f3b208f0d4750d0ba079d' )
+SetUrl( 'ApiLink_void_nn__os__SetMultiWaitHolderUserData(MultiWaitHolderType_*multiWaitHolder|_uintptr_t_userData)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a05af1a7e142f1ece42a53fe41085f53b' )
+SetUrl( 'ApiLink_uintptr_t_nn__os__GetMultiWaitHolderUserData(const_MultiWaitHolderType_*multiWaitHolder)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a9e8c73312415fc00c72808fcc00fea33' )
+SetUrl( 'ApiLink_nn__os__EventType', '../../../Api/HtmlNX/structnn_1_1os_1_1_event_type.html' )
+SetUrl( 'ApiLink_nn__os__SemaphoreType', '../../../Api/HtmlNX/structnn_1_1os_1_1_semaphore_type.html' )
+SetUrl( 'ApiLink_nn__os__Semaphore', '../../../Api/HtmlNX/classnn_1_1os_1_1_semaphore.html' )
+SetUrl( 'ApiLink_nn__os__Event', '../../../Api/HtmlNX/classnn_1_1os_1_1_event.html' )
+SetUrl( 'ApiLink_nn__os__MessageQueueType', '../../../Api/HtmlNX/structnn_1_1os_1_1_message_queue_type.html' )
+SetUrl( 'ApiLink_detail__MessageQueueWaitMultiWaitHelper_nn__os__operator&(MessageQueueType_*messageQueue|_MessageQueueWaitType_waitType)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a0a434b3b646d4fafdc951f63fa3a4689' )
+SetUrl( 'ApiLink_nn__os__', '../../../Api/HtmlNX/namespacenn_1_1os.html' )
+SetUrl( 'ApiLink_nn__os__MessageQueueWaitType', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3271c9fc6c46cffdb076b966f15a80bc' )
+SetUrl( 'ApiLink_nn__os__WaitAny', '../../../Api/HtmlNX/namespacenn_1_1os.html#ab9b837eb53fa2c8a9610cec2b69666fd' )
+SetUrl( 'ApiLink_nn__os__TryWaitAny', '../../../Api/HtmlNX/namespacenn_1_1os.html#add056696d279031175e9053145c82677' )
+SetUrl( 'ApiLink_nn__os__TimedWaitAny', '../../../Api/HtmlNX/namespacenn_1_1os.html#a6a76f1be743cfc8791d2a139c7409470' )
+SetUrl( 'ApiLink_std__pair__MultiWaitHolderType_*|_int___nn__os__WaitAny(MultiWaitType_*pMultiWait|_Args_&&..._args)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a22c4b696270b511328e43c40e30a53f6' )
+SetUrl( 'ApiLink_int_nn__os__WaitAny(Args_&&..._args)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3c212b9d05d000b8d34dabf2b65ec367' )
+SetUrl( 'ApiLink_std__pair__MultiWaitHolderType_*|_int___nn__os__TryWaitAny(MultiWaitType_*pMultiWait|_Args_&&..._args)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8fab21890e314a0c21f95cad61bfb8ef' )
+SetUrl( 'ApiLink_int_nn__os__TryWaitAny(Args_&&..._args)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8351902f4ee90954cb0332ae741bb925' )
+SetUrl( 'ApiLink_std__pair__MultiWaitHolderType_*|_int___nn__os__TimedWaitAny(MultiWaitType_*pMultiWait|_TimeSpan_timeout|_Args_&&..._args)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#adcae3cbfea9890fd7b1ace389192094c' )
+SetUrl( 'ApiLink_int_nn__os__TimedWaitAny(TimeSpan_timeout|_Args_&&..._args)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ab095940b13b3c3b338c3b5c76ffb7b24' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

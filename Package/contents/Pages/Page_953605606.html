@@ -1,0 +1,414 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Custom UI for the Texture Export Plug-In | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Custom UI for the Texture Export Plug-In -->
+<div class="pagetitle" id="PageId_953605606">Custom UI for the Texture Export Plug-In</div>
+<div class="text_separate">
+<h1 id="Anchor_953605606_h1_1">Custom UI for the Texture Export Plug-In</h1>
+<p>This page describes how to add a user-customized UI to the options dialog box of the Texture Export plug-in. (This feature is available in NintendoSDK 11.3.0 and later.)</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_953605606_h2_1">Setting Method</a>
+    </li>
+    <li>
+      <a href="#Anchor_953605606_h2_2">User-Defined Callback Functions</a>
+    </li>
+    <li>
+      <a href="#Anchor_953605606_h2_3">dialog Object Member Functions</a>
+    </li>
+    <li>
+      <a href="#Anchor_953605606_h2_4">Using the Pre-Export Script and Post-Export Script to Get User Custom Data</a>
+    </li>
+    <li>
+      <a href="#Anchor_953605606_h2_5">Usage Examples</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_953605606_h3_1">Adding a Rotate Option</a>
+      </li>
+      <li>
+        <a href="#Anchor_953605606_h3_2">Using Config to Switch the UI</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h2 id="Anchor_953605606_h2_1">Setting Method</h2>
+<p>To add a user-customized UI to the options dialog box, place a file named <code>UserCustomExportUi.jsxinc</code> (the user custom UI file) in the config folder.<br />The user-customized UI panel is displayed above <strong>Script Options</strong>.</p>
+<p>The user custom UI file defines callback functions with predetermined names as needed.</p>
+<p>The user-specific data (the user custom data) specified by the user-customized UI can be saved to a PSD/PSB/PSDC file and then used with Pre-Export Script and Post-Export Script.</p>
+<h2 id="Anchor_953605606_h2_2">User-Defined Callback Functions</h2>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Name of Callback Function</th>
+      <th>When It Is Called</th>
+    </tr>
+    <tr>
+      <td>UserCustomOnCreateUi(panel, dialog)</td>
+      <td>
+        <p>To create a dialog box UI.</p>
+        <p>(This function creates the UI controls.)</p>
+      </td>
+    </tr>
+    <tr>
+      <td>UserCustomOnChangeConfig(panel, dialog)</td>
+      <td>
+        <p>To change the configuration.<br />(Called when first displaying the dialog box.)</p>
+      </td>
+    </tr>
+    <tr>
+      <td>UserCustomOnChangeLayerComp(panel, dialog)</td>
+      <td>To change the layer comp to configure.<br />(Called when first displaying the dialog box.)</td>
+    </tr>
+    <tr>
+      <td>UserCustomOnApply(panel, dialog)</td>
+      <td>In the dialog box, click <strong>OK</strong>.</td>
+    </tr>
+    <tr>
+      <td>UserCustomOnCancel(panel, dialog)</td>
+      <td>In the dialog box, click <strong>Cancel</strong>.</td>
+    </tr>
+    <tr>
+      <td>UserCustomOnPreExport(panel, dialog)</td>
+      <td>Before export from the button.</td>
+    </tr>
+    <tr>
+      <td>UserCustomOnPostExport(panel, dialog)</td>
+      <td>After export from the button.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Except for the UI creation callback, the definitions of these callback functions are optional.<br />Use the <code><em>panel</em></code> parameter to add members to the user custom UI panel (the <code>Panel</code> class).<br />Use the <code><em>dialog</em></code> parameter to get various information in the options dialog box (the <code>Window</code> class). Adding members is prohibited.</p>
+<p>Processing is run in the following order when the dialog box is first displayed.</p>
+<ol>
+  <li>UserCustomOnCreateUi()<br class="_mce_tagged_br" /></li>
+  <li>UserCustomOnChangeConfig()<br /></li>
+  <li>UserCustomOnChangeLayerComp()<br /></li>
+</ol>
+<p>Processing are run in the following order when you click <strong>Export</strong> (the <strong>Export Selected Layer Comp</strong> button).</p>
+<ol>
+  <li>UserCustomOnPreExport()</li>
+  <li>Pre-Export Script</li>
+  <li>(Save to temporary folder)</li>
+  <li>Post-Export Script</li>
+  <li>(Move from the temporary folder to the proper folder)</li>
+  <li>UserCustomOnPostExport()</li>
+</ol>
+<p>
+  <code>UserCustomOnApply()</code>, <code>UserCustomOnPreExport()</code>, and <code>UserCustomOnPostExport()</code> can get information from environment variables in the same way as <a href="../Pages/Page_83956098.html#Anchor_83956098_Post-Export_Script">Pre-Export Script and Post-Export Script</a>.<br />The <code>UserCustomOnPostExport()</code> function is called even if export fails. (Export fails if the <code>NINTENDO_EXPORT_SUCCEEDED</code> environment variable value is not <code>1</code>.)</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If you will be using variables or functions other than callback functions, we recommend adding them to the members of <code><em>panel</em></code>.<br />If you do not make them <code><em>panel</em></code> members, use unique names to avoid conflicts with existing functions and variables in the plug-in.</p>
+  </div>
+</div>
+<p>As a special use case, you can choose to not define the UI creation callback function and only define other callback functions. (In this case, the <code><em>panel</em></code> parameter will be <code>undefined</code>.)</p>
+<h2 id="Anchor_953605606_h2_3">dialog Object Member Functions</h2>
+<p>You can use member functions of the <code>dialog</code> object to get various information.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Member Function Name</th>
+      <th>Return Value</th>
+    </tr>
+    <tr>
+      <td>GetDocument()</td>
+      <td>The document being edited (the <code>Document</code> class).</td>
+    </tr>
+    <tr>
+      <td>GetConfigName()</td>
+      <td>The config name being used.</td>
+    </tr>
+    <tr>
+      <td>ExportsLayerComp()</td>
+      <td>Whether to export for each layer comp.</td>
+    </tr>
+    <tr>
+      <td>GetCurrentLayerCompName()</td>
+      <td>The name of layer comp to configure.</td>
+    </tr>
+    <tr>
+      <td>IsCurrentLayerCompEnabled()</td>
+      <td>Whether the layer comp to configure is enabled.</td>
+    </tr>
+    <tr>
+      <td>IsSpecificLayerCompEnabled(layerCompName)</td>
+      <td>Whether the specified layer comp is enabled.</td>
+    </tr>
+    <tr>
+      <td>
+        <strong>GetCurrentLayerCompUserCustomData()</strong>
+      </td>
+      <td>
+        <strong>User custom data</strong> of the layer comp to configure.<br /></td>
+    </tr>
+    <tr>
+      <td>
+        <strong>GetSingleLayerCompUserCustomData()</strong>
+      </td>
+      <td>The layer comp <strong>user custom data</strong> when not exporting for each layer comp.<br /></td>
+    </tr>
+    <tr>
+      <td>GetSpecificLayerCompUserCustomData(layerCompName)</td>
+      <td>The <strong>user custom data</strong> of the specified layer comp.<br /></td>
+    </tr>
+    <tr>
+      <td>GetOutputFtxFolderPath()</td>
+      <td>The absolute path of the folder for exporting FTX files.<br />(The null character if not exporting.)</td>
+    </tr>
+    <tr>
+      <td>GetOutputImageFolderPath()</td>
+      <td>The absolute path of the folder for exporting image files.<br />(The null character if not exporting.)</td>
+    </tr>
+    <tr>
+      <td>GetCurrentOutputFtxPaths()</td>
+      <td>Exports from the layer comp to be configured.<br />Array of FTX file absolute paths.</td>
+    </tr>
+    <tr>
+      <td>GetCurrentOutputImagePaths()</td>
+      <td>Exports from the layer comp to be configured.<br />Array of image file absolute paths.</td>
+    </tr>
+    <tr>
+      <td>GetSpecificOutputFtxPaths(layerCompName)</td>
+      <td>Exports from the specified layer comp.<br />Array of FTX file absolute paths.</td>
+    </tr>
+    <tr>
+      <td>GetSpecificOutputImagePaths(layerCompName)</td>
+      <td>Exports from the specified layer comp.<br />Array of image file absolute paths.</td>
+    </tr>
+    <tr>
+      <td>GetExportTarget()</td>
+      <td>Export target when exported from the button.<br />(<code>all</code> / <code>selection</code>)</td>
+    </tr>
+  </tbody>
+</table>
+<p>Member variables added to the user custom data (<code>object</code> type) are saved to a PSD/PSB/PSDC file. Only add data that needs to be saved. (Do not add member functions.)</p>
+<p>The user custom data obtained with the <code>GetSingleLayerCompUserCustomData()</code> function can also be used for saving parameters common to all layer comps.<br />When the <strong>Layer Comp Export</strong> option is disabled, the return values of <code>GetCurrentLayerCompUserCustomData()</code> and <code>GetSingleLayerCompUserCustomData()</code> are identical.</p>
+<p>If <strong>Cancel</strong> is clicked in the dialog box, the user custom data in the PSD/PSB/PSDC file is not changed.<br />If you want to save user-specific settings to a file without using the user custom data, call the <code>UserCustomOnCancel()</code> function as needed to perform the cancel process.</p>
+<h2 id="Anchor_953605606_h2_4">Using the Pre-Export Script and Post-Export Script to Get User Custom Data</h2>
+<p>
+  <strong>Pre-Export Script</strong> and <strong>Post-Export Script</strong> can get the currently active export option settings using the <code>GetActiveExportOptions()</code> function.<br />You can use the member functions of the export option settings to get the user custom data.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>GetSpecificLayerCompUserCustomData(layerCompName)</td>
+      <td>The user custom data for the specified layer comp.<br /></td>
+    </tr>
+    <tr>
+      <td>GetSingleLayerCompUserCustomData()</td>
+      <td>The layer comp user custom data when not exporting for each layer comp.<br /></td>
+    </tr>
+  </tbody>
+</table>
+<p>You can get the name of the layer comp corresponding to the export file from the <code>NINTENDO_EXPORT_FILE_LAYER_COMP_NAMES</code> environment variable.</p>
+<p>
+  <a name="Anchor_953605606_example_utility"></a>
+</p>
+<h2 id="Anchor_953605606_h2_5">Usage Examples</h2>
+<h3 id="Anchor_953605606_h3_1">Adding a Rotate Option</h3>
+<p>This example creates a check box in the user custom UI which, if selected, rotates the exported image file (TGA/PNG) 90 degrees counterclockwise.<br />Configure <code>UserCustomExportUi.jsxinc</code> as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">//! @brief Creates the user custom UI.
+//!
+//! @param[in,out] panel  The user custom UI panel.
+//! @param[in] dialog  The export dialog box.
+</span><span class="kd">function</span> <span class="nx">UserCustomOnCreateUi</span><span class="p">(</span><span class="nx">panel</span><span class="p">,</span> <span class="nx">dialog</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Create a group to place the UI horizontally.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myGroup1</span> <span class="o">=</span> <span class="nx">panel</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myGroup1</span><span class="p">.</span><span class="nx">orientation</span> <span class="o">=</span> <span class="s2">&quot;row&quot;</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Create a check box.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myRotate90Check</span> <span class="o">=</span> <span class="nx">panel</span><span class="p">.</span><span class="nx">myGroup1</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;checkbox&quot;</span><span class="p">,</span> <span class="kc">undefined</span><span class="p">,</span> <span class="s2">&quot;Rotate 90&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myRotate90Check</span><span class="p">.</span><span class="nx">onClick</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">customData</span> <span class="o">=</span> <span class="nx">dialog</span><span class="p">.</span><span class="nx">GetCurrentLayerCompUserCustomData</span><span class="p">(</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">customData</span><span class="p">.</span><span class="nx">rotate90</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//! @brief The callback function for changing the layout comp to configure.
+//!        This is also called when the dialog box is first displayed.
+</span><span class="kd">function</span> <span class="nx">UserCustomOnChangeLayerComp</span><span class="p">(</span><span class="nx">panel</span><span class="p">,</span> <span class="nx">dialog</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Set the check box to the current value.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">customData</span> <span class="o">=</span> <span class="nx">dialog</span><span class="p">.</span><span class="nx">GetCurrentLayerCompUserCustomData</span><span class="p">(</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myRotate90Check</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="p">(</span><span class="nx">customData</span><span class="p">.</span><span class="nx">rotate90</span> <span class="o">!=</span> <span class="kc">undefined</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">?</span> <span class="nx">customData</span><span class="p">.</span><span class="nx">rotate90</span> <span class="o">:</span> <span class="kc">false</span><span class="p">;</span> <span class="c1">// Cleared by default.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Configure <strong>Post-Export Script</strong> as follows. (The folder can be anywhere.)</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nx">$</span><span class="p">.</span><span class="nx">evalFile</span><span class="p">(</span><span class="s2">&quot;D:/Data/CustomRotate90.jsxinc&quot;</span><span class="p">)</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Save the following script with the name <code>CustomRotate90.jsxinc</code> in the path specified by <code>$.evalFile()</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get information from the environment variable.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">fileType</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">getenv</span><span class="p">(</span><span class="s2">&quot;NINTENDO_EXPORT_IMAGE_FILE_EXTENSION&quot;</span><span class="p">).</span><span class="nx">toUpperCase</span><span class="p">(</span><span class="p">);</span> <span class="c1">// TGA / PNG
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">fileNamesStr</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">getenv</span><span class="p">(</span><span class="s2">&quot;NINTENDO_EXPORT_&quot;</span> <span class="o">+</span> <span class="nx">fileType</span> <span class="o">+</span> <span class="s2">&quot;_FILE_NAMES&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="nx">fileNamesStr</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span><span class="p">;</span> <span class="c1">// Does nothing if no image file is exported.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">fileNames</span> <span class="o">=</span> <span class="nx">fileNamesStr</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">folderPath</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">getenv</span><span class="p">(</span><span class="s2">&quot;NINTENDO_EXPORT_TEMP_&quot;</span> <span class="o">+</span> <span class="nx">fileType</span> <span class="o">+</span> <span class="s2">&quot;_FOLDER&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="nx">folderPath</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">folderPath</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">getenv</span><span class="p">(</span><span class="s2">&quot;NINTENDO_EXPORT_&quot;</span> <span class="o">+</span> <span class="nx">fileType</span> <span class="o">+</span> <span class="s2">&quot;_FOLDER&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">fileCompNamesStr</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">getenv</span><span class="p">(</span><span class="s2">&quot;NINTENDO_EXPORT_FILE_LAYER_COMP_NAMES&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">fileCompNames</span> <span class="o">=</span> <span class="p">(</span><span class="nx">fileCompNamesStr</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="o">?</span> <span class="nx">fileCompNamesStr</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">:</span> <span class="kc">null</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Use the ImageMagick software bundled with Photoshop to convert the image files.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">imageMagickPath</span> <span class="o">=</span> <span class="nx">app</span><span class="p">.</span><span class="nx">path</span><span class="p">.</span><span class="nx">fsName</span> <span class="o">+</span> <span class="s2">&quot;\\convert.exe&quot;</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">options</span> <span class="o">=</span> <span class="nx">GetActiveExportOptions</span><span class="p">(</span><span class="p">);</span> <span class="c1">// Get the currently active export option settings.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">fileIdx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">fileIdx</span> <span class="o">&lt;</span> <span class="nx">fileNames</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="o">++</span><span class="nx">fileIdx</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">fileName</span> <span class="o">=</span> <span class="nx">fileNames</span><span class="p">[</span><span class="nx">fileIdx</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">filePath</span> <span class="o">=</span> <span class="nx">folderPath</span> <span class="o">+</span> <span class="nx">fileName</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">customData</span> <span class="o">=</span> <span class="p">(</span><span class="nx">fileCompNames</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">?</span> <span class="nx">options</span><span class="p">.</span><span class="nx">GetSpecificLayerCompUserCustomData</span><span class="p">(</span><span class="nx">fileCompNames</span><span class="p">[</span><span class="nx">fileIdx</span><span class="p">])</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">:</span> <span class="nx">options</span><span class="p">.</span><span class="nx">GetSingleLayerCompUserCustomData</span><span class="p">(</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="nx">customData</span><span class="p">.</span><span class="nx">rotate90</span> <span class="o">!=</span> <span class="kc">undefined</span> <span class="o">&amp;&amp;</span> <span class="nx">customData</span><span class="p">.</span><span class="nx">rotate90</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">command</span> <span class="o">=</span> <span class="s2">&quot;\&quot;&quot;</span> <span class="o">+</span> <span class="nx">imageMagickPath</span> <span class="o">+</span> <span class="s2">&quot;\&quot; \&quot;&quot;</span> <span class="o">+</span> <span class="nx">filePath</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">+</span> <span class="s2">&quot;\&quot; -rotate -90 \&quot;&quot;</span> <span class="o">+</span> <span class="nx">filePath</span> <span class="o">+</span> <span class="s2">&quot;\&quot;&quot;</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">ExecuteExternalCommand</span><span class="p">(</span><span class="nx">command</span><span class="p">);</span> <span class="c1">// Run external commands.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}(</span><span class="p">));</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_953605606_h3_2">Using Config to Switch the UI</h3>
+<p>This example switches the UI based on whether the config is Effect or another config.<br />You use the UI creation callback function to create UI controls that correspond to various configs, and then use the config switching callback function to enable or disable the group visibility flags.<br />Configure <code>UserCustomExportUi.jsxinc</code> as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">//! @brief Creates the user custom UI.
+</span><span class="kd">function</span> <span class="nx">UserCustomOnCreateUi</span><span class="p">(</span><span class="nx">panel</span><span class="p">,</span> <span class="nx">dialog</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Create a group that is a stack of multiple groups to place.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myRootGroup</span> <span class="o">=</span> <span class="nx">panel</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myRootGroup</span><span class="p">.</span><span class="nx">orientation</span> <span class="o">=</span> <span class="s2">&quot;stack&quot;</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myRootGroup</span><span class="p">.</span><span class="nx">alignChildren</span> <span class="o">=</span> <span class="s2">&quot;fill&quot;</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Create a standard UI.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myStandardGroup</span> <span class="o">=</span> <span class="nx">panel</span><span class="p">.</span><span class="nx">myRootGroup</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myStandardGroup</span><span class="p">.</span><span class="nx">orientation</span> <span class="o">=</span> <span class="s2">&quot;row&quot;</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myGrayscaleCheck</span> <span class="o">=</span> <span class="nx">panel</span><span class="p">.</span><span class="nx">myStandardGroup</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;checkbox&quot;</span><span class="p">,</span> <span class="kc">undefined</span><span class="p">,</span> <span class="s2">&quot;Grayscale&quot;</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Create an effect UI.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myEffectGroup</span> <span class="o">=</span> <span class="nx">panel</span><span class="p">.</span><span class="nx">myRootGroup</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myEffectGroup</span><span class="p">.</span><span class="nx">orientation</span> <span class="o">=</span> <span class="s2">&quot;row&quot;</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">mySpeedLabel</span> <span class="o">=</span> <span class="nx">panel</span><span class="p">.</span><span class="nx">myEffectGroup</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;statictext&quot;</span><span class="p">,</span> <span class="kc">undefined</span><span class="p">,</span> <span class="s2">&quot;Speed&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">mySpeedLabel</span><span class="p">.</span><span class="nx">justify</span> <span class="o">=</span> <span class="s2">&quot;right&quot;</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">mySpeedList</span> <span class="o">=</span> <span class="nx">panel</span><span class="p">.</span><span class="nx">myEffectGroup</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;dropdownlist&quot;</span><span class="p">,</span> <span class="kc">undefined</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">]);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">mySpeedList</span><span class="p">.</span><span class="nx">items</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">selected</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">//! @brief The callback function for changing config.
+//!        This is also called when the dialog box is first displayed.
+</span><span class="kd">function</span> <span class="nx">UserCustomOnChangeConfig</span><span class="p">(</span><span class="nx">panel</span><span class="p">,</span> <span class="nx">dialog</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kd">var</span> <span class="nx">isEffect</span> <span class="o">=</span> <span class="p">(</span><span class="nx">dialog</span><span class="p">.</span><span class="nx">GetConfigName</span><span class="p">(</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;Effect&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myStandardGroup</span><span class="p">.</span><span class="nx">visible</span> <span class="o">=</span> <span class="o">!</span><span class="nx">isEffect</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">panel</span><span class="p">.</span><span class="nx">myEffectGroup</span><span class="p">.</span><span class="nx">visible</span> <span class="o">=</span> <span class="nx">isEffect</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">//! @brief The callback function for changing the layout comp to configure.
+//!        This is also called when the dialog box is first displayed.
+</span><span class="kd">function</span> <span class="nx">UserCustomOnChangeLayerComp</span><span class="p">(</span><span class="nx">panel</span><span class="p">,</span> <span class="nx">dialog</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Set each UI control to the current value.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// (Omitted.)
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

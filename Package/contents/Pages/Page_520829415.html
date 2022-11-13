@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>ui2d Extended User Information | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- ui2d Extended User Information -->
+<div class="pagetitle" id="PageId_520829415">ui2d Extended User Information</div>
+<div class="text_separate">
+<h1 id="Anchor_520829415_h1_1">About Extended User Information</h1>
+<p>
+  <code>ui2d</code> makes it possible to add extended user information to each data location.</p>
+<p>It embeds game-specific information in the extended user information for use in processing.</p>
+<h2 id="Anchor_520829415_h2_1">Data Structure</h2>
+<p>The extended user information structure consists of entries comprising name + format (text string, <code>float</code> string, <code>int</code> string) + value as one entry (<code><span class="ApiLink_nn__ui2d__ResExtUserData">nn::ui2d::ResExtUserData</span></code>), which are then defined as an array (<code><span class="ApiLink_nn__ui2d__ResExtUserDataList">nn::ui2d::ResExtUserDataList</span></code>).　</p>
+<h2 id="Anchor_520829415_h2_2">Elements That Can Be Added</h2>
+<p>The elements that can be added are panes (<code><span class="ApiLink_nn__ui2d__Pane">nn::ui2d::Pane</span></code>), layouts (<code><span class="ApiLink_nn__ui2d__Layout">nn::ui2d::Layout</span></code>), animation segment tags (<code><span class="ApiLink_nn__ui2d__AnimResource">nn::ui2d::AnimResource</span></code>), and controls (<code><span class="ApiLink_nn__ui2d__ControlSrc">nn::ui2d::ControlSrc</span></code>).</p>
+<h2 id="Anchor_520829415_h2_3">Setting Data</h2>
+<p>Data can be set from LayoutEditor. (For more information, see the LayoutEditor documentation.)</p>
+<p>A preset feature is available to make setup more efficient. <a href="../Pages/Page_83955969.html">(Extended User Information Presets)</a></p>
+<h2 id="Anchor_520829415_h2_4">Getting Settings From the Runtime</h2>
+<h3 id="Anchor_520829415_h3_1">Sharing Read-Only Resources and Referencing Them Between Instances　　　　　　</h3>
+<p>Basically, extended user information is shared and referenced as read-only resources from multiple instances.</p>
+<ul>
+  <li>Use an access method such as <code>const ResExtUserDataList* GetExtUserDataList() const</code>.</li>
+  <li>Use from instances of classes like <code><span class="ApiLink_nn__ui2d__Pane">nn::ui2d::Pane</span></code> and <code><span class="ApiLink_nn__ui2d__Layout">nn::ui2d::Layout</span></code>, described earlier.</li>
+</ul>
+<p>
+  <br />Overwriting is not assumed because it is a read-only resource (all those that reference other instances are overwritten.)<br />If you need to overwrite the content and store the individual information for each instance, use <code>SystemDataUserPointer</code>, decribed later.</p>
+<h3 id="Anchor_520829415_h3_2">Overwriting the Individual Content of Each Instance</h3>
+<p>There are primarily two methods.</p>
+<h4 id="Anchor_520829415_h4_1">SystemDataUserPointer </h4>
+<p>An additional area (one pointer area) can be added to the extended user information of a pane or layout by the options in a Layout build.</p>
+<ul>
+  <li>Build a layout with <code>isSystemDataUserPointerPerPaneEnabled</code> enabled in <code><span class="ApiLink_nn__ui2d__Layout__BuildOption">nn::ui2d::Layout::BuildOption</span></code>.</li>
+  <li>Get with <code><span class="ApiLink_nn__ui2d__Pane__GetSystemExtDataForUserPointer">nn::ui2d::Pane::GetSystemExtDataForUserPointer</span>()</code>.<br /><ul><li>You can also use this function with the layout, in addition to panes.</li></ul></li>
+</ul>
+<p>An example of using this method is setting a pointer to a data structure that embeds game-specific information in this pointer area.</p>
+<h4 id="Anchor_520829415_h4_2">Using nn::ui2d::Pane::GetUserData()</h4>
+<p>A pane has a discretionary use area of 8 bytes + 1 for null termination that can be retrieved with <code>GetUserData()</code>.</p>
+<p>You can store a specific text string, directly store simple information to use as binary data, or embed a pointer to extended data.</p>
+<p>Use <code><span class="ApiLink_nn__ui2d__Pane__SetUserDataAsBinary">nn::ui2d::Pane::SetUserDataAsBinary</span>()</code> and <code><span class="ApiLink_nn__ui2d__Pane__GetUserDataAsBinary">nn::ui2d::Pane::GetUserDataAsBinary</span>()</code> when using this method for binary data. </p>
+<h2 id="Anchor_520829415_h2_5">Making Occasional Duplicates of Each Instance due to Internal Library Circumstances</h2>
+<p>Duplicates are made of each instance when the library has to overwrite user information.</p>
+<p>Duplicates are made in the following two cases.</p>
+<ul>
+  <li>When using some features, like shape or capture effect<ul><li>User data is used to store additional information to prevent memory usage from increasing when the feature is not used.</li></ul></li>
+  <li>When using animation in the extended user information of a pane</li>
+</ul>
+<p>Note that if duplicates are made, you cannot use any substitution API functions (<code>SetExtUserDataList()</code>) after the user information (the assertion fails).</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__ui2d__ResExtUserData', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_res_ext_user_data.html' )
+SetUrl( 'ApiLink_nn__ui2d__ResExtUserDataList', '../../../Api/HtmlNX/structnn_1_1ui2d_1_1_res_ext_user_data_list.html' )
+SetUrl( 'ApiLink_nn__ui2d__Pane', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_pane.html' )
+SetUrl( 'ApiLink_nn__ui2d__Layout', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_layout.html' )
+SetUrl( 'ApiLink_nn__ui2d__AnimResource', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_anim_resource.html' )
+SetUrl( 'ApiLink_nn__ui2d__ControlSrc', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_control_src.html' )
+SetUrl( 'ApiLink_nn__ui2d__Layout__BuildOption', '../../../Api/HtmlNX/structnn_1_1ui2d_1_1_layout_1_1_build_option.html' )
+SetUrl( 'ApiLink_nn__ui2d__Pane__GetSystemExtDataForUserPointer', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_pane.html#a6f56901bfe5cfea71cebd156ccb23a77' )
+SetUrl( 'ApiLink_nn__ui2d__Pane__SetUserDataAsBinary', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_pane.html#ad5cd47ec139953056a4be7cadd00514f' )
+SetUrl( 'ApiLink_nn__ui2d__Pane__GetUserDataAsBinary', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_pane.html#a9fbb15824e44b9e2f6c6396520160bb4' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,182 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Advertise | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Advertise -->
+<div class="pagetitle" id="PageId_184157342">Advertise</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_184157342_h1_1">Advertise</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_184157342_h2_1">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_184157342_h2_2">Setting the Data to Deliver in the Advertise</a>
+      </li>
+      <li>
+        <a href="#Anchor_184157342_h2_3">Getting the Advertise Data</a>
+      </li>
+      <li>
+        <a href="#Anchor_184157342_h2_4">Security</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_184157342_h1_1">Advertise</h1>
+<h2 id="Anchor_184157342_h2_1">Overview</h2>
+<p>Each <code>ldn</code> library access point periodically delivers data to its surroundings about the local network it has created. In the parlance of the <code>ldn</code> library, this data is called <em>advertise</em>. The advertise is delivered approximately once every 100 milliseconds.</p>
+<p>The advertise includes information that is required for connecting to the local network, and information about stations currently participating in the local network. Stations receive the advertise using the <code><span class="ApiLink_Result_nn__ldn__Scan(NetworkInfo_*outBuffer|_int_*pOutCount|_int_bufferCount|_const_ScanFilter_&filter|_int_channel)_NN_NOEXCEPT">nn::ldn::Scan()</span></code> function, collecting information about all local networks in the vicinity and using that information to select which to connect to. Any data in amounts up to the <code><span class="ApiLink_nn__ldn__AdvertiseDataSizeMax">nn::ldn::AdvertiseDataSizeMax</span></code> bytes specified by the application can be placed in this advertise for delivery. Advertise is the only way to share information with other stations before they join the local network.</p>
+<p>Advertise is also a way to for stations to share information after they have joint a local network, because they continue to receive the advertise and can get it using <code><span class="ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork)_NN_NOEXCEPT">nn::ldn::GetNetworkInfo()</span></code>.</p>
+<h2 id="Anchor_184157342_h2_2">Setting the Data to Deliver in the Advertise</h2>
+<p>To set the data that the application will deliver in the advertise, use the <code><span class="ApiLink_Result_nn__ldn__SetAdvertiseData(const_void_*data|_size_t_dataSize)_NN_NOEXCEPT">nn::ldn::SetAdvertiseData()</span></code> function. The parameters specify the data you want the application to deliver and the byte size of that data. To stop data delivery, set these parameters to <code>nullptr</code> and <code>0</code>.</p>
+<p>This function can be used if the state is either <code><span class="ApiLink_Result_nn__ldn__OpenAccessPoint()_NN_NOEXCEPT">nn::ldn::State_AccessPoint</span></code>, meaning the <code> <span class="ApiLink_nn__ldn__State_AccessPoint">nn::ldn::OpenAccessPoint()</span></code> function was called and the system has begun acting in the role of an access point, or <code><span class="ApiLink_Result_nn__ldn__CreateNetwork(const_NetworkConfig_&network|_const_SecurityConfig_&security|_const_UserConfig_&user)_NN_NOEXCEPT">nn::ldn::State_AccessPointCreated</span></code>, meaning the <code><span class="ApiLink_nn__ldn__State_AccessPointCreated">nn::ldn::CreateNetwork()</span></code> function was called to create the network.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">AdvertiseData</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int32_t</span> <span class="n">counter</span><span class="p">;</span>
+<span class="p">};</span>
+&nbsp;
+<span class="n">AdvertiseData</span> <span class="n">advertiseData</span><span class="p">;</span>
+<span class="n">advertiseData</span><span class="p">.</span><span class="n">counter</span> <span class="o">=</span> <span class="nn">nn::socket::</span><span class="n">InetHtonl</span><span class="p">(</span><span class="mi">12345678</span><span class="p">);</span>
+&nbsp;
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::ldn::</span><span class="n">SetAdvertiseData</span><span class="p">(</span><span class="o">&amp;</span><span class="n">advertiseData</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">AdvertiseData</span><span class="p">));</span>
+<span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultDeviceNotAvailable::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::err::</span><span class="n">ShowError</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For more information about handling <span class="ApiLink_nn__ldn__ResultWifiOff"><code>nn::ldn::ResultWifiOff</code></span>, <span class="ApiLink_nn__ldn__ResultSleep"><code>nn::ldn::ResultSleep</code></span>, and <span class="ApiLink_nn__ldn__ResultDeviceOccupied"><code>nn::ldn::ResultDeviceOccupied</code></span>, see <a href="../Pages/Page_183381194.html">Initializing and Finalizing the ldn Library</a>.</p>
+<h2 id="Anchor_184157342_h2_3">Getting the Advertise Data</h2>
+<p>The <code><span class="ApiLink_Result_nn__ldn__Scan(NetworkInfo_*outBuffer|_int_*pOutCount|_int_bufferCount|_const_ScanFilter_&filter|_int_channel)_NN_NOEXCEPT">nn::ldn::NetworkInfo</span></code> structure obtained with either <code><span class="ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork)_NN_NOEXCEPT">nn::ldn::Scan()</span></code> or <code><span class="ApiLink_nn__ldn__NetworkInfo">nn::ldn::GetNetworkInfo()</span></code> stores the advertise data and its size as set by the <code><span class="ApiLink_Result_nn__ldn__SetAdvertiseData(const_void_*data|_size_t_dataSize)_NN_NOEXCEPT">nn::ldn::SetAdvertiseData()</span></code> function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::ldn::</span><span class="n">NetworkInfo</span> <span class="n">network</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::ldn::</span><span class="n">GetNetworkInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">network</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">network</span><span class="p">.</span><span class="n">ldn</span><span class="p">.</span><span class="n">advertiseDataSize</span> <span class="o">==</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">AdvertiseData</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">auto</span><span class="o">&amp;</span> <span class="n">advertiseData</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">AdvertiseData</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">network</span><span class="p">.</span><span class="n">ldn</span><span class="p">.</span><span class="n">advertiseData</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">advertiseData</span><span class="p">.</span><span class="n">counter</span> <span class="o">=</span> <span class="nn">nn::socket::</span><span class="n">InetNtohl</span><span class="p">(</span><span class="n">advertiseData</span><span class="p">.</span><span class="n">counter</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultDeviceNotAvailable::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::err::</span><span class="n">ShowError</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultInvalidState::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// nn::ldn::GetNetworkInfo() failed because the station has been disconnected from the network.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In the preceding example, the <code><span class="ApiLink_nn__ldn__NetworkInfo">nn::ldn::NetworkInfo</span></code> structure is in a stack, but doing this is not recommended because the structure is 1152 bytes.</p>
+<h2 id="Anchor_184157342_h2_4">Security</h2>
+<p>The advertise data is encrypted by the <code>ldn</code> library for transmission. But whereas for data communications an encryption key is generated based on the passphrase specified in <code><span class="ApiLink_nn__ldn__SecurityConfig">nn::ldn::SecurityConfig</span></code>, for advertise data no passphrase is used and other applications can also read the encrypted data.</p>
+<p>Where necessary, use the application for encryption and decryption and do not include valuable information in the advertise.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_Result_nn__ldn__Scan(NetworkInfo_*outBuffer|_int_*pOutCount|_int_bufferCount|_const_ScanFilter_&filter|_int_channel)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a4fb84c7a11193d330f25503a7fdd3441' )
+SetUrl( 'ApiLink_nn__ldn__AdvertiseDataSizeMax', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a330034973102fc9f98e5748ad5c4c4d6' )
+SetUrl( 'ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a429039282420b36ff23e629950a9560d' )
+SetUrl( 'ApiLink_Result_nn__ldn__SetAdvertiseData(const_void_*data|_size_t_dataSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a203e0c1570e7cb7a9b7460150a54672b' )
+SetUrl( 'ApiLink_Result_nn__ldn__OpenAccessPoint()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#abd2dc6aa5708bb991b291fbe2342dd0b' )
+SetUrl( 'ApiLink_nn__ldn__State_AccessPoint', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#abc1339e71c5817f213faea9b89d46a77a69df6cc798c1d401cf383785f5a57df9' )
+SetUrl( 'ApiLink_Result_nn__ldn__CreateNetwork(const_NetworkConfig_&network|_const_SecurityConfig_&security|_const_UserConfig_&user)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#aedf31f08dc77928ff2943dd1042153f5' )
+SetUrl( 'ApiLink_nn__ldn__State_AccessPointCreated', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#abc1339e71c5817f213faea9b89d46a77aa69ec0e3820b19c8c03d53afe9638a9f' )
+SetUrl( 'ApiLink_nn__ldn__ResultWifiOff', '../../../Api/HtmlNX/classnn_1_1ldn_1_1_result_wifi_off.html' )
+SetUrl( 'ApiLink_nn__ldn__ResultSleep', '../../../Api/HtmlNX/classnn_1_1ldn_1_1_result_sleep.html' )
+SetUrl( 'ApiLink_nn__ldn__ResultDeviceOccupied', '../../../Api/HtmlNX/classnn_1_1ldn_1_1_result_device_occupied.html' )
+SetUrl( 'ApiLink_nn__ldn__NetworkInfo', '../../../Api/HtmlNX/structnn_1_1ldn_1_1_network_info.html' )
+SetUrl( 'ApiLink_nn__ldn__SecurityConfig', '../../../Api/HtmlNX/structnn_1_1ldn_1_1_security_config.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

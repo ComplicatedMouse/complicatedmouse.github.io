@@ -1,0 +1,194 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>VibrationDevice | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- VibrationDevice -->
+<div class="pagetitle" id="PageId_104488991">VibrationDevice</div>
+<div class="text_separate">
+<h1 id="Anchor_104488991_h1_1">VibrationDevice</h1>
+<h2 id="Anchor_104488991_h2_1">Overview</h2>
+<p>
+  <code>VibrationDevice</code> is a class for working with vibration devices.<br />Sending <a href="../Pages/Page_104489003.html">vibration values</a> to an instance of <code>VibrationDevice</code> makes the corresponding physical vibration device vibrate.</p>
+<p>To specify which physical vibration device to use, you must get the corresponding <span class="ApiLink_nn__hid__VibrationDeviceHandle">VibrationDeviceHandle</span>.<br />To get the <span class="ApiLink_nn__hid__VibrationDeviceHandle">VibrationDeviceHandle</span>, use the <span class="ApiLink_int_nn__hid__GetVibrationDeviceHandles(VibrationDeviceHandle_*pOutValues|_int_count|_const_NpadIdType_&id|_NpadStyleSet_style)_NN_NOEXCEPT">GetVibrationDeviceHandles()</span> function.</p>
+<p>To get the vibration device information, use the <span class="ApiLink_void_nn__hid__GetVibrationDeviceInfo(VibrationDeviceInfo_*pOutValue|_const_VibrationDeviceHandle_&handle)_NN_NOEXCEPT">GetVibrationDeviceInfo()</span> function.<br />Before making the vibration devices vibrate, you must use the <span class="ApiLink_void_nn__hid__InitializeVibrationDevice(const_VibrationDeviceHandle_&handle)_NN_NOEXCEPT">InitializeVibrationDevice()</span> function to perform initialization.</p>
+<p>Use the <span class="ApiLink_void_nn__hid__SendVibrationValue(const_VibrationDeviceHandle_&handle|_const_VibrationValue_&value)_NN_NOEXCEPT">SendVibrationValue()</span> function to make a vibration device vibrate.<br />To get the actual vibration value that the vibration device is generating, use the <span class="ApiLink_void_nn__hid__GetActualVibrationValue(VibrationValue_*pOutValue|_const_VibrationDeviceHandle_&handle)_NN_NOEXCEPT">GetActualVibrationValue()</span> function.</p>
+<h2 id="Anchor_104488991_h2_2">Using VibrationDevice</h2>
+<ol>
+  <li>
+    <p>Get the <span class="ApiLink_nn__hid__VibrationDeviceHandle">VibrationDeviceHandle</span> from the <code>NpadId</code>.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid/hid_Npad.h&gt;
+#include &lt;nn/hid/hid_Vibration.h&gt;
+</span>
+<span class="n">NpadStyleSet</span> <span class="n">npadStyle</span> <span class="o">=</span> <span class="nn">nn::hid::NpadStyleFullKey::</span><span class="n">Mask</span><span class="p">;</span>
+<span class="nn">nn::hid::</span><span class="n">NpadIdType</span> <span class="n">npadIds</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="nn">nn::hid::NpadId::</span><span class="n">No1</span><span class="p">,</span> <span class="nn">nn::hid::NpadId::</span><span class="n">No2</span> <span class="p">};</span>
+
+<span class="c1">// Initialize the Npad function.
+</span><span class="nn">nn::hid::</span><span class="n">SetSupportedNpadStyleSet</span><span class="p">(</span><span class="n">npadStyle</span><span class="p">);</span>
+<span class="nn">nn::hid::</span><span class="n">SetSupportedNpadIdType</span><span class="p">(</span><span class="n">npadIds</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">npadIds</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">npadIds</span><span class="p">[</span><span class="mi">0</span><span class="p">]));</span>
+
+<span class="c1">// Get the vibration device handle of NpadId::No1.
+</span><span class="k">const</span> <span class="kt">int</span> <span class="n">VibrationDeviceCountMax</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="nn">nn::hid::</span><span class="n">VibrationDeviceHandle</span> <span class="n">vibrationDevices</span><span class="p">[</span><span class="n">VibrationDeviceCountMax</span><span class="p">];</span>
+<span class="kt">int</span> <span class="n">vibrationDeviceCount</span> <span class="o">=</span> <span class="nn">nn::hid::</span><span class="n">GetVibrationDeviceHandles</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vibrationDevices</span><span class="p">,</span> <span class="n">VibrationDeviceCountMax</span><span class="p">,</span> <span class="n">npadIds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">npadStyle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Use the <span class="ApiLink_void_nn__hid__InitializeVibrationDevice(const_VibrationDeviceHandle_&handle)_NN_NOEXCEPT">InitializeVibrationDevice()</span> function to initialize the vibration devices.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid/hid_Npad.h&gt;
+#include &lt;nn/hid/hid_Vibration.h&gt;
+</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">vibrationDeviceCount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialize the vibration devices.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">InitializeVibrationDevice</span><span class="p">(</span><span class="n">vibrationDevices</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>As necessary, use the <span class="ApiLink_void_nn__hid__SendVibrationValue(const_VibrationDeviceHandle_&handle|_const_VibrationValue_&value)_NN_NOEXCEPT">SendVibrationValue()</span> function to make the vibration devices vibrate.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid/hid_Npad.h&gt;
+#include &lt;nn/hid/hid_Vibration.h&gt;
+</span>
+<span class="nn">nn::hid::</span><span class="n">VibrationDeviceInfo</span> <span class="n">info</span><span class="p">;</span>
+
+<span class="c1">// Set the left vibration device to vibrate at an amplitude of 0.5 and a frequency of 160 Hz.
+</span><span class="nn">nn::hid::</span><span class="n">VibrationValue</span> <span class="n">v1</span> <span class="o">=</span> <span class="nn">nn::hid::VibrationValue::</span><span class="n">Make</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">,</span> <span class="mf">160.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="mf">320.0f</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">vibrationDeviceCount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetVibrationDeviceInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">info</span><span class="p">,</span> <span class="n">vibrationDevices</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">position</span> <span class="o">==</span> <span class="nn">nn::hid::</span><span class="n">VibrationDevicePosition_Left</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SendVibrationValue</span><span class="p">(</span><span class="n">vibrationDevices</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v1</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Set the right vibration device to vibrate at an amplitude of 0.5 and a frequency of 320 Hz.
+</span><span class="nn">nn::hid::</span><span class="n">VibrationValue</span> <span class="n">v2</span> <span class="o">=</span> <span class="nn">nn::hid::VibrationValue::</span><span class="n">Make</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span> <span class="mf">160.0f</span><span class="p">,</span> <span class="mf">0.5f</span><span class="p">,</span> <span class="mf">320.0f</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">vibrationDeviceCount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetVibrationDeviceInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">info</span><span class="p">,</span> <span class="n">vibrationDevices</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">position</span> <span class="o">==</span> <span class="nn">nn::hid::</span><span class="n">VibrationDevicePosition_Right</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SendVibrationValue</span><span class="p">(</span><span class="n">vibrationDevices</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v2</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Set all vibration devices to stop vibrating.
+</span><span class="nn">nn::hid::</span><span class="n">VibrationValue</span> <span class="n">v0</span> <span class="o">=</span> <span class="nn">nn::hid::VibrationValue::</span><span class="n">Make</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">vibrationDeviceCount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SendVibrationValue</span><span class="p">(</span><span class="n">vibrationDevices</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v0</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_104488991_h2_3">VibrationDevice Demo</h2>
+<p> See the <span class="ApiLink_NN_APILINK_HID_VIB_BASIC">Simple Vibration Motor Controls</span> (Samples/Sources/Applications/HidVibrationBasic) sample included in the SDK.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__VibrationDeviceHandle', '../../../Api/HtmlNX/structnn_1_1hid_1_1_vibration_device_handle.html' )
+SetUrl( 'ApiLink_int_nn__hid__GetVibrationDeviceHandles(VibrationDeviceHandle_*pOutValues|_int_count|_const_NpadIdType_&id|_NpadStyleSet_style)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a2950ca0147b2bbb09a2c34aeaf527ca2' )
+SetUrl( 'ApiLink_void_nn__hid__GetVibrationDeviceInfo(VibrationDeviceInfo_*pOutValue|_const_VibrationDeviceHandle_&handle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#aa51427fb3bfd53f3a8784a868a020f23' )
+SetUrl( 'ApiLink_void_nn__hid__InitializeVibrationDevice(const_VibrationDeviceHandle_&handle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#af610eb6d705297bd91c56825b39383bf' )
+SetUrl( 'ApiLink_void_nn__hid__SendVibrationValue(const_VibrationDeviceHandle_&handle|_const_VibrationValue_&value)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#adc2935e350eab46cc13a4e9d33c61ef9' )
+SetUrl( 'ApiLink_void_nn__hid__GetActualVibrationValue(VibrationValue_*pOutValue|_const_VibrationDeviceHandle_&handle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a2fb585205dac5c49b24bf045b8796307' )
+SetUrl( 'ApiLink_NN_APILINK_HID_VIB_BASIC', '../../../Api/HtmlNX/_page_sample_hid_vibration_basic.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

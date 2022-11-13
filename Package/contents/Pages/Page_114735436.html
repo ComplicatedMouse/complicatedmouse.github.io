@@ -1,0 +1,240 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Playing an Effect Using the Depth Buffer　 | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Playing an Effect Using the Depth Buffer　 -->
+<div class="pagetitle" id="PageId_114735436">Playing an Effect Using the Depth Buffer　</div>
+<div class="text_separate">
+<h1 id="Anchor_114735436_h1_1">Introduction</h1>
+<p>Effects that use the depth buffer must be added to the effect system to enable the referencing of render results to the depth buffer up to that point as textures. The depth values for render results up to that point will be used to perform soft particle effects.</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelHeader" style=" border-bottom-width: 1px;">
+    <b>Effects Using the Depth Buffer</b>
+  </div>
+  <div class="panelContent">
+    <p>Configured depth buffer textures are primarily used by effects for soft particles.<br />Configured depth buffer textures can be referenced from both vertex shaders and pixel shaders.<br /><span class="status_macro_base status_macro_Blue">Related Links</span><span style="color: rgb(51,51,51);"> For more information, see the following pages.</span></p>
+    <table class="wrapped">
+      <colgroup>
+        <col />
+        <col />
+      </colgroup>
+      <tbody>
+        <tr>
+          <th>
+            <span class="with-breadcrumbs">
+              <a href="../Pages/Page_96060096.html">Soft Particles</a>
+            </span>
+          </th>
+          <td>Describes the <strong>Soft Particles</strong> feature that applies translucency to the borders of particles that overlap with models.<br /></td>
+        </tr>
+        <tr>
+          <th>
+            <a href="../Pages/Page_96062033.html">Decals</a>
+          </th>
+          <td>This section describes the <strong>Decals</strong> feature, which changes the alpha value of all areas except the edges of particles that overlap with a model.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<h2 id="Anchor_114735436_h2_1">How to Use</h2>
+<p>You must complete the following steps to enable the use of these effects.</p>
+<ol>
+  <li>Copy the depth render results to textures before rendering effects that use the depth buffer.</li>
+  <li>Configure the copied texture view to the effects system.</li>
+</ol>
+<h3 id="Anchor_114735436_h3_1">Copying the Depth Render Results to Textures Before Rendering Effects That Use the Depth Buffer</h3>
+<p>Copy the content of the depth buffer to textures that are prepared separately. You can use the <code><span class="ApiLink_nn__gfx__CommandBuffer__CopyImage">nn::gfx::CommandBuffer::CopyImage</span></code> member function to copy this content.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::gfx::</span><span class="n">TextureSubresource</span> <span class="n">dstSubResource</span><span class="p">;</span>
+<span class="n">dstSubResource</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">();</span>
+<span class="n">dstSubResource</span><span class="p">.</span><span class="n">SetMipLevel</span><span class="p">(</span> <span class="mi">0</span> <span class="p">);</span>
+<span class="n">dstSubResource</span><span class="p">.</span><span class="n">SetArrayIndex</span><span class="p">(</span> <span class="mi">0</span> <span class="p">);</span>
+
+<span class="nn">nn::gfx::</span><span class="n">TextureCopyRegion</span> <span class="n">srcCopyRegion</span><span class="p">;</span>
+<span class="n">srcCopyRegion</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">();</span>
+<span class="n">srcCopyRegion</span><span class="p">.</span><span class="n">SetWidth</span><span class="p">(</span> <span class="n">srcTextureWidth</span> <span class="p">);</span>
+<span class="n">srcCopyRegion</span><span class="p">.</span><span class="n">SetHeight</span><span class="p">(</span> <span class="n">srcTextureHeight</span> <span class="p">);</span>
+<span class="n">srcCopyRegion</span><span class="p">.</span><span class="n">EditSubresource</span><span class="p">().</span><span class="n">SetDefault</span><span class="p">();</span>
+<span class="n">srcCopyRegion</span><span class="p">.</span><span class="n">EditSubresource</span><span class="p">().</span><span class="n">SetMipLevel</span><span class="p">(</span> <span class="mi">0</span> <span class="p">);</span>
+<span class="n">srcCopyRegion</span><span class="p">.</span><span class="n">EditSubresource</span><span class="p">().</span><span class="n">SetArrayIndex</span><span class="p">(</span> <span class="mi">0</span> <span class="p">);</span>
+
+<span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">FlushMemory</span><span class="p">(</span> <span class="nn">nn::gfx::</span><span class="n">GpuAccess_DepthStencil</span> <span class="p">);</span>
+
+<span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">CopyImage</span><span class="p">(</span> <span class="n">depthBufferTexture</span><span class="p">,</span> <span class="n">dstSubResource</span><span class="p">,</span> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">depthBuffer</span><span class="p">,</span> <span class="n">srcCopyRegion</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Initialize the textures you copied content to with the following settings.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Texture settings
+</span><span class="nn">nn::gfx::Texture::</span><span class="n">InfoType</span> <span class="n">info</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">();</span>
+<span class="n">info</span><span class="p">.</span><span class="n">SetWidth</span><span class="p">(</span>  <span class="n">width</span> <span class="p">);</span>
+<span class="n">info</span><span class="p">.</span><span class="n">SetHeight</span><span class="p">(</span> <span class="n">height</span> <span class="p">);</span>
+<span class="n">info</span><span class="p">.</span><span class="n">SetGpuAccessFlags</span><span class="p">(</span> <span class="nn">nn::gfx::</span><span class="n">GpuAccess_Texture</span> <span class="p">);</span>
+<span class="n">info</span><span class="p">.</span><span class="n">SetImageStorageDimension</span><span class="p">(</span> <span class="nn">nn::gfx::</span><span class="n">ImageStorageDimension_2d</span> <span class="p">);</span>
+<span class="n">info</span><span class="p">.</span><span class="n">SetImageFormat</span><span class="p">(</span> <span class="nn">nn::gfx::</span><span class="n">ImageFormat_D32_Float</span> <span class="p">);</span>
+<span class="n">info</span><span class="p">.</span><span class="n">SetMipCount</span><span class="p">(</span> <span class="mi">1</span> <span class="p">);</span>
+
+<span class="c1">// Texture view settings
+</span><span class="nn">nn::gfx::TextureView::</span><span class="n">InfoType</span> <span class="n">viewInfo</span><span class="p">;</span>
+<span class="n">viewInfo</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">();</span>
+<span class="n">viewInfo</span><span class="p">.</span><span class="n">SetImageDimension</span><span class="p">(</span> <span class="nn">nn::gfx::</span><span class="n">ImageDimension_2d</span> <span class="p">);</span>
+<span class="n">viewInfo</span><span class="p">.</span><span class="n">SetImageFormat</span><span class="p">(</span> <span class="nn">nn::gfx::</span><span class="n">ImageFormat_D32_Float</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_114735436_h3_2">Configuring a Texture Descriptor Slot in the Effects System</h3>
+<p>Use the <code><span class="ApiLink_nn__vfx__System__SetDepthBufferTexture">nn::vfx::System::SetDepthBufferTexture</span></code> member function to configure depth buffer textures in the effects system.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">effectSystem</span><span class="o">-&gt;</span><span class="n">SetDepthBufferTexture</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="n">depthStencilTextureViewDescSlot</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_114735436_h3_3">Checking Whether an Effect Using the Depth Buffer Texture Is Playing</h3>
+<p>You can skip the cost of copying the depth buffer to a texture as the situation merits by using the following method to check whether an effect using the depth buffer texture is playing.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>bool nn::vfx::System::IsRequestDepthBufferTexture( int groupId, uint32_t drawPathFlag ) const NN_NOEXCEPT</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__CommandBuffer__CopyImage', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#afd05d1e63d9009d74cf7de5088dab91c' )
+SetUrl( 'ApiLink_nn__vfx__System__SetDepthBufferTexture', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_system.html#ac669d3277fcddff2d6fcaa6b6728d145' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

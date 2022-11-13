@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Gamma Adjustment | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Gamma Adjustment -->
+<div class="pagetitle" id="PageId_106333488">Gamma Adjustment</div>
+<div class="text_separate">
+<h2 id="Anchor_106333488_h2_1">Overview</h2>
+<p>In a linear space, you can perform accurate color calculations with the shader.  We recommend that you use sRGB writes when using the GPU's sRGB texture fetch to write textures created in a gamma space to a framebuffer. This method can write data as gamma space values without losing any of the precision in the results calculated by the shader.  However, because the sRGB texture fetch supports only some formats, you can convert to textures with a gamma value of <code>1.0</code> (linear fetch texture) in advance by using texture converter.  This indicates a state that supports compression of the texture format.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Compressed Texture Formats</th>
+      <th>Linear Fetch Texture</th>
+      <th>sRGB Fetch Texture</th>
+    </tr>
+    <tr>
+      <td>bc1</td>
+      <td>○</td>
+      <td>○</td>
+    </tr>
+    <tr>
+      <td>bc2</td>
+      <td>○</td>
+      <td>○</td>
+    </tr>
+    <tr>
+      <td>bc3</td>
+      <td>○</td>
+      <td>○</td>
+    </tr>
+    <tr>
+      <td>bc4</td>
+      <td>○</td>
+      <td>&times;</td>
+    </tr>
+    <tr>
+      <td>bc5</td>
+      <td>○</td>
+      <td>&times;</td>
+    </tr>
+  </tbody>
+</table>
+<p>As shown, linear fetch texture can be used with any format, but precision is decreased by advance conversion.  The following table shows examples of reduced precision because of formatting. This example is of the shader converter performing gamma correction of <code>2.2</code> in the shader using software.  Note that how each format is seen changes according to the monitor settings.  This example is only for reference. When selecting a format, confirm on the actual hardware.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Compressed Texture Formats</th>
+      <th>Linear Fetch Texture</th>
+      <th>sRGB Fetch Texture</th>
+      <th>Shader Conversion</th>
+    </tr>
+    <tr>
+      <td>bc1</td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430954.png" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430956.png" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430955.png" class="embedded-image" />
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td>bc4</td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430957.png" class="embedded-image" />
+        </span>
+      </td>
+      <td> </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430958.png" class="embedded-image" />
+        </span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For linear fetch texture, color padding because of inadequate precision can be seen.  To calculate color with a linear color space, a workflow incorporating linear fetch texture and sRGB fetch texture is built.</p>
+<h2 id="Anchor_106333488_h2_2">Workflow</h2>
+<p>With <code>g3d</code>, you can create linear fetch texture and sRGB fetch texture by using DCC plug-in configuration settings and the texture converter.  The changes to the gamma values for each process are shown in the following table.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Textures</th>
+      <th>Original image</th>
+      <th>Texture Converter</th>
+      <th>Texture Fetch</th>
+    </tr>
+    <tr>
+      <td>sRGB Texture</td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430987.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430986.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430986.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td>Linear Fetch Texture</td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430987.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430985.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430985.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td>sRGB Fetch Texture</td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430987.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430986.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106333488/106430985.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Images created on an sRGB color profile monitor are textures with gamma values that are indicated with curves such as for the <strong>source image</strong>.  Linear fetch textures have this texture corrected with the DCC plug-in or texture converter, and are then converted to linear space textures.  sRGB fetch textures have gamma correction of <code>2.2</code> performed by the GPU when textures are fetched by the shader, and are then treated as linear space textures.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

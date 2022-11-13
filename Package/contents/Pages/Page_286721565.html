@@ -1,0 +1,495 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Shader Variations | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Shader Variations -->
+<div class="pagetitle" id="PageId_286721565">Shader Variations</div>
+<div class="text_separate">
+<div>
+  <p>
+    <ul class="macro_toc">
+      <li>
+        <a href="#Anchor_286721565_h1_1">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_286721565_h1_2">Creation Method</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_286721565_h2_1">Option Variables</a>
+        </li>
+        <li>
+          <a href="#Anchor_286721565_h2_2">Shader Configuration (FSCA and FSCB) Files</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_286721565_h1_3">Variation Types</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_286721565_h2_3">Preprocessor Branching</a>
+        </li>
+        <li>
+          <a href="#Anchor_286721565_h2_4">Uniform Variable Branch</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_286721565_h1_4">Shader Key</a>
+      </li>
+      <li>
+        <a href="#Anchor_286721565_h1_5">Shader Variation File (FSV File)</a>
+      </li>
+      <li>
+        <a href="#Anchor_286721565_h1_6">Usage in the Runtime</a>
+      </li>
+    </ul>
+  </p>
+  <h1 id="Anchor_286721565_h1_1">Overview</h1>
+  <p>Shader variations represent differences in shader processing. Because conditional branching (such as <code>if</code>) within shaders has a high performance cost, run-time performance can be improved by developing a separate shader in advance and using that shader as a variation when performing branching operations. These <em>shader program variations</em> are represented in <code>g3d</code> as (<span class="ApiLink_nn__g3d__ResShaderProgram">nn::g3d::ResShaderProgram</span>). To use shader variations, <em>option variables</em> must be declared in the shader code. Additionally, the appropriate settings must be applied to annotations and intermediate shader files for shader variation control. During run time, a shader program is determined based on the option variable values specified for the model. The model is rendered using the selected shader. This document describes the structure for shader variations and how to set them.</p>
+  <h1 id="Anchor_286721565_h1_2">Creation Method</h1>
+  <p>To use shader variations, you must create <strong>a shader source with option variables defined</strong> and <strong>shader configuration files (FSCA and FSCB files)</strong>.<br />You can use 3dShaderConverter to convert shader configuration files and get a shader definition file (FSDB file) with shader variation information defined.</p>
+  <h2 id="Anchor_286721565_h2_1">Option Variables</h2>
+  <p>The shader source code defines the option variables. Option variables are preprocessor variable keys for generating shader variations, and each macro is defined using <a href="../Pages/Page_84052806.html">shader annotations</a>. The following example defines the option variables as follows: <code>USE_VERTEX_COLOR</code> is an <code>id</code> value of <code>vertex_color</code> and <code>MULTI_TEX</code> is an <code>id</code> value of <code>multi_tex</code>.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// Define option variables.
+</span><span class="cp">#define USE_VERTEX_COLOR    ( 0 )       </span><span class="c1">// @@ id=&quot;vertex_color&quot;
+</span><span class="cp">#define MULTI_TEX           ( 0 )       </span><span class="c1">// @@ id=&quot;multi_tex&quot; choice=&quot;0: None, 1: Interpolation, 2: Multiplicative , 3: Additive&quot;
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>The source code describes branching and processing using option variables. When shaders are converted to binary, option variables are translated to constants and multiple optimized shader programs are obtained as variations.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// Use option variables.
+</span><span class="k">if</span><span class="p">(</span><span class="n">USE_VERTEX_COLOR</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// process A
+</span><span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// process B
+</span><span class="p">}</span>
+<span class="c1">// process C
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>In the preceding code, an <code>if</code> statement is generated from the <code>USE_VERTEX_COLOR</code> option variable and the processing differences are obtained as the following two variations.</p>
+  <p>Variation A (<code>USE_VERTEX_COLOR</code>=<code>1</code>)</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre>// process A
+// process C</pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>Variation B (<code>USE_VERTEX_COLOR</code>=<code>0</code>)</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre>// process B
+// process C</pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="Anchor_286721565_h3_1">Option Variable Types</h3>
+  <p>Static and dynamic variable types exist for option variables, and can be specified using <a href="../Pages/Page_84052806.html">shader annotations</a>. The default option type is <code>static</code>. These types indicate whether the <code>&lt;shader_option&gt;</code> value for the option variable in the intermediate model file is static.</p>
+  <p>The static option indicates that the model material for <span class="ApiLink_nn__g3d__ResShaderAssign"><code>nn::g3d::ResShaderAssign</code></span> was established statically. When static option variables are connected to intermediate model files using the assign utility, option variable information is added to the <code>&lt;shader_option&gt;</code> of the intermediate model file. A user can use 3DEditor to edit the intermediate model file value <code>&lt;shader_option&gt;</code>. Editing this value specifies the shader program to use at run time during model initialization. The shader is based on the <code>&lt;shader_option&gt;</code> value for <span class="ApiLink_nn__g3d__ResShaderAssign"><code>nn::g3d::ResShaderAssign</code></span>.</p>
+  <p>The dynamic option variable indicates that elements other than the model material will be selected dynamically during run time. Specify an option variable as dynamic for changing these variables during gameplay. Potential applications include changing the skinning count (the shape particle size for the model) or modifying a part of shader processing via an option variable.</p>
+  <p>The runtime handles static option variables with <span class="ApiLink_nn__g3d__ShadingModelObj"><code>nn::g3d::ShadingModelObj</code></span> and dynamic option variables with <span class="ApiLink_nn__g3d__ShaderSelector"><code>nn::g3d::ShaderSelector</code></span>. For more information, see <a href="../Pages/Page_286721547.html">Shader Runtime Workflow</a>.</p>
+  <table class="wrapped">
+    <colgroup>
+      <col />
+      <col />
+      <col />
+    </colgroup>
+    <tbody>
+      <tr>
+        <th>type</th>
+        <th>Granularity</th>
+        <th>Usage Examples</th>
+      </tr>
+      <tr>
+        <th>static</th>
+        <td>An option value determined by the <code>&lt;shader_option&gt;</code> in the <code>&lt;material&gt;</code> of the intermediate model file.</td>
+        <td>A flag indicating whether the target material uses a specific texture.</td>
+      </tr>
+      <tr>
+        <th>dynamic</th>
+        <td>An option value determined by conditions other than the intermediate model file&rsquo;s <code>&lt;shader_option&gt;</code>. Used for changing options during run time.</td>
+        <td>
+          <p>A skinning count determined by shape.</p>
+          <p>A flag indicating whether to display debugging information for normal lines. (It can be changed dynamically during run time.)</p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h2 id="Anchor_286721565_h2_2">Shader Configuration (FSCA and FSCB) Files</h2>
+  <p>A shader configuration file specifies the <em>option variable ranges</em>, <em>default values</em>, and <em>variation types</em> defined by shader code. For the <code>id</code> attribute, specify an identifier for the option variable corresponding to the annotation. For the <code>choice</code> attribute, specify the range of values that can be taken by the option variable. For the <code>default</code> attribute, specify the default value. For the <code>branch</code> attribute, specify whether to treat the variation as a preprocessor variable branch or as a uniform variable branch. The subsequent sections describe preprocessor variable branching and uniform variable branching.</p>
+  <div class="info_new">
+    <div class="info_new_left">Info</div>
+    <div class="info_new_right">
+      <p>Although option variable values, ranges, and defaults can be specified in annotations, this specification facilitates the use of shared shader code across multiple projects. For example, in the annotations in the shader code, you could specify wide file ranges that are applicable to all projects using that shader code. In the shader configuration file, you could then specify annotation ranges for each respective project that are more narrow and specific than the annotations.</p>
+      <p>For more information, see the <a href="../IntermediateFileFormat/Html/3d/3dIntermediateFileFormat.html">3D Intermediate File Specification Manual</a>.</p>
+    </div>
+  </div>
+  <p>
+    <br />The following example shows a shader configuration file. For the two option variables defined in the shader source, it sets <code>choice</code> and its <code>default</code> value, and <code>branch</code> (described later). This generates all shader variation combinations for the choice value defined in this section. In this example, there are two possible values for <code>USE_VERTEX_COLOR</code> (<code>0</code> and <code>1</code>) and four possible values for <code>MULTI_TEXT</code> (<code>0</code>, <code>1</code>, <code>2</code>, and <code>3</code>). Multiplying the combinations together makes eight variations that will be generated.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;? &gt;
+<span class="nt">&lt;nw4f_3dif</span> <span class="na">version=</span><span class="s">&quot;4.0.0&quot;</span><span class="nt">&gt;</span>
+<span class="nt">&lt;shader_config</span> <span class="na">version=</span><span class="s">&quot;4.0.0&quot;</span><span class="nt">&gt;</span>
+<span class="nt">&lt;shader_config_info</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">code_page=</span><span class="s">&quot;65001&quot;</span>
+<span class="nt">/&gt;</span>
+<span class="nt">&lt;include_path_array</span> <span class="na">length=</span><span class="s">&quot;1&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;include_path</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">path=</span><span class="s">&quot;src&quot;</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/include_path_array&gt;</span>&gt;
+<span class="nt">&lt;shader_array</span> <span class="na">length=</span><span class="s">&quot;1&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;shader</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">name=</span><span class="s">&quot;test&quot;</span> <span class="na">material_shader=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;vertex_shader</span> <span class="na">path=</span><span class="s">&quot;test.glsl&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;fragment_shader</span> <span class="na">path=</span><span class="s">&quot;test.glsl&quot;</span> <span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;variation_array</span> <span class="na">length=</span><span class="s">&quot;2&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;variation</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">id=</span><span class="s">&quot;vertex_color&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">choice=</span><span class="s">&quot;bool&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">default=</span><span class="s">&quot;1&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">branch=</span><span class="s">&quot;false&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;variation</span> <span class="na">index=</span><span class="s">&quot;1&quot;</span> <span class="na">id=</span><span class="s">&quot;multi_tex&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">choice=</span><span class="s">&quot;[0, 3]&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">default=</span><span class="s">&quot;0&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">branch=</span><span class="s">&quot;false&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/variation_array&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/shader&gt;</span>
+<span class="nt">&lt;/shader_array&gt;</span>
+<span class="nt">&lt;/shader_config&gt;</span>
+<span class="nt">&lt;/nw4f_3dif&gt;</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h1 id="Anchor_286721565_h1_3">Variation Types</h1>
+  <p>There are two types of variations in g3d. The types are <em>preprocessor branching</em> and <em>uniform variable branching</em>. The type can be specified by setting the branch attribute of a &lt;variation&gt; tag in the shader configuration file. Because preprocessor branching conditionally creates each shader variation, it increases run-time performance at the expense of increased compile time. It is intended for production environments due to its limitations. On the other hand, because uniform variable branching does not create variations, it has a shorter compile time at the expense of decreased run-time performance. It is intended for use in development environments. Additionally, because variation types can be specified for each option variable, they can be used in combination.</p>
+  <table class="relative-table wrapped" style="width: 95.0249%;">
+    <colgroup>
+      <col style="width: 9.48778%;" />
+      <col style="width: 12.2235%;" />
+      <col style="width: 26.6007%;" />
+      <col style="width: 28.2887%;" />
+      <col style="width: 23.3993%;" />
+    </colgroup>
+    <tbody>
+      <tr>
+        <th>Branch Name</th>
+        <th style="text-align: center;">
+          <p>&lt;variation&gt; Branch Attribute</p>
+        </th>
+        <th style="text-align: left;">Advantages</th>
+        <th>Disadvantages</th>
+        <th>Variation Implementation Method</th>
+      </tr>
+      <tr>
+        <td>Preprocessor Branching</td>
+        <td style="text-align: center;">false</td>
+        <td style="text-align: left;">Run-time performance speed is high.</td>
+        <td>Has a long conversion time and shader archive file sizes are big.</td>
+        <td>Implemented as separate shader variations.</td>
+      </tr>
+      <tr>
+        <td>Uniform Variable Branch</td>
+        <td style="text-align: center;">true</td>
+        <td style="text-align: left;">Conversion time is short and shader archive file sizes are small.</td>
+        <td>Run-time performance speed is low.</td>
+        <td>Implemented using uniform variables to create virtual variation shaders.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>The following diagram illustrates the shader archive structure when preprocessor branching is defined with variables of <code>OPTION1</code> and <code>OPTION3</code> and uniform variable branching with a variable of <code>OPTION2</code>. Preprocessor branching is implemented as different shader programs because each possibility for an option is converted to a constant. The number of shader programs do not increase for uniform variable branching because the option variables are simply converted to uniform variables. Variations determined by the option variables for preprocessor branching are implemented by a shader program; however, variation for the option in the uniform variable branch is implemented within the branch processing in the shader that is based on the value set as a uniform variable within a shader program.</p>
+  <p>
+    <br />
+  </p>
+  <div class="flowchart-svg-inline">
+    <img src="../Attachments/Attach_286721565/flowchart_1.svg" />
+  </div>
+  <h2 id="Anchor_286721565_h2_3">Preprocessor Branching</h2>
+  <p>Preprocessor branching is a method for creating shaders with different processing though the use of macro values for different branches. The structure for preprocessor branching is the same as the variations in the <code>gfx</code> library. A shader variation is generated by changing the option variable (macro value) in the shader code based on the specified option variables available in the shader configuration file. The advantage of this method is that the option variables in the shader code are replaced by literals and branches are removed via optimization <strong>resulting in faster processing</strong>. The disadvantage is that only the number of values that can be obtained from the option variables are compiled in the shader program <strong>which increases the conversion time and the size of the shader archive file</strong>. To perform preprocessor branching, set the <strong>branch attribute of the <code>&lt;variation&gt;</code> element in the shader configuration file to <code>false</code></strong>. Additionally, specifying <strong>--force-variation</strong> in the 3D shader converter sets all branch attributes to <code>true</code> causing all of the option variables to be treated as preprocessor branches. Using this option makes it easy to generate shaders for production environments without modifying the shader definition file. With preprocessor branching one variation is implemented as one shader program (<span class="ApiLink_nn__g3d__ResShaderProgram"><code>nn::g3d::ResShaderProgram</code></span>), because variations are created as different shaders. The number of generated shaders equals the number of variations.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="nt">&lt;variation</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">id=</span><span class="s">&quot;vertex_color&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">choice=</span><span class="s">&quot;bool&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">default=</span><span class="s">&quot;1&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">branch=</span><span class="s">&quot;false&quot;</span>
+<span class="nt">/&gt;</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="Anchor_286721565_h3_2">Variation Constants and Preprocessor Definitions</h3>
+  <p>
+    <em>Variation constants</em> and <em>preprocessor definitions</em> are the two compiler methods that can be selected for preprocessor branching. Because the differences between these methods manifest themselves as compiling speed or memory efficiency, we recommend using a method that matches the shader structure of your project.</p>
+  <p>If a uniform variable has been defined for a preprocessor branching option that was set, the <em>variation constant</em> structure is applied. If no uniform variables are defined, the <em>preprocessor definition</em> is applied. If you specify the 3D shader converter option <code>--use-preprocessor-variation</code>, you can forcibly compile with the preprocessor definition even if a uniform variable has been defined. This makes it possible to define option variables using uniform variables for development and change the compilation method for production environments using compilation options. For more information about variation constants and preprocessor definitions, see <a href="../Pages/Page_89981854.html">Shader Compiler</a> &gt; Variation Constants and Preprocessor Definitions.</p>
+  <p>The following example illustrates the use of variation constants. Define uniform variables for option variables in a uniform options block. The source code content is the same as uniform variable branching. This example sets the branch to <code>false</code> in the shader definition file to use preprocessor branching.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// Define option variables.
+</span><span class="cp">#define USE_VERTEX_COLOR    ( 0 )       </span><span class="c1">// @@ id=&quot;vertex_color&quot;
+</span><span class="cp">#define MULTI_TEX           ( 0 )       </span><span class="c1">// @@ id=&quot;multi_tex&quot; choice=&quot;0: None, 1: Interpolation, 2: Multiplicative , 3: Additive&quot;
+</span>
+<span class="c1">// Define the uniform option block.
+</span><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Option</span> <span class="c1">// @@ id=&quot;opt&quot; type=&quot;option&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">useVtxColor</span><span class="p">;</span>    <span class="c1">// @@ id=&quot;vertex_color&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">multiTex</span><span class="p">;</span>       <span class="c1">// @@ id=&quot;multi_tex&quot;
+</span><span class="p">};</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="info_new">
+    <div class="info_new_left">Info</div>
+    <div class="info_new_right">
+      <p>When using variation constants, the macros for option variables are converted to their corresponding uniform variables at compile time. The uniform variable values are changed in variations and compiled.</p>
+      <p>Because the preprocessor runs before the compiler, the appropriate variations are not generated when <code>#if</code> branching is used, as illustrated in the following example.</p>
+      <table class="codeblock">
+        <tbody>
+          <tr>
+            <td class="code">
+              <div class="codeblock"><pre><span class="cp">#define USE_VERTEX_COLOR    ( 0 )       </span><span class="c1">// @@ id=&quot;vertex_color&quot;
+</span><span class="p">.</span>
+<span class="p">.</span>
+<span class="c1">// NG
+</span><span class="cp">#if USE_VERTEX_COLOR
+# endif
+</span>
+<span class="c1">// OK
+</span><span class="k">if</span><span class="p">(</span><span class="n">USE_VERTEX_COLOR</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="p">}</span></pre></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <h2 id="Anchor_286721565_h2_4">
+    <a name="Anchor_286721565_uniform_branch"></a>Uniform Variable Branch</h2>
+  <p>Uniform variable branching is a custom method of <code>g3d</code>. Shader variations are generated by replacing option variables in the shader code with their corresponding uniform variables. When using uniform branching, <code>type=&rdquo;option&rdquo;</code> must be defined in the uniform block (uniform option block) of the shader source code. By using the same branching option variable <code>id</code> as the <code>id</code> in annotations for uniform variables, the 3D shader converter converts the option variable to a uniform variable for compilation. The advantage of this method is that one shader code can handle multiple variations, <strong>reducing the compile time</strong>. The disadvantage is that there is branching in the shader code, resulting in some cases where <strong>the speed is slower</strong>. Uniform variable branching is enabled by setting the branch attribute of the <code>&lt;variation&gt;</code> element of the shader configuration file to <code>true</code>. Uniform variable branching implements variation shaders as uniform variables. Because variations are not different shaders, the number of variations generated does not match the number of shader programs.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// Define option variables.
+</span><span class="cp">#define USE_VERTEX_COLOR    ( 0 )       </span><span class="c1">// @@ id=&quot;vertex_color&quot;
+</span><span class="cp">#define MULTI_TEX           ( 0 )       </span><span class="c1">// @@ id=&quot;multi_tex&quot; choice=&quot;0: None, 1: Interpolation, 2: Multiplicative , 3: Additive&quot;
+</span>
+<span class="c1">// Define the uniform option block.
+</span><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Option</span> <span class="c1">// @@ id=&quot;opt&quot; type=&quot;option&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">useVtxColor</span><span class="p">;</span>    <span class="c1">// @@ id=&quot;vertex_color&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">multiTex</span><span class="p">;</span>       <span class="c1">// @@ id=&quot;multi_tex&quot;
+</span><span class="p">};</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="nt">&lt;variation</span> <span class="na">index=</span><span class="s">&quot;0&quot;</span> <span class="na">id=</span><span class="s">&quot;vertex_color&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">choice=</span><span class="s">&quot;bool&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">default=</span><span class="s">&quot;1&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="na">branch=</span><span class="s">&quot;true&quot;</span>
+<span class="nt">/&gt;</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="Anchor_286721565_h3_3">When the Option Variable Is Dynamic</h3>
+  <p>When the option variable type for uniform variable branching is <code>dynamic</code>, the option variable is not replaced with a uniform variable and is instead replaced with its default value. For this reason, the user must declare a uniform variable outside of a uniform option block and define the branching for the uniform variable inside of the shader using that branching.<br />The following code example demonstrates a uniform variable prepared outside of a uniform option block. This example demonstrates the process for assigning a variable to the skinning variable to change the shape particle size. When using preprocessor branching, variations for a <code>SKINNING</code> range from-1 to 9 are generated, and the value is assigned to <code>skinning</code>. To determine the variation for use during run time, a shader program corresponding to the current skinning count is selected with <span class="ApiLink_void_nn__g3d__ShaderSelector__WriteDynamicKey(int_optionIndex|_int_choiceIndex)_NN_NOEXCEPT"><code>nn::g3d::ShaderSelector::WriteDynamicKey()</code></span>. Because the default value for <code>SKINNING</code> for uniform variable branching is fixed as <code>-1</code>, <code><em>vtxSkinCount</em></code> is assigned to the <code>skinning</code> variable. A variation using a uniform variable is created based on <code>-1</code> as the default value for <code>SKINNING</code>. Even when a dynamic type option variable with a fixed default is used for uniform variable branching, a similar behavior to preprocessor branching can be created using this method. This makes it possible to use uniform variable branching to reduce shader compile time during development and preprocessor branching for production environments.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="cp">#define SKINNING ( 0 )  </span><span class="c1">// @@ id=&quot;skinning&quot; choice=&quot;[-1, 9]&quot; type=&quot;dynamic&quot;
+</span>&nbsp;&nbsp;
+<span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Shape</span> <span class="c1">// @@ id=&quot;shape&quot; type=&quot;shape&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">shapeMtx</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">vtxSkinCount</span><span class="p">;</span>
+<span class="p">};</span>
+&nbsp;
+<span class="kt">int</span> <span class="n">skinning</span> <span class="o">=</span> <span class="n">SKINNING</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">?</span> <span class="nl">SKINNING</span> <span class="p">:</span> <span class="n">vtxSkinCount</span><span class="p">;</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h1 id="Anchor_286721565_h1_4">
+    <a name="Anchor_286721565_shader_key"></a>Shader Key</h1>
+  <p>The shader key that was created based on the shader variation is used in the <code>g3d</code> library to determine the shader variation. There are <strong>static</strong> shader keys, which are generated from <code>static</code>-type option variables, and <strong>dynamic</strong> shader keys, which are generated from <code>dynamic</code>-type option variables. Shader keys are used for the preprocessor branching option variables. Note that shader keys are not created for uniform variable branching option variables.</p>
+  <p>The <code>g3d</code> library has two classes for selecting the shader program representing a variation: the <code><span class="ApiLink_nn__g3d__ShadingModelObj">nn::g3d::ShadingModelObj</span></code> class and the <code><span class="ApiLink_nn__g3d__ShaderSelector">nn::g3d::ShaderSelector</span></code> class. Both classes retain the shader keys. The <code><span class="ApiLink_nn__g3d__ShadingModelObj">nn::g3d::ShadingModelObj</span></code> class handles static shader keys, while the <code><span class="ApiLink_nn__g3d__ShaderSelector">nn::g3d::ShaderSelector</span></code> class, which is the top layer of <code><span class="ApiLink_nn__g3d__ShadingModelObj">nn::g3d::ShadingModelObj</span></code>, handles dynamic shader keys. Ultimately, the <code><span class="ApiLink_bool_nn__g3d__ShaderSelector__UpdateVariation(nn__gfx__Device_*pDevice)_NN_NOEXCEPT">nn::g3d::ShaderSelector::UpdateVariation()</span></code> function determines which shader program to select based on the static and dynamic shader key information. For more information about the creation of shader keys in the source code, see <a href="../Pages/Page_286721547.html">Shader Runtime Workflow</a>.</p>
+  <div class="info_new">
+    <div class="info_new_left">Info</div>
+    <div class="info_new_right">
+      <p>To specify <code>ShaderProgram</code> (the variation), you can simply specify the various shader options in the runtime, so you normally do not need to be concerned about the content of the shader key. However, it is advantageous to have an understanding of the shader key content for debugging purposes, or if you have specified the <code>--dump-shader-source</code> option for 3dShaderConverter.</p>
+      <p>The shader key is expressed using 32-bit &times; N bit flags. The length varies, depending on the number of option variables, and the <code>choice</code> variations. It comprises static-type option bits followed by dynamic-type option bits, and has a minimum length of 64 bits (32 bits of static options, and 32 bits of dynamic options). If there are too many shader options of a particular type to be managed in 32 bits, an additional 32 bits is added for that type.</p>
+      <table class="codeblock">
+        <tbody>
+          <tr>
+            <td class="code">
+              <div class="codeblock"><pre>// The shader key, expressed as 32 bits of static options followed by 32 bits of dynamic options.
+34000000_02000000</pre></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p>The structure of the shader keys that correspond to the shading model is determined based on <code>&lt;option_var_array&gt;</code> from the FSDB shader definition file, via 3dShaderConverter. For this reason, you cannot handle shader keys from before any changes to the option variable count, the option variable sort order, the range of <code><em>choice</em></code>, or to <code><em>type</em></code>, as defined in the FSDB shader definition file, the same way you handle those after the changes. The option variable sort order is dependent on the order that option variables were defined within the shader source code.</p>
+    </div>
+  </div>
+  <h1 id="Anchor_286721565_h1_5">Shader Variation File (FSV File)</h1>
+  <p>Shader definition files (FSDB files) are converted to shader archive files (BFSHA files) using 3dShaderConverter. The resulting shader archive files are generated for all variations of processor branching for which the shader definition files are defined. However, generating a large number of variations increases the compile time. For this reason, shader variation files (FSV files) exist as a system for restricting the number of variations included in shader archive files.</p>
+  <p>Use the following format to enter the shader variation file along with the shader definition file when converting shader definition files to shader archive files using 3dShaderConverter. The <code>choice</code> value in each option variable can be restricted for shader variation files.</p>
+  <p>The following example generates only two variations, with <code>vertex_color</code> as <code>0</code> and <code>1</code>, and <code>multi_tex</code> as <code>0</code>.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;? &gt;
+&lt;nw4f_3dif version=&quot;4.0.0&quot;&gt;
+&lt;shader_variation version=&quot;4.0.0&quot;&gt;
+&lt;shader_variation_info shader_archive=&quot;testArchive&quot; /&gt;
+&lt;target_shader_array length=&quot;1&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;target_shader index=&quot;0&quot; shading_model_name=&quot;test&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;shader_program_array length=&quot;1&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;shader_program index=&quot;0&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;option_array length=&quot;2&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;option index=&quot;0&quot; id=&quot;vertex_color&quot; choice=&quot;0, 1&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;option index=&quot;1&quot; id=&quot;multi_tex&quot; choice=&quot;0&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/option_array&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/shader_program&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/shader_program_array&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/target_shader&gt;
+&lt;/target_shader_array&gt;
+&lt;/shader_variation&gt;
+&lt;/nw4f_3dif&gt;</pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <strong>Note:</strong> If the option variables defined in the shader definition file are not defined in the shader variation file, only default value variations are generated for that option.<br /><strong>Note:</strong> To avoid generating variations, the option variables for uniform variable branching ignore the specifications in the shader variation file.</p>
+  <h1 id="Anchor_286721565_h1_6">Usage in the Runtime</h1>
+  <p>In the runtime, a shader program representing a variation is selected based on the shader key from the shading model used by the model, and that shader program is used to render the model.</p>
+  <p style="text-align: center;">
+    <br />
+  </p>
+  <div class="flowchart-svg-inline">
+    <img src="../Attachments/Attach_286721565/flowchart_2.svg" />
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__ResShaderProgram', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_program.html' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderAssign', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_assign.html' )
+SetUrl( 'ApiLink_nn__g3d__ShadingModelObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__ShaderSelector', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_selector.html' )
+SetUrl( 'ApiLink_void_nn__g3d__ShaderSelector__WriteDynamicKey(int_optionIndex|_int_choiceIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_selector.html#a3afe10975f2f1896503ceedda3e04773' )
+SetUrl( 'ApiLink_bool_nn__g3d__ShaderSelector__UpdateVariation(nn__gfx__Device_*pDevice)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_selector.html#a79873e8ffad5ccd81bc0373f11bf7a44' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

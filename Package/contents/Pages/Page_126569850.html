@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Debugging a Built Program | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Debugging a Built Program -->
+<div class="pagetitle" id="PageId_126569850">Debugging a Built Program</div>
+<div class="text_separate">
+<p>Introduction</p>
+<p>Always build an application following the procedures in <a href="../Pages/Page_107779263.html">Creating an NX Application Project</a> immediately before starting to debug the program in Visual Studio. This procedure is the most orthodox way to use the debugger. However, there may also be situations in which you must debug an application that has already been built. For example, to debug an application built on a CI computer, the tester may need to debug the program built on the developer&rsquo;s computer.</p>
+<p>This page describes how to debug a program that was previously built on another development computer using VSI.</p>
+<h1 id="Anchor_126569850_h1_1">Procedure</h1>
+<h2 id="Anchor_126569850_h2_1">Preparation (Build)</h2>
+<p>To use the feature for debugging previously built programs, you must build the program as a RAW file or an NSP file.</p>
+<p>To build a program in these formats, select <strong>Project Configuration Properties</strong> &gt; <strong>General</strong> &gt; <strong>Application Program Format</strong>.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_126569850/125193156.png" width="300" class="embedded-image" />
+  </span>
+</p>
+<p>Also, make sure that you save the generated NSS file in either the NSPD directory or the same directory as the NSP file during the build. This NSS file stores debugging information that will be required later. The program can be run by using just the NSPD directory or the NSP file, because they contain all the necessary data. You need the NSS file for debugging.</p>
+<h2 id="Anchor_126569850_h2_2">Debugging</h2>
+<h3 id="Anchor_126569850_h3_1">Starting Debugging at the Same Time as Running the Application</h3>
+<p>Drag the program's <code>nspd_root</code> file, or NSP file, to NX VSI to run the program on the development hardware.</p>
+<ol>
+  <li>Confirm that the corresponding NSS file is in the same directory as the <code>nspd_root</code> file or the NSP file.</li>
+  <li>After installing NX VSI, drag the <code>nspd_root</code> file, or NSP file, to Visual Studio.<ul><li>In addition, specify these paths using the VS execution argument.<br />Example: <code>D:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\devenv.exe&quot; D:\HelloWorld.nsp</code></li></ul></li>
+  <li>A project file named with the <code>.vcxproj</code> extension is created in the same directory as the <code>nspd_root</code> file or the NSP file, and a screen similar to the following is displayed.<ul><li><span class="embedded-file-wrapper "><img src="../Attachments/Attach_126569850/161442020.png" width="500" class="embedded-image" /></span></li></ul></li>
+  <li>If you want to specify command-line arguments, enter them in <strong>Configuration Properties</strong> &gt; <strong>Debugging</strong> &gt; <strong>Command Arguments</strong>.<br /><ul><li>These command-line arguments can be obtained using the <code><span class="ApiLink_nn__os__GetHostArgc">nn::os::GetHostArgc</span>()</code> and <code><span class="ApiLink_nn__os__GetHostArgv">nn::os::GetHostArgv</span>()</code> functions defined in <code>nn/os/os_Argument.h</code>.</li></ul></li>
+  <li>To run with the debugger, select <strong>Start Debugging</strong> or press the F5 key.<ul><li>If debugging does not run correctly, verify the following.<br /><ul><li>Has the project for the file to run been set as the startup project?</li><li>Has the active solution configuration been set to <strong>NXDebugOnly</strong>?</li><li>Has the active solution platform been set to the platform on which the file to run was built?</li></ul></li></ul></li>
+  <li>Click the pause button in the Visual Studio toolbar to pause the program. After the program is paused, you can use the various debugging features, such as the variable watcher.</li>
+</ol>
+<p>
+  <a name="Anchor_126569850_AttachAfterLaunch"></a>
+</p>
+<h3 id="Anchor_126569850_h3_2">Debugging an Already Running Application</h3>
+<p>You can subsequently start using VSI to debug an application even when that application was already started using RunOnTarget or TargetManager.</p>
+<ol>
+  <li>Prepare a project for either the NX32 or NX64 platform.<ul><li>In general, it is fine to use the project already in use for developing the relevant application.</li></ul></li>
+  <li>Select the <strong>Debug</strong> &gt; <strong>Attach to Process</strong> menu, and then set transport to <strong>NX Devices</strong> and the extension to the serial number for the target development hardware.<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_126569850/178640334.png" height="250" class="embedded-image" /></span></li>
+  <li>You can get the latest state by pressing the <strong>Refresh</strong> button when the attach target cannot be found.</li>
+  <li>Select the process and click the <strong>Attach</strong> button.</li>
+</ol>
+<h3 id="Anchor_126569850_h3_3">Debugging Immediately After Starting Applications Outside of Visual Studio</h3>
+<p>Use the following procedure to begin debugging an application when debugging immediately after started that application that was started from either RunOnTarget or the HOME Menu.</p>
+<ol>
+  <li>Select <strong>Project Properties</strong> &gt; <strong>Debugging</strong> and in <strong>Debugging Method</strong>, specify <strong>Attach at launch</strong>.</li>
+  <li>Start debugging.<ul><li>Visual Studio enters a standby state until the application is started.</li></ul></li>
+  <li>Use any method to start the application.</li>
+</ol>
+<h3 id="Anchor_126569850_h3_4">NSS Search Path</h3>
+<p>When debugging a built application, you need a NSS file, which includes debug data, that corresponds to the target executable binary.<br />VSI will search for and load NSS files from the following search directories even when you have started debugging with one of the preceding procedures.</p>
+<ul>
+  <li>The path for the NSS file that was generated during the build.</li>
+  <li>The same directory as the <code>nspd_root</code> file or NSP file.</li>
+  <li>The directory specified in <strong>Configuration Properties</strong> &gt; <strong>Debugging</strong> &gt; <strong>Working Directory</strong> for the <code>nspd_root</code> or NSP project.</li>
+  <li>The directory added to <strong>Tools </strong>&gt; <strong>Options</strong> &gt; <strong>Debugging</strong> &gt; <strong>Symbol</strong>.</li>
+</ul>
+<p>If no NSS file corresponding to the executable binary is found in these directories, the following log is saved to Target Manager.<br />The search is only performed for a single hierarchy, so you must specify the directory where the NSS file is located.</p>
+<p>Unable to find debug data for (<em>module name</em>).<br />Find and add the directory containing this file to the Symbol Paths in Visual Studio.</p>
+<p>To learn how to load the debug data later, see <a href="../Pages/Page_172911316.html#Anchor_172911316_h3_3">VSI / Using the Dump Feature#Loading Debug Data</a>.</p>
+<p>If this log is output, even though the settings are correct, make sure that the NSS file is from the same build as the <code>nspd_root</code> or NSP file. For example, check by comparing the timestamps for the NSS file and the currently running binary.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__GetHostArgc', '../../../Api/HtmlNX/namespacenn_1_1os.html#acf2fa6b7b7074a51d0b2de1664cc7bb5' )
+SetUrl( 'ApiLink_nn__os__GetHostArgv', '../../../Api/HtmlNX/namespacenn_1_1os.html#abd77e6bf19be140867869cc759fa492c' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

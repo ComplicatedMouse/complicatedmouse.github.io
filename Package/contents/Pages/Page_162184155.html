@@ -1,0 +1,308 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Controller Support Applet | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Controller Support Applet -->
+<div class="pagetitle" id="PageId_162184155">Controller Support Applet</div>
+<div class="text_separate">
+<p>
+  <br />
+</p>
+<p>The controller support applet is a library applet that displays a UI that supports controller connections.<br />This section describes the workflow through starting the controller support applet.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>For more information about the controller support applet, see Controller Support Applet in the <em>Controller Guide</em>. </p>
+  </div>
+</div>
+<h1 id="Anchor_162184155_h1_1">Including Header Files</h1>
+<p>Add the following code to your program.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid/hid_ControllerSupport.h&gt;
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_162184155_h1_2">Configuring the Play Format and Grip</h1>
+<p>The controller support applet inherits the play format and grip configured in the caller application.<br />Configure the play format and grip in advance to specify the type of controllers to be connected that the applet waits for.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>For more information about play formats and grips, see Application Controller Support &gt; Supporting Different Play Formats and Grips in the <em>Controller Guide</em>.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>There are unsupported combinations of play formats and grips. At present, when any of the following conditions are satisfied, <code><span class="ApiLink_nn__hid__ResultControllerSupportNotSupportedNpadStyle">nn::hid::ResultControllerSupportNotSupportedNpadStyle</span></code> is returned, and the operation stops.</p>
+    <ul>
+      <li>When the grip is set to <code>NpadJoyHoldType_Vertical</code>, and any <code>NpadStyle</code> other than <code>NpadStyleJoyLeft</code>, <code>NpadStyleJoyRight</code> and <code>NpadStyleHandheld</code> is enabled.</li>
+      <li>Either <code>NpadStyleJoyLeft</code> or <code>NpadStyleJoyRight</code> is enabled, and the other is disabled.</li>
+      <li>An application that does not support <code>NpadStyleHandheld</code> is started (the determination parameter <code><em>enableSingleMode</em></code> is set to <code>true</code>) in single-player mode.</li>
+    </ul>
+  </div>
+</div>
+<p>
+  <br />When the grip is not configured, the default setting is <code>NpadJoyHoldType_Vertical</code>.<br /> When enabling an <code>NpadStyle</code> other than <code>NpadStyleJoyLeft</code> and <code>NpadStyleJoyRight</code>, you must explicitly configure the settings for <code>NpadJoyHoldType_Horizontal</code> using code like the following.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::hid::</span><span class="n">SetNpadJoyHoldType</span><span class="p">(</span><span class="nn">nn::hid::</span><span class="n">NpadJoyHoldType_Horizontal</span><span class="p">);</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_162184155_h1_3">Configuring Startup Parameters</h1>
+<p>Before starting the controller support applet, configure the <code><span class="ApiLink_nn__hid__ControllerSupportArg">nn::hid::ControllerSupportArg</span></code> structure, which is passed as a parameter when starting the applet.<br />The following settings are available. You can also just use the default settings (described later) to quickly set values for these settings.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 196.0px;" />
+    <col style="width: 659.0px;" />
+    <col style="width: 187.0px;" />
+    <col style="width: 381.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Parameter Name</th>
+      <th>Description</th>
+      <th>Possible Values</th>
+      <th>Default Value</th>
+    </tr>
+    <tr>
+      <td>playerCountMin</td>
+      <td>The minimum number of players for which wireless controller connections are accepted.</td>
+      <td>0-8</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>playerCountMax</td>
+      <td>The maximum number of players for which wireless controller connections are accepted.</td>
+      <td>1-8</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>enableTakeOverConnection</td>
+      <td>Specifies whether to maintain an existing connection to a controller.</td>
+      <td>
+        <code>true</code>/<code>false</code> </td>
+      <td>
+        <code>true</code>
+      </td>
+    </tr>
+    <tr>
+      <td>enableLeftJustify</td>
+      <td>Specifies whether to left-shift the controller numbers when controller support is terminated.</td>
+      <td>
+        <code>true</code>/<code>false</code></td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td>enablePermitJoyDual</td>
+      <td>Specifies whether to allow determination when there are controllers in dual-controller grip mode.<br />This parameter is expected to be used in situations that prohibit dual-controller grip, such as during local communication.</td>
+      <td>
+        <code>true</code>/<code>false</code></td>
+      <td>true </td>
+    </tr>
+    <tr>
+      <td>enableSingleMode</td>
+      <td>
+        <p>Specifies whether to start controller support in single-player mode.</p>
+        <p>Players are prompted to prepare controllers, including attached controllers, for one person.</p>
+      </td>
+      <td>
+        <code>true</code>/<code>false</code></td>
+      <td>false </td>
+    </tr>
+    <tr>
+      <td>enableIdentificationColor</td>
+      <td>
+        <p>Sets whether to specify a color for the frame shown around each controller number in the controller support UI.</p>
+      </td>
+      <td>
+        <code>true</code>/<code>false</code></td>
+      <td>false</td>
+    </tr>
+    <tr>
+      <td>identificationColor[8]</td>
+      <td>
+        <p>Specifies the color for the frame shown around each controller number in the controller support UI.</p>
+        <p>Even if values are specified, they will not be applied if <code>enableIdentificationColor</code> is <code>false</code>.</p>
+      </td>
+      <td>
+        <p>RGB (8-bit for each component)</p>
+      </td>
+      <td>
+        <p>If <code>false</code> has been set for <code><em>enableIdentificationColor</em></code>,</p>
+        <p>the default color is applied in the controller support UI.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>enableExplainText</td>
+      <td>Specifies whether to use strings for each controller number that is shown in the controller support UI.</td>
+      <td>
+        <code>true</code>/<code>false</code></td>
+      <td>false </td>
+    </tr>
+    <tr>
+      <td>explainText[8]</td>
+      <td>
+        <p>The strings for each controller number shown in the controller support UI.</p>
+        <p>You can specify the maximum <code><span class="ApiLink_nn__hid__ExplainTextMaxLength">nn::hid::ExplainTextMaxLength</span></code> characters.</p>
+        <p>Even if you specify a value, it will not be applied if <code>enableExplainText</code> is <code>false</code>.</p>
+        <p>Look at the actual display to determine whether the string width and other attributes are displaying appropriately.</p>
+      </td>
+      <td>See<br />Refer to .</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For more advanced settings, see <code>hid_ControllerSupportArg.h</code>.</p>
+<h2 id="Anchor_162184155_h2_1">Default Settings</h2>
+<p>The following code sample shows how to configure the initial settings for the startup parameters.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::hid::</span><span class="n">ControllerSupportArg</span> <span class="n">controllerArg</span><span class="p">;</span>
+<span class="n">controllerArg</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_162184155_h1_4">Starting the Controller Support Applet</h1>
+<p>After configuring the startup parameters, pass the startup parameter structure to the <code><span class="ApiLink_nn__hid__ShowControllerSupport">nn::hid::ShowControllerSupport</span>()</code> function to start the controller support applet.<br />This function blocks other processes until the controller support applet is closed.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Normal start.
+</span><span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::hid::</span><span class="n">ShowControllerSupport</span><span class="p">(</span> <span class="n">controllerArg</span> <span class="p">);</span>
+&nbsp;
+<span class="c1">// When getting additional results.
+</span><span class="nn">nn::hid::</span><span class="n">ControllerSupportResultInfo</span> <span class="n">resultInfo</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::hid::</span><span class="n">ShowControllerSupport</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">resultInfo</span><span class="p">,</span> <span class="n">controllerArg</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_162184155_h1_5">Getting the Result</h1>
+<p>After the controller support applet is closed, the <code><span class="ApiLink_nn__hid__ShowControllerSupport">nn::hid::ShowControllerSupport</span>()</code> function returns control.<br />This function returns <code><span class="ApiLink_nn__ResultSuccess">nn::ResultSuccess</span></code> if the application satisfied the specified startup parameter conditions.<br />If the specified conditions were not satisfied because the user canceled the applet or closed the applet by pressing the HOME Button or putting the system to sleep, for example, this function returns <code><span class="ApiLink_nn__hid__ResultControllerSupportCanceled">nn::hid::ResultControllerSupportCanceled</span></code>.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>If the controller support applet returns something other than <code><span class="ApiLink_nn__ResultSuccess">nn::ResultSuccess</span></code>, the error must be handled appropriately, such as by returning to the previous scene. (Do not pass the result to the error viewer.)<br />Note that if the applet is called in single-player mode, no symbol is shown on the screen to return to the previous scene, but there still may be cases where <code><span class="ApiLink_nn__hid__ResultControllerSupportCanceled">nn::hid::ResultControllerSupportCanceled</span></code> is returned.</p>
+  </div>
+</div>
+<p>When <code><span class="ApiLink_nn__ResultSuccess">nn::ResultSuccess</span></code> is returned, additional information during confirmation can be obtained.<br />The following items can be obtained. For more advanced settings, see <code>hid_ControllerSupportArg.h</code>.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Parameter Name</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>playerCount</td>
+      <td>The number of players determined by controller support.<br />Not valid in single-player mode.</td>
+    </tr>
+    <tr>
+      <td>selectedId</td>
+      <td>The <code>NpadIdType</code> selected in single-player mode.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__ResultControllerSupportNotSupportedNpadStyle', '../../../Api/HtmlNX/classnn_1_1hid_1_1_result_controller_support_not_supported_npad_style.html' )
+SetUrl( 'ApiLink_nn__hid__ControllerSupportArg', '../../../Api/HtmlNX/structnn_1_1hid_1_1_controller_support_arg.html' )
+SetUrl( 'ApiLink_nn__hid__ExplainTextMaxLength', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a1af6058ea35cfddd9d8fdeaf937a0449' )
+SetUrl( 'ApiLink_nn__hid__ShowControllerSupport', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a942c0cad1b2e3d791e7e2cbc730b3041' )
+SetUrl( 'ApiLink_nn__ResultSuccess', '../../../Api/HtmlNX/classnn_1_1_result_success.html' )
+SetUrl( 'ApiLink_nn__hid__ResultControllerSupportCanceled', '../../../Api/HtmlNX/classnn_1_1hid_1_1_result_controller_support_canceled.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,249 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Take a Profile | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Take a Profile -->
+<div class="pagetitle" id="PageId_693933941">Take a Profile</div>
+<div class="text_separate">
+<p>In this section we explain the various options when taking a profile.</p>
+<p>If you are just starting out, then please see the <a href="../Pages/Page_685589275.html">Getting Started</a> section for the quickest way to take your first profile.</p>
+<h1 id="Anchor_693933941_h1_1">Setup</h1>
+<p>If you are serious about getting the most out of the Nintendo NX CPU Profiler, then please consider the <a href="../Pages/Page_685594274.html">Full Integration Setup</a> which enables detailed data collection of thread synchronization, GPU, Audio, user-logged data, and precise instrumenting of individual functions. It only takes minutes to setup and is the only way to collect this critical data.</p>
+<p>If you skip the <a href="../Pages/Page_685594274.html">Full Integration Setup</a>, you can still take helpful profiles, but some of the following collection options will be disabled.</p>
+<h1 id="Anchor_693933941_h1_2">Choose your Settings</h1>
+<p>In the <strong> <a href="../Pages/Page_758198873.html">Sampled Profile</a> </strong> tab, you'll see many options for taking a profile. Each option lets you collect specialized data to help you understand your game. Since collecting extra data inevitably affects the performance of your game and therefore hurts the accuracy of the profile, you'll want to selectively turn on features only when you're interested in investigating them.</p>
+<p>You can safely take helpful profiles with the default settings, but if you want to get the most out the profiler, please look over the following decisions.</p>
+<h2 id="Anchor_693933941_h2_1">Decision 1: Duration (how long to collect data)</h2>
+<p>After you hit the&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981668.png" width="22" class="embedded-image" /></span>&nbsp;<strong>Start</strong> button, you'll typically want to collect data for 2-5 seconds before you hit the <span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981669.png" width="22" class="embedded-image" /></span>&nbsp;<strong>Stop</strong> button. This is enough frames to see interesting patterns and get good statistical results. Unfortunately, you might not have much choice as the built-in 64MB buffer will fill up rather quickly and the profile will stop by itself once that buffer is full.</p>
+<p>You'll notice that to the right of the&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981668.png" width="22" class="embedded-image" /></span>&nbsp;<strong>Start</strong> button is a drop down where you can select a set amount of time to profile for. This can be helpful if you want a fixed amount of profile time (anything between 0.1s and 1 hour), letting you just hit <span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981668.png" width="22" class="embedded-image" /></span>&nbsp;<strong>Start</strong> and then wait for the profile to finish without monitoring it and having to hit the <span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981669.png" width="22" class="embedded-image" /></span>&nbsp;<strong>Stop</strong> button. Setting a value of 5 seconds can be a nice convenience for most profiling needs.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_761288311/813981680.png" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_693933941_h2_2">Decision 2: Buffer Mode</h2>
+<p>Starting with Nintendo NX CPU Profiler version 1.7, you can control how the profiler handles its buffers, specially its behavior when the buffer has filled to its capacity.</p>
+<p>Above the drop down is an estimated time for how long a profile will run until the buffers fill to capacity. This capacity estimate is based on the selected sample settings, the overhead of sampling, and average callstack depth. The <strong>Tracing</strong> features, <strong>Code Blocks</strong>, <strong>Heartbeats</strong>, and <strong>User Logs</strong> all impact the actual capacity, but the estimate does not currently have a way to include this data in the calculation as it is heavily dependent on the application being profiled.</p>
+<ul>
+  <li>
+    <strong>Stop When Full</strong>: This is how the profiler behaved in previous releases. When the buffers fill, profiling automatically stops.</li>
+  <li>
+    <strong>Ring Buffer</strong>: When the buffers fill, the profiler starts overwriting old data. This enables profiling to continue until explicitly stopped. When the buffers do fill, the estimated capacity will update to reflect the minimum duration you can expect to receive from the profile.</li>
+</ul>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_761288311/1229652145.png" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_693933941_h2_3">Decision 3: Sampling Rate</h2>
+<p>As this is a statistical profiler, an important decision is choosing a good sampling rate. The default rate of <strong>100x per </strong>(60Hz)<strong> frame</strong> is a balanced choice that satisfies most needs. At this default rate, enough data is collected to see details within each frame while limiting the profiling overhead to roughly 10%. If you select a lower sampling rate like <strong>10x per frame</strong>, the data will be more accurate (as the profiling overhead is lower) and the game will run closer to its potential frame rate, however the per frame data will be too sparse to see individual spikes or per frame details (therefore, you'll need to profile for 10 seconds or longer and only look at function percentages over the entirety of the profile). If you select a higher sampling rate like <strong>500x per frame</strong>, the profiler overhead will be much worse (greater than 10%), but you'll get very fine-grained detail within each frame and more detail whenever there is a single CPU spike on a frame.</p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_761288311/813981679.png" class="embedded-image" />
+  </span>
+</p>
+<p>How much overhead did your profile take?</p>
+<p>The answer is shown in the bottom right of the&nbsp;<strong><a href="../Pages/Page_758198966.html">Overview</a> </strong> tab after you take a profile.</p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_761288523/813981842.png" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_693933941_h2_4">Decision 4: In-Process or Out-of-Process</h2>
+<p>This is a choice of how the profiler samples your game. If you have migrating threads (most games do) or there is a game thread running at <span class="ApiLink_nn__os__HighestThreadPriority">nn::os::HighestThreadPriority</span>, you should only use&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981671.png" width="44" class="embedded-image" /></span>&nbsp;<strong>Out-of-Process</strong>&nbsp;(as&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981670.png" width="44" class="embedded-image" /></span>&nbsp;<strong>In-Process</strong> cannot properly sample threads that migrate between cores or threads at the highest priority). The reason to use&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981670.png" width="44" class="embedded-image" /></span>&nbsp;<strong>In-Process</strong> is that it offers lower profiling overhead (more accurate) and is the only way to profile if you are using an EDEV or an SDEV in 4GB mode. The mode&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981670.png" width="44" class="embedded-image" /></span>&nbsp;<strong>In-Process</strong> is only available if you have performed <a href="../Pages/Page_685594274.html">Full Integration Setup</a>.</p>
+<p>If you're not sure you have migrating threads, you can take a profile with&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981670.png" width="44" class="embedded-image" /></span>&nbsp;<strong>In-Process</strong> and the profiler will warn you in the <strong>Checkers</strong>&nbsp;tab if it saw any migrating threads.</p>
+<p>More explanation can be found in the <a href="../Pages/Page_809639172.html">In-Process vs. Out-Of-Process</a> section.</p>
+<h2 id="Anchor_693933941_h2_5">Decision 5: Performance Counters</h2>
+<p>The NX CPU has dozens of internal performance counters that can track events that can help with optimization, such as counting L2 cache misses. The profiler has made these easy to enable by grouping individual counters into logical groups inside of the <strong>Performance Counter</strong> drop down. Simply select a group and a small selection of related counters will be turned on in the CPU and collected with your profile. Once captured, you can explore these performance counters inside of the <strong>Counters</strong> tab.&nbsp;By default,&nbsp;<strong>Performance Counters</strong>&nbsp;are disabled, since there is some overhead and the additional data fills the profiling buffer more quickly, thus reducing max profile time.</p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_761288311/813981681.png" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>The Performance Monitor Unit is unique per CPU core and not by thread. Since there is no way for the profiler to detect when a migration is about to occur, there is no way to also migrate the current counter values along with the thread when the thread moves to the other core. This may make it difficult to correlate performance counter data with any particular behavior in the application.</p>
+  </div>
+</div>
+<h2 id="Anchor_693933941_h2_6">Decision 6: Thread State Trace</h2>
+<p>The&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981676.png" width="24" class="embedded-image" /></span>&nbsp;<strong style="letter-spacing: 0.0px;">Threads</strong>&nbsp;toggle button enables collection of thread state and thread synchronization information, which can help determine why a thread is blocked from running. Enabling this will add additional profiler overhead and the additional collected data will reduce the maximum time you can profile.</p>
+<p>
+  <strong>Thread State</strong> tracing requires:</p>
+<ul>
+  <li>
+    <a href="../Pages/Page_685594274.html">Full Integration Setup</a>&nbsp;has been completed, where your game calls&nbsp;<span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li>
+  <li>The application is a 64-bit application.</li>
+  <li>The nnSdk module can be found and loaded. A warning will appear if it can't be found or loaded.</li>
+  <li>The nnSdk module is within 128MB of the profiler library. If this is not true at the start of sampling, a warning will appear and the&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981676.png" width="24" class="embedded-image" /></span>&nbsp;<strong>Threads</strong> &nbsp;button will be disabled.</li>
+  <li>There must be a free TLS slot obtainable via <span class="ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT">nn::os::AllocateTlsSlot()</span>.</li>
+</ul>
+<p>To view thread state data, select individual threads in the left&nbsp;<strong>Threads</strong>&nbsp;tab while the right&nbsp;<strong> <a href="../Pages/Page_764970037.html">Timeline</a> </strong>&nbsp;tab is visible.</p>
+<h2 id="Anchor_693933941_h2_7">Decision 7: GPU Trace</h2>
+<p>The&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981675.png" width="20" class="embedded-image" /></span>&nbsp;<strong>Graphics</strong>&nbsp;button enables collection of lightweight GPU event data, such as draw events.&nbsp;Enabling this will add additional profiler overhead and the additional data will reduce the maximum time you can profile.</p>
+<p> <br /></p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>GPU tracing only works when using NVN. Other graphics APIs, such as OpenGL and Vulkan, are not supported.</p>
+    <p>The <span class="ApiLink_nn__gfx">nn::gfx</span> library can be used when NVN is targeted. However, the profiler will perform tracing at the NVN function call level, not at the <span class="ApiLink_nn__gfx">nn::gfx</span> function level.</p>
+  </div>
+</div>
+<p> <strong>GPU Tracing</strong> requires:</p>
+<ul>
+  <li>Call <span class="ApiLink_nn__Result_nn__profiler__InstallGraphicsHooks()_NN_NOEXCEPT">nn::profiler::InstallGraphicsHooks()</span>&nbsp;before NVN functions are loaded with either the nvnLoadCProcs() or nvnLoadCPPProcs() functions and before <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>&nbsp;is called. This function can safely be called from a static initializer.</li>
+  <li>Ideally, ensure that <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>&nbsp;is called before any NVN Queues are initialized. If this is not possible, call <span class="ApiLink_nn__Result_nn__profiler__SetQueuePerFrameOperationEstimates(NVNqueue_*queue|_int_numDraws|_int_numDebugPushes|_int_numComputeDispatches)_NN_NOEXCEPT">nn::profiler::SetQueuePerFrameOperationEstimates()</span>&nbsp;on the queue immediately following the call to <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li>
+</ul>
+<p>To view GPU tracing information, click on the&nbsp;right&nbsp;<strong><a href="../Pages/Page_764970037.html">Timeline</a></strong>&nbsp;tab and any recorded GPU data will be shown in the&nbsp;<strong>GPU</strong>&nbsp;section.</p>
+<h2 id="Anchor_693933941_h2_8">Decision 8: Audio Trace</h2>
+<p>The&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/898112158.png" width="20" class="embedded-image" /></span>&nbsp;<strong>Audio</strong> button enables collection of AudioRenderer performance metrics. Enabling this will add additional profiler overhead and the additional data will reduce the maximum time you can profile.</p>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Audio tracing currently only supports a single AudioRenderer. Additionally, other aspects of the audio system, such as Opus decoding and AudioOut, are not currently collectible as part of audio tracing.</p>
+  </div>
+</div>
+<p>Audio tracing requires:</p>
+<ul>
+  <li>Call <span class="ApiLink_nn__Result_nn__profiler__RegisterAudioRenderer(const_nn__audio__AudioRendererParameter_&parameter|_nn__audio__AudioRendererConfig_*pConfig|_AudioPerformanceMetricsControl_control)_NN_NOEXCEPT">nn::profiler::RegisterAudioRenderer()</span>&nbsp;after opening an AudioRenderer.</li>
+  <li>Call <span class="ApiLink_void_nn__profiler__RecordAudioRendererPerformance(nn__audio__AudioRendererConfig_*pConfig)_NN_NOEXCEPT">nn::profiler::RecordAudioRendererPerformance()</span>&nbsp;each audio frame.</li>
+  <li>The profiler library has been initialized using <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li>
+</ul>
+<p>To view audio tracing information, click on the right&nbsp;<strong><a href="../Pages/Page_764970037.html">Timeline</a>&nbsp;</strong>tab and any recorded audio data will be shown in the <strong>Audio</strong> section.</p>
+<h2 id="Anchor_693933941_h2_9">Decision 9: File System Trace (Experimental)</h2>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>This feature is still considered experimental. For this feature, it means that:</p>
+    <ul>
+      <li>To view data on the <strong> <a href="../Pages/Page_764970037.html">Timeline</a> </strong> tab, the&nbsp;<a href="../Pages/Page_962042331.html">Thread-Centric Data Views</a> experimental feature must also be enabled.</li>
+      <li>Profiles saved with this feature enabled are not guaranteed to be openable in future version of the profiler.</li>
+    </ul>
+  </div>
+</div>
+<p>The <span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/1227347750.png" class="embedded-image" /></span>&nbsp;<strong>File</strong> button enables collection of file system information. Enabling this will hook into the <span class="ApiLink_nn__fs">nn::fs</span> API to watch for file system mounts, file opens and closes, and file reads and writes.</p>
+<p>File system tracing requires:</p>
+<ul>
+  <li>Call <span class="ApiLink_nn__profiler__EnableFileSystemTrace">nn::profiler::EnableFileSystemTrace</span>() before any calls to <span class="ApiLink_nn__fs">nn::fs</span> APIs.</li>
+  <li>The profiler library has been initialized using <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li>
+</ul>
+<p>To view the file system tracing information, some general information will appear in the <strong> <a href="../Pages/Page_764970037.html">Timeline</a> </strong> tab in the <strong>File System Data</strong> section. To see information on a specific file, go to the left <strong> <a href="../Pages/Page_1212546958.html">Files</a> </strong> tab and select the file.</p>
+<h2 id="Anchor_693933941_h2_10">Other Decisions where the Default is Best</h2>
+<p>Some of the options are best left at their default setting. The&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981672.png" width="24" class="embedded-image" /></span>&nbsp;<strong>Leaf Only</strong> and&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981673.png" width="24" class="embedded-image" /></span>&nbsp;<strong>Callstack</strong> buttons are best left with&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981673.png" width="24" class="embedded-image" /></span>&nbsp;<strong>Callstack</strong> being checked. Profiles are much more useful when the entire callstack is collected with each sample. However, if you want very low overhead profiling and don't want to look at the hierarchical function call structure of your game, then recording just&nbsp;<span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981672.png" width="24" class="embedded-image" /></span>&nbsp;<strong>Leaf Only</strong> functions might be more appropriate.</p>
+<p>The <span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981674.png" width="20" class="embedded-image" /></span>&nbsp;<strong>Power</strong> toggle is an optional setting that defaults to off, since it adds a slight amount of profiling overhead and power usage doesn't vary much during gameplay. If you do check the <span class="embedded-file-wrapper "><img src="../Attachments/Attach_761288311/813981674.png" width="20" class="embedded-image" /></span>&nbsp;<strong>Power</strong> toggle, you can view the power data in the <strong>Overview</strong> tab by clicking on <strong>View Detailed Info</strong> and then expanding <strong>Power Information</strong>.</p>
+<h1 id="Anchor_693933941_h1_3">Next Steps</h1>
+<ul>
+  <li>Guidance to help you <a href="../Pages/Page_693933913.html">Analyze your Profile</a>.</li>
+  <li>Collect even more data with&nbsp;<a href="../Pages/Page_685594274.html">Full Integration Setup</a>.</li>
+  <li>Explore different ways to use the profiler in&nbsp;<a href="../Pages/Page_712248228.html">Example Workflows</a>.</li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__HighestThreadPriority', '../../../Api/HtmlNX/namespacenn_1_1os.html#a44ed3b4dddf9ebfb69bc33167369b816' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a1fd4585e5e75647e1cb20bb264f58f6e' )
+SetUrl( 'ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2a67ebeb78e5d624b45ec27d66bdf0b2' )
+SetUrl( 'ApiLink_nn__gfx', '../../../Api/HtmlNX/namespacenn_1_1gfx.html' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__InstallGraphicsHooks()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a907804e676e1b37f7e1b62f5bace7992' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__SetQueuePerFrameOperationEstimates(NVNqueue_*queue|_int_numDraws|_int_numDebugPushes|_int_numComputeDispatches)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a7eba4662b2649f42259c6604171e7425' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__RegisterAudioRenderer(const_nn__audio__AudioRendererParameter_&parameter|_nn__audio__AudioRendererConfig_*pConfig|_AudioPerformanceMetricsControl_control)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a9312a49b962cc1cee3ee4a2be86c21fa' )
+SetUrl( 'ApiLink_void_nn__profiler__RecordAudioRendererPerformance(nn__audio__AudioRendererConfig_*pConfig)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#aaff43cb30e5803f4a44ce4f3a741c300' )
+SetUrl( 'ApiLink_nn__fs', '../../../Api/HtmlNX/namespacenn_1_1fs.html' )
+SetUrl( 'ApiLink_nn__profiler__EnableFileSystemTrace', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a1e84c62cb23cbe2b7c628448d1a2fd2a' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

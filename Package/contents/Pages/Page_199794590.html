@@ -1,0 +1,513 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Processing Flow | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Processing Flow -->
+<div class="pagetitle" id="PageId_199794590">Processing Flow</div>
+<div class="text_separate">
+<h1 id="Anchor_199794590_h1_1">Processing Flow</h1>
+<p>This page shows the processing flow for a typical NintendoWare 3D runtime library (<code>g3d</code> Library) and describes the NintendoWare 3D runtime library.</p>
+<p> <div class="flowchart-svg-inline"><img src="../Attachments/Attach_199794590/flowchart_1.svg" /></div></p>
+<h2 id="Anchor_199794590_h2_1">
+  <br />Initialization</h2>
+<p>
+  <div class="flowchart-svg-inline">
+    <img src="../Attachments/Attach_199794590/flowchart_2.svg" />
+  </div>
+</p>
+<table style="margin-left: 1.5em;" class="table">
+  <tbody>
+    <tr>
+      <th>File Initialization</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>ResFile::ResCast()</code>
+        <br />
+        <code>ResFile::Setup()</code>
+        <br />
+        <code>ResFile::BindTexture()</code>
+        <br />
+        <code>ResShaderFile::ResCast()</code>
+        <br />
+        <code>ResShaderFile::Setup()</code>
+      </td>
+      <td>
+        <p>Initializes the resources (BFRES and BFSHA files) loaded from the file. <code>ResCast()</code> places files in an accessible state. <code>Setup()</code> creates GFX objects and performs other tasks. <code>BindTexture()</code> sets the textures referenced by the resources. The shader archive is initialized in the same way.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Association Between the Shader and the Models</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>ResMaterial::GetShaderAssign()</code>
+          <br />
+          <code>ResMaterial::GetShaderArchiveName()</code>
+          <br />
+          <code>ResShaderAssign::GetShadingModelName()</code>
+          <br />
+          <code>ResMaterial::SetRawParamSize()</code>
+          <br />
+          <code>ResShaderParam::SetOffset()</code>
+        </p>
+        <p>
+          <code>ResShadingModel::GetUniformBlock()</code>
+        </p>
+        <p>
+          <code>ResUniformBlockVar::GetSize()</code>
+        </p>
+        <p>
+          <code>ResUniformVar::GetOffset()</code>
+        </p>
+      </td>
+      <td>
+        <p>Gets the shader archive name and the shading model name from the model resource, and then gets a shading model appropriate to the model resource from the shader archive. Applies the shader parameter information (such as offset and size) from the shading model to the model. The shader parameter sets the offset in the <code>UniformBlock</code> with <code>SetOffset()</code> and sets the overall <code>UniformBlock</code> size with <code>SetRawParamSize()</code>. You can also use <code>ShaderUtility::BindShaderParam()</code> to configure all of the settings.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Building Model Instances</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>ModelObj::Builder::CalculateMemorySize()</code>
+          <br />
+          <code>ModelObj::Builder::GetWorkMemorySize()</code>
+        </p>
+        <p>
+          <code>ModelObj::Builder::Build()</code>
+          <br />
+          <code>ModelObj::CalculateBlockBufferSize()</code>
+          <br />
+          <code>ModelObj::SetupBlockBuffer()</code>
+        </p>
+      </td>
+      <td>Requests the memory size required to build <code>ModelObj</code> with <code>CalculateMemorySize()</code>, and then gets the size with <code>GetWorkMemorySize()</code> and allocates memory in the application. The model instance can be built by passing the allocated memory to <code>Build()</code>. Also, the memory being used as <code>UniformBlock</code> is calculated with <code>CalculateBlockBufferSize()</code> and set with <code>SetupBlockBuffer()</code>. This memory is directly referenced by the GPU. The memory required to build <code>ModelObj</code> is obtained with <code>ModelObj::Alignment_Buffer</code> and the memory alignment used as <code>UniformBlock</code> is obtained with <code>ModelObj::GetBlockBufferAlignment()</code>.</td>
+    </tr>
+    <tr>
+      <th>Building Animation Instances</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>
+            <em>xxx</em>::Builder::CalculateMemorySize()</code>
+          <br />
+          <code>
+            <em>xxx</em>::Builder::GetWorkMemorySize()</code>
+        </p>
+        <p>
+          <code>
+            <em>xxx</em>::Builder::Build()</code>
+          <br />
+          <code>
+            <em>xxx</em>::SetResource()</code>
+          <br />
+          <em>
+            <code>xxx</code>
+          </em>
+          <code>::Bind()</code>
+        </p>
+        <p>
+          <em>xxx</em> represents each animation instance class.</p>
+      </td>
+      <td>
+        <p>Requests the memory size required to build <code>ModelObj</code> with <code>CalculateMemorySize()</code>, and then gets the size with <code>GetWorkMemorySize()</code> and allocates memory in the application. The animation instance can be built by passing the allocated memory to <code>Build()</code>. The memory alignment required to build the animation instance can be obtained with <code>Alignment_Buffer</code>. <code>SetResource()</code> sets resources to calculate for the instance. The animation is also bound to a <code>ModelObj</code> or <code>SkeletonObj</code> by calling <code>Bind()</code> on the instance.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_199794590_h2_2">Initializing nn::gfx Objects</h2>
+<table style="margin-left: 1.5em;" class="table">
+  <tbody>
+    <tr>
+      <th>
+        <code>RasterizerState</code> Initialization</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>ResMaterial::GetRenderInfo()</code>
+        </p>
+      </td>
+      <td>Initializes <code><span class="ApiLink_nn__gfx__RasterizerState">nn::gfx::RasterizerState</span></code>. If required, you can define <code>RenderInfo</code>, get that information in the runtime, and initialize <code>RasterizerState</code> based on the information.</td>
+    </tr>
+    <tr>
+      <th>Initializing VertexState</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>ResModel::GetVertex()</code>
+        </p>
+        <p>
+          <code>ResVertex::FindVertexAttr()</code>
+        </p>
+        <p>
+          <code>ResVertex::GetVertexBufferStride()</code>
+        </p>
+        <p>
+          <code>ResVertexAttr::GetFormat()</code>
+        </p>
+        <p>
+          <code>ResVertexAttr::GetOffset()</code>
+        </p>
+        <p>
+          <code>ResVertexAttr::GetBufferIndex()</code>
+        </p>
+      </td>
+      <td>Gets the vertex attributes and initializes <code><span class="ApiLink_nn__gfx__VertexState">nn::gfx::VertexState</span></code>.</td>
+    </tr>
+    <tr>
+      <th>Initializing DepthStencilState</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>ResMaterial::GetRenderInfo()</code>
+      </td>
+      <td>If required, you can define <code>RenderInfo</code>, get that information in the runtime, and initialize <code>DepthStencilState</code> based on the information.</td>
+    </tr>
+    <tr>
+      <th>Initializing BlendState</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>ResMaterial::GetRenderInfo()</code>
+      </td>
+      <td>If required, you can define <code>RenderInfo</code>, get that information in the runtime, and initialize <code>BlendState</code> based on the information.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_199794590_h2_3">Update animations, etc.</h2>
+<p>
+  <div class="flowchart-svg-inline">
+    <img src="../Attachments/Attach_199794590/flowchart_3.svg" />
+  </div>
+</p>
+<table style="margin-left: 1.5em;" class="table">
+  <tbody>
+    <tr>
+      <th>Animation Calculations</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <em>xxx</em>::GetFrameCtrl()<br />AnimFrameCtrl::UpdateFrame()<br /><em>xxx</em>::Calculate()</p>
+        <p>
+          <em>xxx</em> represents each animation instance class.</p>
+      </td>
+      <td>
+        <p>The animation frame is updated using the <code>AnimFrameCtrl</code> maintaining the animation instance. Animation calculations use updated frames and results that are stored in the animation instance.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Applying Animation</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>
+            <em>xxx</em>::ApplyTo()</code>
+        </p>
+        <p>
+          <em>xxx</em> represents each animation instance class.</p>
+      </td>
+      <td>Applies animatino results to ModelObj. For <code>SceneAnimObj</code>, results are obtained with the <code>GetResult()</code> function.</td>
+    </tr>
+    <tr>
+      <th>Updating the Skeleton</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>ModelObj::CalculateWorld()</code>
+      </td>
+      <td>
+        <p>Bones are updated starting from the root. A pre-registered callback is called during world calculations.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Updating Camera, Light, and Fog</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>CameraAnimObj::GetResult()</code>
+        <br />
+        <code>LightAnimObj ::GetResult()</code>
+        <br />
+        <code>FogAnimObj::GetResult()</code>
+      </td>
+      <td>
+        <p>Updates the cameras, lights, and fog managed by the application. Scene animation results can also be applied.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_199794590_h2_4">Updating Buffers Accessed by the GPU</h2>
+<p>Because buffers accessed by the GPU (graphics processing unit) are overwritten, this process must be called after GPU access for the previous rendering process completes.</p>
+<table style="margin-left: 1.5em;" class="table">
+  <tbody>
+    <tr>
+      <th>Updating Matrix Pallets</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>ModelObj::CalculateSkeleton()</code>
+      </td>
+      <td>
+        <p>Updates the matrix palette maintained by <code>SkeletonObj</code>. Matrices for both smooth skinning and rigid skinning are stored in the matrix palette.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Updating Shape-Related Buffers</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>ModelObj::CalculateShape()</code>
+      </td>
+      <td>
+        <p>The <code>UniformBlock</code> set with shape units is updated.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Updating Material-Related Buffers</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>ModelObj::CalculateMaterial()</code>
+      </td>
+      <td>
+        <p>Updates shader parameters. <code>DirtyFlag</code> is set for shader parameters updated by animations and so on. It is applied in <code>UniformBlock</code> by calling the <code>CalculateMaterial()</code> function.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Updating View-Related Resources</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>ModelObj::CalculateView()</code>
+        </p>
+      </td>
+      <td>
+        <p>Updates the <code>UniformBlock</code> related to View. Billboard calculations are performed.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_199794590_h2_5">Creating Draw Commands</h2>
+<p>
+  <div class="flowchart-svg-inline">
+    <img src="../Attachments/Attach_199794590/flowchart_4.svg" />
+  </div>
+</p>
+<table style="margin-left: 1.5em;" class="table">
+  <tbody>
+    <tr>
+      <th>Determining Visibility</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>ModelObj::IsShapeVisible()</code>
+      </td>
+      <td>
+        <p>Determines whether to perform rendering. Make sure that you stop the process to apply the results of visibility animation or the results of frustum culling by the application. The library does not determine what is rendered.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Loading Shaders</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>ResShaderProgram::Load()</code>
+      </td>
+      <td>Stacks shader program load commands in the command buffer. The loaded shaders do not necessarily need to be <code>g3d</code> shaders.</td>
+    </tr>
+    <tr>
+      <th>Loading UniformBlock</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>MaterialObj::GetMaterialBlock()</code>
+        </p>
+        <p>
+          <code>ShapeObj::GetShapeBlock()</code>
+        </p>
+        <p>
+          <code>SkeletonObj::GetMtxBlock()</code>
+        </p>
+      </td>
+      <td>Gets <code>Uniform block</code>. Loads with <code>gfx::ComandBuffer::SetConstantBuffer</code>.</td>
+    </tr>
+    <tr>
+      <th>Draw.</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <code>ResMesh::Draw()</code>
+        <br />
+        <code>ResMesh::DrawSubMesh()</code>
+      </td>
+      <td>
+        <p>Stacks render commands in the command buffer. When controlling rendering with <code>SubMesh</code> units, render is performed using the <code>DrawSubMesh</code> function.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Sampler, Texture Settings</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>MaterialObj::GetTextureDescriptorSlot()</code>
+        </p>
+        <p>
+          <code>MaterialObj::GetSamplerDescriptorSlot()</code>
+        </p>
+      </td>
+      <td>Set the sampler and texture with <code>gfx::CommandBuffer::SetTextureAndSampler</code>.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_199794590_h2_6">Render Command Issue</h2>
+<p>Use <code><span class="ApiLink_nn__gfx__Queue__ExecuteCommand">nn::gfx::Queue::ExecuteCommand</span>()</code> to execute the command buffer.</p>
+<h2 id="Anchor_199794590_h2_7">End Processing</h2>
+<p>
+  <div class="flowchart-svg-inline">
+    <img src="../Attachments/Attach_199794590/flowchart_5.svg" />
+  </div>
+</p>
+<table style="margin-left: 1.5em;" class="table">
+  <tbody>
+    <tr>
+      <th>Destroying Instances</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>ModelObj::CleanupBlockBuffer()</p>
+      </td>
+      <td>
+        <p>Destroys instances of <code>ModelObj</code>, <code>SkeletalAnimObj</code>, and so on. The memory passed during the instance build is also released.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>File Shutdown Processing</th>
+      <th> </th>
+    </tr>
+    <tr>
+      <td>
+        <p>ResFile::Cleanup()</p>
+        <p>ResFile::ReleaseTexture()</p>
+        <p>ResShaderFile::Cleanup()</p>
+      </td>
+      <td>
+        <p>The <code>Cleanup()</code> function performs tasks such as destroying <code>GFX</code> objects. The <code>ReleaseTexture()</code> function deletes texture references.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__RasterizerState', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ae593c6d30037899897efda75cace06d6' )
+SetUrl( 'ApiLink_nn__gfx__VertexState', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a2e8016663b919b587be59f4adb79b2c6' )
+SetUrl( 'ApiLink_nn__gfx__Queue__ExecuteCommand', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_queue.html#a3513accbae08380417a92fb51043f1e8' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

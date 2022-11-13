@@ -1,0 +1,194 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Custom Action Tutorial | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Custom Action Tutorial -->
+<div class="pagetitle" id="PageId_248653458">Custom Action Tutorial</div>
+<div class="text_separate">
+<h1 id="Anchor_248653458_h1_1">Custom Actions</h1>
+<p>
+  <em>Custom actions</em> provide a way to design behaviors tightly connected to the game, for example for determining collisions between particles and objects in the game, or for locating light sources by referencing the positions of particles.</p>
+<p>This section provides a tutorial for using custom actions and introduces examples of some frequently used implementations.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_248653458_h1_1">Custom Actions</a>
+    </li>
+    <li>
+      <a href="#Anchor_248653458_h1_2">Tutorial</a>
+    </li>
+    <li>
+      <a href="#Anchor_248653458_h1_3">Particle Operations</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_248653458_h1_2">Tutorial</h1>
+<p>This tutorial modifies the code in the <code>VfxViewerSimple</code> sample demo to give you a sense of how custom actions work.</p>
+<ul>
+  <li>Create a callback function.</li>
+  <li>Register the created callback function.</li>
+  <li>Preview to check operations.</li>
+</ul>
+<p>As the first step, open <code>VfxViewerSimple</code> in Visual Studio.</p>
+<h2 id="Anchor_248653458_h2_1">Creating a Callback Function</h2>
+<p>Code the following callback function before the <code>nnMain</code> function in <code>main.cpp</code>. <br />This callback function is a simple way to realize a collision effect. It gets the world coordinates for the particle and flips the y-value of the particle velocity if the y-value is less than 0.0, which causes the particle to be reflected.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>void ParticleCalculateCallbackSample( nn::vfx::ParticleCalculateArg&amp; arg )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::util::Vector4f pos;
+&nbsp;&nbsp;&nbsp;&nbsp;nn::util::Vector3f vec;
+
+&nbsp;&nbsp;&nbsp;&nbsp;// Get the particle position.
+&nbsp;&nbsp;&nbsp;&nbsp;arg.GetWorldPos( &amp;pos );
+
+&nbsp;&nbsp;&nbsp;&nbsp;// Reflect the particle if the position in world coordinates is less than 0.0f.
+&nbsp;&nbsp;&nbsp;&nbsp;if ( pos.GetY() &lt; 0.0f )
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg.GetLocalVec( &amp;vec );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vec.SetY( - vec.GetY() * 0.8f );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg.SetLocalVec( vec );
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_248653458_h2_2">Setting the Custom Action</h2>
+<p>The next step registers the coded callback function in the VFX system. <br />This is a callback for particle processing, so register it as a particle calculation callback.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::vfx::CallbackSet callbackSet;
+callbackSet.particleCalculate = ParticleCalculateCallbackSample;
+vfxSystem-&gt;SetCallback( nn::vfx::CallbackId_CustomAction1, callbackSet );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_248653458_h2_3">Previewing to Check Operation</h2>
+<p>Build and run the VfxViewerSimple sample. Then start EffectMaker and create a new emitter set. <br />Select <strong>Emitter1</strong> and create a behavior where the particle drops from a height of Y = 10.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Tab</th>
+      <th>Group</th>
+      <th>Parameter</th>
+    </tr>
+    <tr>
+      <td>Emitter</td>
+      <td>Emitter Transform</td>
+      <td>Position (&plusmn;) Y = 10</td>
+    </tr>
+    <tr>
+      <td>Emission</td>
+      <td>Other movement settings</td>
+      <td>Gravity = 0.7</td>
+    </tr>
+  </tbody>
+</table>
+<p>Add a custom action to <strong>Emitter1</strong> to call your created callback function. <br />To add the custom action, right-click <strong>Emitter1</strong>, and from the shortcut menu, select <strong>Custom Action</strong>. <br />Confirm that you have created an effect where a falling particle reflects back when it reaches a height of 0.</p>
+<p> </p>
+<h1 id="Anchor_248653458_h1_3">Particle Operations</h1>
+<p>This section introduces examples of frequently used particle operations.</p>
+<h2 id="Anchor_248653458_h2_4">Operation on Particle Position and Speed</h2>
+<p>Use a particle calculation callback that is called after CPU processing at the particle level has been completed.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>//---------------------------------------------------------------------------
+// Example of particle calculation callback.
+//---------------------------------------------------------------------------
+void _ParticleCalculateCallback( nn::vfx::ParticleCalculateArg&amp; arg )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::util::Vector4f pos;
+&nbsp;&nbsp;&nbsp;&nbsp;nn::util::Vector3f vec;
+
+&nbsp;&nbsp;&nbsp;&nbsp;// Get the particle position.
+&nbsp;&nbsp;&nbsp;&nbsp;arg.GetWorldPos( &amp;pos );
+
+&nbsp;&nbsp;&nbsp;&nbsp;// Reflect the particle if the position in world coordinates is less than 0.0f.
+&nbsp;&nbsp;&nbsp;&nbsp;if ( pos.GetY() &lt; 0.0f )
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg.GetLocalVec( &amp;vec );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vec.SetY( - vec.GetY() * 0.8f );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg.SetLocalVec( vec );
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_248653458_h2_5">Killing Particles</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>//---------------------------------------------------------------------------
+// Example of particle calculation callback.
+//---------------------------------------------------------------------------
+void _ParticleCalculateCallback( nn::vfx::ParticleCalculateArg&amp; arg )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::util::Vector4f pos;
+&nbsp;&nbsp;&nbsp;&nbsp;nn::util::Vector3f vec;
+
+&nbsp;&nbsp;&nbsp;&nbsp;// Get the particle position.
+&nbsp;&nbsp;&nbsp;&nbsp;arg.GetWorldPos( &amp;pos );
+
+&nbsp;&nbsp;&nbsp;&nbsp;// Reflect the particle if the position in world coordinates is less than 0.0f.
+&nbsp;&nbsp;&nbsp;&nbsp;if ( pos.GetY() &lt; 0.0f )
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg.Kill();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

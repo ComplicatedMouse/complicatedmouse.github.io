@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Interoperability With Low-Level Graphics APIs | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Interoperability With Low-Level Graphics APIs -->
+<div class="pagetitle" id="PageId_95694638">Interoperability With Low-Level Graphics APIs</div>
+<div class="text_separate">
+<h1 id="Anchor_95694638_h1_1">Interoperability With Low-Level Graphics APIs</h1>
+<p>This section describes object interoperability when using both the <code>gfx</code> library APIs and low-level graphics APIs.</p>
+<h2 id="Anchor_95694638_h2_1">Overview</h2>
+<p>The <code>gfx</code> library is designed under the assumption that in some cases, it will be used in tandem with direct low-level graphics APIs for a variety of reasons.<br />The following cases are examples.</p>
+<ul>
+  <li>Cases where low-level graphics features not covered by the <code>gfx</code> library are used</li>
+  <li>Cases where features are still being migrated to the <code>gfx</code> library</li>
+  <li>Cases where low-level graphics APIs are used directly in sections where performance is critical to avoid the overhead of the <code>gfx</code> library</li>
+  <li>Cases where a library that was migrated to the <code>gfx</code> library is used together with a library that uses low-level graphics APIs directly</li>
+</ul>
+<p>The interoperability feature is provided to support cases such as these, where the <code>gfx</code> library is used in tandem with low-level graphics APIs. </p>
+<p>It includes the conversion of <code>gfx</code> library objects to low-level graphics API objects, and the reverse conversion of low-level graphics API objects to <code>gfx</code> library objects.</p>
+<h2 id="Anchor_95694638_h2_2">Object Ownership</h2>
+<p>The creator of an interoperable object is responsible for destroying that object.</p>
+<p>If an object is initialized as a <code>gfx</code> library object, it is finalized as a <code>gfx</code> library object, even if it is converted to a low-level graphics API object. You must not call any finalization function in the low-level graphics API.</p>
+<p>If an object is initialized as a low-level graphics API object, it is finalized by the low-level graphics API, even if it is converted to a <code>gfx</code> library object. You must not call any finalization function in the <code>gfx</code> library.</p>
+<h2 id="Anchor_95694638_h2_3">Converting gfx Library Objects to Low-Level Graphics API Objects</h2>
+<p>This functionality is achieved using the feature that converts an accessor to data, as described in <a href="../Pages/Page_83955626.html">Classes</a>.<br />This feature provides access to the low-level graphics API object held by the <code>gfx</code> library object.</p>
+<h3 id="Anchor_95694638_h3_1">Example Using a GL4 Sampler</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::gfx::Sampler gfxSampler;
+gfxSampler.Initialize( ... ); // Initialize the sampler.
+&nbsp;
+nn::gfx::Sampler::DataType&amp; gfxSamplerData = nn::gfx::AccessorToData( gfxSampler );
+GLuint&amp; gl4Sampler = gfxSamplerData.hSampler;
+... // Use the converted sampler with the GL4 API.
+&nbsp;
+gfxSampler.Finalize( ... ); // The sampler was initialized by gfx, so finalize with gfx.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_95694638_h2_4">Converting Low-Level Graphics API Objects to gfx Library Objects</h2>
+<p>You can use the same technique that was used when converting a <code>gfx</code> library object to a low-level graphics API object (convert an accessor to data) and then set the member variables of the <code>gfx</code> object to appropriate values, but interoperability API functions are provided to do this conversion in a safe manner.</p>
+<p>Unlike the other features in the <code>gfx</code> library, the interoperability API functions have a dedicated interface for each low-level graphics API instead of abstracting them. The interoperability classes have a naming convention using a suffix that corresponds to the low-level graphics API is appended to <code>nn::gfx::Interoperation</code>. For example, the GL4 version is named <code><span class="ApiLink_nn__gfx__InteroperationGl4">nn::gfx::InteroperationGl4</span></code>.</p>
+<p>The conversion is run on the real object by reference. If the low-level graphics API object is already a reference type, the pointer is copied. If the low-level graphics API object is a value type, the <code>gfx</code> library object references the value.</p>
+<h3 id="Anchor_95694638_h3_2">Example Using a GL4 Sampler</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>GLuint gl4Sampler;
+glGenSamplers( 1, &amp;gl4Samlper ); // Initialize the sampler.
+... // Configure the sampler.
+&nbsp;
+nn::gfx::Sampler gfxSampler;
+nn::gfx::InteroperationGl4::ConvertToGfxSampler( &amp;gfxSampler, gl4Sampler );
+... // Use the converted sampler with the gfx API.
+&nbsp;
+glDeleteSamplers( 1, &amp;gl4Sampler ); // The sampler was initialized by GL4, so finalize with GL4.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__InteroperationGl4', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#aec6047a9b4ab4e9f9809373e863f55d8' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

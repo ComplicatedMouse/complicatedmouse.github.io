@@ -1,0 +1,691 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>HlslCrossCompiler | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- HlslCrossCompiler -->
+<div class="pagetitle" id="PageId_233735395">HlslCrossCompiler</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_233735395_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_233735395_h1_2">Shader Models</a>
+    </li>
+    <li>
+      <a href="#Anchor_233735395_h1_3">Important Considerations</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_233735395_h2_1">In/Out Variable Location Number When Using HLSLCC_FLAG_SEPARABLE_SHADER_OBJECTS</a>
+      </li>
+      <li>
+        <a href="#Anchor_233735395_h2_2">Intrinsic Functions That Cannot Be Converted</a>
+      </li>
+      <li>
+        <a href="#Anchor_233735395_h2_3">Converting SamplerState</a>
+      </li>
+      <li>
+        <a href="#Anchor_233735395_h2_4">SampleCmpLevelZero() Conversion</a>
+      </li>
+      <li>
+        <a href="#Anchor_233735395_h2_5">Array Indexing Limitations for User-Defined Structures Declared in cbuffer</a>
+      </li>
+      <li>
+        <a href="#Anchor_233735395_h2_6">Limitations on Nested User-Defined Arrays Declared in cbuffer</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_233735395_h1_4">Usage</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_233735395_h2_7">NVIDIA HLSL Extensions</a>
+      </li>
+      <li>
+        <a href="#Anchor_233735395_h2_8">Options</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_233735395_h3_1">--shader-model</a>
+        </li>
+        <li>
+          <a href="#Anchor_233735395_h3_2">--entry-point</a>
+        </li>
+        <li>
+          <a href="#Anchor_233735395_h3_3">--hlslcc-option-flags</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_233735395_h4_1">Details of Each Flag</a>
+          </li>
+          <ul>
+            <li>
+              <a href="#Anchor_233735395_h5_1">HLSLCC_FLAG_FORCE_DECLARED_ORDER_ATTRIB_LOCATION</a>
+            </li>
+            <li>
+              <a href="#Anchor_233735395_h5_2">HLSLCC_FLAG_USE_REGISTER_NUMBER_AS_RAW_STRUCTURED_BUFFER_BINDING</a>
+            </li>
+            <li>
+              <a href="#Anchor_233735395_h5_3">HLSLCC_FLAG_TYPED_SSBO</a>
+            </li>
+            <li>
+              <a href="#Anchor_233735395_h5_4">HLSLCC_FLAG_COMBINE_TEX_SAMP_BINDLESS</a>
+            </li>
+            <li>
+              <a href="#Anchor_233735395_h5_5">HLSLCC_FLAG_GS_ENABLED、HLSLCC_FLAG_TESS_ENABLED</a>
+            </li>
+          </ul>
+        </ul>
+        <li>
+          <a href="#Anchor_233735395_h3_4">--hlsl-compile-option-flags</a>
+        </li>
+        <li>
+          <a href="#Anchor_233735395_h3_5">--preprocessor-definition</a>
+        </li>
+        <li>
+          <a href="#Anchor_233735395_h3_6">--include-directory</a>
+        </li>
+        <li>
+          <a href="#Anchor_233735395_h3_7">--shift-patch-location</a>
+        </li>
+        <li>
+          <a href="#Anchor_233735395_h3_8">--enable-packoffset</a>
+        </li>
+        <li>
+          <a href="#Anchor_233735395_h3_9">--system-buffer-binding</a>
+        </li>
+        <li>
+          <a href="#Anchor_233735395_h3_10">--use-sv-position-w</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_233735395_h1_5">Licenses</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_233735395_h1_1">Introduction</h1>
+<p>HlslCrossCompiler (<code>Tools/Graphics/GraphicsTools/HlslCrossCompiler.exe</code>) is a tool for converting HLSL to GLSL. The tool uses <code>hlslcc.dll</code> (<code>Tools/Graphics/GraphicsTools/hlslcc.dll</code>) forked from HLSLcc (<a href="https://github.com/Unity-Technologies/HLSLcc">https://github.com/Unity-Technologies/HLSLcc</a>) with the addition of several of its own improvements.</p>
+<h1 id="Anchor_233735395_h1_2">Shader Models</h1>
+<p>The following shader models are supported.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>NintendoSDK</th>
+      <th>Shader Models</th>
+    </tr>
+    <tr>
+      <td>3.x</td>
+      <td>cs_5_0, vs_5_0, ps_5_0</td>
+    </tr>
+    <tr>
+      <td>4.0.0</td>
+      <td>cs_5_0, vs_5_0, gs_5_0, ps_5_0</td>
+    </tr>
+    <tr>
+      <td>4.1.0</td>
+      <td>cs_5_0, vs_5_0, hs_5_0, ds_5_0, gs_5_0, ps_5_0</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_233735395_h1_3">Important Considerations</h1>
+<h2 id="Anchor_233735395_h2_1">In/Out Variable Location Number When Using HLSLCC_FLAG_SEPARABLE_SHADER_OBJECTS</h2>
+<p>Behavior of location numbers, assigned to <code>in</code> and <code>out</code> variables, differs according to version.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>NintendoSDK</th>
+      <th>In/Out Variable Location Number</th>
+    </tr>
+    <tr>
+      <td>4.x.x. and earlier</td>
+      <td>
+        <div class="content-wrapper">
+          <p>Location numbers are assigned in the order of in/out variable declarations (<code>dd_input</code>/<code>output</code>) in DXBC.</p>
+          <p>This behavior is the same as the original HLSLcc.</p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>5.0.0</td>
+      <td>
+        <p>Location numbers are not assigned.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>5.1.0</td>
+      <td>
+        <div class="content-wrapper">
+          <p>Semantic indices in HLSL are assigned as location numbers.</p>
+          <div class="warn_new">
+            <div class="warn_new_left">Warning</div>
+            <div class="warn_new_right">
+              <p>The <code>in</code> variable of vertex shaders until now has been assigned to locations in order of <code>dcl_input</code>, but starting with this version they are assigned according to the semantic index. This practice is intended to avoid mismatches between the <code>in</code> and <code>out</code> variable location numbers.</p>
+              <p>Use <code>HLSLCC_FLAG_FORCE_DECLARED_ORDER_ATTRIB_LOCATION</code> (0x800000), added in NintendoSDK 5.3.0, to revert to the previous behavior. The advantage of this approach is that the upper limit on the number of locations is not likely to be reached in cases where there are a large number of unused <code>in</code> and <code>out</code> variables.</p>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_233735395_h2_2">Intrinsic Functions That Cannot Be Converted</h2>
+<ul>
+  <li>Msad4()</li>
+  <li>
+    <p>F32ToF16()</p>
+    <div class="info_new">
+      <div class="info_new_left">Info</div>
+      <div class="info_new_right">
+        <p>Added support for conversion using the <code>F32ToF16()</code> function from NintendoSDK 5.0.0.</p>
+      </div>
+    </div>
+  </li>
+</ul>
+<h2 id="Anchor_233735395_h2_3">Converting SamplerState</h2>
+<p>When multiple instances of <code>SamplerState</code> are used for individual textures in HLSL, the result of the conversion may not be the expected result. For example, this could be the case for code like the following.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Texture2D&lt;float4&gt; tex0;
+SamplerState samplerState0;
+SamplerState samplerState1;
+float4 color0 = tex0.Sample( samplerState0, IN.Texcoord0 );
+float4 color1 = tex0.Sample( samplerState1, IN.Texcoord1 );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can handle this using either of these <code>--hlslcc-option-flag</code> values. For more information, see the section about <code>--hlslcc-option-flags</code>.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 339.0px;" />
+    <col style="width: 627.0px;" />
+    <col style="width: 146.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Flag</th>
+      <th>Functionality</th>
+      <th>Supporting NintendoSDK</th>
+    </tr>
+    <tr>
+      <td>HLSLCC_FLAG_COMBINE_TEXTURE_SAMPLERS</td>
+      <td>Creates only as many uniform sampler as there are combinations of <code>Texture</code> and <code>SamplerState</code> used in HLSL.</td>
+      <td>3.x and later</td>
+    </tr>
+    <tr>
+      <td>
+        <a href="#Anchor_233735395_h5_4">HLSLCC_FLAG_COMBINE_TEX_SAMP_BINDLESS</a>
+      </td>
+      <td>Uses <code>GL_NV_bindless_texture</code> functionality.</td>
+      <td>4.0.0 and later</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_233735395_h2_4">SampleCmpLevelZero() Conversion</h2>
+<p>Normally, this conversion maps to <code>textureLod(ShadowSamplerType, ...)</code>, and requires fetching the texel from mip level 0, but the following GLSL sampler types map to <code>texture()</code> because there is no overload function for <code>textureLod()</code>.</p>
+<ul>
+  <li>
+    <code>samplerCubeShadow</code>
+  </li>
+  <li>sampler2DRectShadow</li>
+  <li>sampler2DArrayShadow</li>
+  <li>
+    <code>samplerCubeArrayShadow</code>
+  </li>
+</ul>
+<p>For this reason, note that when a mipmap has been prepared, the texel could be fetched from any mip levels other than 0.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This section describes the behavior in NintendoSDK 4.0.0 and later. Previously, there were cases where uncompilable GLSL was output because all of the shadow samplers were converted to <code>textureLod()</code>.</p>
+  </div>
+</div>
+<h2 id="Anchor_233735395_h2_5">Array Indexing Limitations for User-Defined Structures Declared in cbuffer</h2>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This section describes a workaround for a bug in versions earlier than NintendoSDK 4.2.0.</p>
+    <p>This bug is not present in NintendoSDK 4.2.0 and later.</p>
+  </div>
+</div>
+<p>When user-defined structure type arrays are used in HLSL, the array indexing calculations are occasionally incorrect.</p>
+<p>
+  <code>cbuffer</code> is treated as a <code>float4</code> array when the DXBC is accessed, so the index arrays described in HLSL are recalculated by the HLSL converter.</p>
+<p>The following code examples show the HLSL and the compiled DXBC.</p>
+<ul>
+  <li>
+    <p>HLSL</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>#undef HLSLCC_GLSL
+#ifndef HLSLCC_GLSL
+cbuffer u_InstancedMV : register( b0 )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float4 u_modelviewMtx0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float4 u_modelviewMtx1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float4 u_modelviewMtx2;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float4 u_modelviewMtx3;
+&nbsp;&nbsp;&nbsp;&nbsp;} mv[25];                   // MaxFieldInstances from main.cpp
+};
+#else
+cbuffer u_InstancedMV : register( b0 )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float4 row;
+&nbsp;&nbsp;&nbsp;&nbsp;} mv[100];                   // MaxFieldInstances from main.cpp
+};
+#endif
+&nbsp;.
+&nbsp;.
+VertexShaderOutput main( VertexShaderInput input )
+{
+&nbsp;.
+&nbsp;.
+#ifndef HLSLCC_GLSL
+&nbsp;&nbsp;&nbsp;&nbsp;int instanceId = input.instanceId;
+&nbsp;&nbsp;&nbsp;&nbsp;matrix modelviewMtx = matrix( mv[ instanceId ].u_modelviewMtx0,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mv[ instanceId ].u_modelviewMtx1,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mv[ instanceId ].u_modelviewMtx2,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mv[ instanceId ].u_modelviewMtx3 );
+#else
+&nbsp;&nbsp;&nbsp;&nbsp;int mtxIdx = 4 * input.instanceId;
+&nbsp;&nbsp;&nbsp;&nbsp;matrix modelviewMtx = matrix( mv[ mtxIdx + 0 ].row,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mv[ mtxIdx + 1 ].row,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mv[ mtxIdx + 2 ].row,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mv[ mtxIdx + 3 ].row );
+#endif
+&nbsp;&nbsp;&nbsp;&nbsp;modelviewMtx = transpose( modelviewMtx );
+&nbsp;.
+&nbsp;.
+}</pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>DXBC</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>dcl_constantbuffer CB0[100], dynamicIndexed // Definition of u_InstancedMV in DXBC.
+dcl_input_sgv v2.x, instance_id
+&nbsp;.
+&nbsp;.
+ishl r0.x, v2.x, l(2) // Indexing calculation inserted by the HLSL compiler   ( 1 ).
+mul r1.xyzw, v0.yyyy, cb0[r0.x + 1].xyzw  // Access to u_InstancedMV.
+&nbsp;.
+&nbsp;.</pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<p>HLSLcc leaves DXBC instructions unchanged when HLSL is converted to GLSL, so the GLSL will include unnecessary indexing calculations. (In the DXBC code ( 1 ) )</p>
+<p>To deal with the converted GLSL, you must either make the corrections manually or rewrite the arrays in HLSL as <code>float4</code> arrays, similar to the preceding HLSL example.</p>
+<h2 id="Anchor_233735395_h2_6">Limitations on Nested User-Defined Arrays Declared in cbuffer</h2>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This section applies to NintendoSDK 5.0.0 and later.</p>
+    <p>Versions earlier than 5.0.0 may output GLSL code that cannot be compiled.</p>
+  </div>
+</div>
+<p>If there are two or more arrays in a nested member variables in <code>cfbuffer</code>, HLSL does not convert properly to GLSL if the following conditions apply.</p>
+<ul>
+  <li>If two or more arrays are present in a nested member variable, one or more of the arrays is referenced via dynamic indexing.</li>
+</ul>
+<p>The following code shows an example. The array access operations marked with OK allow the indices to be converted appropriately.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>struct BufType1
+{
+&nbsp;&nbsp;&nbsp;&nbsp;float4 pos[3];
+&nbsp;&nbsp;&nbsp;&nbsp;float f;
+&nbsp;&nbsp;&nbsp;&nbsp;float4x4 scale;
+};
+
+struct BufType2
+{
+&nbsp;&nbsp;&nbsp;&nbsp;BufType1 buf1Array[3];
+};
+
+struct BufType3
+{
+&nbsp;&nbsp;&nbsp;&nbsp;BufType2 buf2;
+};
+
+struct OutBuf
+{
+&nbsp;&nbsp;&nbsp;&nbsp;float fval[4];
+};
+
+cbuffer Value
+{
+&nbsp;&nbsp;&nbsp;&nbsp;BufType3 buf3;
+};
+
+RWStructuredBuffer&lt;OutBuf&gt; Out;
+[numthreads(1, 1, 1)]
+void main( uint3 thId : SV_DispatchThreadID )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;int idx = thId.x;
+&nbsp;&nbsp;&nbsp;&nbsp;int idx2 = thId.y;
+&nbsp;&nbsp;&nbsp;&nbsp;Out[idx].fval[0] = buf3.buf2.buf1Array[0].pos[0].x;    // a) OK, as no dynamic indexing is present.
+&nbsp;&nbsp;&nbsp;&nbsp;Out[idx].fval[1] = buf3.buf2.buf1Array[idx].scale[0].x;    // b) OK, as this doesn't meet failure condition, &quot;scale&quot; isn't declared as float4x4 array.
+&nbsp;&nbsp;&nbsp;&nbsp;Out[idx].fval[2] = buf3.buf2.buf1Array[idx].pos[0].x;    // c) NG but generated GLSL may be correct as HLSLcc tries to assign the dynamic index part to the first array.
+&nbsp;&nbsp;&nbsp;&nbsp;Out[idx].fval[3] = buf3.buf2.buf1Array[0].pos[idx].x;    // d) NG, as this meets failure condition but HLSLcc assigns the dynamic indexing part to the first array.
+&nbsp;&nbsp;&nbsp;&nbsp;Out[idx].fval[3] = buf3.buf2.buf1Array[idx].pos[idx2].x;  // e) NG, as this meets failure condition but HLSLcc assigns the dynamic indexing part to the first array and assigns '[0]' for '[idx2]'.
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This limitation is due to the design of DXBC <code>cbuffer</code> references.</p>
+<p>When using dynamic indices, references to <code>cbuffer</code> in DXBC take the form <code>cb0[dynamic + immediate_value]</code>.</p>
+<p>This limitation is set because when there are multiple arrays in nested member variables in the HLSL code, factors like compiler optimization can make it difficult to determine which array index the <code>dynamic</code> label corresponds to.</p>
+<p />
+<p>
+  <br />
+</p>
+<p>When all of the conditions are satisfied, HSLScc adds a DXBC dynamic index to the first array, and <code>0</code> to arrays after that.</p>
+<h1 id="Anchor_233735395_h1_4">Usage</h1>
+<p>This section describes the important options. You can specify the <code>--help</code> option to check how to use the tool.</p>
+<h2 id="Anchor_233735395_h2_7">NVIDIA HLSL Extensions</h2>
+<p>The tool supports the conversion of NVIDIA HLSL extensions (<a href="http://docs.nvidia.com/gameworks/content/gameworkslibrary/coresdk/nvapi/nvHLSLExtns_8h.html">nvHLSLExtns.h</a>).</p>
+<p>The NVIDIA HLSL extensions enable the use of NVIDIA GPU features that are not supported by standard HLSL.</p>
+<p>The NVIDIA HLSL extensions supported by HLSLcc are converted to GLSL NVIDIA extension intrinsic functions.</p>
+<p>The supported NVIDIA HLSL extensions are those functions declared by <a href="http://docs.nvidia.com/gameworks/content/gameworkslibrary/coresdk/nvapi/nvHLSLExtns_8h.html">nvHLSLExtns.h</a>, with the exception of the <code>NvInterlocked*()</code> and <code>NvLoadUavTyped()</code> functions.</p>
+<p>To use <a href="http://docs.nvidia.com/gameworks/content/gameworkslibrary/coresdk/nvapi/nvHLSLExtns_8h.html">nvHLSLExtns.h</a>, include it in the HLSL.</p>
+<h2 id="Anchor_233735395_h2_8">Options</h2>
+<h3 id="Anchor_233735395_h3_1">--shader-model</h3>
+<p>Specifies a shader model.</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelContent">
+    <p>HlslCrossCompiler.exe simple.hlsl --shader-model cs_5_0</p>
+  </div>
+</div>
+<h3 id="Anchor_233735395_h3_2">--entry-point</h3>
+<p>Specifies the entry point. If nothing is specified, <code>main</code> is treated as the entry point.</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelContent">
+    <p> HlslCrossCompiler.exe simple.hlsl --entry-point &quot;CSMain&quot; --shader-model cs_5_0</p>
+  </div>
+</div>
+<h3 id="Anchor_233735395_h3_3">--hlslcc-option-flags</h3>
+<p>Specifies HLSLcc convert options. In addition to the <code>HLSLCC_FLAG</code> for the fork origin (<a href="https://github.com/Unity-Technologies/HLSLcc/blob/5f8fc4367513076189ad3b91f6d56059e065fcc5/include/hlslcc.h#L377"><span style="color: rgb(51,102,255);">hlslcc.h</span></a>), you can also specify the following.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Flag name.</th>
+      <th>Flag value.</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>HLSLCC_FLAG_FORCE_DECLARED_ORDER_ATTRIB_LOCATION</td>
+      <td>0x800000</td>
+      <td>If set, this shader uses attribute location declared order.</td>
+    </tr>
+    <tr>
+      <td>HLSLCC_FLAG_USE_REGISTER_NUMBER_AS_RAW_STRUCTURED_BUFFER_BINDING</td>
+      <td>0x4000000</td>
+      <td>If set, this shader uses register number as binding index for structured and raw buffer.</td>
+    </tr>
+    <tr>
+      <td>HLSLCC_FLAG_TYPED_SSBO</td>
+      <td>0x40000000</td>
+      <td>If set, use the <code>struct</code> type rather than a <code>uint</code> array for <code>ssbo</code>.</td>
+    </tr>
+    <tr>
+      <td>HLSLCC_FLAG_STD140_UBO</td>
+      <td>0x80000000</td>
+      <td>if set, use std140 layout for uniform buffers</td>
+    </tr>
+    <tr>
+      <td>HLSLCC_FLAG_COMBINE_TEX_SAMP_BINDLESS</td>
+      <td>0x10000000</td>
+      <td>If set, combine texture and sampler at runtime via bindless textures (64-bit objects)</td>
+    </tr>
+  </tbody>
+</table>
+<p>The following example shows setting <code>HLSLCC_FLAG_STD140_UBO</code> and <code>HLSLCC_FLAG_COMBINE_TEX_SAMP_BINDLESS</code>.</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelContent">
+    <p> HlslCrossCompiler.exe simple.hlsl --hlslcc-option-flags=&quot;0x80000000&quot; --hlslcc-option-flags=&quot;0x10000000&quot; --shader-model ps_5_0</p>
+  </div>
+</div>
+<h4 id="Anchor_233735395_h4_1">Details of Each Flag</h4>
+<p>This section describes the flags that the behavior must be noted for.</p>
+<h5 id="Anchor_233735395_h5_1">HLSLCC_FLAG_FORCE_DECLARED_ORDER_ATTRIB_LOCATION</h5>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This feature is available for NintendoSDK 5.3.0 and later.</p>
+  </div>
+</div>
+<p>Assigns the in locations of vertex shaders in order of <code>dd_input</code>, even if </p>
+<p>
+  <code>HLSLCC_FLAG_SEPARABLE_SHADER_OBJECTS</code> is used.</p>
+<h5 id="Anchor_233735395_h5_2">HLSLCC_FLAG_USE_REGISTER_NUMBER_AS_RAW_STRUCTURED_BUFFER_BINDING</h5>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This feature is available for NintendoSDK 5.1.0 and later.</p>
+  </div>
+</div>
+<p>When using this flag, the register number is used in the binding index after converting <code>ByteAddressBuffer</code> and <code>StructuredBuffer</code>. </p>
+<p>An error occurs if the register number being used in <code>ByteAddressBuffer</code> and <code>StructuredBuffer</code> matched the register number being used in <code>RW*Buffer</code>.</p>
+<p>If not yet specified, binding index is assigned in order, starting from register numbers not yet used in a RW*Buffer.</p>
+<h5 id="Anchor_233735395_h5_3">HLSLCC_FLAG_TYPED_SSBO</h5>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This feature is available for NintendoSDK 5.0.0 and later.</p>
+  </div>
+</div>
+<p>Previously, <code>RWStructuredBuffer&lt;type&gt;</code> was converted to a <code>uint</code> array. However, this flag can be used to convert it to a <code>type</code> array instead.</p>
+<p>In some cases, this can optimize the executable code after compiling.</p>
+<p>One restriction is that all member variables of <code>type</code> must be <code>float4</code>-typed members.</p>
+<h5 id="Anchor_233735395_h5_4">HLSLCC_FLAG_COMBINE_TEX_SAMP_BINDLESS<a name="Anchor_233735395_HLSLCC_FLAG_COMBINE_TEX_SAMP_BINDLESS"></a></h5>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This feature is available for NintendoSDK 4.0.0 and later.</p>
+  </div>
+</div>
+<p>Set this flag to generate GLSL source code that uses the <code>GL_NV_bindless_texture</code> features.</p>
+<p>A uniform block called <code>_SampTex_</code>, which holds the texture and sampler handlers, is added in the GLSL source code. For this reason, set the sampler and handler values obtained from the runtime to each member of <code>_SampTex_</code></p>
+<p />
+<h5 id="Anchor_233735395_h5_5">HLSLCC_FLAG_GS_ENABLED、HLSLCC_FLAG_TESS_ENABLED</h5>
+<p>This flag must be added under the following conditions.</p>
+<ol>
+  <li>When converting shader stages that receive the output from the geometry shader or the tessellation control shader.<br />　HLSLcc adds <code>vs</code>, <code>hs</code>, <code>ds</code>, <code>gs</code>, or <code>ps</code> as the suffix for the name of the <code>out</code> variable for each stage.<br />Because the pixel shader receives the vertex shader output by default, the pixel shader <code>in</code> variable name is the vertex shader <code>out</code> variable name if this flag is not specified.<br /><br />　By specifying this flag when converting shader stages that receive the output from the geometry shader or the tessellation control shader, the appropriate <code>in</code> variable name is declared.<br /><br /><br /></li>
+  <li>
+    <p>When converting a vertex shader, except when the next stage is a pixel shader.<br />　The flag determines whether to add the <code>flat</code> qualifier to the integer type <code>out</code> variable of the vertex shader.<br />Because <code>HLSLcc</code> uses a pipeline that only holds a vertex shader and pixel shader by default,<br />the <code>flat</code> qualifier is added to the integer type <code>out</code> variable unless this flag is specified. This flag controls that qualifier.</p>
+    <div class="info_new">
+      <div class="info_new_left">Info</div>
+      <div class="info_new_right">
+        <p>This behavior occurs in NintendoSDK 5.0.0 and later. Previously, the <code>flat</code> qualifier would be added to integer type <code>out</code> variables in the vertex shader regardless of whether this flag was set.</p>
+      </div>
+    </div>
+  </li>
+</ol>
+<h3 id="Anchor_233735395_h3_4">--hlsl-compile-option-flags</h3>
+<p>Specifies the HLSL compile options. The values that can be specified are defined in <code>d3dcompiler.h</code> in the Windows 10 SDK.</p>
+<p>In the following example, <code>D3DCOMPILE_WARNINGS_ARE_ERRORS 0x40000</code> and <code>D3DCOMPILE_DEBUG 0x1</code> are set as the compile options.</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelContent">
+    <p>HlslCrossCompiler.exe simple.hlsl --hlsl-option-flags=&quot;0x40000&quot; --hlsl-option-flags=&quot;0x1&quot; --shader-model cs_5_0</p>
+  </div>
+</div>
+<h3 id="Anchor_233735395_h3_5">--preprocessor-definition</h3>
+<p>Specifies the preprocessor definitions to add to the HLSL.</p>
+<p>Be sure to write &quot;=&quot; and then the value. If no values are specified, <code>1</code> will be set for the preprocessor definition.</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelContent">
+    <p>HlslCrossCompiler.exe simple.hlsl --preprocessor-definition=&quot;FOO&quot; --preprocessor-definition=&quot;BAR=1&quot; --shader-model cs_5_0</p>
+  </div>
+</div>
+<h3 id="Anchor_233735395_h3_6">--include-directory</h3>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This option is available in NintendoSDK 5.0.0 and later.</p>
+  </div>
+</div>
+<p>This option specifies HLSL include directories.</p>
+<p>A relative path or absolute path can be specified. If a relative path has been specified, the relative paths are searched from the <code>exe</code> execution directory.</p>
+<p>The include files are searched in the following order.</p>
+<ol>
+  <li>Directories containing files denoted with <code>#include</code></li>
+  <li>Additional directories specified using <code>--include-directory</code> (searched in the order they are specified in <code>--include-directory</code> )</li>
+</ol>
+<h3 id="Anchor_233735395_h3_7">--shift-patch-location</h3>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This option is available in NintendoSDK 6.1.0 and later.</p>
+  </div>
+</div>
+<p>Offsets are applied to the patch out location in the hull shader, and the patch in location in the domain shader.</p>
+<p>Use when patch in/out variables cover usual locations of in/out variables.</p>
+<p>The following values can be passed to this option.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Parameters</th>
+      <th>Description</th>
+      <th>Supporting NintendoSDK</th>
+    </tr>
+    <tr>
+      <td>Integer value.</td>
+      <td>Adds an integer value as an offset.</td>
+      <td>6.1.0</td>
+    </tr>
+    <tr>
+      <td>auto</td>
+      <td>
+        <p>If the string &quot;auto&quot; is passed in, HLSLcc determines the best location automatically.</p>
+      </td>
+      <td>6.2.0</td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The maximum number of locations that can be specified is determined based on the graphics API.</p>
+    <p>For the maximum number, see the specifications for the various graphics APIs.</p>
+  </div>
+</div>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelContent">
+    <p>HlslCrossCompiler.exe simple.hlsl --shift-patch-location 8 --shader-model hs_5_0</p>
+  </div>
+</div>
+<h3 id="Anchor_233735395_h3_8">--enable-packoffset</h3>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This option is available in NintendoSDK 6.2.0 and later.</p>
+  </div>
+</div>
+<p>Enables conversion of the <code>cbuffer</code> <code>packoffset</code> keyword.</p>
+<p>To use this option, <code>--hlslcc-option-flags HLSLCC_FLAG_STD140_UBO</code> must be specified.</p>
+<h3 id="Anchor_233735395_h3_9">--system-buffer-binding</h3>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This option is available in NintendoSDK 7.1.0 and later.</p>
+  </div>
+</div>
+<p>One buffer is defined by storing the <code>HlslccSystemBuffer</code> system value using <code>HLSLCC_FLAG</code>.</p>
+<p>Specify the binding for this system buffer.</p>
+<h3 id="Anchor_233735395_h3_10">--use-sv-position-w</h3>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This option is available in NintendoSDK 8.0.0 and later.</p>
+  </div>
+</div>
+<p>This option converts <code>SV_Position.w</code> to <code>1.0</code> / <code>gl_FragCoord.w</code>. If not specified, it is converted to <code>gl_FragCoord.w</code>.</p>
+<h1 id="Anchor_233735395_h1_5">Licenses</h1>
+<p>MIT license and BSD license for <code>hlslcc.dll</code>. The license clauses are in the following file.</p>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelContent">
+    <p>Documents/Licenses/Hlslcc/license.txt</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

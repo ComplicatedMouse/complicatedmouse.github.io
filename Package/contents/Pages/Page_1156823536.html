@@ -1,0 +1,799 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Resource Data (ROM) Compression | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Resource Data (ROM) Compression -->
+<div class="pagetitle" id="PageId_1156823536">Resource Data (ROM) Compression</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_1156823536_h1_1">Introduction</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_1156823536_h2_1">Features</a>
+      </li>
+      <li>
+        <a href="#Anchor_1156823536_h2_2">References</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_1156823536_h1_2">Design</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_1156823536_h2_3">Performance Impact</a>
+      </li>
+      <li>
+        <a href="#Anchor_1156823536_h2_4">Impact on Patches</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_1156823536_h1_3">Important Information</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_1156823536_h2_5">Cases Not Suitable for Compression</a>
+      </li>
+      <li>
+        <a href="#Anchor_1156823536_h2_6">Development in Raw (NSPD) Format</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_1156823536_h1_4">How to Use</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_1156823536_h2_7">Creating an NSP File With ROM Compression Enabled</a>
+      </li>
+      <li>
+        <a href="#Anchor_1156823536_h2_8">Checking Compression</a>
+      </li>
+      <li>
+        <a href="#Anchor_1156823536_h2_9">Configuring File Compression</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_1156823536_h1_1">Introduction</h1>
+<p>This page describes the compression feature for resource data (ROM compression) included in application images and provided by the Nintendo SDK. </p>
+<p>It can be used with <span style="color: rgb(23,43,77);">Firmware for NX</span> 13.0.0-3.0 or later, and with the AuthoringTool included in AuthoringToolKit 13.2.0 and later.</p>
+<h2 id="Anchor_1156823536_h2_1">Features</h2>
+<p>This feature offers the following abilities and benefits.</p>
+<h6 id="Anchor_1156823536_h6_1">Reduced Application Size</h6>
+<p>Compressing resource data enables you to reduce application download size and minimize the volume required on the game card.</p>
+<h6 id="Anchor_1156823536_h6_2">No Additional Development Costs</h6>
+<p>This feature can be enabled by simply specifying the option when creating an application image.<br />The system handles the decompressing of resource data, and applications can handle the decompressed files transparently using the standard file system API.</p>
+<h6 id="Anchor_1156823536_h6_3">No Need to Design a Compression Process to Prevent Patch Sizes From Increasing</h6>
+<p>If you are independently compressing resource data for your application, you must be careful to not increase the patch size.</p>
+<p>This feature automatically manages compression so that the patch size does not increase.<br />However, resource data is still assumed to be designed in such a way as to avoid increasing the patch size.</p>
+<p>The effects on patches are described in detail later.</p>
+<h6 id="Anchor_1156823536_h6_4">Improved Performance</h6>
+<p>In general, the higher the compression ratio, the lower the storage media access volume and the better the file read performance.<br /></p>
+<p>On the other hand, the system can become overloaded with decompression processing, which can reduce performance depending on the file structure and access pattern.<br />If you are using ROM compression in an attempt to improve file read performance, first determine whether the application being developed will actually benefit from it, and then implement compression.</p>
+<p>The impact on performance is described in detail later.</p>
+<h2 id="Anchor_1156823536_h2_2">References</h2>
+<p>A tutorial is presented on NDP in Development Tips &gt; <a href="https://developer.nintendo.com/group/development/g1kr9vj6/tech-info/development-tips?articleId=312037515">Reducing NSP file size with the resource data compression feature</a>. Refer to that as well.</p>
+<h1 id="Anchor_1156823536_h1_2">Design</h1>
+<p>When creating an application image with ROM compression enabled, each file within the resource data is stored in a compressed state.</p>
+<p>The following settings can be applied for each file, based on the options provided when the application image was created.</p>
+<ul>
+  <li>Compression Enabled/Disabled</li>
+  <li>Compression Type</li>
+  <li>Compression Level</li>
+</ul>
+<p>However, compression types and levels supported for ROM compression are limited to those provided by NintendoSDK.</p>
+<p>Note that this feature cannot currently be used with DLC.</p>
+<p>Compressed resource data can be browsed in <a href="../Pages/Page_107338701.html">the same way as regular resource data</a>, by calling <code><span class="ApiLink_nn__fs__MountRom">nn::fs::MountRom</span>()</code>.<br />You do not need to implement file decompression within the application itself.</p>
+<h2 id="Anchor_1156823536_h2_3">Performance Impact</h2>
+<p>The following graphs compare the performance when reading resource data files with and without ROM compression.<br />The compression ratios shown in the figure represent the average compression ratios for the data being read.</p>
+<table class="relative-table wrapped" style="width: 39.8364%;">
+  <colgroup>
+    <col style="width: 5.04314%;" />
+    <col style="width: 25.2088%;" />
+    <col style="width: 25.0642%;" />
+    <col style="width: 18.4288%;" />
+    <col style="width: 26.255%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>Game Cards of 4 GB or Less</th>
+      <th>Game Cards of 8 GB or More</th>
+      <th>System Memory</th>
+      <th>microSD Memory Card</th>
+    </tr>
+    <tr>
+      <th>Sequential Access</th>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_1156823536/1246115313.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_1156823536/1246115315.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_1156823536/1246115317.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_1156823536/1246115319.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>Random Access</th>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_1156823536/1246115312.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_1156823536/1246115314.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_1156823536/1246115316.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_1156823536/1246115318.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In general, the higher the compression ratio, the less access to the storage media, which tends to improve read performance.<br />The system core is used for the decompression process. When the ROM compression feature is used, the read performance is more likely to be affected by the CPU resource load and the memory bandwidth load. At the same time, other processes that use the system core are also impacted by the CPU resource load and memory bandwidth load when this feature is used.<br />Depending on the application, using this feature may reduce read performance. If you are using this feature in an attempt to improve read performance, we recommend first checking to see whether any performance issues are actually present.</p>
+<p>In addition, performance can vary significantly depending on the actual data content and access patterns, but even with this feature, there are additional considerations for optimizing file system (FS) access performance.<br />For more information about optimizing FS access performance, see <a href="../Pages/Page_185130689.html">fs Library &gt; Performance</a>.</p>
+<h2 id="Anchor_1156823536_h2_4">Impact on Patches</h2>
+<p>If the application is independently compressing resource data, pay attention to data compression in line with the important information in <a href="../Pages/Page_185135554.html">Patches &gt; Optimization Information</a> so that when creating a patch, the size increases only by an appropriate amount relative to the size of the fixes.<br />Unlike with independent compression, the ROM compression feature automatically compresses patch size as much as possible relative to the size of the fixes. For this reason, this function does not require the developer to consider additional factors for design compression and file structure.</p>
+<p>However, developers must still design resource data to avoid increasing the patch size. For more information when designing resource data, see <a href="../Pages/Page_185135554.html">Patches &gt; Optimization Information</a>.</p>
+<p>If you are using ROM compression, compression is also enabled for the data included in patches.</p>
+<p>If lots of tiny revisions involving changes on the order of several bytes to files in the original application have been made, the patch tends to be larger when ROM compression is used.<br />This is especially noticeable if compression has no effect on those files. To prevent this situation, we recommend using the compression config (described later) to leave files as uncompressed if you know compression will have no effect for the files.</p>
+<p>Compression to reduce patch size occurs when a patch is created, not when a revised version of the application is created.<br />The following results can occur.</p>
+<ul>
+  <li>Different compression ratios between the revised version of the application and the patch</li>
+  <li>Patch settings different from the compression type and compression level specified in the revised version of the application</li>
+  <li>Patch creation that takes a significant amount of time</li>
+</ul>
+<p>Especially for a final patch creation, it may take more than three times longer than when ROM compression is not used..<br />Because this additional time can affect development efficiency, make sure that you consider it when using the feature.</p>
+<h1 id="Anchor_1156823536_h1_3">Important Information</h1>
+<h2 id="Anchor_1156823536_h2_5">Cases Not Suitable for Compression</h2>
+<p>This feature is suitable for use by applications that meet one or more of the following conditions.</p>
+<ul>
+  <li>The application is new.</li>
+  <li>Resource data contains many uncompressed files.</li>
+  <li>Highly efficient resource data compression is not a hard requirement.</li>
+  <li>There is no program implementation for decompression, or resources are insufficient.</li>
+  <li>You do not know how to compress to meet conditions for reducing the patch size.</li>
+</ul>
+<p>On the other hand, compression is not suitable for use in the following cases. </p>
+<h6 id="Anchor_1156823536_h6_5">Almost all resource data files are already compressed.</h6>
+<p>There are no benefits to using this feature on resource data (ROM) that has already been compressed. In addition, there are additional risks incurred due to the overhead required for decompression.</p>
+<h6 id="Anchor_1156823536_h6_6">A mechanism capable of compressing resource data while keeping down patch size already exists.</h6>
+<p>If an existing compression method is equally or more efficient than this feature, and can keep patch size as small is possible, there is little benefit to replacing it with this feature.</p>
+<h6 id="Anchor_1156823536_h6_7">You are updating applications and patches that have already been released without using this feature.</h6>
+<p>Reducing patch size is a priority when creating a patch based on an application or patch where this feature was not used, so ROM compression is highly likely to not function as intended even if it is enabled.<br />A great deal of resource data might not be compressed, with no corresponding benefits. ROM compression leads to a significant change in performance between the revised version of the application and the patch. For this reason, we cannot recommend it as a method of increasing debugging efficiency.</p>
+<p>If the previous version of an application did not use ROM compression and the revised version does use it, AuthoringTool displays a warning when you start to create a patch.</p>
+<h6 id="Anchor_1156823536_h6_8">A high compression ratio and access efficiency are required for most resource data.</h6>
+<p>This feature emphasizes general-purpose utility, without restrictions on target data. In terms of compression ratio and performance, better results are gained by performing the optimal independent compression and decompression for each file within the resource data.<br />We do not recommend using this feature for applications that require a high level of compression for most of the resource data.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If you want to perform your own compression for only some files but still use this feature, use the disable compression setting provided by this feature individually for each file to avoid duplicate decompression. For more information, see <a href="#Anchor_1156823536_compression_config_example">Example of Compression Config Input</a>.</p>
+  </div>
+</div>
+<h2 id="Anchor_1156823536_h2_6">Development in Raw (NSPD) Format</h2>
+<p>ROM compression occurs when an NSP file is created. The file system handles resource data as is, uncompressed, on raw (NSPD) start.<br />Note the following differences compared to when an application is compressing resource data independently.</p>
+<ul>
+  <li>The size of the resource data handled when developing in NSPD format is larger.</li>
+  <li>The difference in file access timing between the NSP format and NSPD format is significant.</li>
+</ul>
+<h1 id="Anchor_1156823536_h1_4">How to Use</h1>
+<h2 id="Anchor_1156823536_h2_7">Creating an NSP File With ROM Compression Enabled</h2>
+<p>You can enable ROM compression by specifying the <code>--compression</code> option when creating an application NSP using the AuthoringTool <code>creatensp</code> command.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ AuthoringTool.exe creatensp -o sample.nsp --meta <span class="nv">$NINTENDO_SDK_ROOT</span>/Resources/SpecFiles/Application.aarch64.lp64.nmeta --type Application --desc <span class="nv">$NINTENDO_SDK_ROOT</span>/Resources/SpecFiles/Application.desc --program C:/Application/Binaries/NX64/NX_Debug/application.nspd/program0.ncd/code C:/Application/Binaries/NX64/NX_Debug/application.nspd/program0.ncd/data --nro C:/Application/Binaries/NX64/NX_Debug/application.nspd/program0.ncd/data/nro --compression --compression-type Lz4 --compression-level <span class="m">16</span> --compression-file-config C:/Application/Binaries/NX64/NX_Debug/application.nspd/CompressionConfig.txt</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_1156823536_h3_1">AuthoringTool ROM Compression Options List</h3>
+<table class="relative-table wrapped" style="width: 96.3455%;">
+  <colgroup>
+    <col style="width: 18.6368%;" />
+    <col style="width: 81.3632%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: left;">--compression</th>
+      <td style="text-align: left;">
+        <p>Enables ROM compression.<br />This option is required when using ROM compression.</p>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">--compression-type &lt;compression type&gt;</th>
+      <td style="text-align: left;">
+        <div class="content-wrapper">
+          <p>Specifies the default compression type used in ROM compression.</p>
+          <p>If not specified, <code>Lz4</code> (LZ4 or LZ4HC) is selected.</p>
+          <p>
+            <br />The following formats can be specified.</p>
+          <table class="wrapped">
+            <tbody>
+              <tr>
+                <th>Compression Type</th>
+                <th>Description</th>
+              </tr>
+              <tr>
+                <td>Lz4</td>
+                <td>LZ4 or LZ4HC</td>
+              </tr>
+              <tr>
+                <td>None</td>
+                <td>No compression</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="note_new">
+            <div class="note_new_left">Note</div>
+            <div class="note_new_right">
+              <p>Regardless of the specified compression type, if the size after compression exceeds the size before compression for each compression block unit (64 KiB) specified by AuthoringTool, that block is uncompressed.<br />For this reason, files consisting of multiple compressed blocks may have a mixture of compressed and uncompressed areas.</p>
+              <p>
+                <br />
+              </p>
+              <p>In addition, the following files are not compressed regardless of the specified compression type.</p>
+              <ul>
+                <li>Files under <code>/.nrr/</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">--compression-level &lt;compression level&gt;</th>
+      <td style="text-align: left;">
+        <p>Specifies the compression level used in ROM compression.<br />The default value and range differ depending on the compression type.</p>
+        <p>The following table provides the details.</p>
+        <table class="wrapped">
+          <tbody>
+            <tr>
+              <th>Compression Type</th>
+              <th>Compression Level</th>
+              <th>Default Value</th>
+              <th>Notes</th>
+            </tr>
+            <tr>
+              <td>Lz4 (LZ4 or LZ4HC)</td>
+              <td>0 to 16</td>
+              <td>0</td>
+              <td>
+                <p>The compression types and parameters for each value are as follows.</p>
+                <ul>
+                  <li>0: LZ4 compression</li>
+                  <li>1 to 16: LZ4HC compression at a <code>compressionLevel</code> from 1 to 16</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td>None (No compression)</td>
+              <td>Optional</td>
+              <td>0</td>
+              <td>No impact.</td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">--compression-file-config &lt;path|&quot;compression config&quot;&gt;</th>
+      <td style="text-align: left;">
+        <div class="content-wrapper">
+          <p>Specifies whether to compress each file.</p>
+          <p>For more information, see <a href="#Anchor_1156823536_compression_config_example">Example of Compression Config Input</a>.</p>
+          <div class="note_new">
+            <div class="note_new_left">Note</div>
+            <div class="note_new_right">
+              <p>If <code>--compression-type</code> or <code>--compression-level</code> are specified along with <code>--compression-file-config</code>, if a match for <code>--compression-file-config</code> is present, the values specified in <code>--compression-file-config</code> take precedence.<br /></p>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_1156823536_h3_2">Modifying Created NSP Entries</h3>
+<p>NSP files with ROM compression enabled can have entries modified using the <code>replace</code> subcommand, using the same method as a standard NSP file.<br />The following table shows the behavior based on the entry to be modified and the ROM compression options specified.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Scope</th>
+      <th>Option Specified?</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <p>Entries that are not resource data (in or under FS1 in the program content)</p>
+      </td>
+      <td>-</td>
+      <td>Resource data content and compression settings are not changed regardless of the options specified.</td>
+    </tr>
+    <tr>
+      <td rowspan="2">Resource data entries</td>
+      <td>Not specified</td>
+      <td>Compresses and stores all resource data entries, including those with modifications, using the default compression settings.</td>
+    </tr>
+    <tr>
+      <td>Specified</td>
+      <td>Compresses and stores all resource data entries, including those with modifications, using the specified compression settings.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The same settings must be explicitly specified in order for the <code>replace</code> command to change the resource data entries while still preserving the non-default compression settings specified when the NSP was first generated.<br />Also, the <code>replace</code> command cannot be used to enable or disable ROM compression.</p>
+<p>Example:</p>
+<ul>
+  <li>Modify <code>SampleShader.bnsh</code> in <code>sample.nsp</code> to compress all entries, using default compression settings</li>
+</ul>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ AuthoringTool.exe replace sample.nsp ad89c98613c1b86c3e356f055b84bfb0.nca/fs1/SampleShader.bnsh SampleShader_modified.bnsh -o extract_dir </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Modify <code>SampleShader.bnsh</code> in <code>sample.nsp</code> to compress all entries, using the specified compression settings</li>
+</ul>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ AuthoringTool.exe replace sample.nsp ad89c98613c1b86c3e356f055b84bfb0.nca/fs1/SampleShader.bnsh SampleShader_modified.bnsh -o extract_dir --compression --compression-level <span class="m">16</span> --compression-file-config C:/Application/Binaries/NX64/NX_Debug/application.nspd/CompressionConfig.txt</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_1156823536_h3_3">Creating Patches</h3>
+<p>The methods used to create patches via command-line specification do not change when ROM compression is enabled. For more information, see <a href="../Pages/Page_185135488.html">Patches &gt; Building and Running a Patch</a>.</p>
+<h2 id="Anchor_1156823536_h2_8">Checking Compression</h2>
+<p>The <code>list</code> command can be used to check the compression ratio.</p>
+<ul>
+  <li>
+    <span style="letter-spacing: 0.0px;">If a file is compressed</span>, the size change and compression ratio of the file are displayed.</li>
+  <li>Use the <code>-v</code> option to display the overall resource data compression ratio.</li>
+</ul>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$ AuthoringTool.exe list -v compressed_sample.nsp
+b80cef6f7a8609d176fb79090c606e2a.nca            <span class="o">(</span><span class="m">458752</span> byte<span class="o">)</span>
+2667d786e3fba6fe98c98af7f0e5d4b3.nca            <span class="o">(</span><span class="m">131072</span> byte<span class="o">)</span>
+e76efa77b87f8d5bd8528c32b3045e44.cnmt.nca       <span class="o">(</span><span class="m">3584</span> byte<span class="o">)</span>
+e76efa77b87f8d5bd8528c32b3045e44.cnmt.xml       <span class="o">(</span><span class="m">1358</span> byte<span class="o">)</span>
+b80cef6f7a8609d176fb79090c606e2a.programinfo.xml        <span class="o">(</span><span class="m">2445</span> byte<span class="o">)</span>
+2667d786e3fba6fe98c98af7f0e5d4b3.raw.AmericanEnglish.jpg        <span class="o">(</span><span class="m">77685</span> byte<span class="o">)</span>
+2667d786e3fba6fe98c98af7f0e5d4b3.nx.AmericanEnglish.jpg <span class="o">(</span><span class="m">14265</span> byte<span class="o">)</span>
+2667d786e3fba6fe98c98af7f0e5d4b3.raw.Japanese.jpg       <span class="o">(</span><span class="m">77685</span> byte<span class="o">)</span>
+2667d786e3fba6fe98c98af7f0e5d4b3.nx.Japanese.jpg        <span class="o">(</span><span class="m">14265</span> byte<span class="o">)</span>
+2667d786e3fba6fe98c98af7f0e5d4b3.nacp.xml       <span class="o">(</span><span class="m">4506</span> byte<span class="o">)</span>
+cardspec.xml                                    <span class="o">(</span><span class="m">196</span> byte<span class="o">)</span>
+authoringtoolinfo.xml                           <span class="o">(</span><span class="m">253</span> byte<span class="o">)</span>
+titlelist.xml                                   <span class="o">(</span><span class="m">993</span> byte<span class="o">)</span>
+---------------------------------------------
+b80cef6f7a8609d176fb79090c606e2a.nca/fs0/main.npdm      <span class="o">(</span><span class="m">1604</span> byte<span class="o">)</span>
+<span class="o">[</span>Info<span class="o">]</span> b80cef6f7a8609d176fb79090c606e2a.nca/fs1 is compressed. Compression ratio avg. <span class="o">=</span> 61.14 %.
+b80cef6f7a8609d176fb79090c606e2a.nca/fs1/data0.dat      <span class="o">(</span><span class="m">49152</span> byte -&gt; <span class="m">24584</span> byte, 50.02 % compressed<span class="o">)</span>
+b80cef6f7a8609d176fb79090c606e2a.nca/fs1/data1.dat      <span class="o">(</span><span class="m">90112</span> byte -&gt; <span class="m">51251</span> byte, 56.87 % compressed<span class="o">)</span>
+b80cef6f7a8609d176fb79090c606e2a.nca/fs1/data2.dat      <span class="o">(</span><span class="m">212992</span> byte -&gt; <span class="m">106547</span> byte, 50.02 % compressed<span class="o">)</span>
+b80cef6f7a8609d176fb79090c606e2a.nca/fs2/NintendoLogo.png       <span class="o">(</span><span class="m">20489</span> byte<span class="o">)</span>
+b80cef6f7a8609d176fb79090c606e2a.nca/fs2/StartupMovie.gif       <span class="o">(</span><span class="m">51019</span> byte<span class="o">)</span>
+2667d786e3fba6fe98c98af7f0e5d4b3.nca/fs0/control.nacp   <span class="o">(</span><span class="m">16384</span> byte<span class="o">)</span>
+2667d786e3fba6fe98c98af7f0e5d4b3.nca/fs0/icon_AmericanEnglish.dat       <span class="o">(</span><span class="m">14265</span> byte<span class="o">)</span>
+2667d786e3fba6fe98c98af7f0e5d4b3.nca/fs0/icon_Japanese.dat              <span class="o">(</span><span class="m">14265</span> byte<span class="o">)</span>
+e76efa77b87f8d5bd8528c32b3045e44.cnmt.nca/fs0/Application_0005000c10000001.cnmt         <span class="o">(</span><span class="m">192</span> byte<span class="o">)</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Calculations of the overall resource data compression ratio include the associated metadata (a minimum of 32 KiB) present at compression.<br />As a result, a value higher than 100% might be displayed, depending on the size of the resource data before and after compression.</p>
+  </div>
+</div>
+<h2 id="Anchor_1156823536_h2_9">Configuring File Compression</h2>
+<p>Entering a compression configuration enables you to specify a compression type and compression level for each file.<br />You can also specify a file that describes the compression configuration (a <em>compression config file</em>).</p>
+<h3 id="Anchor_1156823536_h3_4">Compression Config Specifications</h3>
+<p>Use one of the following methods to specify a compression config.</p>
+<ul>
+  <li>Directly specify the compression config using command-line arguments.</li>
+  <li>Specify the path of a compression config file using command-line arguments.</li>
+  <li>Specify the path of a compression config file in the NMETA file. (For more information, see <a href="../Pages/Page_166503043.html">Writing the NMETA File</a>.)</li>
+</ul>
+<p>The following notation is used in the compression config to efficiently specify the presence or lack of compression.</p>
+<table class="relative-table wrapped" style="width: 96.4856%;">
+  <colgroup>
+    <col style="width: 39.1052%;" />
+    <col style="width: 60.8948%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Notation Used in This Document</th>
+      <th>Format</th>
+    </tr>
+    <tr>
+      <td>Specifying files and directory paths one by one</td>
+      <td>
+        <code>e:&lt;<em>File/directory path on RomFs</em>&gt;:&lt;<em>Compression type</em>&gt;:&lt;<em>Compression level</em>&gt;&lt;Reserved&gt;</code>
+      </td>
+    </tr>
+    <tr>
+      <td>Specifying file entry paths using regular expressions<br /><strong>Note:</strong> Use .NET Framework syntax for the regular expressions.</td>
+      <td>
+        <code>r:&lt;<em>Regular expression indicating the file entry path on RomFs</em>&gt;:&lt;<em>Compression type</em>&gt;:&lt;<em>Compression level</em>&gt;&lt;Reserved&gt;</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The compression config file includes the following information.</p>
+<ul>
+  <li>Compression configs are listed one per line (referred to as &quot;rules&quot;).</li>
+  <li>Files that match multiple rules apply the first matching rule.</li>
+  <li>Lines beginning with a semicolon (;) are treated as comments.</li>
+  <li>The only path separator that may be used is the slash (/). (You cannot use the backslash (\).)</li>
+  <li>A slash (/) is required at the beginning of each file and directory path.</li>
+  <li>There is no error, even if there is a rule that none of the files match.</li>
+</ul>
+<p>To specify the compression config directly using command-line arguments, combine the rules specified in the preceding compression config file into a single string using a double pipe (||).</p>
+<h3 id="Anchor_1156823536_h3_5">Example of Compression Config Input<a name="Anchor_1156823536_compression_config_example"></a></h3>
+<p>In one of the following input examples, the path of the compression config file is specified via a command-line argument. In the other example, the compression config is directly specified via a command-line argument.<br /></p>
+<p>The results are the same for both examples.</p>
+<ul>
+  <li>Specifying the path of a compression config file using command-line arguments:</li>
+</ul>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>--compression-file-config CompressionConfig.txt</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6</td>
+      <td class="code">
+        <div class="codeblock"><pre>; Comment lines
+e:/Resources.zip:None:0
+e:/Archives:None:0
+r:^/Movies/.*<span class="se">\.</span>video$:None:0
+r:^/Images/texture-<span class="o">[</span>^/<span class="o">]</span>*$:None:0
+r:.*:Lz4:16</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="wrapped relative-table" style="width: 96.494%;">
+  <colgroup>
+    <col style="width: 5.45455%;" />
+    <col style="width: 47.5207%;" />
+    <col style="width: 47.0248%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Line Number</th>
+      <th>Description</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Treated as a comment line and ignored.</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>
+        <p>Specifies <code>/Resources.zip</code> as out of scope for compression.</p>
+      </td>
+      <td>
+        <p>It is possible to specify a specific file or files.</p>
+        <p>We recommend excluding files that are already compressed.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>
+        <p>Specifies <code>/Archives/</code> as out of scope for compression.</p>
+      </td>
+      <td>
+        <p>Individual directories can be specified.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Specifies files with the extension <code>.video</code> under <code>/Movies/</code> as out of scope for compression.</td>
+      <td>We recommend excluding files that are already compressed, such as video files, from compression.</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Specifies files under<code> /Images/</code> with a filename starting with &quot;<code>texture-</code>&quot; as being out of scope for compression.</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>
+        <p>All other entries on RomFs are designated as LZ4HC (level 16).</p>
+      </td>
+      <td>
+        <p>This rule does not apply to files that first matched rules 2 to 5.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Directly specifying the compression config using command-line arguments:</li>
+</ul>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>--compression-file-config &quot;e:/Resources.zip:None:0||e:/Archives:None:0||r:^/Movies/.*\.video$:None:0||r:^/Images/texture-[^/]*$:None:0||r:.*:Lz4:16&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The result of applying the preceding compression config to the following resource data is as follows.</p>
+<table class="relative-table wrapped" style="width: 88.1497%;">
+  <colgroup>
+    <col style="width: 8.85744%;" />
+    <col style="width: 8.81073%;" />
+    <col style="width: 12.1828%;" />
+    <col style="width: 10.699%;" />
+    <col style="width: 9.27296%;" />
+    <col style="width: 50.177%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th colspan="3">Path</th>
+      <th>Compression Type</th>
+      <th>Compression Level</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td rowspan="3">/Archives/</td>
+      <td colspan="2">file1.bin</td>
+      <td>No compression</td>
+      <td>0</td>
+      <td>Matches the rule in line 3.</td>
+    </tr>
+    <tr>
+      <td colspan="2">file2.bin</td>
+      <td>No compression</td>
+      <td>0</td>
+      <td>Matches the rule in line 3.</td>
+    </tr>
+    <tr>
+      <td>SubDirectory/</td>
+      <td>file3.bin</td>
+      <td>No compression</td>
+      <td>0</td>
+      <td>
+        <p>The rule in line 3 also matches child directories.</p>
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="2">/Movies/<br /><br /></td>
+      <td colspan="2">scene1.video</td>
+      <td>No compression</td>
+      <td>0</td>
+      <td>Matches the rule in line 4.</td>
+    </tr>
+    <tr>
+      <td colspan="2">scene2.movie</td>
+      <td>LZ4HC</td>
+      <td>16</td>
+      <td>Does not match the rule in line 4.</td>
+    </tr>
+    <tr>
+      <td rowspan="3">/Images/<br /><br /></td>
+      <td colspan="2">texture-001.dat</td>
+      <td>No compression</td>
+      <td>0</td>
+      <td>Matches the rule in line 5.</td>
+    </tr>
+    <tr>
+      <td colspan="2">texture-002.bin</td>
+      <td>No compression</td>
+      <td>0</td>
+      <td>Matches the rule in line 5.</td>
+    </tr>
+    <tr>
+      <td>Photos/</td>
+      <td>photo-001.dat</td>
+      <td>LZ4HC</td>
+      <td>16</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td colspan="3">/fileA.txt</td>
+      <td>LZ4HC</td>
+      <td>16</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td colspan="3">/fileB.txt</td>
+      <td>LZ4HC</td>
+      <td>16</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td colspan="3">/Resources.zip</td>
+      <td>No compression</td>
+      <td>0</td>
+      <td>Matches the rule in line 2.</td>
+    </tr>
+    <tr>
+      <td colspan="3">/Resources.zip.bak</td>
+      <td>LZ4HC</td>
+      <td>16</td>
+      <td>
+        <span style="color: rgb(255,0,0);">The rule in line 2 does not match if the filename is a partial match.</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_1156823536_h3_6">Checking the Compression Config</h3>
+<p>Use the following steps to check whether the compression config is applied to the file as intended.</p>
+<ol>
+  <li>Add the <code>--save-adf</code> option to the <code>creatensp</code> command.</li>
+  <li>Open <code>*.Program.nca.rom.adf</code> generated in the NSP output destination directory.</li>
+  <li>Check the <code>compressionType</code> and <code>compressionLevel</code> of the file entries listed under <code>entries</code>.</li>
+</ol>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__MountRom', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2e453fe1fbf8f818dc45bbd2897105cd' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,685 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>HTTPS | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- HTTPS -->
+<div class="pagetitle" id="PageId_157461290">HTTPS</div>
+<div class="text_separate">
+<div class="layout-root">
+  <div class="layout-base">
+    <div class="layout-section two_right_sidebar">
+      <div class="layout-cell">
+        <h1 id="Anchor_157461290_h1_1">Overview</h1>
+        <p>The Nintendo SDK libcurl is configured to provide HTTPS feature backed by Nintendo SDK SSL library. It behaves almost in the same way as the standard libcurl though few additional steps need to be performed to use HTTPS in the Nintendo SDK's libcurl.</p>
+        <p>Like the off-the-shelf libcurl, non-trivial amount of knowledge of the SSL library is necessary to use HTTPS properly. It is highly recommended to go through <a href="../Pages/Page_181899138.html">the documentation of the SSL library</a> first to understand what the SSL library provides and limitations in it. This documentation refers some entities in the SSL library below.</p>
+        <h1 id="Anchor_157461290_h1_2">Exception</h1>
+        <ul>
+          <li>Prior to Nintendo SDK 0.14.0, 64-bit Windows builds did not support HTTPS. But as of Nintendo SDK 0.14.0, HTTPS is supported in all build types.</li>
+          <li>Please note that&nbsp;<a href="https://curl.haxx.se/libcurl/c/CURLOPT_CAINFO.html">CURLOPT_CAINFO</a>&nbsp;and&nbsp;<a href="https://curl.haxx.se/libcurl/c/CURLOPT_CAPATH.html">CURLOPT_CAPATH</a>&nbsp;are not supported in Nintendo SDK libcurl to specify alternate certificates<br /><ul><li>Built-in certificates are always utilized in the SSL library without explicit configuration</li><li>Or necessary certificates need to be imported via <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span></li></ul></li>
+        </ul>
+      </div>
+      <div class="layout-cell">
+        <table class="wrapped">
+          <colgroup>
+            <col />
+          </colgroup>
+          <tbody>
+            <tr>
+              <th style="text-align: center;">Table of Contents</th>
+            </tr>
+            <tr>
+              <td>
+                <div class="content-wrapper">
+                  <p>
+                    <ul class="macro_toc">
+                      <li>
+                        <a href="#Anchor_157461290_h1_1">Overview</a>
+                      </li>
+                      <li>
+                        <a href="#Anchor_157461290_h1_2">Exception</a>
+                      </li>
+                      <li>
+                        <a href="#Anchor_157461290_h1_3">Differences from the normal libcurl</a>
+                      </li>
+                      <ul>
+                        <li>
+                          <a href="#Anchor_157461290_h2_1">Initialization/Finalization</a>
+                        </li>
+                        <li>
+                          <a href="#Anchor_157461290_h2_2">CURL handle, SSL context object and SSL connection objects</a>
+                        </li>
+                        <li>
+                          <a href="#Anchor_157461290_h2_3">Working with a SSL connection</a>
+                        </li>
+                        <li>
+                          <a href="#Anchor_157461290_h2_4">Certificate Validation</a>
+                        </li>
+                        <li>
+                          <a href="#Anchor_157461290_h2_5">Error Handling</a>
+                        </li>
+                      </ul>
+                    </ul>
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="layout-base">
+    <div class="layout-section single">
+      <div class="layout-cell">
+        <h1 id="Anchor_157461290_h1_3">Differences from the normal libcurl</h1>
+        <h2 id="Anchor_157461290_h2_1">Initialization/Finalization</h2>
+        <p>The Nintendo SDK libcurl automatically initializes/finalizes the SSL library since the user of libcurl is not required to call <span class="ApiLink_nn__Result_nn__ssl__Initialize()_NN_NOEXCEPT">nn::ssl::Initialize()</span> and <span class="ApiLink_nn__Result_nn__ssl__Finalize()_NN_NOEXCEPT">nn::ssl::Finalize()</span> explicitly.</p>
+        <p>The SSL library is initialized automatically only when&nbsp;<a href="https://curl.haxx.se/libcurl/c/curl_global_init.html">curl_global_init()</a>&nbsp;or&nbsp;<a href="https://curl.haxx.se/libcurl/c/curl_global_init_mem.html">curl_global_init_mem()</a>&nbsp;is called. It is finalized only when<a href="https://curl.haxx.se/libcurl/c/curl_global_cleanup.html">&nbsp;curl_global_cleanup()</a>&nbsp;function is called.</p>
+        <p>It is possible to initialize the SSL library by <span class="ApiLink_nn__ssl__Initialize">nn::ssl::Initialize</span>() prior to libcurl initialization. Doing so may be useful especially when the user needs to set concurrency limit manually. Please make sure to call <span class="ApiLink_nn__ssl__Finalize">nn::ssl::Finalize</span>() explicitly after&nbsp;<a href="https://curl.haxx.se/libcurl/c/curl_global_cleanup.html">curl_global_cleanup()</a>&nbsp;is called if the SSL library is initialized outside libcurl. If <span class="ApiLink_nn__ssl__Initialize">nn::ssl::Initialize</span>() is called multiple times before the library is finalized, each successive call after the first will return immediately with <span class="ApiLink_nn__Result__">nn::Result::</span><span style="color: rgb(23,43,77);">ResultLibraryAlreadyInitialized and will not update the concurrency limit.</span></p>
+        <h2 id="Anchor_157461290_h2_2">CURL handle, SSL context object and SSL connection objects</h2>
+        <p>Unlike using the SSL library directly for use of SSL/TLS, it is not required to instantiate a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object and a <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span> object explicitly. This is because each CURL handle (which can&nbsp;be obtained by&nbsp;<a href="https://curl.haxx.se/libcurl/c/curl_easy_init.html">curl_easy_init()</a>) comes with the object of <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span> and <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> inside libcurl.</p>
+        <p>
+          <strong>SSL context</strong>
+        </p>
+        <p>Even though instantiation of such objects is not required, it is still required to &quot;create&quot; a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object manually.</p>
+        <p>In addition to that, libcurl provides a way to import a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object instantiated outside libcurl. In this situation, the user of libcurl is responsible to instantiate and create a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> before importing it to a CURL handle. With this feature, the user of libcurl can share <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object between CURL handles rather than creating a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object every time for each CURL handle.</p>
+        <p>
+          <strong>SSL Connection</strong>
+        </p>
+        <p>Unlike <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object, nothing is required to deal with <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span>. Instantiation and creation of a <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span> object tied to a CURL handle is automatically handled inside libcurl.</p>
+        <p>The below table summarizes the difference between the SSL library and libcurl in terms of <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object and <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span> object handling.</p>
+        <table class="relative-table wrapped" style="width: 58.504%; margin-left: auto; margin-right: auto;">
+          <colgroup>
+            <col style="width: 22.8659%;" />
+            <col style="width: 18.2927%;" />
+            <col style="width: 19.2073%;" />
+            <col style="width: 19.6646%;" />
+            <col style="width: 19.9695%;" />
+          </colgroup>
+          <tbody>
+            <tr>
+              <th rowspan="2">
+                <br />
+              </th>
+              <th style="text-align: center;" colspan="2">Creation</th>
+              <th style="text-align: center;" colspan="2">Instantiation</th>
+            </tr>
+            <tr>
+              <td class="highlight-red" style="text-align: center;">SSL library</td>
+              <td class="highlight-red" style="text-align: center;">libcurl</td>
+              <td class="highlight-red" style="text-align: center;">SSL library</td>
+              <td class="highlight-red" style="text-align: center;">libcurl</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span>
+              </td>
+              <td style="text-align: center;">Required</td>
+              <td style="text-align: center;">Required</td>
+              <td style="text-align: center;">Required</td>
+              <td style="text-align: center;">Optional</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span>
+              </td>
+              <td style="text-align: center;">Required</td>
+              <td style="text-align: center;">Not Allowed</td>
+              <td style="text-align: center;">Required</td>
+              <td style="text-align: center;">
+                <p>Not Allowed</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <h3 id="Anchor_157461290_h3_1">Preparing a SSL context</h3>
+        <p>To use HTTPS, libcurl requires a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> to be prepared by the user. This context can be prepared by one of the below methods.</p>
+        <ul>
+          <li>CURLOPT_SSL_CTX_FUNCTION</li>
+          <li>CURLOPT_SSL_CONTEXT</li>
+        </ul>
+        <p>CURLOPT_SSL_CTX_FUNCTION is the simpler method which uses the <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object tied to each curl handle. CURLOPT_SSL_CONTEXT requires bit more handling compared to&nbsp;CURLOPT_SSL_CTX_FUNCTION because the user of libcurl needs to import a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object to libcurl.</p>
+        <p>Please find more details below.</p>
+        <h3 id="Anchor_157461290_h3_2">Callback Function (CURLOPT_SSL_CTX_FUNCTION)</h3>
+        <p>This is the method which utilizes a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object tied to each CURL handle. The user of libcurl registers a callback function by&nbsp;CURLOPT_SSL_CTX_FUNCTION. libcurl calls the registered callback function along with the pointer to the <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> tied to the CURL handle. This is where the user of libcurl has an opportunity to create/configure <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object.</p>
+        <p>Note that the CURLOPT_SSL_CTX_FUNCTION option is provided as a standard feature in the public version of libcurl.&nbsp;Please refer to the man page of&nbsp;<a href="https://curl.haxx.se/libcurl/c/CURLOPT_SSL_CTX_FUNCTION.html">CURLOPT_SSL_CTX_FUNCTION</a>&nbsp;for details.&nbsp;</p>
+        <h4 id="Anchor_157461290_h4_1">Function prototype</h4>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre>#include &lt;curl/curl.h&gt;
+&nbsp;
+CURLcode ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *userptr);</pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="level0">Unlike the normal version of&nbsp;libcurl, the&nbsp;<em><span class="emphasis">ssl_ctx</span>&nbsp;</em>parameter is actually a pointer to the Nintendo SSL library's <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span>. Note that it is the pointer to the <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object which is maintained inside Libcurl hence the caller is not required to instantiate the object of <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> inside the callback function.</p>
+        <p class="level0">Note that returning a negative value from this callback function will cause&nbsp;CURLE_ABORTED_BY_CALLBACK.</p>
+        <p class="level0">CURLOPT_SSL_CTX_DATA is also supported in the same way as the public version of libcurl. The pointer to the data set by this option will be passed in userptr pointer in ssl_ctx_callback.</p>
+        <h4 id="Anchor_157461290_h4_2">Example</h4>
+        <p>When the callback function is called, cast the ssl_ctx variable to a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> pointer then create/configure the <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object.</p>
+        <p>Note that cleanup of the <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object created in the callback is properly handled by libcurl upon calling curl_easy_cleanup(). Thus the user of libcurl is not required to destroy/free <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object.</p>
+        <p>
+          <br />
+        </p>
+        <div class="expand-container" id="expander-157461290-1">
+          <div class="expand-control" id="expander-control-157461290-1">
+            <span class="expand-control-icon collapsed-icon"> </span>
+            <span class="expand-control-text">The code example of CURLOPT_SSL_CTX_FUNCTION</span>
+          </div>
+          <div class="expand-content expand-hidden" id="expander-content-157461290-1">
+            <table class="codeblock">
+              <tbody>
+                <tr>
+                  <td class="code">
+                    <div class="codeblock"><pre>CURLcode CurlSslContextCallback(CURL *curl, void *ssl_ctx, void *userptr)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// Obtain pointer to the SSL context tied to a CURL handle
+&nbsp;&nbsp;&nbsp;&nbsp;nn::ssl::Context* pContext = reinterpret_cast&lt;nn::ssl::Context*&gt;(ssl_ctx);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;// Create a nn::ssl::Context
+&nbsp;&nbsp;&nbsp;&nbsp;nn::Result result;
+&nbsp;&nbsp;&nbsp;&nbsp;result = pContext-&gt;Create(nn::ssl::Context::SslVersion_Auto);
+&nbsp;&nbsp;&nbsp;&nbsp;if (result.IsFailure())
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return -1; // error out here
+&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;// Import CA certificate (optional)
+&nbsp;&nbsp;&nbsp;&nbsp;nn::ssl::CertStoreId serverCertStoreId;
+&nbsp;&nbsp;&nbsp;&nbsp;char*                pCaCert = nullptr; // Pointer to the CA certificate in PEM format need to be set
+&nbsp;&nbsp;&nbsp;&nbsp;uint32_t             caCertSize = 0;    // The size of the CA certificate needs to be set
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;result = pContext-&gt;ImportServerPki(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;serverCertStoreId,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pCaCert,                         
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sizeof(pCaCert),                 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nn::ssl::CertificateFormat_Pem);    // Please pass nn::ssl::CertificateFormat_Der if the CA certificate in DER format is passed in pCaCert
+&nbsp;&nbsp;&nbsp;&nbsp;if(result.IsFailure())
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return -1; // error out here        
+&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;// Import client PKI information (optional)
+&nbsp;&nbsp;&nbsp;&nbsp;nn::ssl::CertStoreId clientCertStoreId;
+&nbsp;&nbsp;&nbsp;&nbsp;char*       pPkcs12Data    = nullptr; // Pointer to the data in PKCS12 format needs to be set
+&nbsp;&nbsp;&nbsp;&nbsp;uint32_t    pkcs12DataSize = 0;       // The size of PKCS12 data needs to be set
+&nbsp;&nbsp;&nbsp;&nbsp;char*       pkcs12Password = nullptr; // Appropriate password for the PKCS12 data needs to be set
+&nbsp;&nbsp;&nbsp;&nbsp;uint32_t    passwordSize   = 0;       // The size of the password needs to be set
+&nbsp;&nbsp;&nbsp;&nbsp;result = m_SslContext.ImportClientPki(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;clientCertStoreId,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pPkcs12Data,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkcs12Password,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pkcs12DataSize,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;passwordSize);
+&nbsp;&nbsp;&nbsp;&nbsp;if(result.IsFailure())
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return -1; // error out here        
+&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;return 0;
+}</pre></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <h3 id="Anchor_157461290_h3_3">
+          <span style="color: rgb(117,117,117);">Importing the SSL context (CURLOPT_SSL_CONTEXT)</span>
+        </h3>
+        <p>This is the method which takes a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object from outside so that a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> tied to a CURL handle is not used.</p>
+        <p>Instead of creating an SSL context for each CURL handle in the callback, the user of libcurl may want to create only one SSL context and share it among multiple CURL handles. The benefit of doing so is that it will save processing time by not repeating the same operations, such as importing the same certificate multiple times. One example of where this could be helpful is when making many requests for different assets in the same domain.</p>
+        <p>In order to share the SSL context amongst multiple CURL handles, the application must prepare the SSL context first, then tell each CURL handle to use it via the custom Nintendo SDK libcurl option, CURLOPT_SSL_CONTEXT.</p>
+        <p>The code for preparing the SSL context is the same as when preparing it in the CURLOPT_SSL_CTX_FUNCTION callback but the timing and scope of the code is different. The SSL context must be prepared before the first CURL handle uses it and<strong>&nbsp;it must remain valid until the final CURL handle that uses it has been cleaned up</strong>&nbsp;with curl_easy_cleanup().</p>
+        <p>Note that when sharing the SSL context like this, unlike when using the CURLOPT_SSL_CTX_FUNCTION callback, the application must clean up the SSL context with <span class="ApiLink_nn__ssl__Context__Destroy">nn::ssl::Context::Destroy</span>() when it is no longer in use.</p>
+        <h4 id="Anchor_157461290_h4_3">Example</h4>
+        <div class="expand-container" id="expander-157461290-2">
+          <div class="expand-control" id="expander-control-157461290-2">
+            <span class="expand-control-icon collapsed-icon"> </span>
+            <span class="expand-control-text">The sample code of CURLOPT_SSL_CONTEXT</span>
+          </div>
+          <div class="expand-content expand-hidden" id="expander-content-157461290-2">
+            <table class="codeblock">
+              <tbody>
+                <tr>
+                  <td class="code">
+                    <div class="codeblock"><pre>void PerformHttps()
+{
+&nbsp;&nbsp;&nbsp;&nbsp;CURL*             pCurlHandle = nullptr;
+&nbsp;&nbsp;&nbsp;&nbsp;nn::ssl::Context* pContext = nullptr;
+&nbsp;&nbsp;&nbsp;&nbsp;CURLcode          res = CURLE_OK;
+&nbsp;&nbsp;&nbsp;&nbsp;nn::Result        result;
+
+&nbsp;&nbsp;&nbsp;&nbsp;// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+&nbsp;&nbsp;&nbsp;&nbsp;// Initialize libcurl, create a curl handle and configure the handle
+&nbsp;&nbsp;&nbsp;&nbsp;// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;do {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Instanciate a nn::ssl::Context object
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pContext = new nn::ssl::Context();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (pContext == nullptr)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Create the nn::ssl::Context object
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result = pContext-&gt;Create(nn::ssl::Context::SslVersion_Auto);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (result.IsFailure())
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Configure the nn::ssl::Context at here if needed
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//     e.g. Importing CA certificates
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Set the nn::ssl::Context object to the curl handle
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;res = curl_easy_setopt(pCurlHandle, CURLOPT_SSL_CONTEXT, pContext);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (res != CURLE_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Perform HTTPS with libcurl
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;} while(0);
+
+&nbsp;&nbsp;&nbsp;&nbsp;// !!!!!!!!!!!!!!!!!!!!!!
+&nbsp;&nbsp;&nbsp;&nbsp;// Close the curl handle
+&nbsp;&nbsp;&nbsp;&nbsp;// !!!!!!!!!!!!!!!!!!!!!!
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;// Cleanup the nn::ssl::Context object
+&nbsp;&nbsp;&nbsp;&nbsp;if (pContext != nullptr)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pContext-&gt;Destroy();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete pContext;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;// !!!!!!!!!!!!!!!!!!!!!
+&nbsp;&nbsp;&nbsp;&nbsp;// Finalize libcurl
+&nbsp;&nbsp;&nbsp;&nbsp;// !!!!!!!!!!!!!!!!!!!!!
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+}
+</pre></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p>Please refer the below sample application for further details.</p>
+        <ul>
+          <li>
+            <span class="ApiLink_PageSampleLibcurlSslContextImport">Samples/Sources/Applications/Libcurl/SslContextImport&nbsp;</span>
+          </li>
+        </ul>
+        <h2 id="Anchor_157461290_h2_3">Working with a SSL connection</h2>
+        <p>As it is mentioned above, the user of libcurl doesn't need to prepare/cleanup a SSL connection explicitly. Like a <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> object, each curl handle comes with a <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span> object. This object is utilized inside libcurl automatically so the user of libcurl doesn't need to deal with it.</p>
+        <h3 id="Anchor_157461290_h3_4">CURLOPT_SSL_CONN_FUNCTION_BEFORE / CURLOPT_SSL_CONN_FUNCTION_AFTER</h3>
+        <p>For users who may need to deal with <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span> object directly, libcurl provides below options.</p>
+        <ul>
+          <li>CURLOPT_SSL_CONN_FUNCTION_BEFORE</li>
+          <li>CURLOPT_SSL_CONN_FUNCTION_AFTER</li>
+        </ul>
+        <p>Both options are provided to set a callback function to be called before/after DoHandshake() method of the <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span> class.</p>
+        <p>The user may set a data pointer to the curl handle by&nbsp;SSL_CONN_DATA option. The pointer to the data is passed to callback functions set by above options.&nbsp;Here're function prototypes.</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre>typedef struct
+{
+&nbsp;&nbsp;bool isHandshakeSuccess; /* Set to true when SSL handshake succeeds */
+&nbsp;&nbsp;size_t certDataSize;     /* The size of the certificate(s) data */
+&nbsp;&nbsp;size_t certCount;        /* The number of certificates */ 
+} curl_handshake_info;
+
+typedef CURLcode (*curl_ssl_conn_callback_before)(CURL *curl,     /* easy handle */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *ssl_conn, /* actually an nn::ssl::Connection */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *userptr); /* pointer to the data set by SSL_CONN_DATA */
+
+typedef CURLcode (*curl_ssl_conn_callback_after)(CURL *curl,     /* easy handle */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *ssl_conn, /* actually an nn::ssl::Connection */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *userptr,  /* pointer to the data set by SSL_CONN_DATA */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;curl_handshake_info handshake_info);</pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>CURLOPT_SSL_CONN_FUNCTION_BEFORE may be used to configure more details in the SSL connection before performing SSL handshake. CURLOPT_SSL_CONN_FUNCTION_AFTER may be used to obtain more information of SSL handshake.</p>
+        <p>For example, these callback functions need to be used when the user of libcurl needs certificate(s) data obtained during SSL handshake. This is because the user is required to set a pointer to a buffer before performing SSL handshake, then the buffer needs to be referred to get certificate(s) data after SSL handshake.</p>
+        <p>Please refer the below common HTTPS utility code of Libcurl samples for code example.</p>
+        <ul>
+          <li>Samples/Sources/Applications/Libcurl/Common/HttpsHelper.cpp</li>
+        </ul>
+        <h2 id="Anchor_157461290_h2_4">Certificate Validation</h2>
+        <p>Like normal version of libcurl, verify option can be configured through curl_easy_setopt(). Please refer to the man page of&nbsp;<a href="https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYPEER.html">CURLOPT_SSL_VERIFYPEER</a>&nbsp;and&nbsp;<a href="https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html">CURLOPT_SSL_VERIFYHOST</a>&nbsp;for details.</p>
+        <p>Both&nbsp;<a href="https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYPEER.html">CURLOPT_SSL_VERIFYPEER</a>&nbsp;and&nbsp;<a href="https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html">CURLOPT_SSL_VERIFYHOST</a>&nbsp;are enabled by default.</p>
+        <p>In addition to existing verify options in libcurl, the Nintendo SDK libcurl provides few other options related to certificate validation.</p>
+        <ul>
+          <li>CURLOPT_SSL_VERIFYDATE</li>
+          <li>CURLOPT_SSL_SKIP_DEFAULT_VERIFY</li>
+        </ul>
+        <h4 id="Anchor_157461290_h4_4">CURLOPT_SSL_VERIFYDATE</h4>
+        <p>Because many users may not have the date set correctly on their system, the Nintendo SDK libcurl has a custom option, CURLOPT_SSL_VERIFYDATE, for developers who&nbsp;may not want to fail the verification of an SSL certificate based on the date.</p>
+        <p>When CURLOPT_SSL_VERIFYDATA is 1, the SSL handshake will fail when the certificate sent by the server is expired or not valid yet.&nbsp;The default value of CURLOPT_SSL_VERIFYDATE is 0, it means time validation will not be performed when verifying server certificates.</p>
+        <h4 id="Anchor_157461290_h4_5">Example</h4>
+        <div class="expand-container" id="expander-157461290-3">
+          <div class="expand-control" id="expander-control-157461290-3">
+            <span class="expand-control-icon collapsed-icon"> </span>
+            <span class="expand-control-text">The sample code to configure verify options</span>
+          </div>
+          <div class="expand-content expand-hidden" id="expander-content-157461290-3">
+            <table class="codeblock">
+              <tbody>
+                <tr>
+                  <td class="code">
+                    <div class="codeblock"><pre>// Enable VERIFYPEER option
+if (curl_easy_setop(curlHandle, CURLOPT_SSL_VERIFYPEER, 1L) != CURLE_OK)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// error out here
+}
+ 
+// Enable VERIFYHOST option
+if (curl_easy_setop(curlHandle, CURLOPT_SSL_VERIFYHOST, 2L) != CURLE_OK)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// error out here
+}
+ 
+// Disable VERIFYDATE option
+if (curl_easy_setop(curlHandle, CURLOPT_SSL_VERIFYDATE, 0L) != CURLE_OK)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// error out here
+}</pre></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <h4 id="Anchor_157461290_h4_6">CURLOPT_SSL_SKIP_DEFAULT_VERIFY</h4>
+        <p>By default, the SSL library doesn't allow disabling default verify options. This means, below two options cannot be disabled.</p>
+        <ul>
+          <li>
+            <a href="https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYPEER.html">CURLOPT_SSL_VERIFYPEER</a>&nbsp;</li>
+          <li>
+            <a href="https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html">CURLOPT_SSL_VERIFYHOST</a>
+          </li>
+        </ul>
+        <p>It is not recommended to disable these fundamental verify options unless there's a strong reason. For those who may need to disable it (e.g. for testing),&nbsp;the Nintendo SDK libcurl provides&nbsp;CURLOPT_SSL_SKIP_DEFAULT_VERIFY option.</p>
+        <h4 id="Anchor_157461290_h4_7">Example</h4>
+        <div class="expand-container" id="expander-157461290-4">
+          <div class="expand-control" id="expander-control-157461290-4">
+            <span class="expand-control-icon collapsed-icon"> </span>
+            <span class="expand-control-text">The sample code to disable verify options</span>
+          </div>
+          <div class="expand-content expand-hidden" id="expander-content-157461290-4">
+            <table class="codeblock">
+              <tbody>
+                <tr>
+                  <td class="code">
+                    <div class="codeblock"><pre>// Enable CURLOPT_SSL_SKIP_DEFAULT_VERIFY option before disabling default options
+if (curl_easy_setop(curlHandle, CURLOPT_SSL_SKIP_DEFAULT_VERIFY, 1L) != CURLE_OK)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// error out here
+}
+ 
+// Disable CURLOPT_SSL_VERIFYPEER option
+if (curl_easy_setop(curlHandle, CURLOPT_SSL_VERIFYPEER, 0L) != CURLE_OK)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// error out here
+}
+ 
+// Disable CURLOPT_SSL_VERIFYHOST option
+if (curl_easy_setop(curlHandle, CURLOPT_SSL_VERIFYHOST, 0L) != CURLE_OK)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// error out here
+}</pre></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <h2 id="Anchor_157461290_h2_5">
+          <span style="color: rgb(117,117,117);">Error Handling</span>
+        </h2>
+        <p>There are some libcurl errors which can be returned specifically for HTTPS. Please find below table for details.</p>
+        <table class="wrapped">
+          <colgroup>
+            <col />
+            <col />
+          </colgroup>
+          <tbody>
+            <tr>
+              <th style="text-align: center;">Curl Error</th>
+              <th style="text-align: center;">Description</th>
+            </tr>
+            <tr>
+              <td>
+                <span style="color: rgb(51,51,51);">CURLE_PEER_FAILED_VERIFICATION</span>
+              </td>
+              <td>
+                <div class="content-wrapper">
+                  <p>Failed to verify the server during the SSL handshake.</p>
+                  <p>
+                    <br />
+                  </p>
+                  <p>
+                    <strong>CURLINFO_SSL_VERIFYRESULT</strong> </p>
+                  <p>More detail can be obtained by CURLINFO_SSL_VERIFYRESULT which is provided as a standard feature in the public version of libcurl. In the Nintendo SDK libcurl, CURLINFO_SSL_VERIFYRESULT provides the value which can be translated into the form of <span class="ApiLink_nn__Result">nn::Result</span> defined in ssl_Result.public.h. To perform this translation, please call <span class="ApiLink_nn__ssl__GetSslResultFromValue">nn::ssl::GetSslResultFromValue</span>().</p>
+                  <p>
+                    <br />
+                  </p>
+                  <p>Note that the value maintained for CURLINFO_SSL_VERIFYRESULT is reset to 0 every time just before the SSL handshake is performed.</p>
+                  <table class="codeblock">
+                    <tbody>
+                      <tr>
+                        <td class="code">
+                          <div class="codeblock"><pre>CURLcode res          = CURLE_OK;
+long     verifyResult = 0;
+ 
+res = curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT, &amp;verifyResult);
+if (res != CURLE_OK)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;NN_LOG(&quot;curl_easy_getinfo - CURLINFO_SSL_VERIFYRESULT failed: %d\n&quot;, res);
+}
+else
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::Result tmpResult;
+&nbsp;&nbsp;&nbsp;&nbsp;if (nn::ssl::GetSslResultFromValue(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;tmpResult,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reinterpret_cast&lt;char*&gt;(&amp;verifyResult),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sizeof(verifyResult)).IsSuccess())
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NN_LOG(&quot;CURLINFO_SSL_VERIFYRESULT: %d\n&quot;, tmpResult.GetDescription());
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NN_LOG(&quot;Failed to convert SSL result.\n&quot;);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre></div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span style="color: rgb(51,51,51);">CURLE_SSL_CONNECT_ERROR</span>
+              </td>
+              <td>
+                <p>Failed to complete the SSL handshake. This error can be returned in several cases (e.g. somehow back-end TCP connection is not established yet, failed to set host name, TCP connection is closed by the server during SSL handshake, etc.).</p>
+                <p>
+                  <br />
+                </p>
+                <p>
+                  <strong>
+                    <span style="color: rgb(51,51,51);">CURLINFO_SSL_HANDSHAKE_RESULT</span>
+                  </strong>
+                </p>
+                <p>If this is caused during the SSL handshake, it is possible to get more detail by <span style="color: rgb(51,51,51);">CURLINFO_SSL_HANDSHAKE_RESULT which is the curl info option found only in Nintendo's libcurl. CURLINFO_SSL_HANDSHAKE_RESULT can be used in the same way as how CURLINFO_SSL_VERIFYRESULT is used as it is described above. If CURLINFO_SSL_HANDSHAKE_RESULT provides 0, it means something failed even before performing the SSL handshake. In this case, it is recommended to close the CURL handle and perform curl process again from the start.</span></p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span style="color: rgb(51,51,51);">CURLE_SSL_CACERT</span>
+              </td>
+              <td>
+                <p>Failed to verify the server certificate because its CA certificate was not found in our certstore.</p>
+                <p>This could be returned especially when performing the SSL handshake with the server which CA certificate is not found in built-in certstore.</p>
+                <p>
+                  <br />
+                </p>
+                <p>Importing such the CA certificate via <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> could resolve this issue.</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span style="color: rgb(51,51,51);">CURLE_SSL_CERTPROBLEM</span>
+              </td>
+              <td>
+                <p>Failed to complete the SSL handshake because expected client certificate is not imported.</p>
+                <p>
+                  <br />
+                </p>
+                <p>Importing the appropriate client PKI via <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> could resolve this issue.</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p>CURLE_SSL_CTX_FUNCTION_NOT_SET</p>
+                <p>(Nintendo specific)</p>
+              </td>
+              <td>Failed to start HTTPS because callback function is not set even when <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> is not imported.</td>
+            </tr>
+            <tr>
+              <td>
+                <p>CURLE_SSL_CTX_INVALID</p>
+                <p>(Nintendo specific)</p>
+              </td>
+              <td>Failed to start HTTPS because <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> is not created by <span class="ApiLink_nn__ssl__Context__Create">nn::ssl::Context::Create</span>().</td>
+            </tr>
+            <tr>
+              <td>
+                <p>CURLE_SSL_CTX_FATAL</p>
+                <p>(Nintendo specific)</p>
+              </td>
+              <td rowspan="2">Failed to start HTTPS due to an internal error. Please cleanup libcurl and the SSL library (if it's initialized outside libcurl) to handle it as a fatal error.Failed to start HTTPS due to an internal error. Please cleanup libcurl and the SSL library (if it's initialized outside libcurl) to handle it as a fatal error.</td>
+            </tr>
+            <tr>
+              <td>
+                <p>CURLE_SSL_INVALID_REFERENCE</p>
+                <p>(Nintendo specific)</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__ssl__Context', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_context.html' )
+SetUrl( 'ApiLink_nn__Result_nn__ssl__Initialize()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ssl.html#aaa943d1a4363d560d45d53dfa2182683' )
+SetUrl( 'ApiLink_nn__Result_nn__ssl__Finalize()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ssl.html#a56d990644d149228c45f0c5ece11a9d9' )
+SetUrl( 'ApiLink_nn__ssl__Initialize', '../../../Api/HtmlNX/namespacenn_1_1ssl.html#aaa943d1a4363d560d45d53dfa2182683' )
+SetUrl( 'ApiLink_nn__ssl__Finalize', '../../../Api/HtmlNX/namespacenn_1_1ssl.html#a56d990644d149228c45f0c5ece11a9d9' )
+SetUrl( 'ApiLink_nn__Result__', '../../../Api/HtmlNX/classnn_1_1_result.html' )
+SetUrl( 'ApiLink_nn__ssl__Connection', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html' )
+SetUrl( 'ApiLink_nn__ssl__Context__Destroy', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_context.html#a99a0b8026a5495ad0ba2540010a6c533' )
+SetUrl( 'ApiLink_PageSampleLibcurlSslContextImport', '../../../Api/HtmlNX/_page_sample_libcurl_ssl_context_import.html' )
+SetUrl( 'ApiLink_nn__Result', '../../../Api/HtmlNX/classnn_1_1_result.html' )
+SetUrl( 'ApiLink_nn__ssl__GetSslResultFromValue', '../../../Api/HtmlNX/namespacenn_1_1ssl.html#a2abf903b13b976d609303079719504a6' )
+SetUrl( 'ApiLink_nn__ssl__Context__Create', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_context.html#aacdf74adeeff3469725d7ccc787eb36e' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

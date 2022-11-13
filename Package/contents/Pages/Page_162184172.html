@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Mii Applet | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Mii Applet -->
+<div class="pagetitle" id="PageId_162184172">Mii Applet</div>
+<div class="text_separate">
+<p>This library applet provides features to create new Mii characters and edit created Mii characters.</p>
+<p>This section covers the basic workflow through starting the Mii applet.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>To submit a ROM that uses this applet, you must submit a separate request. Contact Nintendo if you want to submit this type of ROM.</p>
+  </div>
+</div>
+<h1 id="Anchor_162184172_h1_1">Including Header Files</h1>
+<p>Add the following code to your program.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/mii.h&gt;
+</span><span class="n">or</span>
+<span class="cp">#include &lt;nn/mii/mii_Applet.h&gt;
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_162184172_h1_2">Starting the Mii Applet</h1>
+<p>The Mii applet can be started when the mode is Add Mii Mode.</p>
+<h2 id="Anchor_162184172_h2_1">Add Mii Mode</h2>
+<p>This mode allows you to add one Mii to the database.</p>
+<p>Start the Add Mii Mode by calling the following API. This API blocks other processes until the applet is closed.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="n">AppendMii</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">pOutAppendIndex</span><span class="p">);</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>After the applet is closed, use the preceding API to get the results.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Result</th>
+      <th>Description of the result.</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__ResultSuccess">nn::ResultSuccess</span>
+      </td>
+      <td>One Mii was added and the applet was closed.</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__mii__ResultCanceled">nn::mii::ResultCanceled</span>
+      </td>
+      <td>The applet was terminated without adding a Mii character.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The database index for the added Mii is set in the <code><em>pOutAppendIndex</em></code> argument only if the result is <code><span class="ApiLink_nn__ResultSuccess">nn::ResultSuccess</span></code>.</p>
+<p>After returning to your application from the Mii applet with the result <code><span class="ApiLink_nn__ResultSuccess">nn::ResultSuccess</span></code>, re-obtain the Mii from the database. If a result other than <code><span class="ApiLink_nn__ResultSuccess">nn::ResultSuccess</span></code> was obtained, obtain the Mii again according to the application specifications.</p>
+<p>The following table includes the patterns to use when the applet is called normally, until returning to the calling application, and the obtained results. Note that the Mii may be deleted regardless of the value of the results obtained.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Pattern</th>
+      <th>Obtained Result</th>
+    </tr>
+    <tr>
+      <td>Add one Mii and return to the application.</td>
+      <td>
+        <span class="ApiLink_nn__ResultSuccess">nn::ResultSuccess</span>
+      </td>
+    </tr>
+    <tr>
+      <td>The database is full, so first delete one Mii, then add one Mii, and return to the application.</td>
+      <td>
+        <span class="ApiLink_nn__ResultSuccess">nn::ResultSuccess</span>
+      </td>
+    </tr>
+    <tr>
+      <td>The database is full, so delete one Mii and return to the application without adding a Mii.</td>
+      <td>
+        <span class="ApiLink_nn__mii__ResultCanceled">nn::mii::ResultCanceled</span>
+      </td>
+    </tr>
+    <tr>
+      <td>Return to the application without adding or deleting Mii characters.</td>
+      <td>
+        <span class="ApiLink_nn__mii__ResultCanceled">nn::mii::ResultCanceled</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__ResultSuccess', '../../../Api/HtmlNX/classnn_1_1_result_success.html' )
+SetUrl( 'ApiLink_nn__mii__ResultCanceled', '../../../Api/HtmlNX/classnn_1_1mii_1_1_result_canceled.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

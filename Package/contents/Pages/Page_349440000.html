@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Skeletal Animation | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Skeletal Animation -->
+<div class="pagetitle" id="PageId_349440000">Skeletal Animation</div>
+<div class="text_separate">
+<h1 id="Anchor_349440000_h1_1">Overview</h1>
+<p>Describes the NintendoWare 3D skeletal animation features. For more information about how to create an animation, see the relevant sections in the pages for <a href="../Pages/Page_83956026.html">the various plug-ins</a>.</p>
+<p>A skeletal animation defines a skeleton, which is a model with a connected hierarchy of bones, and animates that skeleton into prescribed poses (keyframes), so the positions of the vertices that comprise the character act accordingly.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_349440000/349447409.gif" class="embedded-image" />
+  </span>
+</p>
+<h1 id="Anchor_349440000_h1_2">
+  <a name="Anchor_349440000_usage_skeletalAnim"></a>How to Use</h1>
+<p>1. Get the skeletal animation resource from the already configured <code><span class="ApiLink_nn__g3d__ResFile">nn::g3d::ResFile</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::g3d::</span><span class="n">ResFile</span><span class="o">*</span> <span class="n">pResFile</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">skeletalAnimName</span> <span class="o">=</span> <span class="s">&quot;run&quot;</span><span class="p">;</span>
+
+<span class="c1">// Get the animation resources.
+</span><span class="nn">nn::g3d::</span><span class="n">ResSkeletalAnim</span><span class="o">*</span> <span class="n">pResSkeletalAnim</span> <span class="o">=</span> <span class="n">pResFile</span><span class="o">-&gt;</span><span class="n">FindSkeletalAnim</span><span class="p">(</span><span class="n">skeletalAnimName</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Obtained from <code><span class="ApiLink_nn__g3d__ResFile__GetSkeletalAnim">nn::g3d::ResFile::GetSkeletalAnim</span>()</code>.</p>
+  </div>
+</div>
+<p>2. Use <code><span class="ApiLink_nn__g3d__SkeletalAnimObj__Builder">nn::g3d::SkeletalAnimObj::Builder</span></code> to build <code><span class="ApiLink_nn__g3d__SkeletalAnimObj">nn::g3d::SkeletalAnimObj</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::mem::</span><span class="n">StandardAllocator</span> <span class="n">standardAllocator</span><span class="p">;</span>    <span class="c1">// The allocator.
+</span><span class="nn">nn::g3d::</span><span class="n">ModelObj</span> <span class="n">modelObj</span><span class="p">;</span>                     <span class="c1">// The instance of a model having a skeleton based on the skeletal animation.
+</span>
+<span class="nn">nn::g3d::</span><span class="n">SkeletalAnimObj</span> <span class="n">skeletalAnimObj</span><span class="p">;</span>         <span class="c1">// The skeletal animation instance.
+</span>
+<span class="c1">//----------------------------------------------------------------------------------------------------------------------------------
+</span>
+<span class="nn">nn::g3d::SkeletalAnimObj::</span><span class="n">Builder</span> <span class="n">builder</span><span class="p">;</span>         <span class="c1">// The variable for building the skeletal animation instance.
+</span>
+<span class="c1">// Set up the resource.
+// Set the parameters required to run the animation.
+</span><span class="n">builder</span><span class="p">.</span><span class="n">Reserve</span><span class="p">(</span><span class="n">modelObj</span><span class="p">.</span><span class="n">GetResource</span><span class="p">());</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">Reserve</span><span class="p">(</span><span class="n">pResSkeletalAnim</span><span class="p">);</span>
+
+<span class="c1">// Calculate the memory size required to build the instance.
+</span><span class="n">builder</span><span class="p">.</span><span class="n">CalculateMemorySize</span><span class="p">();</span>
+
+<span class="c1">// Get the memory size required to build the instance.
+</span><span class="kt">size_t</span> <span class="n">workMemorySize</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">GetWorkMemorySize</span><span class="p">();</span>
+
+<span class="c1">// Reserve the memory required to build the instance.
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">pWorkMemory</span> <span class="o">=</span> <span class="n">standardAllocator</span><span class="p">.</span><span class="n">Allocate</span><span class="p">(</span><span class="n">workMemorySize</span><span class="p">,</span> <span class="nn">nn::g3d::SkeletalAnimObj::</span><span class="n">Alignment_Buffer</span><span class="p">);</span>
+
+<span class="c1">// Build the instance.
+</span><span class="kt">bool</span> <span class="n">suceeded</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">Build</span><span class="p">(</span><span class="o">&amp;</span><span class="n">skeletalAnimObj</span><span class="p">,</span> <span class="n">pWorkMemory</span><span class="p">,</span> <span class="n">workMemoySize</span><span class="p">);</span>
+<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">suceeded</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>3. Bind the animation resource and model to the <code><span class="ApiLink_nn__g3d__SkeletalAnimObj">nn::g3d::SkeletalAnimObj</span></code> that was built.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Set the animation resource.
+</span><span class="n">skeletalAnimObj</span><span class="p">.</span><span class="n">SetResource</span><span class="p">(</span><span class="n">pResSkeletalAnim</span><span class="p">);</span>
+
+<span class="c1">// Bind it to the model.
+</span><span class="n">skeletalAnimObj</span><span class="p">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">modelObj</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If <code><span class="ApiLink_nn__g3d__SkeletalAnimObj__IsAcceptable">nn::g3d::SkeletalAnimObj::IsAcceptable</span>()</code> returns <code>true</code>, it is possible switch the animation played by calling these functions.</p>
+    <p>There is no need to rebuild <code><span class="ApiLink_nn__g3d__SkeletalAnimObj">nn::g3d::SkeletalAnimObj</span></code> from <code><span class="ApiLink_nn__g3d__SkeletalAnimObj__Builder">nn::g3d::SkeletalAnimObj::Builder</span></code>.</p>
+  </div>
+</div>
+<p>4. Update <code><span class="ApiLink_nn__g3d__SkeletalAnimObj">nn::g3d::SkeletalAnimObj</span></code> and apply it to the model instance.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Calculate animation results.
+</span><span class="n">skeletalAnimObj</span><span class="p">.</span><span class="n">Calculate</span><span class="p">();</span>
+
+<span class="c1">// Apply the animation results to the model instance.
+</span><span class="n">skeletalAnimObj</span><span class="p">.</span><span class="n">ApplyTo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">modelObj</span><span class="p">);</span>
+
+<span class="c1">// Update frame.
+</span><span class="n">skeletalAnimObj</span><span class="p">.</span><span class="n">GetFrameCtrl</span><span class="p">().</span><span class="n">UpdateFrame</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_349440000_h1_3">Features</h1>
+<p>The <code>g3d</code> library supports the following features.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_368747410.html">Blending</a>
+      </td>
+      <td>This feature enables multiple skeletal animations to be simultaneously applied to a model.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <a href="../Pages/Page_368748025.html">Retargeting</a>
+        </p>
+      </td>
+      <td>This feature enables a skeletal animation, that was created specifically for one model, to be applied to another model.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <a href="../Pages/Page_412412381.html">Motion Mirroring</a>
+        </p>
+      </td>
+      <td>This feature reverses the skeletal animation on the left and right orientation of the model and plays it.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__ResFile', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_file.html' )
+SetUrl( 'ApiLink_nn__g3d__ResFile__GetSkeletalAnim', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_file.html#ae13da380c5e44f3395e5b9054d4ce928' )
+SetUrl( 'ApiLink_nn__g3d__SkeletalAnimObj__Builder', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeletal_anim_obj_1_1_builder.html' )
+SetUrl( 'ApiLink_nn__g3d__SkeletalAnimObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeletal_anim_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__SkeletalAnimObj__IsAcceptable', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeletal_anim_obj.html#afff3676ee53a78631ba42ed1c51065e7' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

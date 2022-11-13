@@ -1,0 +1,481 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Threads | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Threads -->
+<div class="pagetitle" id="PageId_83955697">Threads</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955697_h1_1">Threading Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955697_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955697_h3_1">Thread States</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955697_h3_2">Thread Priority</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955697_h3_3">Maximum Number of Threads</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_83955697_h2_2">Scheduling</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955697_h3_4">About the CPU Core Mask</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_83955697_h4_1">Priority Core Numbers</a>
+          </li>
+        </ul>
+        <li>
+          <a href="#Anchor_83955697_h3_5">Floating-Point Units</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_83955697_h2_3">Using Threads</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955697_h2_4">Specific Example of Using Threads</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955697_h2_5">Threading Feature API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955697_h2_6">Things to Note When Using Threads</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955697_h3_6">Thread Stack Mirroring</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955697_h3_7">Memory Regions That Can Be Specified for Thread Stacks</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955697_h3_8">Notes on Ending Threads</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955697_h3_9">Destroying Threads</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83955697_h1_1">Threading Feature</h1>
+<h2 id="Anchor_83955697_h2_1">Feature Overview</h2>
+<p style="color: rgb(51,51,51);">In the processor, a thread is the smallest unit of execution for executing multiple processes in parallel. The operating system library provides a threading feature for dividing a program into multiple units of execution.</p>
+<p style="color: rgb(51,51,51);">When a program is started, only a single thread called the &quot;main thread&quot; is executed. This is the <code>nnMain()</code> function. The program can create a new thread by calling the <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority|_int_idealCoreNumber)_NN_NOEXCEPT">nn::os::CreateThread()</span> function, and then execute the thread by calling the <span class="ApiLink_void_nn__os__StartThread(ThreadType_*thread)_NN_NOEXCEPT">nn::os::StartThread()</span> function. Also, several features are provided to control the threads after they have started. These features are described later.</p>
+<p style="color: rgb(51,51,51);">Threads begin execution from the entry function that was specified when calling <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority|_int_idealCoreNumber)_NN_NOEXCEPT">nn::os::CreateThread()</span>, and end upon returning from the thread entry function. Threads that have ended can be freed by using the <span class="ApiLink_void_nn__os__DestroyThread(ThreadType_*thread)_NN_NOEXCEPT">nn::os::DestroyThread()</span> function.</p>
+<p style="color: rgb(51,51,51);">Each thread has states or attributes that indicate the following.</p>
+<ul>
+  <li style="color: rgb(51,51,51);">Thread status</li>
+  <li style="color: rgb(51,51,51);">Thread priority</li>
+  <li style="color: rgb(51,51,51);">CPU core mask</li>
+  <li style="color: rgb(51,51,51);">Priority core number</li>
+  <li style="color: rgb(51,51,51);">Context for floating-point units</li>
+</ul>
+<h3 style="color: rgb(51,51,51);" id="Anchor_83955697_h3_1">Thread States</h3>
+<p>Threads are manipulated using the <code><span class="ApiLink_nn__os__ThreadType">nn::os::ThreadType</span></code> object. That object can have any of the following states. When using the various APIs that control threads, one of the object states must be met, as a precondition. For more information, see the various API references. Also, do not destroy the content of a <code><span class="ApiLink_nn__os__ThreadType">nn::os::ThreadType</span></code> object until <span class="ApiLink_void_nn__os__DestroyThread(ThreadType_*thread)_NN_NOEXCEPT">nn::os::DestroyThread()</span> destroys the thread.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Object States</th>
+      <th>Descriptions</th>
+    </tr>
+    <tr>
+      <td style="text-align: center;">NotInitialized</td>
+      <td>Either the object has not yet been initialized or it has been explicitly placed in an uninitialized state by the <span class="ApiLink_void_nn__os__DestroyThread(ThreadType_*thread)_NN_NOEXCEPT">nn::os::DestroyThread()</span> function.<br /></td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Initialized</td>
+      <td>The target thread has been created by the <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority|_int_idealCoreNumber)_NN_NOEXCEPT">nn::os::CreateThread()</span> function.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Started</td>
+      <td>The target thread has started running with the <span class="ApiLink_void_nn__os__StartThread(ThreadType_*thread)_NN_NOEXCEPT">nn::os::StartThread()</span> function.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Exited</td>
+      <td>The target thread ended.</td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="color: rgb(51,51,51);" id="Anchor_83955697_h3_2">Thread Priority</h3>
+<p style="color: rgb(51,51,51);">A priority is assigned to each thread and taken into account when scheduling execution.</p>
+<p style="color: rgb(51,51,51);">The thread priority in an application can be set to any value from <span class="ApiLink_nn__os__HighestThreadPriority">nn::os::HighestThreadPriority</span> (0) to <span class="ApiLink_nn__os__LowestThreadPriority">nn::os::LowestThreadPriority</span> (31), where a smaller number represents a higher priority. The standard value for thread priority is <span class="ApiLink_nn__os__DefaultThreadPriority">nn::os::DefaultThreadPriority</span> (16).</p>
+<p style="color: rgb(51,51,51);">The affect of thread priority on scheduling depends on the target environment. The scheduling algorithm is described later.</p>
+<h3 style="color: rgb(51,51,51);" id="Anchor_83955697_h3_3">Maximum Number of Threads</h3>
+<p style="color: rgb(51,51,51);">The table shows the maximum number of threads available to the application. This number includes the main thread started in <code>nnMain()</code>. This maximum value may change in a future firmware update. (The number may increase, but it will not decrease.) If you try to create a thread that exceeds the limit, an abort occurs during the <code><span class="ApiLink_nn__os__CreateThread">nn::os::CreateThread</span>()</code> function.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Operating Environment</th>
+      <th>Maximum Number of Threads</th>
+    </tr>
+    <tr>
+      <td>NX32 and NX64</td>
+      <td>96 (See the note.)</td>
+    </tr>
+    <tr>
+      <td>Win32 and x64</td>
+      <td>
+        <p>Depends on the Windows specification.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Note:</strong> For the thread count, only one thread is used as the system thread, responsible for GPU error handling in NX Add-On 8.1 and later. For more information, see <a href="../Pages/Page_105383443.html">nnMain() and Library Initialization</a> &gt; Automatically Starting the System Thread.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>You can ease the restriction on the number of threads to 256 only when 6 GB of memory is available in SDEV.</p>
+    <p>To ease the restriction on the number of threads, select the DevMenu <strong>Debug</strong>tab and set <strong>Application Extra Thread</strong> to <strong>Enabled</strong>, or execute debug <strong>--enable-application-extra-thread</strong> with a DevMenuCommand.</p>
+    <p>This feature is not available for retail products and EDEV.</p>
+  </div>
+</div>
+<h2 id="Anchor_83955697_h2_2">Scheduling</h2>
+<p>A number of threads can operate in parallel equivalent to the number of CPU cores in the processor (the number of available CPU cores differs depending on the environment.) Scheduling determines which threads run in each CPU core and when they run.</p>
+<p>Only one thread at a time can run on a CPU core, and the thread that runs next is determined based on the thread priority. Priority-based scheduling is applied to all threads in the NX32 and NX64 environments. The executable thread with the highest priority is the one that is granted permission to run. While a certain Thread A is running and Thread B with higher priority becomes executable, scheduling is immediately performed and Thread B with the higher priority can get permission to run. This kind of behavior is called preempting Thread A. Contrarily, while thread A is running, thread C with the same priority as thread A and thread D with lower priority, cannot run.</p>
+<p>The scheduler maintains a queue containing all the threads of the various priorities, with all the threads of the same priority grouped together. When multiple threads in the queue have the same priority, the thread at the front of the queue is the only one that is granted permission to execute. When a thread that was waiting for some synchronization object wakes up, it is attached to the end of the priority queue and its execution is delayed until it is granted permission to execute. You can also call the <span class="ApiLink_void_nn__os__YieldThread()_NN_NOEXCEPT">nn::os::YieldThread()</span> function from a thread to move that thread to the end of the queue and hand over CPU execution rights to another thread with the same priority.</p>
+<p>Summarizing, the thread that satisfies the following conditions is the thread that is granted permission to execute in each CPU core.</p>
+<ul>
+  <li>The thread is an executable thread (i.e., it is not waiting).</li>
+  <li>The thread has the highest priority among the executable threads.</li>
+  <li>The thread is ahead in the queue of all other threads with the same priority.</li>
+</ul>
+<p>Because of this scheduling mechanism, a thread with the highest priority can continue to run in an infinite loop (busy loop), while other threads with the same priority or threads with lower priority never get to run. By using the various synchronization features of the <code>os</code> library to make threads wait as appropriate, threads must be designed and implemented to have priority over other threads that do not get permission to run.</p>
+<p>In addition to the scheduling mechanism described earlier, there is also a round-robin mechanism for the group of threads with the lowest priority of <span class="ApiLink_nn__os__LowestThreadPriority">nn::os::LowestThreadPriority</span>. The round-robin mechanism works as follows. The thread highest in the queue with the priority of <span class="ApiLink_nn__os__LowestThreadPriority">nn::os::LowestThreadPriority</span> runs in the CPU for a certain amount of time and then automatically moves to the end of the queue. At that time, the next-highest thread in the queue gets permission to run in the CPU.</p>
+<p>Because scheduling occurs at the CPU core level, based on priority, another thread with a lower priority than yours could run on another core.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In the Windows environment, thread priorities specified by functions like <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority)_NN_NOEXCEPT">nn::os::CreateThread()</span> are all ignored, and thread scheduling is left to the Windows scheduling mechanism. In Windows, scheduling grants some permissions to all threads to run in the CPU.</p>
+    <p>Because the scheduling model in the development hardware environment is different from the Windows environment, design your thread priority with the development hardware in mind but also ensure that you can control synchronization among threads. In other words, do not assume that threads with higher priority will always block threads with lower priority. Instead, use a mechanism to control synchronization that will work the same way in any environment for blocking and synchronization among threads. If you design your program on the assumption that threads are blocked according to their priority, it may not work correctly in an environment where threads can move among multiple CPU cores.</p>
+  </div>
+</div>
+<h3 id="Anchor_83955697_h3_4">About the CPU Core Mask</h3>
+<p>A <em>CPU core mask</em> (or <em>affinity mask</em>) is a bit pattern that represents the CPU cores on which the current thread can operate.</p>
+<p>Use the <span class="ApiLink_nn__Bit64_nn__os__GetThreadAvailableCoreMask()_NN_NOEXCEPT">nn::os::GetThreadAvailableCoreMask()</span> function to get the CPU core mask that is currently set for the current thread. You can use the <span class="ApiLink_void_nn__os__SetThreadCoreMask(ThreadType_*thread|_int_idealCore|_Bit64_affinityMask)_NN_NOEXCEPT">nn::os::SetThreadCoreMask()</span> function to specify the CPU cores on which the current thread can run. At this time, if multiple CPU cores are set to be available, the thread will automatically move among CPU cores. If you want to bind threads to a single CPU core, design your program with the <span class="ApiLink_void_nn__os__SetThreadCoreMask(ThreadType_*thread|_int_idealCore|_Bit64_affinityMask)_NN_NOEXCEPT">nn::os::SetThreadCoreMask()</span> function to use a single core.</p>
+<p>If a priority core number has been specified, only that priority core number is set for the CPU core mask when each thread is created. If a priority core number has not been specified, only the default priority core number (CPU core 0) is set.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In the Windows environment and the development hardware environment, the scaling algorithm is different when the thread is moving among CPU cores specified by <span class="ApiLink_void_nn__os__SetThreadCoreMask(ThreadType_*thread|_int_idealCore|_Bit64_affinityMask)_NN_NOEXCEPT">nn::os::SetThreadCoreMask()</span>.</p>
+  </div>
+</div>
+<h4 id="Anchor_83955697_h4_1">Priority Core Numbers</h4>
+<p>The priority core number (ideal core) represents the preferred CPU core to use. By default, the priority core number for every thread is core number 0. As a result, immediately after a program starts, its main thread (<code>nnMain</code>) also runs on CPU core number 0.</p>
+<p>You can change the priority core number for each thread by using the following functions.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority|_int_idealCoreNumber)_NN_NOEXCEPT">nn::os::CreateThread()</span> (The version that has a parameter for specifying the priority core number of the target thread)</li>
+  <li>
+    <span class="ApiLink_void_nn__os__SetThreadCoreMask(ThreadType_*thread|_int_idealCore|_Bit64_affinityMask)_NN_NOEXCEPT">nn::os::SetThreadCoreMask()</span>
+  </li>
+</ul>
+<p>Note that if you create a thread using the version of the <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority)_NN_NOEXCEPT">nn::os::CreateThread()</span> function that does not have this parameter to specify the priority, the created thread takes 0 as its priority core number. That is, the created thread does not inherit the priority core number of the creating thread.</p>
+<p>If <code><span class="ApiLink_nn__os__IdealCoreDontCare">nn::os::IdealCoreDontCare</span></code> is specified for <span class="ApiLink_void_nn__os__SetThreadCoreMask(ThreadType_*thread|_int_idealCore|_Bit64_affinityMask)_NN_NOEXCEPT">nn::os::SetThreadCoreMask()</span>, the target thread will move as needed between the multiple CPU cores indicated by the bit pattern of <code>affinityMask</code> that is specified at the same time. That is, it will make effective use of idle CPUs without being bound to a specific CPU core.</p>
+<h3 id="Anchor_83955697_h3_5">Floating-Point Units</h3>
+<p>Floating-point unit (FPU) registers are treated as part of the thread context. In other words, they hold a different value for each thread.</p>
+<p>The setting value of floating-point units (each type of setting value specifiable using a function such as <code>std::fesetround()</code>) also holds a different value for each thread. When generating threads using <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority|_int_idealCoreNumber)_NN_NOEXCEPT">nn::os::CreateThread()</span>, the initial value of the FPU setting for the generated thread inherits the FPU setting value of the source thread.</p>
+<p>We recommend explicitly setting the FPU setting value of <code>nnMain()</code>, the main thread, near the beginning of <code>nnMain()</code>. (Also see <a href="../Pages/Page_105383443.html">nnMain() and Library Initialization</a>.)</p>
+<h2 id="Anchor_83955697_h2_3">Using Threads</h2>
+<p>To use threads, you must prepare an <span class="ApiLink_nn__os__ThreadType">nn::os::ThreadType</span> structure object as follows.<br />There are no restrictions on where the object can be defined.</p>
+<p>In addition, the stack region to be used by the thread is separately allocated in advance.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/nn_Macro.h&gt;
+#include &lt;nn/os.h&gt;
+</span>
+<span class="k">const</span> <span class="kt">size_t</span>                     <span class="n">threadStackSize</span> <span class="o">=</span> <span class="mi">8192</span><span class="p">;</span>
+<span class="n">NN_OS_ALIGNAS_THREAD_STACK</span> <span class="kt">char</span>  <span class="n">g_ThreadStack</span><span class="p">[</span> <span class="n">threadStackSize</span> <span class="p">];</span>
+<span class="nn">nn::os::</span><span class="n">ThreadType</span>               <span class="n">g_Thread</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You must also define and register a thread function like the following to serve as the entry function of the thread.<br />The thread function takes the form of <span class="ApiLink_nn__os__ThreadFunction">nn::os::ThreadFunction</span>, and is written in the following format.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span>  <span class="nf">ThreadEntryFunction</span><span class="p">(</span> <span class="kt">void</span> <span class="o">*</span><span class="n">arg</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Process to run in thread.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>After these preparations are complete, use the thread according to the following procedure.</p>
+<ol>
+  <li>
+    <p>First, create the thread. The thread structure is also initialized at this time.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">CreateThread</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Thread</span><span class="p">,</span> <span class="n">ThreadEntryFunction</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">g_ThreadStack</span><span class="p">,</span> <span class="n">threadStackSize</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">DefaultThreadPriority</span> <span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Thread creation failed.
+</span><span class="p">}</span> 
+<span class="c1">// Thread creation succeeded.
+</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>If the thread was successfully created, begin execution of the thread at an appropriate time.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">StartThread</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Thread</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To free the thread, wait for the process running on the thread to complete and then free the thread.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">WaitThread</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Thread</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">DestroyThread</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Thread</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_83955697_h2_4">Specific Example of Using Threads</h2>
+<p>For a specific example of using threads, see the <span class="ApiLink_PageSampleOsThread">Threading Feature Sample Program</span>.</p>
+<h2 id="Anchor_83955697_h2_5">Threading Feature API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority|_int_idealCoreNumber)_NN_NOEXCEPT">nn::os::CreateThread (with core number)</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority)_NN_NOEXCEPT">nn::os::CreateThread (without core number)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__DestroyThread(ThreadType_*thread)_NN_NOEXCEPT">nn::os::DestroyThread</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__StartThread(ThreadType_*thread)_NN_NOEXCEPT">nn::os::StartThread</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__WaitThread(ThreadType_*thread)_NN_NOEXCEPT">nn::os::WaitThread</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryWaitThread(ThreadType_*thread)_NN_NOEXCEPT">nn::os::TryWaitThread</span>
+  </li>
+  <li>
+    <span class="ApiLink_ThreadType_*_nn__os__GetCurrentThread()_NN_NOEXCEPT">nn::os::GetCurrentThread</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__YieldThread()_NN_NOEXCEPT">nn::os::YieldThread</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SleepThread(TimeSpan_time)_NN_NOEXCEPT">nn::os::SleepThread</span>
+  </li>
+  <li>
+    <span class="ApiLink_int_nn__os__ChangeThreadPriority(ThreadType_*thread|_int_priority)_NN_NOEXCEPT">nn::os::ChangeThreadPriority</span>
+  </li>
+  <li>
+    <span class="ApiLink_int_nn__os__GetThreadPriority(const_ThreadType_*thread)_NN_NOEXCEPT">nn::os::GetThreadPriority</span>
+  </li>
+  <li>
+    <span class="ApiLink_int_nn__os__GetThreadCurrentPriority(const_ThreadType_*thread)_NN_NOEXCEPT">nn::os::GetThreadCurrentPriority</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SetThreadName(ThreadType_*thread|_const_char_*threadName)_NN_NOEXCEPT">nn::os::SetThreadName</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SetThreadNamePointer(ThreadType_*thread|_const_char_*threadName)_NN_NOEXCEPT">nn::os::SetThreadNamePointer</span>
+  </li>
+  <li>
+    <span class="ApiLink_const_char_*_nn__os__GetThreadNamePointer(const_ThreadType_*thread)_NN_NOEXCEPT">nn::os::GetThreadNamePointer</span>
+  </li>
+  <li>
+    <span class="ApiLink_int_nn__os__GetCurrentCoreNumber()_NN_NOEXCEPT">nn::os::GetCurrentCoreNumber</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SetThreadCoreMask(ThreadType_*thread|_int_idealCore|_Bit64_affinityMask)_NN_NOEXCEPT">nn::os::SetThreadCoreMask</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__GetThreadCoreMask(int_*pOutIdealCore|_Bit64_*pOutAffinityMask|_const_ThreadType_*thread)_NN_NOEXCEPT">nn::os::GetThreadCoreMask</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__Bit64_nn__os__GetThreadAvailableCoreMask()_NN_NOEXCEPT">nn::os::GetThreadAvailableCoreMask</span>
+  </li>
+  <li>
+    <span class="ApiLink_ThreadId_nn__os__GetThreadId(const_ThreadType_*thread)_NN_NOEXCEPT">nn::os::GetThreadId</span>
+  </li>
+</ul>
+<h2 id="Anchor_83955697_h2_6">Things to Note When Using Threads</h2>
+<h3 id="Anchor_83955697_h3_6">Thread Stack Mirroring</h3>
+<p>In the NX32 and NX64 build environments, the stack region specified using <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority|_int_idealCoreNumber)_NN_NOEXCEPT">nn::os::CreateThread()</span> is mirrored in another space before being used as the stack region. At this time, accessing the memory region that is being mirrored is prohibited. Guard pages that deny access are placed on either side of the mirroring memory region. This action allows overflow and underflow access for the stack region to be captured as memory access violation exceptions in the created thread. However, because the guard pages are limited, stack access exceeding this size might not create a memory access violation exception. Use <span class="ApiLink_void_nn__os__DestroyThread(ThreadType_*thread)_NN_NOEXCEPT">nn::os::DestroyThread()</span> to cancel this mirroring.</p>
+<p>In the Win32 and x64 build environments, the stack region specified using <span class="ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority|_int_idealCoreNumber)_NN_NOEXCEPT">nn::os::CreateThread()</span> is only used minimally as a temporary work region; it is not used as the stack region of generated threads. NintendoSDK specifies the stack region for matching the NX build time and API specifications.</p>
+<h3 id="Anchor_83955697_h3_7">Memory Regions That Can Be Specified for Thread Stacks</h3>
+<p>As previously mentioned, while a mirrored region is being used as an actual thread stack region, access to the original region is prohibited. For this reason, stack memory that is already being used for any thread stack cannot be used as the stack region for a newly created thread. For example, an array of automatic variables defined in some function cannot be passed as the stack region of the <code><span class="ApiLink_nn__os__CreateThread">nn::os::CreateThread</span>()</code> function. If you do this, the API will detect an abnormal memory state and abort.</p>
+<p>Pass the following types of memory for the thread stack region.</p>
+<ul>
+  <li>A statically allocated memory region. (See the code example that follows.)</li>
+  <li>A memory region allocated from a <a href="../Pages/Page_83956147.html">memory heap</a> by the <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">nn::os::AllocateMemoryBlock()</span> function.</li>
+</ul>
+<p>The memory region specified for the thread stack must be aligned to <span class="ApiLink_nn__os__ThreadStackAlignment">nn::os::ThreadStackAlignment</span>. For example, if you were going to use a statically allocated memory region for the thread stack, you could define it in the following way. <span class="ApiLink_NN_OS_ALIGNAS_THREAD_STACK">NN_OS_ALIGNAS_THREAD_STACK</span> is a macro for specifying the alignment of the thread stack.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="n">NN_OS_ALIGNAS_THREAD_STACK</span> <span class="kt">char</span> <span class="n">g_ThreadStack</span><span class="p">[</span><span class="mh">0x4000</span><span class="p">];</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955697_h3_8">Notes on Ending Threads</h3>
+<p>You must not end a thread while it still has a <a href="../Pages/Page_83955800.html">mutex</a> or similar resource.<br />If a thread is terminated under such conditions, the mutex state becomes undefined.</p>
+<h3 id="Anchor_83955697_h3_9">Destroying Threads</h3>
+<p>Only run the process to destroy threads on threads that have not yet started executing or are already finished.<br />A thread cannot destroy itself, so be sure to perform the process from a different thread.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority|_int_idealCoreNumber)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a75f43e1d3c194c0d2173ef5d95785933' )
+SetUrl( 'ApiLink_void_nn__os__StartThread(ThreadType_*thread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a18eec7c4c4c298f7abaa9ef41d6de76b' )
+SetUrl( 'ApiLink_void_nn__os__DestroyThread(ThreadType_*thread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a9dbfcfb82583a9e34431e8c11d2411dd' )
+SetUrl( 'ApiLink_nn__os__ThreadType', '../../../Api/HtmlNX/structnn_1_1os_1_1_thread_type.html' )
+SetUrl( 'ApiLink_nn__os__HighestThreadPriority', '../../../Api/HtmlNX/namespacenn_1_1os.html#a44ed3b4dddf9ebfb69bc33167369b816' )
+SetUrl( 'ApiLink_nn__os__LowestThreadPriority', '../../../Api/HtmlNX/namespacenn_1_1os.html#a88510f5f630a16612aa8d479c10b56de' )
+SetUrl( 'ApiLink_nn__os__DefaultThreadPriority', '../../../Api/HtmlNX/namespacenn_1_1os.html#a5985811d04e64c0823ed758fd420591d' )
+SetUrl( 'ApiLink_nn__os__CreateThread', '../../../Api/HtmlNX/namespacenn_1_1os.html#a1e7db66d31e254873b613d4eadd0d716' )
+SetUrl( 'ApiLink_void_nn__os__YieldThread()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8bd5e5e72c058eb7d1b5f0ebfbb2cf6f' )
+SetUrl( 'ApiLink_nn__Result_nn__os__CreateThread(ThreadType_*thread|_ThreadFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_priority)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a1e7db66d31e254873b613d4eadd0d716' )
+SetUrl( 'ApiLink_nn__Bit64_nn__os__GetThreadAvailableCoreMask()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a91345e6e4543ab561f49480b89ae9a65' )
+SetUrl( 'ApiLink_void_nn__os__SetThreadCoreMask(ThreadType_*thread|_int_idealCore|_Bit64_affinityMask)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ac50b86561c15ee3e8195c83fddc8e732' )
+SetUrl( 'ApiLink_nn__os__IdealCoreDontCare', '../../../Api/HtmlNX/namespacenn_1_1os.html#a333a7029b85a51321a4c79176e91eab3' )
+SetUrl( 'ApiLink_nn__os__ThreadFunction', '../../../Api/HtmlNX/namespacenn_1_1os.html#abec974a5d224f7c62cfa9af4af3c954a' )
+SetUrl( 'ApiLink_PageSampleOsThread', '../../../Api/HtmlNX/_page_sample_os_thread.html' )
+SetUrl( 'ApiLink_void_nn__os__WaitThread(ThreadType_*thread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8070c91be85c5ccb36b56e9ff3a75b26' )
+SetUrl( 'ApiLink_bool_nn__os__TryWaitThread(ThreadType_*thread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a182856f23709b02b6022cc1b1765f69e' )
+SetUrl( 'ApiLink_ThreadType_*_nn__os__GetCurrentThread()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ad106866a5b13bc3d430104333966b479' )
+SetUrl( 'ApiLink_void_nn__os__SleepThread(TimeSpan_time)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a96b335e87af44c60a0d6dca75f11c9d2' )
+SetUrl( 'ApiLink_int_nn__os__ChangeThreadPriority(ThreadType_*thread|_int_priority)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ac7eb0e6eae11777e92308cdee62e6cb2' )
+SetUrl( 'ApiLink_int_nn__os__GetThreadPriority(const_ThreadType_*thread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a912a6d5e17c206344f177bc192cb1e50' )
+SetUrl( 'ApiLink_int_nn__os__GetThreadCurrentPriority(const_ThreadType_*thread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a9b6b2e5e1968e008dde27d6c4762b33d' )
+SetUrl( 'ApiLink_void_nn__os__SetThreadName(ThreadType_*thread|_const_char_*threadName)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a05cbcb85bd308694ec37eff49be93cf1' )
+SetUrl( 'ApiLink_void_nn__os__SetThreadNamePointer(ThreadType_*thread|_const_char_*threadName)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a90f2d7d33024e710d09a2b6d01b15522' )
+SetUrl( 'ApiLink_const_char_*_nn__os__GetThreadNamePointer(const_ThreadType_*thread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2941b0122ed1f1af2d7007af285d83b5' )
+SetUrl( 'ApiLink_int_nn__os__GetCurrentCoreNumber()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a4b94c321b41c4fb4d0a4e87473297c48' )
+SetUrl( 'ApiLink_void_nn__os__GetThreadCoreMask(int_*pOutIdealCore|_Bit64_*pOutAffinityMask|_const_ThreadType_*thread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a39edb8f3e676c4bab13047a5ad1894f8' )
+SetUrl( 'ApiLink_ThreadId_nn__os__GetThreadId(const_ThreadType_*thread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#adcae078c4e6e1d1746ff8bd0eb7f7d85' )
+SetUrl( 'ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a875bf6b3129f06654e641513c63017dd' )
+SetUrl( 'ApiLink_nn__os__ThreadStackAlignment', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8b116319f3d483f3805c193661f22150' )
+SetUrl( 'ApiLink_NN_OS_ALIGNAS_THREAD_STACK', '../../../Api/HtmlNX/os___thread_common_8h.html#a5ce0c3c0aaceb976178a60a18d90f470' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

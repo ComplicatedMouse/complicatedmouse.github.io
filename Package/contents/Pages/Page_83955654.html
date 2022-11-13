@@ -1,0 +1,266 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Info and Objects | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Info and Objects -->
+<div class="pagetitle" id="PageId_83955654">Info and Objects</div>
+<div class="text_separate">
+<h1 id="Anchor_83955654_h1_1">Info and Objects</h1>
+<p>Most classes in <code>gfx</code> use the following info and object configurations.</p>
+<h2 id="Anchor_83955654_h2_1">Overview</h2>
+<p>
+  <code>gfx</code> introduces the concept of <em>info</em> and <em>objects</em> to differentiate clearly between data that differs according to the low-level graphics API and data that is shared without depending on the low-level graphics API.<br />By doing so, only the data that can be handled in common and without depending on the low-level graphics API, for example, can be made into resources without excess or deficiency.</p>
+<p>The type of data that is not dependent on the low-level graphics API is called <em>info</em>. Info simply stores several variables only and does not communicate with the GPU. It fills the role as arguments for object initialization.</p>
+<p>An object is a class that depends on the low-level graphics API. There are as many variations as there are low-level graphics functions. It retains information unique to the target low-level graphics API to facilitate communication with the GPU.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955654/90145093.png" class="embedded-image" />
+  </span>
+</p>
+<p>Both info and objects follow the class rules in GFX. For more information, see <a href="../Pages/Page_83955626.html">Classes</a>. </p>
+<h2 id="Anchor_83955654_h2_2">Info</h2>
+<p>An Info class is a class that does not depend on the low-level graphics API and retains parameters that are handled in common.<br />Because this class does not depend on the low-level graphics API, it does not have any variations different from objects. Info classes are intended to be made into a resource.</p>
+<p>Info is not dependent on an object but is completed by it.</p>
+<p>Info provides parameter values that are needed to initialize the corresponding object. Each parameter is set by using a corresponding <code>Set*</code> function. Each parameter set in Info is obtained by using a corresponding <code>Get*</code> function.<br />Each parameter is not unique to a low-level graphics API, and the parameters of the enumerated values use enumerated types that are defined with GFX.<br />Parameters of no interest can be set to the default value in GFX by calling the <code>SetDefault</code> function.<br />Also, because making a resource is anticipated, a reserved region is added at the end of the memory that is allocated for the parameter. </p>
+<p>An Info class has a name with an <code>Info*</code> suffix .</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::gfx::*Info</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>All <code>Info</code> classes have the following interfaces.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Interfaces</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Constructor.</td>
+      <td>Each parameter is initialized to zero</td>
+    </tr>
+    <tr>
+      <td>
+        <code>SetDefault</code>
+      </td>
+      <td>Each parameter is initialized to the default value.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The default value is different from the zero-initialization value set by the constructor, and is typically a frequently-used value.</p>
+<p>After being used to initialize an object, Info can be freed because it is not referenced by the object. This can be declared as a temporary variable when initializing the object.</p>
+<h2 id="Anchor_83955654_h2_3">Object</h2>
+<p>Object is the class that depends on the low-level graphics API and retains states to facilitate communication with the GPU.<br />Because of this dependence on the low-level graphics API, it provides variations to support each low-level graphics API element, and the content of each is different.<br />For more information, see <a href="../Pages/Page_83956170.html">Low Level Graphics API Variations</a>.</p>
+<p>Objects, unlike Info, do not have unique suffixes.</p>
+<p>Objects are initialized by using the corresponding Info. The corresponding Info is defined as InfoType.<br />As with several low-level graphics APIs, after you initialize an object, you cannot change it. Object immutability reduces the need to achieve consistency and verification when working with drivers. To make a change, first free the object, and then initialize it again using Info.<br />Also, the content of Info during initialization cannot be obtained. To get the content of Info during initialization, a method that always manages as a set with information can be used.</p>
+<p>Objects are designed with a private copy constructor and with copying prohibited because we do not recommend copying objects and prohibit it in some cases for low-level APIs. There is an exception, however, for objects that are not contained in a low-level API and whose data structure is not altered by a low-level API. For these objects, the data constructor is public.</p>
+<p>Devices are an exception, and all objects require a device for being initialized and freed.</p>
+<p>Excluding devices, the following interfaces are shared by all objects.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Interfaces</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>InfoType</td>
+      <td>Type definition of the corresponding Info</td>
+    </tr>
+    <tr>
+      <td>Constructor.</td>
+      <td>Zero-initializes the object</td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <strong>When a Memory Pool Is Not Necessary</strong>
+        </p>
+        <p>Initialize( <span class="ApiLink_nn__gfx__Device">nn::gfx::Device</span>* pDevice, const InfoType&amp; info )</p>
+      </td>
+      <td>Initializes an object from the info information.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <strong>When Requesting a Memory Pool</strong>
+        </p>
+        <p>Initialize( <span class="ApiLink_nn__gfx__Device">nn::gfx::Device</span>* pDevice, const InfoType&amp; info, <span class="ApiLink_nn__gfx__MemoryPool">nn::gfx::MemoryPool</span>* pMemoryPool, ptrdiff_t memoryPoolOffset, size_t memoryPoolSize )</p>
+      </td>
+      <td>Initializes an object from the <code><em>info</em></code> information and sets the memory pool to use.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>Finalize( <span class="ApiLink_nn__gfx__Device">nn::gfx::Device</span>* pDevice )</code>
+      </td>
+      <td>Freeing an Object</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955654_h3_1">Additional Requested Memory</h3>
+<p>Several objects request additional memory for initialization. This must be passed before initialization.<br />The additional requested memory must be set using the <code>SetMemory()</code> function when <code>GetRequiredMemorySize()</code> returns a value greater than zero.</p>
+<p>Alignment of the start address of the additional requested memory may be requested.<br />This alignment is defined as RequiredMemoryInfo_Alignment, and the memory passed as the additional requested memory must follow this alignment.</p>
+<p>Note that the size and alignment of the additional requested memory differs according to the variation of the low-level graphics API.</p>
+<p>The following shared interfaces are used for additional requested memory.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Interfaces</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>RequiredMemoryInfo_Alignment</td>
+      <td>Alignment for the memory to follow that is passed to <code>SetMemory</code>.</td>
+    </tr>
+    <tr>
+      <td>GetRequiredMemorySize( const InfoType&amp; info )</td>
+      <td>Returns the size of the additional requested memory required to initialization with this information.</td>
+    </tr>
+    <tr>
+      <td>SetMemory( void* memory, size_t size )</td>
+      <td>Sets the required additional requested memory before initialization.</td>
+    </tr>
+    <tr>
+      <td>GetMemory()</td>
+      <td>Returns a pointer to the additional requested memory that was set.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Even if the object is freed, the additional requested memory is not freed. If the size and alignment for memory required for the next initialization conforms to the memory that is already set, then the next initialization can be performed without modifications.</p>
+<h3 id="Anchor_83955654_h3_2">User Pointers</h3>
+<p>Many <code>gfx</code> objects include a user pointer that users can freely set and get.<br />You can set any user pointer using the <code>SetUserPtr()</code> function and you can get any user pointer using the <code>GetUserPtr()</code> function.<br />Pointers are principally used when you want to bind additional information to particular objects. </p>
+<p>With the exception of <code>SetUserPtr()</code> and <code>GetUserPtr()</code>, the <code>gfx</code> library makes no other use of user pointers, including reading and writing them.</p>
+<h3 id="Anchor_83955654_h3_3">Restrictions on Finalization</h3>
+<p>Objects can be freed if they are not being used by the GPU.</p>
+<p>If you call the <code><span class="ApiLink_nn__gfx__Queue">Sync</span></code> function of the <code><span class="ApiLink_void_nn__gfx__TQueue__Sync()_NN_NOEXCEPT">nn::gfx::Queue</span></code> class to attain rough synchronization, you can be certain when control returns from the function that all commands issued up to that point have completed, so you can finalize objects any time until the next call to the <code><span class="ApiLink_void_nn__gfx__TQueue__ExecuteCommand(TCommandBuffer__Target___*pCommandBuffer|_TFence__Target___*pFence)_NN_NOEXCEPT">ExecuteCommand</span></code> function. </p>
+<p>Synchronization at the command buffer unit can be done using <a href="../Pages/Page_83955552.html">Fence</a>.<br />If a fence that is submitted with a command buffer is in a signaled state, the fact that the commands contained in that command buffer have been executed by the GPU can be used to determine whether those commands can be freed. </p>
+<h2 id="Anchor_83955654_h2_4">Info Classes That Depend on Low-Level Graphics APIs</h2>
+<p>Some Info classes also have versions that depend on low-level graphics APIs. These classes can be used instead of ordinary Info classes. As with objects, variations exist for each low-level graphics API. These classes are the same as ordinary Info classes with respect to unsupported low-level graphics APIs.</p>
+<p>The names of Info classes that are dependent on low-level graphics APIs are prefixed with the letter &quot;T&quot; but are otherwise the same as ordinary Info class names.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::gfx::T*Info&lt;&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Template parameters can be used to specify the target <a href="../Pages/Page_83956170.html">variation of a low-level graphics API</a>. If they are omitted, it is equivalent to specifying the low-level graphics API of the current target.</p>
+<p>Info classes that depend on a low-level graphics API do not provide a <code>Get</code> method but otherwise have the same interface as ordinary Info classes. This allows you to use the same code to configure both ordinary Info classes and Info classes that depend on a low-level graphics API by just changing the type declared by the code. In addition, the class also includes the following interface.</p>
+<table class="table">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Interfaces</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <code>ConvertFromInfo( T*Info* <em>pDestInfo</em>, const *Info&amp; <em>info</em> )</code>
+      </td>
+      <td>Converts an instance of an ordinary Info class into an instance of an Info class that is dependent on a low-level graphics API.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the <code>ConvertFromInfo</code> function to take an instance of an ordinary Info class and create an instance of an Info class that depends on a low-level graphics API with the same settings.</p>
+<p>It is possible to pass an instance of an Info class that depends on a low-level graphics API as a parameter to an interface that expects an instance of an ordinary Info class (like an object's <code>Initialize</code> method).</p>
+<p>Info classes that depend on low-level graphics APIs are mainly used for<a href="../Pages/Page_95694638.html">interoperability with those low-level graphics APIs</a>. Info classes that depend on low-level graphics APIs do not normally need to be used.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__Device', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a911efa3d8dce04d59a39b97d97079cd7' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPool', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ad620d8208dd309eb7c4dd5973a6aeee5' )
+SetUrl( 'ApiLink_nn__gfx__Queue', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#afceb1f20a49ed58f99e33f2324312e1b' )
+SetUrl( 'ApiLink_void_nn__gfx__TQueue__Sync()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_queue.html#afc21092b4436c72ed0ca8d23c6a2ff78' )
+SetUrl( 'ApiLink_void_nn__gfx__TQueue__ExecuteCommand(TCommandBuffer__Target___*pCommandBuffer|_TFence__Target___*pFence)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_queue.html#a3513accbae08380417a92fb51043f1e8' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

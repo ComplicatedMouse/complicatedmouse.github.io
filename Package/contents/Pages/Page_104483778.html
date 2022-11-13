@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Performance Scaling Methods | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Performance Scaling Methods -->
+<div class="pagetitle" id="PageId_104483778">Performance Scaling Methods</div>
+<div class="text_separate">
+<p>This section describes how to scale performance. Combining these methods lessens the performance difference between the console and handheld modes, enabling you to support them both in a more equitable fashion.</p>
+<p>Some of the following content may seem to be matter of course for developers who have done PC development work.</p>
+<h1 id="Anchor_104483778_h1_1">Overview</h1>
+<p>Performance scaling refers to changing the amount of the following resources, as necessary.</p>
+<ul>
+  <li>CPU</li>
+  <li>GPU</li>
+  <li>Memory usage</li>
+  <li>Memory region</li>
+</ul>
+<p>The memory size does not change when switching between console mode and handheld mode for the NX, so it is not necessary to consider scaling the memory usage from a performance perspective. That said, note that there may be cases where games will work in handheld mode, but will have a memory bottleneck in console mode.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Starting with NX Add-On 0.8.0, the memory clock during handheld mode is changed from 1600 MHz to 1331 MHz. For this reason, you must consider whether there may be any problems with bandwidth while in handheld mode.</p>
+  </div>
+</div>
+<p>The following table shows the possible changes to game applications that can be made to scale performance. Notes on each follow.</p>
+<p>Because the game application cannot control when to switch between console and handheld modes, you must implement a game mechanism that allows for performance scaling at the desired timing.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Method</th>
+      <th>Target</th>
+    </tr>
+    <tr>
+      <td>Screen Render Resolution</td>
+      <td>GPU, memory usage, memory region</td>
+    </tr>
+    <tr>
+      <td>Multipass Render Resolution</td>
+      <td>GPU, memory usage, memory region</td>
+    </tr>
+    <tr>
+      <td>Frame Per Second Change (2x, 3x, ...)</td>
+      <td>CPU, GPU, memory region</td>
+    </tr>
+    <tr>
+      <td>Variable Frame Rate</td>
+      <td>CPU, GPU, memory region</td>
+    </tr>
+    <tr>
+      <td>MSAA Settings</td>
+      <td>Memory usage, memory region</td>
+    </tr>
+    <tr>
+      <td>HDR Pixel Format</td>
+      <td>Memory usage, memory region</td>
+    </tr>
+    <tr>
+      <td>Shader Complexity, Shadow Filtering</td>
+      <td>GPU</td>
+    </tr>
+    <tr>
+      <td>Post-Process Settings (Anti-Alias, Blur, Tone Mapping)</td>
+      <td>GPU, memory region</td>
+    </tr>
+    <tr>
+      <td>Scene LOD (Number of Objects)</td>
+      <td>
+        <p>CPU, GPU, memory region</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Geometry LOD</td>
+      <td>GPU</td>
+    </tr>
+    <tr>
+      <td>Texture LOD</td>
+      <td>Memory usage, memory region</td>
+    </tr>
+    <tr>
+      <td>Particle LOD</td>
+      <td>CPU, GPU, memory region</td>
+    </tr>
+    <tr>
+      <td>Animation LOD</td>
+      <td>CPU</td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>This section describes methods of changing between the console and handheld modes. It is also possible to use the preceding methods at other times. For example, you may want to use these methods to avoid a reduction in frame rate.</p>
+<h2 id="Anchor_104483778_h2_1">Screen Render Resolution</h2>
+<p>Changing the render target resolution for the main display output enables scaling for the GPU and memory. Reducing the resolution reduces the number of pixels the GPU needs to fill: the GPU load goes down. In addition, the memory bandwidth is reduced because the number of pixels handled is reduced.</p>
+<h2 id="Anchor_104483778_h2_2">Multipass Render Resolution</h2>
+<p>Changing the render target resolution for the multipass render midway results, which are not output to the display, enables scaling for the GPU and memory. Reducing the resolution reduces the number of pixels the GPU needs to fill: the GPU load goes down. In addition, the memory bandwidth is reduced because the number of pixels handled is reduced. For an effective reduction, you must appropriately distribute the balance for the amount reduced in each path.</p>
+<h2 id="Anchor_104483778_h2_3">Frame Per Second Change</h2>
+<p>Changing the frame per second (FPS) rate enables scaling for the GPU, CPU, and memory. Lowering the FPS reduces the number of frames processed by the GPU and CPU per unit of time, which can lower the processing load for the GPU and CPU. In addition, the memory bandwidth is reduced because the number of frames handled is reduced.</p>
+<p>Note that changing the base FPS rate can have an effect on the nature of the game.</p>
+<h2 id="Anchor_104483778_h2_4">Variable Frame Rate</h2>
+<p>Changing the variable frame rate enables scaling for the GPU, CPU, and memory. Changing the frame rate in conjunction with the processing load on the GPU and CPU can enable the frame rate to automatically drop when switching to handheld mode. This change can reduce the processing load for the GPU and CPU in addition to the memory bandwidth.</p>
+<h2 id="Anchor_104483778_h2_5">MSAA Settings</h2>
+<p>Changing the number of sample pixels used for MSAA computations enables scaling for the memory. Reducing the number of samples handled at the same time reduces the memory bandwidth in exchange for anti-aliasing.</p>
+<h2 id="Anchor_104483778_h2_6">HDR Pixel Format</h2>
+<p>Changing the HDR image format enables scaling for the memory. Using a smaller-sized format reduces the amount of memory used and the memory bandwidth in exchange for dynamic range and precision.  In addition, using a smaller format can result in increases to rendering back-end performance and texture performance. </p>
+<h2 id="Anchor_104483778_h2_7">Shader Complexity, Shadow Filtering</h2>
+<p>Changing the shader computation method enables scaling for the GPU. Using shader computation approximations and reducing the number of texture samples can reduce the GPU's processing load.</p>
+<h2 id="Anchor_104483778_h2_8">Post-Processing Settings</h2>
+<p>Changing whether post-processing procedures such as anti-aliasing, blurring, and tone mapping are enabled or disabled, in addition to changing computation methods, enables scaling for the GPU and memory. Disabling some of the post-processing procedures that occur in the GPU and reducing the number of samples used and using approximations in post-processing computations can reduce the GPU's processing load and the memory bandwidth.</p>
+<h2 id="Anchor_104483778_h2_9">Scene LOD</h2>
+<p>Changing the number of rendered objects enables scaling for the GPU, CPU, and memory. Reducing the number of rendered objects can reduce the GPU and CPU processing load and memory bandwidth in exchange for the level of scene detail and the volume of data.</p>
+<h2 id="Anchor_104483778_h2_10">Geometry LOD</h2>
+<p>Changing the number of rendered model vertices (primitives), using a geometry shader or other method, enables scaling for the GPU. Reducing the number of model vertices can, in reducing the number of primitives the GPU computes in exchange for model precision, reduce the GPU processing load.</p>
+<h2 id="Anchor_104483778_h2_11">Texture LOD</h2>
+<p>Changing the size of the used texture enables scaling for the memory. Using a smaller-sized texture reduces the amount of memory used and the memory bandwidth in exchange for the level of texture detail.</p>
+<h2 id="Anchor_104483778_h2_12">Particle LOD</h2>
+<p>Changing the number of rendered particles and their computation method enables scaling for the GPU, CPU, and memory. Reducing the number of rendered particles and using approximations in computations, can reduce the GPU and CPU processing loads and the memory bandwidth, in exchange for effect results.</p>
+<h2 id="Anchor_104483778_h2_13">Animation LOD</h2>
+<p>Changing the animation update interval enables scaling for the CPU. Enlarging the interval at which animations (processed by the CPU) are updated can reduce CPU processing loads in exchange for animation precision. </p>
+<p>However, thinning out animations critical to game logic can result in increased debugging costs. Be careful. </p>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

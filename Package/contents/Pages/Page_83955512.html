@@ -1,0 +1,378 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Custom Shaders | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Custom Shaders -->
+<div class="pagetitle" id="PageId_83955512">Custom Shaders</div>
+<div class="text_separate">
+<h1 id="Anchor_83955512_h1_1">Custom Shaders</h1>
+<p>Customizing the effect standard shaders enables the expression of effects not supported with standard shaders when you implement shader expressions that are unique to your application.<br />By implementing lighting, fog, or shadows, drawings can be made more natural with 3D model rendering.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>There is a custom shader sample program (<code>VfxCustomShader</code>).</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955512_h2_1">Custom Shader Overview</h2>
+<p>Custom shaders are implemented when the vertex and fragment shader code that a user inserts within a standard shader is called with a callback function.</p>
+<p>Users can add code adjusting vertex position and color for vertex shaders or output color for pixel shaders to callback functions. They can also add variables to pass from vertex shaders to pixel shaders to realize the desired effect. The following example shows a custom vertex shader.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span> <span class="n">std140</span><span class="p">,</span> <span class="n">binding</span> <span class="o">=</span> <span class="n">SYS_CUSTOM_SHADER_UNIFORM_BLOCK_ID_0</span> <span class="p">)</span> <span class="n">uniform</span> <span class="n">sysCustomShaderUniformBlock0</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span>    <span class="n">applicationAlpha</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// Declaration for calling a callback at the end of a vertex shader.
+</span><span class="cp">#define USE_USR_FINAL_ADJUSTMENT_VERTEX_PROCSS
+</span><span class="kt">void</span> <span class="nf">FinalAdjustmentVertexProcess</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">sysMasterAlpha</span> <span class="o">*=</span> <span class="n">applicationAlpha</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>    <span class="c1">// Perform a fade, in conjunction with application status.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>To use a callback function, you must include a definition for its use, such as <code>#define USE_USR_FINAL_ADJUSTMENT_VERTEX_PROCSS</code>, at the head of the callback function.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955512_h2_2">Editing and Saving Custom Shader Parameters in EffectMaker</h2>
+<p>To edit and save custom shader parameters in EffectMaker and convert them to binary, you must make the following preparations.</p>
+<ul>
+  <li>Creating a User Data Definition File</li>
+  <li>Creating a Custom Shader Settings File</li>
+  <li>Add these files to the project configuration file.</li>
+</ul>
+<h3 id="Anchor_83955512_h3_1">Creating a User Data Definition File</h3>
+<p>You can create a user data definition file that includes parameter definitions that you create and enables the custom UI to be recognized and displayed in EffectMaker. For more information, see the <a href="../Pages/Page_107778324.html">User Data Definitions</a> page.<br />Code the following block at the start of the created custom shader parameter structure, setting the <code>UserDataDefinition</code> element's <code>Kind</code> attribute to <code>CustomShader</code> to declare that it is a user data definition for a custom shader.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19</td>
+      <td class="code">
+        <div class="codeblock"><pre>/// <span class="err">&lt;</span>?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;? &gt;
+/// <span class="nt">&lt;UserDataDefinition</span> <span class="na">Kind=</span><span class="s">&quot;CustomShader&quot;</span>
+<span class="err">/</span>//                     Name=&quot;Custom Shader Sample&quot;
+///                     Version=&quot;0&quot;&gt;
+///   <span class="nt">&lt;ParameterDefinition</span> <span class="na">Name=</span><span class="s">&quot;Shader flags&quot;</span>
+<span class="err">/</span>//                        Type=&quot;CheckButtons&quot;
+///                        BuiltInMember=&quot;ShaderFlags&quot;&gt;
+///     <span class="nt">&lt;OptionGroup&gt;</span>
+///       <span class="nt">&lt;Option</span> <span class="na">BitIndex=</span><span class="s">&quot;0&quot;</span> <span class="na">Value=</span><span class="s">&quot;Change Color&quot;</span> <span class="nt">/&gt;</span>
+///       <span class="nt">&lt;Option</span> <span class="na">BitIndex=</span><span class="s">&quot;1&quot;</span> <span class="na">Value=</span><span class="s">&quot;Change Position&quot;</span> <span class="nt">/&gt;</span>
+///       <span class="nt">&lt;Option</span> <span class="na">BitIndex=</span><span class="s">&quot;2&quot;</span> <span class="na">Value=</span><span class="s">&quot;Sample Light&quot;</span> <span class="nt">/&gt;</span>
+///       <span class="nt">&lt;Option</span> <span class="na">BitIndex=</span><span class="s">&quot;3&quot;</span> <span class="na">Value=</span><span class="s">&quot;Check Normal&quot;</span> <span class="nt">/&gt;</span>
+///     <span class="nt">&lt;/OptionGroup&gt;</span>
+///   <span class="nt">&lt;/ParameterDefinition&gt;</span>
+struct ResCustomShader
+{
+　　　Anything below：ResCustomShader is the same as the custom action / emitter extension parameters.
+　　　:
+};</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The user data definition for the custom shader can use a built-in parameter for branched implementation of shaders. In the preceding example, the <code>BuiltInMember</code> attribute of the <code>ParameterDefinition</code> element is set to <code>ShaderFlags</code>, and different combinations of the four check boxes can be used to manipulate the definitions in the shader. The definitions for <code>CUSTOM_SHADER_FLAG_0 ~ 3</code> can be enabled or disabled, so by writing declarations like the following at the start of your code, you can branch at any definition name.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#ifdef CUSTOM_SHADER_FLAG_0
+#define CHANGE_COLOR
+#endif
+#ifdef CUSTOM_SHADER_FLAG_1
+#define CHANGE_POSITION
+#endif
+#ifdef CUSTOM_SHADER_FLAG_2
+#define SAMPLE_LIGHT
+#endif
+#ifdef CUSTOM_SHADER_FLAG_3
+#define CHECK_NORMAL
+#endif
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following table shows the combinations of built-in parameters and controls that can be used.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Type</th>
+      <th>BuiltInMember</th>
+      <th>Symbols Defined in the Shader</th>
+    </tr>
+    <tr>
+      <td>CheckButtons</td>
+      <td>ShaderFlags</td>
+      <td>
+        <p>CUSTOM_SHADER_FLAG_0 ~ 63 (can choose many)</p>
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="8">RadioButtons</td>
+      <td>ShaderSwitch0</td>
+      <td>
+        <p>CUSTOM_SHADER_SWITCH_FLAG_0 ~ 7 (choose one)</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ShaderSwitch1</td>
+      <td>CUSTOM_SHADER_SWITCH_FLAG_8 ~ 15 (choose one)</td>
+    </tr>
+    <tr>
+      <td>ShaderSwitch2</td>
+      <td>CUSTOM_SHADER_SWITCH_FLAG_16 ~ 23 (choose one)</td>
+    </tr>
+    <tr>
+      <td>ShaderSwitch3</td>
+      <td>CUSTOM_SHADER_SWITCH_FLAG_24 ~ 31 (choose one)</td>
+    </tr>
+    <tr>
+      <td>ShaderSwitch4</td>
+      <td>CUSTOM_SHADER_SWITCH_FLAG_32 ~ 39 (choose one)</td>
+    </tr>
+    <tr>
+      <td>ShaderSwitch5</td>
+      <td>CUSTOM_SHADER_SWITCH_FLAG_40 ~ 47 (choose one)</td>
+    </tr>
+    <tr>
+      <td>ShaderSwitch6</td>
+      <td>CUSTOM_SHADER_SWITCH_FLAG_48 ~ 55 (choose one)</td>
+    </tr>
+    <tr>
+      <td>ShaderSwitch7</td>
+      <td>CUSTOM_SHADER_SWITCH_FLAG_56 ~ 63 (choose one)</td>
+    </tr>
+  </tbody>
+</table>
+<p>The built-in parameters are not included in the structure members so they are defined before <code>struct</code>. The member definitions must be sandwiched between <code>ParameterDefinition</code> tags. The only items the element must contain are the settings for <code>OptionGroup</code>.</p>
+<p>The values specified for <code>BulitInMember</code> will work if you omit &quot;Shader&quot; and write them as &quot;Flags, Switch0&hellip;&hellip;&quot; If you will be saving these elements to an emitter set (ESET) file, attach &quot;Shader&quot; to their names.<br />Also note that you cannot use the same names as these for structure members. </p>
+<h3 id="Anchor_83955512_h3_2">Creating a Custom Shader Settings File</h3>
+<p>Create a custom shader settings file to import the user data definitions file that you created into EffectMaker.<br />A maximum of eight custom shaders can be added to EffectMaker. You must create custom shader files for each custom shader, and settings files for each custom shader file.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955512/108659477.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<h4 id="Anchor_83955512_h4_1">Custom Shader File</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot;? &gt;
+<span class="nt">&lt;CustomShaderUIDefinition</span> <span class="na">Label=</span><span class="s">&quot;Custom Shader1&quot;</span> <span class="na">Label_EN=</span><span class="s">&quot;CustomShader1&quot;</span><span class="nt">&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;VertexShaderPaths&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Vertex shader file --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ShaderPath&gt;</span>Shader\CustomShader_SampleDef.glsl<span class="nt">&lt;/ShaderPath&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ShaderPath&gt;</span>Shader\CustomShader_Sample.vsh<span class="nt">&lt;/ShaderPath&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;/VertexShaderPaths&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;FragmentShaderPaths&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Pixel shader file --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ShaderPath&gt;</span>Shader\CustomShader_SampleDef.glsl<span class="nt">&lt;/ShaderPath&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ShaderPath&gt;</span>Shader\CustomShader_Sample.fsh<span class="nt">&lt;/ShaderPath&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;/FragmentShaderPaths&gt;</span>
+&nbsp;&nbsp;<span class="cm">&lt;!-- User data definition file --&gt;</span>
+　<span class="nt">&lt;DataModelSetting</span> <span class="na">DefinitionFile=</span><span class="s">&quot;CustomShader1.h&quot;</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/CustomShaderUIDefinition&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h4 id="Anchor_83955512_h4_2">Custom Shader Settings File</h4>
+<p>
+  <code>&lt;GeneralCustomShaders&gt;</code> describes shader code that can be used for all custom shaders to be added.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot;? &gt;
+<span class="nt">&lt;CustomShaderUIDefList&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;GeneralCustomShaders&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;VertexShaderPaths&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Common vertex shader --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ShaderPath&gt;</span>Shader\CustomShader_General.vsh<span class="nt">&lt;/ShaderPath&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/VertexShaderPaths&gt;</span>
+　&nbsp;&nbsp;<span class="nt">&lt;ComputeShaderPaths&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Common compute shader --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Used to implement the ComputeShader version of custom field --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ShaderPath&gt;</span>Shader\CustomShader_General.csh<span class="nt">&lt;/ShaderPath&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/ComputeShaderPaths&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;FragmentShaderPaths&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Common pixel shader --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ShaderPath&gt;</span>Shader\CustomShader_General.fsh<span class="nt">&lt;/ShaderPath&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/FragmentShaderPaths&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;/GeneralCustomShaders&gt;</span>
+&nbsp;&nbsp;<span class="cm">&lt;!-- Custom shader file --&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;DefLinkData</span> <span class="na">SettingId=</span><span class="s">&quot;1&quot;</span><span class="nt">&gt;</span>CustomShader1.xml<span class="nt">&lt;/DefLinkData&gt;</span>
+<span class="nt">&lt;/CustomShaderUIDefList&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_83955512_h3_3">Registering in the Project Settings File</h3>
+<p>To use the custom shader parameter in EffectMaker, you must enter the path of the custom shader settings file that you created in the Project Settings file. For more information, see <a href="../Pages/Page_83955992.html">Project Settings File</a>.<br />You can also check how things work without using the Project Settings file by setting an emitter extended parameter settings file in EffectMaker's options.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955512_h2_3">Accessing a User-Proprietary Constant Buffer Within the Described Shader</h2>
+<p>You can see more advanced shader effects by using a user-proprietary constant buffer within your described vertex and pixel shaders. By using a user data definitions file in your constant buffer, you can also link them to parameters set by EffectMaker.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_83955731.html">Custom Shader Examples</a>
+      </th>
+      <td>There is a tutorial that uses a proprietary constant buffer, using the <code>RenderState</code> callback function.<br /></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955512_h2_4">Using Textures Outside the Control of the Effects Runtime</h2>
+<p>You can access a light map generated online within the application using your described pixel shader, and apply a light map to effects.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_83955731.html">Custom Shader Examples</a>
+      </th>
+      <td>
+        <p>There is a tutorial that sets textures, using the <code>RenderState</code> callback function.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955512_h2_5">Variables and Macros Available Within Custom Shaders</h2>
+<p>Variables and macros prepared beforehand by the system are available for use within custom shaders.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_218170681.html">Variables and Macros Available Within Custom Shaders</a>
+      </th>
+      <td>
+        <p>Describes the variables and macros available to the user within custom shaders.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83955512_h2_6">Customizable Functions Within Custom Shaders</h2>
+<p>Some effect standard functions and the clip functions can be independently defined within custom shaders.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_218170764.html">Customizable Functions Within Custom Shaders</a>
+      </th>
+      <td>
+        <p>Describes the effect standard functions that can be independently customized by the user within custom shaders.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

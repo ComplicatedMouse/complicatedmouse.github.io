@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Blending | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Blending -->
+<div class="pagetitle" id="PageId_823379641">Blending</div>
+<div class="text_separate">
+<h1 id="Anchor_823379641_h1_1">Overview</h1>
+<p>This page describes the blending feature (<code><span class="ApiLink_nn__g3d__ShapeAnimBlender">nn::g3d::ShapeAnimBlender</span></code>) for <a href="../Pages/Page_348344512.html">Shape Animation</a>.</p>
+<p>The blending feature enables you to apply multiple shape animations to a single model at the same time.</p>
+<h1 id="Anchor_823379641_h1_2">How to Use</h1>
+<ol>
+  <li>
+    <p>Prepare <code><span class="ApiLink_nn__g3d__ModelObj">nn::g3d::ModelObj</span></code> for applying the shape animations and several <code><span class="ApiLink_nn__g3d__ShapeAnimObj">nn::g3d::ShapeAnimObj</span></code> instances with <a href="../Pages/Page_348344512.html">Shape Animation</a> completed through step 5.<br /></p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// The instance of a model having a shape based on the shape animation.
+</span><span class="nn">nn::g3d::</span><span class="n">ModelObj</span> <span class="n">modelObj</span><span class="p">;</span>
+
+<span class="c1">// The shape animation instance to be blended.
+</span><span class="nn">nn::g3d::</span><span class="n">ShapeAnimObj</span> <span class="n">shapeAnimObjA</span><span class="p">;</span>
+<span class="nn">nn::g3d::</span><span class="n">ShapeAnimObj</span> <span class="n">shapeAnimObjB</span><span class="p">;</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      <br />
+    </p>
+  </li>
+  <li>
+    <p>Use <code><span class="ApiLink_nn__g3d__ShapeAnimBlender__Builder">nn::g3d::ShapeAnimBlender::Builder</span></code> to build <code><span class="ApiLink_nn__g3d__ShapeAnimBlender">nn::g3d::ShapeAnimBlender</span></code>.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::mem::</span><span class="n">StandardAllocator</span> <span class="n">standardAllocator</span><span class="p">;</span>   <span class="c1">// The allocator.
+</span><span class="nn">nn::g3d::</span><span class="n">ShapeAnimBlender</span> <span class="n">shapeAnimBlender</span>      <span class="c1">// The shape animation blender instance.
+</span>
+<span class="c1">//----------------------------------------------------------------------------------------------------------------------------------
+</span>
+
+<span class="nn">nn::g3d::ShapeAnimBlender::</span><span class="n">Builder</span> <span class="n">builder</span><span class="p">;</span>         <span class="c1">// Variable for building shape animation resource instance.
+</span>
+<span class="c1">// Set the model resource to be animated.
+// Set the parameters required for blending.
+</span><span class="n">builder</span><span class="p">.</span><span class="n">Reserve</span><span class="p">(</span><span class="n">modelObj</span><span class="p">.</span><span class="n">GetResource</span><span class="p">());</span> 
+
+<span class="c1">// Calculate the memory size required to build the instance.
+</span><span class="n">builder</span><span class="p">.</span><span class="n">CalculateMemorySize</span><span class="p">();</span>
+
+<span class="c1">// Get the memory size required to build the instance.
+</span><span class="kt">size_t</span> <span class="n">workMemorySize</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">GetWorkMemorySize</span><span class="p">();</span>
+
+<span class="c1">// Reserve the memory required to build the instance.
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">pWorkMemory</span> <span class="o">=</span> <span class="n">standardAllocator</span><span class="p">.</span><span class="n">Allocate</span><span class="p">(</span><span class="n">workMemorySize</span><span class="p">,</span> <span class="nn">nn::g3d::ShapeAnimBlender::</span><span class="n">Alignment_Buffer</span><span class="p">);</span>
+<span class="c1">// Build the instance.
+</span><span class="kt">bool</span> <span class="n">isSucceeded</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">Build</span><span class="p">(</span><span class="o">&amp;</span><span class="n">shapeAnimBlender</span><span class="p">,</span> <span class="n">pWorkMemory</span><span class="p">,</span> <span class="n">workMemorySize</span><span class="p">);</span>
+<span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">isSuceeded</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      <br />
+    </p>
+  </li>
+  <li>
+    <p>
+      <span style="letter-spacing: 0.0px;">
+        <span style="letter-spacing: 0.0px;">Set the shape animation instance you want to blend and the blending ratio (amount) for the <code><span class="ApiLink_nn__g3d__ShapeAnimBlender">nn::g3d::ShapeAnimBlender</span></code> you built, and apply it to the model instance.<br />If the sum of the blend amounts does not total <code>1</code>, it is normalized in the <code><span class="ApiLink_nn__g3d__ShapeAnimBlender__ApplyTo">nn::g3d::ShapeAnimBlender::ApplyTo</span>()</code> function. However, this normalization process is costly, so it is better to make the sum of the blend amounts total <code>1</code> in the application.<br /></span>
+      </span>
+    </p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Reset the total value of the blending amount.
+</span><span class="n">shapeAnimBlender</span><span class="p">.</span><span class="n">ClearResult</span><span class="p">();</span>
+
+<span class="c1">// Set the blending amount, and blend the animation instance.
+// We recommend settings that add up to 1.
+</span><span class="n">shapeAnimBlender</span><span class="p">.</span><span class="n">Blend</span><span class="p">(</span><span class="o">&amp;</span><span class="n">shapeAnimObjA</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">);</span>
+<span class="n">shapeAnimBlender</span><span class="p">.</span><span class="n">Blend</span><span class="p">(</span><span class="o">&amp;</span><span class="n">shapeAnimObjB</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">);</span>
+
+<span class="c1">// Apply the animation blending result to the model instance.
+</span><span class="n">shapeAnimBlender</span><span class="p">.</span><span class="n">ApplyTo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ModelObj</span><span class="p">);</span>
+
+<span class="c1">// Update the animation instance frame.
+</span><span class="n">shapeAnimObjA</span><span class="p">.</span><span class="n">GetFrameCtrl</span><span class="p">().</span><span class="n">UpdateFrame</span><span class="p">();</span>
+<span class="n">shapeAnimObjB</span><span class="p">.</span><span class="n">GetFrameCtrl</span><span class="p">().</span><span class="n">UpdateFrame</span><span class="p">();</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The user does not need to run the shape animation instance function <code><span class="ApiLink_nn__g3d__ShapeAnimObj__Calculate">nn::g3d::ShapeAnimObj::Calculate</span>()</code> because this function is called within the <code>Blend()</code> function.</p>
+    <p>If the total blend value is not 1, normalize within the <code>ApplyTo()</code> function before applying.</p>
+    <p>There is no limit to the number of shape animations that you can blend.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_823379641_h1_3">Restrictions</h1>
+<ul>
+  <li>Similar to shape animations, processing to apply calculation results to the vertex buffer, by means of the <code>g3d</code> library, is only supported for CPU calculations.<ul><li>Implementations in the application, such as shaders that apply shape animation calculation results to the vertex buffer, make it possible to perform high-speed blending computation.</li></ul></li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__ShapeAnimBlender', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_anim_blender.html' )
+SetUrl( 'ApiLink_nn__g3d__ModelObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__ShapeAnimObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_anim_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__ShapeAnimBlender__Builder', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_anim_blender_1_1_builder.html' )
+SetUrl( 'ApiLink_nn__g3d__ShapeAnimBlender__ApplyTo', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_anim_blender.html#aba1b060f6f58c749d4baab648e9b6b4a' )
+SetUrl( 'ApiLink_nn__g3d__ShapeAnimObj__Calculate', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_anim_obj.html#a34ec5de95786f78f2ffefc9c5d94ccb2' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

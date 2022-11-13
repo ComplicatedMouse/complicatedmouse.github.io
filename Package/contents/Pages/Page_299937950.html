@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>ScalableViewport | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- ScalableViewport -->
+<div class="pagetitle" id="PageId_299937950">ScalableViewport</div>
+<div class="text_separate">
+<h1 id="Anchor_299937950_h1_1">
+  <span style="color: rgb(117,117,117);">Introduction</span>
+</h1>
+<p>ScalableViewport is a library for easily converting a viewport state, scissor state and the like, between two sets of window coordinates.</p>
+<p>By defining the window coordinates that create the layout and the window coordinates that are actually rendered, you can render the layout without it being corrupted when the rendering resolution dynamically changes.</p>
+<h1 id="Anchor_299937950_h1_2">ScalableViewport</h1>
+<h2 id="Anchor_299937950_h2_1">Header File</h2>
+<p>Include <code>nn/gfx/util/gfx_ScalableViewport.h</code>.</p>
+<h2 id="Anchor_299937950_h2_2">Usage</h2>
+<h3 id="Anchor_299937950_h3_1">Defining the Window Coordinates</h3>
+<p>Define the virtual window coordinates and the physical window coordinates.</p>
+<p>The virtual window coordinates represent the area where the layout is created.</p>
+<p>The physical window coordinates represent the actual rendering area.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/gfx/util/gfx_ScalableViewport.h&gt;
+</span>
+<span class="nn">nn::gfx::util::ScalableViewport::</span><span class="n">WindowCoordinate</span> <span class="n">virtualWindowCoord</span><span class="p">;</span>
+<span class="n">virtualWindowCoord</span><span class="p">.</span><span class="n">SetOriginMode</span><span class="p">(</span><span class="nn">nn::gfx::util::ScalableViewport::</span><span class="n">OriginMode_UpperLeft</span><span class="p">);</span>
+<span class="n">virtualWindowCoord</span><span class="p">.</span><span class="n">SetSize</span><span class="p">(</span><span class="mf">1280.0f</span><span class="p">,</span> <span class="mf">720.0f</span><span class="p">);</span>
+
+<span class="nn">nn::gfx::util::ScalableViewport::</span><span class="n">WindowCoordinate</span> <span class="n">physicalWindowCoord</span><span class="p">;</span>
+<span class="n">physicalWindowCoord</span><span class="p">.</span><span class="n">SetOriginMode</span><span class="p">(</span><span class="nn">nn::gfx::util::ScalableViewport::</span><span class="n">OriginMode_LowerLeft</span><span class="p">);</span>
+<span class="n">physicalWindowCoord</span><span class="p">.</span><span class="n">SetSize</span><span class="p">(</span><span class="mf">1920.0f</span><span class="p">,</span> <span class="mf">1080.0f</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This source code creates a layout with a window size of 1280 &times; 720 and the origin in the upper left, </p>
+    <p>and configures rendering to a window size of 1920 &times; 1080 with the origin in the lower left.</p>
+  </div>
+</div>
+<h3 id="Anchor_299937950_h3_2">Initializing</h3>
+<p>Call the <code>Initialize</code> function to initialize <code>ScalableViewport</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::gfx::util::</span><span class="n">ScalableViewport</span> <span class="n">scalableViewport</span><span class="p">;</span>
+<span class="n">scalableViewport</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span><span class="n">virtualWindowCoord</span><span class="p">,</span> <span class="n">physicalWindowCoord</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_299937950_h3_3">Setting the Rendering Range in the Virtual Window Coordinates</h3>
+<p>Set the rendering range in the virtual window coordinates.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::gfx::util::ScalableViewport::</span><span class="n">Rect</span> <span class="n">virtualRect</span><span class="p">;</span>
+<span class="n">virtualRect</span><span class="p">.</span><span class="n">originX</span> <span class="o">=</span> <span class="mf">640.0f</span><span class="p">;</span>
+<span class="n">virtualRect</span><span class="p">.</span><span class="n">originY</span> <span class="o">=</span> <span class="mf">0.0f</span><span class="p">;</span>
+<span class="n">virtualRect</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">640.0f</span><span class="p">;</span>
+<span class="n">virtualRect</span><span class="p">.</span><span class="n">height</span> <span class="o">=</span> <span class="mf">720.0f</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>You defined the virtual window at 1280 &times; 720 in the beginning, so the rendering range set here is configured on the right half of the screen.</p>
+  </div>
+</div>
+<h3 id="Anchor_299937950_h3_4">Converting the Rendering Range to the Range in the Physical Window Coordinates</h3>
+<p>Convert the rendering range to the range you actually want to render.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::gfx::util::ScalableViewport::</span><span class="n">Rect</span> <span class="n">physicalRect</span><span class="p">;</span>
+<span class="n">scalableViewport</span><span class="p">.</span><span class="n">ConvertRectVirtualToPhysical</span><span class="p">(</span><span class="o">&amp;</span><span class="n">physicalRect</span><span class="p">,</span> <span class="n">virtualRect</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_299937950_h3_5">Setting the Viewport State From the Area of the Physical Window Coordinates</h3>
+<p>Set the viewport state from the area of the physical window coordinates.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::gfx::</span><span class="n">ViewportStateInfo</span> <span class="n">viewportStateInfo</span><span class="p">;</span>
+<span class="n">scalableViewport</span><span class="p">.</span><span class="n">SetupViewportStateInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">viewportStateInfo</span><span class="p">,</span> <span class="n">physicalRect</span><span class="p">);</span>
+<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetViewports</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">viewportStateInfo</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>You can use <code><span class="ApiLink_nn__gfx__util__ScalableViewport__SetupScissorStateInfo">nn::gfx::util::ScalableViewport::SetupScissorStateInfo</span>()</code> to set the scissor state in the same way.</p>
+  </div>
+</div>
+<h3 id="Anchor_299937950_h3_6">Changing the Physical Window Coordinates</h3>
+<p>The physical window coordinates are updated at times such as when the rendering resolution changes while the application is running.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::gfx::util::ScalableViewport::</span><span class="n">WindowCoordinate</span> <span class="n">updatedPhysicalWindowCoord</span><span class="p">;</span>
+<span class="n">updatedPhysicalWindowCoord</span><span class="p">.</span><span class="n">SetOriginMode</span><span class="p">(</span><span class="nn">nn::gfx::util::ScalableViewport::</span><span class="n">OriginMode_LowerLeft</span><span class="p">);</span>
+<span class="n">updatedPhysicalWindowCoord</span><span class="p">.</span><span class="n">SetSize</span><span class="p">(</span><span class="mf">1280.0f</span><span class="p">,</span> <span class="mf">720.0f</span><span class="p">);</span>
+
+<span class="n">scalableViewport</span><span class="p">.</span><span class="n">SetPhysicalWindowCoordinate</span><span class="p">(</span><span class="n">updatedPhysicalWindowCoord</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_299937950_h2_3">Important Information</h2>
+<p>The origin of the physical window coordinates depends on the low-level graphics API.</p>
+<h2 id="Anchor_299937950_h2_4">API References</h2>
+<p>See the <code>ScalableViewport</code> class in the <code><span class="ApiLink_nn__gfx__util">nn::gfx::util</span></code> namespace.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__util__ScalableViewport__SetupScissorStateInfo', '../../../Api/HtmlNX/classnn_1_1gfx_1_1util_1_1_scalable_viewport.html#a6972895e35fc6c1d6da44133cf4e4a27' )
+SetUrl( 'ApiLink_nn__gfx__util', '../../../Api/HtmlNX/namespacenn_1_1gfx_1_1util.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Standard MIDI File | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Standard MIDI File -->
+<div class="pagetitle" id="PageId_83956031">Standard MIDI File</div>
+<div class="text_separate">
+<h1 id="Anchor_83956031_h1_1">Standard MIDI File</h1>
+<p>This section describes how to create sequence data from a standard MIDI file.</p>
+<p>At the time of conversion, the standard MIDI file is converted into a text sequence file. <br />The text sequence file is written using sequence commands described later in this document.</p>
+<h2 id="Anchor_83956031_h2_1">Format</h2>
+<p>Format 0 or Format 1 can be used as the SMF format. Format 2 is not supported.</p>
+<h2 id="Anchor_83956031_h2_2">Track</h2>
+<p>Up to 16 separate tracks can be used. <br />However, there is a limit on the number of tracks that can be used by the overall <code>nw::atk</code> library system.</p>
+<p>Channel numbers 1 through 16 correspond to track numbers 0 through 15, respectively. <br />In addition, MIDI events that affect the entire sequence, such as tempo change, can be mixed in and output on Track 0.</p>
+<h2 id="Anchor_83956031_h2_3">Looping an Entire Sequence</h2>
+<p>To loop all tracks in an SMF under the same timing, insert square brackets ([ ]) as markers on the MIDI sequencer.</p>
+<p>The position of the opening bracket ([) is taken as the start point and the position of the closing bracket (]) is taken as the end point. During conversion a <code>jump</code> command is added to all tracks so that they jump to labels at the start and end points.</p>
+<p>You can also substitute the strings <code>loop_start</code> and <code>loop_end</code> in place of the opening and closing brackets, respectively.</p>
+<h2 id="Anchor_83956031_h2_4">Looping at the Track Level</h2>
+<p>To loop at the track level, insert Control Change 89 with a value of zero for the loop start point and Control Change 90 (with any value) as the loop end point.</p>
+<h2 id="Anchor_83956031_h2_5">Empty Space at the Start of an SMF</h2>
+<p>When SoundMaker converts an SMF, it automatically removes any empty space up to the first <code>note on</code> command. <br />To prevent this empty space from being cut, add a dummy note having a low volume at the start of the sequence.</p>
+<p>If a loop starts at a position before the first <code>note on</code> command, only the empty space before the loop start position is removed.</p>
+<h2 id="Anchor_83956031_h2_6">MIDI Events</h2>
+<p>Standard MIDI files (SMF files) created for NW4R SoundMaker for the Wii, NW4C SoundMaker for the CTR, and NW4F SoundMaker for the Cafe all can be used without modification, including the Control Change numbers.</p>
+<p>To see which MIDI events are supported by NintendoWare SoundMaker, see the <strong>Table of Supported MIDI Control Codes</strong> <a href="../Pages/Page_83955585.html">appended</a> to the Sequence Data Manual.</p>
+<h2 id="Anchor_83956031_h2_7">Embedding Text Commands in an SMF</h2>
+<h3 id="Anchor_83956031_h3_1">Feature Overview</h3>
+<p>Creating sequence data using the sequencer is useful when you want to quickly check a sound. <br />However, it takes more than MIDI events alone to use all of the sequence commands. <br />SoundPlayer includes a feature to embed text commands in an SMF so that they can be output together with MIDI events as sequence commands. <br />Any text command can be output using this feature.</p>
+<p>For more information about sequence commands, see Text Sequences.</p>
+<h3 id="Anchor_83956031_h3_2">Embedding</h3>
+<p>The following strings can be embedded in SMF data as markers or text events. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>text_03:    pan_r 30, 90</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This specification outputs the command <code>pan_r 30, 90</code> at the specified location in the third track (MIDI channel).</p>
+<h3 id="Anchor_83956031_h3_3">Outputting All Tracks</h3>
+<p>You can output all tracks by adding a line like the following. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>text_all:    pan_r 30, 90</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Note:</strong> Nothing is output for tracks not being used.</p>
+<h3 id="Anchor_83956031_h3_4">Expanding Label Name</h3>
+<p>An error results if, for example, you want to define labels at the same position on all tracks using <code>text_all</code> as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>text_all:BLOCK_A:</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This code defines the label <code>BLOCK_A</code> in multiple locations and results in a multiple label definition error. To achieve the desired effect, use the following code instead.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>text_all:$BLOCK_A:</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Adding the dollar sign ($) character at the beginning expands the label names, outputting data on each track as follows. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>SMF_filename_Track_0_BLOCK_A:</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The SMF filename is inserted at the &quot;filename&quot; location and the track number at the number location. <br />A multiple label definition error does not result in this case because the track number differs for each track.</p>
+<p>Also, if a double dollar sign ($$) is used instead of a dollar sign ($), the behavior is as follows. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>text_all:$$BLOCK_A:</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The SMF filename part is not expanded. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Track_0_BLOCK_A:</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83956031_h3_5">Notes About Real-Time MIDI Playback</h3>
+<p>Embedded text sequences are not processed during real-time MIDI playback when using SoundMaker PC emulation and the PreviewBank window in AtkPlayer. <br />Note that the result of such real-time MIDI playback is different from the result of the data converted and played back.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Optimization | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Optimization -->
+<div class="pagetitle" id="PageId_106333612">Optimization</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_106333612_h2_1">Identifying Bottlenecks</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106333612_h3_1">Identifying the Frame</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_2">Isolating the CPU and GPU</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_106333612_h2_2">Render Optimization</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106333612_h3_3">CPU GPU Perform Only Necessary Draws</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_4">CPU Keep Command Creation to a Minimum</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_5">CPU  GPU Use LOD</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_106333612_h2_3">Data Optimization</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106333612_h3_6">GPU Use Compressed Textures</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_7">GPU Use the Post Vertex Cache Effectively</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_8">GPU Use Vertex Quantization</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_9">GPU Use Submesh Partition</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_10">CPU Use Animation Quantization</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_11">CPU Use Animation Frame Conversion</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_12">CPU GPU Delete Unnecessary Data by Compression of a Material, Bone, or Shape</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_13">CPU GPU Monitor Problematic Intermediate Files</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_106333612_h2_4">Shader Optimization</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106333612_h3_14">GPU Avoid Branching Instructions</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_15">GPU Avoid Dynamic Access to Uniform Blocks</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_16">GPU Reduce the Number of Variables Passed Between Stages</a>
+      </li>
+      <li>
+        <a href="#Anchor_106333612_h3_17">GPU Use Interleave to Delete Efficient Packing and Unnecessary Data</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_106333612_h2_5">Cache Optimization</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106333612_h3_18">CPU   GPU Increase Cache Hit Rates</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h2 id="Anchor_106333612_h2_1">Identifying Bottlenecks</h2>
+<p>Even if non-bottleneck locations are speeded up, those effects are limited. By appropriately identifying and speeding up bottlenecks, the effect of optimization is increased.</p>
+<h3 id="Anchor_106333612_h3_1">Identifying the Frame</h3>
+<p>By speeding up the processing performed in the frame with a high load, the effect of optimization is increased. You can identify frames with high loads by displaying the processing time for each frame numerically or graphically on the screen.</p>
+<h3 id="Anchor_106333612_h3_2">Isolating the CPU and GPU</h3>
+<p>The location to optimize changes depending on whether CPU or GPU processing is overflowing. Skipping executing the command buffer enables you to see the CPU load. When using a framework for which the CPU and GPU seldom perform synchronization, you can confirm directly by displaying processing time for each frame.</p>
+<h2 id="Anchor_106333612_h2_2">Render Optimization</h2>
+<h3 id="Anchor_106333612_h3_3">
+  <span style="color: rgb(255,0,0);">CPU</span> <span style="color: rgb(51,102,255);">GPU</span> Perform Only Necessary Draws</h3>
+<p>The GPU performs the render process up to a point even for off-screen objects. Implement in the application so that the render process is not performed for objects that have completed their role. Normally, even for objects that must be rendered, perform frustum culling or occlusion culling so that unnecessary GPU processing is not performed. Frustum culling is supported by the <code>g3d</code> library.</p>
+<h3 id="Anchor_106333612_h3_4">
+  <span style="color: rgb(255,0,0);">CPU</span> Keep Command Creation to a Minimum</h3>
+<p>When the number of commands increases, the CPU cost for creating commands and the GPU cost for processing the commands increases. You can control command creation by caching the material states or the previous state. Note that optimal sort methods or cache methods change according to the project specifications or rendering methods, so use the appropriate implementation.</p>
+<h3 id="Anchor_106333612_h3_5">
+  <span style="color: rgb(255,0,0);">CPU  </span>
+  <span style="color: rgb(51,102,255);">GPU</span> Use LOD</h3>
+<p>CPU and GPU processing can be minimized by using LOD for models that have a small reflected region in the camera. For example, you can minimize the CPU load by changing the update frequency for the animation. You can minimize GPU vertex and triangle processing by switching to models with fewer vertices.</p>
+<h2 id="Anchor_106333612_h2_3">Data Optimization</h2>
+<h3 id="Anchor_106333612_h3_6">
+  <span style="color: rgb(51,102,255);">GPU</span> Use Compressed Textures</h3>
+<p>You can minimize the load for referencing textures from the GPU by using compressed textures. Create textures in BC format with <code>g3d</code>.</p>
+<h3 id="Anchor_106333612_h3_7">
+  <span style="color: rgb(51,102,255);">GPU</span> Use the Post Vertex Cache Effectively</h3>
+<p>The post vertex cache minimizes loads for the vertex shader by caching vertices after calculations. In <code>g3d</code>, the intermediate file optimizer can reorder them in the optimized index order. During export from the DCC tool, export is performed in the state where optimization is automatically performed to a certain degree.</p>
+<h3 id="Anchor_106333612_h3_8">
+  <span style="color: rgb(51,102,255);">GPU</span> Use Vertex Quantization</h3>
+<p>Vertex quantization minimizes the amount of data referenced by the GPU by compressing the bit width used by vertices. In <code>g3d</code>, the intermediate file optimizer quantization analysis performs quantization according to the vertex attributes. During export from the DCC tool, export is performed in the state where the optimal quantization format is automatically specified.</p>
+<h3 id="Anchor_106333612_h3_9">
+  <span style="color: rgb(51,102,255);">GPU</span> Use Submesh Partition</h3>
+<p>Submesh partition is a <code>g3d</code> optimization that minimizes the GPU vertex load by partitioning rendering in bounding units, and using them to perform actions such as frustum culling. In <code>g3d</code>, the intermediate file optimizer submesh partition performs partitioning according to the input parameters and the vertex. The partitioned submesh is stored in a binary as a binary tree with AABB. As shown in the following example, the mode and width can be specified for submesh partitioning in the intermediate file optimizer. Specify a suitable width by using a method such as making AABB visible.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&nbsp;3dIntermediateFileOptimizer.exe --divide-submesh --divide-submesh-options=&quot;--max-bounding-box-width=100.0&quot; ground.fmdb</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Frustum culling can be determined in submesh units at runtime by using <code>nw::g3d::ViewVolume</code>.</p>
+<h3 id="Anchor_106333612_h3_10">
+  <span style="color: rgb(255,0,0);">CPU</span> Use Animation Quantization</h3>
+<p>Animation quantization is a <code>g3d</code> optimization that increases cache efficiency by compressing the bit width used by the animation. In the intermediate file optimizer, quantization is performed according to the tolerance and animation data. During export from the DCC tool, export is performed in the state where the quantization format is specified by setting the tolerance.</p>
+<h3 id="Anchor_106333612_h3_11">
+  <span style="color: rgb(255,0,0);">CPU</span> Use Animation Frame Conversion</h3>
+<p>Converting animation into frames can omit the frame search process, reducing the load of the animation update process. You can execute animation frame conversion in runtime, during setup. You can also cancel frame conversion during runtime.</p>
+<h3 id="Anchor_106333612_h3_12">
+  <span style="color: rgb(255,0,0);">CPU</span> <span style="color: rgb(51,102,255);">GPU</span> Delete Unnecessary Data by Compression of a Material, Bone, or Shape</h3>
+<p>Material, bone, and shape compression is a <code>g3d</code> optimization to delete unnecessary data without affecting rendering. By setting when to export from the DCC tool, you can output data in a state that deletes unnecessary data.</p>
+<h3 id="Anchor_106333612_h3_13">
+  <span style="color: rgb(255,0,0);">CPU</span> <span style="color: rgb(51,102,255);">GPU</span> Monitor Problematic Intermediate Files</h3>
+<p>With the intermediate file filter command-line tool, you can list intermediate files that are problematic for the game development project. By building a development environment that can always attend to these problematic intermediate files, you can exclude intermediate files that negatively affect performance.</p>
+<h2 id="Anchor_106333612_h2_4">Shader Optimization</h2>
+<h3 id="Anchor_106333612_h3_14">
+  <span style="color: rgb(51,102,255);">GPU</span> Avoid Branching Instructions</h3>
+<p>Using branching instructions with the shader leads to a decrease in GPU performance. In particular, we recommend that the fragment shader generate a shader variation that uses <code>ifdef</code> without using branching instructions. With the <code>g3d</code> shader system, shader variation generation is supported by using options.</p>
+<h3 id="Anchor_106333612_h3_15">
+  <span style="color: rgb(51,102,255);">GPU</span> Avoid Dynamic Access to Uniform Blocks</h3>
+<p>Dynamic access to uniform blocks (access using a variable index to an array) is just as costly as texture access. You can reduce the load by avoiding dynamic access as much as possible.</p>
+<h3 id="Anchor_106333612_h3_16">
+  <span style="color: rgb(51,102,255);">GPU</span> Reduce the Number of Variables Passed Between Stages</h3>
+<p>Increasing the number of variables passed increases the load on the interpolator. If the interpolator is a bottleneck, on some platforms you may be able reduce the load by combining two <code>vec2</code> variables into one <code>vec4</code> variable. For more information, see the graphics documentation for each platform.</p>
+<h3 id="Anchor_106333612_h3_17">
+  <span style="color: rgb(51,102,255);">GPU</span> Use Interleave to Delete Efficient Packing and Unnecessary Data</h3>
+<p>You can use interleave annotation to rearrange the interleaves for the vertex attributes contained in model data. You can also delete vertex attributes that are not used in the shader. For more information, see the sample demo shader.</p>
+<h2 id="Anchor_106333612_h2_5">Cache Optimization</h2>
+<h3 id="Anchor_106333612_h3_18">
+  <span style="color: rgb(255,0,0);">CPU  </span> <span style="color: rgb(51,102,255);">GPU</span> Increase Cache Hit Rates</h3>
+<p>For both the CPU and GPU, the cache hit rate can be improved by making the data size smaller and placing related variables nearby. <strong>Note:</strong> Do not make an excess memory region with alignment or padding.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

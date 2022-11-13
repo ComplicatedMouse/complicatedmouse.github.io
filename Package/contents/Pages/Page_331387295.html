@@ -1,0 +1,262 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Individual File Data Cache | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Individual File Data Cache -->
+<div class="pagetitle" id="PageId_331387295">Individual File Data Cache</div>
+<div class="text_separate">
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Individual file data cache is available in NX Add-On 6.0.0 and later.</p>
+  </div>
+</div>
+<h1 id="Anchor_331387295_h1_1">Feature Overview</h1>
+<p>The file data cache feature that caches the data of files specified by the application in memory specified by the application is called the <em>individual file data cache feature</em>.</p>
+<p>The individual file data cache caches file data for files specified when the feature was enabled.</p>
+<p>Individual file data cache has an enabled state and a disabled state for each targeted file. File data caching is performed only when individual file data cache is enabled for that file. The operation of reading an enabled file references the cached data and does not generate a read operation on storage media.</p>
+<p>The individual file data cache operation takes precedence over other file data caching features. For example, when used at the same time as <a href="../Pages/Page_313329665.html">global file data cache</a>, when file data are read, data cached in the individual file data cache is referenced, while no caching operation is performed to the global file data cache.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Individual file data cache does not work in the Windows environment. In addition, a number of restrictions apply when using this feature in the NX environment. For more information, see the <a href="#Anchor_331387295_h1_3">Restrictions</a> and <a href="#Anchor_331387295_invalidate_cache">Disabling Cache</a> later in this document.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Specifications for the individual file data cache feature may be augmented and changed in future NintendoSDK releases.</p>
+  </div>
+</div>
+<h1 id="Anchor_331387295_h1_2">
+  <span style="color: rgb(117,117,117);">Quick Start</span>
+</h1>
+<p>Call the <code><span class="ApiLink_nn__fs__EnableIndividualFileDataCache">nn::fs::EnableIndividualFileDataCache</span>()</code> function from your application to enable individual file data cache. The target file specified at this time must not be opened in write mode. In addition, memory must be allocated from the application for the individual file data cache. Allocate a size of memory that is larger than the target file size, and provide this memory to the argument of the <code><span class="ApiLink_nn__fs__EnableIndividualFileDataCache">nn::fs::EnableIndividualFileDataCache</span>()</code> function.</p>
+<p>A simple usage example of the individual file data cache follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;cstdlib&gt;
+#include &lt;nn/fs.h&gt;
+</span>
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">cacheSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span><span class="o">*</span> <span class="n">cacheBuffer</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Mounts the ROM file system.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">QueryMountRomCacheSize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cacheSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">cacheBuffer</span> <span class="o">=</span> <span class="k">new</span><span class="p">(</span><span class="nn">std::</span><span class="n">nothrow</span><span class="p">)</span> <span class="kt">char</span><span class="p">[</span><span class="n">cacheSize</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ASSERT_NOT_NULL</span><span class="p">(</span><span class="n">cacheBuffer</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span><span class="nn">nn::fs::</span><span class="n">MountRom</span><span class="p">(</span><span class="s">&quot;rom&quot;</span><span class="p">,</span> <span class="n">cacheBuffer</span><span class="p">,</span> <span class="n">cacheSize</span><span class="p">));</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The file targeted for the individual file data cache.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">FilePath</span> <span class="o">=</span> <span class="s">&quot;rom:/test/testdata&quot;</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::fs::</span><span class="n">FileHandle</span> <span class="n">file</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span><span class="nn">nn::fs::</span><span class="n">OpenFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">file</span><span class="p">,</span> <span class="n">FilePath</span><span class="p">,</span> <span class="nn">nn::fs::</span><span class="n">OpenMode_Read</span><span class="p">));</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Gets the file size of the file targeted for the individual file data cache.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int64_t</span> <span class="n">fileSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span><span class="nn">nn::fs::</span><span class="n">GetFileSize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fileSize</span><span class="p">,</span> <span class="n">file</span><span class="p">));</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::fs::</span><span class="n">CloseFile</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocates memory for the individual file data cache.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">fileDataCacheSize</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fileSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">void</span><span class="o">*</span> <span class="n">fileDataCache</span> <span class="o">=</span> <span class="nn">std::</span><span class="n">malloc</span><span class="p">(</span><span class="n">fileDataCacheSize</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Enable individual file data cache using the allocated memory.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span><span class="nn">nn::fs::</span><span class="n">EnableIndividualFileDataCache</span><span class="p">(</span><span class="n">FilePath</span><span class="p">,</span> <span class="n">fileDataCache</span><span class="p">,</span> <span class="n">fileDataCacheSize</span><span class="p">));</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The application uses the necessary features of the fs library.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// While individual file data cache is enabled, reference the cache when accessing the FilePath.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Unmounts the file system.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::fs::</span><span class="n">Unmount</span><span class="p">(</span><span class="s">&quot;rom&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">delete</span><span class="p">[]</span> <span class="n">cacheBuffer</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">cacheBuffer</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// When no longer needed, disable Individual file data cache and release the allocated memory.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::fs::</span><span class="n">DisableIndividualFileDataCache</span><span class="p">(</span><span class="n">FilePath</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">std::</span><span class="n">free</span><span class="p">(</span><span class="n">fileDataCache</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>After editing this source code, build the application image in <strong>NSP format</strong> and run it. For some file systems, the individual file data cache feature does not function in the raw format (NSPD files) and application images for the Windows environment. For more information, see <a href="#Anchor_331387295_h1_3">Restrictions</a> later in this document.</p>
+<p>This example caches data in the file indicated by <code>rom:/test/testdata</code>, in an application running in NSP format.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>You can also check individual file data cache in actual operation in <span class="ApiLink_PageSampleFsIndividualFileDataCache">this sample program</span>.</p>
+  </div>
+</div>
+<h1 id="Anchor_331387295_h1_3">Restrictions</h1>
+<h2 id="Anchor_331387295_h2_1">Restrictions in the Windows Environment</h2>
+<p>No file data is cached in the Windows environment.</p>
+<h2 id="Anchor_331387295_h2_2">Restrictions in the NX Environment</h2>
+<p>In some cases, depending on the file system, the individual file data cache is unavailable. It cannot be used in the following file systems.</p>
+<ul>
+  <li>
+    <a href="../Pages/Page_685577216.html">RamDisk</a>
+  </li>
+  <li>
+    <a href="../Pages/Page_213598244.html">Host PC</a>
+  </li>
+  <li>
+    <a href="../Pages/Page_112886110.html">SD Card</a>
+  </li>
+  <li>ROM file systems when started in raw format (NSPD)</li>
+  <li>Save data, cache storage, and temporary storage file systems being emulated on a host PC by running <code><span class="ApiLink_nn__fs__SetSaveDataRootPath">nn::fs::SetSaveDataRootPath</span>()</code></li>
+</ul>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>The individual file data cache feature is also be enabled for save data, cache storage, and temporary storage file systems being emulated on a host PC by running <code><span class="ApiLink_nn__fs__SetSaveDataRootPath">nn::fs::SetSaveDataRootPath</span>()</code> at the time NX Add-On 6.0.0 was released, but this behavior will be revised with the release of NintendoSDK.</p>
+  </div>
+</div>
+<p>When you call <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> on a file system that use individual file data caching, the effect of the <a href="../Pages/Page_277373520.html">access priority</a> may not work as expected. For example, if thread B with <code>Realtime</code> priority begins to read source data after thread A with <code>Normal</code> priority has begun to read resource data, in some cases thread A finishes reading first, which would not be expected based on the priority settings of the two threads.</p>
+<h1 id="Anchor_331387295_h1_4">How to Use</h1>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p> Also see the <span class="ApiLink_Result_nn__fs__EnableIndividualFileDataCache(const_char_*path|_void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">API Reference</span>.</p>
+  </div>
+</div>
+<h2 id="Anchor_331387295_h2_3">Enabling Cache</h2>
+<p>You can use the <code><span class="ApiLink_nn__fs__EnableIndividualFileDataCache">nn::fs::EnableIndividualFileDataCache</span>()</code> function to provide the target file path and the memory for use for file data caching, and enable the individual file data cache feature. The size of the memory provided at this time must be greater than the size of the target file. Also note that, when enabled, all of the data in the file will be subject to being loaded to the cache.</p>
+<p>The file data in the cache is read out thereafter whenever the application executes <code><span class="ApiLink_nn__fs__OpenFile">nn::fs::OpenFile</span>()</code> on the target file, and then executes <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> for the resulting handle. (Before the cache is enabled, a <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> for a handle resulting from the<code> <span class="ApiLink_nn__fs__OpenFile">nn::fs::OpenFile</span>()</code> function does not reference file data in the cache.)</p>
+<p>The memory provided by the application for individual file data caching is used by the <code>fs</code> library while the individual file data cache is enabled, so your application must not make any changes to the individual file data cache memory region during that time. To use the memory allocated for individual file data cache for another application, you must call the <code><span class="ApiLink_nn__fs__DisableIndividualFileDataCache">nn::fs::DisableIndividualFileDataCache</span>()</code> function for the file for which that memory had been allocated.</p>
+<p>Because cache management is performed for each mounted file system, even if files are the same, their caches are seen as being for different files if the mount names are different.</p>
+<h2 id="Anchor_331387295_h2_4">Disabling Cache<a name="Anchor_331387295_invalidate_cache"></a></h2>
+<p>To disable the individual file data cache feature, call the <code><span class="ApiLink_nn__fs__DisableIndividualFileDataCache">nn::fs::DisableIndividualFileDataCache</span>()</code> function. When you do this, the memory provided by the application for individual file data cache is freed from the <code>fs</code> library.</p>
+<p>The individual file data cache is disabled in some cases other than when the <code><span class="ApiLink_nn__fs__DisableIndividualFileDataCache">nn::fs::DisableIndividualFileDataCache</span>()</code> function is called. In these cases, the memory provided by the application for individual file data cache is freed from the <code>fs</code> library. Specifically, the individual file data cache is disabled when the following operations are executed.</p>
+<ul>
+  <li>The file system containing the target file is unmounted.</li>
+  <li>The target file is opened specifying <code>OpenMode_AllowAppend</code>.</li>
+  <li>The size of the target file is changed with <code><span class="ApiLink_nn__fs__SetFileSize">nn::fs::SetFileSize</span>()</code>.</li>
+  <li>The substance of a file expressed by the path is changed by a <code><span class="ApiLink_nn__fs__CreateFile">nn::fs::CreateFile</span>()</code> or <code><span class="ApiLink_nn__fs__RenameFile">nn::fs::RenameFile</span>()</code> function called after a function like <code><span class="ApiLink_nn__fs__DeleteFile">nn::fs::DeleteFile</span>()</code>.</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__fs__RenameDirectory">nn::fs::RenameDirectory</span>()</code> is executed on the file system containing the target file.</li>
+</ul>
+<h1 id="Anchor_331387295_h1_5">Usage Tips</h1>
+<h2 id="Anchor_331387295_h2_5">Selecting the File to Enable Caching</h2>
+<p>The individual file data cache feature is most effectively employed with the following kinds of files.</p>
+<ul>
+  <li>High-frequency access files</li>
+  <li>Files whose size is smaller than the available memory size to improve performance</li>
+  <li>When operations like disabling the cache are not performed</li>
+</ul>
+<p>To use caching effectively and as intended, we recommend using it when you know in advance how the file to be targeted will be accessed. FS access logs can be used to understand access patterns.</p>
+<p>If you cannot figure out which files to target, consider using the <a href="../Pages/Page_313329665.html">global file data cache</a> feature instead of using individual file data cache. For a general description of ways to improve file access performance, see fs Library &gt; <a href="../Pages/Page_185130689.html">Performance</a>. Also see that documentation.</p>
+<h2 id="Anchor_331387295_h2_6">Using in File Systems That Generate Write Operations</h2>
+<p>Because the individual file data cache feature, unlike global file data cache, also works on file systems that generate write operations, you might be able to improve access performance and reduce access frequency in file systems that generate write operations, such as save data operations. It is effective to apply the individual file data cache feature in cases where the data of persistent files of unchanging size is accessed with high frequency.</p>
+<h2 id="Anchor_331387295_h2_7">When to Enable Caching</h2>
+<p>Because all of the data in the target file is read out when the <code><span class="ApiLink_nn__fs__EnableIndividualFileDataCache">nn::fs::EnableIndividualFileDataCache</span>()</code> function is executed, enable caching before the target file is to be accessed. File data caching can also be enabled in smaller units, but we do not recommend it because it might increase loading to storage media by the <code><span class="ApiLink_nn__fs__EnableIndividualFileDataCache">nn::fs::EnableIndividualFileDataCache</span>()</code> function.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__EnableIndividualFileDataCache', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2d72712742fd49f26a5bd36cce94d481' )
+SetUrl( 'ApiLink_PageSampleFsIndividualFileDataCache', '../../../Api/HtmlNX/_page_sample_fs_individual_file_data_cache.html' )
+SetUrl( 'ApiLink_nn__fs__SetSaveDataRootPath', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a90c27aaf70aec66968715663cd8c5415' )
+SetUrl( 'ApiLink_nn__fs__ReadFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a90b280140b3e9d7eb83af3e807e4c0c3' )
+SetUrl( 'ApiLink_Result_nn__fs__EnableIndividualFileDataCache(const_char_*path|_void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2d72712742fd49f26a5bd36cce94d481' )
+SetUrl( 'ApiLink_nn__fs__OpenFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a0f2b5b30657b1ffaf1dec49bfb36462b' )
+SetUrl( 'ApiLink_nn__fs__DisableIndividualFileDataCache', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a774744bdd98a6a252de1262ce56f4ef6' )
+SetUrl( 'ApiLink_nn__fs__SetFileSize', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ab469b77c1d8c44eaedb9b6d658aba6c6' )
+SetUrl( 'ApiLink_nn__fs__CreateFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a3e89c4d57cc8379265894ff7f3e98b2c' )
+SetUrl( 'ApiLink_nn__fs__RenameFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#aaa1a2e4d197a78400b604debc9c7c4ea' )
+SetUrl( 'ApiLink_nn__fs__DeleteFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a812ac4964fb5564467c5475c1b9fb16b' )
+SetUrl( 'ApiLink_nn__fs__RenameDirectory', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a394c7c7cce23b0a368e83d115baafe17' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

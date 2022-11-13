@@ -1,0 +1,424 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Motion Mirroring | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Motion Mirroring -->
+<div class="pagetitle" id="PageId_416020631">Motion Mirroring</div>
+<div class="text_separate">
+<h1 id="Anchor_416020631_h1_1">Overview</h1>
+<p>g3d motion mirroring is a feature to flip skeletal animation horizontally and play it. The animation is flipped with the model's central yz-plane as the symmetric face.<br />Constraints are put in place for the model bone architecture to lower runtime CPU calculation costs.</p>
+<p>This section describes how to create models that support motion mirroring.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/416020778.gif" width="400" class="embedded-image" />
+  </span>
+</p>
+<h1 id="Anchor_416020631_h1_2">Creating Models</h1>
+<p>This section describes the process for creating models that are compatible with motion mirroring.</p>
+<ol>
+  <li>Create joints for the center of the model and half of the model's body based on the specifications.</li>
+  <li>Create the half-body joints for the opposite side of the model with <strong>Joint Mirroring (Mirror Plane: YZ, Mirror Target: Movement)</strong>.</li>
+  <li>(Optional) Set the motion mirroring type with the motion mirroring settings plug-in.</li>
+  <li>(Optional) Check whether the model conforms to the specifications.</li>
+  <li>Enable settings to include motion mirroring information in the binary file.</li>
+</ol>
+<h2 id="Anchor_416020631_h2_1">1. Creating Joints for the Center of the Model and Half of the Body</h2>
+<p>Create joints for the center of the model and half of the body.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/416020779.png" width="350" class="embedded-image" />
+  </span>
+</p>
+<p>Joints positioned in the center of the model (on the yz-plane) must meet conditions for x-type, y-type, or z-type in the following table. Select the type that suits the project.<br />However, joints for which the motion mirroring type is set to <code>none</code>, described later, do not need to satisfy the conditions described for each type.</p>
+<p>
+  <strong>X-type</strong> is the basic shape.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Type Name</th>
+      <th>
+        <p>Description</p>
+      </th>
+      <th>Outliner Example</th>
+      <th>Joint Example</th>
+    </tr>
+    <tr>
+      <th>X-type</th>
+      <td>
+        <ul>
+          <li>The <span style="color: rgb(255,0,0);">x-axis</span> local to the joint in the center of the model is parallel to the world x-axis.</li>
+        </ul>
+        <p>
+          <br />
+        </p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_416020631/416020780.png" width="280" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_416020631/416020781.png" width="320" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Y-type</strong> and <strong>Z-type</strong> are expanded forms that distinguish the joints in the center of the model into two types: the upper and lower classes occupying the x-type.<br /></p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col style="width: 49.0px;" />
+    <col style="width: 560.0px;" />
+    <col style="width: 345.0px;" />
+    <col style="width: 375.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Type Name</th>
+      <th>
+        <p>Description</p>
+      </th>
+      <th>Outliner Example</th>
+      <th>Joint Example</th>
+    </tr>
+    <tr>
+      <th>Y-type</th>
+      <td>
+        <div class="content-wrapper">
+          <ul>
+            <li>The <span style="color: rgb(255,0,0);">x-axis</span> local to the upper class is parallel to the world x-axis.</li>
+            <li>The <span style="color: rgb(51,153,102);">y-axis</span> local to the lower class is parallel to the world x-axis.</li>
+            <li>Joints separated into left and right such as arms and legs are derived from lower class joints.</li>
+          </ul>
+          <p>
+            <br />
+          </p>
+          <p>
+            <strong>Note:</strong> In the diagram on the right, the upper class is <span style="color: rgb(255,0,0);">Root</span> and the lower classes are <span style="color: rgb(0,128,0);">Hip, Chest, and Head.</span></p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_416020631/416020782.png" width="300" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_416020631/416020783.png" width="320" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>Z-type</th>
+      <td>
+        <div class="content-wrapper">
+          <ul>
+            <li>The <span style="color: rgb(255,0,0);">x-axis</span> local to the upper class is parallel to the world x-axis.</li>
+            <li>The <span style="color: rgb(0,0,255);">z-axis</span> local to the lower class is parallel to the world X-axis.</li>
+            <li>Joints separated into left and right such as arms and legs are derived from lower class joints.</li>
+          </ul>
+          <p>
+            <br />
+            <strong>Note:</strong> In the diagram on the right, the upper class is <span style="color: rgb(255,0,0);">Root</span> and the lower classes are <span style="color: rgb(0,0,255);">Hip, Chest, and Head.</span></p>
+          <p>
+            <br />
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_416020631/416020784.png" width="280" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_416020631/416020785.png" width="320" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If you create a joint in Maya with <strong>Create Joint</strong>, only the terminal joints may be oriented differently (a random value is entered in <strong>Joint direction</strong>). The local axis of such end joints is different from the orientation of the local axis of other central joints, so it is highly likely that it is contrary to the specifications of x-, y-, and z-type mirroring. Adjust joint orientations as needed, while accounting for the terminal joint orientation.</p>
+    <p>
+      <span class="embedded-file-wrapper ">
+        <img src="../Attachments/Attach_416020631/426189482.gif" width="200" class="embedded-image" />
+      </span>
+    </p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_416020631_h2_2">2. Creating Joints for the Other Half of the Body</h2>
+<p>Select the half-body joints created in step 1. Open the window from <strong>Skeleton</strong> &gt; <strong>Joint Mirroring</strong>, specify <strong>Mirror Plane: YZ</strong> and <strong>Mirror Target: Movement</strong>, and execute mirroring.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/1206409815.png" width="400" class="embedded-image" />
+  </span>
+</p>
+<p>For example, if you select the joints outlined in red and mirror them, the joint is mirror-replicated as in the diagram.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/416020786.png" width="320" class="embedded-image" />
+  </span>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/416020787.png" width="330" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_416020631_h2_3">3. (Optional) Setting the Motion Mirroring Type</h2>
+<p>Set the motion mirroring type for each transform node with the <a href="../Pages/Page_409304046.html">motion mirroring settings plug-in</a>.<br />The default value is <strong>auto</strong>. Nodes added automatically during Maya export are also exported as <code>auto</code>.</p>
+<table class="relative-table wrapped" style="width: 70.4334%;">
+  <colgroup>
+    <col style="width: 9.50896%;" />
+    <col style="width: 54.092%;" />
+    <col style="width: 36.3991%;" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>
+        <p style="text-align: center;">Type</p>
+      </th>
+      <th style="text-align: center;">Description</th>
+      <th>
+        <p style="text-align: center;">Mirroring Animation Behavior</p>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">none</td>
+      <td>
+        <p>Configures nodes to not play mirroring or to not exist aside from half of the body.</p>
+      </td>
+      <td>Plays the model's own bone animations as is.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">center</td>
+      <td>Configures the node at the center of the model that plays mirroring.</td>
+      <td>Plays the mirroring of the model's own bone animations.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">side</td>
+      <td>
+        <p>Configures nodes that have bilaterally symmetrical nodes that play mirroring.</p>
+        <p>Child nodes of nodes configured to <code>none</code> cannot be set to this type.</p>
+      </td>
+      <td>
+        <p>Plays the mirroring of the bone animation being mirrored.</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">auto</td>
+      <td>
+        <p>Nodes are configured to be <code>none</code>, <code>center</code>, or <code>side</code> automatically based on bone position and parent-child relationships during binary conversion.</p>
+      </td>
+      <td>
+        <p>The behavior follows <code>none</code>, <code>center</code>, or <code>side</code>.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following figure shows an example configuration.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/416020788.png" width="400" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_416020631_h2_4">4. (Optional) Conformity Check</h2>
+<p>You can check whether the model architecture fits motion mirroring specifications if you select the model root node in Maya and select <a href="../Pages/Page_409304046.html">Check &gt; Check Motion Mirroring</a>.</p>
+<p>If there are no problems, <strong>OK</strong> appears in the command response.<br />If there are problems, <strong>NG</strong> appears in the command response and details are sent to the script editor. In addition, the node with the problem is selected.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The script performs the same processing as the check using 3D Binary Converter.<br />While binary conversion succeeds for models that have passed the conformity check, they may have different behavior than users expect in the actual mirroring animation due to inappropriate motion mirroring type settings and so forth.<br />For final confirmation of mirroring animations, use the preview feature in 3dEditor or check the animation in the actual application.</p>
+  </div>
+</div>
+<h2 id="Anchor_416020631_h2_5">5. Settings to Include Motion Mirroring Information in the Binary File</h2>
+<p>To use the <strong>Motion Mirroring</strong> feature, you must configure the settings to include motion mirroring information in the binary resource (BFRES file).<br />When exporting a model, first enable the <a href="../Pages/Page_83956186.html">Animation Options &gt; MotionMirroring</a> check box in <strong>Export Options</strong> in Maya.</p>
+<h1 id="Anchor_416020631_h1_3">Automatic Determination With auto</h1>
+<p>When <strong>auto</strong> is specified for the motion mirroring type, it is converted to <code>side</code>, <code>center</code>, or <code>none</code> by the 3D Binary Converter according to the following rules.<br /><strong>Note:</strong> The error tolerance value is close to <strong>0</strong>, and it changes depending on the model size.</p>
+<table class="relative-table wrapped" style="width: 67.1969%;">
+  <colgroup>
+    <col style="width: 10.1307%;" />
+    <col style="width: 89.8693%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>After Conversion</th>
+      <th>Determination Conditions</th>
+    </tr>
+    <tr>
+      <th>side</th>
+      <td>
+        <ul>
+          <li>When the parent node is <code>side</code> and there are bilaterally symmetrical nodes</li>
+          <li>When the parent node is <code>center</code>, the absolute value (&alpha;) of the target node's x-coordinate is greater than the error tolerance value, and there are bilaterally symmetrical nodes</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>center</th>
+      <td>
+        <ul>
+          <li>When the parent node is <code>center</code> and the absolute value (&alpha;) of the target node's x-coordinate falls within the following: <strong>0 &lt;= &alpha; &lt; error tolerance</strong> value</li>
+          <li>When the parent node is <code>center</code> and the absolute value (&alpha;) of the target node's x-coordinate falls within the following: <strong>0 &lt;= &alpha; &lt; error tolerance value</strong></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>none</th>
+      <td>
+        <ul>
+          <li>When conditions for <code>side</code> or <code>center</code> do not apply</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_416020631/flowchart_1.svg" />
+</div>
+<p>
+  <br />
+  <strong>Note:</strong> <code>center</code> is determined by the node's x-coordinate position, so place the node at the center of the model as close to x = 0 as possible.<br /><strong>Note:</strong> When you want to specify a node that is away from x = 0 as <code>center</code>, explicitly configure it accordingly without using <code>auto</code>.</p>
+<h1 id="Anchor_416020631_h1_4">Determining Bilaterally Symmetrical Nodes</h1>
+<p>For nodes with the motion mirroring type of side, a bilaterally symmetrical node is detected, and it is paired with that node.<br />This section describes the process for determining bilaterally symmetrical nodes that will be paired.</p>
+<h2 id="Anchor_416020631_h2_6">Determination Process</h2>
+<ol>
+  <li>When the coordinates of the target node are (x,y,z), selects a node near (-x,y,z).</li>
+  <li>If multiple nodes are selected in 1, it compares the name of the target node with the names of those that were selected. The node with the most partial match strings in the name is then selected.<br />Example: If the name of the target node is &quot;Finger1_Right&quot;, and the selected nodes are &quot;Finger1_Left&quot; and &quot;Finger2_Left,&quot; &quot;Finger1_Left&quot; is selected because it has more characters with partial matches.</li>
+  <li>If multiple nodes are selected in 2, it compares the number of characters in the names of the target node and the selected nodes. The node with the name that has the closest number of characters is then selected.<br />Example: If the name of the target node is &quot;Finger1_Right&quot; (13 characters), and the selected nodes are &quot;Finger1_Left&quot; (12 characters) and &quot;Finger1_Hoge_Left&quot; (17 characters), &quot;Finger1_Left&quot; is selected because the number of characters is closer.</li>
+  <li>If a node is still not determined, the one with the smaller index number is selected.</li>
+</ol>
+<h1 id="Anchor_416020631_h1_5">Behavior</h1>
+<p>This section provides examples of behavior when playing mirrored animation, depending on the motion mirroring type.</p>
+<h2 id="Anchor_416020631_h2_7">side</h2>
+<p>Shows the behavior when <strong>side</strong> is configured for both the left and right arm, and bone animation is created only for one side.<br />When the mirror is played, the mirrored animation corresponding to the opposite side is applied to the bones on the one side.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/416020789.png" height="250" class="embedded-image" />
+  </span>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/416020790.gif" height="250" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_416020631_h2_8">center</h2>
+<p>The following image shows the behavior when bone animation such as bowing for one side is created for the <code>center</code>-configured joint in the center.<br />When mirroring is played, it plays the target node's mirrored bone animation, causing the opposite side to bow.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/416020791.png" height="250" class="embedded-image" />
+  </span>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/416020792.gif" height="250" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_416020631_h2_9">none</h2>
+<p>For bones configured as <code>none</code>, the target node's bone animation is played as is when you play the animation.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_416020631/416020793.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<h1 id="Anchor_416020631_h1_6">Troubleshooting</h1>
+<h2 id="Anchor_416020631_h2_10">Binary conversion fails.</h2>
+<p>The model bones may be violating the motion mirroring specifications. Confirm the following.</p>
+<ul>
+  <li>Joints positioned in the center of the model meet conditions for <strong>X-type</strong>, <strong>Y-type</strong>, or <strong>Z-type</strong>.</li>
+  <li>If <strong>Y-type</strong> or <strong>Z-type</strong>, the parent of the joints extending to the left and right such as arms and legs is a lower class joint.</li>
+  <li>The motion mirroring type is not <code>side</code> for child nodes of nodes where the motion mirroring type is <code>none</code>.</li>
+  <li>Nodes with the motion mirroring type of <code>side</code> have bilaterally symmetrical nodes. (If the coordinates are too far apart, symmetrical nodes are not detected even if they exist in the architecture.)</li>
+  <li>The curve value included in the binary is not quaternion. (The mirroring feature supports only Euler angles.)</li>
+</ul>
+<h2 id="Anchor_416020631_h2_11">Model drawing breaks.</h2>
+<p>The motion mirroring types may not be configured appropriately. Confirm the following.</p>
+<ul>
+  <li>One half of the model's body was created with the <strong>Joint Mirroring</strong> options <strong>Mirror Plane: YZ</strong> and <strong>Mirror Target: Movement</strong>, instead of other options.</li>
+  <li>When a node configured to <code>none</code> exists for a <code>center</code> node's parent, the <code>none</code> node does not have unintended rotation values or joint directions.</li>
+  <li>Nodes that do not exist in the center of the model (on the yz-plane) are not unintentionally specified with the motion mirroring type <code>center</code>.</li>
+  <li>The motion mirroring type <code>none</code> is not specified for unintended nodes.<br /><br /></li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>When <strong>auto</strong> is configured for the motion mirroring type, the 3D Binary Converter automatically determines the type. As a result, it may make a determination that differs from the user's expected result.<br />If the determination differs from the expected result, we recommend that you check <strong>Automatic Determination with auto</strong> and fix the node or explicitly configure the mistakenly determined node to <code>none</code>, <code>side</code>, or <code>center</code>.</p>
+  </div>
+</div>
+<!--Remove-->
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

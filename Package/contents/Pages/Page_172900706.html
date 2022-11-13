@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Handling Errors | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Handling Errors -->
+<div class="pagetitle" id="PageId_172900706">Handling Errors</div>
+<div class="text_separate">
+<h1 id="Anchor_172900706_h1_1">Results That Applications Can Distinguish</h1>
+<p>Of the error results defined by the <code>account</code> library, the following can be distinguished by applications.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Result (included in the <span class="ApiLink_nn__account">nn::account</span> namespace)</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>ResultCancelled</td>
+      <td>Returned when the process is terminated by program request.<br />Returned when executing functions such as <code><span class="ApiLink_nn__account__AsyncContext__Cancel">nn::account::AsyncContext::Cancel</span>()</code>. </td>
+    </tr>
+    <tr>
+      <td>ResultCancelledByUser</td>
+      <td>
+        <p>Returned when the process is terminated by user request.</p>
+        <p>Sometimes returned when calling the UI provided by the system.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ResultUserNotExist</td>
+      <td>
+        <p>Returned when the specified user account does not exist.</p>
+        <p>Sometimes returned when specifying a UID obtained at the time of executing a past application.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ResultNetworkServiceAccountUnavailable</td>
+      <td>
+        <p>Returned when the network-service account is unavailable for various reasons.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ResultNintendoAccountAuthorizationInteractionRequired </td>
+      <td>Returned when user operations are necessary to get Nintendo Account authorization.</td>
+    </tr>
+    <tr>
+      <td>ResultTokenCacheUnavailable</td>
+      <td>
+        <p>Returned when the cache has expired when getting the authentication token cache for a network-service account or other account.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ResultNetworkCommunicationError</td>
+      <td>
+        <p>Returned when an issue occurs during network communication.</p>
+        <p>This error code encompasses errors related to network communications defined in the <code>account</code> library.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Depending on the function, the following error results, other than those related to the <code>account</code> library, may be returned.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Result</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__ssl__ResultSslService">nn::ssl::ResultSslService</span>
+      </td>
+      <td>
+        <p>Returned when an issue occurs during network communication.</p>
+        <p>This error code encompasses the errors related to SSL connection that occur during <code>account</code> library communications.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_172900706_h1_2">How Applications Are Expected to Handle Errors</h1>
+<p>This section describes how the program is expected to handle errors returned by the <code>account</code> library.</p>
+<h2 id="Anchor_172900706_h2_1">Results That Must Not Be Handled as Errors</h2>
+<p>Do not handle these results as errors. Handle them as a normal part of the system. </p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Result (included in the <span class="ApiLink_nn__account">nn::account</span> namespace)</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>ResultCancelled</td>
+      <td>
+        <p>Do not notify users of any of the following states.</p>
+        <ul style="list-style-type: square;">
+          <li>Termination based on the user's discretion, such as user UI operations that are part of normal operations.</li>
+          <li>Implicit termination such as scene transitions for processes done implicitly for the user.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>ResultCancelledByUser</td>
+      <td>
+        <p>This error is only returned in cases of termination on the system UI clearly based on the user's discretion.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ResultUserNotExist</td>
+      <td>
+        <p>Returned when the UID that the application recorded to save data or elsewhere, is specified in the <code>account</code> library.<br />In this instance, the application must promptly put the relevant UID-related information in the current state.</p>
+        <p>(Make it so that inconsistency does not occur with the current state of the UID not existing due to deletion, disabling of performance aspects, and so on.)</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_172900706_h2_2">Resolvable Errors</h2>
+<p>The errors listed in this section are returned when the <code>account</code> library is in the state of not expecting handling from the program, but the errors can be resolved by program processing.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Result (included in the <span class="ApiLink_nn__account">nn::account</span> namespace)</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>ResultNetworkServiceAccountUnavailable</td>
+      <td>
+        <p>The network-service account is in an unavailable state for the following reasons.</p>
+        <ul style="list-style-type: square;">
+          <li>Has not satisfied the <a href="../Pages/Page_159246422.html">Network-Service Account Usage Policy</a></li>
+          <li>Need re-agreement of EULA or re-consent of user</li>
+          <li>Data abnormality that requires repair</li>
+        </ul>
+        <p>This state can be resolved by calling the<code><span class="ApiLink_nn__account__EnsureNetworkServiceAccountAvailable">nn::account::EnsureNetworkServiceAccountAvailable</span>()</code> function.<br />Call this function to have the system UI notify the user of the error content and begin the sequence to recover the state.</p>
+        <p>When the state is restored, you can re-run the API that returned the error and continue the program.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ResultNintendoAccountAuthorizationInteractionRequired </td>
+      <td>
+        <p>User operations are necessary to get Nintendo Account authorization.<br />Refer to the reference for the API that returns the error and perform error handling.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>ResultTokenCacheUnavailable</td>
+      <td>
+        <p>Returned when the cache has expired when getting the authentication token cache for a network-service account or other account.</p>
+        <p>To resolve the error, call <code><span class="ApiLink_nn__account__EnsureNetworkServiceAccountAvailable">nn::account::EnsureNetworkServiceAccountAvailable</span>()</code> or another such function that allocates cache.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_172900706_h3_1">Exceptions to the Rule of Error Resolution</h3>
+<h4 id="Anchor_172900706_h4_1">ResultNetworkServiceAccountUnavailable</h4>
+<p>In principle, the program must act to resolve this error.<br />Reason being that if processing is interrupted without performing anything to resolve the error, there is a risk that the system will fall into a state where users cannot proceed with their intended operations.</p>
+<p>The resolution of this error is examined as part of the guideline check.<br />For more information, see the guideline for what process to implement when a network service account is unavailable. </p>
+<p>There is an exception to the rule, however, and resolution of this error can be postponed in the following situation.</p>
+<ul style="list-style-type: square;">
+  <li>If the error is returned as the result of a background process in a scene, creating a situation where the display of the error-handing UI would confuse the user.<ul style="list-style-type: square;"><li>Example: Authentication takes place in the background, ahead of a tutorial scene.<ul style="list-style-type: square;"><li>In this case, you can delay error resolution because the display of an error message during a tutorial may seem unusual to users.</li><li>If you choose to delay action, quickly transition to error resolution after the tutorial has ended.</li></ul></li></ul></li>
+</ul>
+<h4 id="Anchor_172900706_h4_2">ResultTokenCacheUnavailable</h4>
+<p>In principle, the program must act to resolve this error.</p>
+<h2 id="Anchor_172900706_h2_3">Errors That Must Be Displayed in the Error Viewer</h2>
+<p>Display the errors listed in this section in the error viewer for the following reasons.</p>
+<ul style="list-style-type: square;">
+  <li>There is a requirement to request the user to perform a specific action.</li>
+  <li>The error occurred due to an external factor, or factor with high uncertainty, of the application or system.</li>
+</ul>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <th>Result</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__account__ResultNetworkCommunicationError">nn::account::ResultNetworkCommunicationError</span>
+      </td>
+      <td>
+        <p>Includes when authentication to use network services failed, and occurring errors during communication.</p>
+        <p>For network communication errors, when necessary, you can use the error viewer to get information about the error type and the user handling method. </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__ssl__ResultSslService">nn::ssl::ResultSslService</span>
+      </td>
+      <td>Includes errors that occur during communication.<br />For network communication errors, when necessary, you can use the error viewer to get information about the error type and the user handling method.  </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__account', '../../../Api/HtmlNX/namespacenn_1_1account.html' )
+SetUrl( 'ApiLink_nn__account__AsyncContext__Cancel', '../../../Api/HtmlNX/classnn_1_1account_1_1_async_context.html#ad48d7238a9e392303b04fdbe0d1e654b' )
+SetUrl( 'ApiLink_nn__ssl__ResultSslService', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_result_ssl_service.html' )
+SetUrl( 'ApiLink_nn__account__EnsureNetworkServiceAccountAvailable', '../../../Api/HtmlNX/namespacenn_1_1account.html#a3f6aca5d7fd762684b1ee408a35d99f6' )
+SetUrl( 'ApiLink_nn__account__ResultNetworkCommunicationError', '../../../Api/HtmlNX/classnn_1_1account_1_1_result_network_communication_error.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

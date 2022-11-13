@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Instruction | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Instruction -->
+<div class="pagetitle" id="PageId_288014121">Instruction</div>
+<div class="text_separate">
+<h1 id="Anchor_288014121_h1_1">Precondition</h1>
+<h2 id="Anchor_288014121_h2_1">Network Interface</h2>
+<p>Prior to using the SSL library (and the socket library), it is necessary to activate the system network interface. Please refer to&nbsp;<a href="../Pages/Page_104465190.html">NIFM library</a>&nbsp;documentation for details.</p>
+<h2 id="Anchor_288014121_h2_2">Socket library</h2>
+<p>Because the SSL library requires TCP/IP socket, the socket library provided by NintendoSDK needs to be used in conjunction with the SSL library to create TCP/IP socket and establish connection with the server. Please refer to&nbsp;<a href="../Pages/Page_107338335.html">Socket library documentation</a>&nbsp;for details.</p>
+<h2 id="Anchor_288014121_h2_3">SSL library</h2>
+<p>The ssl library needs to be initialized before using any API or methods provided in classes by the SSL library. Please call <span class="ApiLink_nn__Result_nn__ssl__Initialize()_NN_NOEXCEPT">nn::ssl::Initialize()</span> first for this matter. Once the SSL is not needed anymore, please call <span class="ApiLink_nn__Result_nn__ssl__Finalize()_NN_NOEXCEPT">nn::ssl::Finalize()</span> to tell the SSL library that the application doesn't need it anymore.</p>
+<p>Please perform initialization and finalization only from the main thread.</p>
+<h1 id="Anchor_288014121_h1_2">Programing procedure</h1>
+<h2 id="Anchor_288014121_h2_4">Socket Library</h2>
+<ol>
+  <li>Initialize the socket library by <span class="ApiLink_nn__socket__Initialize">nn::socket::Initialize</span>()</li>
+  <li>Create TCP client socket by <span class="ApiLink_nn__socket__Socket">nn::socket::Socket</span>()</li>
+  <li>Optionally resolve the host name by <span class="ApiLink_nn__socket__GetHostByName">nn::socket::GetHostByName</span>()</li>
+  <li>Establish TCP connection on the desired port (e.g. 443 for a normal https server) with the server by <span class="ApiLink_nn__socket__Connect">nn::socket::Connect</span>()</li>
+</ol>
+<h2 id="Anchor_288014121_h2_5">SSL Library</h2>
+<ol>
+  <li>Initialize the SSL library by <span class="ApiLink_nn__ssl__Initialize">nn::ssl::Initialize</span>()<ul><li>The SSL library needs to be initialized prior to any other SSL library API call</li></ul></li>
+  <li>Create the SSL context object(<span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span>)<ul><li>Just instantiating the class object of <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> is not considered as creation, please call <span class="ApiLink_nn__ssl__Context__Create">nn::ssl::Context::Create</span>() explicitly</li><li>The version of the SSL/TLS protocol is determined when the SSL context object is created</li><li>CA certificates in DER or PEM format may be imported into the SSL context object<ul><li>Imported CA certificates will be used by all SSL connections created under the context</li><li>Imported CA certificates are available only to the connections created under the context</li><li>Imported CA certificates are available until the context is destroyed by <span class="ApiLink_nn__ssl__Context__Destroy">nn::ssl::Context::Destroy</span>() or the destructor of <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> is called</li></ul></li><li>Client PKI information in PKCS12 format for client authorization may be imported into the SSL context<ul><li>Only one client PKI can be imported by the SSL context</li><li>Imported client PKI information will be used by all SSL connections created under the context</li><li>Imported client PKI information&nbsp;is available only to the connections created under the context</li><li>Imported client PKI information is&nbsp;available until the context is destroyed by <span class="ApiLink_nn__ssl__Context__Destroy">nn::ssl::Context::Destroy</span>() or the destructor of <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> is called</li></ul></li></ul></li>
+  <li>Create the SSL connection object (<span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span>)<ul><li>Just instantiating the class object of <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span> is not considered as creation, please call <span class="ApiLink_nn__ssl__Connection__Create">nn::ssl::Connection::Create</span>() explicitly</li><li>The SSL connection object is created under the SSL context object created above</li><li>Register the socket descriptor of the TCP socket created above by <span class="ApiLink_nn__ssl__Connection__SetSocketDescriptor">nn::ssl::Connection::SetSocketDescriptor</span>()<ul><li>Once the socket descriptor is passed, it must not be manipulated by any socket API including <span class="ApiLink_nn__socket__Close">nn::socket::Close</span>()</li></ul></li><li>Set the host name to be used for host name validation by <span class="ApiLink_nn__ssl__Connection__SetHostName">nn::ssl::Connection::SetHostName</span>()</li><li>Set the verify option by <span class="ApiLink_nn__ssl__Connection__SetVerifyOption">nn::ssl::Connection::SetVerifyOption</span>()</li><li>Optionally set I/O mode of I/O APIs by <span class="ApiLink_nn__ssl__Connection__SetIoMode">nn::ssl::Connection::SetIoMode</span>()</li></ul></li>
+  <li>Perform SSL handshake by <span class="ApiLink_nn__ssl__Connection__DoHandshake">nn::ssl::Connection::DoHandshake</span>()<ul><li><p>Optionally the buffer which is used to store the server certificate during SSL handshake may be set&nbsp;by <span class="ApiLink_nn__ssl__Connection__SetServerCertBuffer">nn::ssl::Connection::SetServerCertBuffer</span>() before calling <span class="ApiLink_nn__ssl__Connection__DoHandshake">nn::ssl::Connection::DoHandshake</span>()</p></li><li><span class="ApiLink_nn__ssl__Connection__Poll">nn::ssl::Connection::Poll</span>() may be used to wait for the appropriate event to process</li></ul></li>
+  <li>Perform SSL communication by <span class="ApiLink_nn__ssl__Connection__Read">nn::ssl::Connection::Read</span>() / <span class="ApiLink_nn__ssl__Connection__Write">nn::ssl::Connection::Write</span>()<ul><li><span class="ApiLink_nn__ssl__Connection__Poll">nn::ssl::Connection::Poll</span>() may be used to wait for the appropriate event to process</li><li><span class="ApiLink_nn__ssl__Connection__Read">nn::ssl::Connection::Read</span>() will set 0 as received bytes when the connection is disconnected by the server</li></ul></li>
+  <li>Destroy <span class="ApiLink_nn__ssl__Connection">nn::ssl::Connection</span> by <span class="ApiLink_nn__ssl__Connection__Destroy">nn::ssl::Connection::Destroy</span>()<ul><li>Destroying the SSL connection object will close SSL connection including underlying TCP connection</li><li>The SSL connection object needs to be destroyed before destroying the SSL context</li></ul></li>
+  <li>Destroy <span class="ApiLink_nn__ssl__Context">nn::ssl::Context</span> by <span class="ApiLink_nn__ssl__Context__Destroy">nn::ssl::Context::Destroy</span>()<ul><li>Destroying the SSL context will free up imported CA certificates and client PKI information</li><li>All SSL connection objects&nbsp;imported under the context need to be destroyed before destroying the SSL context</li></ul></li>
+  <li>Finalize the SSL library<ul><li>All SSL connection objects&nbsp;and SSL context need to be destroyed before finalizing the SSL library<ul><li>Any remaining SSL connection object and SSL contexts will be forcibly destroyed in the Release build</li></ul></li></ul></li>
+  <li>Finalize the socket library<ul><li>The socket library must not be finalized until imported socket is closed by <span class="ApiLink_nn__ssl__Connection__Destroy">nn::ssl::Connection::Destroy</span>()</li></ul></li>
+</ol>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__Result_nn__ssl__Initialize()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ssl.html#aaa943d1a4363d560d45d53dfa2182683' )
+SetUrl( 'ApiLink_nn__Result_nn__ssl__Finalize()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ssl.html#a56d990644d149228c45f0c5ece11a9d9' )
+SetUrl( 'ApiLink_nn__socket__Initialize', '../../../Api/HtmlNX/namespacenn_1_1socket.html#adacc3405184e8f28fb630745b9f43db0' )
+SetUrl( 'ApiLink_nn__socket__Socket', '../../../Api/HtmlNX/namespacenn_1_1socket.html#a9afeb564bac1d0c04af2fec1f00c739f' )
+SetUrl( 'ApiLink_nn__socket__GetHostByName', '../../../Api/HtmlNX/namespacenn_1_1socket.html#a1e9d1531ba7ecd1f6d4438629540517a' )
+SetUrl( 'ApiLink_nn__socket__Connect', '../../../Api/HtmlNX/namespacenn_1_1socket.html#a6b827725f713f2618b9a7b68bb7dd744' )
+SetUrl( 'ApiLink_nn__ssl__Initialize', '../../../Api/HtmlNX/namespacenn_1_1ssl.html#aaa943d1a4363d560d45d53dfa2182683' )
+SetUrl( 'ApiLink_nn__ssl__Context', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_context.html' )
+SetUrl( 'ApiLink_nn__ssl__Context__Create', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_context.html#aacdf74adeeff3469725d7ccc787eb36e' )
+SetUrl( 'ApiLink_nn__ssl__Context__Destroy', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_context.html#a99a0b8026a5495ad0ba2540010a6c533' )
+SetUrl( 'ApiLink_nn__ssl__Connection', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html' )
+SetUrl( 'ApiLink_nn__ssl__Connection__Create', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#acc7cd82b1baae8ae3d42104b21fa5282' )
+SetUrl( 'ApiLink_nn__ssl__Connection__SetSocketDescriptor', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#a67ac05024d557a3e092c84b9c93ee121' )
+SetUrl( 'ApiLink_nn__socket__Close', '../../../Api/HtmlNX/namespacenn_1_1socket.html#ae01110d228e2148d830b1ecfb9aaa425' )
+SetUrl( 'ApiLink_nn__ssl__Connection__SetHostName', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#abb32d983ca5f49b73b22fb9b87dc6269' )
+SetUrl( 'ApiLink_nn__ssl__Connection__SetVerifyOption', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#a41e963b74c54952cc679812f0e8fa7b8' )
+SetUrl( 'ApiLink_nn__ssl__Connection__SetIoMode', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#a5c0d109fe1a6dd9cff4edba5a730c776' )
+SetUrl( 'ApiLink_nn__ssl__Connection__DoHandshake', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#a02dbc9c070198bdd16b8cd6593f6025d' )
+SetUrl( 'ApiLink_nn__ssl__Connection__SetServerCertBuffer', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#a28eaf3a7e9b5bb9e3b8d33fe03fab534' )
+SetUrl( 'ApiLink_nn__ssl__Connection__Poll', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#a092648cb7981810b99d53902854a49b7' )
+SetUrl( 'ApiLink_nn__ssl__Connection__Read', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#aaeb1673da1d9f1661d872d9617023b81' )
+SetUrl( 'ApiLink_nn__ssl__Connection__Write', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#ae79bff191f1bb044150a8a1978d144ba' )
+SetUrl( 'ApiLink_nn__ssl__Connection__Destroy', '../../../Api/HtmlNX/classnn_1_1ssl_1_1_connection.html#a3c99c604e624efa732a1a983b23e9393' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

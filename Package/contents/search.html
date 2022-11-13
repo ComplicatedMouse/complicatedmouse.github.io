@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="template/js/jquery/jquery.js"></script>
+<!-- ツリーのデータを表示に使用しています -->
+<script type="text/javascript" src="template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="tocData.js"></script>
+<script type="text/javascript" src="tocDataApi.js"></script>
+<script type="text/javascript" src="searchindex.js"></script>
+<link href="template/css/template.css" rel="stylesheet" type="text/css" />
+<title>Search Page</title>
+
+<style type="text/css">
+<!--
+-->
+</style>
+
+</head>
+<body data-reassemble="forcenolabel=yes,forceNoIndex=no" onload="startSearch();">
+<div class="body_content">
+<div id="search_title">Search Page</div>
+<noscript>
+<div id="search_noscript">You must enable JavaScript before you can use the search feature.</div>
+</noscript>
+<div id="search_hint">
+You can search the documentation from this page. Enter keywords in the following textbox, and press ENTER or click <STRONG>Search</STRONG> to search for them. <br/>The search results include all pages containing those keywords.<BR /><STRONG>Note:</STRONG>  Only pages containing all of the specified keywords are included.
+</div>
+
+<div id="search_box">
+   <form name="search" action="" method="get">
+     <fieldset class="search_fieldset">
+       <input type="text" class="search_query" name="q" />
+       <button class="search_button" title="Search">Search</button><br />
+       Include the following pages in search results<br />
+       <input type="hidden" name="api" value="0" />
+       <div id="search_checkbox_api">
+         <label>
+           <input type="checkbox" name="api" value="1" onclick="onClickCheckbox('api');" checked />API reference
+         </label>
+         <br />
+       </div>
+       <input type="hidden" name="sample" value="0" />
+       <div id="search_checkbox_sample">
+         <label>
+           <input type="checkbox" name="sample" value="1" onclick="onClickCheckbox('sample');" checked />Sample Descriptions
+         </label>
+         <br />
+       </div>
+       <input type="hidden" name="clog" value="0" />
+       <div id="search_checkbox_clog">
+         <label>
+           <input type="checkbox" name="clog" value="1" onclick="onClickCheckbox('clog');" />Revision History
+         </label>
+         <br />
+       </div>
+       <input type="hidden" name="known" value="0" />
+       <div id="search_checkbox_known">
+         <label>
+           <input type="checkbox" name="known" value="1" onclick="onClickCheckbox('known');" />Known Bugs
+         </label>
+         <br />
+       </div>
+       <div id="search_checkbox_others">
+       <input type="hidden" name="others" value="0" />
+         <label>
+           <input type="checkbox" name="others" value="1" onclick="onClickCheckbox('others');" checked />Other than the above
+         </label>
+       </div>
+     </fieldset>
+     <input type="hidden" name="skip" value="0">
+   </form>
+   <form name="dummy">
+     <input type="hidden" name="q_string" value="">
+     <input type="hidden" name="api_flag" value="">
+     <input type="hidden" name="sample_flag" value="">
+     <input type="hidden" name="clog_flag" value="">
+     <input type="hidden" name="known_flag" value="">
+     <input type="hidden" name="others_flag" value="">
+   </form>
+</div>
+
+<div id="search_message"></div>
+<div id="search_result"></div>
+
+<script type="text/javascript">
+<!--
+if (!Search.enableApiSearch) $("#search_checkbox_api,#search_checkbox_sample,#search_checkbox_known").css("display", "none");
+
+var q_string = "";
+var flags = { 
+              api: document.search.api[1].checked,
+              sample : document.search.sample[1].checked,
+              clog : document.search.clog[1].checked,
+              known : document.search.known[1].checked,
+              others : document.search.others[1].checked
+            };
+var q_skip = 0;
+function startSearch()
+{
+  // GETで渡されるパラメータの解釈
+  var query = location.search;
+  query = query.slice(query.lastIndexOf("?")+1);
+  var params = query.split("&");
+  for (var i = 0; i < params.length; i++)
+  {
+    var param = params[i];
+    var ind = param.indexOf("=");
+    if (ind < 0) continue;
+    var key = param.substring(0, ind);
+    key = decodeURIComponent(key);
+    key = key.replace(/\s/g, "");
+    if (key.match(/^q$/i))
+    {
+      var data = param.slice(ind + 1);
+      if (data == null) data = "";
+      var array = data.split("+");
+      q_string = "";
+      for (var n = 0; n < array.length; n++) q_string += (((n > 0) ? " " : "") + decodeURIComponent(array[n]));
+    }
+    else if (key.match(/^api$/i))
+    {
+      var data = param.slice(ind + 1);
+      if (data == null) data = "";
+      if (data == "0") flags.api = false;
+      if (data == "1") flags.api = true;
+    }
+    else if (key.match(/^sample$/i))
+    {
+      var data = param.slice(ind + 1);
+      if (data == null) data = "";
+      if (data == "0") flags.sample = false;
+      if (data == "1") flags.sample = true;
+    }
+    else if (key.match(/^clog$/i))
+    {
+      var data = param.slice(ind + 1);
+      if (data == null) data = "";
+      if (data == "0") flags.clog = false;
+      if (data == "1") flags.clog = true;
+    }
+    else if (key.match(/^known$/i))
+    {
+      var data = param.slice(ind + 1);
+      if (data == null) data = "";
+      if (data == "0") flags.known = false;
+      if (data == "1") flags.known = true;
+    }
+    else if (key.match(/^others$/i))
+    {
+      var data = param.slice(ind + 1);
+      if (data == null) data = "";
+      if (data == "0") flags.others = false;
+      if (data == "1") flags.others = true;
+    }
+    else if (key.match(/^skip$/i))
+    {
+      var data = param.slice(ind + 1);
+      if (data != null) q_skip = parseInt(data);
+      if (isNaN(q_skip)) q_skip = 0;
+    }
+  }
+  if (document.search != null)
+  {
+    if (document.search.api != null)
+      document.search.api[1].checked = flags.api;
+    if (document.search.sample != null)
+      document.search.sample[1].checked = flags.sample;
+    if (document.search.clog != null)
+      document.search.clog[1].checked = flags.clog;
+    if (document.search.known != null)
+      document.search.known[1].checked = flags.known;
+    if (document.search.others != null)
+      document.search.others[1].checked = flags.others;
+  }
+  // hidden にしているチェックボックスの初期化処理を行う
+  onClickCheckbox("api");
+  onClickCheckbox("sample");
+  onClickCheckbox("clog");
+  onClickCheckbox("known");
+  onClickCheckbox("others");
+  if (q_string != "")
+  {
+    var s = q_string;
+    if ((document.search != null) && (document.search.q != null))
+    {
+      document.search.q.value = s;
+      document.search.q.focus();
+      document.search.q.select();
+    }
+    document.dummy.q_string.value = q_string;
+    document.dummy.api_flag.value = flags.api;
+    document.dummy.sample_flag.value = flags.sample;
+    document.dummy.clog_flag.value = flags.clog;
+    document.dummy.known_flag.value = flags.known;
+    document.dummy.others_flag.value = flags.others;
+    Search.search(s, "search_message", "search_result", flags, q_skip);
+  }
+}
+
+function btnClick(value)
+{
+  if ((document.search != null) && (document.search.skip != null))
+  {
+    if (document.search.q != null) document.search.q.value = document.dummy.q_string.value;
+    if (document.search.api != null)
+    {
+      document.search.api[1].checked = (document.dummy.api_flag.value == "true");
+      onClickCheckbox("api");
+    }
+    if (document.search.sample != null)
+    {
+      document.search.sample[1].checked = (document.dummy.sample_flag.value == "true");
+      onClickCheckbox("sample");
+    }
+    if (document.search.clog != null)
+    {
+      document.search.clog [1].checked = (document.dummy.clog_flag.value == "true");
+      onClickCheckbox("clog");
+    }
+    if (document.search.known != null)
+    {
+      document.search.known[1].checked = (document.dummy.known_flag.value == "true");
+      onClickCheckbox("known");
+    }
+    if (document.search.others != null)
+    {
+      document.search.others[1].checked = (document.dummy.others_flag.value == "true");
+      onClickCheckbox("others");
+    }
+    document.search.skip.value = value;
+    document.search.submit();
+  }
+}
+
+function onClickCheckbox(category)
+{
+  if(document.getElementsByName(category).item(1).checked)
+  {
+    document.getElementsByName(category).item(0).disabled = true;
+  }
+  else
+  {
+    document.getElementsByName(category).item(0).disabled = false;
+  }
+}
+// -->
+</script>
+
+<p>&nbsp;</p>
+<hr /><p>CONFIDENTIAL</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,254 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>SDK PGO Supplemental Information | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- SDK PGO Supplemental Information -->
+<div class="pagetitle" id="PageId_672740002">SDK PGO Supplemental Information</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_672740002_h2_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_672740002_h2_2">Step 1: Create profile generating build</a>
+    </li>
+    <li>
+      <a href="#Anchor_672740002_h2_3">Step 2: Gather raw profile data</a>
+    </li>
+    <li>
+      <a href="#Anchor_672740002_h2_4">Step 3: Merge profile data</a>
+    </li>
+    <li>
+      <a href="#Anchor_672740002_h2_5">Step 4: Create profile optimized build</a>
+    </li>
+    <li>
+      <a href="#Anchor_672740002_h2_6">Supplemental Information</a>
+    </li>
+    <li>
+      <a href="#Anchor_672740002_h2_7">Instrumenting applications with NRO</a>
+    </li>
+    <li>
+      <a href="#Anchor_672740002_h2_8">External links:</a>
+    </li>
+  </ul>
+</p>
+<h2 id="Anchor_672740002_h2_1">Overview</h2>
+<p>Applying&nbsp;<strong>Profile Guided Optimization</strong>&nbsp;(<strong>PGO</strong>) enables the compiler tool chain to better optimize applications through the gathering and leveraging of profile data.&nbsp; This profile data contains statistics about how often code blocks are executed during the application, which the compiler tool chain can utilize when making decisions on how to lay out code optimally.&nbsp; Applying PGO requires multiple steps, since the profile data must be gathered during runtime before it can be applied during compilation.</p>
+<p>Note that the PGO type that is supported in the NintendoSDK NX Addon environment is the&nbsp;<strong>Instrumented</strong>&nbsp;variety.&nbsp; An optimization level of at least&nbsp;<strong>-O2</strong>&nbsp;is recommended when applying PGO.</p>
+<p>The steps involved can be broken down into the following:</p>
+<ol>
+  <li>Create profile generating build</li>
+  <li>Gather raw profile data</li>
+  <li>Merge profile data</li>
+  <li>Create profile optimized build</li>
+</ol>
+<p>These steps are discussed in more detail below.</p>
+<h2 id="Anchor_672740002_h2_2">Step 1: Create profile generating build</h2>
+<p>Before we can obtain profile data, a special version of the application that collects and outputs the data to a location on the host machine is necessary.&nbsp; In order to generate this we must:</p>
+<ol>
+  <li>Specify the flag&nbsp;<code>-fprofile-instr-generate</code>&nbsp;in the compiler and linker commands for all source files that comprise the application, including libraries, as much as possible.&nbsp;<br /><br />For source files within NRO modules, please see the supplemental information section.<br /><br /></li>
+  <li>Call either&nbsp;<code>__llvm_profile_store_default()</code>&nbsp;or&nbsp;<code>__llvm_profile_write_file()</code>&nbsp;to write out the data from the target application to the host.<br />&nbsp;<br />These functions are declared in<code>&nbsp;&lt;profile/profile_interface.h&gt;</code>, so make sure to include this header.<code> <br /><br />__llvm_profile_store_default()</code>&nbsp;mounts the host file system for the user with&nbsp;<code><span class="ApiLink_nn__fs__MountHostRoot">nn::fs::MountHostRoot</span>()</code>.<code> __llvm_profile_write_file()</code>&nbsp;leaves it up to the caller to mount the host file system in the way that they choose, either through&nbsp;<code><span class="ApiLink_nn__fs__MountHostRoot">nn::fs::MountHostRoot</span>()</code>&nbsp;or&nbsp;<code><span class="ApiLink_nn__fs__MountHost">nn::fs::MountHost</span>()</code>. Otherwise, these two functions are equivalent.</li>
+</ol>
+<p>The&nbsp;<code>-fprofile-instr-generate</code>&nbsp;flag can be specified with a path to a file that will store the raw profile data. (For example,&nbsp;<code>-fprofile-instr-generate=C:/pgo/test.profraw</code></p>
+<p>If no path is specified, the file location will be according to the following rules:</p>
+<ul>
+  <li>If&nbsp;<code>__llvm_profile_set_filename(const char*)</code>&nbsp;is not called:<br />The generated profile data will be stored in the directory where the application's executable resides, with the file name being the base executable name with the extension&nbsp;<strong>.profraw</strong>, unless certain specific environment variables are defined.&nbsp; See&nbsp;<code>&lt;profile/profile_interface.h&gt;</code>&nbsp;for more details.<br /><br /></li>
+  <li>If&nbsp;<code>__llvm_profile_set_filename(const char*)</code>&nbsp;is called with an argument that is a <strong>relative path</strong>:<br />The profile data file will be stored relative to the directory where the application's executable resides based on the argument.<br /><br /></li>
+  <li>&nbsp;If&nbsp;<code>__llvm_profile_set_filename(const char*)</code>&nbsp;is called with an argument that is an <strong>absolute path</strong>:<br />The profile data file will be written to the absolute path.&nbsp; If the absolute path is for a file directly on the root of the C:/ drive, the write operation will fail and a message such as one of the following will be logged:</li>
+</ul>
+<p style="margin-left: 90.0px;">
+  <code>LLVM Profile Error: Failed to write file &lt;file path&gt;: Resource busy<br /><br /><code>Host I/O operation failed on &lt;file path&gt; with Windows API error 5.&nbsp; Please refer to Windows System Error list.</code><br /></code>
+</p>
+<p>Note that because the file is output on the host side, you will fail to get profile data if the application is launched without a target/host connection--for instance, when launching an installed app through the Dev Menu or Home Menu.</p>
+<p>If using VSI, there are PGO-specific settings that can be utilized instead of specifying the above compiler flag manually.&nbsp; These settings are located under&nbsp;<strong>Project Properties &gt; Configuration Properties &gt; C/C++ &gt; Code Generation</strong>&nbsp;in Visual Studio:</p>
+<ul>
+  <li>
+    <strong>Profile Guided Optimization (PGO)<br /></strong>
+  </li>
+  <li>
+    <strong>PGO Data File (.profdata)<br /></strong>
+  </li>
+</ul>
+<p>Setting&nbsp;<strong>Profile Guided Optimization (PGO)</strong> to&nbsp;<strong>Generate Profile Guided Optimization Data</strong>&nbsp;will cause the&nbsp;<code>-fprofile-instr-generate</code>&nbsp;flag to be added to the compiler and linker commands.&nbsp; If using this setting, it should be set in each dependent project of the application (e.g., libraries), in addition to the main application project.</p>
+<p>If using <strong>Generate Profile Guided Optimization Data</strong>, <code>-fprofile-instr-generate</code> will be specified without the optional path, so the resulting .profraw file will be written to a location that is determined according to the rules above.&nbsp; If this is not desirable, you can instead specify&nbsp;<code>-fprofile-instr-generate</code>&nbsp;directly through the following configuration properties:</p>
+<ul>
+  <li>
+    <strong>C/C++ &gt; Command Line &gt; Additional Options</strong>
+  </li>
+  <li>
+    <strong>Linker &gt; Command Line &gt; Additional Options</strong>
+  </li>
+</ul>
+<p>When approaching the setup of the profile generating build, you may want to consider the following ideas:</p>
+<ul>
+  <li>Create a build target copied off your standard versions (such as Develop or Release) and name it something descriptive.&nbsp; Add all options related to the profile generating build there.&nbsp; Make a preprocessor variable that's only defined in this build target, and use it to control whether the profile data write call and header file are included.<br /><br />The benefit of this approach is that it eliminates the need to switch project properties back and forth, which is even more of a consideration given that there are different options required when generating the final PGO optimized build.&nbsp; Also, given the runtime overhead of the profile tabulation and generation, keeping these options separate from the normal build targets is desirable.&nbsp; On the flip side, it will be another build configuration that will need to be maintained.&nbsp; Things could get out of sync with the Release target and rest of the build system if care is not taken.<br /><br /></li>
+  <li>Add in the profile generating API call around your application's finalization routines.&nbsp;<br /><br />This way, pressing the Home Button and closing the application from the system software will trigger the .profraw file to be generated.&nbsp; This works when running through the Visual Studio debugger as well.&nbsp; The benefit is that no extra special input controls for the trigger needs to be implemented.&nbsp; See&nbsp;<a href="../Pages/Page_162179114.html">Exiting the Program</a>&nbsp;for more details.</li>
+</ul>
+<h2 id="Anchor_672740002_h2_3">Step 2: Gather raw profile data</h2>
+<p>In this step, we take the profile generating build and run it to gather raw profile data.&nbsp; It is possible to make use of multiple .profraw files for the purposes of optimization.&nbsp; In fact, use of multiple files can result in improved optimization.</p>
+<p>Using&nbsp;<strong>RunOnTarget</strong>&nbsp;on the command line should allow for easy profile data generation across different runs.&nbsp; Standardizing the user input during a given run will help towards controlling and analyzing optimization results.&nbsp; The goal is to be able to systematically compare the performance across different final PGO optimized builds.&nbsp; The&nbsp;<strong>HID Shell</strong>&nbsp;tool and its functionality for input control and automation may allow for profile generation to take place in a more controlled manner.</p>
+<p>
+  <strong style="letter-spacing: 0.0px;">Caution:&nbsp;</strong>This instrumentation will entail noticeable CPU overhead, so be sure that your application acts in a deterministic manner when the program is forced to run under increased CPU load.</p>
+<h2 id="Anchor_672740002_h2_4">Step 3: Merge profile data</h2>
+<p>After raw profile data has been gathered, this data must be merged into a file format (<strong>.profdata</strong>) that can be passed back into the compiler when generating the final optimized build.&nbsp; One or more .profraw files can be merged into a single final&nbsp;.profdata&nbsp;file.&nbsp; The program and command to use for this step is&nbsp;<code>llvm-profdata merge</code>, and is called in the following manner:</p>
+<p style="margin-left: 60.0px;">
+  <code>llvm-profdata merge -output=&lt;path to .profdata file&gt; &lt;paths to input .profraw files&gt;</code>
+</p>
+<h2 id="Anchor_672740002_h2_5">Step 4: Create profile optimized build</h2>
+<p>To create the final optimized build, pass in the merged .profdata file by specifying the&nbsp;<code>-fprofile-instr-use&nbsp;</code>flag in the compiler commands for&nbsp;all source files of the application and dependent libraries, as well as in the final linker command, as follows:</p>
+<p style="margin-left: 60.0px;">
+  <code>-fprofile-instr-use</code>=&lt;path to .profdata file&gt;</p>
+<p>If using VSI, setting&nbsp;<strong>Profile Guided Optimization (PGO)</strong> to&nbsp;<strong>Apply Profile Guided Optimization Data</strong>&nbsp;will specify&nbsp;<code>-fprofile-instr-use</code> with the value of the&nbsp;<strong>PGO Data File (.profdata)</strong> property.&nbsp; If the file specified through <strong>PGO Data File (.profdata)</strong> is not found, the following warning will be emitted and&nbsp;<code>-fprofile-instr-use</code>&nbsp;will be omitted from the build process:</p>
+<p style="margin-left: 60.0px;">
+  <code>OASISLINK : warning : PGO is turned on, but will not be applied - unable to locate PGO source &lt;path to .profdata file&gt;<br /></code>
+</p>
+<p>Please remember to remove the calls to __llvm_profile_store_default()/__llvm_profile_write_file() in this optimized build. If those calls from the profile generating build are left in, linking will fail.&nbsp; Even if the appropriate clang library (mentioned below) is manually specified to get around the linker errors, there will be additional run time overhead as a result of doing so. Preprocessor macros can help control the addition/removal of these calls based on build configuration.</p>
+<p>Similarly to the profile generating build, you may wish to consider creating a dedicated build target to hold the configuration of the optimized build.</p>
+<p>When building the optimized version, you may notice warnings such as the following:</p>
+<ol>
+  <li>
+    <code>OASISCL : warning : no profile data available for file &lt;source .cpp file&gt; [-Wprofile-instr-unprofiled]</code>
+  </li>
+  <li>
+    <code>OASISCL : warning : profile data may be out of date: of M functions, N has mismatched data that will be ignored [-Wprofile-instr-out-of-date]</code>
+  </li>
+</ol>
+<p>The first warning can occur for source files in libraries that did not get linked into the profile generating build.&nbsp; The second warning may indicate a need to generate and merge the profile data again.</p>
+<h2 id="Anchor_672740002_h2_6">
+  <span style="letter-spacing: -0.008em;">Supplemental Information</span>
+</h2>
+<ul>
+  <li>When generating an instrumentation build using -fprofile-instr-generate, note that libclang_rt.profile-aarch64.a is currently automatically included during link time, though this library may change in the future.</li>
+  <li>When recording data, the compiler adds a static data region for the basic block counts. The only calls to malloc() are for the file path to save the profiling data.</li>
+  <li>Whenever your application changes, it is a good idea to recreate the instrumented profile data.&nbsp; If you continue to use older profile data, the benefits it provides will decrease quickly and can even become harmful to overall performance.</li>
+</ul>
+<h2 id="Anchor_672740002_h2_7">
+  <span style="color: rgb(33,33,33);">Instrumenting&nbsp;applications with NRO</span>
+</h2>
+<p>NRO dynamic libraries can be instrumented manually with starting from Rynda version 1.8.10. The steps to customize your project are as follows:</p>
+<ol>
+  <li>
+    <p>Enable instrumenting the NRO by using&nbsp;<strong><code>-fprofile-generate</code></strong>&nbsp;or&nbsp;<strong><code>-fprofile-instr-generate</code></strong>&nbsp;as compiler and linker options when you build the NRO library.</p>
+  </li>
+  <li>
+    <p>Prevent the profiling library&nbsp;startup code from running&nbsp;by defining&nbsp;the following global variable somewhere in the NRO library code:</p>
+    <table class="wrapped">
+      <tbody>
+        <tr>
+          <td>
+            <p>
+              <code class="cpp plain">__attribute__((visibility(</code>
+              <code class="cpp string">&quot;hidden&quot;</code>
+              <code class="cpp plain">)))&nbsp;</code>
+              <code class="cpp color1 bold">int</code>
+              <code class="cpp plain">__llvm_profile_runtime = 0;</code>
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Make sure that the runtime library is not linked using &quot;whole archive&quot;&nbsp;mode by adding the&nbsp;<strong><code>-Wl,--no-whole-archive</code></strong>&nbsp;linker option.&nbsp; This is located in &quot;Additional Options&quot; box&nbsp;of &quot;Linker/Command Line&quot; properties of the NRO project, when using Visual Studio. Please note that&nbsp;<strong><code>--whole-archive</code></strong>&nbsp;and&nbsp;<strong><code>--no-whole-archive</code></strong>&nbsp;options only affect input libraries which follow after the option within the command line. Each option could be used several times to achieve the desired behavior.</p>
+  </li>
+  <li>
+    <p>Call&nbsp;<strong><code>__llvm_profile_initialize_file()</code></strong>&nbsp;or&nbsp;<strong><code>__llvm_profile_set_filename()</code></strong>&nbsp;from the NRO code to set up the profile data file name. This step is not required if the main application is also instrumented.</p>
+  </li>
+  <li>
+    <p>Call&nbsp;<strong><code>__llvm_profile_store_default()</code></strong>&nbsp;from the NRO code at the end of the NRO execution to store the collected NRO profiling data.</p>
+  </li>
+</ol>
+<p>In VSI 10.3.0 or later, you can instrument with Visual Studio by the follows:</p>
+<ol>
+  <li>&nbsp; &nbsp; Set your NRO library properties to&nbsp;<strong>Project Properties &gt; C / C ++ &gt; Code Generation &gt; Profile Guided Optimization&nbsp;(PGO)</strong>&nbsp;to&nbsp;<strong>Generate Profile Guided Optimization Data</strong>.</li>
+  <li>
+    <p>Call&nbsp;<strong><code>__llvm_profile_initialize_file()</code></strong>&nbsp;or&nbsp;<strong><code>__llvm_profile_set_filename()</code></strong>&nbsp;from the NRO code to set up the profile data file name. This step is not required if the main application is also instrumented.</p>
+  </li>
+  <li>　Call&nbsp;<strong><code>__llvm_profile_store_default()</code></strong>&nbsp;from the NRO code at the end of the NRO execution to store the collected NRO profiling data.</li>
+</ol>
+<h2 id="Anchor_672740002_h2_8">External links:</h2>
+<p>
+  <a href="https://clang.llvm.org/docs/UsersManual.html#profile-guided-optimization">https://clang.llvm.org/docs/UsersManual.html#profile-guided-optimization</a>
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__MountHostRoot', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2ea39d2487ac28bc767cd699eeeebe11' )
+SetUrl( 'ApiLink_nn__fs__MountHost', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a1b85bf3f3cf038cb67a991a3e3304751' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,885 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Notifications For Programs | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Notifications For Programs -->
+<div class="pagetitle" id="PageId_166065886">Notifications For Programs</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_166065886_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_166065886_h1_2">Target Environments</a>
+    </li>
+    <li>
+      <a href="#Anchor_166065886_h1_3">Getting Notifications</a>
+    </li>
+    <li>
+      <a href="#Anchor_166065886_h1_4">Program Focus States and Handling</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_166065886_h2_1">Types of Focus States</a>
+      </li>
+      <li>
+        <a href="#Anchor_166065886_h2_2">Handling Changes in the Focus State</a>
+      </li>
+      <li>
+        <a href="#Anchor_166065886_h2_3">Notification of Changes in the Focus State</a>
+      </li>
+      <li>
+        <a href="#Anchor_166065886_h2_4">Notification of Resuming From Automatic Program Suspension</a>
+      </li>
+      <li>
+        <a href="#Anchor_166065886_h2_5">Examples of BG Focus State-Aware Implementations</a>
+      </li>
+      <li>
+        <a href="#Anchor_166065886_h2_6">Actual Operation Time of the Program</a>
+      </li>
+      <li>
+        <a href="#Anchor_166065886_h2_7">Notifications of Changes in Operating Mode</a>
+      </li>
+      <li>
+        <a href="#Anchor_166065886_h2_8">Notifications of Changes in Performance Mode</a>
+      </li>
+      <li>
+        <a href="#Anchor_166065886_h2_9">Notifications of Exit Requests</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_166065886_h3_1">When Notifications Are and Are Not Made for Exit Requests</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_166065886_h1_1">Overview</h1>
+<p>Applications process advancing and staging in a game based on changes to the system state and changes to the focus state of the application. Applications receive these state change notifications as messages and can then perform the following.</p>
+<ul style="list-style-type: square;">
+  <li>Stopping, resuming, and otherwise controlling the progress of the game based on notification of changes to the focus state</li>
+  <li>Changing how the game is staged by the system, based on notification of changes in the operating mode</li>
+  <li>Switching how richly the game is staged by the system, based on notification of changes in the system's performance mode</li>
+</ul>
+<p>If these kinds of actions are not necessary for your application, there is no need to receive notifications. By default, all messages are in the non-notifying state.</p>
+<h1 id="Anchor_166065886_h1_2">Target Environments</h1>
+<p>The features described in this chapter are available only in the NX32 build and NX64 build environments.</p>
+<h1 id="Anchor_166065886_h1_3">Getting Notifications</h1>
+<p>Programs can get system state changes as notifications. Getting notifications can change the application's behavior.</p>
+<p>However, not all notification messages are enabled by default. The application must enable the desired notification messages as necessary. The available notification messages are described in the next section.</p>
+<p>Notification messages are defined as <code><span class="ApiLink_nn__oe__Message">nn::oe::Message</span></code>-typed constants (the <code>typedef</code> is an unsigned 32-bit integer). The following functions are for getting notifications.</p>
+<ul style="list-style-type: square;">
+  <li>To poll for a notification: <code><span class="ApiLink_nn__oe__TryPopNotificationMessage">nn::oe::TryPopNotificationMessage</span>()</code></li>
+  <li>To get an event to wait for a notification: <code><span class="ApiLink_nn__oe__GetNotificationMessageEvent">nn::oe::GetNotificationMessageEvent</span>()</code></li>
+  <li>To wait for and get a notification: <code><span class="ApiLink_nn__oe__PopNotificationMessage">nn::oe::PopNotificationMessage</span>()</code></li>
+</ul>
+<p>We suggest using the different functions in these separate ways.</p>
+<ul style="list-style-type: square;">
+  <li>To wait for a notification in a loop on a dedicated thread:<ul style="list-style-type: square;"><li>Call <code><span class="ApiLink_nn__oe__PopNotificationMessage">nn::oe::PopNotificationMessage</span>()</code> inside the loop to wait for and get the message, and then conduct the process for that message.</li></ul></li>
+  <li>To wait for a notification in a rendering loop or other loop:<ul style="list-style-type: square;"><li>Call <code><span class="ApiLink_nn__oe__TryPopNotificationMessage">nn::oe::TryPopNotificationMessage</span>()</code> inside the loop and, if a message is received, conduct the process for that message.</li><li>Note that if the process for a particular message is heavy, the rendering loop will interfere with its surroundings if the process is conducted inside the loop.</li></ul></li>
+  <li>(For advanced users) For finer control over the timing of messages handling:<ul style="list-style-type: square;"><li>Wait for the appropriate <code><span class="ApiLink_nn__os__SystemEvent">nn::os::SystemEvent</span></code> obtained using <code><span class="ApiLink_nn__oe__GetNotificationMessageEvent">nn::oe::GetNotificationMessageEvent</span>()</code> to be signaled, and then get the message using <code><span class="ApiLink_nn__oe__TryPopNotificationMessage">nn::oe::TryPopNotificationMessage</span>()</code>.</li><li>You can also use a function like <code><span class="ApiLink_nn__os__WaitAny">nn::os::WaitAny</span>()</code> to wait for other events at the same time in a single thread.</li></ul></li>
+</ul>
+<p>Do not wait for notifications by idling the <code><code><span class="ApiLink_nn__oe__TryPopNotificationMessage">nn::oe::TryPopNotificationMessage</span>()</code> </code>function. To use <code><span class="ApiLink_nn__oe__TryPopNotificationMessage">nn::oe::TryPopNotificationMessage</span>()</code>, call it inside a loop such as a rendering loop that runs periodically.</p>
+<p>The following sample code is for waiting to receive a notification in a loop on a dedicated thread.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/nn_Macro.h&gt;
+#include &lt;nn/os.h&gt;
+#include &lt;nn/oe.h&gt;
+#include &lt;nn/nn_Log.h&gt;
+#include &lt;nn/nn_Assert.h&gt;
+</span>
+<span class="n">NN_OS_ALIGNAS_THREAD_STACK</span> <span class="kt">char</span> <span class="n">g_MessageThreadStack</span><span class="p">[</span><span class="mh">0x4000</span><span class="p">];</span>
+<span class="kt">void</span> <span class="nf">HandleMessageAutoLoop</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">arg</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(;;)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">auto</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">nn::oe::</span><span class="n">PopNotificationMessage</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">switch</span> <span class="p">(</span><span class="n">message</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::oe::</span><span class="nl">MessageFocusStateChanged</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Notifies when there has been a change to the program's focus state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Does not notify based on the nn::oe::SetFocusHandlingMode() specification.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">auto</span> <span class="n">state</span> <span class="o">=</span> <span class="nn">nn::oe::</span><span class="n">GetCurrentFocusState</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">switch</span> <span class="p">(</span><span class="n">state</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::oe::</span><span class="nl">FocusState_InFocus</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// In-focus state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::oe::</span><span class="nl">FocusState_OutOfFocus</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Out-of-focus state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::oe::</span><span class="nl">FocusState_Background</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// BG focus state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::oe::</span><span class="nl">MessageResume</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Notifies when the application resumes from a suspended state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Does not notify based on the nn::oe::SetResumeNotificationEnabled() specification.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::oe::</span><span class="nl">MessageOperationModeChanged</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Notifies when the operation mode has changed between handheld mode and TV mode.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// You can get the current operation mode using the nn::oe::GetOperationMode() function.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Does not notify based on the nn::oe::SetOperationModeChangedNotificationEnabled() specification.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::oe::</span><span class="nl">MessagePerformanceModeChanged</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Notifies when the performance mode has changed between Normal mode and Boost mode.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// You can get the current performance mode using the nn::oe::GetPerformanceMode() function.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Does not notify based on the nn::oe::SetPerformanceModeChangedNotificationEnabled() specification.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::oe::</span><span class="nl">MessageExitRequest</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Notification to the program of an request to exit.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// This notification is only sent if nn::oe::EnterExitRequestHandlingSection()
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// was called beforehand. The processes prior to existing are quickly performed, and
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// the application finally exits on the call to nn::oe::LeaveExitRequestHandlingSection().
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">default</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Unknown messages will be ignored.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;Unhandled message = 0x%08x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">message</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">ThreadType</span>  <span class="n">messageThread</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">CreateThread</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">messageThread</span><span class="p">,</span> <span class="n">HandleMessageAutoLoop</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">g_MessageThreadStack</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">g_MessageThreadStack</span><span class="p">),</span> <span class="nn">nn::os::</span><span class="n">HighestThreadPriority</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ASSERT</span><span class="p">(</span> <span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">(),</span> <span class="s">&quot;Cannot create message handling thread.&quot;</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">StartThread</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">messageThread</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processing by the application.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//         ：
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <ul>
+      <li>Not all notifications are enabled by default. The desired notifications must be explicitly configured using the respective functions.</li>
+      <li>Any received messages that are not necessary for your application can simply be ignored.</li>
+      <li>Notifications are limited to one message per frame. Multiple notifications can also be sent sequentially. For this reason, regardless of which function you use to get notifications, make sure to get all of the notifications that can currently be retrieved before proceeding to the next frame.</li>
+    </ul>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <ul>
+      <li>We recommend preparing the thread for processing message notifications as a dedicated, independent thread, if possible. This is for the following reasons.</li>
+      <li>If the API from some other module is called on the message processing thread, that thread might be blocked for an extended time (for example if the error viewer was started). Under such circumstances, if a user operation from the HOME Menu ends the application, the application cannot process the exit request message (<code><span class="ApiLink_nn__oe__MessageExitRequest">nn::oe::MessageExitRequest</span></code>). As a result, the user has a negative experience when the application finally ends a while after it crashed.</li>
+      <li>While the thread is blocked, it cannot handle any messages, and not  only exit request messages.</li>
+      <li>To avoid these types of situations and resolve problems, make the message processing thread an independent thread, and have this thread notify the application's own state manager when it receives a message notification from the system.</li>
+    </ul>
+  </div>
+</div>
+<h1 id="Anchor_166065886_h1_4">Program Focus States and Handling</h1>
+<h2 id="Anchor_166065886_h2_1">Types of Focus States</h2>
+<p>Programs have the following three focus states and sleep state. Strictly speaking, the sleep state is not another type of focus state, but is described here for convenience. Programs control game advancement and other behavior according to these states.</p>
+<table class="wrapped" style="margin-left: 20.0px;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Types of Focus States</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td>
+        <p>In-focus state<br />(initial state) </p>
+      </td>
+      <td>
+        <p>In this state, the program is in focus.</p>
+        <p>This state indicates that immediately after the program has been started from the HOME Menu</p>
+        <p>it is the target for direct user operations.</p>
+        <p>All threads in the program can operate.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Out-of-focus state</p>
+      </td>
+      <td>
+        <p>The state of the program not in focus, and when a library applet is starting.</p>
+        <p>All threads in the program can run, but the thread that called the library applet</p>
+        <p>is blocked by the relevant API (with a few exceptions).</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>BG focus state</p>
+        <p>(background<br />　focus state)</p>
+      </td>
+      <td>
+        <p>The state of the program not in focus, and DevMenu or the HOME Menu in the foreground.</p>
+        <p>Program behavior in this state differs depending on the focus handling mode (described later).</p>
+        <p>(However, immediately after waking from sleep, the sleep state continues until the program resumes.)</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Sleep State</td>
+      <td>
+        <p>The state of the entire system sleeping, and program operation suspended.</p>
+        <p>Programs cannot detect this state.<br />Immediately after waking from sleep, the program remains in the sleep state even if the screen transitions to the HOME screen via the entrance screen.<br /> When the program resumes, it resumes from either the in-focus state or the out-of-focus state.<br /></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p style="text-align: left;">The following figure depicts the different focus states of the application.</p>
+<p style="text-align: center;">
+  <img src="../Attachments/Attach_166065886/188809926.png"></img>
+</p>
+<p>The application is already in focus when it reaches the call to <code>nninitStartup()</code>.</p>
+<p>
+  <strong>Figure 1</strong> depicts the application in the in-focus state. In this state, the application can display to the screen and render images in the foreground, output audio, and receive HID input from the user. Games and other programs can proceed with preferential use of the various resources in this state.</p>
+<p>
+  <strong>Figure 2</strong> depicts the application in the out-of-focus state. In this state, some library applet is operating in the foreground, so the program's own screen display and image processing are restricted, and HID input is not received. Although audio plays, the value may be reduced by the running library applet (and in some cases may drop to zero). The various threads can run in this state, but the thread that started the library applet is blocked by the startup function. (There are some exceptions, however. For more information, see the API references for the library applets.)</p>
+<p>
+  <strong>Figure 3</strong> depicts the application in the BG focus state. Program behavior in this state differs depending on the focus handling mode (described later), but the following conditions apply in all cases, so it is best that an application in the BG focus state not proceed with any basic game processing until it transitions to the in-focus state or the out-of-focus state. However, if network online status needs to be maintained, it is possible to continue operations in the background.</p>
+<ul>
+  <li>The program is not displayed on the screen, and image processing is restricted (the GPU cannot be fully used).</li>
+  <li>HID input is not received.</li>
+  <li>Audio volume is not output.</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>When the application is in the BG focus state and a library applet is started from the HOME Menu, the application does not go to the out-of-focus state but remains in the BG focus state. The out-of-focus state indicates the state when the application itself has started the library applet.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Programs that start a library applet from an application take the out-of-focus state and are hidden. For more information about the types of library applets and which module calls start them, see <a href="../Pages/Page_178488679.html">Features &gt; Library Applets</a>.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_166065886_h2_2">Handling Changes in the Focus State</h2>
+<p>The application controls advancing the game according to the focus state. The following variations are expected depending on the application's characteristics.</p>
+<ul>
+  <li>The program controls advancing the game, but you want operations to automatically stop when in the BG focus state.</li>
+  <li>While the program controls advancing the game, you want the program to continue running even in the BG focus state for the following reasons.<ul><li>You want to maintain the communication session, such as during online play.</li><li>You want computations to continue in the CPU, GPU, or other resource.</li></ul></li>
+</ul>
+<p>Depending on the situation, use the following functions in the application to specify how to handle the focus state.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__oe__SetFocusHandlingMode">nn::oe::SetFocusHandlingMode</span>(<span class="ApiLink_nn__oe__FocusHandlingMode">nn::oe::FocusHandlingMode</span> mode);</li>
+</ul>
+<p>In <code>mode</code>, specify one of the following focus handling modes. The default value at program start is <strong>Suspend Mode</strong>. (The default value is <strong>Individual In Focus Mode</strong> in NX Add-On 10.2.0 only.)</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <p>Focus Handling Mode</p>
+        <p>(Value to Specify in <code>mode</code>)</p>
+      </th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <p>Individual In Focus Mode</p>
+        <p>(<code><span class="ApiLink_nn__oe__FocusHandlingMode_InFocusOnly">nn::oe::FocusHandlingMode_InFocusOnly</span></code>)</p>
+      </td>
+      <td>
+        <p>Mode where the program automatically suspends when not in the in-focus state.</p>Even if the focus state changes, the <code><span class="ApiLink_nn__oe__MessageFocusStateChanged">nn::oe::MessageFocusStateChanged</span></code> notification is not sent.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>Suspend Mode</p>
+        <p>(<code><span class="ApiLink_nn__oe__FocusHandlingMode_Suspend">nn::oe::FocusHandlingMode_Suspend</span></code>)</p>
+      </td>
+      <td>
+        <p>Mode where the program automatically suspends when in the BG focus state.</p>
+        <p>Even if the focus state changes, the <code><span class="ApiLink_nn__oe__MessageFocusStateChanged">nn::oe::MessageFocusStateChanged</span></code> notification is not sent.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Suspend Notification Mode</p>
+        <p>(<code><span class="ApiLink_nn__oe__FocusHandlingMode_SuspendAndNotify">nn::oe::FocusHandlingMode_SuspendAndNotify</span>)</code></p>
+      </td>
+      <td>
+        <p>Mode where the application automatically suspends when in the BG focus state and the <code><span class="ApiLink_nn__oe__MessageFocusStateChanged">nn::oe::MessageFocusStateChanged</span></code> notification is sent when the focus state changes.</p>
+        <p>However, this mode does not make the application aware of the BG focus state, so the change of focus state notification is not sent when transitioning from or returning to the BG focus state.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Notification Mode</p>
+        <p>(<code><span class="ApiLink_nn__oe__FocusHandlingMode_Notify">nn::oe::FocusHandlingMode_Notify</span></code>)</p>
+      </td>
+      <td>
+        <p>Mode where the program continues to operate even in the BG focus state.</p>
+        <p>When the focus state changes, the <code><span class="ApiLink_nn__oe__MessageFocusStateChanged">nn::oe::MessageFocusStateChanged</span></code> notification is sent.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following table summarizes the program operating states and whether a notification is sent for the various program focus states in these various modes.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Item</th>
+      <th style="text-align: center;">
+        <p>Individual In Focus</p>
+        <p>Mode</p>
+      </th>
+      <th style="text-align: center;">
+        <p>Suspend Mode</p>
+      </th>
+      <th style="text-align: center;">
+        <p>Suspend Notification Mode</p>
+      </th>
+      <th style="text-align: center;">   Notification Mode   </th>
+    </tr>
+    <tr>
+      <td style="text-align: center;">In-focus state</td>
+      <td class="highlight-green" style="text-align: center;">Continue operation</td>
+      <td class="highlight-green" style="text-align: center;">
+        <p>Continue operation</p>
+      </td>
+      <td class="highlight-green" style="text-align: center;">
+        <p>Continue operation</p>
+      </td>
+      <td class="highlight-green" style="text-align: center;">
+        <p>Continue operation</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Out-of-focus state</td>
+      <td class="highlight-red" style="text-align: center;">
+        <p>Automatic suspend</p>
+      </td>
+      <td class="highlight-green" style="text-align: center;">
+        <p>Continue operation</p>
+      </td>
+      <td class="highlight-green" style="text-align: center;">
+        <p>Continue operation</p>
+      </td>
+      <td class="highlight-green" style="text-align: center;">
+        <p>Continue operation</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">BG focus state</td>
+      <td class="highlight-red" style="text-align: center;">Automatic suspend</td>
+      <td class="highlight-red" style="text-align: center;">Automatic suspend</td>
+      <td class="highlight-red" style="text-align: center;">Automatic suspend</td>
+      <td class="highlight-green" style="text-align: center;">Continue operation</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">(Sleep State)</td>
+      <td class="highlight-red" style="text-align: center;">Automatic suspend</td>
+      <td class="highlight-red" style="text-align: center;">Automatic suspend</td>
+      <td class="highlight-red" style="text-align: center;">Automatic suspend</td>
+      <td class="highlight-red" style="text-align: center;">Automatic suspend</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Notification when changing focus states</td>
+      <td style="text-align: center;" colspan="2">No</td>
+      <td class="highlight-yellow" style="text-align: center;" colspan="2">Yes</td>
+    </tr>
+  </tbody>
+</table>
+<p>The following table shows whether there is a &quot;change notification&quot; when the focus state transitions in each mode, and whether &quot;automatic suspend&quot; begins, continues, or stops.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Focus State Change</th>
+      <th style="text-align: center;" colspan="2">
+        <p>Individual In Focus</p>
+        <p>Mode</p>
+      </th>
+      <th style="text-align: center;" colspan="2">
+        <p>Suspend Mode</p>
+      </th>
+      <th style="text-align: center;" colspan="2">
+        <p>Suspend Notification</p>
+        <p>Mode</p>
+      </th>
+      <th style="text-align: center;" colspan="2">Notification Mode</th>
+    </tr>
+    <tr>
+      <td class="highlight-grey" style="text-align: center;">Before transition  &rarr;  after transition</td>
+      <td class="highlight-grey" style="text-align: center;">Notification of change</td>
+      <td class="highlight-grey" style="text-align: center;">Automatic suspend</td>
+      <td class="highlight-grey" style="text-align: center;">Notification of change</td>
+      <td class="highlight-grey" style="text-align: center;">Automatic suspend</td>
+      <td class="highlight-grey" style="text-align: center;">Notification of change</td>
+      <td class="highlight-grey" style="text-align: center;">Automatic suspend</td>
+      <td class="highlight-grey" style="text-align: center;">Notification of change</td>
+      <td class="highlight-grey" style="text-align: center;">Automatic suspend</td>
+    </tr>
+    <tr>
+      <td>   In-focus state &rarr; out-of-focus state</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Start</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Yes</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Yes</td>
+      <td style="text-align: center;">-----</td>
+    </tr>
+    <tr>
+      <td>   In-focus state &rarr; BG focus state</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Start</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Start</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Start</td>
+      <td style="text-align: center;">Yes</td>
+      <td style="text-align: center;">-----</td>
+    </tr>
+    <tr>
+      <td>Out-of-focus state &rarr; in-focus state</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">disable</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Yes</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Yes</td>
+      <td style="text-align: center;">-----</td>
+    </tr>
+    <tr>
+      <td>Out-of-focus state &rarr; BG focus state</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Continue</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Start</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Start</td>
+      <td style="text-align: center;">Yes</td>
+      <td style="text-align: center;">-----</td>
+    </tr>
+    <tr>
+      <td>    BG focus state &rarr; in-focus state</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">disable</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">disable</td>
+      <td style="text-align: center;">★1</td>
+      <td style="text-align: center;">Disable</td>
+      <td style="text-align: center;">Yes</td>
+      <td style="text-align: center;">-----</td>
+    </tr>
+    <tr>
+      <td>    BG focus state &rarr; out-of-focus state</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">Continue</td>
+      <td style="text-align: center;">-----</td>
+      <td style="text-align: center;">disable</td>
+      <td style="text-align: center;">★1</td>
+      <td style="text-align: center;">Disable</td>
+      <td style="text-align: center;">Yes</td>
+      <td style="text-align: center;">-----</td>
+    </tr>
+  </tbody>
+</table>
+<p>Change notifications marked with ★1 are only sent under certain conditions. More specifically, these change notifications are only sent when the state prior to entering the BG focus state is different from the state taken after leaving the BG focus state. Change notifications are sent or not sent in the following cases.</p>
+<ul>
+  <li>
+    <strong>Cases Where Change Notifications Are Sent</strong>
+    <br />
+    <ul>
+      <li>In-focus state &rarr; BG focus state &rarr; out-of-focus state</li>
+      <li>Out-of-focus state &rarr; BG focus state &rarr; in-focus state</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Cases Where Change Notifications Are Not Sent</strong>
+    <ul>
+      <li>In-focus state &rarr; BG focus state &rarr; in-focus state</li>
+      <li>Out-of-focus state &rarr; BG focus state &rarr; out-of-focus state</li>
+    </ul>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the program uses <code><span class="ApiLink_nn__oe__SetFocusHandlingMode">nn::oe::SetFocusHandlingMode</span>()</code> to change to a mode with automatic suspend, automatic suspend occurs at that time depending on the program state. However, the program automatic suspend processing is asynchronous with the issuing of <code><span class="ApiLink_nn__oe__SetFocusHandlingMode">nn::oe::SetFocusHandlingMode</span>()</code>, so note that suspend processing may occur when executing program commands several minutes after this function is called.</p>
+    <p>When the setting is dynamically changed to suspend mode or individual in-focus mode from another mode, in some cases a notification of change in the focus state (see the next section) is not sent when the program resumes from suspension. If a notification is required, use notification mode or suspend notification mode, or notification of resuming from program suspension (described later).</p>
+  </div>
+</div>
+<h2 id="Anchor_166065886_h2_3">Notification of Changes in the Focus State</h2>
+<p>When the focus handling mode is Notification Mode or Suspend Notification Mode and a change in the application's focus state occurs, the following notification will be sent.</p>
+<ul>
+  <li>
+    <code>
+      <span class="ApiLink_nn__oe__MessageFocusStateChanged">nn::oe::MessageFocusStateChanged</span>
+    </code>: Focus state change has occurred</li>
+</ul>
+<p>When this message is received, use <code><span class="ApiLink_nn__oe__GetCurrentFocusState">nn::oe::GetCurrentFocusState</span>()</code> to get the current focus state type, and process according to the focus state.</p>
+<p>For game scenes that involve high user interactivity, perform the following steps.</p>
+<ul style="list-style-type: square;">
+  <li>If the return value is BG focus state (<code><span class="ApiLink_nn__oe__FocusState_Background">nn::oe::FocusState_Background</span></code>), stop the game from advancing. (As necessary, get user confirmation when operation resumes.)</li>
+  <li>If the return value is the out-of-focus state (<code><span class="ApiLink_nn__oe__FocusState_OutOfFocus">nn::oe::FocusState_OutOfFocus</span></code>), stop the game from advancing</li>
+  <li>If the return value is the in-focus state (<code><span class="ApiLink_nn__oe__FocusState_InFocus">nn::oe::FocusState_InFocus</span></code>), resume advancing the game</li>
+</ul>
+<p>By doing this, you can prevent the game from advancing in unseen ways to the disadvantage of the user.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If you call <code><span class="ApiLink_nn__oe__GetCurrentFocusState">nn::oe::GetCurrentFocusState</span>()</code> to get the latest type of focus state after <code><span class="ApiLink_nn__oe__MessageFocusStateChanged">nn::oe::MessageFocusStateChanged</span></code> has been reported, in some cases you get a state that appears to the application to be the same type as the previous focus state. (In other words, the application does not notice the change in state.) Design your application so it continues to run as it has been running when this happens.</p>
+    <p>This situation can arise if the focus state has actually changed but the application cannot call <code><span class="ApiLink_nn__oe__GetCurrentFocusState">nn::oe::GetCurrentFocusState</span>()</code>, so it cannot get the current focus state.</p>
+  </div>
+</div>
+<h2 id="Anchor_166065886_h2_4">Notification of Resuming From Automatic Program Suspension</h2>
+<p>Applications are automatically suspended by the system in situations like the following.</p>
+<ul>
+  <li>The mode is suspend mode or suspend notification mode and the program has transitioned to the BG focus state.</li>
+  <li>When the program transitions to a state other than in-focus while in individual in-focus mode.</li>
+  <li>The system enters sleep mode and the program has transitioned to the sleep state.</li>
+</ul>
+<p>Program suspension is canceled and operation resumes if you restore the application from any of these states. If you issue the following API in advance, the application can receive the <code><span class="ApiLink_nn__oe__MessageResume">nn::oe::MessageResume</span></code> notification indicating resuming operation from suspension. This notification feature is not dependent on the Notification of Changes in the Focus State (described earlier). Regardless of the focus handling mode, a notification is sent when the preceding conditions are satisfied. This notification is disabled by default.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__oe__SetResumeNotificationEnabled">nn::oe::SetResumeNotificationEnabled</span>(true);</li>
+</ul>
+<p>Applications can use this notification to perform the following types of processing.</p>
+<ul>
+  <li>In music games, you want to synchronize the video and audio playback when the suspension is canceled</li>
+  <li>In action games, you want to automatically cause a paused state when the suspension is canceled</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The <code><span class="ApiLink_nn__oe__MessageResume">nn::oe::MessageResume</span></code> resume notification is provided as a way to detect when the application has been automatically suspended by the system. For this reason, the notification is issued not only when the application wakes from the sleep state, but also when it resumes operation after being automatically suspended in the BG focus state or out-of-focus state.</p>
+    <p>When the focus handling mode is notification mode, the application can continue operating in the BG focus state. If the system enters sleep during this time, however, the application enters the sleep state and is automatically suspended. Afterward, if the application wakes up from sleep and changes from the sleep state to the BG focus state, the <code><span class="ApiLink_nn__oe__MessageResume">nn::oe::MessageResume</span></code> notification is immediately sent at this time if notification of resuming is enabled.</p>
+  </div>
+</div>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>Conditions for a program suspension may be changed or added in a future system update. For example, in the 6NUP firmware and later, functionality was added to detect license conflicts when the same user tries to start an application simultaneously on multiple NX systems and suspend the program to restraint it from starting.</p>
+    <p>For this reason, do not use the <code><span class="ApiLink_nn__oe__MessageResume">nn::oe::MessageResume</span></code> message for any other purposes. In particular, <strong>do not use <code><span class="ApiLink_nn__oe__MessageResume">nn::oe::MessageResume</span></code> messages to detect that the system has been put to sleep</strong>.</p>
+  </div>
+</div>
+<h2 id="Anchor_166065886_h2_5">Examples of BG Focus State-Aware Implementations</h2>
+<p>In notification mode (<code><span class="ApiLink_nn__oe__FocusHandlingMode_Notify">nn::oe::FocusHandlingMode_Notify</span></code>), programs continue to run behind the HOME Menu screen when in the BG focus state. We recommend that programs do the following when in this state.</p>
+<ul>
+  <li>Continue any necessary processes such as processes that maintain network sessions.</li>
+  <li>Avoid using other CPU processes as much as possible.<ul><li>Putting applications in a blocking state until they leave the BG focus state reduces unnecessary battery consumption.</li></ul></li>
+</ul>
+<p>We recommend the following handling for GPU and audio processes.</p>
+<ul>
+  <li>You can continue to use GPU processes in the background.<ul><li>However, the application screen itself is not rendered.</li><li>Also, the performance of GPU processes is limited to approximately half of the performance available in the in-focus state.</li></ul></li>
+  <li>You can also continue to use audio processes in the background.<br /><ul><li>However, no sound is actually output.</li></ul></li>
+</ul>
+<p>
+  <br />
+</p>
+<p>In notification mode, change notifications (<code><span class="ApiLink_nn__oe__MessageFocusStateChanged">nn::oe::MessageFocusStateChanged</span></code>) are received when the focus state changes, which makes it possible to know when applications leave the BG focus state. As a result, you can prevent unnecessary CPU usage by using a synchronization mechanism such as <code><span class="ApiLink_nn__os__Event">nn::os::Event</span></code> to implement the following logic in the application.</p>
+<ul>
+  <li>Prepare one <code><span class="ApiLink_nn__os__Event">nn::os::Event</span></code> object that takes the cleared state in the BG focus state and takes the signaled state in all other states.</li>
+  <li>Put this <code><span class="ApiLink_nn__os__Event">nn::os::Event</span></code> object in the waiting state in loops on threads created by the application.<ul><li>If you also need to handle exit requests (described later), you can prepare another <code><span class="ApiLink_nn__os__Event">nn::os::Event</span></code> object to send exit requests within the application and then call <code><span class="ApiLink_nn__os__WaitAny">nn::os::WaitAny</span>()</code> on it on each thread.</li></ul></li>
+</ul>
+<p>The behavior of threads waiting in this blocking state is the same as when applications are in suspend mode, and as a result the program does not consume any CPU. This makes it possible to achieve similar reductions in battery consumption when using notification mode.</p>
+<h2 id="Anchor_166065886_h2_6">Actual Operation Time of the Program</h2>
+<p>With NX Add-On 6.4 and later, <code><span class="ApiLink_nn__oe__GetProgramTotalActiveTime">nn::oe::GetProgramTotalActiveTime</span>()</code> can get the cumulative actual operation time of the program since starting the program in the <code><span class="ApiLink_nn__TimeSpan">nn::TimeSpan</span></code> format. This time does not include the time when the console is in sleep mode or the time when the program is automatically suspended due to changes in the in-focus state, as described in the previous section. It returns only the time when the program was running (and is reset to <strong>0</strong> when the program is terminated).</p>
+<p>Use it for saving the total play time for a game to save data and the like.</p>
+<h2 id="Anchor_166065886_h2_7">Notifications of Changes in Operating Mode</h2>
+<p>The <code><span class="ApiLink_nn__oe__MessageOperationModeChanged">nn::oe::MessageOperationModeChanged</span></code> message notifies that the operating mode of the system has been changed. The following table lists the operating modes. The current mode can be obtained using the <code><span class="ApiLink_nn__oe__GetOperationMode">nn::oe::GetOperationMode</span>()</code> function.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Operating Modes</th>
+      <th>Description</th>
+      <th>Video Output</th>
+      <th>Audio Output</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__oe__OperationMode_Handheld">nn::oe::OperationMode_Handheld</span>
+      </td>
+      <td>Handheld Mode</td>
+      <td>The LCD screen on the system.</td>
+      <td>Either the console's built-in speakers, or an external audio output device (such as headphones).</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__oe__OperationMode_Console">nn::oe::OperationMode_Console</span>
+      </td>
+      <td>Console Mode</td>
+      <td>HDMI connection (TV)</td>
+      <td>The HDMI connected device (such as a TV) or an external audio output device (such as headphones).</td>
+    </tr>
+  </tbody>
+</table>
+<p>The application can conduct processes as required to accommodate the operation mode, for example by changing how the game is staged.</p>
+<p>The operation mode reflects the state of the NX system, and when the application starts, the NX will not always be in a particular state. For this reason, if necessary, call the <code><span class="ApiLink_nn__oe__GetOperationMode">nn::oe::GetOperationMode</span>()</code> function to get the operation mode when the application starts.</p>
+<p>
+  <code>
+    <span class="ApiLink_nn__oe__MessageOperationModeChanged">nn::oe::MessageOperationModeChanged</span>
+  </code> notifications are sent after notification is enabled using the following function. The default is disabled.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__oe__SetOperationModeChangedNotificationEnabled">nn::oe::SetOperationModeChangedNotificationEnabled</span>(true);</li>
+</ul>
+<h2 id="Anchor_166065886_h2_8">Notifications of Changes in Performance Mode</h2>
+<p>The <code><span class="ApiLink_nn__oe__MessagePerformanceModeChanged">nn::oe::MessagePerformanceModeChanged</span></code> message notifies that the performance mode of the system has been changed. The following table lists the performance modes. The current mode can be obtained using the <code><span class="ApiLink_nn__oe__GetPerformanceMode">nn::oe::GetPerformanceMode</span>()</code> function.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Performance Mode</th>
+      <th>Description</th>
+      <th>Specific Performance Values</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__oe__PerformanceMode_Normal">nn::oe::PerformanceMode_Normal</span>
+      </td>
+      <td>Normal mode</td>
+      <td rowspan="2">
+        <p>See the <a href="../Pages/Page_107339250.html">Selecting Performance Configurations</a></p>
+        <p>page.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__oe__PerformanceMode_Boost">nn::oe::PerformanceMode_Boost</span>
+      </td>
+      <td>Boost mode</td>
+    </tr>
+  </tbody>
+</table>
+<p>The application can conduct processes as required to accommodate the performance mode, for example by changing how the game is staged.</p>
+<p>The operation mode reflects the state of the NX system, and when the application starts, the NX will not always be in a particular state. For this reason, if necessary, call the <code><span class="ApiLink_nn__oe__GetPerformanceMode">nn::oe::GetPerformanceMode</span>()</code> function to get the performance mode when the application starts.</p>
+<p>
+  <code>
+    <span class="ApiLink_nn__oe__MessagePerformanceModeChanged">nn::oe::MessagePerformanceModeChanged</span>
+  </code> notifications are sent after notification is enabled using the following function. The default is disabled.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__oe__SetPerformanceModeChangedNotificationEnabled">nn::oe::SetPerformanceModeChangedNotificationEnabled</span>(true);</li>
+</ul>
+<p>The actual performance parameters for the performance mode will vary, depending on the <code><span class="ApiLink_nn__oe__PerformanceConfiguration">nn::oe::PerformanceConfiguration</span></code> settings. For more information, see the <a href="../Pages/Page_107339250.html">Selecting Performance Configurations</a> page.</p>
+<h2 id="Anchor_166065886_h2_9">Notifications of Exit Requests</h2>
+<p>When the application is quit from places such as the menu screen, a program exit request is issued for the application. By default, a program will forcibly exit, regardless of its state, when a program exit request is issued.</p>
+<p>However, the application can be entered into an interval for handling the program exit request by calling <code><span class="ApiLink_nn__oe__EnterExitRequestHandlingSection">nn::oe::EnterExitRequestHandlingSection</span>()</code> beforehand. If a program exit request occurs during this interval, the <code><span class="ApiLink_nn__oe__MessageExitRequest">nn::oe::MessageExitRequest</span></code> notification will be sent to the application's own program. When the program receives this notification, save data is saved, the network session is disconnected, all processes that must be run before exiting are quickly completed, and finally, the <code><span class="ApiLink_nn__oe__LeaveExitRequestHandlingSection">nn::oe::LeaveExitRequestHandlingSection</span>()</code> function is called and the program is exited. Program exiting is an asynchronous process, so implement your code such there is no trouble with the value returned by this function. We recommend that you normally do nothing, and just continue to wait for the program to exit, as shown in the following example.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+#include &lt;nn/oe.h&gt;
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::oe::</span><span class="n">LeaveExitRequestHandlingSection</span><span class="p">()</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(;;)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">SleepThread</span><span class="p">(</span> <span class="nn">nn::TimeSpan::</span><span class="n">FromDays</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The process does not get to this point.
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If no <code><span class="ApiLink_nn__oe__MessageExitRequest">nn::oe::MessageExitRequest</span></code> message has been reported during the program's exit handling interval, you can end that interval by calling <code><span class="ApiLink_nn__oe__LeaveExitRequestHandlingSection">nn::oe::LeaveExitRequestHandlingSection</span>()</code>. (The program itself does not end at this time.) If a program exit request is subsequently issued outside of this interval, the program ends automatically regardless of its operating state.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>In some cases, such as with some bugs, the program might never end despite the <code><span class="ApiLink_nn__oe__MessageExitRequest">nn::oe::MessageExitRequest</span></code> message. To avoid this situation, the program is forced to exit after a certain amount of time when this message is reported while the HOME Menu is in use. (As of firmware version 4.0.1, this time is 15 seconds.) When this kind of forced exit occurs, a message is shown to users informing them that the software was closed due to an error.</p>
+    <p>In situations where the user can end the program, having to wait a long time for the program to end worsens the user experience. This timeout is prepared as a workaround in a worst-case scenario. It uses a time frame that is not intended for free use by the application. Implement your programs so they finish exiting quickly, and do not face this issue.</p>
+    <p>By default, even when debugging the processes executed when closing a program, the program is forcibly closed after 15 seconds. When debugging the processes executed when closing a program, you can disable the timer for forcibly closing applications by using the feature described in <a href="../Pages/Page_325711330.html">Development Support Features</a> &gt; <span class="toc-item-body"><a href="../Pages/Page_325711330.html">Disabling the Timer for Forcibly Closing Applications</a></span>.</p>
+  </div>
+</div>
+<h3 id="Anchor_166065886_h3_1">When Notifications Are and Are Not Made for Exit Requests</h3>
+<p>Program exit requests are notified in the following cases.</p>
+<ul>
+  <li>When another application starts from the HOME Menu.</li>
+  <li>The application has been explicitly exited by the user from the HOME Menu.</li>
+  <li>When the user selects to restart or turn off the system from Power Options in the POWER Menu.</li>
+  <li>When the play time is up, an interrupt scene starts, and the user selects to end the application there.</li>
+</ul>
+<p>In the following situations, the program is forcibly ended without notification of an exit request. As a result, program exit requests cannot be handled.</p>
+<ul>
+  <li>The card is removed in cases when the program was started from the game card.</li>
+  <li>The SD card is removed.</li>
+  <li>The system forcibly enters sleep mode because of a low battery and then forcibly shuts down because the battery has been completely drained.</li>
+  <li>The user presses and holds the POWER Button for 7 seconds to forcibly shut down the system.</li>
+  <li>The user presses and holds the POWER Button for 12 seconds to forcibly shut down the system.</li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__oe__Message', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ac67e18c07e043f16c104858669a635e7' )
+SetUrl( 'ApiLink_nn__oe__TryPopNotificationMessage', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a9faa774fd40d37a007e0ba967e8b1788' )
+SetUrl( 'ApiLink_nn__oe__GetNotificationMessageEvent', '../../../Api/HtmlNX/namespacenn_1_1oe.html#afef8c76a5d56c2f9457a90cc0bad5dda' )
+SetUrl( 'ApiLink_nn__oe__PopNotificationMessage', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a312f487c9d48472d900d6ba36db0a0d0' )
+SetUrl( 'ApiLink_nn__os__SystemEvent', '../../../Api/HtmlNX/classnn_1_1os_1_1_system_event.html' )
+SetUrl( 'ApiLink_nn__os__WaitAny', '../../../Api/HtmlNX/namespacenn_1_1os.html#ab9b837eb53fa2c8a9610cec2b69666fd' )
+SetUrl( 'ApiLink_nn__oe__MessageExitRequest', '../../../Api/HtmlNX/namespacenn_1_1oe.html#aa7fc5515ea49f1dbc2cdbefccebe0fb5' )
+SetUrl( 'ApiLink_nn__oe__SetFocusHandlingMode', '../../../Api/HtmlNX/namespacenn_1_1oe.html#af6a0179cd2166aac102f520d39a33f0d' )
+SetUrl( 'ApiLink_nn__oe__FocusHandlingMode', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a936b09d580883d7c6b9981fd7d552692' )
+SetUrl( 'ApiLink_nn__oe__FocusHandlingMode_InFocusOnly', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a936b09d580883d7c6b9981fd7d552692a7d5f27530bf26c541e2f4b48064aea65' )
+SetUrl( 'ApiLink_nn__oe__MessageFocusStateChanged', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a731f0fdd6844ba0ec03d62e40e4023a1' )
+SetUrl( 'ApiLink_nn__oe__FocusHandlingMode_Suspend', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a936b09d580883d7c6b9981fd7d552692ac7ddbbe8d615a0b0f8c80098212532db' )
+SetUrl( 'ApiLink_nn__oe__FocusHandlingMode_SuspendAndNotify', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a936b09d580883d7c6b9981fd7d552692a6d4aeb7fc957b25eae7d5e9843eae801' )
+SetUrl( 'ApiLink_nn__oe__FocusHandlingMode_Notify', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a936b09d580883d7c6b9981fd7d552692a620f8849062b752ad6b454da6bb804eb' )
+SetUrl( 'ApiLink_nn__oe__GetCurrentFocusState', '../../../Api/HtmlNX/namespacenn_1_1oe.html#adafd3c9e326c25f6b212a5a141f94f43' )
+SetUrl( 'ApiLink_nn__oe__FocusState_Background', '../../../Api/HtmlNX/namespacenn_1_1oe.html#adb1de1670f290d1ee4af0cdbe9ea2effa7fe24d5845b8682eee47322c498dfb09' )
+SetUrl( 'ApiLink_nn__oe__FocusState_OutOfFocus', '../../../Api/HtmlNX/namespacenn_1_1oe.html#adb1de1670f290d1ee4af0cdbe9ea2effabf05f4f790fbdc3cdbb3bf5de3a3c71c' )
+SetUrl( 'ApiLink_nn__oe__FocusState_InFocus', '../../../Api/HtmlNX/namespacenn_1_1oe.html#adb1de1670f290d1ee4af0cdbe9ea2effa6568ef060bae975fde787c5fd9eff375' )
+SetUrl( 'ApiLink_nn__oe__MessageResume', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a2b4a0282927ba16a2a8e6e3e390c0203' )
+SetUrl( 'ApiLink_nn__oe__SetResumeNotificationEnabled', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a5af737bc29bedc1c7d55152b77a07e23' )
+SetUrl( 'ApiLink_nn__os__Event', '../../../Api/HtmlNX/classnn_1_1os_1_1_event.html' )
+SetUrl( 'ApiLink_nn__oe__GetProgramTotalActiveTime', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a699bb996381c90b12be811a3b6958e6b' )
+SetUrl( 'ApiLink_nn__TimeSpan', '../../../Api/HtmlNX/classnn_1_1_time_span.html' )
+SetUrl( 'ApiLink_nn__oe__MessageOperationModeChanged', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ac95d8f7712a09e591e806fe2d29c66ee' )
+SetUrl( 'ApiLink_nn__oe__GetOperationMode', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ab500f9a7dfae3fbe8d44e7fb1c961cf7' )
+SetUrl( 'ApiLink_nn__oe__OperationMode_Handheld', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ac5025778e5c531c83351aecf4d10dc32aae78025cfe8e21913aa83446139408e2' )
+SetUrl( 'ApiLink_nn__oe__OperationMode_Console', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ac5025778e5c531c83351aecf4d10dc32aef88d67822ab38d48d48e92b9aaf8994' )
+SetUrl( 'ApiLink_nn__oe__SetOperationModeChangedNotificationEnabled', '../../../Api/HtmlNX/namespacenn_1_1oe.html#aded257a3cfea501f76418b16f174a7fe' )
+SetUrl( 'ApiLink_nn__oe__MessagePerformanceModeChanged', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ae5e266ca9329a70d1adca187fcddd32e' )
+SetUrl( 'ApiLink_nn__oe__GetPerformanceMode', '../../../Api/HtmlNX/namespacenn_1_1oe.html#aa709a0d485f39a8867b8725c257f140d' )
+SetUrl( 'ApiLink_nn__oe__PerformanceMode_Normal', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a62764c814fcc2dc88ea4b89e096e7f84a5e1c0cc0a1c61538ce6c93165d17864e' )
+SetUrl( 'ApiLink_nn__oe__PerformanceMode_Boost', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a62764c814fcc2dc88ea4b89e096e7f84a98206f2aff5c73b8c83f9c55aa99fe4e' )
+SetUrl( 'ApiLink_nn__oe__SetPerformanceModeChangedNotificationEnabled', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ab40157a66111c6ce5491e7111ae0ff2c' )
+SetUrl( 'ApiLink_nn__oe__PerformanceConfiguration', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a096139fd9b2ff830679916e5dc7af4ad' )
+SetUrl( 'ApiLink_nn__oe__EnterExitRequestHandlingSection', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a5855d2bd5c04501a767e5553cb18443b' )
+SetUrl( 'ApiLink_nn__oe__LeaveExitRequestHandlingSection', '../../../Api/HtmlNX/namespacenn_1_1oe.html#abb6fcf4883ebba904f69b3df97d09ea4' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

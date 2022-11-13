@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Using Network Service Accounts | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Using Network Service Accounts -->
+<div class="pagetitle" id="PageId_159246422">Using Network Service Accounts</div>
+<div class="text_separate">
+<h1 id="Anchor_159246422_h1_1">Advance Preparations</h1>
+<p>To use a network service account, the following preparations must be made in advance.</p>
+<ul style="list-style-type: square;">
+  <li>Configure the internet connection settings.<ul style="list-style-type: square;"><li>For more information, see <a href="../Pages/Page_104465190.html">nifm Library</a>.</li></ul></li>
+  <li>Creating user accounts.<ul><li>To create a user account, use the <a href="../Pages/Page_310877311.html"><strong>Managing accounts</strong> menu in DevMenu</a>.</li><li>In the <strong>Accounts</strong> menu, click <strong>Add a user account</strong> to create a single user account.</li></ul></li>
+</ul>
+<h1 id="Anchor_159246422_h1_2">Availability of Network Service Accounts</h1>
+<p>In the current version of the SDK, network service accounts are deemed &quot;available&quot; when the following conditions are satisfied.</p>
+<ul style="list-style-type: square;">
+  <li>The network service account has been registered.</li>
+  <li>The registered network service account has the network service account qualifications required by a program, as described later.</li>
+  <li>The user account is in one of the following states.<ul style="list-style-type: square;"><li>Linking with a Nintendo Account is complete, and the link is sound.</li><li>The procedure described in the Using Network Service Accounts Without Linking to a Nintendo Account section that follows, is complete.</li></ul></li>
+</ul>
+<p>The program can provide network services to the available network service accounts. </p>
+<h2 id="Anchor_159246422_h2_1">Checking the Availability of Network Service Accounts</h2>
+<p>You can use the following procedure to check the availability of a network service account.</p>
+<ul>
+  <li>Open the <strong>Account detail</strong> screen for the user account in the <a href="../Pages/Page_310877311.html">Managing accounts menu of DevMenu</a> (See <a href="../Pages/Page_107328771.html">DevMenu</a>).</li>
+  <li>Confirm what is written in the parentheses at the end of the NSA.<ul><li><strong>Available:</strong> A network service account is available.</li><li>If anything else, it indicates that a network service account is not available.</li></ul></li>
+  <li>Confirm the license text.<ul><li><strong>Available</strong>: Has the network service account qualifications, described later, that programs can require.</li><li><strong>Other</strong>: Either does not have the network service account qualifications, described later, that programs can require, or the status is unclear.</li></ul></li>
+</ul>
+<h2 id="Anchor_159246422_h2_2">Losing Availability of Network Service Accounts</h2>
+<p>The availability of network service accounts can be lost at the following times.</p>
+<ul style="list-style-type: square;">
+  <li>When this feature uses communication</li>
+  <li>When the application uses communication</li>
+  <li>When the network service account qualifications (described later) that programs can require have expired</li>
+</ul>
+<p>For this reason, note that the availability of a network service account can change at any time, regardless of program processing.</p>
+<h2 id="Anchor_159246422_h2_3">Restoring the Availability of Network Service Accounts</h2>
+<p>Network service account availability can be recovered at any point, using this feature via user controls, even when that availability has been lost.<br />For this reason, note that the availability of a network service account can change at any time, regardless of program processing.</p>
+<p>You can use the following procedure to recover availability of a network service account when it has been lost, within a development environment.<br />(However, this process does not check for whether the account meets the requirements of the program.)</p>
+<ul>
+  <li>Open the <strong>Account detail</strong> screen for the user account in the <a href="../Pages/Page_310877311.html">Managing accounts menu of DevMenu</a> (See <a href="../Pages/Page_107328771.html">DevMenu</a>).</li>
+  <li>Click <strong>Unregister NSA</strong> to unregister the network service account.</li>
+  <li>Re-fulfill the criteria for availability as described earlier.</li>
+</ul>
+<h2 id="Anchor_159246422_h2_4">Network Service Account Requirements That Can Be Requested by the Program</h2>
+<p>The program can request certain requirements for network service accounts to use network services on each platform.</p>
+<!--Remove-->
+<div class="platform_nx">
+  <p>For the Nintendo Switch, the program may have requirements of network service accounts within the scope of the following policies.</p>
+  <ul style="list-style-type: square;">
+    <li>No additional requirements.</li>
+    <li>Require the user to join Nintendo Switch Online to use the network service account with the program.</li>
+    <li>Require the user to join Nintendo Switch Online to use feature groups defined independently by the program.</li>
+  </ul>
+</div>
+<h3 id="Anchor_159246422_h3_1">Supporting Applications Where the Program Does Not Request Unique Requirements</h3>
+<p>If the program uses a policy <strong>other than</strong> the items marked with an asterisk, have the application internally check for the availability of network service accounts.<br />If requirements exist, logging in to the network service account will fail in a way similar to when errors occur that are related to other network service accounts.<br />Similarly, use the <span class="ApiLink_nn__account"><code>nn::account::EnsureNetworkServiceAvailableAsync()</code></span> function to resolve this error.</p>
+<h3 id="Anchor_159246422_h3_2">Notes About the Requirements to Use Feature Groups Defined Independently by the Program (SDK 4.4.0 and Later)<br /></h3>
+<p>When the program uses the policies marked with an asterisk, the program must independently submit a request to get the requirements from the user.<br />In addition, if the program determines whether to require credentials to use a user's network service account, you must display the system UI using the <span class="ApiLink_nn__account"><code>nn::account::ShowLicenseRequirementsForNetworkService()</code></span> function of NintendoSDK.</p>
+<p>The program shall follow the guidelines to ensure that users that perfectly satisfy the requirements, are able to use the services provided by the program.</p>
+<h2 id="Anchor_159246422_h2_5">Tips</h2>
+<h3 id="Anchor_159246422_h3_3">Using Network Service Accounts Without Linking to a Nintendo Account</h3>
+<p>For ease of development, you can disable the following condition that is normally a prerequisite for available network service accounts.<br />By disabling this requisite condition, you can discard the procedure related to Nintendo Accounts and still use network service accounts. </p>
+<ul>
+  <li>Linking with a Nintendo Account is complete, and the link is sound.</li>
+</ul>
+<p>The procedure for this is as follows.</p>
+<ol>
+  <li>Disable the network service account use policy using one of the following methods.<ul><li>Change <strong>Requires Nintendo Account for use of network service</strong> in <strong>Account Management</strong> &gt; <strong>Firmware settings</strong> for <a href="../Pages/Page_107328771.html">DevMenu</a> to <strong>disable</strong>, and reset the development hardware.</li><li>Change <code>fwdbg:require_na_for_nwservice</code> in the Account System Settings for <a href="../Pages/Page_424117455.html">DevMenuCommand</a> to <code>disable</code>, and reset the development hardware.</li></ul></li>
+  <li>Create a network service account.<br /><ul><li>Display the details for the user account from the <a href="../Pages/Page_310877311.html"><strong>Manage accounts</strong> menu of DevMenu</a> and<a href="../Pages/Page_107328771.html">DevMenu</a>.</li><li>Select the user account in the <strong>Accounts</strong> menu and click <strong>Register NSA</strong> to perform the registration process.<ul><li>No information is required to be entered at time of registration.</li><li>If the registration is successful, &quot;Success&quot; will be displayed on the screen.</li></ul></li></ul></li>
+</ol>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Use of this feature is limited to convenience in application development.<br />Ultimately, the application must assure operation in the state where Nintendo Account policy is enabled.</p>
+  </div>
+</div>
+<h3 id="Anchor_159246422_h3_4">Omitting the Verification of Network Service Account Credentials (for SDK 5.0.0 and Later)</h3>
+<p>To make development work easier, you can omit the verification of credentials that occurs when logging in to a network service account.<br />You can use this practice to get the ID token for a network service account without the required network service account credentials.<br /><strong>Note:</strong> The data related to credentials is not recorded in the ID token when emitting credentials verification. Extra care is needed when programs verify credentials in proprietary ways.</p>
+<p>Use one of the following methods to omit credential verification.</p>
+<ul style="list-style-type: square;">
+  <li>Use the procedure described previously in Using Network Service Accounts Without Linking to a Nintendo Account.</li>
+  <li>In <a href="../Pages/Page_107328771.html">DevMenu</a>, select <strong>Account Management</strong> &gt; <strong>Firmware settings</strong>, change <strong>Enable Nintendo Account license verification</strong> to <strong>disable</strong>, and reset the development hardware.</li>
+  <li>In <a href="../Pages/Page_424117455.html">DevMenuCommand</a>, in the Account System Settings, change <code>fwdbg:na_license_verification_enabled</code> to <code>disable</code>, and reset the development hardware.</li>
+</ul>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Use of this feature is limited to convenience in application development.<br />You must make sure that applications will ultimately work when the verification of network service account credentials is enabled.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>In versions earlier than NintendoSDK 5.0.0, even if the procedure described in Using Network Service Accounts Without Linking to a Nintendo Account has been implemented, the process of verifying credentials is not omitted and getting the ID token fails. (Error code: 2124-5006)</p>
+  </div>
+</div>
+<h1 id="Anchor_159246422_h1_3">Conditions For Program to Use Network Service Accounts</h1>
+<p>In the current version of NintendoSDK, programs that satisfy the following conditions can use network service accounts. </p>
+<ul>
+  <li>All conditions for an available network service account have been satisfied.</li>
+  <li>The program has an application ID approved for network services on OMAS (Online title MAnagement System).</li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <div>
+      <p>For more information about using network service accounts from a program, see the example implementation in the sample <code>Samples/Sources/Applications/AccountApplication</code>. <br />This sample program implements error handling as recommended for NintendoSDK and described in <a href="../Pages/Page_172900706.html">Handling Errors</a>.</p>
+    </div>
+    <div class="platform_nx">
+      <p>For more information about the <code>account</code> library error codes and descriptions of the <code>Result</code> values, see <a href="../Pages/Page_187703099.html">Error Codes</a>.</p>
+    </div>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>In the state where Nintendo Account policy is disabled, calling APIs for Nintendo Accounts may fail regardless of the linked state.<br />This failure may include errors not described in the reference.</p>
+  </div>
+</div>
+<h2 id="Anchor_159246422_h2_6">Using Network Service Accounts</h2>
+<p>When network service accounts are available for use by the program, the following SDK features of the <code>account</code> library can be used.</p>
+<ul style="list-style-type: square;">
+  <li>
+    <span class="ApiLink_Result_nn__account__GetNetworkServiceAccountId(NetworkServiceAccountId_*pOutId|_const_UserHandle_&handle)_NN_NOEXCEPT">
+      <code>nn::account::GetNetworkServiceAccountId()</code>
+    </span>
+  </li>
+  <li>
+    <span class="ApiLink_Result_nn__account__EnsureNetworkServiceAccountIdTokenCacheAsync(AsyncContext_*pOutContext|_const_UserHandle_&handle)_NN_NOEXCEPT">
+      <code>nn::account::EnsureNetworkServiceAccountIdTokenCacheAsync()</code>
+    </span>
+  </li>
+  <li>
+    <span class="ApiLink_Result_nn__account__LoadNetworkServiceAccountIdTokenCache(size_t_*pOutActualSize|_char_*buffer|_size_t_bufferSize|_const_UserHandle_&handle)_NN_NOEXCEPT">
+      <code>nn::account::LoadNetworkServiceAccountIdTokenCache()</code>
+    </span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__account', '../../../Api/HtmlNX/namespacenn_1_1account.html' )
+SetUrl( 'ApiLink_Result_nn__account__GetNetworkServiceAccountId(NetworkServiceAccountId_*pOutId|_const_UserHandle_&handle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1account.html#a8a800930ca2f1f5b402bf4cc25db7f1d' )
+SetUrl( 'ApiLink_Result_nn__account__EnsureNetworkServiceAccountIdTokenCacheAsync(AsyncContext_*pOutContext|_const_UserHandle_&handle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1account.html#ade43b0fd5b5f5e1ec1752efe37d1ed97' )
+SetUrl( 'ApiLink_Result_nn__account__LoadNetworkServiceAccountIdTokenCache(size_t_*pOutActualSize|_char_*buffer|_size_t_bufferSize|_const_UserHandle_&handle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1account.html#afae1661923ba118f18a5b4af7ff1011a' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

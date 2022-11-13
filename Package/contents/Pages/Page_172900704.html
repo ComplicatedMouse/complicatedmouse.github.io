@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Shaders | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Shaders -->
+<div class="pagetitle" id="PageId_172900704">Shaders</div>
+<div class="text_separate">
+<h1 id="Anchor_172900704_h1_1">Overview</h1>
+<p>The <code>g3d</code> shader system has mechanisms for comment-style <a href="../Pages/Page_84052806.html">shader annotations</a> to user-coded shader source, and for shader intermediate files, and for the <a href="../Pages/Page_83956037.html">3D shader converter</a>. By appropriately using these mechanisms, you can build shader structures tailored to <a href="../Pages/Page_286721565.html">shader variations</a> and other use cases, and link <code>g3d</code> models to the <code>g3d</code> library and tools such as <a href="../Pages/Page_83955978.html">3DEditor</a>. Because the <code>g3d</code> library is designed to be independent of any specific shader system, it can be used in combination with any shader system, and not just the g3d shader system.</p>
+<h2 id="Anchor_172900704_h2_1">Shader Documentation Table of Contents</h2>
+<p>The shader documentation has the following structure. For more information about the g3d shader system, see <a href="../Pages/Page_106333222.html">Shader Resource Workflow</a>, and <a href="../Pages/Page_286721547.html">Shader Runtime Workflow</a>.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>
+        <p>Page</p>
+      </th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Shaders (this page)</td>
+      <td>An overview of <code>g3d</code> shaders.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <a href="../Pages/Page_106333222.html">Shader Resource Workflow</a>
+        </p>
+      </td>
+      <td>Describes the workflow up to the conversion of the shader code to the binary handled by the runtime, and describes the files handled by the g3d shader system.</td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_286721547.html">Shader Runtime Workflow</a>
+      </td>
+      <td>Describes the workflow for loading the shader binary in the runtime, and for rendering models.</td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_84052806.html">Shader Annotations</a>
+      </td>
+      <td>Describes how to write annotations in the shader code, and describes the specifications.</td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_286721565.html">Shader Variations</a>
+      </td>
+      <td>Describes how to create variations, and describes the specifications.</td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_106332818.html">Uniform Blocks</a>
+      </td>
+      <td>Describes the uniform blocks supported by <code>g3d</code> (<code>Shape</code>, <code>Skeleton</code>, <code>Material</code>, and <code>Option</code>).</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_172900704_h1_2">Shader Structure</h1>
+<h2 id="Anchor_172900704_h2_2">Resource Files</h2>
+<p>The resource files handled by <code>g3d</code> shaders include <em>shader source files</em>, a number of <em>intermediate files</em>, and the <em>binary files</em> for the runtime. Shader source files are text files in which the user has coded shader processes. Additional information, known as <em>shader annotation</em>, must also be included to link with the g3d runtime and with the various tools. The annotation configures settings for shader variations, adds identifying information, and also configures the 3DEditor UI display settings. There are three kinds of intermediate files: <em>shader configuration files</em> (FSCA and FSCB), <em>shader definition files</em> (FSDB), and <em>shader variation files</em> (FSVA and FSVB). You can use intermediate files primarily to define shading models and configure shader variations, to edit materials using 3DEditor, and to assign shaders to model intermediate files. One kind of <strong>binary file</strong> is used in the runtime: the <em>shader archive file</em> (BFSHA). You can use the <a href="../Pages/Page_83956037.html">3D shader converter</a> to convert the intermediate files and ultimately, create a shader archive file. For more information, see <a href="../Pages/Page_106333222.html">Shader Resource Workflow</a>.</p>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_172900704/flowchart_1.svg" />
+</div>
+<h2 id="Anchor_172900704_h2_3">Runtime</h2>
+<p>If shaders are being handled in the runtime, they are used by loading the binary files (shader archive files). The shader archive file is handled as an <code><span class="ApiLink_nn__g3d__ResShaderArchive">nn::g3d::ResShaderArchive</span></code> object storing one or many <em>shading models</em> (<code><span class="ApiLink_nn__g3d__ResShadingModel">nn::g3d::ResShadingModel</span></code> objects). A <em>shading model</em> is a <code>g3d</code> concept representing the kind of shading to use when rendering a model. It expresses the differences between the shader source and the defined macros. The shading model holds numerous shader programs (<code><span class="ApiLink_nn__g3d__ResShaderProgram">nn::g3d::ResShaderProgram</span></code> objects). A shader program is a concept that corresponds to a single <strong><a href="../Pages/Page_286721565.html">shader variation</a></strong>, and holds one <code><span class="ApiLink_nn__gfx__ResShaderVariation">nn::gfx::ResShaderVariation</span></code> object. For more information about the processing in the runtime, see <a href="../Pages/Page_286721547.html">Shader Runtime Workflow</a>.</p>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_172900704/flowchart_2.svg" />
+</div>
+<h1 id="Anchor_172900704_h1_3">Relationship to Models</h1>
+<p>
+  <code>g3d</code> has a mechanism for associating the model's material information with a shader for handling. This section presents an overview of the relationship between <code>g3d</code> models and shaders.</p>
+<h2 id="Anchor_172900704_h2_4">Intermediate Files</h2>
+<p>The <a href="../Pages/Page_83956043.html"><code>assign</code> utility</a> is used to associate a shader definition file (FSDB) with the model intermediate files (FMDA and FMDB), and some of the shader information is added to the model intermediate files according to the <a href="../Pages/Page_84052806.html">shader annotation</a>. For more information, see <a href="../Pages/Page_106333222.html">Shader Resource Workflow</a>.</p>
+<ul>
+  <li>The shader's rendering information, option variables, sampler variables, material uniform block variables, and vertex attribute information are added to <code>&lt;shader_assign&gt;</code> in the model intermediate file.</li>
+  <li>The vertex buffer definition in the intermediate model file is updated based on the vertex interleave information specified in the shader annotations.</li>
+</ul>
+<h3 style="margin-left: 0.5em;" id="Anchor_172900704_h3_1">3dEditor</h3>
+<p>The designer uses <a href="../Pages/Page_83955978.html">3DEditor</a> to open the shader definition file (FSDB file) and the model intermediate files (FMDA and FMDB files), and edit values and option variables for the material of the model. The shader-related elements that can be edited include the material uniform block variables, option variables, and sampler values in <code>&lt;shader_assign&gt;</code> of the model intermediate file. At this time, 3DEditor references the UI settings (such as the names of elements, whether they are editable, and the editable range of values) defined in the shader annotations in the shader definition file to build a UI, which can then be used by designers to edit these values. For more information, see <a href="../Pages/Page_83955978.html">3dEditor</a>.</p>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_172900704/flowchart_3.svg" />
+</div>
+<h2 id="Anchor_172900704_h2_5">Runtime</h2>
+<p>In the runtime, the shader program (variation) to use for rendering is determined based on the option variables held by the model. In addition, the <code>Shape</code>, <code>Skeleton</code> (bone matrix), <code>Material</code> and <code>Option</code> uniform block information held by the model is loaded to the shader, and rendering is performed. For more information, see <a href="../Pages/Page_286721547.html">Shader Runtime Workflow</a>.</p>
+<p style="text-align: center;">
+  <br />
+</p>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_172900704/flowchart_4.svg" />
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__ResShaderArchive', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_archive.html' )
+SetUrl( 'ApiLink_nn__g3d__ResShadingModel', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shading_model.html' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderProgram', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_program.html' )
+SetUrl( 'ApiLink_nn__gfx__ResShaderVariation', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_res_shader_variation.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

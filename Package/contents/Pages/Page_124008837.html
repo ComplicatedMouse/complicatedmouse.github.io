@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Keyboard | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Keyboard -->
+<div class="pagetitle" id="PageId_124008837">Keyboard</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_124008837_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_124008837_h1_2">Structure in the Windows Environment</a>
+    </li>
+    <li>
+      <a href="#Anchor_124008837_h1_3">How to Use</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_124008837_h1_1">Introduction</h1>
+<p>This API is for implementing keyboard operations.</p>
+<p>The input state is updated in intervals of 8 ms or greater based on the most recent sample values at that time.</p>
+<p>The press state of each key is recorded by the bit set in <span class="ApiLink_nn__hid__KeyboardState__keys">KeyboardState::keys</span>. The USB HID Keyboard/Keypad Page Usage ID for each key corresponds to the respective bit location.</p>
+<p>The required modifier information when converting to the character corresponding to each key is recorded in <span class="ApiLink_nn__hid__KeyboardState__modifiers">KeyboardState::modifiers</span>.</p>
+<p>
+  <br />
+</p>
+<p>When using the API, you must first call <span class="ApiLink_void_nn__hid__InitializeKeyboard()_NN_NOEXCEPT">InitializeKeyboard()</span> to initialize it.</p>
+<p>The <span class="ApiLink_void_nn__hid__GetKeyboardState(KeyboardState_*pOutValue)_NN_NOEXCEPT">GetKeyboardState()</span> and <span class="ApiLink_int_nn__hid__GetKeyboardStates(KeyboardState_outValues[]|_int_count)_NN_NOEXCEPT">GetKeyboardStates()</span> functions have been prepared to get the input state.</p>
+<p>Use <span class="ApiLink_void_nn__hid__GetKeyboardState(KeyboardState_*pOutValue)_NN_NOEXCEPT">GetKeyboardState()</span> to get the latest input state.</p>
+<p>To get several past input states, starting from the latest input state, use <span class="ApiLink_int_nn__hid__GetKeyboardStates(KeyboardState_outValues[]|_int_count)_NN_NOEXCEPT">GetKeyboardStates()</span>. A maximum of <span class="ApiLink_nn__hid__KeyboardStateCountMax">KeyboardStateCountMax</span> states can be retroactively obtained.</p>
+<p>
+  <span style="color: rgb(23,43,77);">Getting input states does not change the internal state. For this reason, if you call the same function repeatedly, you get the same values each time unless the input state has been updated in the interim.</span>
+</p>
+<p>The input state contains a number (<span class="ApiLink_nn__hid__KeyboardState__samplingNumber">KeyboardState::samplingNumber</span>) that increments with each update. This number can be used to determine the obtained input state.</p>
+<p>To perform keyboard operations in the locked state, use <span class="ApiLink_void_nn__hid__SendKeyboardLockKeyEvent(KeyboardLockKeyEventSet_value)_NN_NOEXCEPT">SendKeyboardLockKeyEvent()</span>.</p>
+<p>Lock key events are defined under the <span class="ApiLink_nn__hid__KeyboardLockKeyEvent">KeyboardLockKeyEvent</span> structure. For example, if <span class="ApiLink_nn__hid__KeyboardLockKeyEvent__NumLockToggle">KeyboardLockKeyEvent::NumLockToggle::Mask</span> is specified, a NUM LOCK toggle event is generated.<br /></p>
+<p>
+  <br />
+</p>
+<p>The API can always be used independent of the connection state of the keyboard.</p>
+<p>If sampling fails because a keyboard is not connected or for another similar reason, the input state at that time is deemed to have no input, as though no keys are being pressed and the toggle keys are disabled.</p>
+<p>After <span class="ApiLink_void_nn__hid__InitializeKeyboard()_NN_NOEXCEPT">InitializeKeyboard()</span> has been called, even if the keyboard is disconnected and reconnected, it can continue to be used without re-initialization.</p>
+<p>When you need to determine whether the keyboard is connected, reference the <span class="ApiLink_nn__hid__KeyboardState">IsConnected</span> flag of the <span class="ApiLink_nn__hid__KeyboardState__attributes">attributes</span> member variable of the <span class="ApiLink_nn__hid__KeyboardAttribute__IsConnected">KeyboardState</span> structure.</p>
+<h1 id="Anchor_124008837_h1_2">Structure in the Windows Environment</h1>
+<p>In a Windows environment, the key pressed state is determined by converting to the Usage ID from the scan code according to <a href="http://download.microsoft.com/download/1/6/1/161ba512-40e2-4cc9-843a-923143f3456c/translate.pdf">USB HID to PS/2 Scan Code Translation Table</a>.</p>
+<h1 id="Anchor_124008837_h1_3">How to Use</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid/hid_Keyboard.h&gt;
+</span>&nbsp;
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="c1">// 1. Initialize Keyboard.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">InitializeKeyboard</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// 2. Get the input state as necessary.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">KeyboardState</span> <span class="n">state</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetKeyboardState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">keys</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::KeyboardKey::</span><span class="n">A</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Handle presses of the A key.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+<span class="c1">// Reference the IsConnected flag to determine whether connected.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">attributes</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::KeyboardAttribute::</span><span class="n">IsConnected</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processes if connected.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">else</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processes if disconnected.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+<span class="c1">// Use GetKeyboardStates() if you want to get a past input state and the current input state at the same time.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">KeyboardState</span> <span class="n">states</span><span class="p">[</span><span class="nn">nn::hid::</span><span class="n">KeyboardStateCountMax</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">stateCount</span> <span class="o">=</span> <span class="nn">nn::hid::</span><span class="n">GetKeyboardStates</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">states</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]));</span>
+
+<span class="c1">// Use SendKeyboardLockKeyEvent() to change the keyboard lock state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SendKeyboardLockKeyEvent</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::KeyboardLockKeyEvent::NumLockOn::</span><span class="n">Mask</span> <span class="o">|</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::KeyboardLockKeyEvent::CapsLockOff::</span><span class="n">Mask</span> <span class="o">|</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::KeyboardLockKeyEvent::ScrollLockOff::</span><span class="n">Mask</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__KeyboardState__keys', '../../../Api/HtmlNX/structnn_1_1hid_1_1_keyboard_state.html#a74aa0a5e3ff4818e75acf27fd22a4666' )
+SetUrl( 'ApiLink_nn__hid__KeyboardState__modifiers', '../../../Api/HtmlNX/structnn_1_1hid_1_1_keyboard_state.html#af5e4689c1a1436917bf2ab80004db47c' )
+SetUrl( 'ApiLink_void_nn__hid__InitializeKeyboard()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a7166575a2fd722e67eb8400828dd4b72' )
+SetUrl( 'ApiLink_void_nn__hid__GetKeyboardState(KeyboardState_*pOutValue)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#abe32e309493540451e3ada237ba6ee6c' )
+SetUrl( 'ApiLink_int_nn__hid__GetKeyboardStates(KeyboardState_outValues[]|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a1dd47864aa616886e73f16c07b0c1dae' )
+SetUrl( 'ApiLink_nn__hid__KeyboardStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#aec6ae8561ca58186c23d31dbc6eb0004' )
+SetUrl( 'ApiLink_nn__hid__KeyboardState__samplingNumber', '../../../Api/HtmlNX/structnn_1_1hid_1_1_keyboard_state.html#a3d597433b652365ca0df0025fa3ca3a0' )
+SetUrl( 'ApiLink_void_nn__hid__SendKeyboardLockKeyEvent(KeyboardLockKeyEventSet_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a79985581b51a04253790a776580efac2' )
+SetUrl( 'ApiLink_nn__hid__KeyboardLockKeyEvent', '../../../Api/HtmlNX/structnn_1_1hid_1_1_keyboard_lock_key_event.html' )
+SetUrl( 'ApiLink_nn__hid__KeyboardLockKeyEvent__NumLockToggle', '../../../Api/HtmlNX/structnn_1_1hid_1_1_keyboard_lock_key_event.html#a38b778d76adffb2aca6f3f386867c1dd' )
+SetUrl( 'ApiLink_nn__hid__KeyboardState', '../../../Api/HtmlNX/structnn_1_1hid_1_1_keyboard_state.html' )
+SetUrl( 'ApiLink_nn__hid__KeyboardState__attributes', '../../../Api/HtmlNX/structnn_1_1hid_1_1_keyboard_state.html#a0a6dff3d39861fb86b6f09a3ba172a72' )
+SetUrl( 'ApiLink_nn__hid__KeyboardAttribute__IsConnected', '../../../Api/HtmlNX/structnn_1_1hid_1_1_keyboard_attribute.html#af4b5e900264ad527d6b09d21fa7315a2' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

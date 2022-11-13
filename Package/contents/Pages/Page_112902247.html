@@ -1,0 +1,558 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    ignoreClass: ".*",
+    processClass: "math-(display|inline)",
+    processEscapes: false,
+    processRefs: false
+  },
+  "HTML-CSS": {
+    imageFont: null
+  }
+});
+</script>
+<script type="text/javascript" src="../template/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG"></script>
+<title>irsensor Library | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- irsensor Library -->
+<div class="pagetitle" id="PageId_112902247">irsensor Library</div>
+<div class="text_separate">
+<h1 id="Anchor_112902247_h1_1">Introduction</h1>
+<p>The <code>irsensor</code> library is the library for making use of the features of the IR Motion Camera built into the Joy-Con (R).</p>
+<p>This section describes the various features provided by the <code>irsensor</code> library and how to use the API resources.</p>
+<p>For more information about the IR Motion Camera, see the document entitled <em>IR Motion Camera Guide</em>.<br />(The IR Motion Camera Guide is available on the Nintendo Developer Portal under Developer Support &gt; NX &gt; Downloads.) )</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Before using this library, set up the environment and update the Joy-Con firmware as described in <a href="../Pages/Page_163415475.html">Preparing Controllers</a>.</p>
+    <p>Although the library can work with some earlier versions of the Joy-Con firmware, such operations are not supported. Always update the Joy-Con firmware to match the SDK version.</p>
+  </div>
+</div>
+<h1 id="Anchor_112902247_h1_2">How the Libraries Are Provided and How to Use Them</h1>
+<h2 id="Anchor_112902247_h2_1">Windows Environment</h2>
+<p>The <code>irsensor</code> library is provided as a static library file (<code>libnn_irsensor.lib</code>).<br />To use the specified library file, you must explicitly link it.</p>
+<h2 id="Anchor_112902247_h2_2">Development Hardware Environment</h2>
+<p>The <code>irsensor</code> library is provided in the <code>nnSdk.nso</code> dynamic library.<br />As a result, it can be used by default without any particular attention required.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>In versions of SDK earlier than NX Add-On 3.1.0, the <code>irsensor</code> Library was provided as the static library file <code>libnn_irsensor.a</code>.</p>
+  </div>
+</div>
+<h1 id="Anchor_112902247_h1_3">Feature Provided</h1>
+<p>The <code>irsensor</code> library provides the following features (modes).</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Feature (Mode)</th>
+      <th>Overview</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_112902609.html">Common Features</a>
+      </td>
+      <td>Common features required to use each mode.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_112902345.html">Clustering Mode</a>
+      </td>
+      <td>Mode for detecting clusters of objects captured by the IR camera.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_112902376.html">Moment Mode</a>
+      </td>
+      <td>In this mode, a moment calculation is performed on the image captured by the IR camera as part of the image processing and the result is output.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_112902380.html">Image Transfer Mode</a>
+      </td>
+      <td>Mode for displaying images captured by the IR camera at a low frame rate.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_112902387.html">Hand Analysis Mode</a>
+      </td>
+      <td>Mode for displaying information about the image of a hand captured by the IR camera, such as external shape, outline, and area.</td>
+      <td>Supported in 0.8.0 and later. Performance improved since 4.0.0.</td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_165050999.html">Pointing Mode</a>
+      </td>
+      <td>This mode is used for pointing to the screen based on information captured from a retroreflective bar by the IR camera.</td>
+      <td>Supported in 4.2.0 and later, but requires specific hardware and prior confirmation by Nintendo.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_112902247_h1_4">Important Information</h1>
+<h2 id="Anchor_112902247_h2_3">Data Update Cycle</h2>
+<p>The data for the IR Motion Camera is far larger in size than other kinds of data like button data, so the update cycle for data received from the Joy-Con is slower when you use the IR Motion Camera than when you are only using button data and the motion sensor data (accelerometer and gyroscope) from the controller. (The specification calls for the data to be updated once every 15 milliseconds, though the actual time can depend on the wireless environment.)<br />Note that the update speed of the button and motion sensor data also slows to match the update speed of the IR Motion Camera data.</p>
+<h2 id="Anchor_112902247_h2_4">Dealing With Synchronous Functions</h2>
+<p>For the sake of system consistency and to lighten the error handling burden on application developers, some of the functions of the <code>irsensor</code> library might block the calling thread for a long time.<br />Because there is also blocking related to events like updating controllers and displaying errors triggered by user operations (connecting a controller, running the battery out, and so on), there is a possibly that sounds and pictures called from the main thread of the application will freeze.</p>
+<p>For synchronous functions that might be blocked due to these kinds of user operations or system behavior, we recommend calling them from a thread other than the main thread.<br />For more information about the specifications for the various library functions, see the API Reference.</p>
+<h2 id="Anchor_112902247_h2_5">Handling Changes in Controller Connection Status, Application Focus, and Sleep Mode State</h2>
+<p>The system handles user operation-triggered events such as controller disconnection and reconnection, changes in application focus, and waking up from sleep mode. Applications do not need to implement any special handling for these events.</p>
+<p>The system is designed to return to the requested state whenever possible based on run/stop requests sent from the application for each type of processor, while also tracking the applet and controller state.<br />As a result, when the user connects a controller, transitions from a menu to an application, or wakes the system up from sleep mode in a state in which the <code><span class="ApiLink_nn__irsensor__Run">nn::irsensor::Run</span>**Processor</code> function has been called, the system automatically returns to the original state afterward.<br />Meanwhile, you can use functions such as <code><span class="ApiLink_nn__irsensor__Get">nn::irsensor::Get</span>***ProcessorState</code>, <code><span class="ApiLink_nn__irsensor__GetIrCameraStatus">nn::irsensor::GetIrCameraStatus</span></code>, and <code><span class="ApiLink_nn__irsensor__GetImageProcessorStatus">nn::irsensor::GetImageProcessorStatus</span></code> to get the processor and controller state, including for the system-handled processes described earlier. This makes it possible to handle these events to implement features such as displaying the controller connection status to the user and waiting on the application side until reconnection can be confirmed.<br /></p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>In NX Add-On 4.x, there is a bug where the <code><span class="ApiLink_nn__irsensor__GetImageProcessorStatus">nn::irsensor::GetImageProcessorStatus</span></code> function returns invalid status values for some user operations. For more information, see the Known Bugs page.</p>
+  </div>
+</div>
+<h2 id="Anchor_112902247_h2_6">Controller Firmware Updates</h2>
+<p>This feature is available from NX Add-On 4.0.0.</p>
+<p>The IR Motion Camera features are related to the controller firmware, so to use new features a request to update the firmware is made.<br />When it is known that an update is required in order to use the IR Motion Camera, the firmware update feature of the controller support applet can be called inside the library to request the user to update the controller firmware without notifying the application.<br /><br /><br />When it would not be expedient, from the perspective of the user experience of the application, for the user to update the IR Motion Camera while it is in use, you can call the <code><span class="ApiLink_nn__irsensor__CheckFirmwareUpdateNecessity">nn::irsensor::CheckFirmwareUpdateNecessity</span></code> function to check the necessity of updating the firmware in advance.<br />If an update is required, call the <code><span class="ApiLink_nn__hid__ShowControllerFirmwareUpdate">nn::hid::ShowControllerFirmwareUpdate</span></code> function and have the controller support applet run the firmware update ahead of time.</p>
+<h2 id="Anchor_112902247_h2_7">Calling the Error Viewer From the System</h2>
+<p>The IR Motion Camera will start the error viewer and display error messages in the following types of cases.</p>
+<ul>
+  <li>Hardware problems</li>
+  <li>Unable to use the IR Motion Camera because the battery level for the Joy-Con controller is low.<ul><li>This problem will only arise if you connect and attempt to use a Joy-Con that is running low on battery power.</li></ul></li>
+</ul>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <div class="confluence-information-macro-body">
+      <p>Note that if the IR Motion Camera has displayed the error viewer, it may require some time for control to return to the application.</p>
+    </div>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>The following functions that get data could call the error viewer from the system.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__irsensor__GetMomentProcessorState">nn::irsensor::GetMomentProcessorState</span> / <span class="ApiLink_nn__irsensor__GetMomentProcessorStates">nn::irsensor::GetMomentProcessorStates</span></li>
+  <li>
+    <span class="ApiLink_nn__irsensor__GetClusteringProcessorState">nn::irsensor::GetClusteringProcessorState</span> / <span class="ApiLink_nn__irsensor__GetClusteringProcessorStates">nn::irsensor::GetClusteringProcessorStates</span></li>
+  <li>
+    <span class="ApiLink_nn__irsensor__GetImageTransferProcessorState">nn::irsensor::GetImageTransferProcessorState</span>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__irsensor__GetHandAnalysisSilhouetteState">nn::irsensor::GetHandAnalysisSilhouetteState</span>
+    </code>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__irsensor__GetHandAnalysisImageState">nn::irsensor::GetHandAnalysisImageState</span>
+    </code>
+  </li>
+  <li>
+    <span class="ApiLink_nn__irsensor__GetPointingProcessorStates">nn::irsensor::GetPointingProcessorStates</span>
+  </li>
+</ul>
+<h2 id="Anchor_112902247_h2_8">Limits on Number of Wirelessly Connected Controllers That Can Use IR Motion Camera Simultaneously</h2>
+<p>If the IR Motion Camera feature will be used when multiple controllers are connected wirelessly to the system, the following limits apply to how many controllers can be used.</p>
+<ul>
+  <li>If only one wireless controller will be using the IR Motion Camera<ul><li>Up to seven additional wireless controllers can be connected.</li></ul></li>
+  <li>If two or more wireless controller will be using the IR Motion Camera<ul><li>A maximum of only four controllers can be connected wirelessly to the system.<ul><li>A maximum of four controllers can use the IR Motion Camera at the same time (in which case other controllers cannot be connected).</li></ul></li></ul></li>
+</ul>
+<p>If the Npad type is <code>NpadStyleJoyDual</code> or <code>NpadStyleFullKey</code>, a single <code>Npad</code> object can connect multiple wireless controllers, but only one wireless controller, at most, can be equipped with an IR Motion Camera.<br />If multiple IR Motion Cameras are being used, you must appropriately restrict the number based on the game scenario using the <code><span class="ApiLink_nn__hid__SetSupportedNpadIdType">nn::hid::SetSupportedNpadIdType</span></code> function, set the Npad style using the <code><span class="ApiLink_nn__hid__SetSupportedNpadStyleSet">nn::hid::SetSupportedNpadStyleSet</span></code> function, and configure the IR Motion Camera settings for each <code>Npad</code> object.<br /><br />Note that if the controller settings are not configured appropriately, the use of the IR Motion Camera might become restricted by a wireless controller inadvertently connected by the user.<br />The in-use state refers to states in which one of the <code><span class="ApiLink_nn__irsensor__Run">nn::irsensor::Run</span>***Processor</code> functions has been called. While in this in-use state, calling the <code><span class="ApiLink_nn__irsensor__StopImageProcessor">nn::irsensor::StopImageProcessor</span></code> function makes the IR Motion Camera enter the suspended state.<br /><br /></p>
+<p>The following table presents examples of permissible settings when multiple IR Motion Cameras are being used. (As these are examples of the use of multiple IR Motion Cameras, the case where there is only one <code>NpadIdType</code> is omitted.)<br />Care is required because there are exceptions when the style gets changed, during the course of gameplay, by calls to functions like <code><span class="ApiLink_nn__hid__SetNpadJoyAssignmentModeDual">nn::hid::SetNpadJoyAssignmentModeDual</span></code>.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th colspan="2" rowspan="2">Npad Settings When <span style="color: rgb(255,0,0);">Multiple IR Motion Cameras</span> Are Used<br /><br /><br /></th>
+      <th style="text-align: center;" colspan="4">
+        <p>Permissible Number of NpadIdType Variables</p>
+        <p>(Excluding Handheld)</p>
+      </th>
+      <th style="text-align: center;" rowspan="2">Notes</th>
+    </tr>
+    <tr>
+      <td class="highlight-grey">2</td>
+      <td class="highlight-grey">3</td>
+      <td class="highlight-grey">4</td>
+      <td class="highlight-grey">5 or more</td>
+    </tr>
+    <tr>
+      <td class="highlight-grey" rowspan="5">
+        <p>
+          <strong>Permissible NpadStyleSet</strong>
+        </p>
+        <p>
+          <strong>Combinations</strong>
+        </p>
+        <p>
+          <strong>(Excluding Handheld)</strong>
+          <br />
+        </p>
+      </td>
+      <td class="highlight-grey">
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909304.png" class="embedded-image" />
+            </span>
+          </p>
+          <p>JoyRight</p>
+        </div>
+      </td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="highlight-grey">
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909304.png" class="embedded-image" />
+            </span>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909288.png" class="embedded-image" />
+            </span>
+          </p>
+          <p>
+            <br />
+          </p>
+          <p>JoyRight/JoyLeft</p>
+        </div>
+      </td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>
+        <p>No</p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="highlight-grey">
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_112902247/205909304.png" class="embedded-image" />
+          </span>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_112902247/205909317.png" class="embedded-image" />
+          </span>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_112902247/205909324.png" class="embedded-image" />
+          </span>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_112902247/205909360.png" class="embedded-image" />
+          </span>
+          <p>
+            <br />
+          </p>
+          <p>JoyRight/JoyDual/FullKey</p>
+        </div>
+      </td>
+      <td>Yes</td>
+      <td>(See note)</td>
+      <td>No</td>
+      <td>No</td>
+      <td>
+        <strong>Note</strong>: Permissible if only one JoyDual/FullKey is using an IR Motion Camera.</td>
+    </tr>
+    <tr>
+      <td class="highlight-grey">
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909304.png" class="embedded-image" />
+            </span>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909288.png" class="embedded-image" />
+            </span>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909317.png" class="embedded-image" />
+            </span>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909324.png" class="embedded-image" />
+            </span>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909360.png" class="embedded-image" />
+            </span>
+          </p>
+          <p>JoyRight/JoyLeft/JoyDual/FullKey</p>
+        </div>
+      </td>
+      <td>
+        <p>Yes</p>
+      </td>
+      <td>(See note)</td>
+      <td>No</td>
+      <td>No</td>
+      <td>
+        <p>
+          <strong>Note</strong>: Permissible if only one JoyDual/FullKey is using an IR Motion Camera.</p>
+      </td>
+    </tr>
+    <tr>
+      <td class="highlight-grey">
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909317.png" class="embedded-image" />
+            </span>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909324.png" class="embedded-image" />
+            </span>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_112902247/205909360.png" class="embedded-image" />
+            </span>
+          </p>
+          <p>JoyDual/FullKey</p>
+        </div>
+      </td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If a <code>Get</code> function is called to get IR Motion Camera data when these conditions are not satisfied, the function returns <code><span class="ApiLink_nn__irsensor__ResultIrsensorDeviceResourceNotAvailable">nn::irsensor::ResultIrsensorDeviceResourceNotAvailable</span></code>.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>In NX Add-On 1.0.x and previous versions, the <code>Get</code> function would abort if called when these conditions were not satisfied.</p>
+    <p>In NX Add-On 6.3.0 and earlier, the function was designed to return <code><span class="ApiLink_nn__irsensor__ResultIrsensorNotReady">nn::irsensor::ResultIrsensorNotReady</span></code>. (Compatibility has been maintained.)</p>
+  </div>
+</div>
+<h2 id="Anchor_112902247_h2_9">NFC Functionality and Exclusion Specifications</h2>
+<p>Hardware restrictions prevent the simultaneous use of the IR Motion Camera and NFC features.<br />If the same application is using both the IR Motion Camera and the NFC feature, make sure that you stop using one feature before you start using the other.<br />More specifically, this exclusion determination is performed after one of the <code><span class="ApiLink_nn__irsensor__Run">nn::irsensor::Run</span>***Processor</code> functions of the IR Motion Camera has been called. While in this state, you can call the <code><span class="ApiLink_nn__irsensor__StopImageProcessor">nn::irsensor::StopImageProcessor</span></code> function on the target handle to make the processor enter the suspended state and make the other features available for use again.<br /></p>
+<h2 id="Anchor_112902247_h2_10">Determining Whether Input Occurred Using IR Motion Camera Data</h2>
+<p>The amount of data that can be obtained from the IR Motion Camera varies significantly depending on the distance between the camera and the object, making it difficult to determine whether the data represents noise or valid input. For this reason, do not use this data to determine whether the system is receiving input.<br />That way, if there is no input from any other devices, the screen will eventually dim and the system will enter sleep mode, even if the IR Motion Camera is active and there is some change in its data.</p>
+<p>If your application includes scenes where it would be problematic for the system to enter sleep mode, you can use the <code><span class="ApiLink_nn__oe__ReportUserIsActive">nn::oe::ReportUserIsActive</span>()</code> function to report the input state. However, there are limitations on how this function can be used. Make sure to see <a href="../Pages/Page_198946139.html">Control Over Idle State Actions</a>.<br /></p>
+<h2 id="Anchor_112902247_h2_11">IR Motion Camera Behavior When the Application Is Not In-Focus</h2>
+<p>If a <code>Get</code> function is called to get IR Motion Camera data when the application is not in focus (for example, because it has been configured to operate in the background even when the HOME Menu is active, so it can use network features in the background or call a library applet), that <code>Get</code> function returns <code><span class="ApiLink_nn__irsensor__ResultIrsensorDeviceNotReady">nn::irsensor::ResultIrsensorDeviceNotReady</span></code>.<br /></p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>In NX Add-On 1.0.x and earlier, if an application that was not in the in-focus state called the Get function while the IR Motion Camera was being used by an applet in a different focus state, the function would return undefined data, and in some cases, there was even a risk of it aborting.<br /></p>
+  </div>
+</div>
+<h2 id="Anchor_112902247_h2_12">IR Motion Camera Data When Quick Settings Is Running</h2>
+<p>The data from the IR Motion Camera can continue to be used in the normal way even when Quick Settings has been activated by a long press of the HOME Button.<br />In contrast, button input and motion sensor data is not usable when the Quick Settings are active.</p>
+<h2 id="Anchor_112902247_h2_13">IR Motion Camera Settings and Battery Life</h2>
+<p>The IR Motion Camera consumes a large amount of power. Care is required when configuring parameters because battery life will vary depending on the values that are set.<br />The main settings that affect battery life are the number of infrared LEDs that are lit and the exposure time. If you want to secure brightness while also protecting battery life, preferentially increase the digital gain, even though that will increase noise.<br /><br />In addition, the infrared LED and exposure time is controlled automatically to match the user's environment or operations when in pointing mode or hand analysis mode.<br />For this reason, note that the battery life will change greatly depending on usage.<br />The table shows the relationship between typical settings and battery life.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Example Configurations</th>
+      <th>IR LED</th>
+      <th>Exposure Time (Microseconds)</th>
+      <th>Battery Life</th>
+    </tr>
+    <tr>
+      <td>
+        <p>Low power settings.<br />(For cases such as when you only want to detect near objects.)</p>
+      </td>
+      <td>Two LEDs lighted. (<code>IrCameraLightTarget_NearObjects</code> or <code>FarObjects</code>)</td>
+      <td>10</td>
+      <td>Approximately 12 hours.</td>
+    </tr>
+    <tr>
+      <td>SDK demo default settings.<br />(For cases where you want a balance between recognition distance and power consumption.)</td>
+      <td>Four LEDs lit. (<code>IrCameraLightTarget_AllObjects</code>)</td>
+      <td>300</td>
+      <td>Approximately 7.8 hours.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>Full power settings.</p>
+        <p>(For cases where you want to detect objects as far away as possible.)</p>
+      </td>
+      <td>Four LEDs lit. (<code>IrCameraLightTarget_AllObjects</code>)</td>
+      <td>600</td>
+      <td>Approximately 5.8 hours.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>Pointing mode settings.</p>
+        <p>
+          <br />
+        </p>
+      </td>
+      <td>Fixed settings for 4 lit LEDs.</td>
+      <td>Automatically controlled.</td>
+      <td>
+        <p>Approximately 4.7 hours.</p>
+        <p>(Worst case where the device is used 4 meters away from the retroreflective bar.)</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_112902247_h2_14">Variation in Sensor Values</h2>
+<p>Because of unit-to-unit variations in IR Motion Camera characteristics, be careful when using the absolute values for brightness and coordinates obtained from the sensor.<br />In particular, if you plan to use the absolute values for coordinates when the Joy-Con (and, as a result, the IR Motion Camera) is stationary, make sure that you include a margin of error to account for these variations.</p>
+<p>For example, the brightness can vary by roughly &plusmn;10 percent due to individual variations.<br />As a result, if you set the brightness threshold to about 255 for detecting objects, in some cases the objects might not be detected due to individual hardware variations.</p>
+<h2 id="Anchor_112902247_h2_15">Noise Due to the Hardware</h2>
+<p>When the sensor exposure time and gain are set to high values and the sensor observes a particularly bright region (as shown in the following image), circular noise may become visible in the image due to the lens geometry. This behavior is by design.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_112902247/161444415.bmp" width="300" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_112902247_h2_16">Lens Distortion</h2>
+<p>The lens of the IR Motion Camera creates barrel distortion.<br />If you want to get more accurate data for purposes such as image processing, you can correct for this distortion in your application.</p>
+<p>Consider the following diagram of image distortion. (Note that the amount of distortion shown in this diagram is exaggerated for descriptive purposes.)<br />When the frame made up of straight black lines is captured, the lens distorts the picture to look like the frame in blue.<br />R' and R represent the distances from the center of the lens to the same corresponding point before and after distortion.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_112902247/205889718.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>To represent the relationship before and after distortion, the distortion ratio is defined as follows.</p>
+<div class="math-display">\[ Distortion Ratio = (R - R') / R' \times 100   \]</div>
+<p>Because the extent of distortion changes depending on the distance from the center of the lens, the distortion ratio can be represented as a function of the distance.<br />If the distance is defined as <em>x</em>, with 0.0 at the center of the lens and 1.0 at the corner of the distorted image (as shown in the preceding figure), the distortion ratio f(<em>x</em>) is calculated as follows.</p>
+<div class="math-display">\[ f(x) = 234.726x^6 - 532.274x^5 + 479.245x^4 - 280.277x^3 + 96.4481x^2 + 0.902929x + 0.019044 \]</div>
+<p>
+  <br />If you want to display the image or get more accurate data for purposes such as image processing, use this equation to calculate the distortion ratio and then transform the relevant pixel positions to correct for the distortion.<br /></p>
+<h1 id="Anchor_112902247_h1_5">Sample Programs</h1>
+<p>See the sample demos located in the <code>Samples\Sources\Applications\IrSensorMomentBasic</code> directory.</p>
+<p>To quickly check how each mode works, see the sample demos located in the <code>Samples\Sources\Applications\IrSensorViewer</code> directory.</p>
+<p>The controller style and other factors also affect how the IR Motion Camera works, so also review the HID samples and documentation.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+// ApiLink_nn__irsensor__Run
+// ApiLink_nn__irsensor__Get
+SetUrl( 'ApiLink_nn__irsensor__GetIrCameraStatus', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#acf66c625dc12cd1fb0d06e79eb1d32a5' )
+SetUrl( 'ApiLink_nn__irsensor__GetImageProcessorStatus', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a07eb18481070f89065809a60a5928bcb' )
+SetUrl( 'ApiLink_nn__irsensor__CheckFirmwareUpdateNecessity', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#ae2d917a320b39f4bc1f29f87d2418819' )
+SetUrl( 'ApiLink_nn__hid__ShowControllerFirmwareUpdate', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a7533399b957c748b818b5a2114541ca8' )
+SetUrl( 'ApiLink_nn__irsensor__GetMomentProcessorState', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a505a4e54e2b1931bd78c4a85f5b67276' )
+SetUrl( 'ApiLink_nn__irsensor__GetMomentProcessorStates', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a54d616f420145c9b7ac415d3c3d93523' )
+SetUrl( 'ApiLink_nn__irsensor__GetClusteringProcessorState', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a6572060a5c7f41d2c19edde462fb5136' )
+SetUrl( 'ApiLink_nn__irsensor__GetClusteringProcessorStates', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#af83d851b9b53c14d5e661f240ac482c2' )
+SetUrl( 'ApiLink_nn__irsensor__GetImageTransferProcessorState', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#aa8e5d943258b76d2e90837bd319fa023' )
+SetUrl( 'ApiLink_nn__irsensor__GetHandAnalysisSilhouetteState', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a28072a0acab4430a22b83bac1411d1fc' )
+SetUrl( 'ApiLink_nn__irsensor__GetHandAnalysisImageState', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a067ae380c70a0125d0c606bbdcc72391' )
+SetUrl( 'ApiLink_nn__irsensor__GetPointingProcessorStates', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#affe5dbef15c8120623fa7301622502e1' )
+SetUrl( 'ApiLink_nn__hid__SetSupportedNpadIdType', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a82326d8c0d5f888fce443798bb829e97' )
+SetUrl( 'ApiLink_nn__hid__SetSupportedNpadStyleSet', '../../../Api/HtmlNX/namespacenn_1_1hid.html#ac04a55a989058f9d69c5c3e4e29c4480' )
+SetUrl( 'ApiLink_nn__irsensor__StopImageProcessor', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a3052171f2c63aafc0e4a164366ae22d7' )
+SetUrl( 'ApiLink_nn__hid__SetNpadJoyAssignmentModeDual', '../../../Api/HtmlNX/namespacenn_1_1hid.html#ae113078fec2203ef85f1c92bc9119183' )
+SetUrl( 'ApiLink_nn__irsensor__ResultIrsensorDeviceResourceNotAvailable', '../../../Api/HtmlNX/classnn_1_1irsensor_1_1_result_irsensor_device_resource_not_available.html' )
+SetUrl( 'ApiLink_nn__irsensor__ResultIrsensorNotReady', '../../../Api/HtmlNX/classnn_1_1irsensor_1_1_result_irsensor_not_ready.html' )
+SetUrl( 'ApiLink_nn__oe__ReportUserIsActive', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a42c00e7bc82aa57851ad3ac1af529c69' )
+SetUrl( 'ApiLink_nn__irsensor__ResultIrsensorDeviceNotReady', '../../../Api/HtmlNX/classnn_1_1irsensor_1_1_result_irsensor_device_not_ready.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

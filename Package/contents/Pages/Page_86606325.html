@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Custom Fields | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Custom Fields -->
+<div class="pagetitle" id="PageId_86606325">Custom Fields</div>
+<div class="text_separate">
+<h1 id="Anchor_86606325_h1_1">Custom Fields</h1>
+<p>When custom fields are used, particle behavior can be manipulated at the time as the field processing. For example, the following uses are possible.</p>
+<ul>
+  <li>Wind in a game affecting a particle.</li>
+  <li>Implementing an independent field.<br /><br /></li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>You can customize in a similar fashion using custom actions, but will be limited to the use of CPU emitters.</p>
+  </div>
+</div>
+<h2 id="Anchor_86606325_h2_1">Custom Field Overview</h2>
+<p>For particle processing, the field calculation process is performed after the calculations for basic behavior such as gravity and air resistance are calculated.<br />The custom field can call independent processes as callbacks <em>after all field calculations are completed</em>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The timing of the custom field callback call is before calling the particle calculation callback for custom actions and custom shaders.<br />The calculations are performed in the following order.</p>
+    <ol>
+      <li>Particle behavior calculation (gravity, air resistance, and normal fields)</li>
+      <li>Custom Field</li>
+      <li>(Emitter plug-in: particle calculation callback)</li>
+      <li>Custom action: particle calculation callback</li>
+      <li>Custom shader: particle calculation callback</li>
+    </ol>
+  </div>
+</div>
+<h2 id="Anchor_86606325_h2_2">Custom Fields Restrictions</h2>
+<p>CPU emitter or GPU+SO emitter settings are forced on custom fields, the same as for other fields.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>When a custom field is added in EffectMaker, the emitter is automatically set to the GPU+SO emitter.<br />This setting can be manually changed to the CPU emitter.</p>
+  </div>
+</div>
+<p>In addition, only one custom field is embedded by sharing in an application (only one in the <code><span class="ApiLink_nn__vfx__System">nn::vfx::System</span></code> class).</p>
+<h2 id="Anchor_86606325_h2_3">Callbacks</h2>
+<p>There are two types of runtime callbacks: CPU callbacks and GPU+SO callbacks. The type used is automatically selected by the particle calculation type.<br />Use the following method for these settings.</p>
+<h3 id="Anchor_86606325_h3_1">CPU Callbacks</h3>
+<h4 id="Anchor_86606325_h4_1">Callback Implementation</h4>
+<p>The following is an example of callback implementation.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">//! @brief CPU version custom field callback implementation
+//! @param[in] pOutPos  Pointer to the current particle position. Manipulate this variable when changing the position.
+//! @param[in] pOutVec  Pointer to the current particle speed. Manipulate this variable when changing the speed.
+//! @param[in] pOutLife  Pointer to the particle lifetime.
+//! @param[in] pOutBirthLife  Pointer to the time when the particle was generated.
+//! @param[in] pEmitter  Pointer to the emitter.
+//! @param[in] pParticleProperty  Pointer to the particle attribute.
+//! @param[in] pCustomFieldData  Pointer to the custom field data. The parameter set with the UI can be referenced from here.
+//! @param[in] particleIndex  Particle index. Used to access particle information from pParticleProperty.
+//! @return                      Note: Though a boolean value is returned, this is currently ignored by the caller.
+</span><span class="kt">bool</span> <span class="nf">CustomFieldCallbackSample</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">Vector3fType</span><span class="o">*</span> <span class="n">pOutPos</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">Vector3fType</span><span class="o">*</span> <span class="n">pOutVec</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span><span class="o">*</span> <span class="n">pOutLife</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span><span class="o">*</span> <span class="n">pOutBirthTime</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::vfx::</span><span class="n">Emitter</span><span class="o">*</span> <span class="n">pEmitter</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::vfx::detail::</span><span class="n">ParticleProperty</span><span class="o">*</span> <span class="n">pParticleProperty</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::vfx::detail::</span><span class="n">ResFieldCustom</span><span class="o">*</span> <span class="n">pCustomFieldData</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">particleIndex</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h4 id="Anchor_86606325_h4_2">Callback Registration to the nn::vfx::System Class</h4>
+<p>Registers the callback prepared in the previous section to the System class using a dedicated API. The following shows a registration example.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Implements a custom field.
+</span><span class="kt">bool</span> <span class="nf">CustomFieldCallbackSample</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">Vector3fType</span><span class="o">*</span> <span class="n">pOutPos</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">Vector3fType</span><span class="o">*</span> <span class="n">pOutVec</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span><span class="o">*</span> <span class="n">pOutLife</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span><span class="o">*</span> <span class="n">pOutBirthTime</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::vfx::</span><span class="n">Emitter</span><span class="o">*</span> <span class="n">pEmitter</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::vfx::detail::</span><span class="n">ParticleProperty</span><span class="o">*</span> <span class="n">pParticleProperty</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::vfx::detail::</span><span class="n">ResFieldCustom</span><span class="o">*</span> <span class="n">pCustomFieldData</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">particleIndex</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span><span class="p">}</span>
+
+<span class="c1">// ...
+</span>
+<span class="c1">// Timed with a system initialization process, etc., the callback is registered to the nw::eft2::System class.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// nn::vfx::System* system; is in a defined state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">system</span><span class="o">-&gt;</span><span class="n">SetCustomFieldCallback</span><span class="p">(</span> <span class="n">CustomFieldCallbackSample</span> <span class="p">);</span>    <span class="c1">// Custom field registration.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_86606325_h3_2">GPU+SO (Compute Shader) Callback</h3>
+<p>If a callback is prepared in a compute shader, it is automatically called.<br />(Internally, an empty function is called if this is not defined.)</p>
+<p>For information about registering custom compute shaders, see <a href="../Pages/Page_83955512.html">Custom Shaders</a>.</p>
+<p>The following shows an example of implementation.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">//---------------------------------------------------
+// GPU+SO version custom field callback implementation.
+//---------------------------------------------------
+</span>
+<span class="cp">#define USE_USR_CUSTOM_FIELD        </span><span class="c1">//  Note: Required for declaring a user-specified custom field function.
+</span><span class="kt">void</span> <span class="nf">AdjustmentStreamOutPosVec</span> <span class="p">(</span><span class="n">inout</span> <span class="n">vec3</span> <span class="n">outPos</span><span class="p">,</span> <span class="n">inout</span> <span class="n">vec3</span> <span class="n">outVec</span><span class="p">,</span> <span class="n">inout</span> <span class="kt">float</span> <span class="n">outParticleLife</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Parameter name definition.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Floating point numbers set with the EffectMaker UI are input to the following UBO internal structure. Assign a name that is easy to use.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cp">#define param0 ctm0.x
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cp">#define param1 ctm0.y
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cp">#define param2 ctm0.z
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cp">#define param3 ctm0.w
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cp">#define param4 ctm1.x
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cp">#define param5 ctm1.y
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cp">#define param6 ctm1.z
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cp">#define param7 ctm1.w
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// outPos = ... // Updates the position.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// outVec = ... // Updates the speed.
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_86606325_h2_4">EffectMaker Settings</h2>
+<p>To use a custom field in EffectMaker, right-click an emitter and select <strong>Custom Field</strong>.<br />If a callback is properly implemented, processing is automatically performed.</p>
+<ul>
+  <li>16 bits</li>
+  <li>8 numbers (floating-point numbers)</li>
+</ul>
+<p>can be used.</p>
+<h3 id="Anchor_86606325_h3_3">Displaying Labels </h3>
+<p> You can change the labels for the entries of bits and numbers in the Project Settings file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot;? &gt;
+<span class="nt">&lt;EffectMakerProjectConfig&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;CustomFieldData&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;BitLabel&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Label&gt;</span>Bit label 1<span class="nt">&lt;/Label&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Label&gt;</span>Bit label 2<span class="nt">&lt;/Label&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/BitLabel&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;FloatLabel&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Label&gt;</span>Number label 1<span class="nt">&lt;/Label&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Label&gt;</span>Number label 2<span class="nt">&lt;/Label&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/FloatLabel&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;/CustomFieldData&gt;</span>
+<span class="nt">&lt;/EffectMakerProjectConfig&gt;</span>
+</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>After you apply this in the Project Settings file, the custom fields look something like the following image.</p>
+<p> <span class="embedded-file-wrapper "><img src="../Attachments/Attach_86606325/96633926.PNG" width="500" height="355" class="embedded-image" /></span></p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__vfx__System', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_system.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

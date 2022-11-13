@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Sound Handles | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Sound Handles -->
+<div class="pagetitle" id="PageId_233875714">Sound Handles</div>
+<div class="text_separate">
+<h1 id="Anchor_233875714_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_233875714_h2_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_233875714_h2_2">Process Flow of Sound Playback</a>
+    </li>
+    <li>
+      <a href="#Anchor_233875714_h2_3">Timing of the Return of the Sound Instances to the Pool</a>
+    </li>
+    <li>
+      <a href="#Anchor_233875714_h2_4">Controlling a Sound After It Has Been Detached</a>
+    </li>
+  </ul>
+</p>
+<h2 id="Anchor_233875714_h2_1">Introduction</h2>
+<p>The <code>atk</code> library uses sound handles (such as the <code><span class="ApiLink_nn__atk__SoundHandle">nn::atk::SoundHandle</span></code> class) to control the playback of sounds. <br />Sound instances are separate from sound handles. An instance exists while a sound is being played and manages the parameters for that sound. <br />This section provides information to better understand the control of sound.</p>
+<h2 id="Anchor_233875714_h2_2">Process Flow of Sound Playback</h2>
+<p>The following figure shows the process flow for sound playback. <br /><br />This flow focuses on the relationship between sound handles and sound instances, and omits the <code><span class="ApiLink_nn__atk__SoundStartable__StartInfo">nn::atk::SoundStartable::StartInfo</span></code> process, the association with <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code>, and other such processes that are only loosely related to the subject of this section.<br /></p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_233875714/233874777.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<h4 id="Anchor_233875714_h4_1">1. Detach the previous sound instance from the sound handle. (Detach)</h4>
+<p>The sound instance that was associated with the sound handle when the previous playback request was made is detached from the sound handle. If this is the first time that sound is being played, nothing particular is done in this first step of the flow. <br />A playing sound will not stop until there is no longer a relationship between the sound handle and the sound instance.</p>
+<h4 id="Anchor_233875714_h4_2">2. Select the sound player to play. (Select)</h4>
+<p>Information is obtained from the sound archive about which player is linked to the sound with the playback request, and the sound player to play is selected. <br />A check is made to determine whether the sound can be played with the specified sound player. If it cannot, playback fails.</p>
+<h4 id="Anchor_233875714_h4_3">3. Allocate the sound instance. (Alloc)</h4>
+<p>The sound instance pool allocates a sound instance to use to play the sound. <br />The sound instance pool allocates a sound instance for every sound at initialization time. The number of instances in this pool is based on the specifications made in the SoundMaker sound archive settings for the numbers of the various sounds (the number of sequence sounds and the like.)<br /> <br /><br />If the number of simultaneous playback requests exceeds the number of sound instances, the sound with the lowest priority is stopped and the sound instance that was used for that sound is assigned.<br /> <br />This priority is evaluated individually for each sound. That is, a wave sound can be stopped by a playback request for another wave sound, but a stream sound cannot be stopped by a wave sound playback request.<br /></p>
+<h4 id="Anchor_233875714_h4_4">4. Register the sound instance to the sound player. (Register)</h4>
+<p>The allocated sound instance is registered to the sound player. This sound instance is not unregistered from the sound player until the process to stop the sound is performed.</p>
+<h4 id="Anchor_233875714_h4_5">5. Attach the sound handle and the sound instance. (Attach)</h4>
+<p>The allocated sound instance is attached to the sound handle. <br />The attached sound instance is retained until there is another playback request for the same sound handle or until the sound instance is returned to the sound instance pool.</p>
+<h2 id="Anchor_233875714_h2_3">Timing of the Return of the Sound Instances to the Pool</h2>
+<p>The sound instance is returned to the sound instance pool when the sound stops. The sound can stop for any of the following reasons.</p>
+<ul>
+  <li>The sound is not looped and playback has ended.</li>
+  <li>A sound instance is being allocated and because of its priority the sound has been stopped.</li>
+  <li>The user explicitly requested playback to stop.</li>
+  <li>The sound is stopped because of the single-playback setting.</li>
+</ul>
+<h2 id="Anchor_233875714_h2_4">Controlling a Sound After It Has Been Detached</h2>
+<p>In principle, a sound that will not stop automatically is controlled by preparing a dedicated sound handle. However, until playback stops, that sound will continue being managed by <code><span class="ApiLink_nn__atk__SoundPlayer">nn::atk::SoundPlayer</span></code>, which enables you to have some control over the sound.<br /> <br /><br />For example, you can use the <code><span class="ApiLink_nn__atk__SoundPlayer__ForEachSound">nn::atk::SoundPlayer::ForEachSound</span>()</code> function to perform a particular process on all of the sounds belonging to <code><span class="ApiLink_nn__atk__SoundPlayer">nn::atk::SoundPlayer</span></code>. <br />You can also use this functionality to perform a process on an individual sound, but in consideration of the processing load, it is better to use a dedicated sound handle for this purpose.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk__SoundHandle', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_handle.html' )
+SetUrl( 'ApiLink_nn__atk__SoundStartable__StartInfo', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_startable_1_1_start_info.html' )
+SetUrl( 'ApiLink_nn__atk__SoundActor', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_actor.html' )
+SetUrl( 'ApiLink_nn__atk__SoundPlayer', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_player.html' )
+SetUrl( 'ApiLink_nn__atk__SoundPlayer__ForEachSound', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_player.html#ac2d244e3aa2df9fa791f0c768161087e' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

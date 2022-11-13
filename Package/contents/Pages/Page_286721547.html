@@ -1,0 +1,477 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Shader Runtime Workflow | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Shader Runtime Workflow -->
+<div class="pagetitle" id="PageId_286721547">Shader Runtime Workflow</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_286721547_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_286721547_h1_2">Classes</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_286721547_h2_1">Resource Classes</a>
+      </li>
+      <li>
+        <a href="#Anchor_286721547_h2_2">Instance Classes</a>
+      </li>
+      <li>
+        <a href="#Anchor_286721547_h2_3">Utility Classes</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_286721547_h1_3">Processing Flow</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_286721547_h2_4">Initialization</a>
+      </li>
+      <li>
+        <a href="#Anchor_286721547_h2_5">Updating Shader Programs Used for Rendering</a>
+      </li>
+      <li>
+        <a href="#Anchor_286721547_h2_6">Rendering</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_286721547_h1_1">Overview</h1>
+<p>This document describes the classes and a simple processing workflow overview for the <code>g3d</code> runtime shader. For more information and specific code examples, see <a href="../Pages/Page_204215072.html">Rendering Models</a>.</p>
+<h1 id="Anchor_286721547_h1_2">Classes</h1>
+<p>This section describes the major classes for the <span class="ApiLink_nn__g3d"><code>nn::g3d</code></span> shader.</p>
+<h2 id="Anchor_286721547_h2_1">Resource Classes</h2>
+<p>These classes represent the internal structure of the shader archive file. </p>
+<h3 id="Anchor_286721547_h3_1">
+  <span class="ApiLink_nn__g3d__ResShaderFile">nn::g3d::ResShaderFile</span>
+</h3>
+<p>This class manages shader archive binary headers and string pools. It also holds a pointer to <span class="ApiLink_nn__g3d__ResShaderArchive"><code>nn::g3d::ResShaderArchive</code></span>. <span class="ApiLink_void_nn__g3d__ResShaderFile__Setup(nn__gfx__Device_*pDevice)_NN_NOEXCEPT"><code>nn::g3d::ResShaderFile::Setup()</code></span> can be called to set up an entire resource when loading a runtime from the shader archive file and after the shader has been cast using <span class="ApiLink_static_ResShaderFile_*_nn__g3d__ResShaderFile__ResCast(void_*ptr)_NN_NOEXCEPT"><code>nn::g3d::ResShaderFile::ResCast()</code></span>.</p>
+<h3 id="Anchor_286721547_h3_2">
+  <span class="ApiLink_nn__g3d__ResShaderArchive">nn::g3d::ResShaderArchive</span>
+</h3>
+<p>A resource class representing an actual shader archive. It holds multiple <span class="ApiLink_nn__g3d__ResShadingModel"><code>nn::g3d::ResShadingModel</code></span> pointers.</p>
+<h3 id="Anchor_286721547_h3_3">
+  <span class="ApiLink_nn__g3d__ResShadingModel">nn::g3d::ResShadingModel</span>
+</h3>
+<p>A resource class representing a shading model. It holds multiple pointers including <span class="ApiLink_nn__g3d__ResShaderProgram"><code>nn::g3d::ResShaderProgram</code></span>, <span class="ApiLink_nn__g3d__ResUniformBlockVar"><code>nn::g3d::ResUniformBlockVar</code></span>, <span class="ApiLink_nn__g3d__ResSamplerVar"><code>nn::g3d::ResSamplerVar</code></span>, <span class="ApiLink_nn__g3d__ResShaderOption"><code>nn::g3d::ResShaderOption</code></span>, and <span class="ApiLink_nn__g3d__ResAttrVar"><code>nn::g3d::ResAttrVar</code></span>. It selects the shader variation described by its annotation or gets the location for a vertex attribute.</p>
+<h3 id="Anchor_286721547_h3_4">
+  <span class="ApiLink_nn__g3d__ResShaderProgram">nn::g3d::ResShaderProgram</span>
+</h3>
+<p>A class representing a shader variation. It holds a <span class="ApiLink_nn__gfx__ResShaderVariation"><code>nn::gfx::ResShaderVariation</code></span> pointer. It gets the location of a sampler, uniform block, or shader storage block described by a shader annotation and loads that resource into the GPU.</p>
+<h2 id="Anchor_286721547_h2_2">Instance Classes</h2>
+<p>Instance classes are used to determine which shader variation (<span class="ApiLink_nn__g3d__ResShaderProgram"><code>nn::g3d::ResShaderProgram</code></span>) to use for rendering. Two types of option variable classes are available for shader variation selection. For more information about option types, see <a href="../Pages/Page_286721565.html">Shader Variation</a> &gt; Option Variable Types.</p>
+<h3 id="Anchor_286721547_h3_5">
+  <span class="ApiLink_nn__g3d__ShaderSelector">nn::g3d::ShaderSelector</span>
+</h3>
+<p>This class is for selecting and updating the <span class="ApiLink_nn__g3d__ResShaderProgram"><code>nn::g3d::ResShaderProgram</code></span> used for rendering. It holds a shader key representing a dynamic type option variable for selecting a variation shader. It holds a <span class="ApiLink_nn__g3d__ShadingModelObj"><code>nn::g3d::ShadingModelObj</code></span> pointer and positions it at the top layer of <span class="ApiLink_nn__g3d__ShadingModelObj"><code>nn::g3d::ShadingModelObj</code></span>.</p>
+<h3 id="Anchor_286721547_h3_6">
+  <span class="ApiLink_nn__g3d__ShadingModelObj">nn::g3d::ShadingModelObj</span>
+</h3>
+<p>
+  <span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT">
+    <code>nn::g3d::ShadingModelObj</code>
+  </span> selects the range of the variation shader supported by the static type option variable. Additionally, it updates the uniform block buffer to make the corresponding uniform variable branching possible (branching performed by setting the branch option variable to <code>true</code>).</p>
+<h2 id="Anchor_286721547_h2_3">Utility Classes</h2>
+<h3 id="Anchor_286721547_h3_7">
+  <span class="ApiLink_nn__g3d__ShaderUtility">nn::g3d::ShaderUtility</span>
+</h3>
+<p>This class provides static functions for initializing shader instances based on the material information for the model resource, and changing the material settings of the model from the material uniform block information for the shader resource.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Function</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_static_void_nn__g3d__ShaderUtility__InitializeShaderKey(Bit32_*pKey|_int_keyLength|_const_ResShadingModel_*pResShadingModel|_const_ResShaderAssign_*pResShaderAssign|_bool_materialPass)_NN_NOEXCEPT">nn::g3d::ShaderUtility::InitializeShaderKey()</span>
+      </td>
+      <td>Uses the <span class="ApiLink_nn__g3d__ResShaderAssign">nn::g3d::ResShaderAssign</span> option variable information of the model resource material to initialize the <span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT">nn::g3d::ShadingModelObj</span> shader key.</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_static_void_nn__g3d__ShaderUtility__BindShaderParam(ResMaterial_*pResMaterial|_const_ResShadingModel_*pResShadingModel)_NN_NOEXCEPT">nn::g3d::ShaderUtility::BindShaderParam()</span>
+      </td>
+      <td>Associates a material uniform block size and a uniform variable offset from <span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT"><code>nn::g3d::ShadingModelObj</code></span> to a model resource material.</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_static_void_nn__g3d__ShaderUtility__InitializeShaderParam(MaterialObj_*pMaterialObj|_const_ResShadingModel_*pResShadingModel)_NN_NOEXCEPT">nn::g3d::ShaderUtility::InitializeShaderParam()</span>
+      </td>
+      <td>Assigns the initial uniform block value of <span class="ApiLink_nn__g3d__ResShadingModel">nn::g3d::ResShadingModel</span> to the shader parameter value of <span class="ApiLink_nn__g3d__MaterialObj">nn::g3d::MaterialObj</span>.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_286721547_h1_3">Processing Flow</h1>
+<p>This section describes the processing steps starting from loading a shader archive file through using that shader for rendering.</p>
+<h2 id="Anchor_286721547_h2_4">Initialization</h2>
+<h3 id="Anchor_286721547_h3_8">Initializing Shader Archives</h3>
+<p>Initialize the shader file after loading it and casting it with <span class="ApiLink_nn__g3d__ResShaderFile"><code>nn::g3d::ResShaderFile</code></span>. <span class="ApiLink_ResShaderArchive_*_nn__g3d__ResShaderFile__GetResShaderArchive()_NN_NOEXCEPT"><code>nn::g3d::ResShaderFile::GetResShaderArchive()</code></span> gets a <span class="ApiLink_nn__g3d__ResShaderArchive"><code>nn::g3d::ResShaderArchive</code></span> that is an actual shader archive.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Load the user implementation file.
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">pFile</span> <span class="o">=</span> <span class="n">LoadFile</span><span class="p">(</span><span class="s">&quot;ShaderArchive.bfsha&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;
+<span class="c1">// Cast the file pointer using nn::g3d::ResShaderFile::ResCast().
+</span><span class="nn">nn::g3d::</span><span class="n">ResShaderFile</span><span class="o">*</span> <span class="n">pResShaderFile</span> <span class="o">=</span> <span class="nn">nn::g3d::ResShaderFile::</span><span class="n">ResCast</span><span class="p">(</span><span class="n">pFile</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Set up the nn::g3d::ResShaderFile.
+</span><span class="n">pResShaderFile</span><span class="o">-&gt;</span><span class="n">Setup</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+&nbsp;&nbsp;
+<span class="c1">// Get the nn::g3d::ResShaderArchive.
+</span><span class="nn">nn::g3d::</span><span class="n">ResShaderArchive</span> <span class="n">pResShaderArchive</span> <span class="o">=</span> <span class="n">pResShaderFile</span><span class="o">-&gt;</span><span class="n">GetResShaderArchive</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_286721547_h3_9">Initializing Model Resource Shader Parameters</h3>
+<p>Initialize the shader parameter of the model resource using the material uniform block of the shading model.</p>
+<p>The shading model&rsquo;s material uniform block information (such as offset and size) is applied to the model. All configurations can be set together using <span class="ApiLink_static_void_nn__g3d__ShaderUtility__BindShaderParam(ResMaterial_*pResMaterial|_const_ResShadingModel_*pResShadingModel)_NN_NOEXCEPT">nn::g3d::ShaderUtility::BindShaderParam()</span>. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Get the nn::g3d::ResShaderArchive specified by the model material name.
+</span><span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderAssign</span><span class="o">*</span> <span class="n">pResShaderAssign</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetShaderAssign</span><span class="p">();</span>
+<span class="nn">nn::g3d::</span><span class="n">ResShadingModel</span><span class="o">*</span> <span class="n">pResShadingModel</span> <span class="o">=</span> <span class="n">pResShaderArchive</span><span class="o">-&gt;</span><span class="n">FindShadingModel</span><span class="p">(</span><span class="n">pResShaderAssign</span><span class="o">-&gt;</span><span class="n">GetShadingModelName</span><span class="p">());</span>
+
+
+<span class="c1">// /Set nn::g3d::ResShadingMode's material uniform block size and the offset of each uniform variable to the material resource of the model.
+</span><span class="nn">nn::g3d::ShaderUtility::</span><span class="n">BindShaderParam</span><span class="p">(</span><span class="n">pResMaterial</span><span class="p">,</span> <span class="n">pResShadingModel</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />When setting a converter to a material uniform variable annotation, a conversion callback function can be set to the <span class="ApiLink_nn__g3d__ResShaderParam"><code>nn::g3d::ResShderParam</code></span> of the model resource. The <span class="ApiLink_void_nn__g3d__MaterialObj__CalculateMaterial(int_bufferIndex)_NN_NOEXCEPT"><code>nn::g3d::MaterialObj::CalculateMaterial()</code></span> internal library function for material uniform block variable calculations can be replaced with custom user conversion calculations by using a callback function. For more information, see <a href="../Pages/Page_106332818.html">Uniform Blocks</a> &gt; Material.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Get the model material shader parameter.
+</span><span class="nn">nn::g3d::</span><span class="n">ResShaderParam</span><span class="o">*</span> <span class="n">pResShaderParam</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetShaderParam</span><span class="p">(</span><span class="n">shaderParamIndex</span><span class="p">);</span>
+
+<span class="c1">// Get the converter name specified by the annotation.
+</span><span class="kt">int</span> <span class="n">materialBlockIndex</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetSystemBlockIndex</span><span class="p">(</span><span class="nn">nn::g3d::ResUniformBlockVar::</span><span class="n">Type_Material</span><span class="p">);</span>
+<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">pConverter</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetUniformBlock</span><span class="p">(</span><span class="n">materialBlockIndex</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">FindUniform</span><span class="p">(</span><span class="n">pResShaderParam</span><span class="o">-&gt;</span><span class="n">GetId</span><span class="p">())</span><span class="o">-&gt;</span><span class="n">GetConverter</span><span class="p">();</span>
+
+<span class="c1">// Set a custom callback function for conversion calculations if converter names match.
+// To run conversion processes for every frame, set nn::g3d::ResMaterial::SetVolatile() to run for each frame.
+</span><span class="k">if</span> <span class="p">(</span><span class="n">pConverter</span> <span class="o">&amp;&amp;</span> <span class="n">strcmp</span><span class="p">(</span><span class="n">pConverter</span><span class="p">,</span> <span class="s">&quot;texsrt_ex&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResShaderParam</span><span class="o">-&gt;</span><span class="n">SetConvertShaderParamCallback</span><span class="p">(</span><span class="nn">nn::g3d::ResShaderParam::</span><span class="n">ConvertTexSrtExCallback</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">SetVolatile</span><span class="p">(</span><span class="n">shaderParamIndex</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_286721547_h3_10">Initializing nn::g3d::ShadingModelObj</h3>
+<p>Initializes <span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT"><code>nn::g3d::ShadingModelObj</code></span>. <code>ShadingModelObj</code> holds the shader key for managing shader variation ranges for determined static option variables. Initializations are required for each material because variation ranges change depending on the model material configuration.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Create nn::g3d::ShadingModelObj::Builder based on a nn::g3d::ResShadingModel.
+</span><span class="nn">nn::g3d::ShadingModelObj::</span><span class="n">Builder</span> <span class="n">builder</span><span class="p">(</span><span class="n">pResShadingModel</span><span class="p">);</span>
+
+
+<span class="c1">// Initialize nn::g3d::ShadingModelObj.
+</span><span class="nn">nn::g3d::</span><span class="n">ShadingModelObj</span> <span class="n">shadingModelObj</span><span class="p">;</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Calculate the internal buffer size of a nn::g3d::ShadingModelObj.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">builder</span><span class="p">.</span><span class="n">CalculateMemorySize</span><span class="p">();</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocate an internal buffer for a nn::g3d::ShadingModelObj.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">alignment</span> <span class="o">=</span> <span class="nn">nn::g3d::ShadingModelObj::</span><span class="n">Alignment_Buffer</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">bufferSize</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">GetWorkMemorySize</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">void</span><span class="o">*</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">Allocate</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">,</span> <span class="n">alignment</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialization.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">bool</span> <span class="n">success</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">Build</span><span class="p">(</span><span class="o">&amp;</span><span class="n">shadingModelObj</span><span class="p">,</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">bufferSize</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Initialize the option uniform block buffer for a nn::g3d::ShadingModelObj.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">shadingModelObj</span><span class="p">.</span><span class="n">CalculateBlockBufferSize</span><span class="p">(</span><span class="n">pDevice</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">ptrdiff_t</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">AllocateMemoryPool</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">shadingModelObj</span><span class="p">.</span><span class="n">GetBlockBufferAlignment</span><span class="p">(</span><span class="n">pDevice</span><span class="p">));</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">shadingModelObj</span><span class="p">.</span><span class="n">SetupBlockBuffer</span><span class="p">(</span><span class="n">pDevice</span><span class="p">,</span> <span class="n">GetMemoryPool</span><span class="p">(),</span> <span class="n">offset</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_286721547_h3_11">Initializing a Static Shader Key</h3>
+<p>Initialize a static shader key by applying the option value registered to the model resource&rsquo;s <span class="ApiLink_nn__g3d__ResShaderAssign"><code>nn::g3d::ResShaderAssign</code></span> to <span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT"><code>nn::g3d::ShadingModelObj</code></span>. Next, update the shader program range with <span class="ApiLink_bool_nn__g3d__ShadingModelObj__UpdateShaderRange()_NN_NOEXCEPT"><code>nn::g3d::ShadingModelObj::UpdateShaderRange()</code></span> using the static option for preprocessor branching. Then, update the option uniform block buffer with <span class="ApiLink_void_nn__g3d__ShadingModelObj__CalculateOptionBlock()_NN_NOEXCEPT"><code>nn::g3d::ShadingModelObj::CalculateOptionBlock()</code></span> using the static option value for uniform variable branching. Because the static option value is statically assigned to the model resource with <span class="ApiLink_nn__g3d__ResShaderAssign"><code>nn::g3d::ResShaderAssign</code></span>, there is normally no need to update the shader key for every frame if the shader key has been initialized and applied with <code>UpdateShaderRange()</code> and <code>CalculateOptionBlock()</code>. Note however that the uniform variable branching option uniform block buffer value that was initialized must be set to the shader for every frame. For more information about preprocessor branching and uniform variable branching, see <a href="../Pages/Page_286721565.html">Shader Variation</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Initialize a static shader key based on ResShaderAssign's option variable value.
+</span><span class="nn">nn::g3d::ShaderUtility::</span><span class="n">InitializeShaderKey</span><span class="p">(</span><span class="o">&amp;</span><span class="n">shadingModelObj</span><span class="p">,</span> <span class="n">pResShaderAssign</span><span class="p">);</span>
+
+
+<span class="c1">// Update the shader program range for preprocessor branching's (branch = false) option variable.
+</span><span class="n">shadingModelObj</span><span class="p">.</span><span class="n">UpdateShaderRange</span><span class="p">();</span>
+
+
+<span class="c1">// Update the uniform block buffer for the corresponding uniform variable branching (branch = true) option variable.
+</span><span class="n">shadingModelObj</span><span class="p">.</span><span class="n">CalculateOptionBlock</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_286721547_h3_12">Creating nn::g3d::ShaderSelector</h3>
+<p>Initializes a <span class="ApiLink_nn__g3d__ShaderSelector"><code>nn::g3d::ShaderSelector</code></span> based on <span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT"><code>nn::g3d::ShadingModelObj</code></span>. <span class="ApiLink_nn__g3d__ShaderSelector"><code>nn::g3d::ShaderSelector</code></span> is a shader key management class based on a dynamic option. One <span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT"><code>nn::g3d::ShadingModelObj</code></span> object is created per material. However, a <span class="ApiLink_nn__g3d__ShaderSelector"><code>nn::g3d::ShaderSelector</code></span> is a dynamic option and one is created per particle size (a unit smaller than shape) for operation.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Create a nn::g3d::ShaderSelector::Builder based on nn::g3d::ShadingModelObj.
+</span><span class="nn">nn::g3d::ShaderSelector::</span><span class="n">Builder</span> <span class="n">builder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">shadingModelObj</span><span class="p">);</span>
+
+
+<span class="c1">// Initialize a nn::g3d::ShaderSelector.
+</span><span class="nn">nn::g3d::</span><span class="n">ShaderSelector</span> <span class="n">shaderSelector</span><span class="p">;</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Calculate the internal buffer size of a nn::g3d::ShadingModelObj.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">builder</span><span class="p">.</span><span class="n">CalculateMemorySize</span><span class="p">();</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocate an internal buffer for a nn::g3d::ShadingModelObj.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">alignment</span> <span class="o">=</span> <span class="nn">nn::g3d::ShaderSelector::</span><span class="n">Alignment_Buffer</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">bufferSize</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">GetWorkMemorySize</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">void</span><span class="o">*</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">Allocate</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">,</span> <span class="n">alignment</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialization.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">builder</span><span class="p">.</span><span class="n">Build</span><span class="p">(</span><span class="n">shaderSelector</span><span class="p">,</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">bufferSize</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_286721547_h2_5">Updating Shader Programs Used for Rendering</h2>
+<h3 id="Anchor_286721547_h3_13">Updating a Dynamic Shader Key</h3>
+<p>This step updates the dynamic shader key managed by <span class="ApiLink_nn__g3d__ShaderSelector"><code>nn::g3d::ShaderSelector</code></span>. The dynamic shader key managed by <span class="ApiLink_nn__g3d__ShaderSelector"><code>nn::g3d::ShaderSelector</code></span> can be optionally updated at run time. However, only items related to the dynamic options for preprocessor branching can be updated. Because the dynamic option&rsquo;s default value for uniform branching is fixed, its value cannot be updated. For more information, see <a href="../Pages/Page_286721565.html">Shader Variation</a> &gt; Dynamic Options for Uniform Variable Branching.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Get the option variable index from ShaderSelector by option name.
+</span><span class="kt">int</span> <span class="n">optionIndex</span> <span class="o">=</span> <span class="n">pShaderSelector</span><span class="o">-&gt;</span><span class="n">FindDynamicOptionIndex</span><span class="p">(</span><span class="n">pOptonName</span><span class="p">);</span>
+
+
+<span class="c1">// Get the nn::g3d::ResShaderOption.
+</span><span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderOption</span><span class="o">*</span> <span class="n">pResShaderOption</span> <span class="o">=</span> <span class="n">pShaderSelector</span><span class="o">-&gt;</span><span class="n">GetDynamicOption</span><span class="p">(</span><span class="n">optionIndex</span><span class="p">);</span>
+
+
+<span class="c1">// Use a string to specify an option value to update and get the choice index corresponding to the specified value.
+</span><span class="kt">int</span> <span class="n">choiceIndex</span> <span class="o">=</span> <span class="n">pResShaderOption</span><span class="o">-&gt;</span><span class="n">FindChoiceIndex</span><span class="p">(</span><span class="s">&quot;true&quot;</span><span class="p">);</span>
+
+
+<span class="c1">// Update the ShaderSelector's shader key.
+</span><span class="n">pShaderSelector</span><span class="o">-&gt;</span><span class="n">WriteDynamicKey</span><span class="p">(</span><span class="n">optionIndex</span><span class="p">,</span> <span class="n">choiceIndex</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_286721547_h3_14">Selecting a Shader Program to Use</h3>
+<p>Select a shader program for the corresponding shader key after updating the shader key. Calling <span class="ApiLink_bool_nn__g3d__ShaderSelector__UpdateVariation(nn__gfx__Device_*pDevice)_NN_NOEXCEPT"><code>ShaderSelector::UpdateVariation()</code></span> updates the pointer for the shader program held internally by <code>ShaderSelector</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Update the shader program for the corresponding shader key.
+</span><span class="n">pShaderSelector</span><span class="o">-&gt;</span><span class="n">UpdateVariation</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_286721547_h2_6">Rendering</h2>
+<p>Render using <span class="ApiLink_void_nn__g3d__ResMesh__Draw(nn__gfx__CommandBuffer_*pCommandBuffer)_const_NN_NOEXCEPT"><code>nn::g3d::ResMesh::Draw()</code></span> after setting <span class="ApiLink_nn__g3d__ResShaderProgram"><code>nn::g3d::ResShaderProgram</code></span>, vertex state, sampler and uniform blocks.</p>
+<h3 id="Anchor_286721547_h3_15">Loading a Shader Into the Command Buffer</h3>
+<p>This step sets the <span class="ApiLink_nn__g3d__ResShaderProgram"><code>nn::g3d::ResShaderProgram</code></span> selected by <span class="ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT"><code>nn::g3d::ShadingModelObj</code></span> or <span class="ApiLink_nn__g3d__ShaderSelector"><code>nn::g3d::ShaderSelector</code></span> to the command buffer.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Get the ShaderProgram for the corresponding shader key.
+</span><span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderProgram</span><span class="o">*</span> <span class="n">pResShaderProgram</span> <span class="o">=</span> <span class="n">pShaderSelector</span><span class="o">-&gt;</span><span class="n">GetProgram</span><span class="p">();</span>
+<span class="n">pResShaderProgram</span><span class="o">-&gt;</span><span class="n">Load</span><span class="p">(</span><span class="n">pCommandBuffer</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_286721547_h3_16">Loading a Sampler Into the Command Buffer</h3>
+<p>Get the sampler location with <span class="ApiLink_int_nn__g3d__ResShaderProgram__GetSamplerLocation(int_samplerIndex|_Stage_stage)_const_NN_NOEXCEPT"><code>nn::g3d::ShaderProgram::GetSamplerLocation()</code></span> and set it to the command buffer.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Get the vertex stage sampler location and set it to the command buffer.
+</span><span class="kt">int</span> <span class="n">locationVertexShader</span> <span class="o">=</span> <span class="n">pResShaderProgram</span><span class="o">-&gt;</span><span class="n">GetSamplerLocation</span><span class="p">(</span><span class="n">samplerIndex</span><span class="p">,</span> <span class="nn">nn::g3d::</span><span class="n">Stage_Vertex</span><span class="p">);</span>
+
+<span class="c1">// Load. textureDescriptorSlot and samplerDescriptorSlot must be managed in the application.
+</span><span class="k">if</span> <span class="p">(</span><span class="n">locationVertexShader</span> <span class="o">!=</span> <span class="nn">nn::g3d::</span><span class="n">ShaderLocationNone</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetTextureAndSampler</span><span class="p">(</span><span class="n">locationVertexShader</span><span class="p">,</span> <span class="nn">nn::gfx::</span><span class="n">ShaderStage_Vertex</span><span class="p">,</span> <span class="n">textureDescriptorSlot</span><span class="p">,</span> <span class="n">samplerDescriptorSlot</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_286721547_h3_17">Loading a Uniform Block Into the Command Buffer</h3>
+<p>Set the uniform block buffer value to the command buffer for each model instance after getting a skeleton, shape, material, or option uniform block index with <span class="ApiLink_int_nn__g3d__ResShadingModel__GetSystemBlockIndex(ResUniformBlockVar__Type_type)_const"><code>nn::g3d::ResShadingModel::GetSystemBlockIndex()</code></span> and getting the location with <span class="ApiLink_int_nn__g3d__ResShaderProgram__GetUniformBlockLocation(int_blockIndex|_Stage_stage)_const_NN_NOEXCEPT"><code>nn::g3d::ResShaderProgram::GetUniformBlockLocation()</code></span>. The following example demonstrates how to set the material uniform block to the vertex stage. Materials are managed with <span class="ApiLink_nn__g3d__MaterialObj"><code>nn::g3d::MaterialObj</code></span>. Shapes are managed with <span class="ApiLink_nn__g3d__ShapeObj"><code>nn::g3d::ShapeObj</code></span>. Skeletons are managed with <span class="ApiLink_nn__g3d__SkeletonObj"><code>nn::g3d::SkeletonObj</code></span>. Options are managed with <span class="ApiLink_nn__g3d__ShadingModelObj"><code>nn::g3d::ShadingModelObj</code></span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Get the index of the material uniform block.
+</span><span class="kt">int</span> <span class="n">materialUniformBlockIndex</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetSystemBlockIndex</span><span class="p">(</span><span class="nn">nn::g3d::ResUniformBlockVar::</span><span class="n">Type_Material</span><span class="p">);</span>
+
+
+<span class="c1">// Get the uniform block buffer after calculating with MaterialObj.
+</span><span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">MaterialObj</span><span class="o">*</span> <span class="n">pMaterialObj</span> <span class="o">=</span> <span class="n">pModelObj</span><span class="o">-&gt;</span><span class="n">GetMaterial</span><span class="p">(</span><span class="n">pShapeObj</span><span class="o">-&gt;</span><span class="n">GetMaterialIndex</span><span class="p">());</span>
+<span class="k">const</span> <span class="nn">nn::gfx::</span><span class="n">Buffer</span><span class="o">*</span> <span class="n">pMaterialUniformBlock</span> <span class="o">=</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">GetMaterialBlock</span><span class="p">(</span><span class="n">bufferIndex</span><span class="p">);</span>
+
+
+<span class="k">if</span> <span class="p">(</span><span class="n">materialUniformBlockIndex</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">IsBlockBufferValid</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get the GPU address and size of the uniform block buffer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">GpuAddress</span> <span class="n">gpuAddress</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pMaterialUniformBlock</span><span class="o">-&gt;</span><span class="n">GetGpuAddress</span><span class="p">(</span><span class="o">&amp;</span><span class="n">gpuAddress</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">GetMaterialBlockSize</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get the location of the vertex stage uniform block.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">locationVS</span> <span class="o">=</span> <span class="n">pResShaderProgram</span><span class="o">-&gt;</span><span class="n">GetUniformBlockLocation</span><span class="p">(</span><span class="n">materialUniformBlockIndex</span><span class="p">,</span> <span class="nn">nn::g3d::</span><span class="n">Stage_Vertex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">locationVS</span> <span class="o">!=</span> <span class="nn">nn::g3d::</span><span class="n">ShaderLocationNone</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pCommandBuffer</span><span class="o">-&gt;</span><span class="n">SetConstantBuffer</span><span class="p">(</span><span class="n">locationVS</span><span class="p">,</span> <span class="nn">nn::gfx::</span><span class="n">ShaderStage_Vertex</span><span class="p">,</span> <span class="n">gpuAddress</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d', '../../../Api/HtmlNX/namespacenn_1_1g3d.html' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderFile', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_file.html' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderArchive', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_archive.html' )
+SetUrl( 'ApiLink_void_nn__g3d__ResShaderFile__Setup(nn__gfx__Device_*pDevice)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_file.html#a6ca625333d1fb3f4b903d0ee4533666c' )
+SetUrl( 'ApiLink_static_ResShaderFile_*_nn__g3d__ResShaderFile__ResCast(void_*ptr)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_file.html#a39a1802d90e4a26b504d97710bfdca5a' )
+SetUrl( 'ApiLink_nn__g3d__ResShadingModel', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shading_model.html' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderProgram', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_program.html' )
+SetUrl( 'ApiLink_nn__g3d__ResUniformBlockVar', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_uniform_block_var.html' )
+SetUrl( 'ApiLink_nn__g3d__ResSamplerVar', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_sampler_var.html' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderOption', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_option.html' )
+SetUrl( 'ApiLink_nn__g3d__ResAttrVar', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_attr_var.html' )
+SetUrl( 'ApiLink_nn__gfx__ResShaderVariation', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_res_shader_variation.html' )
+SetUrl( 'ApiLink_nn__g3d__ShaderSelector', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_selector.html' )
+SetUrl( 'ApiLink_nn__g3d__ShadingModelObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__ShadingModelObj__ShadingModelObj()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html#ad74fda291355558a5ff65c61c43a02ab' )
+SetUrl( 'ApiLink_nn__g3d__ShaderUtility', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_utility.html' )
+SetUrl( 'ApiLink_static_void_nn__g3d__ShaderUtility__InitializeShaderKey(Bit32_*pKey|_int_keyLength|_const_ResShadingModel_*pResShadingModel|_const_ResShaderAssign_*pResShaderAssign|_bool_materialPass)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_utility.html#ad580b2ac794fb58d7d320dff65eb1f79' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderAssign', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_assign.html' )
+SetUrl( 'ApiLink_static_void_nn__g3d__ShaderUtility__BindShaderParam(ResMaterial_*pResMaterial|_const_ResShadingModel_*pResShadingModel)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_utility.html#a26b394ba1043958e5f64a6d6f25efe9b' )
+SetUrl( 'ApiLink_static_void_nn__g3d__ShaderUtility__InitializeShaderParam(MaterialObj_*pMaterialObj|_const_ResShadingModel_*pResShadingModel)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_utility.html#abf73a987c98be174ebcc853e49ed072f' )
+SetUrl( 'ApiLink_nn__g3d__MaterialObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_material_obj.html' )
+SetUrl( 'ApiLink_ResShaderArchive_*_nn__g3d__ResShaderFile__GetResShaderArchive()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_file.html#ab2a9392d9a139efe97b011ac5aec96c4' )
+SetUrl( 'ApiLink_nn__g3d__ResShaderParam', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_param.html' )
+SetUrl( 'ApiLink_void_nn__g3d__MaterialObj__CalculateMaterial(int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_material_obj.html#acb09821f66b8cc37c265e6b8207dea33' )
+SetUrl( 'ApiLink_bool_nn__g3d__ShadingModelObj__UpdateShaderRange()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html#a7344a8679fb60796cb12e788a215499b' )
+SetUrl( 'ApiLink_void_nn__g3d__ShadingModelObj__CalculateOptionBlock()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html#a64b7fb97ce4d006bb694c8cd5d5a57a5' )
+SetUrl( 'ApiLink_bool_nn__g3d__ShaderSelector__UpdateVariation(nn__gfx__Device_*pDevice)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_selector.html#a79873e8ffad5ccd81bc0373f11bf7a44' )
+SetUrl( 'ApiLink_void_nn__g3d__ResMesh__Draw(nn__gfx__CommandBuffer_*pCommandBuffer)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_mesh.html#a173bc09329f2ceac966449db0fc95002' )
+SetUrl( 'ApiLink_int_nn__g3d__ResShaderProgram__GetSamplerLocation(int_samplerIndex|_Stage_stage)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_program.html#a230aa75c74402d3c287ff42b4a1b036d' )
+SetUrl( 'ApiLink_int_nn__g3d__ResShadingModel__GetSystemBlockIndex(ResUniformBlockVar__Type_type)_const', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shading_model.html#afacf6918201832d395807faa8ea79eb2' )
+SetUrl( 'ApiLink_int_nn__g3d__ResShaderProgram__GetUniformBlockLocation(int_blockIndex|_Stage_stage)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_program.html#ac913291aa562765be2d267a4c5829b92' )
+SetUrl( 'ApiLink_nn__g3d__ShapeObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html' )
+SetUrl( 'ApiLink_nn__g3d__SkeletonObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeleton_obj.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

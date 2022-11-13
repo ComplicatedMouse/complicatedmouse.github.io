@@ -1,0 +1,1557 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    ignoreClass: ".*",
+    processClass: "math-(display|inline)",
+    processEscapes: false,
+    processRefs: false
+  },
+  "HTML-CSS": {
+    imageFont: null
+  }
+});
+</script>
+<script type="text/javascript" src="../template/js/MathJax/MathJax.js?config=TeX-AMS-MML_SVG"></script>
+<title>Audio Effects | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Audio Effects -->
+<div class="pagetitle" id="PageId_93362777">Audio Effects</div>
+<div class="text_separate">
+<h3 id="Anchor_93362777_h3_1">I/O Buffers for Effects</h3>
+<p>The <code><span class="ApiLink_nn__audio">nn::audio</span></code> effects must be added to either <code>SubMix</code> or <code>FinalMix</code> before use. All added effects are processed through operations on the mix buffers managed by <code>SubMix</code> and <code>FinalMix</code> In other words, the mix buffers managed by <code>SubMix</code> and <code>FinalMix</code> are the input and output for the added effects.</p>
+<p>For more information about the relationship between the mix buffers and <code>SubMix</code> and <code>FinalMix</code>, see <a href="../Pages/Page_89991492.html#Anchor_89991492_h3_14">Mix Buffers</a>. This section describes the relationship between the various <code><span class="ApiLink_nn__audio">nn::audio</span></code> effects and the effects managed by <code>SubMix</code> and <code>FinalMix</code>.</p>
+<p>The code example adds the effect <code>BufferMixer</code> to a <code>SubMix</code> object that has four mix buffers. Use <code><span class="ApiLink_nn__audio__AddBufferMixer">nn::audio::AddBufferMixer</span>()</code> to add the <code>BufferMixer</code> effect to <code>SubMix</code>. The instance of the <code>BufferMixer</code> effect is initialized at the same time it is added.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::audio::SubMixType subMix;
+// Initialize SubMixType as having four mix buffers.
+// ...
+
+// Add the BufferMixer effect to subMix.
+nn::audio::BufferMixerType bufferMixer;
+nn::Result result = nn::audio::AddBufferMixer(pConfig, &amp;bufferMixer, &amp;subMix);
+if (result.IsFailure())
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// Error handle
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>BufferMixer</code> is an effect that performs mixing among different mix buffers. You can use the four mix buffers managed by <code><em>subMix</em></code> as I/O for <code><em>bufferMixer</em></code>. The following code is used to mix the content of <code><em>subMix</em></code> mix buffer index 0 to 2, and the content of mix buffer index 1 to 3, for example.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// Of the four mix buffers managed by subMix, mix the content of mix buffer 0 to 2 and the content of 1 to 3.
+const int inOutCount = 2;
+int8_t input[inOutCount] = [0, 1];
+int8_t output[inOutCount] = [2, 3];
+nn::audio::SetBufferMixerInputOutput(&amp;bufferMixer, input, output, inOutCount);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following image shows the results from the code to this point, together with the I/O relationship.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_93362777/159285687.png" class="embedded-image" />
+  </span>
+</p>
+<p>Additional <code><span class="ApiLink_nn__audio">nn::audio</span></code> effects, such as <code>Delay</code> and <code>Reverb</code> also undergo I/O effect processing with the mix buffers that manage the added <code>SubMix</code> and <code>FinalMix</code>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>You cannot add any initialized effects that were added to specific instances of <code>SubMix</code> or <code>FinalMix</code> to different instances of <code>SubMix</code> and <code>FinalMix</code> before deleting those effects from the original instances of <code>SubMix</code> and <code>FinalMix</code>. If you add effects that have already been added to specific instances of <code>SubMix</code> or <code>FinalMix</code> to different instances of <code>SubMix</code> or <code>FinalMix</code>, the following warning message appears.</p>
+    <div style="border-width: 1px;" class="preformatted panel">
+      <div class="preformattedContent panelContent">
+        <pre>[nn::audio] Warning: Passed effect is already initialized. Please confirm if (the effect address you are attempting to add) is valid effect object.</pre>
+      </div>
+    </div>
+    <p>Make sure that the effect for the address included in the warning message has been added correctly.</p>
+  </div>
+</div>
+<h3 id="Anchor_93362777_h3_2">Effect Processing Sequence</h3>
+<p>In the audio renderer, all effects are processed after all <code>Voice</code> processes have finished.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_93362777/93522081.png" class="embedded-image" />
+  </span>
+</p>
+<p>All effects are processed in the order in which they were appended. For example, if effects are added to <code>FinalMix</code> in the order of <span class="ApiLink_Result_nn__audio__AddDelay(AudioRendererConfig_*pOutConfig|_DelayType_*pDelay|_void_*buffer|_size_t_bufferSize|_FinalMixType_*pFinalMix|_nn__TimeSpan_delayTimeMax|_int_channelCountMax)_NN_NOEXCEPT">AddDelay()</span> followed by <span class="ApiLink_Result_nn__audio__AddAux(AudioRendererConfig_*pOutConfig|_AuxType_*pAux|_FinalMixType_*pFinalMix|_void_*pSendBuffer|_void_*pReturnBuffer|_size_t_sendReturnBufferSize)_NN_NOEXCEPT">AddAux()</span>, the effects are processed in the order of <code>Delay</code> followed by <code>Aux</code>.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_93362777/93522082.png" class="embedded-image" />
+  </span>
+</p>
+<p>The SDK provides the following kinds of audio effects.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_93362777_h2_1">BufferMixer</a>
+    </li>
+    <li>
+      <a href="#Anchor_93362777_h2_2">Delay</a>
+    </li>
+    <li>
+      <a href="#Anchor_93362777_h2_3">Reverb</a>
+    </li>
+    <li>
+      <a href="#Anchor_93362777_h2_4">I3dl2Reverb</a>
+    </li>
+    <li>
+      <a href="#Anchor_93362777_h2_5">Aux</a>
+    </li>
+    <li>
+      <a href="#Anchor_93362777_h2_6">Capture</a>
+    </li>
+    <li>
+      <a href="#Anchor_93362777_h2_7">BiquadFilter</a>
+    </li>
+    <li>
+      <a href="#Anchor_93362777_h2_8">LightLimiter</a>
+    </li>
+  </ul>
+</p>
+<p>The features for each audio effect are described in the following sections.</p>
+<h2 id="Anchor_93362777_h2_1">BufferMixer</h2>
+<p>Applies the volume to the mix buffer that is the input, and mixes it with the mix buffer that is the output. This effect is intended for purposes like bus routing.</p>
+<p>Mix routing by <code>BufferMix</code> uses the <code><span class="ApiLink_nn__audio__SetBufferMixerInputOutput">nn::audio::SetBufferMixerInputOutput</span>()</code> function. The volume applied during mixing can be set using the <code><span class="ApiLink_nn__audio__SetBufferMixerVolume">nn::audio::SetBufferMixerVolume</span>()</code> function. The relationship between the input mix buffer, the output mix buffer, and the volume is as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>(Output mix buffer) += (Input mix buffer) * (Volume)</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_93362777_h2_2">
+  <span style="color: rgb(117,117,117);">Delay</span>
+</h2>
+<p>Provides a standard delay effect. This effect performs the processes shown in the figures for waveform data.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>For the input channels, you can use one, two, four, or six channels.</p>
+  </div>
+</div>
+<h3 id="Anchor_93362777_h3_3">Processing Flow</h3>
+<h4 id="Anchor_93362777_h4_1">For One Channel</h4>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_93362777/93522083.png" class="embedded-image" />
+  </span>
+</p>
+<h4 id="Anchor_93362777_h4_2">For Multiple Channels</h4>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_93362777/93522084.png" class="embedded-image" />
+  </span>
+</p>
+<h3 id="Anchor_93362777_h3_4">Input Channel Order</h3>
+<p>The Delay input channels are processed in the following order, assuming that the channels are configured.<br />When using the <code><span class="ApiLink_nn__audio__SetDelayInputOutput">nn::audio::SetDelayInputOutput</span>()</code> function to set input/output channels, make sure that you set them in the correct order.</p>
+<h4 id="Anchor_93362777_h4_3">NintendoSDK 14.0.0 and Later</h4>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Number of Channels</th>
+      <th>Input Channel Order</th>
+    </tr>
+    <tr>
+      <td>2ch</td>
+      <td>FrontLeft, FrontRight</td>
+    </tr>
+    <tr>
+      <td>4ch</td>
+      <td>FrontLeft, FrontRight, RearLeft, RearRight</td>
+    </tr>
+    <tr>
+      <td>6ch</td>
+      <td>FrontLeft, FrontRight, FrontCenter, LowFrequency, RearLeft, RearRight</td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_93362777_h4_4">NintendoSDK 13.x.x and Earlier</h4>
+<p>Note that the order of the channels for 6ch differs from the order in NintendoSDK 14.0.0 and later.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Number of Channels</th>
+      <th>Input Channel Order</th>
+    </tr>
+    <tr>
+      <td>2ch</td>
+      <td>FrontLeft, FrontRight</td>
+    </tr>
+    <tr>
+      <td>4ch</td>
+      <td>FrontLeft, FrontRight, RearLeft, RearRight</td>
+    </tr>
+    <tr>
+      <td>6ch</td>
+      <td>FrontLeft, FrontRight, RearLeft, RearRight, FrontCenter, LowFrequency</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_93362777_h3_5">Delay Parameters</h3>
+<h4 id="Anchor_93362777_h4_5">Low Pass Filter</h4>
+<p>LPF stands for <em>low-pass filter</em>. The behavior of the low-pass filter is determined by the <code>Low Pass Amount</code> parameter shown in the following formula.<br />The larger the value for the <code>Low Pass Amount</code> parameter, the lower the cutoff frequency and the &quot;hollower&quot; the sound.</p>
+<div class="math-display">\[ LPF(z) = \frac{b_{0}}{1-a_{1}z^{-1}} \]</div>
+<div class="math-display">\[ a_{1} = 0.95 * (LowPassAmount) \]</div>
+<div class="math-display">\[ b_{0} = 1.0 - a_{1} \]</div>
+<p>
+  <br />
+</p>
+<p>The relationship between the coefficients and the cutoff frequency <em>f</em> can be expressed as follows.</p>
+<div class="math-display">\[ a_{1} = 2 - cos(\omega_{c}) - \sqrt{(2 - cos(\omega_{c}))^2 - 1} \]</div>
+<p>The following code shows how the variables are defined.</p>
+<div class="math-display">\[ \omega_{c} = 2{\pi}f_{c} \]</div>
+<div class="math-display">\[ f_{c} = \frac{f}{f_{s}} \]</div>
+<div class="math-display">\[ f_{s} : sampling frequency \]</div>
+<p>You can use these relational expressions to calculate the value of <code>Low Pass Amount</code> for any individual frequency.</p>
+<p>In addition, by specifying the following parameters you can operate <code><span class="ApiLink_nn__audio__DelayType">nn::audio::DelayType</span></code> like a simple low pass filter.<br />For descriptions of these parameters, see the following sections.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>dryGain = 0;
+inGain = 1;
+feedbackGain = 0;
+channelSpread = 0;
+delayTime = 0;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_93362777_h4_6">Delay Volume</h4>
+<p>The block in the figure depicted by <span class="embedded-file-wrapper "><img src="../Attachments/Attach_93362777/93522088.png" class="embedded-image" /></span> represents the delay component.</p>
+<p>This component delays the sample data by the amount of time set in the <code>Delay Time</code> parameter.</p>
+<h4 id="Anchor_93362777_h4_7">Channel Spread</h4>
+<p>The Channel Spread Matrix process is conducted only when there are multiple channels. It works to adjust the effective delay among the channels. To be specific, it performs the following matrix calculations.</p>
+<h5 id="Anchor_93362777_h5_1">For Two Channels</h5>
+<p>The channel spread assumes that the input channels are laid out in the order of FrontLeft and FrontRight.</p>
+<div class="math-display">\[ \begin{bmatrix}
+FeedbackDirect &amp; FeedbackCross \\
+FeedbackCross &amp; FeedbackDirect
+\end{bmatrix} \]</div>
+<p>If <code>Input</code> is the input sample data and <code>Output</code> is the output sample data, the result is the following expression.</p>
+<div class="math-display">\[ \begin{bmatrix}
+Output_{1ch} \\
+Output_{2ch}
+\end{bmatrix}
+ = 
+\begin{bmatrix}
+FeedbackDirect &amp; FeedbackCross \\
+FeedbackCross &amp; FeedbackDirect
+\end{bmatrix}
+\begin{bmatrix}
+Input_{1ch} \\
+Input_{2ch}
+\end{bmatrix}
+ =
+\begin{bmatrix}
+FeedbackDirect * Input_{1ch} + FeedbackCross * Input_{2ch} \\
+FeedbackDirect * Input_{2ch} + FeedbackCross * Input_{1ch} \\
+\end{bmatrix} \]</div>
+<div class="math-display">\[ Output_{1ch} = FeedbackDirect * Input_{1ch} + FeedbackCross * Input_{2ch} \]</div>
+<div class="math-display">\[ Output_{2ch} = FeedbackCross * Input_{1ch} + FeedbackDirect * Input_{2ch} \]</div>
+<h5 id="Anchor_93362777_h5_2">For Four Channels</h5>
+<p>The channel spread assumes that the input channels are laid out in the order of FrontLeft, FrontRight, RearLeft, and RearRight.</p>
+<div class="math-display">\[ \begin{bmatrix}
+FeedbackDirect &amp; FeedbackCross &amp; FeedbackCross &amp; 0 \\
+FeedbackCross &amp; FeedbackDirect &amp; 0 &amp; FeedbackCross \\
+FeedbackCross &amp; 0 &amp; FeedbackDirect &amp; FeedbackCross \\
+0 &amp; FeedbackCross &amp; FeedbackCross &amp; FeedbackDirect
+\end{bmatrix} \]</div>
+<p>The various values of <code>Feedback Direct</code> and <code>Feedback Cross</code> are computed using the following expression.</p>
+<div class="math-display">\[ (FeedbackDirect) = (1 - (ChannelSpread)) * (FeedbackGain) \]</div>
+<div class="math-display">\[ (FeedbackCross) = (ChannelSpread) * (FeedbackGain) \]</div>
+<p>Accordingly, the larger the value for <code>Channel Spread</code>, the greater the effect on other channels.</p>
+<h5 id="Anchor_93362777_h5_3">For Six Channels</h5>
+<p>The input channels in the channel spread differ, depending on the NintendoSDK version.</p>
+<p>For NintendoSDK 14.0.0 and later, the input channels are assumed to be laid out in the order of FrontLeft, FrontRight, FrontCenter, LowFrequency, RearLeft, and RearRight.</p>
+<div class="math-display">\[ \begin{bmatrix}
+FeedbackDirect &amp; 0 &amp; FeedbackCross &amp; 0 &amp; FeedbackCross &amp; 0 \\
+0 &amp; FeedbackDirect &amp; FeedbackCross &amp; 0 &amp; 0 &amp; FeedbackCross \\
+FeedbackCross &amp; FeedbackCross &amp; FeedbackDirect &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; Feedback &amp; 0 &amp; 0 \\
+FeedbackCross &amp; 0 &amp; 0 &amp; 0 &amp; FeedbackDirect &amp; FeedbackCross \\
+0 &amp; FeedbackCross &amp; 0 &amp; 0 &amp; FeedbackCross &amp; FeedbackDirect
+\end{bmatrix} \]</div>
+<p>For NintendoSDK 13.x.x and earlier, the input channels are assumed to be laid out in the order of FrontLeft, FrontRight, RearLeft, RearRight, FrontCenter, and LowFrequency.</p>
+<div class="math-display">\[ \begin{bmatrix}
+FeedbackDirect &amp; 0 &amp; FeedbackCross &amp; 0 &amp; FeedbackCross &amp; 0 \\
+0 &amp; FeedbackDirect &amp; 0 &amp; FeedbackCross &amp; FeedbackCross &amp; 0 \\
+FeedbackCross &amp; 0 &amp; FeedbackDirect &amp; FeedbackCross &amp; 0 &amp; 0 \\
+0 &amp; FeedbackCross &amp; FeedbackCross &amp; FeedbackDirect &amp; 0 &amp; 0 \\
+FeedbackCross &amp; FeedbackCross &amp; 0 &amp; 0 &amp; FeedbackDirect &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; Feedback 
+\end{bmatrix} \]</div>
+<p>The various values of Feedback, <code>Feedback Direct</code>, and <code>Feedback Cross</code> are computed using the following expression.</p>
+<div class="math-display">\[ Feedback = 0.98 * (FeedbackGain) \]</div>
+<div class="math-display">\[ FeedbackDirect = (1 - ChannelSpread) * Feedback \]</div>
+<div class="math-display">\[ FeedbackCross = 0.5 * ChannelSpread * Feedback \]</div>
+<h4 id="Anchor_93362777_h4_8">Setting Method</h4>
+<p>Get and set all these various parameters using the following API functions.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Parameter Name</th>
+      <th>Related Functions</th>
+      <th>Valid Range for Values</th>
+    </tr>
+    <tr>
+      <td>Dry Gain</td>
+      <td>
+        <p>
+          <span class="ApiLink_float_nn__audio__GetDelayDryGain(const_DelayType_*pDelay)_NN_NOEXCEPT">GetDelayDryGain()</span>
+        </p>
+        <p>
+          <span class="ApiLink_void_nn__audio__SetDelayDryGain(DelayType_*pDelay|_float_dryGain)_NN_NOEXCEPT">SetDelayDryGain()</span>
+        </p>
+      </td>
+      <td>0.0f to 1.0f</td>
+    </tr>
+    <tr>
+      <td>In Gain</td>
+      <td>
+        <p>
+          <span class="ApiLink_float_nn__audio__GetDelayInGain(const_DelayType_*pDelay)_NN_NOEXCEPT">GetDelayInGain()</span>
+        </p>
+        <p>
+          <span class="ApiLink_void_nn__audio__SetDelayInGain(DelayType_*pDelay|_float_inGain)_NN_NOEXCEPT">SetDelayInGain()</span>
+        </p>
+      </td>
+      <td>0.0f to 1.0f</td>
+    </tr>
+    <tr>
+      <td>Feedback Gain</td>
+      <td>
+        <p>
+          <span class="ApiLink_float_nn__audio__GetDelayFeedbackGain(const_DelayType_*pDelay)_NN_NOEXCEPT">GetDelayFeedbackGain()</span>
+        </p>
+        <p>
+          <span class="ApiLink_void_nn__audio__SetDelayFeedbackGain(DelayType_*pDelay|_float_feedbackGain)_NN_NOEXCEPT">SetDelayFeedbackGain()</span>
+        </p>
+      </td>
+      <td>0.0f to 1.0f</td>
+    </tr>
+    <tr>
+      <td>Channel Spread</td>
+      <td>
+        <p>
+          <span class="ApiLink_float_nn__audio__GetDelayChannelSpread(const_DelayType_*pDelay)_NN_NOEXCEPT">GetDelayChannelSpread()</span>
+        </p>
+        <p>
+          <span class="ApiLink_void_nn__audio__SetDelayChannelSpread(DelayType_*pDelay|_float_channelSpread)_NN_NOEXCEPT">SetDelayChannelSpread()</span>
+        </p>
+      </td>
+      <td>0.0f to 1.0f</td>
+    </tr>
+    <tr>
+      <td>Low Pass Filter Amount</td>
+      <td>
+        <p>
+          <span class="ApiLink_float_nn__audio__GetDelayLowPassAmount(const_DelayType_*pDelay)_NN_NOEXCEPT">GetDelayLowPassAmount()</span>
+        </p>
+        <p>
+          <span class="ApiLink_void_nn__audio__SetDelayLowPassAmount(DelayType_*pDelay|_float_lowPassAmount)_NN_NOEXCEPT">SetDelayLowPassAmount()</span>
+        </p>
+      </td>
+      <td>0.0f to 1.0f</td>
+    </tr>
+    <tr>
+      <td>Delay Time</td>
+      <td>
+        <p>
+          <span class="ApiLink_nn__TimeSpan_nn__audio__GetDelayTime(const_DelayType_*pDelay)_NN_NOEXCEPT">GetDelayTime()</span>
+        </p>
+        <p>
+          <span class="ApiLink_void_nn__audio__SetDelayTime(DelayType_*pDelay|_nn__TimeSpan_time)_NN_NOEXCEPT">SetDelayTime()</span>
+        </p>
+      </td>
+      <td>
+        <p>When adding a delay using <span class="ApiLink_Result_nn__audio__AddDelay(AudioRendererConfig_*pOutConfig|_DelayType_*pDelay|_void_*buffer|_size_t_bufferSize|_FinalMixType_*pFinalMix|_nn__TimeSpan_delayTimeMax|_int_channelCountMax)_NN_NOEXCEPT">AddDelay()</span>, you can set any duration up to the maximum time set in the <code><em>delayTimeMax</em></code> argument.</p>
+        <p />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_93362777_h2_3">Reverb</h2>
+<p>Reverb is an effect that emulates the echoing of sound in a closed space.</p>
+<p>When a sound occurs in an enclosed space, such as a room or a cave, the sound waves travel through the air and reflect off the walls repeatedly. This reflected sound continues to reflect repeatedly against the other walls, forming additional echoes. At each reflection some energy is absorbed by the wall, making the echo slightly quieter. As this process continues, the size of each echo decreases gradually over time. At the same time, the overall effect is to create an increasing number of echoes. Sounds formed in this way are known as reverberation.</p>
+<p>The <em>reverb effect</em> (the artificial reverberations) is designed to emulate the sound of reverberation created by enclosed spaces. It can be used to create a sense of space, and the reverb parameter settings can be changed to create different types of space. For example, imagine a game character inside a large stone room. You would want a reverb where the first reflections are spread far apart (due to the time it takes the sound to travel across the large room), and where the sounds take a long time to decay (due to the high reflectivity of the stone walls and floor.) If the character then enters a small carpeted room with lots of furniture, you would want to use a reverb where the reflections would be quicker and would decay more quickly (due to the sound being absorbed by the walls.)</p>
+<h3 id="Anchor_93362777_h3_6">Reverb Models</h3>
+<p>The reverb effect separates these effects into three sounds for modeling.</p>
+<ul>
+  <li>Direct Sound<ul><li> This sound travels directly from the sound source to the listener and arrives first. The direct sound is created by the signal that travels through the mixer without going through any effects.</li></ul></li>
+  <li>Early Reflection <br /><ul><li>Sounds begin to arrive a short time after the direct sound. The first reflections are few and relatively spread out in time.</li></ul></li>
+  <li>Late Reverberation<ul><li>As the reflections multiply they eventually become so close together that they are indistinguishable. At that point, it becomes late reverberation. The levels of the reflections decay until they are inaudible.</li></ul></li>
+</ul>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_93362777/96640999.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<h3 id="Anchor_93362777_h3_7">Processing Flow</h3>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_93362777/96641000.png" width="600" class="embedded-image" />
+  </span>
+</p>
+<p>Reverb effect processing is performed as shown in the figure.<br />The <strong>Early Reflection</strong> block in the figure is the block where early reflections are produced. You can adjust this option using the <strong>Early Mode</strong> and <strong>Predelay Time</strong> parameters in the following table.<br />The <strong>Late Reverb</strong> block in the figure is the block where late reverberation is produced. You can adjust it using the <strong>Late Mode</strong>, <span class="argument"><strong>Decay Time</strong></span>, <span class="argument"><strong>High Frequency Decay Ratio</strong></span>, and <span class="argument"><strong>Coloration</strong></span> parameters. <br />For detailed descriptions of these parameters and the meaning of each gain in the figure, see the following table.</p>
+<h3 id="Anchor_93362777_h3_8">Input Channel Order</h3>
+<p>The Reverb input channels are processed in the following order, assuming that the channels are configured.<br />When using the <code><span class="ApiLink_nn__audio__SetReverbInputOutput">nn::audio::SetReverbInputOutput</span>()</code> function to set input/output channels, make sure that you set them in the correct order.</p>
+<h4 id="Anchor_93362777_h4_9">NintendoSDK 14.0.0 and Later</h4>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Number of Channels</th>
+      <th>Input Channel Order</th>
+    </tr>
+    <tr>
+      <td>2ch</td>
+      <td>FrontLeft, FrontRight</td>
+    </tr>
+    <tr>
+      <td>4ch</td>
+      <td>FrontLeft, FrontRight, RearLeft, RearRight</td>
+    </tr>
+    <tr>
+      <td>6ch</td>
+      <td>FrontLeft, FrontRight, FrontCenter, LowFrequency, RearLeft, RearRight</td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_93362777_h4_10">NintendoSDK 13.x.x and Earlier</h4>
+<p>Note that the order of the channels for 6ch differs from the order in NintendoSDK 14.0.0 and later.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Number of Channels</th>
+      <th>Input Channel Order</th>
+    </tr>
+    <tr>
+      <td>2ch</td>
+      <td>FrontLeft, FrontRight</td>
+    </tr>
+    <tr>
+      <td>4ch</td>
+      <td>FrontLeft, FrontRight, RearLeft, RearRight</td>
+    </tr>
+    <tr>
+      <td>6ch</td>
+      <td>FrontLeft, FrontRight, RearLeft, RearRight, FrontCenter, LowFrequency</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_93362777_h3_9">Reverb Parameters</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>
+        <div class="tablesorter-header-inner">Parameter Name</div>
+      </th>
+      <th>Related Functions</th>
+      <th>
+        <div class="tablesorter-header-inner">Description</div>
+      </th>
+      <th>
+        <div class="tablesorter-header-inner">Valid Range</div>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>
+        <span class="argument">Early Mode</span>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbEarlyMode">nn::audio::GetReverbEarlyMode</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbEarlyMode">nn::audio::SetReverbEarlyMode</span>()</p>
+      </td>
+      <td>
+        <p>Selects the preset value for <strong>Early Reflection</strong>. Five presets have been prepared as <code><span class="ApiLink_nn__audio__ReverbType__EarlyMode">nn::audio::ReverbType::EarlyMode</span></code> for <strong>Early Reflection</strong>. Each value is designed to emulate a different size space.</p>
+        <table class="wrapped">
+          <tbody>
+            <tr>
+              <th> Setting Value</th>
+              <th>Description</th>
+            </tr>
+            <tr>
+              <td>EarlyMode_SmallRoom </td>
+              <td>Small room. </td>
+            </tr>
+            <tr>
+              <td>EarlyMode_LargeRoom</td>
+              <td>Large room.</td>
+            </tr>
+            <tr>
+              <td>EarlyMode_Hall</td>
+              <td>Hall.</td>
+            </tr>
+            <tr>
+              <td>EarlyMode_Cavern</td>
+              <td>Cave.</td>
+            </tr>
+            <tr>
+              <td>EarlyMode_NoEarlyReflection</td>
+              <td>No early reflection.</td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+      <td>
+        <p>See the table at left.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <span class="argument">Early Gain</span>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbEarlyGain">nn::audio::GetReverbEarlyGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbEarlyGain">nn::audio::SetReverbEarlyGain</span>()</p>
+      </td>
+      <td>Adjusts the gain of <strong>Early Reflection</strong>.</td>
+      <td>0.0f to 1.0f</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="argument">Predelay Time</span>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbPredelayTime">nn::audio::GetReverbPredelayTime</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbPredelayTime">nn::audio::SetReverbPredelayTime</span>()</p>
+      </td>
+      <td>
+        <p>Adjusts the time between the first <strong>Early Reflection</strong> and <strong>Late Reverberation</strong> for the sound. In general, a larger value creates a sense of a larger space.</p>
+      </td>
+      <td>
+        <ul>
+          <li>0 to 100 milliseconds (SDK 1.x and prior versions)</li>
+          <li>0 to 300 milliseconds (SDK 2.0.0 and later versions)</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <span class="argument">Late Mode</span>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbLateMode">nn::audio::GetReverbLateMode</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbLateMode">nn::audio::SetReverbLateMode</span>()</p>
+      </td>
+      <td>
+        <p>Selects the preset value for <strong>Late Reverberation</strong>. Five presets that affect the temporal distribution of reflected sound have been prepared as <code><span class="ApiLink_nn__audio__ReverbType__LateMode">nn::audio::ReverbType::LateMode</span></code> for <strong>Late Reverberation</strong>. These preset values are selected in <strong>Late Mode</strong>.</p>
+        <table class="wrapped">
+          <tbody>
+            <tr>
+              <th>Setting Value</th>
+              <th>Description</th>
+            </tr>
+            <tr>
+              <td>LateMode_Hall</td>
+              <td>Hall.</td>
+            </tr>
+            <tr>
+              <td>LateMode_MetalCorridor</td>
+              <td>Metal corridor.</td>
+            </tr>
+            <tr>
+              <td>LateMode_Cavern</td>
+              <td>
+                <p>Cave.</p>
+              </td>
+            </tr>
+            <tr>
+              <td>LateMode_MaximumDelay</td>
+              <td>Maximum delay.</td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+      <td>See the table at left.</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="argument">Late Gain</span>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbLateGain">nn::audio::GetReverbLateGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbLateGain">nn::audio::SetReverbLateGain</span>()</p>
+      </td>
+      <td>Adjusts the gain of <strong>Late Reverberation</strong>.</td>
+      <td>0.0f to 1.0f</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="argument">Decay Time</span>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbDecayTime">nn::audio::GetReverbDecayTime</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbDecayTime">nn::audio::SetReverbDecayTime</span>()</p>
+      </td>
+      <td>
+        <p>This parameter adjusts the time it takes the late reverb to decrease by 60 dB.</p>
+        <p>Of all the parameters, <strong>Decay Time</strong> has the strongest effect on the perceived size of the space. A larger <strong>Decay Time</strong> leads to a longer lasting sound, and the sense of a larger space.</p>
+      </td>
+      <td>0.1 to 20 seconds</td>
+    </tr>
+    <tr>
+      <th>
+        <p>
+          <span class="argument">High Frequency Decay Ratio<br /></span>
+        </p>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbHighFrequencyDecayRatio">nn::audio::GetReverbHighFrequencyDecayRatio</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbHighFrequencyDecayRatio">nn::audio::SetReverbHighFrequencyDecayRatio</span>()</p>
+      </td>
+      <td>
+        <p>Adjusts the <strong>Decay Time</strong> for high-frequency sounds compared to the <strong>Decay Time</strong> for low-frequency sounds.</p>
+        <p class="argument">For example, when this parameter is <code>0.5</code>, high frequencies will decay twice as fast as low frequencies. When the value is 1.0, both high and low frequencies will decay at the same rate.</p>
+        <p>In typical rooms, high frequencies decay faster than low frequencies. This effect is caused by the reflective properties of the walls of the space and how sounds are attenuated as they propagate through air.</p>
+      </td>
+      <td>0.1f to 1.0f</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="argument">Coloration</span>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbColoration">nn::audio::GetReverbColoration</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbColoration">nn::audio::SetReverbColoration</span>()</p>
+      </td>
+      <td>
+        <p>Adjusts the tone of <strong>Late Reverberation</strong>.</p>
+        <p>In a room where sound reverberates evenly, the late reverb will not make any particular frequencies stand out. In other words, it will not have a tone. It will also not result in audibly repeating patterns of echoes. However, sometimes it is desirable to design a reverb for a space with uneven reverberation. For example, a long metal corridor will create patterns of echoes that result in some frequencies ringing longer. The <strong>Coloration</strong> parameter is useful for adding some of this character to the sound.<br />At 0.0 the reverb sounds colorless, while at 1.0 it will be more colored.</p>
+      </td>
+      <td>
+        <p>0.0f to 1.0f</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <span class="argument">Reverb Gain</span>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbReverbGain">nn::audio::GetReverbReverbGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbReverbGain">nn::audio::SetReverbReverbGain</span>()</p>
+      </td>
+      <td>This parameter adjusts the input gain driving the reverb algorithm.</td>
+      <td>0.0f to 1.0f</td>
+    </tr>
+    <tr>
+      <th>
+        <span class="argument">Out Gain</span>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbOutGain">nn::audio::GetReverbOutGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbOutGain">nn::audio::SetReverbOutGain</span>()</p>
+      </td>
+      <td>This parameter adjusts the gain of the processed output audio.<br />This gain does not alter the dry output.</td>
+      <td>
+        <p>0.0f to 1.0f</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <span class="argument">Dry Gain</span>
+      </th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__GetReverbDryGain">nn::audio::GetReverbDryGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__SetReverbDryGain">nn::audio::SetReverbDryGain</span>()</p>
+      </td>
+      <td>This parameter adjusts the gain for the Direct Sound.</td>
+      <td>0.0f to 1.0f</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_93362777_h2_4">I3dl2Reverb</h2>
+<p>
+  <code>
+    <span class="ApiLink_nn__audio">nn::audio</span>
+  </code> provides reverb effects that conform in part to the specification for Interactive 3D Audio Level 2 (<code><span class="ApiLink_nn__audio__I3dl2ReverbType">nn::audio::I3dl2ReverbType</span></code>). These effects are used basically the same way as regular reverb effects, but different parameters are configured.</p>
+<h3 id="Anchor_93362777_h3_10">Input Channel Order</h3>
+<p>The I3dl2Reverb input channels are processed in the following order, assuming that the channels are configured.<br />When using the <code><span class="ApiLink_nn__audio__SetI3dl2ReverbInputOutput">nn::audio::SetI3dl2ReverbInputOutput</span>()</code> function to set input/output channels, make sure that you set them in the correct order.</p>
+<h4 id="Anchor_93362777_h4_11">NintendoSDK 14.0.0 and Later</h4>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Number of Channels</th>
+      <th>Input Channel Order</th>
+    </tr>
+    <tr>
+      <td>2ch</td>
+      <td>FrontLeft, FrontRight</td>
+    </tr>
+    <tr>
+      <td>4ch</td>
+      <td>FrontLeft, FrontRight, RearLeft, RearRight</td>
+    </tr>
+    <tr>
+      <td>6ch</td>
+      <td>FrontLeft, FrontRight, FrontCenter, LowFrequency, RearLeft, RearRight</td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_93362777_h4_12">NintendoSDK 13.x.x and Earlier</h4>
+<p>Note that the order of the channels for 6ch differs from the order in NintendoSDK 14.0.0 and later.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Number of Channels</th>
+      <th>Input Channel Order</th>
+    </tr>
+    <tr>
+      <td>2ch</td>
+      <td>FrontLeft, FrontRight</td>
+    </tr>
+    <tr>
+      <td>4ch</td>
+      <td>FrontLeft, FrontRight, RearLeft, RearRight</td>
+    </tr>
+    <tr>
+      <td>6ch</td>
+      <td>FrontLeft, FrontRight, RearLeft, RearRight, FrontCenter, LowFrequency</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_93362777_h3_11">I3dl2 Reverb Parameters</h3>
+<p>The following parameters are used with I3dl2 reverb effects.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Parameter Name</th>
+      <th>Related Functions</th>
+      <th>Description</th>
+      <th>Valid Range</th>
+    </tr>
+    <tr>
+      <th>Room Gain</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbRoomGain">nn::audio::SetI3dl2ReverbRoomGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbRoomGain">nn::audio::GetI3dl2ReverbRoomGain</span>()</p>
+      </td>
+      <td>
+        <p>Adjusts the attenuation of the low-frequency component for both <strong>Early Reflection</strong> and <strong>Late Reverberation</strong>.</p>
+      </td>
+      <td>-10000.0f to 0.0f [mB]</td>
+    </tr>
+    <tr>
+      <th>Room Hf Gain</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbRoomHfGain">nn::audio::SetI3dl2ReverbRoomHfGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbRoomHfGain">nn::audio::GetI3dl2ReverbRoomHfGain</span>()</p>
+      </td>
+      <td>Adjusts the attenuation of the high-frequency component for both <strong>Early Reflection</strong> and <strong>Late Reverberation</strong>.</td>
+      <td>-10000.0f to 0.0f [mB]</td>
+    </tr>
+    <tr>
+      <th>Decay Time</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbLateReverbDecayTime">nn::audio::SetI3dl2ReverbLateReverbDecayTime</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbLateReverbDecayTime">nn::audio::GetI3dl2ReverbLateReverbDecayTime</span>()</p>
+      </td>
+      <td>
+        <p>Adjusts the reverberation time.</p>
+        <p>This is the length of time for the low-frequency component of <strong>Late Reverberation</strong> to decay to 60 decibels.</p>
+      </td>
+      <td>0.1f to 20.0f seconds</td>
+    </tr>
+    <tr>
+      <th>Hf Decay Ratio</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbLateReverbHfDecayRatio">nn::audio::SetI3dl2ReverbLateReverbHfDecayRatio</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbLateReverbHfDecayRatio">nn::audio::GetI3dl2ReverbLateReverbHfDecayRatio</span>()</p>
+      </td>
+      <td>
+        <p>Adjusts the ratio of the low-frequency reverberation time to the high-frequency reverberation time.</p>
+      </td>
+      <td>0.1f to 2.0f</td>
+    </tr>
+    <tr>
+      <th>Reflections Gain</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbReflectionsGain">nn::audio::SetI3dl2ReverbReflectionsGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbReflectionsGain">nn::audio::GetI3dl2ReverbReflectionsGain</span>()</p>
+      </td>
+      <td>Adjusts the level of <strong>Early Reflection</strong> based on the <strong>Room Gain</strong>.</td>
+      <td>-10000.0f to 1000.0f [mB]</td>
+    </tr>
+    <tr>
+      <th>Reflection Delay Time</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbReflectionDelayTime">nn::audio::SetI3dl2ReverbReflectionDelayTime</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbReflectionDelayTime">nn::audio::GetI3dl2ReverbReflectionDelayTime</span>()</p>
+      </td>
+      <td>Adjusts the delay time of <strong>Early Reflection</strong> based on the <strong>Direct Sound</strong>. In general, a larger value creates a sense of a larger space.</td>
+      <td>0.0f to 0.3f seconds</td>
+    </tr>
+    <tr>
+      <th>Reverb Gain</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbReverbGain">nn::audio::SetI3dl2ReverbReverbGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbReverbGain">nn::audio::GetI3dl2ReverbReverbGain</span>()</p>
+      </td>
+      <td>Adjusts the level of <strong>Late Reverberation</strong> based on the <strong>Room Gain</strong>.</td>
+      <td>-10000.0f to 2000.0f [mB]</td>
+    </tr>
+    <tr>
+      <th>Late Reverb Delay Time</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbLateReverbDelayTime">nn::audio::SetI3dl2ReverbLateReverbDelayTime</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbLateReverbDelayTime">nn::audio::GetI3dl2ReverbLateReverbDelayTime</span>()</p>
+      </td>
+      <td>Adjusts the delay time of <strong>Late Reverberation</strong> based on the <strong>Early Reflection</strong>.</td>
+      <td>0.0f to 0.1f seconds</td>
+    </tr>
+    <tr>
+      <th>Late Reverb Diffusion</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbLateReverbDiffusion">nn::audio::SetI3dl2ReverbLateReverbDiffusion</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbLateReverbDiffusion">nn::audio::GetI3dl2ReverbLateReverbDiffusion</span>()</p>
+      </td>
+      <td>Adjusts the diffusion of <strong>Late Reverberation</strong>.</td>
+      <td>0.1f to 100.0f</td>
+    </tr>
+    <tr>
+      <th>Late Reverb Density</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbLateReverbDensity">nn::audio::SetI3dl2ReverbLateReverbDensity</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbLateReverbDensity">nn::audio::GetI3dl2ReverbLateReverbDensity</span>()</p>
+      </td>
+      <td>Adjusts the modal density of <strong>Late Reverberation</strong>.</td>
+      <td>0.1f to 100.0f</td>
+    </tr>
+    <tr>
+      <th>Hf Reference</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbHfReference">nn::audio::SetI3dl2ReverbHfReference</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbHfReference">nn::audio::GetI3dl2ReverbHfReference</span>()</p>
+      </td>
+      <td>Adjusts the frequency that is used as a reference by <code>RoomHf</code> and <code>HfDecayRatio</code>.<br />This reference frequency is applied as a boundary for both low-frequency and high-frequency effects.</td>
+      <td>20.0f to～ 20000.0f [Hz]</td>
+    </tr>
+    <tr>
+      <th>Dry Gain</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetI3dl2ReverbDryGain">nn::audio::SetI3dl2ReverbDryGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetI3dl2ReverbDryGain">nn::audio::GetI3dl2ReverbDryGain</span>()</p>
+      </td>
+      <td>Adjusts the gain for the <strong>Direct Sound</strong>.</td>
+      <td>
+        <p>0.0f to 1.0f</p>
+        <p>
+          <br />
+        </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_93362777_h3_12">Preset Parameters</h3>
+<p>Presets have been prepared for setting all of these parameters at the same time. Each value is designed to emulate a different size space.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Setting Value</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Preset_SmallRoom</td>
+      <td>Small room.</td>
+    </tr>
+    <tr>
+      <td>Preset_LargeRoom</td>
+      <td>Large room.</td>
+    </tr>
+    <tr>
+      <td>PresetTwist</td>
+      <td>Hall.</td>
+    </tr>
+    <tr>
+      <td>Preset_CavernousCathedral</td>
+      <td>Cathedral.</td>
+    </tr>
+    <tr>
+      <td>Preset_MetalCorridor</td>
+      <td>Metal corridor.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The following parameter relationships exist between <code>Reverb</code> and <code>I3dl2Reverb</code>. You can get the same effects using both by converting each parameter as follows.</p>
+    <ul>
+      <li>
+        <p>The <code>Room Hf Gain</code> and <code>Hf Reference</code> effects in <code>I3dl2Reverb</code> are not provided by the <code>Reverb</code>, so a constant value must be set for each effect.</p>
+        <ul>
+          <li>
+            <p>I3dl2Reverb Room Hf Gain</p>
+            <table class="codeblock">
+              <tbody>
+                <tr>
+                  <td class="code">
+                    <div class="codeblock"><pre><span class="n">i3dl2Reverb</span><span class="o">-&gt;</span><span class="n">roomHf</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span></pre></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p>The <code>Room Hf Gain</code> parameter is defined as the attenuation of the high-frequency elements for low-frequency elements.<br />This parameter controls the low-pass filter (effects applied before early reflections and late reverb blocks input is passed).</p>
+          </li>
+          <li>
+            <p>I3dl2Reverb Hf Reference</p>
+            <table class="codeblock">
+              <tbody>
+                <tr>
+                  <td class="code">
+                    <div class="codeblock"><pre><span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span> <span class="n">hfReference</span> <span class="o">=</span> <span class="mf">5000.0</span><span class="p">;</span></pre></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p>This parameter is hard-coded to 5000 for Reverb effects. The parameter may be set to any value between 20 and 20,000 (Hertz) for I3dl2Reverb effects.</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p>The following parameters are the correct correspondence between the Reverb effects and I3DL2Reverb effects.</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre><span class="n">i3dl2Reverb</span><span class="o">-&gt;</span><span class="n">decayTime</span> <span class="o">=</span> <span class="n">reverb</span><span class="o">-&gt;</span><span class="n">decayTime</span><span class="p">;</span>
+<span class="n">i3dl2Reverb</span><span class="o">-&gt;</span><span class="n">decayHfRatio</span> <span class="o">=</span> <span class="n">reverb</span><span class="o">-&gt;</span><span class="n">highFrequencyDecayRatio</span><span class="p">;</span></pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        <p>The following parameters convert between <code>linear</code> and <code>milliBells</code>.</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre><span class="n">i3dl2Reverb</span><span class="o">-&gt;</span><span class="n">roomGain</span> <span class="o">=</span> <span class="mf">2000.0</span> <span class="o">*</span> <span class="n">log10</span><span class="p">(</span><span class="n">reverb</span><span class="o">-&gt;</span><span class="n">reverbGain</span><span class="p">);</span>
+<span class="n">i3dl2Reverb</span><span class="o">-&gt;</span><span class="n">reflectionsGain</span> <span class="o">=</span> <span class="mf">2000.0</span> <span class="o">*</span> <span class="n">log10</span><span class="p">(</span><span class="n">reverb</span><span class="o">-&gt;</span><span class="n">earlyGain</span><span class="p">);</span>
+<span class="n">i3dl2Reverb</span><span class="o">-&gt;</span><span class="n">reverbGain</span> <span class="o">=</span> <span class="mf">2000.0</span> <span class="o">*</span> <span class="n">log10</span><span class="p">(</span><span class="n">reverb</span><span class="o">-&gt;</span><span class="n">lateGain</span><span class="p">);</span></pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li>
+        <p>The <code>Coloration</code> parameter in the I3DL2Reverb effects corresponds to <code><em>diffusion</em></code> in the Reverb effects.</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre><span class="n">i3dl2Reverb</span><span class="o">-&gt;</span><span class="n">diffusion</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">reverb</span><span class="o">-&gt;</span><span class="n">coloration</span><span class="p">);</span></pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li>
+        <p>The <code><em>reflectionsDelayTime</em></code> parameter in the I3DL2Reverb effects corresponds to the <code><em>predelayTime</em></code> in the Reverb effects.</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre><span class="n">i3dl2Reverb</span><span class="o">-&gt;</span><span class="n">reflectionsDelayTime</span> <span class="o">=</span> <span class="mf">0.001</span> <span class="o">*</span> <span class="n">reverb</span><span class="o">-&gt;</span><span class="n">predelayTime</span><span class="p">;</span></pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li>
+        <p>
+          <code>Early mode</code> and <code>Late mode</code> in the I3DL2Reverb effects correspond, respectively, to <code>late Reverb delay</code> and <code><em>density</em></code> in the Reverb effects.</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre><span class="k">switch</span> <span class="p">(</span><span class="n">reverb</span><span class="o">-&gt;</span><span class="n">earlyMode</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">case</span> <span class="mi">0</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span><span class="n">reverbDelay</span> <span class="o">=</span> <span class="mf">0.012</span><span class="p">;</span>  <span class="c1">// Small room
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="k">case</span> <span class="mi">1</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span><span class="n">reverbDelay</span> <span class="o">=</span> <span class="mf">0.040</span><span class="p">;</span>  <span class="c1">// Large room
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="k">case</span> <span class="mi">2</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span> <span class="n">reverbDelay</span> <span class="o">=</span> <span class="mf">0.050</span><span class="p">;</span> <span class="c1">// Hall
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="k">case</span> <span class="mi">3</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span> <span class="n">reverbDelay</span> <span class="o">=</span> <span class="mf">0.050</span><span class="p">;</span> <span class="c1">// Cavern 
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="k">case</span> <span class="mi">4</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span> <span class="n">reverbDelay</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>   <span class="c1">// no early reflection
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span> <span class="n">reflectionsGain</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10000.0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="k">default</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span> <span class="n">reverbDelay</span> <span class="o">=</span> <span class="mf">0.050</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+
+
+<span class="k">switch</span> <span class="p">(</span><span class="n">reverb</span><span class="o">-&gt;</span><span class="n">lateMode</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">case</span> <span class="mi">0</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span><span class="n">density</span> <span class="o">=</span> <span class="mf">61.0</span><span class="p">;</span>   <span class="c1">// room
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="k">case</span> <span class="mi">1</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span><span class="n">density</span> <span class="o">=</span> <span class="mf">69.0</span><span class="p">;</span>   <span class="c1">// hall
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="k">case</span> <span class="mi">2</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span><span class="n">density</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>    <span class="c1">// corridor
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="k">case</span> <span class="mi">3</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span><span class="n">density</span> <span class="o">=</span> <span class="mf">61.0</span><span class="p">;</span>   <span class="c1">// cavern
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="k">case</span> <span class="mi">4</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span><span class="n">density</span> <span class="o">=</span> <span class="mf">69.0</span><span class="p">;</span>   <span class="c1">// max delay in the feedback delay network
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="k">default</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">i3dl2Reverb</span> <span class="o">-&gt;</span><span class="n">density</span> <span class="o">=</span> <span class="mf">61.0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </div>
+</div>
+<h2 id="Anchor_93362777_h2_5">Aux</h2>
+<p>This provides functionality for users to implement their own audio effect processes and incorporate them into the audio renderer. It is comprised of the following two features.</p>
+<ol>
+  <li>A feature to get rendering process sample data from the audio renderer (<span class="ApiLink_int_nn__audio__ReadAuxSendBuffer(AuxType_*pAux|_int32_t_*pOutData|_int_count)_NN_NOEXCEPT">ReadAuxSendBuffer()</span>).</li>
+  <li>A feature to write back any sample data to the rendering process from which data was obtained (<span class="ApiLink_int_nn__audio__WriteAuxReturnBuffer(AuxType_*pAux|_const_int32_t_*pData|_int_count)_NN_NOEXCEPT">WriteAuxReturnBuffer()</span>).</li>
+</ol>
+<p>The user can realize any effect by conducting some process on the sample data obtained using feature 1, and then writing the data back to the audio renderer using feature 2. Like other effects, <code>Aux</code> effects are processed in the order in which they were added. Accordingly, the user can use <code>Aux</code> to get sample data from any rendering process.</p>
+<p>
+  <code>Aux</code> uses two buffers at this time. (The following figure is an example of <code>Aux</code> added to <code>FinalMix</code>.)</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_93362777/93522094.png" class="embedded-image" />
+  </span>
+</p>
+<ul>
+  <li>
+    <code>Send Buffer</code> holds the sample data taken from the buffer specified by <code>Final Mix</code>.</li>
+  <li>
+    <code>Return Buffer</code> holds the sample data passed from the user. Data is read from this buffer by <code>Aux</code> in every frame, so the required amount of sample data must always be written to it.<br />The user must take responsibility for writing the data.</li>
+</ul>
+<p>For more information about the format of the sample data held in <code>Send Buffer</code> and <code>Return Buffer</code> and how to handle the data, see the API reference content for the <span class="ApiLink_int_nn__audio__ReadAuxSendBuffer(AuxType_*pAux|_int32_t_*pOutData|_int_count)_NN_NOEXCEPT">ReadAuxSendBuffer()</span> function and the <span class="ApiLink_int_nn__audio__WriteAuxReturnBuffer(AuxType_*pAux|_const_int32_t_*pData|_int_count)_NN_NOEXCEPT">WriteAuxReturnBuffer()</span> function.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The sizes of <code>Send Buffer</code> and <code>Return Buffer</code> correspond to the delay time before user-specified effects are applied. Note that you cannot specify the same buffer for <code>Send Buffer</code> and <code>Return Buffer</code>.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The user is responsible for reading data from <code>Send Buffer</code> and writing data back to <code>Return Buffer</code>. If not enough data is written back to <code>Return Buffer</code>, and the audio renderer cannot load the required sample data, this might produce dropouts and other audio glitches. The user must control the sizes of <code>Send Buffer</code> and <code>Return Buffer</code>, striking a balance between the computational costs and processing time of user-defined signal processing.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In past versions of the SDK supplied by Nintendo, this same functionality was realized by registering callback functions to the audio renderer. That method assumed that the callback functions would be called in every audio frame, requiring users to consume CPU time at a fixed frequency.</p>
+    <p>With <code>Aux</code>, the user can control the sizes of <code>Send Buffer</code> and <code>Return Buffer</code>. This enables control over the processing load balance.</p>
+  </div>
+</div>
+<h2 id="Anchor_93362777_h2_6">Capture</h2>
+<p>Provides the functionality to acquire and process sample data without affecting the output after effect processing.<br />The user can periodically call the <code><span class="ApiLink_nn__audio__ReadCaptureBuffer">nn::audio::ReadCaptureBuffer</span>()</code> function to get the sample data during the rendering process.</p>
+<p>
+  <code>Aux</code> exists as a similar effect, but the following figure shows the difference in behavior between <code>Aux</code> and <code>Capture</code>. (The following figure shows an example where <code>Aux</code> and <code>Capture</code> are added to FinalMix.)</p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_93362777/1127063114.png" width="950" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>Specifically, the following points differ when compared to <code>Aux</code>.</p>
+<ul>
+  <li>It does not have the functionality to write back arbitrary sampling data to the rendering process.<ul><li>It does not have a feature equivalent to <code><span class="ApiLink_nn__audio__WriteAuxReturnBuffer">nn::audio::WriteAuxReturnBuffer</span>()</code>.</li></ul></li>
+  <li>It does not affect the output after effect processing.<ul><li>For this reason, the output delay after effect processing, which occurs with <code>Aux</code>, does not occur.</li></ul></li>
+</ul>
+<p>Due to these characteristics, <code>Capture</code> is expected to be used for purposes such as the user's independent audio analysis processing.</p>
+<p>For more information about the sample data that can be obtained and how to handle it, see the API reference for <code><span class="ApiLink_nn__audio__ReadCaptureBuffer">nn::audio::ReadCaptureBuffer</span>()</code>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The user must call the <code><span class="ApiLink_nn__audio__ReadCaptureBuffer">nn::audio::ReadCaptureBuffer</span>()</code> function periodically to get the sample data.<br />If sample data is not periodically loaded, old sample data will be overwritten and the recorded sample data will be lost.</p>
+    <p>Use either of the following methods to make adjustments and prevent the loss of recorded sample data.</p>
+    <ol>
+      <li>Increase the size of the buffer used, and increase the interval between loading sample data.</li>
+      <li>Increase the frequency of calling <code><span class="ApiLink_nn__audio__ReadCaptureBuffer">nn::audio::ReadCaptureBuffer</span>()</code>.</li>
+    </ol>
+  </div>
+</div>
+<h2 id="Anchor_93362777_h2_7">BiquadFilter</h2>
+<p>This feature provides the effects of a standard biquad filter. It is intended to be used for filtering with filters, such as low-pass filters and high-pass filters. It provides the same functionality as the <code>VoiceType</code> biquad filter, with the exception of cases where the filter targets are <code>SubMix</code> or <code>FinalMix</code> mix buffers.</p>
+<p>Routing of the <code>BiquadFilter</code> mix is performed by the <code><span class="ApiLink_nn__audio__SetBufferMixerInputOutput">nn::audio::SetBufferMixerInputOutput</span>()</code> function. The parameter applied for the effect can be set using the <code><span class="ApiLink_nn__audio__SetBiquadFilterParameter">nn::audio::SetBiquadFilterParameter</span>()</code> function. The filter transfer function is expressed as follows.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The values set for <code>numerator</code> and <code>denominator</code> are treated as Q14 fixed-point format values.</p>
+  </div>
+</div>
+<div class="math-display">\[ H(z) = \frac{numerator_{0}+numerator_{1}z^{-1}+numerator_{2}z^{-2}}{(1 << 14) - denominator_{0}z^{-1} - denominator_{1}z^{-2}} \]</div>
+<h2 id="Anchor_93362777_h2_8">LightLimiter</h2>
+<p>The <code><span class="ApiLink_nn__audio">nn::audio</span></code> library provides a limiter effect that has a relatively light processing load.</p>
+<p>The purpose of the limiter effect is to limit signals to levels below the threshold.<br />By limiting the amplitude or the RMS (root mean square) below the threshold, you can prevent audio from distorting and cutting out, as can happen when signal levels exceed the threshold.</p>
+<p>The library also provides <code><span class="ApiLink_nn__audio__AuxLimiterType">nn::audio::AuxLimiterType</span></code> as a limiter, but this effect has a lighter processing load than that limiter.</p>
+<h3 id="Anchor_93362777_h3_13">Behavior of LightLimiter</h3>
+<p>The following figure depicts how LightLimiter operates.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_93362777/998928908.png" height="400" class="embedded-image" />
+  </span>
+</p>
+<p>Using the look-ahead feature, the input signals are pre-loaded and the decision whether to limit the signals is made so the amplitude is kept below the threshold.<br />The limiting is conducted progressively beforehand to reduce the amplitude of signals that exceed the threshold and keep them below the threshold.<br />In this way, even when signals with a large amplitude are suddenly input, the amplitude is limited so the signals do not exceed the threshold.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The limiting on the pre-loaded signal is stropped at the release stage, so there is a possibility that the signal will exceed the threshold at that time.<br />However, if the release stage lasts a sufficient time and is handled like a normal sound waveform, for practical purposes there are few situations where signals exceeding the threshold at the release phase is a problem.</p>
+  </div>
+</div>
+<h3 id="Anchor_93362777_h3_14">Features of LightLimiter</h3>
+<p>The LightLimiter effect provided by the <code><span class="ApiLink_nn__audio">nn::audio</span></code> library has the following characteristics.</p>
+<ol>
+  <li>Limits the signal amplitude.<br /><ol><li>The effect works to keep the amplitude of the signal below the threshold.</li></ol></li>
+  <li>Limiting is performed on the input signals using look-ahead.<br /><ol><li>Even signals with large amplitudes that are suddenly input can be limited and kept below the threshold.</li><li>The delay only amounts to the time spent looking ahead at the signals.<ol><li>Generally speaking, the delay is not an issue because the amount of the delay is set below the discernible level for humans.</li></ol></li></ol></li>
+  <li>The limiter is applied independently to each channel.<br /><ol><li>LightLimiter can be used with multichannel audio, and the signal limiting is conducted on each channel independently.</li></ol></li>
+</ol>
+<p>In addition, compared to <code><span class="ApiLink_nn__audio__AuxLimiterType">nn::audio::AuxLimiterType</span></code>, this effect has the following characteristics.</p>
+<ol>
+  <li>The processing load is lighter.</li>
+  <li>Signals are not necessarily kept below the threshold.<br /><ol><li>Under the following conditions, the signal amplitude may exceed the threshold.<ol><li>If the look-ahead time is not long enough compared to the attack phase time.</li><li>During the release phase.</li></ol></li></ol></li>
+</ol>
+<h3 id="Anchor_93362777_h3_15">LightLimiter Parameters</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Parameter Name</th>
+      <th>Related Functions</th>
+      <th>Description</th>
+      <th>Valid Range</th>
+    </tr>
+    <tr>
+      <th>Threshold</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetLightLimiterThreshold">nn::audio::SetLightLimiterThreshold</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetLightLimiterThreshold">nn::audio::GetLightLimiterThreshold</span>()</p>
+      </td>
+      <td>
+        <p>The threshold amplitude that the limiter targets when limiting the signal.</p>
+        <p>When a signal whose amplitude exceeds this threshold is input, the effect works to keep the amplitude below the threshold.</p>
+        <p>The value <code>0.0f</code> represents silence, and <code>1.0f</code> represents the full range.</p>
+      </td>
+      <td>0.0f ~</td>
+    </tr>
+    <tr>
+      <th>LookAheadTime</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetLightLimiterLookAheadTime">nn::audio::SetLightLimiterLookAheadTime</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetLightLimiterLookAheadTime">nn::audio::GetLightLimiterLookAheadTime</span>()</p>
+      </td>
+      <td>
+        <p>The look-ahead time for input signals.</p>
+        <p>The amount of look-ahead time to provide so signals with a large amplitude that are suddenly input can be processed to be kept below the threshold.</p>
+        <p>When setting the look-ahead time, it is important to be aware of the delay this creates.</p>
+        <p>In addition, you must set a value that is sufficiently large compared to the attack time.<br />If you do not, the limiting might not be applied in time to prevent signals from exceeding the threshold.</p>
+      </td>
+      <td>Between 0 microseconds and (std::numeric_limits&lt;int32_t&gt;::max() - 1) microseconds.</td>
+    </tr>
+    <tr>
+      <th>AttackTime</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetLightLimiterAttackTime">nn::audio::SetLightLimiterAttackTime</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetLightLimiterAttackTime">nn::audio::GetLightLimiterAttackTime</span>()</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>The attack time.</p>
+          <p>For signals that exceed the threshold, this is the amount of time before the amplitude is limited.</p>
+          <p>To prevent signals from exceeding the threshold, this value must set sufficiently small compared to the look-ahead time.</p>
+        </div>
+      </td>
+      <td>Between 0 microseconds and (std::numeric_limits&lt;int32_t&gt;::max() - 1) microseconds.</td>
+    </tr>
+    <tr>
+      <th>ReleaseTime</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetLightLimiterReleaseTime">nn::audio::SetLightLimiterReleaseTime</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetLightLimiterReleaseTime">nn::audio::GetLightLimiterReleaseTime</span>()</p>
+      </td>
+      <td>
+        <p>The release time.</p>
+        <p>This is the amount of time before the limiting is released when the signal amplitude has dropped below the threshold.</p>
+      </td>
+      <td>Between 0 microseconds and (std::numeric_limits&lt;int32_t&gt;::max() - 1) microseconds.</td>
+    </tr>
+    <tr>
+      <th>InputGain</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetLightLimiterInputGain">nn::audio::SetLightLimiterInputGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetLightLimiterInputGain">nn::audio::GetLightLimiterInputGain</span>()</p>
+      </td>
+      <td>
+        <p>The gain of the input.</p>
+        <p>The input signal is multiplied by the value of <code>InputGain</code> before the limiter's process is performed.</p>
+      </td>
+      <td>0.0f ~</td>
+    </tr>
+    <tr>
+      <th>OutputGain</th>
+      <td>
+        <p>
+          <span class="ApiLink_nn__audio__SetLightLimiterOutputGain">nn::audio::SetLightLimiterOutputGain</span>()</p>
+        <p>
+          <span class="ApiLink_nn__audio__GetLightLimiterOutputGain">nn::audio::GetLightLimiterOutputGain</span>()</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>The gain of the output. The signal is multiplied by the value of <code>OutputGain</code> after the limiter's process is performed.</p>
+        </div>
+      </td>
+      <td>0.0f ~</td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This is a detailed explanation of the relationship between the attack time and the release time.</p>
+    <p>In the table of LightLimiter parameters, the attack time is described as &quot;<em>the amount of time before the amplitude is limited</em>&quot; and the release time is described as &quot;<em>the amount of time before the limiting is released</em>.&quot; However, in actuality, limiting and releasing are not performed completely with this timing.<br />If the amplitude limiting rate is represented by a range of 0 to 1, 0 is the situation where the limiter is not limiting the amplitude at all, and 1 is where limiting is applied completely and the amplitude is held below the threshold. The transition of the amplitude limiting rate as it changes from 0 to 1 can be expressed in the following way:</p>
+    <div class="math-display">\[ 1 - e^{- t / T_{attack}} \]</div>
+    <p>The attack time is the time in the preceding expression where</p>
+    <div class="math-display">\[ t = T_{attack} \]</div>
+    <p> In other words, it is the time until</p>
+    <div class="math-display">\[ 1 - 1 / e \fallingdotseq 0.63 \]</div>
+    <p>becomes the value of the amplitude limiting rate.</p>
+    <p>
+      <span class="embedded-file-wrapper ">
+        <img src="../Attachments/Attach_93362777/1003987899.png" height="400" class="embedded-image" />
+      </span>
+    </p>
+    <p>In this same way, the transition of the amplitude limiting rate as it changes from 1 to 0 can be expressed as follows.</p>
+    <div class="math-display">\[ e^{- t / T_{release}} \]</div>
+    <p>The release time is the time in the preceding expression where</p>
+    <div class="math-display">\[ t = T_{release} \]</div>
+    <p> In other words, it is the time until</p>
+    <div class="math-display">\[ 1 / e \fallingdotseq 0.37 \]</div>
+    <p>becomes the value of the amplitude limiting rate.</p>
+    <p>
+      <span class="embedded-file-wrapper ">
+        <img src="../Attachments/Attach_93362777/1003987904.png" height="400" class="embedded-image" />
+      </span>
+    </p>
+    <p>This transition in the amplitude limiting rate is represented by exponential decay, and the amplitude limiting rate itself is calculated using floating-point, resulting in arithmetic errors.<br />For this reason, in the attack phase, the amplitude limiting rate approaches a value of 1 but does not necessarily become 1.<br />And in the same way, in the release phase, the amplitude limiting rate approaches a value of 0 but does not necessarily become 0.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__audio', '../../../Api/HtmlNX/namespacenn_1_1audio.html' )
+SetUrl( 'ApiLink_nn__audio__AddBufferMixer', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a7bd3cc176b82c7cd5659c364ab97ab08' )
+SetUrl( 'ApiLink_Result_nn__audio__AddDelay(AudioRendererConfig_*pOutConfig|_DelayType_*pDelay|_void_*buffer|_size_t_bufferSize|_FinalMixType_*pFinalMix|_nn__TimeSpan_delayTimeMax|_int_channelCountMax)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ad332d3b8805f5157ef98572a99a9f2a0' )
+SetUrl( 'ApiLink_Result_nn__audio__AddAux(AudioRendererConfig_*pOutConfig|_AuxType_*pAux|_FinalMixType_*pFinalMix|_void_*pSendBuffer|_void_*pReturnBuffer|_size_t_sendReturnBufferSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a086c8ae883a8dabacad2c3ff3e995f13' )
+SetUrl( 'ApiLink_nn__audio__SetBufferMixerInputOutput', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a70ca2b0217074d7daf6534da7db1de0b' )
+SetUrl( 'ApiLink_nn__audio__SetBufferMixerVolume', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a0bcd31951156f6c1422c409b2685ab3e' )
+SetUrl( 'ApiLink_nn__audio__SetDelayInputOutput', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a7ac9e44ccd0d4f0fd0865cd6871949e8' )
+SetUrl( 'ApiLink_nn__audio__DelayType', '../../../Api/HtmlNX/structnn_1_1audio_1_1_delay_type.html' )
+SetUrl( 'ApiLink_float_nn__audio__GetDelayDryGain(const_DelayType_*pDelay)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a7e7db23976c5c7ce25d354b46fbb41f8' )
+SetUrl( 'ApiLink_void_nn__audio__SetDelayDryGain(DelayType_*pDelay|_float_dryGain)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a0fec11e5f1f1f3631724c47bd6025962' )
+SetUrl( 'ApiLink_float_nn__audio__GetDelayInGain(const_DelayType_*pDelay)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a30e4daa91121a5eb404eb54ecdc08fc5' )
+SetUrl( 'ApiLink_void_nn__audio__SetDelayInGain(DelayType_*pDelay|_float_inGain)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a329bfdf77c21faf791e3d8d3fea994ff' )
+SetUrl( 'ApiLink_float_nn__audio__GetDelayFeedbackGain(const_DelayType_*pDelay)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a7f4a6269c07ff5f77eb9209d00af595e' )
+SetUrl( 'ApiLink_void_nn__audio__SetDelayFeedbackGain(DelayType_*pDelay|_float_feedbackGain)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ab435746ebd9510b866571bb5f51ada0e' )
+SetUrl( 'ApiLink_float_nn__audio__GetDelayChannelSpread(const_DelayType_*pDelay)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a16b59f407ca82ae84883c7bc05e51c10' )
+SetUrl( 'ApiLink_void_nn__audio__SetDelayChannelSpread(DelayType_*pDelay|_float_channelSpread)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a533af8968ee99402d8941b01d17badbb' )
+SetUrl( 'ApiLink_float_nn__audio__GetDelayLowPassAmount(const_DelayType_*pDelay)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a61abee481b45e4c907b91262f647a2c5' )
+SetUrl( 'ApiLink_void_nn__audio__SetDelayLowPassAmount(DelayType_*pDelay|_float_lowPassAmount)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a95c256f18c08f3345aeb8d3649056b12' )
+SetUrl( 'ApiLink_nn__TimeSpan_nn__audio__GetDelayTime(const_DelayType_*pDelay)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a14dede97c7c28ba18a41418da43bf690' )
+SetUrl( 'ApiLink_void_nn__audio__SetDelayTime(DelayType_*pDelay|_nn__TimeSpan_time)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ab8b0a4aba0c4bbb672a370b53335bdc7' )
+SetUrl( 'ApiLink_nn__audio__SetReverbInputOutput', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aff0e36cd224e963c355f8ef8fa88c38a' )
+SetUrl( 'ApiLink_nn__audio__GetReverbEarlyMode', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ad2d434d80021951b86f047646bf365fb' )
+SetUrl( 'ApiLink_nn__audio__SetReverbEarlyMode', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a27abfee25a0a706e70ff422ce1e98052' )
+SetUrl( 'ApiLink_nn__audio__ReverbType__EarlyMode', '../../../Api/HtmlNX/structnn_1_1audio_1_1_reverb_type.html#aba28878a06e614f8cfcebe12af7e0d50' )
+SetUrl( 'ApiLink_nn__audio__GetReverbEarlyGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a27f673bcf0e2f9732a182bdeb0a8c57a' )
+SetUrl( 'ApiLink_nn__audio__SetReverbEarlyGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a9f590b0ee7bb678ed5fe5dd4c7a34625' )
+SetUrl( 'ApiLink_nn__audio__GetReverbPredelayTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a18f70a8ace1728dd6be20426d375df8d' )
+SetUrl( 'ApiLink_nn__audio__SetReverbPredelayTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a48695d8f40bbbc14bef58d2d1033bd7e' )
+SetUrl( 'ApiLink_nn__audio__GetReverbLateMode', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a482077842a0a7eff2cf07674d7d1cc4d' )
+SetUrl( 'ApiLink_nn__audio__SetReverbLateMode', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a697f7a665c9bcc92536e9415a0143e24' )
+SetUrl( 'ApiLink_nn__audio__ReverbType__LateMode', '../../../Api/HtmlNX/structnn_1_1audio_1_1_reverb_type.html#a180b7274e24a924de18f2523852626ac' )
+SetUrl( 'ApiLink_nn__audio__GetReverbLateGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#af87d0bc0f4478187c6bd792ab847f3c0' )
+SetUrl( 'ApiLink_nn__audio__SetReverbLateGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a7938c31a464de54d5a8e0e655dfe6381' )
+SetUrl( 'ApiLink_nn__audio__GetReverbDecayTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aba4e3eb8a6f9379bd4fa39f976861ac1' )
+SetUrl( 'ApiLink_nn__audio__SetReverbDecayTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ae18ec92d863f3795cca87501c0fae0fe' )
+SetUrl( 'ApiLink_nn__audio__GetReverbHighFrequencyDecayRatio', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ab9529458496a896c0346d89c59b00514' )
+SetUrl( 'ApiLink_nn__audio__SetReverbHighFrequencyDecayRatio', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a5d498965acc8537a96cb09975beaffb3' )
+SetUrl( 'ApiLink_nn__audio__GetReverbColoration', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a15b63fd521d0802b30c5225e16f02a38' )
+SetUrl( 'ApiLink_nn__audio__SetReverbColoration', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aad4ac77900079e7b2ed46d4786ea6d47' )
+SetUrl( 'ApiLink_nn__audio__GetReverbReverbGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a1d20ae6043da7f7ce625c8f995ae5e3f' )
+SetUrl( 'ApiLink_nn__audio__SetReverbReverbGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#adfe0d6397b0092e46b93632a7ac5e55e' )
+SetUrl( 'ApiLink_nn__audio__GetReverbOutGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a98af6a84f74bfea25631b3f0d0e2ff19' )
+SetUrl( 'ApiLink_nn__audio__SetReverbOutGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a16465cda5c37905584b55897af87e57f' )
+SetUrl( 'ApiLink_nn__audio__GetReverbDryGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a83cd9776d37fb17187714acdc0bdbcab' )
+SetUrl( 'ApiLink_nn__audio__SetReverbDryGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a9937a89c853ffa172d1ccef907419cb2' )
+SetUrl( 'ApiLink_nn__audio__I3dl2ReverbType', '../../../Api/HtmlNX/structnn_1_1audio_1_1_i3dl2_reverb_type.html' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbInputOutput', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a8a31783d96a7f992dc95ebd30a9ad3db' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbRoomGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a6d3b9fcb3a508698685e01de1dddcba1' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbRoomGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a9e9d95aae46a165e9452c0a519d9926d' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbRoomHfGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aae9838aad6e5138efe0e492b6586a742' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbRoomHfGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a305d3c374ac911c69b0642f5360bb052' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbLateReverbDecayTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a6a11597710a0f2bbb30eb60e28808cfa' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbLateReverbDecayTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a98093560487330f1a25ab13b826427f5' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbLateReverbHfDecayRatio', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aad30ac49698bba62743bc16134c9fa9f' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbLateReverbHfDecayRatio', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ab7bff456f63109630c5051f31896f01c' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbReflectionsGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#afa6dc3f9e7027504cf7e617495831288' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbReflectionsGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ab45ebec61b8d07839bf8dc6fa8e36f30' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbReflectionDelayTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a78b8448789678f7c4eb96e299b245889' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbReflectionDelayTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a41959e9a0094f683cfcff34b3157b500' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbReverbGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a370d8d1264111192626a30c1e398f3c3' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbReverbGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a9f5366afdedba8ad877154cd3ffb94c2' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbLateReverbDelayTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a4e2109f9f8c35ae695cd4b4b9d4883c1' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbLateReverbDelayTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ae098ed845f298857adaea3ad8ce84450' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbLateReverbDiffusion', '../../../Api/HtmlNX/namespacenn_1_1audio.html#adae214c1d78ad0282973bd915854acd5' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbLateReverbDiffusion', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a488235ededae0fa48e55b7296f7b7a28' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbLateReverbDensity', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ab33ac8b566a98f9967a603a98c39cb38' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbLateReverbDensity', '../../../Api/HtmlNX/namespacenn_1_1audio.html#acb9683dabafbc1785cfe8bca1874bbe8' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbHfReference', '../../../Api/HtmlNX/namespacenn_1_1audio.html#abc7c0584a83e1cd1309f59234c3ec693' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbHfReference', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aea2a8a9c28a5fc5500dbbf553e0c183b' )
+SetUrl( 'ApiLink_nn__audio__SetI3dl2ReverbDryGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a21b700e630d0b1ab68099dd4477cb70c' )
+SetUrl( 'ApiLink_nn__audio__GetI3dl2ReverbDryGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aa0c9e3063f2ff99589dea564c67f96bd' )
+SetUrl( 'ApiLink_int_nn__audio__ReadAuxSendBuffer(AuxType_*pAux|_int32_t_*pOutData|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#adaf2f0b6dfbaa1b020d61cd56b963965' )
+SetUrl( 'ApiLink_int_nn__audio__WriteAuxReturnBuffer(AuxType_*pAux|_const_int32_t_*pData|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a28965347a7dc482c646c14e579449359' )
+SetUrl( 'ApiLink_nn__audio__ReadCaptureBuffer', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a11831c5f69d9088ecb36cd6e10ee741b' )
+SetUrl( 'ApiLink_nn__audio__WriteAuxReturnBuffer', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a28965347a7dc482c646c14e579449359' )
+SetUrl( 'ApiLink_nn__audio__SetBiquadFilterParameter', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a14e10457a7df070f7199b648b233f98e' )
+SetUrl( 'ApiLink_nn__audio__AuxLimiterType', '../../../Api/HtmlNX/structnn_1_1audio_1_1_aux_limiter_type.html' )
+SetUrl( 'ApiLink_nn__audio__SetLightLimiterThreshold', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a452de0ded15b4bc2cb43d6d621d26e01' )
+SetUrl( 'ApiLink_nn__audio__GetLightLimiterThreshold', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aa95eb6cd6822e4ef2183dd8bbc9b4d60' )
+SetUrl( 'ApiLink_nn__audio__SetLightLimiterLookAheadTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a11eddcef27393df3870156d106677dfc' )
+SetUrl( 'ApiLink_nn__audio__GetLightLimiterLookAheadTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#afee0394e913f76e1a7b3b57f3da3e214' )
+SetUrl( 'ApiLink_nn__audio__SetLightLimiterAttackTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ae19685a79679c2764b27059e0bba9f61' )
+SetUrl( 'ApiLink_nn__audio__GetLightLimiterAttackTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a15613bf34c399efa929410a39ff3657a' )
+SetUrl( 'ApiLink_nn__audio__SetLightLimiterReleaseTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a98da6468118408e6f03a2e2c0eae0b88' )
+SetUrl( 'ApiLink_nn__audio__GetLightLimiterReleaseTime', '../../../Api/HtmlNX/namespacenn_1_1audio.html#af09c40a2760271e61692ebe320a69b20' )
+SetUrl( 'ApiLink_nn__audio__SetLightLimiterInputGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ab6296f26432d6bc4a46217957edb05a1' )
+SetUrl( 'ApiLink_nn__audio__GetLightLimiterInputGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a538876817582613f83a62ba77aff1719' )
+SetUrl( 'ApiLink_nn__audio__SetLightLimiterOutputGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a01be37deed50b246eb649dfcdd2a9ec5' )
+SetUrl( 'ApiLink_nn__audio__GetLightLimiterOutputGain', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a949f7ef952babb00c818be68f05a7f37' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,279 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Timer Events | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Timer Events -->
+<div class="pagetitle" id="PageId_83955551">Timer Events</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955551_h1_1">Timer Event Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955551_h2_1">Feature Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955551_h2_2">Using a Timer Event</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955551_h2_3">Timer Event API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955551_h2_4">Considerations When Using Timer Events</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955551_h3_1">Using Multiple Wait With Timer Events</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955551_h3_2">Auto­Clear Mode</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955551_h3_3">Manual­Clear Mode</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83955551_h1_1">Timer Event Feature</h1>
+<h2 id="Anchor_83955551_h2_1">Feature Overview</h2>
+<p>The timer event feature uses a single bit (2 values) to represent a signaled or non-signaled state as a way to synchronize <a href="../Pages/Page_83955697.html">threads</a>. This feature is the same as the standard <a href="../Pages/Page_83955697.html">event</a> feature, with the addition of a timer function that can be used to specify a delay before putting the event in a signaled state. However, it does not include a timeout.</p>
+<p>The initial state of a timer event is non-signaled. You can also choose whether to automatically clear a timer event to a non-signaled state when a thread that is waiting for the timer event wakes. For more information, see the <a href="../Pages/Page_83955790.html">event</a> feature.</p>
+<p>There are two ways to delay the signaling of the event: a one-shot timer and a periodic timer. The <code><span class="ApiLink_void_nn__os__StartOneShotTimerEvent(TimerEventType_*event|_nn__TimeSpan_first)_NN_NOEXCEPT">StartOneShotTimerEvent</span></code> function takes a single argument, the time to delay. After the function is called, the event enters a signaled state one time, only after the time specified in the <code><em>first</em></code> parameter elapses. The <code><span class="ApiLink_void_nn__os__StartPeriodicTimerEvent(TimerEventType_*event|_nn__TimeSpan_first|_nn__TimeSpan_interval)_NN_NOEXCEPT">StartPeriodicTimerEvent</span></code> function, on the other hand, takes two arguments: the time to delay and an interval. After the function is called, the event enters a signaled state after the time specified in the <code><em>first</em></code> parameter elapses and again every time the time specified in the <code><em>internal</em></code> parameter elapses thereafter.</p>
+<p>To stop the timer, call the <code><span class="ApiLink_void_nn__os__StopTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">StopTimerEvent</span></code> function. While the timer is running, you can also call the <code><span class="ApiLink_void_nn__os__SignalTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">SignalTimerEvent</span></code> function and the <code><span class="ApiLink_void_nn__os__ClearTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">ClearTimerEvent</span></code> function. The timer operates independently of the setting and clearing of the signaled state, so the affect is limited to just that part of the object.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955551_h2_2">Using a Timer Event</h2>
+<p>To use a timer event, you must prepare an <code><span class="ApiLink_nn__os__TimerEventType">nn::os::TimerEventType</span></code> structure object as follows.<br />There are no restrictions on where the object can be defined.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="nn">nn::os::</span><span class="n">TimerEventType</span>    <span class="n">g_TimerEvent</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Use the defined object according to the following procedure.</p>
+<ol>
+  <li>
+    <p>You must initialize the timer event before use. Specify the clear mode of the timer event in the second parameter.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeTimerEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_TimerEvent</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">EventClearMode_ManualClear</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Start the timer of the timer event as necessary.<br />In the following example, the timer event is first signaled 100 milliseconds after the function is called, and then is signaled again every 20 milliseconds thereafter.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">StartPeriodicTimerEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_TimerEvent</span><span class="p">,</span> <span class="nn">nn::TimeSpan::</span><span class="n">FromMilliSeconds</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="nn">nn::TimeSpan::</span><span class="n">FromMilliSeconds</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Wait for the timer event as necessary.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">WaitTimerEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_TimerEvent</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Clear the timer event to a non-signaled state as necessary.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">ClearTimerEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_TimerEvent</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Stop the timer when it is no longer required.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">StopTimerEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_TimerEvent</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>When you have finished using the timer event, free the object.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FinalizeTimerEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_TimerEvent</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_83955551_h2_3">Timer Event API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeTimerEvent(TimerEventType_*event|_EventClearMode_clearMode)_NN_NOEXCEPT">nn::os::InitializeTimerEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::FinalizeTimerEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__StartOneShotTimerEvent(TimerEventType_*event|_nn__TimeSpan_first)_NN_NOEXCEPT">nn::os::StartOneShotTimerEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__StartPeriodicTimerEvent(TimerEventType_*event|_nn__TimeSpan_first|_nn__TimeSpan_interval)_NN_NOEXCEPT">nn::os::StartPeriodicTimerEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__StopTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::StopTimerEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__WaitTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::WaitTimerEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryWaitTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::TryWaitTimerEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SignalTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::SignalTimerEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__ClearTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::ClearTimerEvent</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955551_h2_4">Considerations When Using Timer Events</h2>
+<h3 id="Anchor_83955551_h3_1">Using Multiple Wait With Timer Events</h3>
+<p>When waiting for one of multiple timer event wait targets (<code><span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">WaitAny</span></code>) and removing the wait by making that event into a signal, the event will not be automatically cleared even with automatic clear mode (<code><span class="ApiLink_nn__os__EventClearMode_AutoClear">EventClearMode_AutoClear</span></code>).</p>
+<p>The multiple wait feature does not change the state of an object made into a signal. For this reason, after getting a <code>MultiWaitHolderType</code> that was made into a signal, make sure that you perform standby processing for targeted timer events by using a function such as <span class="ApiLink_bool_nn__os__TryWaitTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">TryWaitTimerEvent</span>. The targeted event will then clear automatically. If there is a possibility that the targeted event may be already subject to <span class="ApiLink_bool_nn__os__TryWaitTimerEvent(TimerEventType_*event)_NN_NOEXCEPT"> TryWaitTimerEvent</span> by another thread, you must handle it by verifying that return value and performing the multiple wait again.</p>
+<h3 id="Anchor_83955551_h3_2">Auto&shy;Clear Mode</h3>
+<p>In most cases, when using auto-clear mode (<span class="ApiLink_nn__os__EventClearMode_AutoClear"><code>nn::os::EventClearMode_AutoClear</code></span>) be careful not to use <span class="ApiLink_void_nn__os__ClearTimerEvent(TimerEventType_*event)_NN_NOEXCEPT"><code>nn::os::ClearTimerEvent()</code></span> more than necessary to control when timer events are cleared.</p>
+<p>In auto-clear mode, if the <span class="ApiLink_void_nn__os__SignalTimerEvent(TimerEventType_*event)_NN_NOEXCEPT"><code>nn::os::SignalTimerEvent()</code></span> function starts a temporary thread and then <span class="ApiLink_void_nn__os__ClearTimerEvent(TimerEventType_*event)_NN_NOEXCEPT"><code>nn::os::ClearTimerEvent()</code></span> is called before the CPU gets execution rights for that thread, the thread immediately returns the waiting state as soon as it actually becomes usable because the target event is in the non-signaled state. When using auto-clear mode, events are automatically cleared when a function such as <code><span class="ApiLink_void_nn__os__WaitTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::WaitTimerEvent()</span></code> starts a new thread, so normally you do not need to manually call the <code><span class="ApiLink_void_nn__os__ClearTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::ClearTimerEvent()</span></code> function.</p>
+<h3 id="Anchor_83955551_h3_3">Manual&shy;Clear Mode</h3>
+<p>You must also be careful about using the <span class="ApiLink_nn__os__EventClearMode_ManualClear">nn::os::ClearTimerEvent()</span> function in manual clear mode (<span class="ApiLink_void_nn__os__ClearTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::EventClearMode_ManualClear</span>).</p>
+<p>Specifically, make sure that <span class="ApiLink_void_nn__os__WaitTimerEvent(TimerEventType_*event)_NN_NOEXCEPT"><code>nn::os::ClearTimerEvent()</code></span> is not called at approximately the same time as calls to <code><span class="ApiLink_void_nn__os__SignalTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::WaitTimerEvent()</span></code> or <code><span class="ApiLink_void_nn__os__ClearTimerEvent(TimerEventType_*event)_NN_NOEXCEPT">nn::os::SignalTimerEvent()</span></code> on other threads. This results in an undefined order of operations in the thread, and the order of waiting for the timer event, signaling the event, and clearing the timer event cannot be assured.</p>
+<p>If this sort of situation could occur, reconsider your design and the use of the timer event feature.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__os__StartOneShotTimerEvent(TimerEventType_*event|_nn__TimeSpan_first)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a9b3ec8d6c3a7f4410dc6f9c4dec0f88d' )
+SetUrl( 'ApiLink_void_nn__os__StartPeriodicTimerEvent(TimerEventType_*event|_nn__TimeSpan_first|_nn__TimeSpan_interval)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ac869e53e9d805c3a5781d6493fad6ccd' )
+SetUrl( 'ApiLink_void_nn__os__StopTimerEvent(TimerEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a6aa23680b72e19fd5cb974ef44325695' )
+SetUrl( 'ApiLink_void_nn__os__SignalTimerEvent(TimerEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ad526c59d6481d5fcf0e130d71c7f1252' )
+SetUrl( 'ApiLink_void_nn__os__ClearTimerEvent(TimerEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2612c1c11f55172e23bf13d0b8a4e5b2' )
+SetUrl( 'ApiLink_nn__os__TimerEventType', '../../../Api/HtmlNX/structnn_1_1os_1_1_timer_event_type.html' )
+SetUrl( 'ApiLink_void_nn__os__InitializeTimerEvent(TimerEventType_*event|_EventClearMode_clearMode)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a9fdcd9b26aa9e78c2c17f6b9c02c0314' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeTimerEvent(TimerEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a1752ba511e60ce027c4af0f6d5e3ebe9' )
+SetUrl( 'ApiLink_void_nn__os__WaitTimerEvent(TimerEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3bdecafeed401cb6b8accdb15178ad66' )
+SetUrl( 'ApiLink_bool_nn__os__TryWaitTimerEvent(TimerEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#aa431fe82cc23064bbad8cacf102756fd' )
+SetUrl( 'ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ab9b837eb53fa2c8a9610cec2b69666fd' )
+SetUrl( 'ApiLink_nn__os__EventClearMode_AutoClear', '../../../Api/HtmlNX/namespacenn_1_1os.html#a11ab71d44973a4135958c420e5682452a31f6133098296b3ddb7e14da3dc695cc' )
+SetUrl( 'ApiLink_nn__os__EventClearMode_ManualClear', '../../../Api/HtmlNX/namespacenn_1_1os.html#a11ab71d44973a4135958c420e5682452a8b702480f5120eeeb01e7102227285da' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,849 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Uniform Blocks | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Uniform Blocks -->
+<div class="pagetitle" id="PageId_106332818">Uniform Blocks</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_106332818_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_106332818_h1_2">Shader Source Code</a>
+    </li>
+    <li>
+      <a href="#Anchor_106332818_h1_3">Runtime Workflow</a>
+    </li>
+    <li>
+      <a href="#Anchor_106332818_h1_4">Shape</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106332818_h2_1">Shader Code</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_2">Initializing the Buffer Region</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_3">Updating the Source Region</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_4">Writing to the Buffer Region</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_106332818_h1_5">Skeleton</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106332818_h2_5">Shader Code</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_6">Initializing the Buffer Region</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_7">Updating the Source Region</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_8">Writing to the Buffer Region</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_106332818_h1_6">Material</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106332818_h2_9">Shader Code</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_10">Initializing Material Resources</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_11">Initializing the Buffer Region</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_12">Updating the Source Region</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_13">Writing to the Buffer Region</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_106332818_h1_7">Option</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106332818_h2_14">Shader Code</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_15">Initializing the Buffer Region</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_16">Updating the Source Region</a>
+      </li>
+      <li>
+        <a href="#Anchor_106332818_h2_17">Writing to the Buffer Region</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_106332818_h1_1">Overview</h1>
+<p>The <code>g3d</code> library supports management of the following four types of uniform blocks. The memory placement presumes the OpenGL <code>std140 layout</code>.</p>
+<ul>
+  <li>Shape</li>
+  <li>Skeleton</li>
+  <li>Material</li>
+  <li>Option</li>
+</ul>
+<h1 id="Anchor_106332818_h1_2">Shader Source Code</h1>
+<p>This section provides an overview of usage and example definitions for each type of uniform block in the context of shader source code.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <a href="../Pages/Page_84052806.html">Shader annotations</a> must always be defined for the uniform blocks in your shader source code. If any shader annotations are missing, conversion errors occur.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Some aspects of the uniform block format for shapes and skeletons are fixed on the system side to facilitate handling of these uniform blocks in the library.<br />For reference information to use when defining shape and skeleton uniform blocks, see the uniform variables column in the following table.</p>
+  </div>
+</div>
+<table class="wrapped relative-table" style="width: 91.6072%;">
+  <colgroup>
+    <col style="width: 5.03295%;" />
+    <col style="width: 13.8406%;" />
+    <col style="width: 44.3379%;" />
+    <col style="width: 36.7885%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>Usage</th>
+      <th>Uniform Variables</th>
+      <th>Uniform Block Definition Example</th>
+    </tr>
+    <tr>
+      <th>Shape</th>
+      <td>
+        <p>Rigid body vertex calculation</p>
+        <p>User variable-based shape operations</p>
+      </td>
+      <td>
+        <table class="wrapped">
+          <tbody>
+            <tr>
+              <th style="text-align: center;">Type</th>
+              <th style="text-align: center;">Format</th>
+              <th style="text-align: center;">Description</th>
+            </tr>
+            <tr>
+              <td>
+                <p>
+                  <code class="plain plain">vec4[3]</code>
+                </p>
+              </td>
+              <td style="text-align: center;">Fixed</td>
+              <td>4&times;3 conversion matrix for converting from local bone coordinates to world coordinates.</td>
+            </tr>
+            <tr>
+              <td>int</td>
+              <td style="text-align: center;">Fixed</td>
+              <td>Maximize the number of bones used for skinning per vertex.</td>
+            </tr>
+            <tr>
+              <td>padding</td>
+              <td style="text-align: center;">Fixed</td>
+              <td>12-byte padding.</td>
+            </tr>
+            <tr>
+              <td>
+                <pre>User area</pre>
+              </td>
+              <td style="text-align: center;">Optional</td>
+              <td>192-byte user area.</td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <table class="codeblock">
+            <tbody>
+              <tr>
+                <td class="code">
+                  <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Shape</span> <span class="c1">// @@ id=&quot;shape&quot; type=&quot;shape&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">mtx</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">skinCnt</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">padding0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">padding1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">padding2</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">userArea</span><span class="p">[</span><span class="mi">12</span><span class="p">];</span> <span class="c1">// Can be used freely by the user.
+</span><span class="p">};</span></pre></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>Skeleton</th>
+      <td>Vertex skinning calculations</td>
+      <td>
+        <table class="wrapped">
+          <tbody>
+            <tr>
+              <th style="text-align: center;">Type</th>
+              <th style="text-align: center;">Format</th>
+              <th style="text-align: center;">Description</th>
+            </tr>
+            <tr>
+              <td>vec4[3*&alpha;]</td>
+              <td style="text-align: center;">Fixed</td>
+              <td>
+                <p>4&times;3 conversion matrix for converting from local model coordinates to world coordinates &times; number of smooth skinning matrices</p>
+                <p style="text-align: center;">+</p>
+                <p>4&times;3 conversion matrix for converting from local bone coordinates to world coordinates &times; number of rigid skinning matrices.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <table class="codeblock">
+            <tbody>
+              <tr>
+                <td class="code">
+                  <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Skeleton</span> <span class="c1">// @@ id=&quot;skel&quot; type=&quot;skeleton&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">mtx</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="mi">128</span><span class="p">];</span>  <span class="c1">// 4×3 matrix × (number of smooth skinning matrices + number of rigid skinning matrices).
+</span><span class="p">};</span></pre></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>Material</th>
+      <td>Material calculations</td>
+      <td>
+        <p>Can be freely configured by the user.</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <table class="codeblock">
+            <tbody>
+              <tr>
+                <td class="code">
+                  <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Material</span> <span class="c1">// @@ id=&quot;mat&quot; type=&quot;material&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt0</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>        <span class="c1">// @@ id=&quot;texsrt0&quot; type=&quot;texsrt&quot; hint=&quot;albedo0&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt1</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>        <span class="c1">// @@ id=&quot;texsrt1&quot; type=&quot;texsrt&quot; hint=&quot;normal0&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec3</span> <span class="n">diffColor</span><span class="p">;</span>         <span class="c1">// @@ id=&quot;diffuse&quot; default=&quot;1 1 1&quot; item=&quot;color&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">weightTex</span><span class="p">;</span>        <span class="c1">// @@ id=&quot;weight_tex&quot; default=&quot;1.0&quot; min=&quot;-1&quot; max=&quot;1&quot;
+</span><span class="p">};</span></pre></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>Option</th>
+      <td>Controlling <a href="../Pages/Page_286721565.html">shader variations</a><br />(primarily for using static options to branch uniform variables)</td>
+      <td>Can be freely configured by the user.</td>
+      <td>
+        <div class="content-wrapper">
+          <table class="codeblock">
+            <tbody>
+              <tr>
+                <td class="code">
+                  <div class="codeblock"><pre><span class="cp">#define ENABLE_VERTEX_COLOR        ( 0 )       </span><span class="c1">// @@ id=&quot;enable_vertex_color&quot;
+</span>
+<span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Option</span>    <span class="c1">// @@ id=&quot;opt&quot; type=&quot;option&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">enableVtxColor</span><span class="p">;</span>          <span class="c1">// @@ id=&quot;enable_vertex_color&quot;
+</span><span class="p">}</span></pre></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_106332818_h1_3">Runtime Workflow</h1>
+<p>Uniform blocks defined in shaders are respectively managed as corresponding classes from the <code>g3d</code> library. Each uniform block management class has two memory regions for working with the uniform block. One of these is a source region for saving changes on the CPU side, while the other is a buffer region (<code><span class="ApiLink_nn__gfx__Buffer">nn::gfx::Buffer</span></code>) used by the GPU. In most cases, users only directly work with the values in the source region. Values changed in the source region are then written to the buffer region by calling the <code>Calculate*()</code> function of the associated management class. Values in the buffer region are assigned to regions which are allocated to shader uniform blocks and then accessed directly by the GPU, so users should not work with these values directly.<br /><br /></p>
+<table class="wrapped relative-table" style="width: 72.6824%;">
+  <colgroup>
+    <col style="width: 17.3716%;" />
+    <col style="width: 15.5589%;" />
+    <col style="width: 11.4804%;" />
+    <col style="width: 55.5891%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Uniform Block Type</th>
+      <th>Management Class</th>
+      <th>Source Region Operations Function</th>
+      <th>Functions for Writing to the Buffer Region</th>
+    </tr>
+    <tr>
+      <td>Shape</td>
+      <td>
+        <span class="ApiLink_nn__g3d__ShapeObj">nn::g3d::ShapeObj</span>
+      </td>
+      <td>
+        <p>
+          <span class="ApiLink_void_*_nn__g3d__ShapeObj__GetUserArea()_NN_NOEXCEPT">GetUserArea()</span>
+        </p>
+      </td>
+      <td>
+        <span class="ApiLink_void_nn__g3d__ModelObj__CalculateShape(int_bufferIndex)_NN_NOEXCEPT">nn::g3d::ModelObj::CalculateShape()</span> / <span class="ApiLink_void_nn__g3d__ShapeObj__CalculateShape(int_viewIndex|_const_nn__util__Matrix4x3fType_&worldMtx|_int_bufferIndex)_NN_NOEXCEPT">CalculateShape()</span></td>
+    </tr>
+    <tr>
+      <td>Skeleton</td>
+      <td>
+        <span class="ApiLink_nn__g3d__SkeletonObj">nn::g3d::SkeletonObj</span>
+      </td>
+      <td>
+        <span class="ApiLink_nn__util__Matrix4x3fType_*_nn__g3d__SkeletonObj__GetWorldMtxArray()_NN_NOEXCEPT">GetWorldMtxArray()</span>
+      </td>
+      <td>
+        <span class="ApiLink_void_nn__g3d__ModelObj__CalculateSkeleton(int_bufferIndex)_NN_NOEXCEPT">nn::g3d::ModelObj::CalculateSkeleton()</span> / <span class="ApiLink_void_nn__g3d__SkeletonObj__CalculateSkeleton(int_bufferIndex)_NN_NOEXCEPT">CalculateSkeleton()</span></td>
+    </tr>
+    <tr>
+      <td>Material</td>
+      <td>
+        <span class="ApiLink_nn__g3d__MaterialObj">nn::g3d::MaterialObj</span>
+      </td>
+      <td>
+        <span class="ApiLink_void_*_nn__g3d__MaterialObj__EditShaderParam(int_paramIndex)_NN_NOEXCEPT">EditShaderParam()</span>
+      </td>
+      <td>
+        <span class="ApiLink_void_nn__g3d__ModelObj__CalculateMaterial(int_bufferIndex)_NN_NOEXCEPT">nn::g3d::ModelObj::CalculateMaterial()</span> / <span class="ApiLink_void_nn__g3d__MaterialObj__CalculateMaterial(int_bufferIndex)_NN_NOEXCEPT">CalculateMaterial()</span></td>
+    </tr>
+    <tr>
+      <td>Option</td>
+      <td>
+        <span class="ApiLink_nn__g3d__ShadingModelObj">nn::g3d::ShadingModelObj</span>
+      </td>
+      <td>
+        <span class="ApiLink_void_nn__g3d__ShadingModelObj__WriteStaticKey(int_optionIndex|_int_choiceIndex)_NN_NOEXCEPT">WriteStaticKey()</span>
+      </td>
+      <td>
+        <span class="ApiLink_void_nn__g3d__ShadingModelObj__CalculateOptionBlock(int_bufferIndex)_NN_NOEXCEPT">CalculateOptionBlock()</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="flowchart-svg-inline">
+  <img src="../Attachments/Attach_106332818/flowchart_1.svg" />
+</div>
+<p>
+  <br />
+</p>
+<p>The following example shows a simple workflow for assigning skeleton uniform block values to a shader.</p>
+<ol>
+  <li>
+    <p>Initialize the buffer region.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::g3d::ModelObj::</span><span class="n">SetupBlockBuffer</span><span class="p">()</span> 
+<span class="c1">// or
+</span><span class="nn">nn::g3d::SkeletonObj::</span><span class="n">SetupBlockBuffer</span><span class="p">()</span> </pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      <br />
+    </p>
+  </li>
+  <li>
+    <p>Apply changes to the source region.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Update the local bone matrix of SkeletonObj for skeletal animations and the like.
+</span><span class="nn">nn::g3d::SkeletalAnimObj::</span><span class="n">ApplyTo</span><span class="p">(</span><span class="n">pSkeletonObj</span><span class="p">)</span>
+&nbsp;
+<span class="c1">// Convert the local bone matrix to the world matrix and store in the source region.
+</span><span class="nn">nn::g3d::SkeletonObj::</span><span class="n">CalculateWorldMtx</span><span class="p">()</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Write the source region values to the buffer region.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::g3d::ModelObj::</span><span class="n">CalculateSkeleton</span><span class="p">()</span>
+<span class="c1">// or
+</span><span class="nn">nn::g3d::SkeletonObj::</span><span class="n">CalculateSkeleton</span><span class="p">()</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Assign the buffer region values to the shader.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Get the uniform block location from the shader program.
+</span><span class="nn">nn::g3d::ResShadingModel::</span><span class="n">GetSystemBlockIndex</span><span class="p">();</span>
+<span class="nn">nn::g3d::</span><span class="n">ResShaderProgram</span><span class="o">-&gt;</span><span class="n">GetUniformBlockLocation</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// Get the GPU address of the buffer region.
+</span><span class="nn">nn::g3d::SkeletonObj::</span><span class="n">GetSkeletonBlock</span><span class="p">();</span>
+<span class="nn">nn::gfx::Buffer::</span><span class="n">GetGpuAddress</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// Set the buffer region values to the shader.
+</span><span class="nn">nn::gfx::</span><span class="n">CommandBufferSetConstantBuffer</span><span class="p">();</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h1 id="Anchor_106332818_h1_4">Shape</h1>
+<p>Shape uniform blocks are used for conversion matrices for converting local bone matrices for shapes to world matrices, for specifying the maximum number of bones used for skinning, and for user areas.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_1">Shader Code</h2>
+<p>Shape uniform blocks are defined as follows. The <code>userArea</code> can be used freely by the user, but because the other uniform variables are defined on the system side, this area must be defined in the same manner.</p>
+<p>The shape uniform variables are primarily used for vertex calculations for rigid body shapes.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Shape</span> <span class="c1">// @@ id=&quot;shape&quot; type=&quot;shape&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">shapeMtx</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">vtxSkinCount</span><span class="p">;</span>    
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">padding0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">padding1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">padding2</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">ivec4</span> <span class="n">userArea</span><span class="p">[</span><span class="mi">12</span><span class="p">];</span>
+<span class="p">};</span>
+
+&nbsp;
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//...
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">skinning</span> <span class="o">=</span> <span class="n">vtxSkinCount</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// For rigid bodies.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">skinning</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pos_w</span><span class="p">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">vec3</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">shapeMtx</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">xyzw</span><span class="p">,</span> <span class="n">i_Position</span><span class="p">.</span><span class="n">xyzw</span><span class="p">),</span> <span class="n">dot</span><span class="p">(</span><span class="n">shapeMtx</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">xyzw</span><span class="p">,</span> <span class="n">i_Position</span><span class="p">.</span><span class="n">xyzw</span><span class="p">),</span> <span class="n">dot</span><span class="p">(</span><span class="n">shapeMtx</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">xyzw</span><span class="p">,</span> <span class="n">i_Position</span><span class="p">.</span><span class="n">xyzw</span><span class="p">));</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//...
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_2">Initializing the Buffer Region</h2>
+<p>Call the <span class="ApiLink_bool_nn__g3d__ModelObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT"><code>nn::g3d::ModelObj::SetupBlockBuffer()</code></span> or<span class="ApiLink_bool_nn__g3d__ShapeObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT"><code>nn::g3d::ShapeObj::SetupBlockBuffer()</code></span> function to automatically set up a shape uniform block buffer.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_3">Updating the Source Region</h2>
+<p>Call the <span class="ApiLink_void_*_nn__g3d__ShapeObj__GetUserArea()_NN_NOEXCEPT"><code>nn::g3d::ShapeObj::GetUserArea()</code></span> function to update the values in the user region.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_4">Writing to the Buffer Region</h2>
+<p>Call the <span class="ApiLink_void_nn__g3d__ShapeObj__CalculateShape(int_viewIndex|_const_nn__util__Matrix4x3fType_&worldMtx|_int_bufferIndex)_NN_NOEXCEPT"><code>nn::g3d::ModelObj::CalculateShape()</code></span> or <span class="ApiLink_void_nn__g3d__ShapeObj__CalculateShape(int_viewIndex|_const_nn__util__Matrix4x3fType_&worldMtx|_int_bufferIndex)_NN_NOEXCEPT"><code>nn::g3d::ShapeObj::CalculateShape()</code></span> function to write the current values to the uniform block buffer.</p>
+<ul>
+  <li>When <span class="ApiLink_void_nn__g3d__ShapeObj__CalculateShape(int_viewIndex|_const_nn__util__Matrix4x3fType_&worldMtx|_int_bufferIndex)_NN_NOEXCEPT"><code>nn::g3d::ModelObj::CalculateShape()</code></span> is used, the bone world matrix calculated by <code><span class="ApiLink_nn__g3d__SkeletonObj">nn::g3d::SkeletonObj</span></code> is written to <code><em>worldMtx</em></code>. When <span class="ApiLink_void_nn__g3d__ShapeObj__CalculateShape(int_viewIndex|_const_nn__util__Matrix4x3fType_&worldMtx|_int_bufferIndex)_NN_NOEXCEPT"><code>nn::g3d::ShapeObj::CalculateShape()</code></span> is used, the world matrix specified as a parameter is written to <code><em>worldMtx</em></code>.</li>
+  <li>The value returned by the <span class="ApiLink_int_nn__g3d__ResShape__GetVertexSkinCount()_const_NN_NOEXCEPT"><code>nn::g3d::ResShape::GetVertexSkinCount()</code></span> function is written to <code><em>vtxSkinCount</em></code>.</li>
+  <li>Any values changed by <span class="ApiLink_void_*_nn__g3d__ShapeObj__GetUserArea()_NN_NOEXCEPT"><code>nn::g3d::ShapeObj::GetUserArea()</code></span> are written to the user area.</li>
+</ul>
+<h1 id="Anchor_106332818_h1_5">Skeleton</h1>
+<p>Skeleton uniform blocks are used when working with smooth skinning matrices and rigid skinning matrices for each bone.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_5">Shader Code</h2>
+<p>Because it is written as a row-major 3x4 matrix array, define it in the shader as is shown in the following example.</p>
+<p>This skeleton uniform block matrix is used to calculate vertices for smooth skinning and rigid skinning.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Skeleton</span> <span class="c1">// @@ id=&quot;skel&quot; type=&quot;skeleton&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">mtxPalette</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="mi">128</span><span class="p">];</span>  <span class="c1">// 4×3 matrix × (number of smooth skinning matrices + number of rigid skinning matrices).
+</span><span class="p">};</span>
+
+
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//...
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">skinning</span> <span class="o">=</span> <span class="n">vtxSkinCount</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">skinning</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// For rigid skinning.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The vertex attribute blending indices take the indices in mtxPalette that affect those vertices.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">i_Index0</span><span class="p">.</span><span class="n">x</span> <span class="o">*</span> <span class="mi">3</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pos_w</span><span class="p">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">vec3</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">mtxPalette</span><span class="p">[</span><span class="n">offset</span><span class="p">].</span><span class="n">xyzw</span><span class="p">,</span> <span class="n">i_Position</span><span class="p">.</span><span class="n">xyzw</span><span class="p">),</span> <span class="n">dot</span><span class="p">(</span><span class="n">mtxPalette</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">1</span><span class="p">].</span><span class="n">xyzw</span><span class="p">,</span> <span class="n">i_Position</span><span class="p">.</span><span class="n">xyzw</span><span class="p">),</span> <span class="n">dot</span><span class="p">(</span><span class="n">mtxPalette</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">2</span><span class="p">].</span><span class="n">xyzw</span><span class="p">,</span> <span class="n">i_Position</span><span class="p">.</span><span class="n">xyzw</span><span class="p">));</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">skinning</span> <span class="o">&lt;=</span><span class="mi">4</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// For smooth skinning.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">skinning</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The vertex attribute blending indices take the indices in mtxPalette that affect those vertices.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// If affected by multiple bones, put the blending indices into arrays corresponding to the number of skinning matrices.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">i_Index0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">weight</span> <span class="o">=</span> <span class="n">i_Weight0</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pos_w</span><span class="p">.</span><span class="n">xyz</span> <span class="o">+=</span> <span class="n">weight</span> <span class="o">*</span> <span class="n">vec3</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">mtxPalette</span><span class="p">[</span><span class="n">offset</span><span class="p">].</span><span class="n">xyzw</span><span class="p">,</span> <span class="n">i_Position</span><span class="p">.</span><span class="n">xyzw</span><span class="p">),</span> <span class="n">dot</span><span class="p">(</span><span class="n">mtxPalette</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">1</span><span class="p">].</span><span class="n">xyzw</span><span class="p">,</span> <span class="n">i_Position</span><span class="p">.</span><span class="n">xyzw</span><span class="p">),</span> <span class="n">dot</span><span class="p">(</span><span class="n">mtxPalette</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">2</span><span class="p">].</span><span class="n">xyzw</span><span class="p">,</span> <span class="n">i_Position</span><span class="p">.</span><span class="n">xyzw</span><span class="p">));</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//...
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_6">Initializing the Buffer Region</h2>
+<p>Call the <span class="ApiLink_bool_nn__g3d__SkeletonObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT"><code>nn::g3d::ModelObj::SetupBlockBuffer()</code></span> or <span class="ApiLink_bool_nn__g3d__SkeletonObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT"><code>nn::g3d::SkeletonObj::SetupBlockBuffer()</code></span> function to automatically set up a skeleton uniform block based on the required matrix palette size.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_7">Updating the Source Region</h2>
+<p>Call the <span class="ApiLink_bool_nn__g3d__SkeletonObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT"><code>nn::g3d::SkeletonObj::CalculateWorldMtx()</code></span> function to update the local bone matrix to the world conversion matrix for each bone on the basis of the local bone matrix calculated for skeletal animations or the like.<br />After the call to <span class="ApiLink_void_nn__g3d__SkeletonObj__CalculateWorldMtx(const_nn__util__Matrix4x3fType_&baseMtx)_NN_NOEXCEPT"><code>nn::g3d::SkeletonObj::CalculateWorldMtx()</code></span>, you can call <span class="ApiLink_nn__util__Matrix4x3fType_*_nn__g3d__SkeletonObj__GetWorldMtxArray()_NN_NOEXCEPT"><code>nn::g3d::SkeletonObj::GetWorldMtxArray()</code></span> to recalculate the conversion matrix.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_8">Writing to the Buffer Region</h2>
+<p>Call <span class="ApiLink_void_nn__g3d__ModelObj__CalculateSkeleton(int_bufferIndex)_NN_NOEXCEPT"><code>nn::g3d::ModelObj::CalculateSkeleton()</code></span> or <span class="ApiLink_void_nn__g3d__SkeletonObj__CalculateSkeleton(int_bufferIndex)_NN_NOEXCEPT"><code>nn::g3d::ModelObj::CalculateSkeleton()</code></span> to write the current matrix values to the buffer region.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Note that the matrices are written to the buffer region as follows.</p>
+    <ul>
+      <li>For rigid bodies and rigid skinning, the conversion matrices for converting from local bone coordinate systems to the world coordinate system</li>
+      <li>For smooth skinning, the conversion matrix for converting from the model coordinate system to the world coordinate system.</li>
+    </ul>
+    <p />
+    <p>Meanwhile, the position of the vertex attributes are as follows.</p>
+    <ul>
+      <li>For rigid bodies and rigid skinning, the local bone coordinate system</li>
+      <li>For smooth skinning, the model coordinate system</li>
+    </ul>
+    <p> </p>
+  </div>
+</div>
+<h1 id="Anchor_106332818_h1_6">Material</h1>
+<p>Material uniform blocks are assigned on a per-material basis and are used for material calculations in the shader. There are no material uniform block elements defined on the system side, so the user can freely define these uniform blocks. Because the user can freely define material uniform blocks in this way, dedicated utility functions for working with them have been prepared, and material uniform variables are known as <em>shader parameters</em>.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_9">Shader Code</h2>
+<p>You can use annotations in the shader source code to define shader parameters. For more information about annotation coding methods, see <a href="../Pages/Page_84052806.html">Shader Annotation</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Material</span> <span class="c1">// @@ id=&quot;mat&quot; type=&quot;material&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt0</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>        <span class="c1">// @@ id=&quot;texsrt0&quot; type=&quot;texsrt&quot; hint=&quot;albedo0&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt1</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>        <span class="c1">// @@ id=&quot;texsrt1&quot; type=&quot;texsrt&quot; hint=&quot;normal0&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec3</span> <span class="n">diffColor</span><span class="p">;</span>         <span class="c1">// @@ id=&quot;diffuse&quot; default=&quot;1 1 1&quot; item=&quot;color&quot; hint=&quot;diffuse&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">weightTex</span><span class="p">;</span>        <span class="c1">// @@ id=&quot;weight_tex&quot; default=&quot;1.0&quot; min=&quot;-1&quot; max=&quot;1&quot;
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_10">Initializing Material Resources</h2>
+<p>Before initializing a buffer region for a material (that is, before creating an instance of the material), you must get the shading model used by the material by using <span class="ApiLink_const_char_*_nn__g3d__ResShaderAssign__GetShaderArchiveName()_const_NN_NOEXCEPT"><code>nn::g3d::ResShaderAssign::GetShaderArchiveName()</code></span> and <span class="ApiLink_const_char_*_nn__g3d__ResShaderAssign__GetShadingModelName()_const_NN_NOEXCEPT"><code>nn::g3d::ResShaderAssign::GetShadingModelName()</code></span>, and you must set the size of the material uniform block for the shader and the offset for each shader parameter to the material resources for the model. Use the <code><span class="ApiLink_void_nn__g3d__ResMaterial__SetRawParamSize(size_t_size)_NN_NOEXCEPT">nn::g3d::ResMaterial::SetRawParamSize()</span></code> function to set the uniform block size, and use the <code><span class="ApiLink_void_nn__g3d__ResShaderParam__SetOffset(ptrdiff_t_offset)_NN_NOEXCEPT">nn::g3d::ResShaderParam::SetOffset()</span></code> function to set the shader parameter offset. These processes are also documented in the Initializing Model Resource Shader Parameters section of <a href="../Pages/Page_286721547.html">Shader Runtime Workflow</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Get the nn::g3d::ResShaderArchive with the name specified in the model material.
+</span><span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderAssign</span><span class="o">*</span> <span class="n">pResShaderAssign</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetShaderAssign</span><span class="p">();</span>
+<span class="nn">nn::g3d::</span><span class="n">ResShadingModel</span><span class="o">*</span> <span class="n">pResShadingModel</span> <span class="o">=</span> <span class="n">pResShaderArchive</span><span class="o">-&gt;</span><span class="n">FindShadingModel</span><span class="p">(</span><span class="n">pResShaderAssign</span><span class="o">-&gt;</span><span class="n">GetShadingModelName</span><span class="p">());</span>
+&nbsp;
+<span class="c1">// Set the material uniform block size and uniform variable offsets stored in nn::g3d::ResShadingModel to the material resources for the model.
+</span><span class="nn">nn::g3d::ShaderUtility::</span><span class="n">BindShaderParam</span><span class="p">(</span><span class="n">pResMaterial</span><span class="p">,</span> <span class="n">pResShadingModel</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">int</span> <span class="n">idxBlock</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetSystemBlockIndex</span><span class="p">(</span><span class="nn">ResUniformBlockVar::</span><span class="n">Type_Material</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">idxBlock</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">SetRawParamSize</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">const</span> <span class="n">ResUniformBlockVar</span><span class="o">*</span> <span class="n">pBlockVar</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetUniformBlock</span><span class="p">(</span><span class="n">idxBlock</span><span class="p">);</span>
+&nbsp;<span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">SetRawParamSize</span><span class="p">(</span><span class="n">pBlockVar</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">());</span>
+&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">idxParam</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">paramCount</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetShaderParamCount</span><span class="p">();</span>
+&nbsp;<span class="n">idxParam</span> <span class="o">&lt;</span> <span class="n">paramCount</span><span class="p">;</span> <span class="o">++</span><span class="n">idxParam</span><span class="p">)</span>
+&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Look up the shader using the id parameter of the shader parameters, and initialize the offsets.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">ResShaderParam</span><span class="o">*</span> <span class="n">pResShaderParam</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetShaderParam</span><span class="p">(</span><span class="n">idxParam</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResUniformVar</span><span class="o">*</span> <span class="n">pUniformVar</span> <span class="o">=</span> <span class="n">pBlockVar</span><span class="o">-&gt;</span><span class="n">FindUniform</span><span class="p">(</span><span class="n">pResShaderParam</span><span class="o">-&gt;</span><span class="n">GetId</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResShaderParam</span><span class="o">-&gt;</span><span class="n">SetOffset</span><span class="p">(</span><span class="n">pUniformVar</span> <span class="o">?</span> <span class="n">pUniformVar</span><span class="o">-&gt;</span><span class="n">GetOffset</span><span class="p">()</span> <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+&nbsp;<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p>If you want to add new texture resources for a material, use the <span class="ApiLink_void_nn__g3d__ResMaterial__SetTextureCount(int_textureCount)_NN_NOEXCEPT"><code>nn::g3d::ResMaterial::SetTextureCount()</code></span> function to increase the number of textures that can be assigned to a particular instance of a material.</p>
+<h2 id="Anchor_106332818_h2_11">
+  <span style="color: rgb(117,117,117);">Initializing the Buffer Region</span>
+</h2>
+<p>Call the <span class="ApiLink_bool_nn__g3d__SkeletonObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT"><code>nn::g3d::ModelObj::SetupBlockBuffer()</code></span> or <span class="ApiLink_bool_nn__g3d__SkeletonObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT"><code>nn::g3d::MaterialObj::SetupBlockBuffer()</code></span> function to initialize the buffer region. This buffer region is initialized using the material uniform block size and offset values of the shading model, as set previously. After the buffer region is initialized, the initial values from the material uniform block for the shader are applied to the buffer region for that material instance to improve resiliency against any changes made to the shader later.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::g3d::</span><span class="n">ResShadingModel</span><span class="o">*</span> <span class="n">pResShadingModel</span><span class="p">;</span>
+<span class="nn">nn::g3d::</span><span class="n">MaterialObj</span><span class="o">*</span> <span class="n">pMaterialObj</span><span class="p">;</span>
+
+<span class="c1">// Apply the initial values of the material uniform block for the shader to the buffer region for the model.
+</span><span class="n">InitializeShaderParam</span><span class="p">(</span><span class="n">pMaterialObj</span><span class="p">,</span> <span class="n">pResShadingModel</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_12">Updating the Source Region</h2>
+<p>Use the pointer returned by the <span class="ApiLink_void_*_nn__g3d__MaterialObj__EditShaderParam(int_paramIndex)_NN_NOEXCEPT"><code>nn::g3d::MaterialObj::EditShaderParam()</code></span> function to make any changes.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_13">Writing to the Buffer Region</h2>
+<p>Call the <span class="ApiLink_void_nn__g3d__ModelObj__CalculateMaterial(int_bufferIndex)_NN_NOEXCEPT"><code>nn::g3d::ModelObj::CalculateMaterial()</code></span> function to write the current values to the uniform block. The library uses dirty flags to keep track of which parts of the source region have been updated and then only writes the parameters that have actually changed. If a callback function has been set using <span class="ApiLink_void_nn__g3d__ResShaderParam__SetConvertShaderParamCallback(ConvertShaderParamCallback_callback)_NN_NOEXCEPT"><code>nn::g3d::ResShaderParam::SetConvertShaderParamCallback()</code></span>, that callback function is also called at this time. Shader parameters for which an offset was not specified when the material resource was initialized are not written to the uniform block because the dirty flag is not set for them.</p>
+<h3 id="Anchor_106332818_h3_1">Callback Function-Based Conversions</h3>
+<p>Using <span class="ApiLink_void_nn__g3d__ResShaderParam__SetConvertShaderParamCallback(ConvertShaderParamCallback_callback)_NN_NOEXCEPT"><code>nn::g3d::ResShaderParam::SetConvertShaderParamCallback()</code></span> to specify a callback function makes it possible to add custom conversion processes to be executed when writing material uniform blocks to the buffer region.</p>
+<p>
+  <strong>The callback function must be registered before creating the model instance.</strong> Also, when using callback functions here, add a <code>converter</code> annotation to the shader annotations in advance so that the callback functions have access to the content of shader parameters. For the <code>converter</code> annotation, specify the content of the associated uniform variable as a string. You can then get these strings in the runtime using <span class="ApiLink_const_char_*_nn__g3d__ResUniformVar__GetConverter()_const_NN_NOEXCEPT"><code>nn::g3d::ResUniformVar::GetConverter()</code></span>. Then, call <code><span class="ApiLink_void_nn__g3d__ResShaderParam__SetConvertShaderParamCallback(ConvertShaderParamCallback_callback)_NN_NOEXCEPT">nn::g3d::ResShaderParam::SetConvertShaderParamCallback()</span></code> to register the appropriate callback function based on the <code>converter</code> string. In addition, adding <code>depend</code> to a shader annotation makes it possible to implement conversion processes that use other shader parameters or arbitrary data as part of the callback function. In this case, call <span class="ApiLink_void_nn__g3d__ResMaterial__SetVolatile(int_paramIndex)_NN_NOEXCEPT"><code>nn::g3d::ResMaterial::SetVolatile()</code></span> to enable per-frame conversion. The library uses dirty flags to manage shader parameters, so when this setting is not enabled, any external parameters that are referenced will not be rewritten to the buffer region if changed at a later point.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cm">/* Do This Before Creating a Model Instance (nn:g3d::ModelObj) */</span>
+<span class="c1">// Get shader parameters for the model material.
+</span><span class="nn">nn::g3d::</span><span class="n">ResShaderParam</span><span class="o">*</span> <span class="n">pResShaderParam</span> <span class="o">=</span> <span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">GetShaderParam</span><span class="p">(</span><span class="n">shaderParamIndex</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Get the converter name specified in the annotation.
+</span><span class="kt">int</span> <span class="n">materialBlockIndex</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetSystemBlockIndex</span><span class="p">(</span><span class="nn">nn::g3d::ResUniformBlockVar::</span><span class="n">Type_Material</span><span class="p">);</span>
+<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">pConverter</span> <span class="o">=</span> <span class="n">pResShadingModel</span><span class="o">-&gt;</span><span class="n">GetUniformBlock</span><span class="p">(</span><span class="n">materialBlockIndex</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">FindUniform</span><span class="p">(</span><span class="n">pResShaderParam</span><span class="o">-&gt;</span><span class="n">GetId</span><span class="p">())</span><span class="o">-&gt;</span><span class="n">GetConverter</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// If the converter name matches, set the custom conversion calculation callback function.
+// Call nn::g3d::ResMaterial::SetVolatile() to enable per-frame processing, if desired.
+</span><span class="k">if</span> <span class="p">(</span><span class="n">pConverter</span> <span class="o">&amp;&amp;</span> <span class="n">strcmp</span><span class="p">(</span><span class="n">pConverter</span><span class="p">,</span> <span class="s">&quot;texsrt_ex&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResShaderParam</span><span class="o">-&gt;</span><span class="n">SetConvertShaderParamCallback</span><span class="p">(</span><span class="nn">nn::g3d::ResShaderParam::</span><span class="n">ConvertTexSrtExCallback</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResMaterial</span><span class="o">-&gt;</span><span class="n">SetVolatile</span><span class="p">(</span><span class="n">shaderParamIndex</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>When <code>depend</code> is specified in the shader annotation for a shader parameter, if the specified target is the ID of another shader parameter, the library automatically sets a pointer to that target shader parameter. Use <span class="ApiLink_bool_nn__g3d__ResShaderParam__GetDependPointer(void_**pOutParamPtr|_const_void_*pSrcShaderParam)_const_NN_NOEXCEPT"><code>nn::g3d::ResShaderParam::GetDependPointer()</code></span> to get this pointer, as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Conversion callback function.
+</span><span class="kt">size_t</span> <span class="nf">CallBack</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">pDst</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span><span class="o">*</span> <span class="n">pSrc</span><span class="p">,</span> <span class="k">const</span> <span class="n">ResShaderParam</span><span class="o">*</span> <span class="n">pShaderParam</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">pUserPtr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Pointer to the target parameter on which to depend.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">void</span><span class="o">*</span> <span class="n">pDependParam</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get the pointer to the parameter on which pSrc depends.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pShaderParam</span><span class="o">-&gt;</span><span class="n">GetDependPointer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pDependParam</span><span class="p">,</span> <span class="n">pSrc</span><span class="p">);</span>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Assign the conversion result calculated using pDependParam and pSrc in pDst.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Specifying a shader parameter's own ID for <code>depend</code> makes it possible to access external data other than shader parameters. In this case, the user must manually specify a pointer to the target data on which the shader parameter depends. To do this, after creating a model instance (<span class="ApiLink_nn__g3d__ModelObj"><code>nn::g3d::ModelObj</code></span>), call <span class="ApiLink_void_*_nn__g3d__MaterialObj__EditShaderParam(int_paramIndex)_NN_NOEXCEPT"><code>nn::g3d::MaterialObj::EditShaderParam()</code></span> to get the corresponding shader parameter, and then call <span class="ApiLink_bool_nn__g3d__ResShaderParam__SetDependPointer(void_*pSrcShaderParam|_const_void_*pDependParam)_const_NN_NOEXCEPT"><code>nn::g3d::ResShaderParam::SetDependPointer()</code></span> to set the pointer to the target data.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">pShaderParam</span> <span class="o">=</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">EditShaderParam</span><span class="p">(</span><span class="n">shaderParamIndex</span><span class="p">);</span>
+<span class="k">const</span> <span class="nn">nn::g3d::</span><span class="n">ResShaderParam</span><span class="o">*</span> <span class="n">pResShaderParam</span> <span class="o">=</span> <span class="n">pMaterialObj</span><span class="o">-&gt;</span><span class="n">GetResource</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetShaderParam</span><span class="p">(</span><span class="n">shaderParamIndex</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Specify the external data pDependParam as the data to depend on.
+</span><span class="n">pResShaderParam</span><span class="o">-&gt;</span><span class="n">SetDependPointer</span><span class="p">(</span><span class="n">pShaderParam</span><span class="p">,</span> <span class="n">pDependParam</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_106332818_h1_7">Option</h1>
+<p>Option uniform blocks are used to control generation of shader variations. More specifically, they are used to control static option variables when working with uniform variable branches (<code>branch=true</code>). For more information about shader variations, see <a href="../Pages/Page_286721565.html">Shader Variations</a>. For more information about the flow of processes in the runtime for shaders that include uniform blocks, see <a href="../Pages/Page_286721547.html">Shader Runtime Workflow</a>.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_14">Shader Code</h2>
+<p>Start by defining variables corresponding to the option variables. These variables must always be defined when working with uniform variable branches. Although these variables are not used in the runtime, they must still be defined because they are referenced during compilation when using variation constants in preprocessor branches.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#define USE_VERTEX_COLOR    ( 0 )       </span><span class="c1">// @@ id=&quot;vertex_color&quot;
+</span>
+<span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Option</span> <span class="c1">// @@ id=&quot;opt&quot; type=&quot;option&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">useVtxColor</span><span class="p">;</span>    <span class="c1">// @@ id=&quot;vertex_color&quot;
+</span><span class="p">};</span>
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//...
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span><span class="p">(</span><span class="n">USE_VERTEX_COLOR</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Process for the USE_VERTEX_COLOR = 0 variation.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">else</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Process for a variation other than USE_VERTEX_COLOR = 0.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//...
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_15">Initializing the Buffer Region</h2>
+<p>Option uniform blocks are constructed automatically by the <span class="ApiLink_bool_nn__g3d__ShadingModelObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT">nn::g3d::ShadingModelObj::SetupBlockBuffer()</span> function.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_16">Updating the Source Region</h2>
+<p>Call <span class="ApiLink_static_void_nn__g3d__ShaderUtility__InitializeShaderKey(ShadingModelObj_*pShadingModelObj|_const_ResShaderAssign_*pResShaderAssign|_bool_materialPass)_NN_NOEXCEPT"><code>nn::g3d::ShaderUtility::InitializeShaderKey()</code></span> to update the source region based on the static option values assigned to the model. This applies the static option values assigned to the model binary data, so this update only needs to be performed once at initialization.</p>
+<h2 style="margin-left: 0.5em;" id="Anchor_106332818_h2_17">Writing to the Buffer Region</h2>
+<p>Call the <span class="ApiLink_void_nn__g3d__ShadingModelObj__CalculateOptionBlock(int_bufferIndex)_NN_NOEXCEPT"><code>nn::g3d::ShadingModelObj::CalculateOptionBlock()</code></span> function to write the current option values to the buffer region. This applies the static option values assigned to the model binary data, so this write operation to the buffer region similarly only needs to be performed once.<br />Note, however, that the values must still be set to the shader uniform block in every frame.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__Buffer', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a8721c66f238e6505cbf9ca0eb71d3e85' )
+SetUrl( 'ApiLink_nn__g3d__ShapeObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html' )
+SetUrl( 'ApiLink_void_*_nn__g3d__ShapeObj__GetUserArea()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html#a366192ea48975363a42b6793469b484c' )
+SetUrl( 'ApiLink_void_nn__g3d__ModelObj__CalculateShape(int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#a79b51e82adb59599c0ec443bd1041d55' )
+SetUrl( 'ApiLink_void_nn__g3d__ShapeObj__CalculateShape(int_viewIndex|_const_nn__util__Matrix4x3fType_&worldMtx|_int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html#ac9b2fc3bb7e76ccac3700abfa9bd5ab8' )
+SetUrl( 'ApiLink_nn__g3d__SkeletonObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeleton_obj.html' )
+SetUrl( 'ApiLink_nn__util__Matrix4x3fType_*_nn__g3d__SkeletonObj__GetWorldMtxArray()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeleton_obj.html#a97fdc7d1e1740b2e49d3c5365589adda' )
+SetUrl( 'ApiLink_void_nn__g3d__ModelObj__CalculateSkeleton(int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#adef78f87e8b217936ccb27f0b4e1a46c' )
+SetUrl( 'ApiLink_void_nn__g3d__SkeletonObj__CalculateSkeleton(int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeleton_obj.html#a1fb31afea2806b20719d3a542e721c10' )
+SetUrl( 'ApiLink_nn__g3d__MaterialObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_material_obj.html' )
+SetUrl( 'ApiLink_void_*_nn__g3d__MaterialObj__EditShaderParam(int_paramIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_material_obj.html#ae9d92b1ba08755e840186f240a598770' )
+SetUrl( 'ApiLink_void_nn__g3d__ModelObj__CalculateMaterial(int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#a674b6b3417778ae519cf3bc6d6f5ff65' )
+SetUrl( 'ApiLink_void_nn__g3d__MaterialObj__CalculateMaterial(int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_material_obj.html#acb09821f66b8cc37c265e6b8207dea33' )
+SetUrl( 'ApiLink_nn__g3d__ShadingModelObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html' )
+SetUrl( 'ApiLink_void_nn__g3d__ShadingModelObj__WriteStaticKey(int_optionIndex|_int_choiceIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html#ab9cec2cef452550fb2db9bb4e28e61f7' )
+SetUrl( 'ApiLink_void_nn__g3d__ShadingModelObj__CalculateOptionBlock(int_bufferIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html#a49887b2a46d659afd9260759178329b3' )
+SetUrl( 'ApiLink_bool_nn__g3d__ModelObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html#ac8e21089d62248d3db9d672cd1da9daf' )
+SetUrl( 'ApiLink_bool_nn__g3d__ShapeObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html#a7cabdabea5964ffbfb204dd0e4bd5bf1' )
+SetUrl( 'ApiLink_int_nn__g3d__ResShape__GetVertexSkinCount()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shape.html#a231c86e11bfa78839b4a41ea549b8fee' )
+SetUrl( 'ApiLink_bool_nn__g3d__SkeletonObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeleton_obj.html#a78d62f7924c6c29ddbbd75ab46e46b84' )
+SetUrl( 'ApiLink_void_nn__g3d__SkeletonObj__CalculateWorldMtx(const_nn__util__Matrix4x3fType_&baseMtx)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_skeleton_obj.html#a1f071644ed29f25b009ff919c5776e9b' )
+SetUrl( 'ApiLink_const_char_*_nn__g3d__ResShaderAssign__GetShaderArchiveName()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_assign.html#a14244bf9c69c763f3341b452d11c192f' )
+SetUrl( 'ApiLink_const_char_*_nn__g3d__ResShaderAssign__GetShadingModelName()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_assign.html#af19bb02607868a0ee63245e8eda8d642' )
+SetUrl( 'ApiLink_void_nn__g3d__ResMaterial__SetRawParamSize(size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_material.html#a3ad8388875be70cd5210f42924e1cc4a' )
+SetUrl( 'ApiLink_void_nn__g3d__ResShaderParam__SetOffset(ptrdiff_t_offset)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_param.html#a3a1cefaece9417b6a3b760c2c5a01fa7' )
+SetUrl( 'ApiLink_void_nn__g3d__ResMaterial__SetTextureCount(int_textureCount)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_material.html#adcaf112be08dd21df078c6bf2ac07eb5' )
+SetUrl( 'ApiLink_void_nn__g3d__ResShaderParam__SetConvertShaderParamCallback(ConvertShaderParamCallback_callback)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_param.html#ab9298aece0c7b8114fddeaefb7aa1314' )
+SetUrl( 'ApiLink_const_char_*_nn__g3d__ResUniformVar__GetConverter()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_uniform_var.html#ad241ab7c97aa3bbbdbc84926e70262b2' )
+SetUrl( 'ApiLink_void_nn__g3d__ResMaterial__SetVolatile(int_paramIndex)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_material.html#ada22c25086b53b1fcb4f406be0e5e1ae' )
+SetUrl( 'ApiLink_bool_nn__g3d__ResShaderParam__GetDependPointer(void_**pOutParamPtr|_const_void_*pSrcShaderParam)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_param.html#ac12eca444cd6f6c2b71f2fcb4e763d47' )
+SetUrl( 'ApiLink_nn__g3d__ModelObj', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_model_obj.html' )
+SetUrl( 'ApiLink_bool_nn__g3d__ResShaderParam__SetDependPointer(void_*pSrcShaderParam|_const_void_*pDependParam)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_param.html#acb6454ceb752cfc31fffe18361338370' )
+SetUrl( 'ApiLink_bool_nn__g3d__ShadingModelObj__SetupBlockBuffer(nn__gfx__Device_*pDevice|_nn__gfx__MemoryPool_*pMemoryPool|_ptrdiff_t_offset|_size_t_memoryPoolSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shading_model_obj.html#a0211c17d76c4cc14b627ef92d456ab5f' )
+SetUrl( 'ApiLink_static_void_nn__g3d__ShaderUtility__InitializeShaderKey(ShadingModelObj_*pShadingModelObj|_const_ResShaderAssign_*pResShaderAssign|_bool_materialPass)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shader_utility.html#a870d826646df32bc9545e9acc4e8c8c5' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Layers | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Layers -->
+<div class="pagetitle" id="PageId_109317072">Layers</div>
+<div class="text_separate">
+<h1 id="Anchor_109317072_h1_1">Overview</h1>
+<p>Applications send content to the display process with layer objects. &nbsp;During the graphics initialization sequence, layers are linked with textures that applications use as their final render target meant to appear on the display. &nbsp;A layer must be associated with a particular display.</p>
+<p>Some parameters of the layer are defined when setting up the native window through the graphics APIs. &nbsp;(For the purposes of this documentation, the terms native window and layer may be used interchangeably.) &nbsp;The dimensions of the textures assigned to the native window relate to how the content may be scaled on the display.</p>
+<h2 id="Anchor_109317072_h2_1">Scaling</h2>
+<p>If the textures associated with a layer do not match the display resolution, then the content is subject to scaling.&nbsp; The final output will be upscaled or downscaled to the current display resolution. &nbsp;A particular platform may impose limitations on the minimum or maximum scaling ratios. &nbsp;</p>
+<p>Content created at 1080p, the maximum supported resolution, can be downscaled to any of the other supported resolutions.&nbsp; If the texture dimensions exceed 1080p, then the display subsystem will be unable to downscale content if the user's display is using 480p.&nbsp; Additionally, there are no limitations on upscaling.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>If the content cannot be scaled, it will not appear on the display.</p>
+  </div>
+</div>
+<p>A notable limitation of the scaling is that the aspect ratio is not preserved. &nbsp;For example, if the application submits a framebuffer with a 4:3 aspect ratio and the display is using a resolution with an aspect ratio of 16:9, then the content will appear stretched:</p>
+<p>
+  <img src="../Attachments/Attach_109317072/174243558.png"></img>
+</p>
+<h1 id="Anchor_109317072_h1_2">Lifecycle</h1>
+<h2 id="Anchor_109317072_h2_2">Rendering a Frame</h2>
+<p>The layer owns all of the potential frame buffers used by the application.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_109317072/109445517.png" class="embedded-image" />
+  </span>
+</p>
+<!--Remove-->
+<p>On request, the display process will retrieve the next available buffer that the application provided.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The buffering mode (ex. double buffering) is set by the application with the graphics APIs. Please check their documentation for details about the available buffering modes.</p>
+  </div>
+</div>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_109317072/109445525.png" class="embedded-image" />
+  </span>
+</p>
+<!--Remove-->
+<p>Once retrieved, the application can render to the frame buffer.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_109317072/109445527.png" class="embedded-image" />
+  </span>
+</p>
+<!--Remove-->
+<p>Finally, the application must release the frame buffer back to the display process. &nbsp;The frame buffer is then queued for use on the display.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_109317072/109445529.png" class="embedded-image" />
+  </span>
+</p>
+<!--Remove-->
+<p>
+  <br />
+</p>
+<h2 id="Anchor_109317072_h2_3">Syncing with Display</h2>
+<p>The process of rendering a frame remains the same no matter the buffering mode. &nbsp;However, one major detail is synchronizing with the refresh rate of the display.</p>
+<p>The display process will only manage buffers on VSYNC events from the physical display. &nbsp;On VSYNC, the display process will use the most recently completed texture.</p>
+<p>The graphics APIs provide a way to acquire and present textures. &nbsp;For illustration purposes, suppose the functions&nbsp;<code>acquire</code> &nbsp;retrieves the next available texture from the display process and&nbsp;<code>present</code> denotes the texture is ready for the display. &nbsp;Additionally, suppose textures&nbsp;<strong>A</strong> and&nbsp;<strong>B</strong> are associated with the same layer in the display pipeline. &nbsp;The basic rendering loop will look like this:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">Texture</span><span class="o">*</span> <span class="n">t</span><span class="p">;</span> <span class="c1">// Will point to A or B
+</span><span class="n">acquire</span><span class="p">(</span><span class="o">&amp;</span><span class="n">t</span><span class="p">);</span>
+<span class="c1">// ...
+</span><span class="n">present</span><span class="p">(</span><span class="n">t</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>During the first frame, calling <code>acquire</code> will retrieve&nbsp;<strong>A</strong> from the display process. &nbsp;If there are GPU commands that will execute against&nbsp;<strong>A</strong>, then a lock is registered. &nbsp;This blocks the display process from acquiring the texture before rendering is finished.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_109317072/109446514.png" class="embedded-image" />
+  </span>
+</p>
+<!--Remove-->
+<p>Note the application can begin rendering&nbsp;<strong>B</strong> at this time in the next call to&nbsp;<code>acquire</code>&nbsp;&ndash; it does not need to explicitly wait for the VSYNC event to occur.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_109317072/109446522.png" class="embedded-image" />
+  </span>
+</p>
+<!--Remove-->
+<p>On VSYNC, the display process finds that&nbsp;<strong>A</strong> finished rendering. &nbsp;It now presents this to the display.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_109317072/109446526.png" class="embedded-image" />
+  </span>
+</p>
+<!--Remove-->
+<p>Now, the application calls&nbsp;<code>present</code> with texture&nbsp;<strong>B</strong> and proceeds to call&nbsp;<code>acquire</code>. &nbsp;At this point, <code>acquire</code> will block. &nbsp;The next texture,&nbsp;<strong>A</strong>, is still in use by the display and is locked by the display process. &nbsp;On the next VSYNC,&nbsp;<strong>B</strong> will appear on the display and the lock released on&nbsp;<strong>A</strong>.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_109317072/109446530.png" class="embedded-image" />
+  </span>
+</p>
+<!--Remove-->
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

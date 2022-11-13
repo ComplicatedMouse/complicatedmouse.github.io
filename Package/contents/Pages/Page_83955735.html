@@ -1,0 +1,305 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Text Sequence | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Text Sequence -->
+<div class="pagetitle" id="PageId_83955735">Text Sequence</div>
+<div class="text_separate">
+<h1 id="Anchor_83955735_h1_1">Text Sequence</h1>
+<h2 id="Anchor_83955735_h2_1">Overview</h2>
+<p>It is possible to list more than one set of sequence data in a single file by editing text sequence files (<code>.fseq</code>) directly with a text editor.</p>
+<p>The character codes that can be used in text sequence files are ANSI and Shift_JIS.</p>
+<p>The following is a sample of a text sequence file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;        Sample SE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+&nbsp;
+yoshi:
+&nbsp;&nbsp;&nbsp;&nbsp;prg 0
+&nbsp;&nbsp;&nbsp;&nbsp;cn4 127, 0
+&nbsp;&nbsp;&nbsp;&nbsp;fin
+&nbsp;&nbsp;&nbsp;
+wihaho:
+&nbsp;&nbsp;&nbsp;&nbsp;prg 1
+&nbsp;&nbsp;&nbsp;&nbsp;cn4 127, 0
+&nbsp;&nbsp;&nbsp;&nbsp;fin
+&nbsp;&nbsp;&nbsp;
+; Note command only
+; Coin sound
+note_only:
+&nbsp;&nbsp;&nbsp;&nbsp;prg 2
+&nbsp;&nbsp;&nbsp;&nbsp;as5 127, 6
+&nbsp;&nbsp;&nbsp;&nbsp;ds6 127, 48
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fin
+&nbsp;
+&nbsp;
+; Loop by jumping (repeats endlessly)
+; Ambulance
+jump_seq:
+&nbsp;&nbsp;&nbsp;&nbsp;prg 3
+_loop_start:
+&nbsp;&nbsp;&nbsp;&nbsp;bn4 127, 48
+&nbsp;&nbsp;&nbsp;&nbsp;gn4 127, 48
+&nbsp;&nbsp;&nbsp;&nbsp;jump _loop_start</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955735_h3_1">Coding Sequence Data</h3>
+<p>Each sequence starts with a label name definition used to identify the sequence. This label is used as the playback starting position specified by SoundMaker.</p>
+<p>A single set of sequence data is created by adding a series of sequence commands after this label definition.</p>
+<h2 id="Anchor_83955735_h2_2">Numeric Value Notation</h2>
+<p>For points that specify numeric parameter values in a text sequence file, the following methods can be used in addition to direct numerical input.</p>
+<h3 id="Anchor_83955735_h3_2">Binary and Hexadecimal Values Notation</h3>
+<p>Although numeric values are usually coded in decimal, you can also code values in binary and hexadecimal.</p>
+<p>When coding values in binary or hexadecimal, prepend <code>0b</code> or <code>0x</code> to the beginning of the value. For example, the decimal value 12 can also be expressed as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>0b1100
+0xc</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955735_h3_3">Bit Notation</h3>
+<p>Bit notation is useful when coding a value where a specific bit can be either <code>1</code> or <code>0</code>, as with bit flags.</p>
+<p>Bit notation is coded by specifying which low-order bits are to be set to <code>1</code>. For example, use the following specification to represent a value where the lower-order bits <code>1</code>, <code>3</code>, and <code>6</code> through <code>8</code> have a value of <code>1</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>{ 1,3,6-8 }</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This is equivalent to <code>0b111001010</code>. Note that the lowest-order bit is bit <code>0</code>.</p>
+<h3 id="Anchor_83955735_h3_4">Format</h3>
+<p>Numerical values can also be represented by numerical formulas. Binary, hexadecimal, or bit notation can be used for each part of a numeric formula.</p>
+<p>For example, each of the following represents a valid numerical formula.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>2 * 4 + 0x10
+( 1 &lt;&lt; 4 ) + 3
+{ 0, 2 } | { 4-6 }</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The table lists the operators that can be used in numeric formulas and their priority.</p>
+<p>Table 1. Operators Used to Describe Numbers as Formulas</p>
+<table class="wrapped">
+  <thead>
+    <tr>
+      <th>
+        <p>Priority</p>
+      </th>
+      <th>
+        <p>Operators</p>
+      </th>
+      <th>
+        <p>Description</p>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <p>1</p>
+      </td>
+      <td>
+        <p>*</p>
+      </td>
+      <td>
+        <p>Multiplication</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p> </p>
+      </td>
+      <td>
+        <p>
+          <code>/</code>
+        </p>
+      </td>
+      <td>
+        <p>Division</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>2</p>
+      </td>
+      <td>
+        <p>+</p>
+      </td>
+      <td>
+        <p>Addition</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p> </p>
+      </td>
+      <td>
+        <p>-</p>
+      </td>
+      <td>
+        <p>Subtractive</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>3</p>
+      </td>
+      <td>
+        <p>&gt;&gt; </p>
+      </td>
+      <td>
+        <p>Right-shift</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p> </p>
+      </td>
+      <td>
+        <p>&lt;&lt; </p>
+      </td>
+      <td>
+        <p>Left-shift</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>4</p>
+      </td>
+      <td>
+        <p>&lt; </p>
+      </td>
+      <td>
+        <p>Left side less than right side</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p> </p>
+      </td>
+      <td>
+        <p>&lt;=</p>
+      </td>
+      <td>
+        <p>Left side less than or equal to right side</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p> </p>
+      </td>
+      <td>
+        <p>&gt; </p>
+      </td>
+      <td>
+        <p>Left side greater than right side</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p> </p>
+      </td>
+      <td>
+        <p>&gt;=</p>
+      </td>
+      <td>
+        <p>Left side greater than or equal to right side</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>5</p>
+      </td>
+      <td>
+        <p>
+          <code>==</code>
+        </p>
+      </td>
+      <td>
+        <p>Left side and right side are equal</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>6</p>
+      </td>
+      <td>
+        <p>&amp;</p>
+      </td>
+      <td>
+        <p>Bitwise AND</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>7</p>
+      </td>
+      <td>
+        <p>|</p>
+      </td>
+      <td>
+        <p>Bitwise OR</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

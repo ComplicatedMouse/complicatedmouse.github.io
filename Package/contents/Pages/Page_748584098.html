@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Troubleshooting and Known Issues | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Troubleshooting and Known Issues -->
+<div class="pagetitle" id="PageId_748584098">Troubleshooting and Known Issues</div>
+<div class="text_separate">
+<h1 id="Anchor_748584098_h1_1">Troubleshooting</h1>
+<p>The following are some common issues and how they may be resolved.</p>
+<h2 id="Anchor_748584098_h2_1">The &quot;Sync&quot; button in the GUI is not enabled</h2>
+<p>One of the following steps might fix the problem.</p>
+<ol>
+  <li>If there is more than one instance of the profiler open, close all other instances.</li>
+  <li>Restart the profiler GUI.</li>
+  <li>Restart the devkit.</li>
+  <li>Restart Target Manager.</li>
+</ol>
+<p>
+  <br />
+</p>
+<p>If the <strong>Sync</strong> button continues to be disabled, close all instances of the profiler GUI and then go into Target Manager's HTCS Entries.</p>
+<ul>
+  <li>You will see &quot;NintendoCpuProfiler:out&quot; and it should automatically start when connected to the devkit. If it is not, please contact your local Nintendo developer support group.</li>
+</ul>
+<h2 id="Anchor_748584098_h2_2">Thread State button is not enabled</h2>
+<p>
+  <span style="letter-spacing: 0.0px;">The profiler will perform some checks before enabling this feature:</span>
+</p>
+<ul>
+  <li>One of the modules seen must be an nnSdk NSO file (for example, nnSdkEn.nso).</li>
+  <li>The application must be 64-bit.</li>
+</ul>
+<h2 id="Anchor_748584098_h2_3">Warnings occur when using Thread State tracing</h2>
+<p>There are number of reasons that warnings may be output while attempting to enable <strong>Thread State</strong> tracing. At its core, the profiler is instrumenting each call that would result in a thread entering or leaving a non-runnable state. These are some of the possible reasons the profiler is unable to collect&nbsp;<strong>Thread State</strong> trace data.</p>
+<ul>
+  <li>The functions in nnSdk must be within 128MB of the profiler library's functions. This is because ARM64 has a maximum single-instruction jump distance of 128MB. This can be checked by opening the&nbsp;<a href="../Pages/Page_758199045.html">Info Window</a> and expanding the <strong>Module Statistics</strong>. From here you can see how far apart nnSdk is from your application. If there is no obvious reason why they are so far apart, it may be that there is too much data in the application's BSS section. In this case, move objects from static memory to be made from the heap instead.</li>
+  <li>A failure can occur while attempting to instrument the functions. These should be rare. Try restarting the application and attempt to enable <strong>Thread State</strong> tracing again.</li>
+</ul>
+<h2 id="Anchor_748584098_h2_4">Adding the call to nn::profiler::Initialize causes a crash</h2>
+<p>The profiler attempts to start HTCS communication if it is not&nbsp;already initialized. If the initialization is attempted again in your&nbsp;application, the call will assert and stop execution. Move the call to&nbsp;<span class="ApiLink_nn__htcs__Initialize">nn::htcs::Initialize</span>() to occur before initializing the profiler.</p>
+<h2 id="Anchor_748584098_h2_5">Profiler GUI crashes</h2>
+<p>In the case of a crash, a log file is saved to %TEMP%/NintendoCpuProfiler/logs. The files are named &quot;NintendoCPUProfilerLog-&lt;date&gt;-&lt;time&gt;.txt&quot; where &lt;date&gt; and &lt;time&gt; are the date and time that the crash occurred respectively. Please send this log file along with any other important information&mdash;such as how the profiler was being used at the time, your environment details, and a copy of the NPROF, if available&mdash;to Nintendo and we&nbsp;will quickly resolve the issue. Please maintain a version of the application that caused the crash (it may be&nbsp;needed to help diagnose the problem).</p>
+<h2 id="Anchor_748584098_h2_6">Profile results don't make sense</h2>
+<p>If the results don't look realistic, the likely cause is that either the wrong NSS file was loaded or the specified NSS is out-of-date from the application currently running. Make sure that two files are in sync with each other and then <strong>Unsync</strong> and&nbsp;<strong>Sync</strong> again and take another profile.</p>
+<p>If the issue persists, you may want to try using the <strong>Sample by Time (Lockstep)</strong> sampling strategy. This forces each core to sample at the same time instead of approximately at the same time, which may be helpful with heavy work threads with affinity to more than one core. Doing this will increase overhead in sampling, but may provide more expected results.</p>
+<h2 id="Anchor_748584098_h2_7">A thread takes more time the higher the sample rate</h2>
+<p>Due to profiler overhead, threads that go off after a set amount of time will appear to take more and more&nbsp;time the higher the sample rate chosen. This is to be expected. If this is a problem, either reduce the&nbsp;sampling rate or disable the thread when profiling.</p>
+<h1 id="Anchor_748584098_h1_2">Known Issues</h1>
+<p>The following are known issues.</p>
+<h2 id="Anchor_748584098_h2_8">Migrating threads issue</h2>
+<p>By default, threads will only run on the core on which they are created. However, it is possible to allow threads to have more than a single core affinity.</p>
+<p>In Nintendo SDK 3.x a change to thread scheduling was made that increased the likelihood of threads migrating to other cores on which they were allowed to run. This introduced an issue where threads could migrate to another core when the profiler's Sampler thread would wake up to take a sample. When such a migration occurs, it results in the kernel reporting to the profiler that the last running thread was the <strong>System Idle Thread</strong> rather than the expected thread from the application.</p>
+<p>If this behavior happens and it causes the profile to contain unreliable data, a critical&nbsp;<strong>Checker</strong>&nbsp;will trigger alerting you to the problem.</p>
+<p>If your application is using threads with more than a single core affinity, it is important that you are aware that the <strong>System Idle Thread</strong> is likely overreported and threads that can migrate&mdash;and the functions on those threads&mdash;are likely underreported.</p>
+<p>
+  <strong>Options</strong>:</p>
+<ul>
+  <li>Use Out-of-Process profiling.</li>
+  <li>Disable allowing threads to run on more than a single core.</li>
+</ul>
+<h2 id="Anchor_748584098_h2_9">Callstacks may contain invalid data</h2>
+<p>If you see <strong>BAD FRAME POINTER</strong> in the&nbsp;callstack, this indicates that a library or module being used was built&nbsp;without frame pointers. Rebuild the library or module with frame pointers enabled. In 64-bit applications, frame pointers are enabled default. In 32-bit applications, frame pointers must be enabled manually. Only the leaf function is guaranteed to be accurate and any other functions under this marker are likely invalid.</p>
+<p>
+  <strong>BAD FRAME POINTER</strong> is also common when using fibers because the callstacks do not end in the expected locations. When this happens, the profiler will insert the <strong>BAD FRAME POINTER</strong> into the callstack.</p>
+<p>If you see <strong>SENTINEL SAVE</strong> in the callstack, this indicates&nbsp;that the profiler needed to abort walking the callstack in order avoid&nbsp;walking off the end of a buffer. All of the data until this marker may&nbsp;be considered valid.</p>
+<p>You may also want to try using the <strong>Sample by Time (Lockstep)</strong> sampling strategy. This forces each core to sample at the same time instead of approximately at the same time, which may be helpful with heavy work threads with affinity to more than one core. Doing this will increase overhead in sampling, but may provide more expected results.</p>
+<h2 id="Anchor_748584098_h2_10">Idle time doesn't show useful information</h2>
+<p>When idle time is recorded, it means that there is no currently running thread on the core. The likely reason is that one or more threads are waiting on a synchronization primitive, such as a mutex or semaphore. You can use the <strong>Thread State</strong> tracing feature to determine why each thread is sleeping and creating extra idle time. This feature can be enabled on the&nbsp;<a href="../Pages/Page_758198873.html">Sampled Profile Tab</a>&nbsp;when taking a new profile.</p>
+<h2 id="Anchor_748584098_h2_11">Sometimes the profiler manages to sample its sampling thread</h2>
+<p>The profiler&nbsp;currently attributes these as '<strong>SYSTEM&nbsp;THREAD</strong>'.</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__htcs__Initialize', '../../../Api/HtmlNX/namespacenn_1_1htcs.html#a7eab72b8843a2a9ff763f52b78da680e' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

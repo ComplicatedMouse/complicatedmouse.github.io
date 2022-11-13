@@ -1,0 +1,282 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>User Exception Handler | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- User Exception Handler -->
+<div class="pagetitle" id="PageId_192306617">User Exception Handler</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_192306617_h1_1">User Exception Handler</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_192306617_h2_1">User Exception Handler</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_192306617_h3_1">Operating Environment for User Exception Handlers</a>
+        </li>
+        <li>
+          <a href="#Anchor_192306617_h3_2">Default User Exception Handler Function</a>
+        </li>
+        <li>
+          <a href="#Anchor_192306617_h3_3">User Exception Information</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_192306617_h2_2">Using the User Exception Handler Feature</a>
+      </li>
+      <li>
+        <a href="#Anchor_192306617_h2_3">Example of Using the User Exception Handler Feature</a>
+      </li>
+      <li>
+        <a href="#Anchor_192306617_h2_4">User Exception Handler Feature API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_192306617_h2_5">Notes About Using the User Exception Handler Feature</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_192306617_h3_4">Using With Debuggers</a>
+        </li>
+        <li>
+          <a href="#Anchor_192306617_h3_5">User Exception Handler Context</a>
+        </li>
+        <li>
+          <a href="#Anchor_192306617_h3_6">Multiple User Exception Handler Occurrences</a>
+        </li>
+        <li>
+          <a href="#Anchor_192306617_h3_7">Resuming From the User Exception Handler Function</a>
+        </li>
+        <li>
+          <a href="#Anchor_192306617_h3_8">Unregistering the User Exception Handler</a>
+        </li>
+        <li>
+          <a href="#Anchor_192306617_h3_9">Specifications in the Development and Retail Product Environments</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_192306617_h1_1">User Exception Handler</h1>
+<h2 id="Anchor_192306617_h2_1">User Exception Handler</h2>
+<p>The user exception handler feature is for handling situations when it becomes necessary to interrupt the current instruction sequence (called a user exception), mainly due to bugs in the program itself.</p>
+<p>Registering the user exception handler function in advance enables user exception handling. The user exception handler function can take information for the user exception as a parameter, which can be formatted and saved to a log.<br /></p>
+<p>When the program starts and reaches the <a href="../Pages/Page_92310396.html#Anchor_92310396_call_nninitStartup">nninitStartup()</a> function, the default user exception handler function (described later) is registered. Program developers can re-register an independently implemented user exception handler function in place of the default user exception handler.</p>
+<p>When a user exception is thrown while the program is running, the user exception handler function is called with the pointer to the user exception information of <span class="ApiLink_nn__os__UserExceptionInfo">nn::os::UserExceptionInfo</span> as a parameter. The user exception handler function operates on the thread context where the user exception was thrown. Other threads continue to operate normally during this time. The program treats returning from the user exception handler function as an unexpected exit. Afterward, the program returns to the HOME Menu or DevMenu according to the development hardware setting and waits for connection to the debugger.<br /></p>
+<p>
+  <span class="ApiLink_void_nn__os__SetUserExceptionHandler(UserExceptionHandler_pHandler|_void_*stack|_size_t_stackSize|_UserExceptionInfo_*pExceptionInfo)_NN_NOEXCEPT">nn::os::SetUserExceptionHandler()</span>, which registers the user exception handler function, passes the following parameters as parameters. At this time, you can also pass special parameters to specify the placement location for the stack region to run the user exception handler function and the user exception information. It is also possible to place in the stack region for the thread where the user exception was thrown. For more information, see the API reference.<br /></p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__os__UserExceptionHandler">nn::os::UserExceptionHandler</span> type of user exception handler function</li>
+  <li>Stack region for running the user exception handler function</li>
+  <li>Address for storing the <span class="ApiLink_nn__os__UserExceptionInfo">nn::os::UserExceptionInfo</span> type of user exception information<br /></li>
+</ul>
+<h3 id="Anchor_192306617_h3_1">Operating Environment for User Exception Handlers</h3>
+<p>User exception handling is only available in the development environment. If a user exception is thrown in a retail product environment, the program is forced to terminate abnormally, and the exception cannot be handled. Even if a user exception handler is registered, it will be ignored.</p>
+<p>The user exception handler feature is not supported in the Windows runtime environment.</p>
+<h3 id="Anchor_192306617_h3_2">Default User Exception Handler Function</h3>
+<p>At the time the program starts and reaches the <a href="../Pages/Page_92310396.html#Anchor_92310396_call_nninitStartup">nninitStartup()</a> function, the default user exception handler function is already registered. This function is publicly available as <span class="ApiLink_void_nn__os__DefaultUserExceptionHandler(nn__os__UserExceptionInfo_*info)_NN_NOEXCEPT">nn::os::DefaultUserExceptionHandler()</span>, so it can also be called from an independently implemented user exception handler function.</p>
+<h3 id="Anchor_192306617_h3_3">User Exception Information</h3>
+<p>The user exception handler function takes a pointer to the <span class="ApiLink_nn__os__UserExceptionInfo">nn::os::UserExceptionInfo</span> structure as a parameter. This structure contains the following information.</p>
+<ul>
+  <li>User exception type</li>
+  <li>The processor's general-purpose register information at the time the user exception was thrown</li>
+  <li>The processor's exception register information at the time the user exception was thrown</li>
+</ul>
+<p>The user exception type <span class="ApiLink_nn__os__UserExceptionInfo"> is stored in one of the nn::os::UserExceptionType</span> enumerated types in the <code>exceptionType</code> member variable of the <span class="ApiLink_nn__os__UserExceptionType">nn::os::UserExceptionInfo</span> structure.</p>
+<p>The processor's general-purpose register information and exception register information are stored in the <code>detail</code> member variable of the <span class="ApiLink_nn__os__UserExceptionInfo">nn::os::UserExceptionInfo</span> structure. The <code>detail</code> member variable has the <span class="ApiLink_nn__os__UserExceptionInfoDetail">nn::os::UserExceptionInfoDetail</span> structure. This structure has the following differences in the NX32 and NX64 build environments. For the meaning of various registers, also see the processor spec sheets.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Build Environment</th>
+      <th>
+        <code>detail</code> Member Variable Structure Type</th>
+    </tr>
+    <tr>
+      <td>NX32</td>
+      <td>
+        <span class="ApiLink_nn__os__UserExceptionInfoDetailAarch32Status64">nn::os::UserExceptionInfoDetailAarch32Status64</span>
+      </td>
+    </tr>
+    <tr>
+      <td>NX64</td>
+      <td>
+        <span class="ApiLink_nn__os__UserExceptionInfoDetailAarch64">nn::os::UserExceptionInfoDetailAarch64</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_192306617_h2_2">Using the User Exception Handler Feature</h2>
+<p>You can register the user exception handler function using <span class="ApiLink_void_nn__os__SetUserExceptionHandler(UserExceptionHandler_pHandler|_void_*stack|_size_t_stackSize|_UserExceptionInfo_*pExceptionInfo)_NN_NOEXCEPT">nn::os::SetUserExceptionHandler()</span>. In addition to the user exception handler function, this function also specifies the stack region and the user exception information location at the same time.</p>
+<p>The following example shows how to allocate and register a dedicated region for both the user exception handler stack region and the user exception information.<br /></p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/nn_Macro.h&gt;
+#include &lt;nn/os.h&gt;
+</span>
+<span class="kt">void</span> <span class="nf">OriginalUserExceptionHandler</span><span class="p">(</span><span class="nn">nn::os::</span><span class="n">UserExceptionInfo</span><span class="o">*</span> <span class="n">info</span><span class="p">)</span><span class="p">;</span>
+<span class="n">NN_ALIGNAS</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span> <span class="kt">char</span> <span class="n">g_UserExceptionStack</span><span class="p">[</span><span class="mh">0x4000</span><span class="p">];</span>
+<span class="nn">nn::os::</span><span class="n">UserExceptionInfo</span> <span class="n">g_UserExceptionInfo</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">SetUserExceptionHandler</span><span class="p">(</span> <span class="n">OriginalUserExceptionHandler</span><span class="p">,</span> <span class="n">g_UserExceptionStack</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">g_UserExceptionStack</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">g_UserExceptionInfo</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can also configure the settings to continue using the thread stack where the exception was thrown as is without allocating a dedicated region for the user exception handler. The registration example follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="kt">void</span> <span class="nf">OriginalUserExceptionHandler</span><span class="p">(</span><span class="nn">nn::os::</span><span class="n">UserExceptionInfo</span><span class="o">*</span> <span class="n">info</span><span class="p">)</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">SetUserExceptionHandler</span><span class="p">(</span> <span class="n">OriginalUserExceptionHandler</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">HandlerStackUsesThreadStack</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">UserExceptionInfoUsesHandlerStack</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In the latter example, however, if a stack overflow on a specific thread occurs, for example, that thread stack no longer has free memory, so the user exception handler cannot run and the program treats it as an unexpected exit. With the former example, even if a stack overflow occurs, the user exception handler can run, so saving the user exception information to a log is possible.</p>
+<h2 id="Anchor_192306617_h2_3">Example of Using the User Exception Handler Feature</h2>
+<p>For a more in-depth example, see the <span class="ApiLink_PageSampleOsUserExceptionHandler">User Exception Handler Feature Sample</span>.</p>
+<h2 id="Anchor_192306617_h2_4">User Exception Handler Feature API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__SetUserExceptionHandler(UserExceptionHandler_pHandler|_void_*stack|_size_t_stackSize|_UserExceptionInfo_*pExceptionInfo)_NN_NOEXCEPT">nn::os::SetUserExceptionHandler()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__DefaultUserExceptionHandler(nn__os__UserExceptionInfo_*info)_NN_NOEXCEPT">nn::os::DefaultUserExceptionHandler()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__EnableUserExceptionHandlerOnDebugging(bool_isEnabled)_NN_NOEXCEPT">nn::os::EnableUserExceptionHandlerOnDebugging()</span>
+  </li>
+</ul>
+<h2 id="Anchor_192306617_h2_5">Notes About Using the User Exception Handler Feature</h2>
+<h3 id="Anchor_192306617_h3_4">Using With Debuggers</h3>
+<p>Even when a user exception is thrown while the VSI debugger is connected, the default breaks the debugger at the location where the user exception was thrown without calling the user exception handler.</p>
+<p>If  <span class="ApiLink_void_nn__os__EnableUserExceptionHandlerOnDebugging(bool_isEnabled)_NN_NOEXCEPT">nn::os::EnableUserExceptionHandlerOnDebugging()</span> is set to <code>true</code> in advance, the user exception handler will be called even while the VSI debugger is connected. Afterward, the debugger will break when the program returns from the user exception handler.</p>
+<h3 id="Anchor_192306617_h3_5">User Exception Handler Context</h3>
+<p>The user exception handler is implemented via the thread context in which the user exception was thrown. (The stack region uses the location specified by <span class="ApiLink_void_nn__os__SetUserExceptionHandler(UserExceptionHandler_pHandler|_void_*stack|_size_t_stackSize|_UserExceptionInfo_*pExceptionInfo)_NN_NOEXCEPT">nn::os::SetUserExceptionHandler()</span>.) For this reason, when the user exception handler issues <span class="ApiLink_ThreadType_*_nn__os__GetCurrentThread()_NN_NOEXCEPT">nn::os::GetCurrentThread()</span>, the thread where the user exception was thrown is returned. Even while the user exception handler is running, other threads continue to run as they did before the user exception was thrown.</p>
+<h3 id="Anchor_192306617_h3_6">Multiple User Exception Handler Occurrences</h3>
+<p>User exceptions can be thrown more than once in the user exception handler function. In that case, the program closes abnormally.</p>
+<p>This can easily occur when, for example, the thread stack in the user exception stack region and user exception information location are used as is. Note that even if you have allocated an independent stack region, you may experience multiple exceptions if the stack region is small.</p>
+<h3 id="Anchor_192306617_h3_7">Resuming From the User Exception Handler Function</h3>
+<p>Typically, when returning from a user exception handler function, it waits for connection to the debugger, as described earlier. (If the JIT debugger is not enabled, the program returns to the HOME Menu or DevMenu.)</p>
+<p>On the other hand, the register data from when the user exception was thrown is stored in the <span class="ApiLink_nn__os__UserExceptionInfo">nn::os::UserExceptionInfo</span> structure, the user exception information. You cannot, however, completely restore all register values to rerun from the exception location after handling the exception in some way in the application. In addition, there are no features or means within the NintendoSDK to recover from a user exception handler because you cannot handle user exceptions in a retail unit.<br /></p>
+<p>Use the user exception handler only as a feature to leave information useful in debugging when a user exception is thrown.</p>
+<h3 id="Anchor_192306617_h3_8">Unregistering the User Exception Handler</h3>
+<p>Use the following code to cancel the registration of the user exception handler function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="nn">nn::os::</span><span class="n">SetUserExceptionHandler</span><span class="p">(</span> <span class="k">nullptr</span><span class="p">,</span> <span class="k">nullptr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">nullptr</span> <span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">EnableUserExceptionHandlerOnDebugging</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_192306617_h3_9">Specifications in the Development and Retail Product Environments</h3>
+<p>As described previously, user exception handling is only available in the development environment. User exception handling is not available the retail product environment. When a user exception is thrown in the retail product environment, it is treated as an abnormal program termination, even if a user exception handler function has been registered.</p>
+<p>You can also disable calls to the user exception handler function in the development environment using <a href="../Pages/Page_107328760.html">DevMenuCommand</a>.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__UserExceptionInfo', '../../../Api/HtmlNX/structnn_1_1os_1_1_user_exception_info.html' )
+SetUrl( 'ApiLink_void_nn__os__SetUserExceptionHandler(UserExceptionHandler_pHandler|_void_*stack|_size_t_stackSize|_UserExceptionInfo_*pExceptionInfo)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a80a1e659aaba155ff9552f48604aec54' )
+SetUrl( 'ApiLink_nn__os__UserExceptionHandler', '../../../Api/HtmlNX/namespacenn_1_1os.html#aff433bbe881d0fcb8fbb47fe3e299173' )
+SetUrl( 'ApiLink_void_nn__os__DefaultUserExceptionHandler(nn__os__UserExceptionInfo_*info)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#aa9f112844be928c69600e987eb45980f' )
+SetUrl( 'ApiLink_nn__os__UserExceptionType', '../../../Api/HtmlNX/namespacenn_1_1os.html#a02aa5878802b6b43d6f12dacb05a5460' )
+SetUrl( 'ApiLink_nn__os__UserExceptionInfoDetail', '../../../Api/HtmlNX/structnn_1_1os_1_1_user_exception_info_detail.html' )
+SetUrl( 'ApiLink_nn__os__UserExceptionInfoDetailAarch32Status64', '../../../Api/HtmlNX/structnn_1_1os_1_1_user_exception_info_detail_aarch32_status64.html' )
+SetUrl( 'ApiLink_nn__os__UserExceptionInfoDetailAarch64', '../../../Api/HtmlNX/structnn_1_1os_1_1_user_exception_info_detail_aarch64.html' )
+SetUrl( 'ApiLink_PageSampleOsUserExceptionHandler', '../../../Api/HtmlNX/_page_sample_os_user_exception_handler.html' )
+SetUrl( 'ApiLink_void_nn__os__EnableUserExceptionHandlerOnDebugging(bool_isEnabled)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a52dba2921df0ef2adf203a4b9829a6d6' )
+SetUrl( 'ApiLink_ThreadType_*_nn__os__GetCurrentThread()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ad106866a5b13bc3d430104333966b479' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

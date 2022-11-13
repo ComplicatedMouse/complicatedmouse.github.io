@@ -1,0 +1,339 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Build Procedure: Creating an Application Image | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Build Procedure: Creating an Application Image -->
+<div class="pagetitle" id="PageId_170694395">Build Procedure: Creating an Application Image</div>
+<div class="text_separate">
+<h1 id="Anchor_170694395_h1_1">Creating Application Images</h1>
+<h2 id="Anchor_170694395_h2_1">Preparing the NMETA File</h2>
+<p>The NMETA file describes the parameters that can be set separately in each application.</p>
+<p>Copy the following files provided in the NintendoSDK and use them in the builds of your application.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Type of Application</th>
+      <th>Metadata Source</th>
+    </tr>
+    <tr>
+      <td>64-bit applications</td>
+      <td>%NINTENDO_SDK_ROOT%\Resources\SpecFiles\Application.aarch64.lp64.nmeta</td>
+    </tr>
+    <tr>
+      <td>32-bit applications</td>
+      <td>%NINTENDO_SDK_ROOT%\Resources\SpecFiles\Application.arm.ilp32.nmeta</td>
+    </tr>
+  </tbody>
+</table>
+<p>The NMETA file contains application-specific information, and must be edited separately for each application by the developer. For more information, see <a href="../Pages/Page_166503043.html">Writing the NMETA File</a>.</p>
+<h2 id="Anchor_170694395_h2_2">Creating the NPDM File</h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_170694395/171970412.png" class="embedded-image" />
+  </span>
+</p>
+<p>The NPDM file represents the metadata relating to the running of the application. The NPDM file is created from the NMETA file using the MakeMeta tool.</p>
+<p>Use the MakeMeta tool, in the following, way to create the NPDM file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>MakeMeta
+&nbsp;&nbsp;&nbsp;&nbsp;--desc %NINTENDO_SDK_ROOT%\Resources\SpecFiles\Application.desc
+&nbsp;&nbsp;&nbsp;&nbsp;--meta &lt;nmeta  file&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;-o &lt;OUTPUT_FILE&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The <code>Application.desc</code> file specified using a command-line option, describes the scope of permissions for the features that a regular application can use.</p>
+    <p>Without modifying this file, specify the file that NintendoSDK provides. Do not copy and use an <code>Application.desc</code> file from another version of NintendoSDK.</p>
+    <p>DESC files can be used when checking a submission, so reference them directly from the package instead of separately copying or renaming each package file.</p>
+  </div>
+</div>
+<h2 id="Anchor_170694395_h2_3">Creating the NRR File</h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_170694395/171969617.png" class="embedded-image" />
+  </span>
+</p>
+<p>The NRR file is a management file that is required to be able use NRO files in the <code>ro</code> library. The NRR file is created from the NRO files using <code>MakeNrr</code>. You can skip this procedure if you do not need the <code>ro</code> library feature.</p>
+<p>Use <code>MakeNrr</code> as follows to create the NRR file. You can register multiple NRO files to one NRR file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>MakeNrr
+&nbsp;&nbsp;&nbsp;&nbsp;-o &lt;OUTPUT_FILE&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;input file&gt;...</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The NRR file must be stored in the data region directory of the application using the procedure described later. It is referenced from the <code>ro</code> library at the time of executing the application.</p>
+    <p>There are restrictions on the location and other particulars of the NRR file. For more information, see <a href="../Pages/Page_161307762.html"><span class="sv-ti-title-text">ro Library</span></a>.</p>
+  </div>
+</div>
+<h2 id="Anchor_170694395_h2_4">Preparing to Create an Application Image</h2>
+<p>To create an application image, you must first consolidate the files needed to execute the application into several directories using the format later described. The following two directories are used for creating an application image.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Directory Name</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Code Region Directory</td>
+      <td>The directory for NSO, NDPM, and other files for the program code. Required for creating application images.</td>
+    </tr>
+    <tr>
+      <td>Data Region Directory</td>
+      <td>The directory for files used as resource data. Not required for creating application images. For more information, see the <a href="../Pages/Page_107338701.html">reference for the file system library</a>.</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_170694395_h3_1">Creating the Code Region Directory</h3>
+<p>The following files are stored in the code region directory. For more information about build targets and build types, see <a href="../Pages/Page_106361459.html">Build Targets and Build Types</a>.</p>
+<ul>
+  <li>The application's NSO file</li>
+  <li>The application's NPDM file</li>
+  <li>
+    <code>%NINTENDO_SDK_ROOT%\Libraries\&lt;<em>BuildTarget</em>&gt;\&lt;<em>BuildType</em>&gt;\nnrtld.nso</code>
+  </li>
+  <li>
+    <code>%NINTENDO_SDK_ROOT%\Libraries&lt;<em>BuildTarget</em>&gt;\&lt;<em>BuildType</em>&gt;\nnSdk.nso</code>
+  </li>
+  <li>
+    <code>%NINTENDO_SDK_ROOT%\Libraries\&lt;<em>BuildTarget</em>&gt;\&lt;<em>BuildType</em>&gt;\&lt;<em>Additional shared library 1 used by the application</em>&gt;.nso</code>
+  </li>
+  <li>
+    <code>%NINTENDO_SDK_ROOT%\Libraries\&lt;<em>BuildTarget</em>&gt;\&lt;<em>BuildType</em>&gt;\&lt;<em>Additional shared library 2 used by the application</em>&gt;.nso</code>
+  </li>
+  <li>...</li>
+  <li>
+    <code>%NINTENDO_SDK_ROOT%\Libraries\&lt;<em>BuildTarget</em>&gt;\&lt;<em>BuildType</em>&gt;\&lt;<em>Additional shared library X used by the application</em>&gt;.nso</code>
+  </li>
+</ul>
+<p>However, the number of NSO files for the additional shared libraries used by the application (described as additional NSO files in the following example) must be between 0 and 10.</p>
+<p>Copy these files directly below the code region directory, as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;code region directory&gt;
+├ &lt;the application's NSO file&gt;
+├ &lt;the application's NPDM file&gt;
+├ nnrtld.nso
+├ nnSdk.nso
+├ &lt;additional shared library 1 used by the application&gt;.nso
+├ &lt;additional shared library 2 used by the application&gt;.nso
+├ ...
+├ &lt;additional shared library X used by the application&gt;.nso</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Next, change the filenames as follows.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Filename Before Changing</th>
+      <th>Filename After Changing</th>
+    </tr>
+    <tr>
+      <td>The application's NSO file</td>
+      <td>
+        <code>main</code> (no filename extension)</td>
+    </tr>
+    <tr>
+      <td>The application's NPDM file</td>
+      <td>
+        <code>main.npdm</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>nnrtld.nso</code>
+      </td>
+      <td>
+        <code>rtld</code> (no filename extension)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>nnSdk.nso</code>
+      </td>
+      <td>
+        <code>sdk</code> (no filename extension)</td>
+    </tr>
+    <tr>
+      <td>Additional NSO file</td>
+      <td>
+        <p>
+          <code>subsdk*</code> (no filename extension)</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Rename the additional NSO files as subsdk0, subsdk1, subsdk2, ..., subsdk9 in the order of the highest priority of link-time symbol resolution. For example, if there are three additional NSO files, the code region directory after renaming them would be below the following directory.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;code region directory&gt;
+├ main
+├ main.npdm
+├ rtld
+├ sdk
+├ subsdk0
+├ subsdk1
+└ subsdk2</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_170694395_h3_2">Creating the Data Region Directory</h3>
+<p>There are no restrictions on the files stored inside the data region directory, or on the directory structure.</p>
+<p>However, the following restrictions apply when using dynamic modules that use the <code>ro</code> library.</p>
+<ul>
+  <li>
+    <p>You must create a directory with the name <code>.nrr</code> under the data region directory, and you must place the NRR file inside of it. No other data, apart from the NRR file, can be stored in the <code>.nrr</code> directory.</p>
+  </li>
+  <li>
+    <p>You cannot modify the NRR file. This includes encrypting, compressing, and so on.</p>
+    <div class="info_new">
+      <div class="info_new_left">Info</div>
+      <div class="info_new_right">
+        <p>You can disable these restrictions from <a href="../Pages/Page_310879077.html">DevMenu, in <span class="toc-item-body"><strong>Development Assistance Settings</strong></span></a>, by specifying <span class="toc-item-body"><span class="toc-link"><strong>Ease Nro Restriction</strong></span></span>.</p>
+      </div>
+    </div>
+  </li>
+</ul>
+<h2 id="Anchor_170694395_h2_5">Creating Application Images</h2>
+<p>There are several types of application images. For more information, see <a href="../Pages/Page_107320222.html">here</a>.</p>
+<p>Application images are created using AuthoringTool.</p>
+<h3 id="Anchor_170694395_h3_3">Creating the NSP File</h3>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_170694395/178643527.png" class="embedded-image" />
+  </span>
+</p>
+<p>The NSP file is an image file of the application that can be installed in the development hardware environment.</p>
+<p>Use AuthoringTool as follows to create the NSP file. For more information, see <a href="../Pages/Page_107320233.html">AuthoringTool</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>AuthoringTool
+&nbsp;&nbsp;&nbsp;&nbsp;creatensp
+&nbsp;&nbsp;&nbsp;&nbsp;-o &lt;OUTPUT_FILE&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;--desc %NINTENDO_SDK_ROOT%\Resources\SpecFiles\Application.desc
+&nbsp;&nbsp;&nbsp;&nbsp;--meta &lt;nmeta  file&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;--type Application
+&nbsp;&nbsp;&nbsp;&nbsp;--program &lt;code region directory&gt; [&lt;data region directory&gt;] 
+&nbsp;&nbsp;&nbsp;&nbsp;[--nro &lt;NRO directory&gt;]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The files specified in the <code>--desc</code> and <code>--meta</code> options become the DESC and NMETA files that will be used when the NPDM file is created.</p>
+<p>When using the <code>ro</code> library, you must do the following.</p>
+<ul>
+  <li>Specify the directory where the NRO files are located for the <code>--nro</code> option. The directory that is specified must contain all of the NRO files that will be used when creating the NRR file. There are no restrictions on the internal structure of this directory.</li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This option does not need to be specified when an NSP is executed on a system where <span class="toc-item-body"><span class="toc-item-body">Ease Nro Restriction</span></span> is enabled in the <span class="toc-link">Development Assistance Settings</span> of <a href="../Pages/Page_107328771.html">DevMenu</a>.</p>
+  </div>
+</div>
+<h3 id="Anchor_170694395_h3_4">Creating the NSPD Directory</h3>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_170694395/178643525.png" class="embedded-image" />
+  </span>
+</p>
+<p>The NSPD directory is a directory in the file system with the same logical structure as the NSP file. This directory uses the same format as the directory created by selecting <strong>Raw</strong> for the application format in the VSI Project Settings.</p>
+<p>Applications that use dynamic modules cannot use application images in NSPD directory format. For more information, see <a href="../Pages/Page_161307762.html"><span class="sv-ti-title-text">ro Library</span></a>.</p>
+<p>To create the NSPD directory, use AuthoringTool as follows. For more information, see <a href="../Pages/Page_107320233.html">AuthoringTool</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&nbsp;AuthoringTool
+&nbsp;&nbsp;&nbsp;&nbsp;createnspd
+&nbsp;&nbsp;&nbsp;&nbsp;-o &lt;output directory&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;--meta &lt;nmeta  file&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;--type Application
+&nbsp;&nbsp;&nbsp;&nbsp;--program &lt;code region directory&gt; [&lt;data region directory&gt;] </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The name of the NSPD directory must be in the format <code><em>&lt;optional name&gt;</em>.nspd</code>.</p>
+<p>The file specified in the <code>--meta</code> option becomes the NMETA file that will be used when the NPDM file is created.</p>
+<p>You must create an <code>nspd_root</code> file to execute the NSPD directory from VSI or Target Manager. Create an empty file with the name <code>&lt;arbitrary_name&gt;.nspd_root</code> in the same hierarchy as the NSPD directory. The <code>&lt;arbitrary_name&gt;</code> file must have the same name as the NSPD directory.</p>
+<h1 id="Anchor_170694395_h1_2">Next Procedure</h1>
+<p>This concludes the description of the build procedure. You can use the following methods to run your created application.</p>
+<ul>
+  <li>Use VSI for <a href="../Pages/Page_126569850.html">Debugging a Built Program</a></li>
+  <li>Use the Load Executable File feature in <a href="../Pages/Page_93359711.html">Target Manager</a></li>
+  <li>Use <a href="../Pages/Page_107320466.html">RunOnTarget</a> and execute the application on the command line</li>
+</ul>
+<p>To install a created application on the NX development hardware, you must use DevMenu. For more information, see <a href="../Pages/Page_107779320.html">Installing Applications on Development Hardware</a>.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

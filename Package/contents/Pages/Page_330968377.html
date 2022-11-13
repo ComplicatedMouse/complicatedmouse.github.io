@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Software Keyboard Applet | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Software Keyboard Applet -->
+<div class="pagetitle" id="PageId_330968377">Software Keyboard Applet</div>
+<div class="text_separate">
+<p>This library applet is called when an application requires text input from the user, such as for a user name or password.</p>
+<p>Depending on the input, there are features that allow predictive text input, character count, and blocking the input of prohibited text. There are presets to easily set the options. They can be specified when calling from the application.  </p>
+<p>This section covers the basic workflow through starting the software keyboard applet.  </p>
+<p>Refer to <a href="../Pages/Page_330968435.html">Inline Keyboard</a> when using the keyboard in parallel with Chat and other application processing.<br /></p>
+<h1 id="Anchor_330968377_h1_1">Including Header Files</h1>
+<p>Add the following code to your program.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/swkbd/swkbd_Api.h&gt;
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>nn/swkbd/swkbd_Api.h</code> is available at the following location.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$NINTENDO_SDK_ROOT/Include/nn/swkbd/swkbd_Api.h</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_330968377_h1_2">Configuring Startup Parameters</h1>
+<p>Before starting the software keyboard applet, configure the <code><span class="ApiLink_nn__swkbd__KeyboardConfig">nn::swkbd::KeyboardConfig</span></code> structure (which is passed as a parameter when starting the applet), and prepare an output buffer for storing the result.<br />Configure these items as described in this section.<br />For more advanced settings, see <code>swkbd_AppearArg.h</code>.</p>
+<h2 id="Anchor_330968377_h2_1">Specifying a Preset</h2>
+<p>When configuring the launch parameters, start by calling the <code><span class="ApiLink_nn__swkbd__MakePreset">nn::swkbd::MakePreset</span>()</code> function to configure the initial settings for the parameters.<br />Call this function before calling the functions described later.<br />For the presets that are available, see the <code><span class="ApiLink_nn__swkbd__Preset">nn::swkbd::Preset</span></code> enumerated type. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::swkbd::</span><span class="n">ShowKeyboardArg</span> <span class="n">showKeyboardArg</span><span class="p">;</span>
+<span class="nn">nn::swkbd::</span><span class="n">MakePreset</span><span class="p">(</span> <span class="o">&amp;</span><span class="p">(</span><span class="n">showKeyboardArg</span><span class="p">.</span><span class="n">keyboardConfig</span><span class="p">),</span> <span class="nn">nn::swkbd::</span><span class="n">Preset_Default</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_330968377_h2_2">Changing the Presets</h2>
+<p>Next, customize the <code><span class="ApiLink_nn__swkbd__KeyboardConfig">nn::swkbd::KeyboardConfig</span></code> structure based on the preset you specified when calling the <code><span class="ApiLink_nn__swkbd__MakePreset">nn::swkbd::MakePreset</span>()</code> function.<br />If you do not need to change anything, you can skip this step.<br />For more information about the <code><span class="ApiLink_nn__swkbd__KeyboardConfig">nn::swkbd::KeyboardConfig</span></code> structure, see <code>swkbd_AppearArg.h</code>.</p>
+<h2 id="Anchor_330968377_h2_3">Getting UTF-8 Text</h2>
+<p>By default, the software keyboard applet returns the entered text in the UTF-16 encoding.<br />To get UTF-8-encoded text, configure the <code><span class="ApiLink_nn__swkbd__KeyboardConfig">nn::swkbd::KeyboardConfig</span></code> structure as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">showKeyboardArg</span><span class="p">.</span><span class="n">keyboardConfig</span><span class="p">.</span><span class="n">isUseUtf8</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_330968377_h2_4">Configuring Header Text, Subtext, and Guide Text</h2>
+<p>If you want description text to be displayed while the software keyboard applet is open, do the following to configure the description text.<br />Note, however, that header text and subtext will not be displayed if the preview field is displaying multiple lines.<br />For more information about each type of text and how that text is displayed, see the <em>System Features Guide</em> and the <code>swkbd_AppearArg.h</code> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">guideString</span> <span class="o">=</span> <span class="kt">u8</span><span class="s">&quot;sample.&quot;</span><span class="p">;</span>
+<span class="nn">nn::swkbd::</span><span class="n">SetGuideTextUtf8</span><span class="p">(</span> <span class="o">&amp;</span><span class="p">(</span> <span class="n">showKeyboardArg</span><span class="p">.</span><span class="n">keyboardConfig</span> <span class="p">),</span> <span class="n">guideString</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The maximum length for strings that can be entered in each field is defined by constants such as <code><span class="ApiLink_nn__swkbd__HeaderTextMaxLength">nn::swkbd::HeaderTextMaxLength</span></code>. However, strings that contain some combinations of characters such as &ldquo;W&rdquo; that have large character widths may exceed the available display area and be cut off.<br /><br />After configuring the header text, subtext, and guide text in this way, check to make sure that the text is displayed correctly.</p>
+<h2 id="Anchor_330968377_h2_5">Allocating a Buffer for Storing the Initial Input Text</h2>
+<p>You can configure text to be displayed in the preview field when the software keyboard applet starts.<br />Do the following to configure this initial input text. <br />Before configuring the initial input text, you must first allocate a memory region.<br />Use the <code><span class="ApiLink_nn__swkbd__GetRequiredWorkBufferSize">nn::swkbd::GetRequiredWorkBufferSize</span>()</code> function to get the required size.<br />The address and size of the memory region must be <code><span class="ApiLink_nn__os__MemoryPageSize">nn::os::MemoryPageSize</span></code>-aligned. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">char</span> <span class="n">heapBuffer</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">];</span>
+<span class="nn">nn::mem::</span><span class="n">StandardAllocator</span> <span class="n">allocator</span><span class="p">(</span> <span class="n">heapBuffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span> <span class="n">heapBuffer</span> <span class="p">)</span> <span class="p">);</span>
+&nbsp;
+<span class="kt">size_t</span> <span class="n">workHeapSize</span> <span class="o">=</span> <span class="nn">nn::swkbd::</span><span class="n">GetRequiredWorkBufferSize</span><span class="p">(</span> <span class="nb">false</span> <span class="p">);</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">workBuffer</span> <span class="o">=</span> <span class="n">allocator</span><span class="p">.</span><span class="n">Allocate</span><span class="p">(</span> <span class="n">workHeapSize</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">MemoryPageSize</span> <span class="p">);</span>
+
+<span class="n">showKeyboardArg</span><span class="p">.</span><span class="n">workBuf</span> <span class="o">=</span> <span class="n">workBuffer</span><span class="p">;</span>
+<span class="n">showKeyboardArg</span><span class="p">.</span><span class="n">workBufSize</span> <span class="o">=</span> <span class="n">workHeapSize</span><span class="p">;</span>
+&nbsp;
+<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">initText</span> <span class="o">=</span> <span class="kt">u8</span><span class="s">&quot;Initial text&quot;</span><span class="p">;</span>
+<span class="nn">nn::swkbd::</span><span class="n">SetInitialTextUtf8</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">showKeyboardArg</span><span class="p">,</span> <span class="n">initText</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_330968377_h2_6">Customized Dictionary Settings</h2>
+<p>If you want to use a custom predictive text input dictionary in the application, configure the customized dictionary in the startup parameters as follows.</p>
+<p>Use the customized dictionary creation tool included in iWnn (integrated language processing middleware) to prepare compressed customized dictionaries for forward lookup prefix searches.</p>
+<p>Place one or more customized dictionaries you have prepared in a contiguous region of memory, and configure the information for each dictionary in <code><span class="ApiLink_nn__swkbd__CustomizedDictionarySet">nn::swkbd::CustomizedDictionarySet</span></code>. The address and size of the memory region must be <code><span class="ApiLink_nn__os__MemoryPageSize">nn::os::MemoryPageSize</span></code>-aligned.</p>
+<p>The following code uses <code><em>dicBuf</em></code> for the starting address of the memory where two customized dictionaries have been placed, and <code><em>dic1Size</em></code> and <code><em>dic2Size</em></code> for the size of each dictionary.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::swkbd::</span><span class="n">CustomizedDictionarySet</span> <span class="n">dicSet</span><span class="p">;</span>
+<span class="n">dicSet</span><span class="p">.</span><span class="n">pDictionaries</span>           <span class="o">=</span> <span class="n">dicBuf</span><span class="p">;</span>
+<span class="n">dicSet</span><span class="p">.</span><span class="n">dictionariesSize</span>        <span class="o">=</span> <span class="n">dic1Size</span> <span class="o">+</span> <span class="n">dic2Size</span><span class="p">;</span>
+<span class="n">dicSet</span><span class="p">.</span><span class="n">dicInfoList</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">lang</span>     <span class="o">=</span> <span class="nn">nn::swkbd::</span><span class="n">DictionaryLang_Japanese</span><span class="p">;</span>
+<span class="n">dicSet</span><span class="p">.</span><span class="n">dicInfoList</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span>   <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">dicSet</span><span class="p">.</span><span class="n">dicInfoList</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">size</span>     <span class="o">=</span> <span class="n">dic1Size</span><span class="p">;</span>
+<span class="n">dicSet</span><span class="p">.</span><span class="n">dicInfoList</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">lang</span>     <span class="o">=</span> <span class="nn">nn::swkbd::</span><span class="n">DictionaryLang_AmericanEnglish</span><span class="p">;</span>
+<span class="n">dicSet</span><span class="p">.</span><span class="n">dicInfoList</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">offset</span>   <span class="o">=</span> <span class="n">dicSet</span><span class="p">.</span><span class="n">dicInfoList</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">size</span><span class="p">;</span>
+<span class="n">dicSet</span><span class="p">.</span><span class="n">dicInfoList</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">size</span>     <span class="o">=</span> <span class="n">dic2Size</span><span class="p">;</span>
+<span class="n">dicSet</span><span class="p">.</span><span class="n">count</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+<span class="nn">nn::swkbd::</span><span class="n">SetCustomizedDictionaries</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">showKeyboardArg</span><span class="p">,</span> <span class="n">dicSet</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_330968377_h2_7">Allocating a Buffer for Storing the Input Result Text</h2>
+<p>The input result text is written directly to the application-specified memory region.<br />Do the following to set this memory region. <br />Use the <code><span class="ApiLink_nn__swkbd__GetRequiredStringBufferSize">nn::swkbd::GetRequiredStringBufferSize</span>()</code> function to get the required size.<br />The address and size of the output memory region must be <code><span class="ApiLink_nn__os__MemoryPageSize">nn::os::MemoryPageSize</span></code>-aligned. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">size_t</span> <span class="n">stringHeapSize</span> <span class="o">=</span> <span class="nn">nn::swkbd::</span><span class="n">GetRequiredStringBufferSize</span><span class="p">();</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">stringBuffer</span> <span class="o">=</span> <span class="n">allocator</span><span class="p">.</span><span class="n">Allocate</span><span class="p">(</span> <span class="n">stringHeapSize</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">MemoryPageSize</span> <span class="p">);</span>
+&nbsp;
+<span class="nn">nn::swkbd::</span><span class="n">String</span> <span class="n">outputString</span><span class="p">;</span>
+<span class="n">outputString</span><span class="p">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">char16_t</span><span class="o">*&gt;</span><span class="p">(</span> <span class="n">stringBuffer</span> <span class="p">);</span>
+<span class="n">outputString</span><span class="p">.</span><span class="n">bufSize</span> <span class="o">=</span> <span class="n">stringHeapSize</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_330968377_h1_3">Starting the Software Keyboard Applet</h1>
+<p>After configuring the startup parameters, pass the startup parameters to the <code><span class="ApiLink_nn__swkbd__ShowKeyboard">nn::swkbd::ShowKeyboard</span>()</code> function to start the software keyboard applet.<br />This function blocks other processes until the software keyboard applet is closed. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::Result result = nn::swkbd::ShowKeyboard( &amp;outputString, showKeyboardArg );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_330968377_h1_4">Getting the Input Result Text</h1>
+<p>The <code><span class="ApiLink_nn__swkbd__ShowKeyboard">nn::swkbd::ShowKeyboard</span>()</code> function returns control after the software keyboard applet is closed.<br />Then, the text input in the software keyboard applet is written to the output memory region.</p>
+<h1 id="Anchor_330968377_h1_5">Practical Examples</h1>
+<p>For more in-depth examples, see the <code>swkbd</code> library sample programs.<br />The <code>swkbd</code> library sample programs are not provided for Windows. </p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__swkbd__KeyboardConfig', '../../../Api/HtmlNX/structnn_1_1swkbd_1_1_keyboard_config.html' )
+SetUrl( 'ApiLink_nn__swkbd__MakePreset', '../../../Api/HtmlNX/namespacenn_1_1swkbd.html#a44c5beaea4acb2e24b0b47698a2a335c' )
+SetUrl( 'ApiLink_nn__swkbd__Preset', '../../../Api/HtmlNX/namespacenn_1_1swkbd.html#a50c3c6ed5888415f52dd585184186d01' )
+SetUrl( 'ApiLink_nn__swkbd__HeaderTextMaxLength', '../../../Api/HtmlNX/namespacenn_1_1swkbd.html#afc5ce6d6a99070935c7b5c9284217e7e' )
+SetUrl( 'ApiLink_nn__swkbd__GetRequiredWorkBufferSize', '../../../Api/HtmlNX/namespacenn_1_1swkbd.html#ae2f89757d528fd8587e8dd4294b46684' )
+SetUrl( 'ApiLink_nn__os__MemoryPageSize', '../../../Api/HtmlNX/namespacenn_1_1os.html#ac880b46610757e748d5bd79211af4236' )
+SetUrl( 'ApiLink_nn__swkbd__CustomizedDictionarySet', '../../../Api/HtmlNX/classnn_1_1swkbd_1_1_customized_dictionary_set.html' )
+SetUrl( 'ApiLink_nn__swkbd__GetRequiredStringBufferSize', '../../../Api/HtmlNX/namespacenn_1_1swkbd.html#a3876daad79ba50d639cae2a84864da68' )
+SetUrl( 'ApiLink_nn__swkbd__ShowKeyboard', '../../../Api/HtmlNX/namespacenn_1_1swkbd.html#ab06b6d8de087ecc445003cb95935e1ea' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

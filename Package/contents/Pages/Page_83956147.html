@@ -1,0 +1,627 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Memory Management | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Memory Management -->
+<div class="pagetitle" id="PageId_83956147">Memory Management</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83956147_h1_1">Memory Management</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956147_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83956147_h3_1">Dynamic Memory Allocation</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_83956147_h4_1">Memory Heap Feature</a>
+          </li>
+          <li>
+            <a href="#Anchor_83956147_h4_2">Virtual Address Memory Management</a>
+          </li>
+        </ul>
+        <li>
+          <a href="#Anchor_83956147_h3_2">Memory Access Permission Settings</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_3">Memory Fences</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_83956147_h2_2">Using the Memory Heap Feature</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956147_h2_3">Using the Virtual Address Memory Management Feature</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956147_h2_4">Example of Using Memory Management</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956147_h2_5">Memory Management API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956147_h2_6">Notes About Using Memory Management</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83956147_h3_4">Amount of Available Memory</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_5">Memory Initial Values</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_6">Getting the Default Memory Heap</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_7">Changing the Heap Size</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_8">Starting Address of the Heap</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_9">Getting Blocks and Consuming the Heap</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_10">Notes About Building Your Own Mechanism For Managing Memory in the Heap</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_11">Virtual Address Memory Management and Memory Consumption</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_12">Virtual Address Memory Management and Address Space</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_13">Specifying 2 GiB and Larger Sizes</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_14">Regions For Which Memory Access Permission Can and Cannot Be Changed</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_15">Depletion of System Memory Following Change in Memory Access Permission</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_16">Locking Memory</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_83956147_h2_7">NX Platform-Specific Information</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83956147_h3_17">NMETA Settings</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_18">Determining the Value for SystemResourceSize</a>
+        </li>
+        <li>
+          <a href="#Anchor_83956147_h3_19">Memory Allocation Speed Optimization for Virtual Address Memory</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83956147_h1_1">Memory Management</h1>
+<h2 id="Anchor_83956147_h2_1">Feature Overview</h2>
+<p>Memory management provides the functionality for basic operations relating to memory, including dynamic memory allocation and the configuration of access permission settings.</p>
+<h3 id="Anchor_83956147_h3_1">Dynamic Memory Allocation</h3>
+<p>There are two kinds of lowest-layer mechanisms for dynamically allocating memory in a program: memory heaps and virtual address memory management. All other means of memory allocation are built on top of these mechanisms.</p>
+<p>These two mechanisms can be used together, but the assumption is that the overall program will use either one or the other. We recommend that you follow suit and consistently use only one of them in your program.</p>
+<p>You can use virtual address memory management to realize all of the features that are possible with memory heaps, so you can think of the virtual address memory management features as a superset of the memory heap features. However, virtual address memory management involves the separate allocation of memory inside the <code>os</code> library, which consumes some memory.</p>
+<div class="platform_nx">
+  <div class="info_new">
+    <div class="info_new_left">Info</div>
+    <div class="info_new_right">
+      <p>In addition to this memory consumption inside the <code>os</code> library, using virtual address memory management on the NX platform reduces the total amount of memory available to the program. For more information, see <a href="#Anchor_83956147_platform_info">NX Platform-Specific Information</a>.</p>
+    </div>
+  </div>
+</div>
+<h4 id="Anchor_83956147_h4_1">Memory Heap Feature</h4>
+<p>The memory heap feature is a feature for allocating a contiguous region of memory when the program runs, and getting and freeing regions of memory called memory blocks from that region. The memory heap region can only allocate one heap from the memory space.</p>
+<p>For the user, the first step is to call the <span class="ApiLink_nn__Result_nn__os__SetMemoryHeapSize(size_t_size)_NN_NOEXCEPT">nn::os::SetMemoryHeapSize()</span> function and determine the size of memory that will be used for this memory heap region. Typically, we recommend issuing this process only once within <a href="../Pages/Page_92310396.html#Anchor_92310396_call_nninitStartup">nninitStartup()</a>, when starting the application. The unit size to which the memory heap can be set is determined by the target environment and can be referenced using the <span class="ApiLink_nn__os__MemoryHeapUnitSize">nn::os::MemoryHeapUnitSize</span> constant.</p>
+<p>After allocating the memory heap, use <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">nn::os::AllocateMemoryBlock()</span> and <span class="ApiLink_void_nn__os__FreeMemoryBlock(uintptr_t_address|_size_t_size)_NN_NOEXCEPT">nn::os::FreeMemoryBlock()</span> to allocate and free memory blocks. The size of the unit that can get and free memory blocks is determined by each target environment and can be viewed using the <span class="ApiLink_nn__os__MemoryBlockUnitSize">nn::os::MemoryBlockUnitSize</span> constant.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If you have not independently defined <code>nninitStartup()</code>, see <a href="../Pages/Page_92310396.html#Anchor_92310396_call_nninitStartup">the default <code>nninitStartup()</code></a> for more information about allocating memory heap and memory blocks.</p>
+  </div>
+</div>
+<h4 id="Anchor_83956147_h4_2">Virtual Address Memory Management</h4>
+<p>Virtual address memory management provides the functionality to allocate and deallocate address ranges in virtual address space, and to assign and unassign real memory anywhere within these allocated address ranges.</p>
+<h3 id="Anchor_83956147_h3_2">Memory Access Permission Settings</h3>
+<p>Use the <span class="ApiLink_void_nn__os__SetMemoryPermission(uintptr_t_address|_size_t_size|_MemoryPermission_permission)_NN_NOEXCEPT">nn::os::SetMemoryPermission()</span> function to configure the memory access permission settings for dynamically allocated memory spaces and for the program's own <code>data</code> and <code>bss</code> regions.</p>
+<p>The specifiable memory address and size must be integer multiples of <span class="ApiLink_nn__os__MemoryPageSize">nn::os::MemoryPageSize</span>. The specifiable memory access permission setting must be one of the following.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__os__MemoryPermission_None">nn::os::MemoryPermission_None</span>  </li>
+  <li>
+    <span class="ApiLink_nn__os__MemoryPermission_ReadOnly">nn::os::MemoryPermission_ReadOnly</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__os__MemoryPermission_ReadWrite">nn::os::MemoryPermission_ReadWrite</span>
+  </li>
+</ul>
+<p>When using <span class="ApiLink_void_nn__os__FreeMemoryBlock(uintptr_t_address|_size_t_size)_NN_NOEXCEPT">nn::os::FreeMemoryBlock()</span> to release back to the memory heap those memory blocks whose memory access permission in the memory block region was changed by using this API, the permission is automatically reset to <span class="ApiLink_nn__os__MemoryPermission_ReadWrite">nn::os::MemoryPermission_ReadWrite</span>.</p>
+<h3 id="Anchor_83956147_h3_3">Memory Fences</h3>
+<p>To run the program at high speed, some processors that are the target NintendoSDK operating environment support a framework for out-of-order execution that dynamically changes the order in which program instructions are executed. Changing the order of instruction execution also changes the order of memory access instruction execution in the program. When this happens, the phenomenon occurs of each processor core observing this memory access order differently. For example, if memory write instruction A is executed followed by memory write instruction B in core 0, the phenomenon may occur of core 1 observing a memory overwrite of instruction A followed by B, while core 2 observes a memory overwrite of instruction B followed by A.</p>
+<p>The memory fence feature is a feature for restricting this memory access instruction execution order and observation order. Memory access with the changes in execution order and observation order restricted is observed in the same memory access order from other processor cores.</p>
+<p>Each function has the name <code>nn::os::FenceMemoryXxxxYyyy()</code>, where Xxxx and Yyyy have a name that indicates the memory access type of <code>Store</code>, <code>Load</code>, or <code>Any</code>. For more information, see <span class="ApiLink_PageNotificationOsMemoryFence">OS-API Memory Fences</span>. The memory fence feature can get the anticipated results when using the <code>std::atomic</code> fence feature.</p>
+<h2 id="Anchor_83956147_h2_2">Using the Memory Heap Feature</h2>
+<p>The memory heap feature starts with allocating a memory heap region as the first step.</p>
+<p>Soon after the application has started (we recommend during <code>nninitStartup()</code>), configure the overall size of the memory heap, as shown in the following code. If sufficient memory is available, the heap of the specified size becomes available for use by the application. The size of the heap must be an integer multiple of <span class="ApiLink_nn__os__MemoryHeapUnitSize">nn::os::MemoryHeapUnitSize</span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">SetMemoryHeapSize</span><span class="p">(</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="p">);</span>   <span class="c1">// For example, 32 MiB.
+</span><span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocation of the memory heap fails.
+</span><span class="p">}</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Alternatively, you can configure the maximum configurable size of the memory heap, according to memory usage conditions when the program starts. For more information, see <a href="#Anchor_83956147_memory_management_anchor1">Notes About Using Memory Management &gt; Amount of Available Memory</a>.</p>
+<p>After the memory heap has been allocated, you can get memory blocks as follows. The size of the memory block must be an integer multiple of <span class="ApiLink_nn__os__MemoryBlockUnitSize">nn::os::MemoryBlockUnitSize</span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">uintptr_t</span>  <span class="n">address</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">AllocateMemoryBlock</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">address</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="p">);</span>   <span class="c1">// For example, 2 MiB.
+</span><span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocation of the memory block fails.
+</span><span class="p">}</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The obtained memory block can be released back to the memory heap as follows. The size of the freed memory block must be an integer multiple of <span class="ApiLink_nn__os__MemoryBlockUnitSize">nn::os::MemoryBlockUnitSize</span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FreeMemoryBlock</span><span class="p">(</span> <span class="n">address</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="p">);</span>   <span class="c1">// Returns 2 MiB.
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83956147_h2_3">Using the Virtual Address Memory Management Feature</h2>
+<div class="platform_nx">
+  <div class="note_new">
+    <div class="note_new_left">Note</div>
+    <div class="note_new_right">
+      <p>To use virtual address memory management on the NX platform, you must configure the NMETA file for its use. For more information, see <a href="#Anchor_83956147_platform_info">NX Platform-Specific Information</a>.</p>
+    </div>
+  </div>
+</div>
+<p>Two steps are required in order to use memory with the virtual address memory management feature.</p>
+<p>The first step is to allocate an address region. The size of this address region must be an integer multiple of <span class="ApiLink_nn__os__MemoryPageSize">nn::os::MemoryPageSize</span>. At this point, a region has been allocated in virtual address space, but that is all and the memory still cannot be used.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="kt">uintptr_t</span> <span class="n">address</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">AllocateAddressRegion</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">address</span><span class="p">,</span> <span class="mi">4ull</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="p">);</span>   <span class="c1">// For example, 4 GiB.
+</span><span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocation of the address region fails.
+</span><span class="p">}</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The second step is to assign real memory inside this address region. The address assigned to this real memory and the size must be integer multiples of <span class="ApiLink_nn__os__MemoryPageSize">nn::os::MemoryPageSize</span>. After the real memory has been assigned the memory can be used.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="kt">uintptr_t</span> <span class="n">assignAt</span> <span class="o">=</span> <span class="n">address</span> <span class="o">+</span> <span class="mi">4ull</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">AllocateMemoryPages</span><span class="p">(</span> <span class="n">assignAt</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="p">);</span>   <span class="c1">// For example, 2 MiB at the end.
+</span><span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Assignment of real memory fails.
+</span><span class="p">}</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In this code example, real memory is assigned to a 2-MiB region starting from <code><em>assignAt</em></code>.</p>
+<p>This assigned real memory can be unassigned in portions.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="kt">uintptr_t</span> <span class="n">at</span> <span class="o">=</span> <span class="n">assignAt</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">FreeMemoryPages</span><span class="p">(</span> <span class="n">at</span><span class="p">,</span> <span class="mi">8</span> <span class="o">*</span> <span class="mi">1024</span> <span class="p">);</span>   <span class="c1">// For example, the middle 8 KiB.
+</span><span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Unassignment of real memory fails.
+</span><span class="p">}</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In this code example, 1020 KiB of real memory and 1020 KiB of actual memory are assigned from <code><em>assignAt</em></code>, separated by 8 KiB of free space.</p>
+<p>The address region is freed as follows. When the address region is freed, any real memory assigned inside this region is unassigned automatically. The address region cannot be freed in portions.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">FreeAddressRegion</span><span class="p">(</span> <span class="n">address</span> <span class="p">);</span>    <span class="c1">// Frees the entire 4 GiB address region.
+</span><span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Freeing the address region fails.
+</span><span class="p">}</span> </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83956147_h2_4">Example of Using Memory Management</h2>
+<p>For an example of using memory management features, see the <span class="ApiLink_PageSampleOsMemoryHeap">Memory Management Features Sample Program</span>.</p>
+<h2 id="Anchor_83956147_h2_5">Memory Management API Reference</h2>
+<p>For more information, see the following links.</p>
+<p>
+  <strong>Memory Heap Functions</strong>
+</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__Result_nn__os__SetMemoryHeapSize(size_t_size)_NN_NOEXCEPT">nn::os::SetMemoryHeapSize()</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">nn::os::AllocateMemoryBlock()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FreeMemoryBlock(uintptr_t_address|_size_t_size)_NN_NOEXCEPT">nn::os::FreeMemoryBlock()</span>
+  </li>
+</ul>
+<p>
+  <strong>Virtual Address Memory Management Functions</strong>
+</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__Result_nn__os__AllocateAddressRegion(uintptr_t_*pOutAddress|_size_t_size)_NN_NOEXCEPT">nn::os::AllocateAddressRegion()</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__Result_nn__os__FreeAddressRegion(uintptr_t_address)_NN_NOEXCEPT">nn::os::FreeAddressRegion()</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__Result_nn__os__AllocateMemoryPages(uintptr_t_address|_size_t_size)_NN_NOEXCEPT">nn::os::AllocateMemoryPages()</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__Result_nn__os__FreeMemoryPages(uintptr_t_address|_size_t_size)_NN_NOEXCEPT">nn::os::FreeMemoryPages()</span>
+  </li>
+  <li>
+    <span class="ApiLink_VirtualAddressMemoryResourceUsage_nn__os__GetVirtualAddressMemoryResourceUsage()_NN_NOEXCEPT">nn::os::GetVirtualAddressMemoryResourceUsage()</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__IsVirtualAddressMemoryEnabled()_NN_NOEXCEPT">nn::os::IsVirtualAddressMemoryEnabled()</span>
+  </li>
+</ul>
+<p>
+  <strong>Accessing Memory Usage Status</strong>
+</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__QueryMemoryInfo(MemoryInfo_*info)_NN_NOEXCEPT">nn::os::QueryMemoryInfo()</span>
+  </li>
+</ul>
+<p>
+  <strong>Memory Access Permission Settings</strong>
+</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__SetMemoryPermission(uintptr_t_address|_size_t_size|_MemoryPermission_permission)_NN_NOEXCEPT">nn::os::SetMemoryPermission()</span>
+  </li>
+</ul>
+<p>
+  <strong>Memory Fence Functions</strong>
+</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__FenceMemoryStoreStore()_NN_NOEXCEPT">nn::os::FenceMemoryStoreStore()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FenceMemoryStoreLoad()_NN_NOEXCEPT">nn::os::FenceMemoryStoreLoad()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FenceMemoryStoreAny()_NN_NOEXCEPT">nn::os::FenceMemoryStoreAny()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FenceMemoryLoadStore()_NN_NOEXCEPT">nn::os::FenceMemoryLoadStore()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FenceMemoryLoadLoad()_NN_NOEXCEPT">nn::os::FenceMemoryLoadLoad()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FenceMemoryLoadAny()_NN_NOEXCEPT">nn::os::FenceMemoryLoadAny()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FenceMemoryAnyStore()_NN_NOEXCEPT">nn::os::FenceMemoryAnyStore()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FenceMemoryAnyLoad()_NN_NOEXCEPT">nn::os::FenceMemoryAnyLoad()</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FenceMemoryAnyAny()_NN_NOEXCEPT">nn::os::FenceMemoryAnyAny()</span>
+  </li>
+</ul>
+<p>[Functions for defect analysis] (May not be used for retail units.)</p>
+<ul>
+  <li>
+    <span class="ApiLink_bool_nn__os__IsMemoryLocked(void_*address|_size_t_size)_NN_NOEXCEPT">nn::os::IsMemoryLocked(void* address, size_t size)</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__IsMemoryLocked(uintptr_t_address|_size_t_size)_NN_NOEXCEPT">nn::os::IsMemoryLocked(uintptr_t address, size_t size)</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83956147_h2_6">Notes About Using Memory Management</h2>
+<p>
+  <a name="Anchor_83956147_memory_management_anchor1"></a>
+</p>
+<h3 id="Anchor_83956147_h3_4">Amount of Available Memory</h3>
+<p>For each platform, programs have a predetermined total amount of available memory. You can find the maximum amount of memory available at the time, by subtracting the amount of memory already used by the current program, from the total amount of available memory. For example, see the following implementation for configuring all remaining available memory as a memory heap.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+#include &lt;nn/util/util_BitUtil.h&gt;
+</span>
+<span class="nn">nn::os::</span><span class="n">MemoryInfo</span> <span class="n">memInfo</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">QueryMemoryInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">memInfo</span><span class="p">);</span>
+
+<span class="kt">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">memInfo</span><span class="p">.</span><span class="n">totalAvailableMemorySize</span><span class="p">)</span> <span class="o">-</span> <span class="n">memInfo</span><span class="p">.</span><span class="n">totalUsedMemorySize</span><span class="p">;</span>
+<span class="n">size</span> <span class="o">=</span> <span class="nn">nn::util::</span><span class="n">align_down</span><span class="p">(</span><span class="n">size</span> <span class="p">,</span> <span class="nn">nn::os::</span><span class="n">MemoryBlockUnitSize</span><span class="p">);</span>
+
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">SetMemoryHeapSize</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>  <span class="c1">// Sets a memory heap using the largest allocatable size.
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83956147_h3_5">Memory Initial Values</h3>
+<p>The initial value of allocated memory is undefined. Initialize and use as needed.</p>
+<h3 id="Anchor_83956147_h3_6">Getting the Default Memory Heap</h3>
+<p>In the NintendoSDK, the <span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span> user-defined function is called when the program starts. If the user has not defined this function, the default <span class="ApiLink_void_nninitStartup(void)">nninitStartup()</span> function found within the SDK is called. For more information, see <a href="../Pages/Page_92310396.html">Starting and Initializing Programs</a>.</p>
+<h3 id="Anchor_83956147_h3_7">Changing the Heap Size</h3>
+<p>You can dynamically increase or decrease the size of the memory heap, after it has been allocated, by again calling the <span class="ApiLink_nn__Result_nn__os__SetMemoryHeapSize(size_t_size)_NN_NOEXCEPT">nn::os::SetMemoryHeapSize()</span> function.</p>
+<p>If you act to increase the size of the heap, the additional memory is added to the end of the existing heap. As a result, you can increase the size of the heap even while it is being used. If adding memory fails, the heap remains the same size it was before.</p>
+<p>If you act to decrease the size of the heap, the unused memory is freed from the end of the heap. As a result, you can decrease the size of the heap, even while it is being used, provided the portion of memory from the end of the heap that you are freeing, is not part of what is currently being used. The memory heap can be restored to the minimum of 0 bytes. To perform this operation, all memory blocks in the memory heap must be freed (or not been allocated).</p>
+<h3 id="Anchor_83956147_h3_8">Starting Address of the Heap</h3>
+<p>The starting address of the memory heap differs, depending on the target environment.</p>
+<p>If an allocated heap is returned to a size of 0 bytes by the <span class="ApiLink_nn__Result_nn__os__SetMemoryHeapSize(size_t_size)_NN_NOEXCEPT">nn::os::SetMemoryHeapSize()</span> function, and then a heap is allocated again, there is no assurance that the starting address will be the same for this heap as it was the previous time the heap was allocated.</p>
+<h3 id="Anchor_83956147_h3_9">Getting Blocks and Consuming the Heap</h3>
+<p>The <code>os</code> library manages both memory regions obtained from the memory heap by the <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">AllocateMemoryBlock()</span> function and memory regions not obtained this way, but it cannot consume more of the memory heap than has been obtained by using <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">AllocateMemoryBlock()</span>.</p>
+<p>For example, if a memory heap of 32 MiB has been configured, and then 2 MiB are obtained using the <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">AllocateMemoryBlock()</span> function, the remaining heap is exactly 30 MiB (without a difference of even 1 byte). If you then get 30 MiB from the heap, the remaining amount is exactly 0 bytes.</p>
+<p>That being said, if the total remaining size of the memory heap is 30 MiB, the <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">AllocateMemoryBlock()</span> does not necessarily successfully get that 30 MiB. The reason is that the memory inside the memory heap may be fragmented. The objective of the memory management feature is to provide a comparatively large amount of memory early on when the application starts. It is not designed for repeated calls to <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">AllocateMemoryBlock()</span> and <span class="ApiLink_void_nn__os__FreeMemoryBlock(uintptr_t_address|_size_t_size)_NN_NOEXCEPT">FreeMemoryBlock()</span>.</p>
+<h3 id="Anchor_83956147_h3_10">Notes About Building Your Own Mechanism For Managing Memory in the Heap</h3>
+<p>If you want to use your own mechanism for managing memory space in the heap, make sure that any regions you intend to manage are allocated using the <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">AllocateMemoryBlock()</span> function. Operations are not assured when you directly access memory regions that have not been allocated by <span class="ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT">AllocateMemoryBlock()</span>.</p>
+<h3 id="Anchor_83956147_h3_11">Virtual Address Memory Management and Memory Consumption</h3>
+<p>Virtual address memory management involves allocating memory inside the <code>os</code> library to manage the address regions. When <span class="ApiLink_nn__Result_nn__os__AllocateAddressRegion(uintptr_t_*pOutAddress|_size_t_size)_NN_NOEXCEPT">nn::os::AllocateAddressRegion()</span> is called, dynamic allocation of memory is performed within the function. The memory that has been dynamically allocated inside the <code>os</code> library in included in the <span class="ApiLink_void_nn__os__QueryMemoryInfo(MemoryInfo_*info)_NN_NOEXCEPT">totalUsedMemorySize</span> value obtained by the <span class="ApiLink_nn__os__MemoryInfo__totalUsedMemorySize">nn::os::QueryMemoryInfo()</span> function.</p>
+<h3 id="Anchor_83956147_h3_12">Virtual Address Memory Management and Address Space</h3>
+<p>Virtual address space of 63 GiB is available to the virtual memory management feature for the allocation of address regions. However, for management overhead reasons, the total address region that can be used is smaller than this amount.</p>
+<h3 id="Anchor_83956147_h3_13">Specifying 2 GiB and Larger Sizes</h3>
+<p>In the 64-bit build environment, when you specify a size of 2 GiB or greater the size will be calculated incorrectly if you write your code as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">SetMemoryHeapSize</span><span class="p">(</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In C/C++, the constant <code>2</code> is <code>int</code> type, so &quot;<code>2 * 1024 * 1024 * 1024</code>&quot; will also be calculated as <code>int</code> type. It will be calculated with a maximum negative value expressed in a signed 32-bit range, implicitly cast to a 64-bit unsigned <code>size_t</code>, and passed as the argument. Do the following to get the correct results.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">SetMemoryHeapSize</span><span class="p">(</span> <span class="mi">2ull</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83956147_h3_14">Regions For Which Memory Access Permission Can and Cannot Be Changed</h3>
+<p>Note that the <span class="ApiLink_void_nn__os__SetMemoryPermission(uintptr_t_address|_size_t_size|_MemoryPermission_permission)_NN_NOEXCEPT">nn::os::SetMemoryPermission()</span> function cannot be used to change the access permission for all types of memory regions. Some regions can be changed this way and others cannot, as shown in the following list.</p>
+<ul>
+  <li>Memory regions for which access permission can be changed<ul><li>Memory heaps</li><li>The regions assigned to real memory using the virtual address memory management feature</li><li>Static variables (RW and ZI sections)</li></ul></li>
+  <li>Memory regions for which access permission cannot be changed<ul><li>Program code regions (such as EX and RO sections)</li><li>Thread stacks</li><li>Other memory regions that are not listed as changeable</li><li>Regions listed as changeable but currently being used by the NintendoSDK API</li></ul></li>
+</ul>
+<h3 id="Anchor_83956147_h3_15">Depletion of System Memory Following Change in Memory Access Permission</h3>
+<p>Using the <span class="ApiLink_void_nn__os__SetMemoryPermission(uintptr_t_address|_size_t_size|_MemoryPermission_permission)_NN_NOEXCEPT">nn::os::SetMemoryPermission()</span> function can lead to a depletion of system memory. For example, this can occur when a large number of changes are made in 4-KB chunks to different types of memory access permissions in a large memory space. This depletion can occur because system memory is needed for managing the program's memory space.</p>
+<p>The specific conditions that can lead to this memory depletion (the specified size and specified number of memory spaces) are highly dependent on the amount of memory used and how it is used. Enough system memory is allocated to preclude this problem under normal usage, but it is important to know about this issue. (We do not recommend changing memory access permissions in a fine-grained manner.)</p>
+<h3 id="Anchor_83956147_h3_16">Locking Memory</h3>
+<p>Some NintendoSDK API functions can lock particular memory regions. Locking a memory region indicates that that memory region is being used by the system for some purpose. If the locked region is accessed incorrectly by some method, a user exception is not always thrown, and an abort does not necessarily occur. For this reason, behavior is not assured. In particular, behavior is undefined for the following kinds of misuse, so note that unusual behavior may surface after a delay even if nothing unusual occurs at the time of access.</p>
+<ul>
+  <li>An <code><span class="ApiLink_nn__os">nn::os</span></code> synchronization object is placed in a locked memory region.</li>
+  <li>An <code>std::atomic</code> series atomic variable is placed in a locked memory region.</li>
+  <li>A function that passes memory to NintendoSDK or system features (such as library applets) is placed in a locked memory region.</li>
+</ul>
+<p>Use the <span class="ApiLink_bool_nn__os__IsMemoryLocked(void_*address|_size_t_size)_NN_NOEXCEPT">nn::os::IsMemoryLocked()</span> function to check whether a specific memory region is locked. In some cases, problems may be found by using this function to check the memory states in the memory allocator or deallocator.</p>
+<p>For more information about the kinds of functions that lock memory regions, see the NintendoSDK API documentation and references.</p>
+<p>
+  <br />
+</p>
+<div class="platform_nx">
+  <p>
+    <a name="Anchor_83956147_platform_info"></a>
+  </p>
+  <h2 id="Anchor_83956147_h2_7">NX Platform-Specific Information</h2>
+  <h3 id="Anchor_83956147_h3_17">NMETA Settings</h3>
+  <p>To use virtual address memory management on the NX platform, you must <a href="../Pages/Page_166503043.html">configure the NMETA file</a> for its use.</p>
+  <p>Specifically, set a value greater than 0 for the <code>SystemResourceSize</code> element in the NMETA file.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre>...
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Core&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;SystemResourceSize&gt;</span>0x01000000<span class="nt">&lt;/SystemResourceSize&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Core&gt;</span> 
+...</pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="Anchor_83956147_h3_18">Determining the Value for SystemResourceSize</h3>
+  <p>Memory of the size specified in <code>SystemResourceSize</code> is subtracted from the memory available to the program and used to manage the program's virtual address space. In the following description, this memory used to manage the program's virtual address space is referred to as <em>management memory</em>.</p>
+  <p>The amount of memory required for management memory has a logical maximum value of 256 MiB. If this value is set for <code>SystemResourceSize</code>, there will never be insufficient management memory. However, this amount of memory is too much, and 16 MiB is enough for most typical applications. For this reason, <code>SystemResourceSize</code> can be set for every program separately, and an appropriate value must be set for each program.</p>
+  <p>If there is insufficient management memory, the virtual address memory management functions returns <span class="ApiLink_nn__os__ResultOutOfResource">nn::os::ResultOutOfResource</span>. To check how much memory is currently being used for management memory, use the <span class="ApiLink_VirtualAddressMemoryResourceUsage_nn__os__GetVirtualAddressMemoryResourceUsage()_NN_NOEXCEPT">nn::os::GetVirtualAddressMemoryResourceUsage()</span> function. In determining the size to set for <code>SystemResourceSize</code>, choose a value so that the <span class="ApiLink_VirtualAddressMemoryResourceUsage_nn__os__GetVirtualAddressMemoryResourceUsage()_NN_NOEXCEPT">usedSize</span> obtained by the <span class="ApiLink_nn__os__VirtualAddressMemoryResourceUsage__usedSize">nn::os::GetVirtualAddressMemoryResourceUsage()</span> function in the various scenes of the running program will be smaller than <span class="ApiLink_nn__os__VirtualAddressMemoryResourceUsage__assignedSize">assignedSize</span> (that is, smaller than the value set for <code>SystemResourceSize</code>).</p>
+  <h3 id="Anchor_83956147_h3_19">Memory Allocation Speed Optimization for Virtual Address Memory</h3>
+  <p>In NX Add-On 7.2 and later, the speed when allocating virtual address memory on the NX platform has been optimized. When an application re-allocates memory that has been released once, it can now allocate at high speed without initializing the memory.</p>
+  <p>This optimization is performed in applications built with versions of SDK for NX Add-On 7.2 or later. Applications built with earlier SDK versions are unaffected. You can also disable optimization when using SDK versions in NX Add-On 7.2 or later by setting <code>MemoryAllocationCompatiblityMode</code> in the NMETA file to <code>True</code>.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre>...
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Core&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;MemoryAllocationCompatibilityMode&gt;</span>True<span class="nt">&lt;/MemoryAllocationCompatibilityMode&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Core&gt;</span> 
+...</pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>This does not mean that it prioritizes allocating released memory when allocating. Even when allocating 2 MB immediately after releasing 2 MB, it may assign memory other than the released memory. In this case, memory initialization is performed. If you want to always allocate memory at high speed, allocate all memory once with <code>os::AllocateMemoryPages</code> and release all areas right away with <code>os::FreeMemoryPages</code>. This step ensures that memory is not initialized. However, several hundred milliseconds are necessary to initially allocate all memory.</p>
+  <p>Memory is also released from applications when the size of <code>os::SetMemoryHeapSize</code> is reduced, but the memory released here is not targeted for optimization.</p>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__Result_nn__os__SetMemoryHeapSize(size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2be8bac50d8d37a91f866d9e0c55886e' )
+SetUrl( 'ApiLink_nn__os__MemoryHeapUnitSize', '../../../Api/HtmlNX/namespacenn_1_1os.html#aeed47f05ce9175eb46876c1ddd0512c7' )
+SetUrl( 'ApiLink_nn__Result_nn__os__AllocateMemoryBlock(uintptr_t_*address|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a875bf6b3129f06654e641513c63017dd' )
+SetUrl( 'ApiLink_void_nn__os__FreeMemoryBlock(uintptr_t_address|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a20fa47e171856fb202b60e6b2a1de719' )
+SetUrl( 'ApiLink_nn__os__MemoryBlockUnitSize', '../../../Api/HtmlNX/namespacenn_1_1os.html#ade84ad9f438e76820510ca0623c5a823' )
+SetUrl( 'ApiLink_void_nn__os__SetMemoryPermission(uintptr_t_address|_size_t_size|_MemoryPermission_permission)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ae3d0ddd1807c032d7ab0e0fda9739bef' )
+SetUrl( 'ApiLink_nn__os__MemoryPageSize', '../../../Api/HtmlNX/namespacenn_1_1os.html#ac880b46610757e748d5bd79211af4236' )
+SetUrl( 'ApiLink_nn__os__MemoryPermission_None', '../../../Api/HtmlNX/namespacenn_1_1os.html#a883ab0b53c72a07619d9e83de4836b9aaf6942de46447bc0df8294a749a329d08' )
+SetUrl( 'ApiLink_nn__os__MemoryPermission_ReadOnly', '../../../Api/HtmlNX/namespacenn_1_1os.html#a883ab0b53c72a07619d9e83de4836b9aad0057f9250371335c5b9292ff44e1750' )
+SetUrl( 'ApiLink_nn__os__MemoryPermission_ReadWrite', '../../../Api/HtmlNX/namespacenn_1_1os.html#a883ab0b53c72a07619d9e83de4836b9aa57ead1592d9473ac1c22f0b4f75ed2c0' )
+SetUrl( 'ApiLink_PageNotificationOsMemoryFence', '../../../Api/HtmlNX/_page_notification_os_memory_fence.html' )
+SetUrl( 'ApiLink_PageSampleOsMemoryHeap', '../../../Api/HtmlNX/_page_sample_os_memory_heap.html' )
+SetUrl( 'ApiLink_nn__Result_nn__os__AllocateAddressRegion(uintptr_t_*pOutAddress|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a11dca1988a4d23dc773f216847a56ecd' )
+SetUrl( 'ApiLink_nn__Result_nn__os__FreeAddressRegion(uintptr_t_address)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a822e071b5061ef30ce2202d67fad8dd0' )
+SetUrl( 'ApiLink_nn__Result_nn__os__AllocateMemoryPages(uintptr_t_address|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#afc2aecae3365f9881e63f3c9a77be239' )
+SetUrl( 'ApiLink_nn__Result_nn__os__FreeMemoryPages(uintptr_t_address|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#aadde176efe5d5ec8352539a4c41cc468' )
+SetUrl( 'ApiLink_VirtualAddressMemoryResourceUsage_nn__os__GetVirtualAddressMemoryResourceUsage()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a49b13b1f8e6e4fa352192eb9d121ff49' )
+SetUrl( 'ApiLink_bool_nn__os__IsVirtualAddressMemoryEnabled()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ab9e6556970df605db16e5548b9fd188c' )
+SetUrl( 'ApiLink_void_nn__os__QueryMemoryInfo(MemoryInfo_*info)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a79f2a489da0a124ebdc8130595c70b94' )
+SetUrl( 'ApiLink_void_nn__os__FenceMemoryStoreStore()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a0b9900ac6f5ffc3cceeaf9e4d4628fd6' )
+SetUrl( 'ApiLink_void_nn__os__FenceMemoryStoreLoad()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a89bc7c5ef7a7884fa2cdb771d1050045' )
+SetUrl( 'ApiLink_void_nn__os__FenceMemoryStoreAny()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8ecf770755dd217ffff4479db6102863' )
+SetUrl( 'ApiLink_void_nn__os__FenceMemoryLoadStore()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a36d20e99e9c3b0e699b51a13acd3ead6' )
+SetUrl( 'ApiLink_void_nn__os__FenceMemoryLoadLoad()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a24612da5b069435fc5f1d8f8720adadf' )
+SetUrl( 'ApiLink_void_nn__os__FenceMemoryLoadAny()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a367aa8b77b2ae4d88e358810ef54b973' )
+SetUrl( 'ApiLink_void_nn__os__FenceMemoryAnyStore()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#acebc9c7ff99fc0e1b04a693daeebda8f' )
+SetUrl( 'ApiLink_void_nn__os__FenceMemoryAnyLoad()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a7bfb421bf54c835b5b731db28d171cf9' )
+SetUrl( 'ApiLink_void_nn__os__FenceMemoryAnyAny()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#addf5cd70de75b033bb8ae4eac87f8fe2' )
+SetUrl( 'ApiLink_bool_nn__os__IsMemoryLocked(void_*address|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a20238ce26424ba34876552fb2d53165a' )
+SetUrl( 'ApiLink_bool_nn__os__IsMemoryLocked(uintptr_t_address|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ac2789b550619d98db2c52198839d35c0' )
+SetUrl( 'ApiLink_void_nninitStartup(void)', '../../../Api/HtmlNX/init___startup_8h.html#ac781c07f35d3d9e7a71d21ad25e25f8f' )
+SetUrl( 'ApiLink_nn__os__MemoryInfo__totalUsedMemorySize', '../../../Api/HtmlNX/structnn_1_1os_1_1_memory_info.html#a179fcdecd518686555036d0db3a5014c' )
+SetUrl( 'ApiLink_nn__os', '../../../Api/HtmlNX/namespacenn_1_1os.html' )
+SetUrl( 'ApiLink_nn__os__ResultOutOfResource', '../../../Api/HtmlNX/classnn_1_1os_1_1_result_out_of_resource.html' )
+SetUrl( 'ApiLink_nn__os__VirtualAddressMemoryResourceUsage__usedSize', '../../../Api/HtmlNX/structnn_1_1os_1_1_virtual_address_memory_resource_usage.html#aa6e16d1c6e86d32ea7ad8d59b74ed1b8' )
+SetUrl( 'ApiLink_nn__os__VirtualAddressMemoryResourceUsage__assignedSize', '../../../Api/HtmlNX/structnn_1_1os_1_1_virtual_address_memory_resource_usage.html#a1efd0c9c08708455bca8ee2e4fd03f77' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

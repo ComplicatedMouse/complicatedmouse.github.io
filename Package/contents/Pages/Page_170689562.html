@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Getting the Language | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Getting the Language -->
+<div class="pagetitle" id="PageId_170689562">Getting the Language</div>
+<div class="text_separate">
+<h1 id="Anchor_170689562_h1_1">Getting the Language</h1>
+<h2 id="Anchor_170689562_h2_1">Feature Overview</h2>
+<p>The application sets the languages that it supports in the <em>application control data</em> in its metafile.</p>
+<p>For more information, see <a href="../Pages/Page_166503043.html">Writing the NMETA File</a>.</p>
+<p>
+  <br />
+</p>
+<p>The language for each console is set in its system settings.</p>
+<p>It is the responsibility of the application to deal with the language set in the system settings.</p>
+<p>If the language that has been set in the system settings is not included among the languages supported by the application in its <em>application control data</em>, the application must select a language that it can support, based on the order of priority of the substitute languages in the system settings.</p>
+<p>The <code>oe</code> library has a feature for comparing the order of priority of the languages in the system settings with the order of priority of the application's supported languages to get the most suitable language to use.</p>
+<p>
+  <span class="text-quote">If your application supports a language that is not included among the languages in the system settings, do not use this API, and instead implement your own process in the application to select a language.</span>
+</p>
+<p>
+  <br />
+</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The <code>oe</code> library is only supported on the NX platform.</p>
+    <p>It is not supported in the <code>Generic</code> build environment.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_170689562_h2_2">Using the Feature to Get the Language</h2>
+<ol>
+  <li>
+    <p>
+      <code>include</code> the <code>oe</code> library header.<br /></p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/oe.h&gt;
+</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
+  </li>
+  <li>
+    <p>Call the <code>oe</code> library function to get the language.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::oe::</span><span class="n">GetDesiredLanguage</span><span class="p">();</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h3 id="Anchor_170689562_h3_1">Determining the Supported Languages</h3>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>In NintendoSDK Firmware for NX 4.0.0 and earlier, you could not set Simplified Chinese, Traditional Chinese, or Korean for the language in the console.</p>
+    <p>For this reason, on consoles with NintendoSDK Firmware for NX 4.0.0 and earlier, the <code><span class="ApiLink_nn__oe__GetDesiredLanguage">nn::oe::GetDesiredLanguage</span></code> function does not return Simplified Chinese, Traditional Chinese, or Korean.</p>
+    <p>To test operations with the language settings for Simplified Chinese, Traditional Chinese, and Korean, you must use NintendoSDK Firmware for NX 4.0.0 or later.</p>
+  </div>
+</div>
+<p>If more than one supported language is set in the application's NMETA file, the application can get the language that corresponds to the language that has been set in the system settings.</p>
+<p />
+<p>For more information about the IETF language codes for these languages, see <a href="../Pages/Page_100911958.html">Language</a>.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>For NX, Chinese (zh-CN) and Taiwanese (<span style="color: rgb(51,51,51);">zh-TW</span>) cannot be used. Use Simplified Chinese (<span style="color: rgb(51,51,51);">zh-Hans</span>) and Traditional Chinese (<span style="color: rgb(51,51,51);">zh-Hant</span>) instead.</p>
+  </div>
+</div>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>#include &lt;nn/oe/oe_ApplicationControlApis.h&gt;
+#include &lt;nn/util/util_StringUtil.h&gt;
+
+nn::settings::LanguageCode code = nn::oe::GetDesiredLanguage();
+
+if ( ::nn::util::Strncmp( code.string, &quot;ja&quot;, sizeof( code.string ) ) == 0 )
+{
+&nbsp;&nbsp;&nbsp;// Japanese language setting.
+} 
+...
+else if ( ::nn::util::Strncmp( code.string, &quot;ko&quot;, sizeof( code.string ) ) == 0 )
+{
+&nbsp;&nbsp;&nbsp;// Korean language setting.
+} 
+else if ( ::nn::util::Strncmp( code.string, &quot;zh-Hans&quot;, sizeof( code.string ) ) == 0 )
+{
+&nbsp;&nbsp;&nbsp;// Simplified Chinese language setting.
+}
+else if ( ::nn::util::Strncmp( code.string, &quot;zh-Hant&quot;, sizeof( code.string ) ) == 0 )
+{
+&nbsp;&nbsp;&nbsp;// Traditional Chinese language setting.
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_170689562_h2_3">API Reference for the Get-Language Feature</h2>
+<ul style="list-style-type: square;">
+  <li>
+    <code>
+      <span class="ApiLink_nn__oe__GetDesiredLanguage">nn::oe::GetDesiredLanguage</span>()</code>
+  </li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__oe__GetDesiredLanguage', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a93bc6192eee2c79988711b0c99bce8cd' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

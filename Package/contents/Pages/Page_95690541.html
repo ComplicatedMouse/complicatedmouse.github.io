@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Buffer | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Buffer -->
+<div class="pagetitle" id="PageId_95690541">Buffer</div>
+<div class="text_separate">
+<h1 id="Anchor_95690541_h1_1">Buffer</h1>
+<h2 id="Anchor_95690541_h2_1">Overview</h2>
+<p>The buffer feature provides options for managing buffers that are referenced by the GPU.</p>
+<p>The NintendoSDK GFX buffer conceptually consolidates the numerous buffers used by the GPU such as the vertex, index, and constant buffers into one. Note that each have different alignment limitations, and the optimal page characteristics in the memory pool it is based in may differ.</p>
+<p>The buffer contents are linearly stored, unlike the texture. Map and UnMap features are used to view and update the content of the buffer from the CPU. To use these features, the memory pool page property must be set to make the memory pool visible to the CPU. Data read and written by the CPU is not automatically cache-controlled, so you must either manually flush the cache as needed or invalidate the cache.</p>
+<h2 id="Anchor_95690541_h2_2">Information</h2>
+<p>Buffer information is defined as <span class="ApiLink_nn__gfx__BufferInfo"><code>nn::gfx::BufferInfo</code></span>.</p>
+<h3 id="Anchor_95690541_h3_1">Size</h3>
+<p>The buffer size is specified by  <code><span class="ApiLink_void_nn__gfx__TTextureInfo__SetSize(size_t_value)_NN_NOEXCEPT">SetSize</span></code>.</p>
+<h3 id="Anchor_95690541_h3_2">GPU Access Method</h3>
+<p>
+  <code>
+    <span class="ApiLink_void_nn__gfx__TSamplerInfo__SetGpuAccessFlags(int_value)_NN_NOEXCEPT">SetGpuAccessFlag</span>
+  </code> specifies how the GPU uses the buffer.</p>
+<h2 id="Anchor_95690541_h2_3">Object</h2>
+<p>The buffer object is defined as <span class="ApiLink_nn__gfx__Buffer"><code>nn::gfx::Buffer</code></span>.</p>
+<h3 id="Anchor_95690541_h3_3">Initialization and Destruction</h3>
+<p>Initializing and freeing the buffer follows the method for ordinary <a href="../Pages/Page_83955654.html">objects</a>.</p>
+<h3 id="Anchor_95690541_h3_4">Memory Pool</h3>
+<p>The static variable <span class="ApiLink_nn__gfx__TBuffer__IsMemoryPoolRequired"><code>IsMemoryPoolRequired</code></span> is defined to represent whether a memory pool is required to handle architectures where the CPU and GPU share memory, or do not share memory.</p>
+<p>When <span class="ApiLink_nn__gfx__TBuffer__IsMemoryPoolRequired"><code>IsMemoryPoolRequired</code></span> is set to <code>true</code>, a valid memory pool must be passed at initialization. Without a memory pool, the buffer fails to initialize and returns an error. The memory pool offset has an alignment limitation at this time. The limit may be obtained by using <span class="ApiLink_static_size_t_nn__gfx__TBuffer__GetBufferAlignment(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT"><code>GetBufferAlignment</code></span>.</p>
+<p>When <span class="ApiLink_nn__gfx__TBuffer__IsMemoryPoolRequired"><code>IsMemoryPoolRequired</code></span> is set to <code>false</code>, it is possible to initialize the buffer by passing <code>NULL</code> as a memory pool argument. In this case, the buffer memory is allocated on the device, and the content is undefined. When a valid memory pool is set, this is considered an initial value and the buffer memory is allocated on the device with the same content.</p>
+<p>There are alignment restrictions on the offset to the memory pool that is specified when the buffer is being initialized. Get this value using the <span class="ApiLink_static_size_t_nn__gfx__TBuffer__GetBufferAlignment(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT"><code>nn::gfx::Buffer::GetBufferAlignment</code></span> function.</p>
+<h3 id="Anchor_95690541_h3_5">Maps</h3>
+<p>To map the memory, the memory pool that is specified when the buffer is created must be specified with the property that makes it visible to the CPU. If the memory pool is specified with the property to use CPU cache, you must flush the CPU cache as needed or invalidate the cache.</p>
+<p>To map the buffer and get addresses for reading and writing by the CPU, call <span class="ApiLink_void_*_nn__gfx__TBuffer__Map()_const_NN_NOEXCEPT"><code>Map</code></span>.<br />To invalidate the CPU cache to ensure that the GPU reads content, call <span class="ApiLink_void_nn__gfx__TBuffer__InvalidateMappedRange(ptrdiff_t_offset|_size_t_size)_const_NN_NOEXCEPT"><code>InvalidateMappedRange</code></span>. <br />To flush the cache to ensure that the GPU reads what the CPU has written, call <code><span class="ApiLink_void_nn__gfx__TBuffer__FlushMappedRange(ptrdiff_t_offset|_size_t_size)_const_NN_NOEXCEPT">FlushMappedRange</span></code>.</p>
+<p>If reading and writing by the CPU is finished, call <code><span class="ApiLink_void_nn__gfx__TBuffer__Unmap()_const_NN_NOEXCEPT">Unmap</span></code> to unmap the memory.</p>
+<h2 id="Anchor_95690541_h2_4">Copying the Buffer</h2>
+<p>It is possible to copy a specified area of a buffer to a specified area of a different buffer.<br />A command to copy the buffer is added by calling the <span class="ApiLink_nn__gfx__CommandBuffer"><code>CopyBuffer</code></span> function of the <span class="ApiLink_void_nn__gfx__TCommandBuffer__CopyBuffer(TBuffer__Target___*pDstBuffer|_ptrdiff_t_dstOffset|_const_TBuffer__Target___*pSrcBuffer|_ptrdiff_t_srcOffset|_size_t_size)_NN_NOEXCEPT"><code>nn::gfx::CommandBuffer</code></span> class. </p>
+<p>It is possible to copy between a buffer and a image. See the description of <a href="../Pages/Page_83955793.html">Textures</a>.</p>
+<h2 id="Anchor_95690541_h2_5">Clearing the Buffer</h2>
+<p>Use <span class="ApiLink_void_nn__gfx__TCommandBuffer__ClearBuffer(TBuffer__Target___*pBuffer|_ptrdiff_t_offset|_size_t_size|_uint32_t_value)_NN_NOEXCEPT"><code>nn::gfx::Buffer::ClearBuffer</code></span> to fill all of the values in the specified buffer range with a single value.</p>
+<h2 id="Anchor_95690541_h2_6">GPU Address</h2>
+<p>A GPU address is requested at various locations, such as when setting a constant buffer.</p>
+<p>Use <span class="ApiLink_void_nn__gfx__TBuffer__GetGpuAddress(GpuAddress_*pOutGpuAddress)_const_NN_NOEXCEPT"><code>GetGpuAddress</code></span> to get the starting GPU address of the target buffer. It is legal to offset the obtained GPU address, using <span class="ApiLink_nn__gfx__GpuAddress"><code>Offset</code></span> in the <span class="ApiLink_void_nn__gfx__GpuAddress__Offset(ptrdiff_t_offset)_NN_NOEXCEPT"><code>nn::gfx::GpuAddress</code></span> class.</p>
+<p>Unlike most other objects, the GPU address object is designed in a way that permits the copying of the object itself.</p>
+<h2 id="Anchor_95690541_h2_7">Buffer Resource State</h2>
+<p>When the buffer's usage method changes, the buffer's state changes are notified to the command buffer to maintain consistency with the cache.<br />Buffer resource state transitions are performed by the <span class="ApiLink_nn__gfx__CommandBuffer"><code>SetBufferStateTransition</code></span> function in the <span class="ApiLink_void_nn__gfx__TCommandBuffer__SetBufferStateTransition(TBuffer__Target___*pBuffer|_int_oldState|_int_oldStageBits|_int_newState|_int_newStageBits)_NN_NOEXCEPT"><code>nn::gfx::CommandBuffer</code></span> namespace. This function specifies the usage method before calling the function and after calling the function using the shader stage arguments. Note that a state transition from an unordered access buffer to an unordered access buffer is required in order to care for the cache for unordered access buffers.</p>
+<p>Using the resource states may allow for operations with a wider range of APIs, but a majority of these may be replaced with the <span class="ApiLink_nn__gfx__CommandBuffer"><code>FlushMemory</code></span> and <span class="ApiLink_void_nn__gfx__TCommandBuffer__FlushMemory(int_gpuAccessFlags)_NN_NOEXCEPT"><code>InvalidateMemory</code></span> functions from the <span class="ApiLink_void_nn__gfx__TCommandBuffer__InvalidateMemory(int_gpuAccessFlags)_NN_NOEXCEPT"><code>nn::gfx::CommandBuffer</code></span> namespace.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__BufferInfo', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_buffer_info.html' )
+SetUrl( 'ApiLink_void_nn__gfx__TTextureInfo__SetSize(size_t_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_buffer_info.html#acf66bfe2703001b5c3c800d73fae0dc5' )
+SetUrl( 'ApiLink_void_nn__gfx__TSamplerInfo__SetGpuAccessFlags(int_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_buffer_info.html#a8baa33ab5cf098fcec0e1609c6ecf0c7' )
+SetUrl( 'ApiLink_nn__gfx__Buffer', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a8721c66f238e6505cbf9ca0eb71d3e85' )
+SetUrl( 'ApiLink_nn__gfx__TBuffer__IsMemoryPoolRequired', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_buffer.html#af96326338663a23e227df75dd7d32faa' )
+SetUrl( 'ApiLink_static_size_t_nn__gfx__TBuffer__GetBufferAlignment(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_buffer.html#a99b1cd500e55e26460655d68eee13842' )
+SetUrl( 'ApiLink_void_*_nn__gfx__TBuffer__Map()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_buffer.html#ae4ea23c81cbef8a6cd39a378678d2df6' )
+SetUrl( 'ApiLink_void_nn__gfx__TBuffer__InvalidateMappedRange(ptrdiff_t_offset|_size_t_size)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_buffer.html#a19e27774f85edc7707f18ccfaf87ef49' )
+SetUrl( 'ApiLink_void_nn__gfx__TBuffer__FlushMappedRange(ptrdiff_t_offset|_size_t_size)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_buffer.html#a27f71dd8a5fa21d256199bf8fcc807ab' )
+SetUrl( 'ApiLink_void_nn__gfx__TBuffer__Unmap()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_buffer.html#a8a5e6d06cc7f541da91237ddf540f4b8' )
+SetUrl( 'ApiLink_nn__gfx__CommandBuffer', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#af719859a76c249a182d878f0cffd47c5' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__CopyBuffer(TBuffer__Target___*pDstBuffer|_ptrdiff_t_dstOffset|_const_TBuffer__Target___*pSrcBuffer|_ptrdiff_t_srcOffset|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a14d0575ef1fe121a565024ed37643e2a' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__ClearBuffer(TBuffer__Target___*pBuffer|_ptrdiff_t_offset|_size_t_size|_uint32_t_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a50a2acc68bac305b7d1dfa5e4f0afe3c' )
+SetUrl( 'ApiLink_void_nn__gfx__TBuffer__GetGpuAddress(GpuAddress_*pOutGpuAddress)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_buffer.html#a67df38d01bea9fdc073b6c3657a34011' )
+SetUrl( 'ApiLink_nn__gfx__GpuAddress', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_gpu_address.html' )
+SetUrl( 'ApiLink_void_nn__gfx__GpuAddress__Offset(ptrdiff_t_offset)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_gpu_address.html#aaf0c4b39e40b12d4b57e0a06ede3f691' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetBufferStateTransition(TBuffer__Target___*pBuffer|_int_oldState|_int_oldStageBits|_int_newState|_int_newStageBits)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a33c9afc3f95512cc61bbef4f0b60f7a6' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__FlushMemory(int_gpuAccessFlags)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a3b43b17e57f564190229a914370bfb9b' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__InvalidateMemory(int_gpuAccessFlags)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a7e5cade7802122a5272657dfaec5d1f1' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

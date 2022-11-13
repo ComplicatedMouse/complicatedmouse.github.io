@@ -1,0 +1,701 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Rendering Framework | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Rendering Framework -->
+<div class="pagetitle" id="PageId_187887372">Rendering Framework</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_187887372_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_187887372_h1_2">Rendering Frameworks Using NVN</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_187887372_h2_1">Render Flow </a>
+      </li>
+      <li>
+        <a href="#Anchor_187887372_h2_2">Introduction to Several Frameworks</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_187887372_h1_3">Rendering Frameworks Using GFX</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_187887372_h2_3">Render Flow</a>
+      </li>
+      <li>
+        <a href="#Anchor_187887372_h2_4">Introduction to Several Frameworks</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_187887372_h1_4">Important Information</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_187887372_h2_5">GPU Resource Allocation</a>
+      </li>
+      <li>
+        <a href="#Anchor_187887372_h2_6">GPU Sleep Mode</a>
+      </li>
+      <li>
+        <a href="#Anchor_187887372_h2_7">Deprecation of nvnQueueAcquireTexture()</a>
+      </li>
+      <li>
+        <a href="#Anchor_187887372_h2_8">No More Waiting for VSync With nvnQueueFinish()</a>
+      </li>
+      <li>
+        <a href="#Anchor_187887372_h2_9">NintendoSDK Sample Applications to Reference</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<p>This section describes the graphics rendering framework using the <code>nvn</code> library and the <code>gfx</code> library. This description primarily uses the <code>nvn</code> library for sample code, functions, and so on.<br />In addition, the description assumes that two or more texture buffers are specified by <span class="ApiLink_void_nvnWindowBuilderSetTextures(NVNwindowBuilder_*builder|_int_numTextures|_NVNtexture_*const_*textures)">nvnWindowBuilderSetTextures()</span> and <span class="ApiLink_void_nn__gfx__SwapChainInfo__SetBufferCount(int_value)_NN_NOEXCEPT">nn::gfx::SwapChainInfo::SetBufferCount()</span>.</p>
+<h1 id="Anchor_187887372_h1_1">Introduction</h1>
+<p>This document has the two following objectives.</p>
+<ul>
+  <li>Introduce multiple rendering frameworks.</li>
+  <li>Publicize the NX specifications and the known bugs related to the rendering framework.</li>
+</ul>
+<p>This documentation assumes that developers can do the following.</p>
+<ul>
+  <li>Properly wait for the GPU without destroying the resource in every frame.</li>
+  <li>Wait for VSync in the right way.</li>
+  <li>Understand and handle known bugs.</li>
+  <li>Maximize GPU resources.</li>
+  <li>Set up a rendering framework that is appropriate for the type of game application.</li>
+</ul>
+<h1 id="Anchor_187887372_h1_2">Rendering Frameworks Using NVN</h1>
+<p>This section starts by describing the basic render flow, and then introduce a simple rendering framework.</p>
+<h2 id="Anchor_187887372_h2_1">Render Flow </h2>
+<h3 style="margin-left: 0.5em;" id="Anchor_187887372_h3_1">Sample Code (DeferredExecution)</h3>
+<p>This code is based on the sample code in the nvn Programming Guide in <a href="../../../Api/HtmlNX/nvn_index.html#nvn_guide_sec_19_1">19.1. Presentation Sample Code</a>, but modified with a focus on the render loop. It differs from the sample code in that, for safety's sake, it explicitly waits for the GPU to complete.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">textureIndex</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">bufferIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">NVNtexture</span> <span class="o">*</span><span class="n">renderTargetTexture</span><span class="p">;</span>
+<span class="n">NVNcommandHandle</span> <span class="n">commandHandle</span><span class="p">;</span>
+
+
+<span class="c1">// Command memory for the command buffer.
+</span><span class="n">NVNmemoryPool</span><span class="o">*</span> <span class="n">commandMemoryPool</span><span class="p">;</span>
+<span class="kt">ptrdiff_t</span> <span class="n">memoryPoolOffset</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+&nbsp;
+<span class="c1">// The sync object to synchronize with the display release fence.
+</span><span class="n">NVNsync</span> <span class="o">*</span><span class="n">displayReleaseSync</span><span class="p">;</span>
+<span class="n">nvnSyncInitialize</span><span class="p">(</span><span class="n">displayReleaseSync</span><span class="p">,</span> <span class="n">device</span><span class="p">);</span>
+
+<span class="c1">// The sync object (gpu) to synchronize with the completion of the GPU.
+</span><span class="n">NVNsync</span> <span class="o">*</span><span class="n">gpuDoneSync</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="n">nvnSyncInitialize</span><span class="p">(</span><span class="n">gpuDoneSync</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="p">);</span>
+<span class="n">nvnSyncInitialize</span><span class="p">(</span><span class="n">gpuDoneSync</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">device</span><span class="p">);</span>
+&nbsp;
+<span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Update the buffer index (if double buffering).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">bufferIndex</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">bufferIndex</span><span class="p">;</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  ACQ : Get the texture that is the target for rendering. */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Get the texture index and the display release fence to report that GPU rendering of that texture is possible.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  The display release fence is signaled when rendering of the texture to the display has ended (vsync).  
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnWindowAcquireTexture</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">renderTargetTexture</span> <span class="o">=</span> <span class="n">textures</span><span class="p">[</span><span class="n">textureIndex</span><span class="p">];</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  QWS : Submit the Sync object obtained with nvnWindowAcquireTexture to the Queue instance. */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// All GPU commands subsequently submitted to Queue, are blocked from executing until the display release fence is signaled.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueWaitSync</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  REC : Create draw commands.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Specify the texture obtained by nvnWindowAcquireTexture as the render target.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Preparing a single cmdBuf (command buffer) object is not an issue, but
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// if CPU commands are set during the running of GPU commands (corresponds to DefferedExecution and DefferedSubmission), to prevent the destruction of the command memory you will need to assign different command memory for the command buffer than was assigned the previous time.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// In this documentation, this is handled using double buffering.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferAddCommandMemory</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">,</span> <span class="n">commandMemoryPool</span><span class="p">,</span> <span class="n">memoryPoolOffset</span><span class="p">[</span><span class="n">bufferIndex</span><span class="p">],</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferAddControlMemory</span><span class="p">(</span><span class="n">cmdBuf</span> <span class="n">controlMemory</span><span class="p">,</span> <span class="n">controlSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferBeginRecording</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferSetRenderTargets</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">renderTargetTexture</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">commandHandle</span> <span class="o">=</span> <span class="n">nvnCommandBufferEndRecording</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  PRE : Submit the draw commands to the queue.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  nvnQueueWaitSync() keeps the submitted commands from executing until the display release fence obtained by nvnWindowAcquireTexture is signaled.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueSubmitCommands</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">commandHandle</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  PRE : Submit a Sync object to the queue to synchronize with the completion of the GPU command. */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Pass a Sync object (gpu) to Queue to receive a signal that the GPU command submitted by nvnQueueSubmitCommands() has completed.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueFenceSync</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">gpuDoneSync</span><span class="p">[</span><span class="n">bufferIndex</span><span class="p">],</span> <span class="n">NVN_SYNC_CONDITION_ALL_GPU_COMMANDS_COMPLETE</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  PRE : Submit a command to the queue to present the texture on the display.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueuePresentTexture</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  WAIT : Wait until the texture is released from the display.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Wait for the signaling of the display release fenced obtained by nvnWindowAcquireTexture.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnSyncWait</span><span class="p">(</span><span class="n">displayReleaseSync</span><span class="p">);</span> 
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  WAIT : Wait for the completion of the GPU command created in the previous frame.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Wait for the signaling of the Sync object (gpu) that was submitted to Queue in the previous frame by nvnQueueFenceSync().
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnSyncWait</span><span class="p">(</span><span class="n">gpuDoneSync</span><span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">bufferIndex</span><span class="p">],</span> <span class="n">NVN_WAIT_TIMEOUT_MAXIMUM</span><span class="p">);</span>
+&nbsp;
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  VSync  */</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="margin-left: 0.5em;" id="Anchor_187887372_h3_2">Figure</h3>
+<p>The figure depicts the behavior of the CPU, GPU, and display in a steady-state situation in the third and subsequent frames when the basic code is executed.<br />The names of the various CPU processes (ACQ, QWS, REC, PRE, WAIT) correspond to the strings used at the start of the descriptions in the preceding code.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_187887372/187887309.png" width="1280" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_187887372_h2_2">Introduction to Several Frameworks</h2>
+<p>This section introduces two other rendering frameworks in addition to the one introduced previously. These are just some examples, and you are free to use them as references when you implement the rendering frameworks for your projects.</p>
+<p>The three example frameworks are <code>DeferredExecution</code>, <code>DeferredSubmission</code>, and <code>Immediate</code>.<br />These frameworks differ in the way commands are created and submitted by the CPU, in the GPU rendering, and in the timing of output to the display.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Name of Framework</th>
+      <th>Acquire Frame</th>
+      <th>Command Creation Frame</th>
+      <th>Command Submission Frame</th>
+      <th>GPU Rendering Frame</th>
+      <th>Display Output Frame</th>
+      <th>Features</th>
+    </tr>
+    <tr>
+      <th>
+        <p>DeferredExecution</p>
+      </th>
+      <td>N</td>
+      <td>N</td>
+      <td>N</td>
+      <td>N+1</td>
+      <td>N+2</td>
+      <td>Output to display takes place two frames after commands are created.</td>
+    </tr>
+    <tr>
+      <th>
+        <p>DeferredSubmission</p>
+      </th>
+      <td>N</td>
+      <td>N</td>
+      <td>N+1</td>
+      <td>N+1</td>
+      <td>N+2</td>
+      <td>Commands are submitted at the start of the next frame after they are created.</td>
+    </tr>
+    <tr>
+      <th>
+        <p>Immediate</p>
+      </th>
+      <td>
+        <code>N-1</code>
+      </td>
+      <td>N</td>
+      <td>N</td>
+      <td>N</td>
+      <td>N+1</td>
+      <td>
+        <p>The shortest delay between creating commands and displaying.</p>
+        <p>However, this framework cannot maximize use of the GPU resource.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>As criteria for selecting a framework, consider the following cases.</p>
+<ul>
+  <li>Select <code>DeferredExecution</code> when using the basic NVN shapes described in the NVN Programming Guide.</li>
+  <li>Consider a framework based on <code>DeferredSubmission</code> if you want to preserve code compatibly with a previous project where commands were not created and submitted in the same frame.</li>
+  <li>Consider a framework based on <code>Intermediate</code> for games like music games and fighting games where you want to minimize the delay between input and screen display.</li>
+</ul>
+<p>Other items are covered in the sample code and the figures that depict the behavior of each framework.</p>
+<h3 style="margin-left: 0.5em;" id="Anchor_187887372_h3_3">DeferredExecution</h3>
+<p>This framework is the basic framework that was introduced in the descriptions earlier in this document. Commands are submitted to the <code>Queue</code> object before signaling the display release fence (before VSync).<br />The <code>Sync</code> object obtained by <span class="ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)">nvnWindowAcquireTexture()</span> must be submitted to <code>Queue</code> with <span class="ApiLink_NVNboolean_nvnQueueWaitSync(NVNqueue_*queue|_const_NVNsync_*sync)">nvnQueueWaitSync()</span> before the commands are submitted, and the execution of subsequently submitted commands must be blocked until the display release fence is signaled.<br />The game application's GPU commands start executing after the display release fence has been signaled (VSync) and the GPU has finished being allocated to the system.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_187887372/187887310.png" width="900" class="embedded-image" />
+  </span>
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">bufferIndex</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">bufferIndex</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnWindowAcquireTexture</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">renderTargetTexture</span> <span class="o">=</span> <span class="n">textures</span><span class="p">[</span><span class="n">textureIndex</span><span class="p">];</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueWaitSync</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferAddCommandMemory</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">,</span> <span class="n">commandMemoryPool</span><span class="p">,</span> <span class="n">memoryPoolOffset</span><span class="p">[</span><span class="n">bufferIndex</span><span class="p">],</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferAddControlMemory</span><span class="p">(</span><span class="n">cmdBuf</span> <span class="n">controlMemory</span><span class="p">,</span> <span class="n">controlSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferBeginRecording</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferSetRenderTargets</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">renderTargetTexture</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferEndRecording</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueSubmitCommands</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">commandHandle</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueFenceSync</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">gpuDoneSync</span><span class="p">[</span><span class="n">bufferIndex</span><span class="p">],</span> <span class="n">NVN_SYNC_CONDITION_ALL_GPU_COMMANDS_COMPLETE</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueuePresentTexture</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">textureIndex</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnSyncWait</span><span class="p">(</span><span class="n">displayReleaseSync</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnSyncWait</span><span class="p">(</span><span class="n">gpuDoneSync</span><span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">bufferIndex</span><span class="p">],</span> <span class="n">NVN_WAIT_TIMEOUT_MAXIMUM</span><span class="p">);</span>
+&nbsp;
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// VSync
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">frameCount</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="margin-left: 0.5em;" id="Anchor_187887372_h3_4">DeferredSubmission</h3>
+<p>The <code>DeferredSubmission</code> framework submits commands to the <code>Queue</code> instance with a different timing.</p>
+<p>Commands are submitted to the <code>Queue</code> after the VSync signaled by the display release fence.<br />Because the system uses the GPU for the three percent of the frame time after the VSync, the application can maximize GPU resources by starting to submit commands within this three percent of time after the VSync.<br />Conversely, the GPU resource is wasted if commands are submitted to <code>Queue</code> starting later than three percent after the VSync.</p>
+<p>Because commands are submitted to <code>Queue</code> after the display release fence has been signaled, the GPU does not need to wait for the display release fence to be signaled.<br />As a result, there is no need to submit the <code>Sync</code> object obtained with <span class="ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)">nvnWindowAcquireTexture()</span> to the <code>Queue</code> instance.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_187887372/187887311.png" width="920" class="embedded-image" />
+  </span>
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span><span class="p">(</span><span class="n">frameCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Submit commands to Queue after signaling the display release fence.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueSubmitCommands</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">commandHandle</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueFenceSync</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">gpuDoneSync</span><span class="p">,</span> <span class="n">NVN_SYNC_CONDITION_ALL_GPU_COMMANDS_COMPLETE</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueuePresentTexture</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnWindowAcquireTexture</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">renderTargetTexture</span> <span class="o">=</span> <span class="n">textures</span><span class="p">[</span><span class="n">textureIndex</span><span class="p">];</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Unnecessary. The CPU submits commands to Queue after the display release fence has been signaled, so the GPU does not need to wait for the display release fence.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// nvnQueueWaitSync(queue, displayReleaseSync);
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferAddCommandMemory</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">,</span> <span class="n">commandMemoryPool</span><span class="p">,</span> <span class="n">memoryPoolOffset</span><span class="p">[</span><span class="n">bufferIndex</span><span class="p">],</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferAddControlMemory</span><span class="p">(</span><span class="n">cmdBuf</span> <span class="n">controlMemory</span><span class="p">,</span> <span class="n">controlSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferBeginRecording</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferSetRenderTargets</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">renderTargetTexture</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferEndRecording</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnSyncWait</span><span class="p">(</span><span class="n">displayReleaseSync</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnSyncWait</span><span class="p">(</span><span class="n">gpuDoneSync</span><span class="p">,</span> <span class="n">NVN_WAIT_TIMEOUT_MAXIMUM</span><span class="p">);</span>
+&nbsp;
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// VSync
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">frameCount</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="margin-left: 0.5em;" id="Anchor_187887372_h3_5">Immediate</h3>
+<p>With this framework, there is little delay between creating commands and displaying.</p>
+<p>Commands are created and submitted after the VSync signaled by the display release fence.<br />Because commands are created and submitted after signaling the display release fence, GPU resources cannot be maximized.</p>
+<p>Because commands are submitted to <code>Queue</code> after the display release fence has been signaled, the GPU does not need to wait for the display release fence to be signaled.<br />As a result, there is no need to submit the <code>Sync</code> object obtained with <span class="ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)">nvnWindowAcquireTexture()</span> to the <code>Queue</code> instance.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_187887372/187887312.png" width="900" class="embedded-image" />
+  </span>
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span><span class="p">(</span><span class="n">frameCount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnWindowAcquireTexture</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnSyncWait</span><span class="p">(</span><span class="n">displayReleaseSync</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Create commands after signaling the display release fence.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferAddCommandMemory</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">,</span> <span class="n">commandMemoryPool</span><span class="p">,</span> <span class="n">memoryPoolOffset</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferAddControlMemory</span><span class="p">(</span><span class="n">cmdBuf</span> <span class="n">controlMemory</span><span class="p">,</span> <span class="n">controlSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferBeginRecording</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferSetRenderTargets</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">renderTargetTexture</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnCommandBufferEndRecording</span><span class="p">(</span><span class="n">cmdBuf</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Submit commands to Queue after signaling the display release fence.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueSubmitCommands</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">commandHandle</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueFenceSync</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">gpuDoneSync</span><span class="p">,</span> <span class="n">NVN_SYNC_CONDITION_ALL_GPU_COMMANDS_COMPLETE</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueuePresentTexture</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnWindowAcquireTexture</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">renderTargetTexture</span> <span class="o">=</span> <span class="n">textures</span><span class="p">[</span><span class="n">textureIndex</span><span class="p">];</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Unnecessary. The CPU submits commands to Queue after the display release fence has been signaled, so the GPU does not need to wait for the display release fence.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// nvnQueueWaitSync(queue, displayReleaseSync);
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnSyncWait</span><span class="p">(</span><span class="n">displayReleaseSync</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnSyncWait</span><span class="p">(</span><span class="n">gpuDoneSync</span><span class="p">,</span> <span class="n">NVN_WAIT_TIMEOUT_MAXIMUM</span><span class="p">);</span>
+&nbsp;
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// VSync
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">frameCount</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_187887372_h1_3">Rendering Frameworks Using GFX</h1>
+<p>The following sample code is for the various frameworks that use the <code>gfx</code> library.<br />In terms of behavior and features, these frameworks are basically the same as the implementations that use the <code>nvn</code> library, so see the Rendering Frameworks Using NVN section earlier in this document.</p>
+<h2 id="Anchor_187887372_h2_3">Render Flow</h2>
+<p>This example uses the <span class="ApiLink_AcquireScanBufferResult_nn__gfx__TSwapChain__AcquireNextScanBufferIndex(int_*pOutScanBufferIndex|_TSemaphore__Target___*pSemaphore|_TFence__Target___*pFence)_NN_NOEXCEPT">nn::gfx::SwapChain::AcquireNextScanBufferIndex()</span> function, which can get the display release fence.<br />The NintendoSDK sample programs <code>GfxSimple</code>, <code>GfxPrimitiveRenderer</code>, and <code>FrameworkDemo</code> have the same kind of implementation, so you can check them</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">nextScanBufferIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;
+<span class="c1">// The sync object (gpu) to synchronize with the completion of the GPU.
+</span><span class="nn">nn::gfx::</span><span class="n">Fence</span> <span class="n">g_GpuDoneSync</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="nn">nn::gfx::Fence::</span><span class="n">InfoType</span> <span class="n">info</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">();</span>
+<span class="n">g_GpuDoneSync</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">Initialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">device</span><span class="p">,</span> <span class="n">info</span><span class="p">);</span>
+<span class="n">g_GpuDoneSync</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">Initialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">device</span><span class="p">,</span> <span class="n">info</span><span class="p">);</span>
+&nbsp;
+<span class="k">while</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Update the buffer index (if double buffering).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">bufferIndex</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">bufferIndex</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  ACQ : Gets the scan buffer that is the target for rendering.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Get the scan buffer index and the display release fences (Semaphore and Fence objects) to report that GPU rendering of that scan buffer is possible.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">AcquireScanBufferResult</span> <span class="n">acquireResult</span> <span class="o">=</span> <span class="n">g_SwapChain</span><span class="p">.</span><span class="n">AcquireNextScanBufferIndex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">nextScanBufferIndex</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DisplaySemaphore</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DisplayFence</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">ColorTargetView</span><span class="o">*</span> <span class="n">pTarget</span> <span class="o">=</span> <span class="n">pScanBufferViews</span><span class="p">[</span> <span class="n">nextScanBufferIndex</span> <span class="p">];</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  QWS : Submit the Semaphore obtained by AcquireNextScanBufferIndex to Queue. */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// All GPU commands subsequently submitted to Queue, are blocked from executing until the display release fence is signaled.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Queue</span><span class="p">.</span><span class="n">SyncSemaphore</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_DisplaySemaphore</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  REC : Create draw commands.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">MakeCommand</span><span class="p">(</span> <span class="n">frame</span><span class="p">,</span> <span class="n">pTarget</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  PRE : Submit the draw commands to the queue.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  Submit a Sync object to the queue to synchronize with the completion of the GPU command. */</span> 
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Queue</span><span class="p">.</span><span class="n">ExecuteCommand</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_GpuDoneSync</span><span class="p">[</span><span class="n">bufferIndex</span><span class="p">]</span> <span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  PRE : Submit a command to the queue to present the texture on the display.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Queue</span><span class="p">.</span><span class="n">Present</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SwapChain</span><span class="p">,</span> <span class="mi">1</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  WAIT : Wait until the texture is released from the display.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Wait for the signaling of the display release fence obtained by AcquireNextScanBufferIndex.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_DisplayFence</span><span class="p">.</span><span class="n">Sync</span><span class="p">(</span> <span class="n">timeout</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  WAIT : Wait for the completion of the GPU command created in the previous frame.  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Wait for the signaling of the Sync object that was submitted to Queue by ExecuteCommand() in the previous frame.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_GpuDoneSync</span><span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">bufferIndex</span><span class="p">].</span><span class="n">Sync</span><span class="p">(</span> <span class="n">timeout</span> <span class="p">);</span>
+&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  VSync  */</span>
+&nbsp;<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_187887372_h2_4">Introduction to Several Frameworks</h2>
+<p>For more information about the features of these different frameworks, see the NVN section.</p>
+<h3 style="margin-left: 0.5em;" id="Anchor_187887372_h3_6">DeferredExecution</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">while</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">bufferIndex</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">bufferIndex</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">AcquireScanBufferResult</span> <span class="n">acquireResult</span> <span class="o">=</span> <span class="n">g_SwapChain</span><span class="p">.</span><span class="n">AcquireNextScanBufferIndex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">nextScanBufferIndex</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DisplaySemaphore</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DisplayFence</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">ColorTargetView</span><span class="o">*</span> <span class="n">pTarget</span> <span class="o">=</span> <span class="n">pScanBufferViews</span><span class="p">[</span> <span class="n">nextScanBufferIndex</span> <span class="p">];</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Queue</span><span class="p">.</span><span class="n">SyncSemaphore</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_DisplaySemaphore</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">MakeCommand</span><span class="p">(</span> <span class="n">frame</span><span class="p">,</span> <span class="n">pTarget</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Queue</span><span class="p">.</span><span class="n">ExecuteCommand</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_GpuDoneSync</span><span class="p">[</span><span class="n">bufferIndex</span><span class="p">]</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Queue</span><span class="p">.</span><span class="n">Present</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SwapChain</span><span class="p">,</span> <span class="mi">1</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_DisplayFence</span><span class="p">.</span><span class="n">Sync</span><span class="p">(</span> <span class="n">timeout</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_GpuDoneSync</span><span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">bufferIndex</span><span class="p">].</span><span class="n">Sync</span><span class="p">(</span> <span class="n">timeout</span> <span class="p">);</span>
+&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  VSync  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">frameCount</span><span class="o">++</span><span class="p">;</span>
+&nbsp;<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="margin-left: 0.5em;" id="Anchor_187887372_h3_7">DeferredSubmission</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">while</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span><span class="p">(</span><span class="n">frameCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Submit commands to Queue after signaling the display release fence.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Queue</span><span class="p">.</span><span class="n">ExecuteCommand</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_GpuDoneSync</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Queue</span><span class="p">.</span><span class="n">Present</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SwapChain</span><span class="p">,</span> <span class="mi">1</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">AcquireScanBufferResult</span> <span class="n">acquireResult</span> <span class="o">=</span> <span class="n">g_SwapChain</span><span class="p">.</span><span class="n">AcquireNextScanBufferIndex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">nextScanBufferIndex</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DisplaySemaphore</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DisplayFence</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">ColorTargetView</span><span class="o">*</span> <span class="n">pTarget</span> <span class="o">=</span> <span class="n">pScanBufferViews</span><span class="p">[</span> <span class="n">nextScanBufferIndex</span> <span class="p">];</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Unnecessary. The CPU submits commands to Queue after the display release fence has been signaled, so the GPU does not need to wait for the display release fence.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// g_Queue.SyncSemaphore( &amp;g_DisplaySemaphore );
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">MakeCommand</span><span class="p">(</span> <span class="n">frame</span><span class="p">,</span> <span class="n">pTarget</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_DisplayFence</span><span class="p">.</span><span class="n">Sync</span><span class="p">(</span> <span class="n">timeout</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_GpuDoneSync</span><span class="p">.</span><span class="n">Sync</span><span class="p">(</span> <span class="n">timeout</span> <span class="p">);</span>
+&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  VSync  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">frameCount</span><span class="o">++</span><span class="p">;</span>
+&nbsp;<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="margin-left: 0.5em;" id="Anchor_187887372_h3_8">Immediate</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">while</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span><span class="p">(</span><span class="n">frameCount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">AcquireScanBufferResult</span> <span class="n">acquireResult</span> <span class="o">=</span> <span class="n">g_SwapChain</span><span class="p">.</span><span class="n">AcquireNextScanBufferIndex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">nextScanBufferIndex</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DisplaySemaphore</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DisplayFence</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_DisplayFence</span><span class="p">.</span><span class="n">Sync</span><span class="p">(</span> <span class="n">timeout</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Create commands after signaling the display release fence.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">MakeCommand</span><span class="p">(</span> <span class="n">frame</span><span class="p">,</span> <span class="n">pTarget</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Submit commands to Queue after signaling the display release fence.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Queue</span><span class="p">.</span><span class="n">ExecuteCommand</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_GpuDoneSync</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Queue</span><span class="p">.</span><span class="n">Present</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SwapChain</span><span class="p">,</span> <span class="mi">1</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">AcquireScanBufferResult</span> <span class="n">acquireResult</span> <span class="o">=</span> <span class="n">g_SwapChain</span><span class="p">.</span><span class="n">AcquireNextScanBufferIndex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">nextScanBufferIndex</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DisplaySemaphore</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DisplayFence</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">ColorTargetView</span><span class="o">*</span> <span class="n">pTarget</span> <span class="o">=</span> <span class="n">pScanBufferViews</span><span class="p">[</span> <span class="n">nextScanBufferIndex</span> <span class="p">];</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Unnecessary. The CPU submits commands to Queue after the display release fence has been signaled, so the GPU does not need to wait for the display release fence.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// g_Queue.SyncSemaphore( &amp;g_DisplaySemaphore );
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_DisplayFence</span><span class="p">.</span><span class="n">Sync</span><span class="p">(</span> <span class="n">timeout</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_GpuDoneSync</span><span class="p">.</span><span class="n">Sync</span><span class="p">(</span> <span class="n">timeout</span> <span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/*  VSync  */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">frameCount</span><span class="o">++</span><span class="p">;</span>
+&nbsp;<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_187887372_h1_4">Important Information</h1>
+<p>This section describes several important items that developers must consider when building rendering frameworks.</p>
+<h2 id="Anchor_187887372_h2_5">GPU Resource Allocation</h2>
+<p>On the NX, the application and the system use the GPU, so the allocation of the GPU resource to both is controlled.<br />For example, when the game application is in focus, three percent of the frame time is allocated to the system and the remaining 97 percent is allocated to the game.<br />Because the three percent of the frame time immediately after the VSync is the time that the system uses, the application cannot process in the GPU immediately after a VSync.</p>
+<p>For the game to maximize GPU resources, developers must understand resource allocation when implementing the rendering framework.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_187887372/187887308.png" height="150" class="embedded-image" />
+  </span>
+</p>
+<p>For more information about GPU resource allocation, see <a href="../Pages/Page_175850533.html">Graphics &gt; Graphics (NX Add-On) &gt; GPU Resource Allocation</a>.</p>
+<h2 id="Anchor_187887372_h2_6">GPU Sleep Mode</h2>
+<p>When the application uses a small amount of GPU processing and GPU processing accounts for only a small percentage of the frame time, the GPU enters sleep mode to save power.<br />While in sleep mode, the GPU cannot execute commands, and it takes approximately 200 to 300 microseconds for the GPU to wake back up and execute the next submitted command.<br />As a result, if only a small amount of  GPU processing occurred in the previous frame, the start of GPU command processing may be delayed immediately after a VSync because the GPU needs to wake from sleep. This behavior is by design and not a bug.</p>
+<p>If it seems like the application's GPU processing starts later than normal after a VSync, suspect that is because the GPU was in sleep mode.<br />On the other hand, if the application uses a lot of GPU processing, the GPU will not enter sleep mode and there will not be any delay in GPU command processing after a VSync, and the application's GPU performance will not be affected.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_187887372/187891704.png" width="729" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_187887372_h2_7">Deprecation of nvnQueueAcquireTexture()</h2>
+<p>The <code>nvnQueueAcquireTexture()</code> function has been deprecated in SDK 12.1.0. Use the <span class="ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)">nvnWindowAcquireTexture()</span> function instead.</p>
+<p>The <code>nvnQueueAcquireTexture()</code> function only gets textures, whereas the <span class="ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)">nvnWindowAcquireTexture()</span> function can get both textures and display release fences.<br />By getting display release fences, the application can use the <span class="ApiLink_NVNboolean_nvnQueueWaitSync(NVNqueue_*queue|_const_NVNsync_*sync)">nvnQueueWaitSync()</span> function at any time to wait for the VSync signaled by the display release fence.</p>
+<p>For more information about the <span class="ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)">nvnWindowAcquireTexture()</span> function, see the API reference in the <code>nvn</code> namespace.</p>
+<h3 id="Anchor_187887372_h3_9">Migration</h3>
+<p>The <code>nvnQueueAcquireTexture()</code> function calls the <span class="ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)">nvnWindowAcquireTexture()</span> function and then submits the obtained display release fence to the <code>Queue</code> class object.<br />As shown in the following sample code, migration can simply be a matter of calling <span class="ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)">nvnWindowAcquireTexture()</span> and <span class="ApiLink_NVNboolean_nvnQueueWaitSync(NVNqueue_*queue|_const_NVNsync_*sync)">nvnQueueWaitSync()</span> at the location where <code>nvnQueueAcquireTexture()</code> was previously used.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Get the display release fence.
+</span><span class="n">NVNwindowAcquireTextureResult</span> <span class="n">result</span> <span class="o">=</span> <span class="n">nvnWindowAcquireTexture</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">displayReleaseSync</span><span class="p">,</span> <span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;
+<span class="c1">// Submit the display release fence to the Queue object.
+// All subsequently submitted commands are blocked from executing until the display release fence is signaled.
+</span><span class="n">nvnQueueWaitSync</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">displayReleaseSync</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>To use the <code>gfx</code> library, you must take action.</p>
+    <p>The <code>gfx</code> function <span class="ApiLink_int_nn__gfx__TSwapChain__AcquireNextScanBufferIndex()_NN_NOEXCEPT">nn::gfx::SwapChain::AcquireNextScanBufferIndex()</span> that has no arguments has been deprecated, and a <span class="ApiLink_AcquireScanBufferResult_nn__gfx__TSwapChain__AcquireNextScanBufferIndex(int_*pOutScanBufferIndex|_TSemaphore__Target___*pSemaphore|_TFence__Target___*pFence)_NN_NOEXCEPT">nn::gfx::SwapChain::AcquireNextScanBufferIndex()</span> function with three arguments has been added. This <span class="ApiLink_nn__gfx__Fence">new version of the function</span> can get not only the pointer to a texture index, but also pointers to <span class="ApiLink_AcquireScanBufferResult_nn__gfx__TSwapChain__AcquireNextScanBufferIndex(int_*pOutScanBufferIndex|_TSemaphore__Target___*pSemaphore|_TFence__Target___*pFence)_NN_NOEXCEPT">nn::gfx::Semaphore</span> and <span class="ApiLink_nn__gfx__Semaphore">nn::gfx::Fence</span> for the display release fence.</p>
+    <p>For more information about the <span class="ApiLink_AcquireScanBufferResult_nn__gfx__TSwapChain__AcquireNextScanBufferIndex(int_*pOutScanBufferIndex|_TSemaphore__Target___*pSemaphore|_TFence__Target___*pFence)_NN_NOEXCEPT">nn::gfx::SwapChain::AcquireNextScanBufferIndex()</span> function, see the API reference for the <code>gfx</code> namespace.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_187887372_h2_8">No More Waiting for VSync With <span class="ApiLink_void_nvnQueueFinish(NVNqueue_*queue)">nvnQueueFinish()</span></h2>
+<p>The <span class="ApiLink_void_nvnQueueFinish(NVNqueue_*queue)">nvnQueueFinish()</span> function makes the CPU wait until all commands submitted to <code>Queue</code> have finished executing.<br />Previously, you could call <span class="ApiLink_void_nvnQueueFinish(NVNqueue_*queue)">nvnQueueFinish()</span> after the display release fence was submitted to <code>Queue</code> to wait for a VSync.</p>
+<p>However, due to the addition of a mechanism for allocating GPU resources, you can no longer use the <span class="ApiLink_void_nvnQueueFinish(NVNqueue_*queue)">nvnQueueFinish()</span> function to wait for a VSync. To be specific, if you call <span class="ApiLink_void_nvnQueueFinish(NVNqueue_*queue)">nvnQueueFinish()</span> after a display release fence has been submitted to <code>Queue</code>, the CPU is blocked until the end of GPU allocation to the system after the VSync. As a result, if you use <span class="ApiLink_void_nvnQueueFinish(NVNqueue_*queue)">nvnQueueFinish()</span> to wait for a VSync in the same manner as before, the CPU starts approximately 3% of the frame time later than the VSync. In addition, if the start of GPU processing is dependent on the submission of a command by the CPU, the GPU may be delayed in starting.</p>
+<p>The <span class="ApiLink_void_nvnQueueFinish(NVNqueue_*queue)">nvnQueueFinish()</span> function is designed to work like this, and was not originally intended to be used to wait for a VSync. The correct way to wait for a VSync is to use the <span class="ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)">nvnQueueWaitSync()</span> function to directly wait for the signaling of the display release fence obtained by the <span class="ApiLink_NVNboolean_nvnQueueWaitSync(NVNqueue_*queue|_const_NVNsync_*sync)">nvnWindowAcquireTexture()</span> function. Review the sample code in this document, which waits for a VSync by waiting for the signaling of the display release fence obtained by the <span class="ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)">nvnWindowAcquireTexture()</span> function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cm">/* Bad case */</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnWindowAcquireTexture</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueWaitSync</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Does't return until &quot;VSync+3%&quot;.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueFinish</span><span class="p">();</span>
+<span class="p">}</span>
+&nbsp;
+<span class="cm">/* good case */</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnWindowAcquireTexture</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">textureIndex</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnQueueWaitSync</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">displayReleaseSync</span><span class="p">);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Does't return until &quot;VSync&quot;.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">nvnSyncWait</span><span class="p">(</span><span class="n">displayReleaseSync</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In the <code>gfx</code> library, the <span class="ApiLink_void_nn__gfx__TQueue__Sync()_NN_NOEXCEPT">nvnQueueFinish()</span> function is called inside the <span class="ApiLink_void_nvnQueueFinish(NVNqueue_*queue)">nn::gfx::Queue::Sync()</span> function.<br />The NintendoSDK still has some sample applications that wait for VSync using the <span class="ApiLink_void_nn__gfx__TQueue__Sync()_NN_NOEXCEPT">nn::gfx::Queue::Sync()</span> function, so you might encounter this issue if you refer to these samples when implementing your rendering framework.<br />You can use the newly added function <span class="ApiLink_AcquireScanBufferResult_nn__gfx__TSwapChain__AcquireNextScanBufferIndex(int_*pOutScanBufferIndex|_TSemaphore__Target___*pSemaphore|_TFence__Target___*pFence)_NN_NOEXCEPT">nn::gfx::SwapChain::AcquireNextScanBufferIndex()</span> to get the display release fence. Wait for the VSync by directly waiting for this sync object to be signaled.</p>
+  </div>
+</div>
+<h2 id="Anchor_187887372_h2_9">NintendoSDK Sample Applications to Reference</h2>
+<ul>
+  <li>Samples/Sources/Applications/GfxPrimitiveRenderer</li>
+  <li>Samples/Sources/Applications/FrameworkDemo</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nvnWindowBuilderSetTextures(NVNwindowBuilder_*builder|_int_numTextures|_NVNtexture_*const_*textures)', '../../../Api/HtmlNX/group__nvn__c__functions.html#ga610c7f233b7bb1e02f4926fe554df5db' )
+SetUrl( 'ApiLink_void_nn__gfx__SwapChainInfo__SetBufferCount(int_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_swap_chain_info.html#ab489421ecb43aae64bc8d0d22b612cd0' )
+SetUrl( 'ApiLink_NVNwindowAcquireTextureResult_nvnWindowAcquireTexture(NVNwindow_*window|_NVNsync_*textureAvailableSync|_int_*textureIndex)', '../../../Api/HtmlNX/group__nvn__c__functions.html#ga7fa0b45affa2e04d77e3c1ad11a03c32' )
+SetUrl( 'ApiLink_NVNboolean_nvnQueueWaitSync(NVNqueue_*queue|_const_NVNsync_*sync)', '../../../Api/HtmlNX/group__nvn__c__functions.html#gaad28b8279c1f539d143c1902212df11f' )
+SetUrl( 'ApiLink_AcquireScanBufferResult_nn__gfx__TSwapChain__AcquireNextScanBufferIndex(int_*pOutScanBufferIndex|_TSemaphore__Target___*pSemaphore|_TFence__Target___*pFence)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_swap_chain.html#a526433e7a3ea68a3ba6092fd9732767e' )
+SetUrl( 'ApiLink_int_nn__gfx__TSwapChain__AcquireNextScanBufferIndex()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_swap_chain.html#ab49ab688a8ba21a8a251528a1e678f7a' )
+SetUrl( 'ApiLink_nn__gfx__Fence', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a3f5549319294e6d37b7ddffbf84cee98' )
+SetUrl( 'ApiLink_nn__gfx__Semaphore', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a03469e863b0fe9185e881eab4038ec36' )
+SetUrl( 'ApiLink_void_nvnQueueFinish(NVNqueue_*queue)', '../../../Api/HtmlNX/group__nvn__c__functions.html#gaab3c15f657cefdff33dab453795ff38f' )
+SetUrl( 'ApiLink_void_nn__gfx__TQueue__Sync()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_queue.html#afc21092b4436c72ed0ca8d23c6a2ff78' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

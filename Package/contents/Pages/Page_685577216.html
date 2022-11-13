@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>RamDisk | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- RamDisk -->
+<div class="pagetitle" id="PageId_685577216">RamDisk</div>
+<div class="text_separate">
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The RamDisk feature is available in NintendoSDK 10.0.0 and later.</p>
+  </div>
+</div>
+<h1 id="Anchor_685577216_h1_1">
+  <span style="color: rgb(117,117,117);">Feature Overview</span>
+</h1>
+<p>The RamDisk feature enables you to use the buffer provided by the application as a temporary file system. The application can handle data in memory via the file system interface infrastructure.</p>
+<p>Content written to RamDisk is not persistent. The file system is always in an empty state immediately after mounting. Use the <a href="../Pages/Page_224957652.html">cache storage</a> feature for any data that needs to be retained after the application is closed.</p>
+<p>For any data handled via the file system interface that does not need to be persisted, we recommend the RamDisk feature over the <a href="../Pages/Page_224955140.html">temporary storage</a> feature.<br />The RamDisk feature differs from the temporary storage feature in the following ways.</p>
+<ul>
+  <li>The file system is placed in the buffer and not the system memory.<ul><li>Because storage is not accessed, the guidelines that limit the number of read and write operations and the write volume do not apply.</li><li>There is no change in access speed due to the storage media.</li><li>There are never cases where the application does not start due to a lack of free space in system memory.</li></ul></li>
+  <li>It is not limited to a maximum of one per application.</li>
+  <li>The application must allocate the buffer.</li>
+</ul>
+<h1 id="Anchor_685577216_h1_2">Creating and Mounting</h1>
+<p>
+  <code>
+    <span class="ApiLink_nn__fs__MountRamDisk">nn::fs::MountRamDisk</span>()</code> builds a mountable file system in the buffer.</p>
+<p>The capacity of the file system built is less than the buffer size specified in <code><span class="ApiLink_nn__fs__MountRamDisk">nn::fs::MountRamDisk</span>()</code> because of the region required for data management, which is based on the file system capacity. <code><span class="ApiLink_nn__fs__GetRamDiskBufferSize">nn::fs::GetRamDiskBufferSize</span>()</code> can get the buffer size corresponding to the file system capacity that the application needs.</p>
+<p>There are no alignment requirements for buffers used in RamDisk.</p>
+<h1 id="Anchor_685577216_h1_3">File Operations</h1>
+<p>Similar to other file systems, use the API in the <code><span class="ApiLink_nn__fs">nn::fs</span></code> namespace for file operations after the mounting process.</p>
+<p>Between mounting and unmounting, use the <code><span class="ApiLink_nn__fs">nn::fs</span></code> API to access the buffer used in RamDisk. Bypassing the <code><span class="ApiLink_nn__fs">nn::fs</span></code> API and directly updating buffer data while mounted damages the file system and may prevent it from working properly.</p>
+<p>Also, there is no need to run <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code> because RamDisk does not support the journaling feature.</p>
+<h1 id="Anchor_685577216_h1_4">Attribute</h1>
+<h2 id="Anchor_685577216_h2_1">File System Content Immediately After Mounting</h2>
+<p>The file system is always empty immediately after <code><span class="ApiLink_nn__fs__MountRamDisk">nn::fs::MountRamDisk</span>()</code>. Even if you reuse the buffer, any files and directories created earlier are lost because <code><span class="ApiLink_nn__fs__MountRamDisk">nn::fs::MountRamDisk</span>()</code> initializes the file system each time.</p>
+<h2 id="Anchor_685577216_h2_2">
+  <span style="color: rgb(117,117,117);">Assigning Blocks</span>
+</h2>
+<p>RamDisk allocates a file data region and a management data region in the buffer set up by <code><span class="ApiLink_nn__fs__MountRamDisk">nn::fs::MountRamDisk</span>()</code>. The file data region is divided up into blocks and managed per block. A single block is 4 KB.</p>
+<p>Blocks are assigned or freed when a file is created or resized. For files, one block is assigned for each 4 KB of file data. If the size of a created file is not a multiple of 4 KB, the required number of blocks are assigned after rounding up the value. Blocks are also used to manage files and directories. One block is assigned for the first 40 files, another block is assigned if that number is exceeded, and another block is added for each additional 42 files. Blocks are similarly assigned for directories. The blocks that are assigned for the managing of files and directories are not freed by subsequent operations. See the following examples.</p>
+<ul>
+  <li>If the size of a created file is 32 KB, 8 blocks are assigned.</li>
+  <li>If the size of a created file is 45 KB, 12 blocks are assigned.</li>
+  <li>If a 45 KB file is resized to a 32 KB file, 4 blocks are freed.</li>
+  <li>If a single file is created in an empty RamDisk along with a root directory, 2 blocks are assigned.</li>
+  <li>If a file of 0 bytes is added to RamDisk consisting of 1 directory and 39 files, no additional block is assigned.</li>
+  <li>If a file of 0 bytes is added to RamDisk consisting of 1 directory and 40 files, one additional block is assigned.</li>
+  <li>If one file consisting of 1 directory and 41 files is deleted from RamDisk, no blocks are freed.</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Blocks that have been allocated as file management blocks and directory management blocks are not freed, even after the files and directories are deleted. The blocks are reused when files and directories are later recreated.</p>
+    <p>Note that the memory region is not completely freed, even when all files and directories are deleted.</p>
+  </div>
+</div>
+<h1 id="Anchor_685577216_h1_5">Restrictions</h1>
+<p>
+  <a href="../Pages/Page_277373520.html">Access priority</a> is not affected.</p>
+<h1 id="Anchor_685577216_h1_6">Important Information</h1>
+<p>The following is a summary of important information.</p>
+<ul>
+  <li>The RamDisk feature is available in NintendoSDK 10.0.0 and later.</li>
+  <li>Content written to RamDisk is not persistent.</li>
+  <li>Between mounting and unmounting, use the <code><span class="ApiLink_nn__fs">nn::fs</span></code> API to access the buffer used in RamDisk.</li>
+  <li>If there is an overlap in mounting the RamDisk buffer, all previously created files and directories are lost.</li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__MountRamDisk', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a0ef2297587a324a49250429c4569e0a1' )
+SetUrl( 'ApiLink_nn__fs__GetRamDiskBufferSize', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a47158cdf85f271b33de66713208f4b55' )
+SetUrl( 'ApiLink_nn__fs', '../../../Api/HtmlNX/namespacenn_1_1fs.html' )
+SetUrl( 'ApiLink_nn__fs__Commit', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac90e600c3fc51adb6823a4ef900fad3a' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

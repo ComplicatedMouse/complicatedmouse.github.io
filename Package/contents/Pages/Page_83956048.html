@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Scalable Fonts | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Scalable Fonts -->
+<div class="pagetitle" id="PageId_83956048">Scalable Fonts</div>
+<div class="text_separate">
+<h1 id="Anchor_83956048_h1_1">Scalable Fonts</h1>
+<h2 id="Anchor_83956048_h2_1">Introduction</h2>
+<p>This document describes scalable fonts.</p>
+<h3 id="Anchor_83956048_h3_1">Overview</h3>
+<p>The scalable font library is for rendering fonts using built-in fonts or optional TrueType or OpenType fonts.</p>
+<p>The scalable font library includes the following components.</p>
+<ul>
+  <li>
+    <strong>
+      <code>ScalableFont</code> Class</strong> ... This class enables rendering of scalable fonts using derivatives of the <code><span class="ApiLink_nn__font__Font">nn::font::Font</span></code> class. Like the <code>ResFont</code> class for bitmap fonts, this class can be used with the <code>TextWriter</code> class to render text and it can be registered to the <code>ArcResourceAccessor</code> class to render layouts.</li>
+  <li>
+    <strong>
+      <code>TextureCache</code> Class</strong> ... Fonts are actually rendered as texture data. This class manages that texture data. Use it by setting it to the <code>ScalableFont</code> class. You can also share a single <code>TextureCache</code> class among multiple <code>ScalableFont</code> classes.</li>
+</ul>
+<h2 id="Anchor_83956048_h2_2">Functionality and Features</h2>
+<h3 id="Anchor_83956048_h3_2">Handling Scalable Fonts in the Runtime</h3>
+<p>Bitmap fonts render quickly and are easy to handle in the runtime, but they consume a large amount of resources and memory in high definition environments because texture data must be stored for all of the characters to be displayed. This issue is most apparent when dealing with fonts with especially large amounts of characters like traditional and simplified Chinese fonts.</p>
+<p>Scalable fonts use TTF or OTF path information as the resource, so <strong>the size of resources are comparatively smaller than with bitmap fonts</strong>. Also, depending on the amount of text displayed at one time, their use can consume less runtime memory than bitmap fonts.</p>
+<p>However, this does not mean that scalable fonts are better than bitmap fonts in every way. <strong>When using scalable fonts, the resource data must be prepared before rendering and cannot be rendered directly like a bitmap font.</strong>. This preparation has a processing cost, and also makes program implementation more complex. If the messages to display are known in advance, you can extract only the characters that are needed from a bitmap font, which reduces the resource size advantage of using scalable fonts.</p>
+<p>To summarize, a scalable font is better than a bitmap font in the following situations.</p>
+<ul>
+  <li>When the types of characters that appear are unknown at the time of resource conversion (such as when the names of Mii characters are displayed).</li>
+  <li>When rendering fonts at varying sizes. (Scalable fonts look better than when the texture of a large bitmap font is scaled down.)</li>
+  <li>When using standard fonts.</li>
+</ul>
+<h3 id="Anchor_83956048_h3_3">Font Library Compatibility</h3>
+<p>The scalable font library is designed and implemented so that it can be used as much as possible like a font library made for displaying bitmap fonts.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955990/83080090.png" class="embedded-image" />
+  </span>
+</p>
+<p>This diagram shows each class of scalable font (indicated in red), in addition to its related classes. The <code>ScalableFont</code> class has the same interface as the <code>Font</code> class. You can handle it from the layout library in the same manner as the <code>ResFont</code> class that handles bitmap fonts.</p>
+<p>You can also use layout library features for adding shadows to text or italicizing text, just as you can with bitmap fonts.</p>
+<p>On the other hand, by matching the interface of the <code>Font</code> class, the scalable font class inherits some limitations that would not normally be required of a scalable font. The following example illustrates these limitations.</p>
+<ul>
+  <li>The <code>Font</code> class can only handle one size of text in a single instance. <strong>The <code>ScalableFont</code> class can also handle only one size of text in a single instance.</strong> If you want to work with multiple sizes, you must create multiple instances of the <code>ScalableFont</code> class. (This also applies to the <code>TextureCache</code> class.)</li>
+  <li>To make the appearance as similar as possible to a bitmap font using the <code>ResFont</code> class, the display position and other text properties are slightly different from typical TrueType font rendering. Normally the difference is not that great, but in some cases the appearance may not be as intended.</li>
+</ul>
+<h3 id="Anchor_83956048_h3_4">Reusing Glyphs From Texture Cache</h3>
+<p>Scalable font resources cannot be used for rendering as is, so they must be extracted as texture data to memory. <strong>The scalable font library includes a mechanism to cache the extracted texture data so that the same character does not need to be re-extracted very often.</strong> This feature is handled by the <code>TextureCache</code> class.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955990/83080089.png" class="embedded-image" />
+  </span>
+</p>
+<p>A single <code>TextureCache</code> class instance can use a single 2D texture as a texture cache. You can set the size during initialization, but note that the maximum size allowed depends on the hardware specifications. The horizontal and vertical sizes must be powers of two. The horizontal and vertical sizes do not need to be the same. For example, setting horizontal to <code>1024</code> and vertical to <code>512</code> is perfectly fine. For the maximum texture size for each type of hardware, see <a href="../Pages/Page_95696747.html">Platform-Specific Information</a>.</p>
+<p>
+  <strong>The <code>TextureCache</code> class configures regions of fixed heights, called <em>lines</em>, in the texture and assigns characters to different lines according to character height.</strong> Line heights are powers of two. Characters with a height between 16 and 31 are assigned to the 32-pixel line, and characters with a height between 32 and 63 are assigned to the 61-pixel line. The location of each line is not predetermined. Lines are created as they become necessary. For example, if the cache contains only a 64-pixel line, and a character that belongs in a 32-pixel line is cached, the 32-pixel line is created at that time. Also, if a 64-pixel character is cached and the 64-pixel line is full, another 64-pixel line is created.</p>
+<p>Lines are created in order from top to bottom. Characters remain in the cache as long as there is space. Unused characters in the cache are only removed and replaced with a new character when there is no more space left in the texture cache.</p>
+<p>This mechanism is designed to leave characters in the texture cache as long as possible. Expanding text takes time. Even text that was used only one time remains for reuse when it is needed again.</p>
+<h3 id="Anchor_83956048_h3_5">Text Effects Such as Boldface and Outlines</h3>
+<p>The scalable font library <strong>can apply text effects such as boldface and outlines</strong>, although these features actually belong to the <code>ScalableFontEngine</code> library used by the scalable font library. When using bitmap fonts, a font with these effects applied must be prepared beforehand, but scalable fonts are capable of covering various uses with a single font.</p>
+<h2 id="Anchor_83956048_h2_3">Creating Data With LayoutEditor</h2>
+<p>For more information about using scalable fonts in LayoutEditor, see <a href="../Pages/Page_83955958.html">Using Scalable Fonts in the LayoutEditor</a>.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83956048_h2_4">Program Implementation</h2>
+<p>In most cases, scalable fonts are used with the layout library. The following descriptions assume they are being used. Also see the sample demo.</p>
+<h3 id="Anchor_83956048_h3_6">Initialization</h3>
+<h4 id="Anchor_83956048_h4_1">Loading Font Data</h4>
+<p>You must first load the texture data. The following scalable font file formats are available.</p>
+<ul>
+  <li>
+    <strong>TTF Format</strong> ... A standard TrueType font that can be installed and used on Windows and other operating systems.</li>
+  <li>
+    <strong>OTF Format</strong> ... A standard OpenType font that can be installed and used on Windows and other operating systems.</li>
+  <li>
+    <strong>BFTTF Format</strong> ... A file format that obfuscates TTF format fonts so that they cannot be installed and used on Windows. The standard fonts are distributed in this format.</li>
+  <li>
+    <strong>BFOTF Format</strong> ... A file format that obfuscates OTF format fonts so that they cannot be installed and used on Windows.</li>
+</ul>
+<h4 id="Anchor_83956048_h4_2">Initializing TextureCache</h4>
+<p>Next, you must initialize the <code>TextureCache</code> class. Initialize the <code>TextureCache</code> class with the <code>Initialize</code> member function. This member function has many parameters. Be sure to read the descriptions in the function reference when configuring them.</p>
+<p>You must pay particular attention to <code><em>textureCacheWidth</em></code>, <code><em>textureCacheHeight</em></code>, and <code><em>glyphNodeCountMax</em></code>. Specify these parameters based on how you want the text to appear in the application.</p>
+<p>Text can only be displayed after it has been placed in the texture cache. For example, if you want to display 400 characters with a 50-point font size at one time, and the cache width is set to 1024, one line in the cache can hold approximately 20 characters. In this example, the cache would need 20 lines with heights of 64 pixels. 20 lines of 64 pixels equals 1280, so a height of 1024 is not enough. The cache needs a height of 2048 pixels. In other words, in this case the best thing to do is specify <code>1024</code> in <code><em>textureCacheWidth</em></code> and <code>2048</code> in <code><em>textureCacheHeight</em></code>.</p>
+<p>Next is <code>glyphNodeCountMax</code>. The texture cache manages text-related data internally in a balanced binary tree. This value specifies the maximum number of nodes in the balanced binary tree. In this example, the texture size is 1024&times;2048. If all lines are 64-pixel lines, up to 20&times;32=640 characters could be cached. However, because of proportional fonts, 50-point characters rarely have a width of 50 pixels. In actual use, more than 20 characters fit on a single line. This means a greater number of nodes is required. As a guide, we recommend specifying twice this amount. In this case, it would be 1,280 nodes.</p>
+<p>A memory allocator is passed to the <code>Initialize</code> member function of <code>TextureCache</code>. Unlike in the layout library, <strong>the only way to allocate memory is through the <code>Initialize</code> member function.</strong> After this happens, the scalable font library does not allocate memory in any situation.</p>
+<h4 id="Anchor_83956048_h4_3">Initializing ScalableFont</h4>
+<p>Next, initialize an instance of the <code>ScalableFont</code> class. The <code>ScalableFont</code> class has some initialization parameters that require care, though not as many as <code>TextureCache</code>.</p>
+<p>Begin by specifying in <code><em>textureCache</em></code> the <code>TextureCache</code> instance that was just initialized. Next, in <code><em>fontSize</em></code>, specify the font size of the BFFNT file that was used when the designer created the data in the layout editor. In <code><em>fontFace</em></code>, specify the type of font specified when <code>TextureCache</code> was initialized. An array will most likely have been specified in <code><em>fontDatas</em></code>, so specify the corresponding font index in that array.</p>
+<p>The <code><em>isAlternateCharSpaceWithOriginalWidth</em></code> parameter specifies how to process when the character to be displayed is not yet prepared. If <code>false</code> is specified (the default setting), an alternate character is displayed in place of the unprepared character. The default alternate character is a question mark (?). If <code>true</code> is specified, the unprepared character simply appears as blank space with the width of the character that was meant to be there. In other words, setting this option to <code>true</code> enables you to implement operations where <strong>characters that cannot be displayed yet are left blank so they can be filled in after the characters are ready</strong>. Choose the option that best suits your needs.</p>
+<h4 id="Anchor_83956048_h4_4">Registering in ArcResourceAccessor</h4>
+<p>Next, before building the layout, register the <code>ScalableFont</code> class instances that you created with <code>ArcResourceAccessor</code>, which are used to build the layout. When registering the fonts, use the same names as the bitmap fonts that were used when creating the layout data. This ensures that scalable fonts are used in place of the bitmap fonts with those names.</p>
+<h3 id="Anchor_83956048_h3_7">Preparing Characters</h3>
+<p>A character must be prepared before it can be rendered with a scalable font. The following sections describe the procedures for preparing characters.</p>
+<h4 id="Anchor_83956048_h4_5">Registering Characters</h4>
+<p>First, you must register the characters to be rendered. To register characters, use the <code>RegisterGlyph</code>, <code>RegisterGlyphs</code>, or <code>RegisterGlyphsWithLength</code> member functions of the <code>ScalableFont</code> class. In these functions, you specify the character (or string) to register and the group number to use when locking the text.</p>
+<p>Locking is a mechanism that prevents certain characters from being removed from <code>TextureCache</code>. It will be described in more detail later.</p>
+<p>Instead of specifying and registering characters yourself, you can also use the <code>RegisterGlyphFromTextBoxRecursive</code> member function, which allows you to register all strings within text boxes that use a <code>ScalableFont</code> within the specified pane. If the strings in the <code>TextBox</code> objects are not going to be actively replaced, calling this member function immediately after building the layout is a very simple and reliable method.</p>
+<h4 id="Anchor_83956048_h4_6">Updating the Texture Cache</h4>
+<p>After you have regsitered the characters you want to render, update the texture cache with them. This process uses the <code>UpdateTextureCache</code> member function of the <code>TextureCache</code> class.</p>
+<p>This operation is quite processor-intensive because it involves converting TTF or OTF path data into bitmap data and copying it to a texture. As a general guideline, it takes about four milliseconds to process roughly 10 characters of the standard font at a size of 40 points. If you try to process more than 10 characters at one time, it does not complete within a single game frame.</p>
+<p>If texture cache updates are only called during scene changes, processing time is not an issue. If you want to update the cache while the player is controlling the application, consider calling <code>UpdateTextureCache</code> on a thread with a lower priority than the main thread and updating over several frames. <code>UpdateTextureCache</code> has been implemented so that it can be called concurrently on a different thread. It can be called while font rendering is taking place on the main thread without any problems.</p>
+<p>After <code>UpdateTextureCache</code> has finished, call <code>CompleteTextureCache</code>. Note that unlike <code>UpdateTextureCache</code>, this function cannot be called concurrently with another function.</p>
+<p>After <code>CompleteTextureCache</code> has finished, you can draw the registered font. However, if characters from a previously drawn layout were replaced during the update, set the <code>DirtyFlag</code> using the <code>SetDirtyFlag</code> member function of the <code>TextBox</code> object. The string drawn in the <code>TextBox</code> object is not updated unless <code>DirtyFlag</code> is set.</p>
+<h3 id="Anchor_83956048_h3_8">Criteria for Removing Text From the Texture Cache</h3>
+<p>If there is not enough room in the texture cache, characters that are not being used are removed and new characters are rendered in their place. A character is determined to be &quot;unused&quot; under the following conditions.</p>
+<p>For a character to be determined as unused, <strong>it must meet all of the following conditions</strong>.</p>
+<ul>
+  <li>The character is not locked in any lock group.</li>
+  <li>The character has not been registered even one time since the last <code>CompleteTextureCache</code>.</li>
+  <li>The text has not been rendered even one time since the last <code>CompleteTextureCache</code>. (It has not been retrieved with the <code>GetGlyph</code> function of <code>ScalableFont</code>.)</li>
+</ul>
+<p>Glyphs that meet all of these conditions are marked as &quot;subject to removal&quot; and can no longer be displayed. As a result, when the characters are displayed in a <code>TextBox</code> object, the alternate character appears instead. In other words, if you do not want a character to be removed, make sure that it fulfills at least one of these conditions. The first two conditions are easier to control.</p>
+<p>Moving on to locking, to lock a character, you must specify a lock group number in the range from 0 through 31 when registering the character. A character can belong to multiple lock groups. For example, the letter &quot;A&quot; can belong to both group 0 and group 2. <strong>While locks can be removed for an entire group, as long as all of its lock groups are not removed text will not be judged to be &quot;unused.&quot;</strong></p>
+<p>As long as a character is locked it will not be removed, but if the texture cache becomes filled with locked characters, you cannot render any new characters. It is best to always leave a bit of open space in the cache and unlock a character after you are no longer using it.</p>
+<p>One method of fulfilling the second condition is to maintain a policy of always registering text in the text box that exists in the layout. <strong>There is no penalty for registering characters that are already in the texture cache. The process sets a flag indicating that the characters are in use and should not be removed.</strong></p>
+<p>As long as you maintain a flow of registering all glyphs in text boxes with <code>RegisterGlyphFromTextBoxRecursive</code>, calling <code>UpdateTextureCache</code>, and then calling <code>CompleteTextureCache</code>, glyphs that appear in the layout are not removed from the cache.</p>
+<h3 id="Anchor_83956048_h3_9">Use Cases</h3>
+<p>There are many different use cases for scalable fonts, ranging from simple to complex. Some of the typical cases are described here.</p>
+<h4 id="Anchor_83956048_h4_7">Registering and Preparing Everything in Advance</h4>
+<p>This method is the simplest. This method is fine as long as the strings that are displayed after the scene change stay the same.</p>
+<ul>
+  <li>After building the layout, register all glyphs that could be displayed with a method that uses <code>RegisterGlyphFromTextBoxRecursive</code> or a similar function. After you do this, call <code>UpdateTextureCache</code> and <code>CompleteTextureCache</code>. (This takes place while the scene changes. There will not usually be an issue even if <code>UpdateTextureCache</code> takes time to complete.</li>
+  <li>After this is complete, all of the glyphs that could potentially be displayed are ready to draw. The cache does not need to be updated until a new scene comes.</li>
+</ul>
+<p>This method can also support cases where most glyphs stay the same but a very small number could change (for example, numbers to display a score) by registering and locking the glyphs to use for displaying the score in the beginning. However, when many glyphs could change, the texture cache could run out of space. Consider using the next method instead.</p>
+<h4 id="Anchor_83956048_h4_8">Preparing New Text During Rendering</h4>
+<p>If many glyphs could change after the scene begins, you must update the texture cache dynamically during the scene. In such cases, use the following procedures.</p>
+<ul>
+  <li>Before the scene begins, register the initial glyphs and call the <code>UpdateTextureCache</code> and <code>CompleteTextureCache</code> functions. Lock these glyphs so they will not be removed.</li>
+  <li>When you need to display a new glyph during the scene, register the glyph using <code>RegisterGlyphs</code>. <code>RegisterGlyphs</code> returns the number of glyphs that were not in the texture cache (in other words, glyphs that need to be added to the cache) at that time. If the function returns <code>0</code>, all of the glyphs are already in the texture cache. The following steps are not necessary.</li>
+  <li>If new glyphs were registered, call <code>UpdateTextureCache</code>. Note that this process could take quite some time. If the application lags, call this function in a low priority subthread.</li>
+  <li>After <code>UpdateTextureCache</code> is finished, call <code>CompleteTextureCache</code>. Call this function on the same thread as the drawing.</li>
+  <li>Then set the <code>DirtyFlag</code> of the <code>TextBox</code> objects that contain the new glyphs. This flag signals the library to redraw the text boxes with the new characters the next time <code>CalculateMtx</code> and <code>Draw</code> are called.</li>
+</ul>
+<h2 id="Anchor_83956048_h2_5">FAQ</h2>
+<h3 id="Anchor_83956048_h3_10">Sometimes I cannot add new characters to the texture cache even though plenty of characters can be removed.</h3>
+<p>Sometimes when the texture cache is full, a message like the following appears when <code>UpdateTextureCache</code> is called, and it is impossible to add new characters, even though plenty of characters can be removed.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::font::TextureCache: no erasable glyph. charCode = 0xe7 lineHeight = 64</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>When this happens, it means an error occurred because a new line could not be created for placing new glyphs. With the current specifications, new lines can be made as long as there is space in the texture cache. After a line is made, it is not removed. This means that if, for example, you were rendering only glyphs that fit in a 32-pixel line and the cache was completely filled with these lines, you would not be able to render any glyphs that require a 64-pixel line because there would be no room to add the line.</p>
+<p>In addition, even if a glyph is rendered at, for example, 25 points, a tall glyph might require a 64-pixel line if it is taller than 32 pixels. This happens with Latin glyphs that have a cedilla or other mark (&Ccedil;, for example).</p>
+<p>One way to avoid this issue is to make one 64-pixel line beforehand so that it is available in case it becomes necessary at a later time. You can explicitly create a line of a specific height using the <code>CreateNewLine</code> member function of the <code>TextureCache</code> object.</p>
+<h3 id="Anchor_83956048_h3_11">When attempting to register a glyph, I get a &quot;Node number max over&quot; message and the registration fails.</h3>
+<p>When registering text using the RegisterGlyph method,</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::font::TextureCache: Node number max over. Please increase InitializeArg::glyphNodeCountMax.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Sometimes this message appears and you cannot register text. This error occurs when there are not enough nodes in the balanced binary tree used to manage glyphs in the texture cache. Each glyph requires one node, including glyphs that are not being used but are still in the texture cache. A larger texture cache requires a greater number of nodes. When this error message appears, increase the value of <code><em>glyphNodeCountMax</em></code>, which is specified when initializing the <code>TextureCache</code>.</p>
+<p>For a description of finding the value to specify in <code><em>glyphNodeCountMax</em></code>, see Initializing TextureCache.</p>
+<p>You can check how many nodes are currently being consumed by calling the <code>DumpGlyphTreeMap</code> member function of the <code>TextureCache</code> class. When you call this function, the state of the balanced binary tree is displayed. The number of nodes is displayed at the end (for example, <strong>dump 102 nodes.</strong>).</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__font__Font', '../../../Api/HtmlNX/classnn_1_1font_1_1_font.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,310 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Audio Effects | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Audio Effects -->
+<div class="pagetitle" id="PageId_158289989">Audio Effects</div>
+<div class="text_separate">
+<h1 id="Anchor_158289989_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_158289989_h2_1">Audio Renderer Effects</a>
+    </li>
+    <li>
+      <a href="#Anchor_158289989_h2_2">User Effects</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_158289989_h3_1">Using User Effects</a>
+      </li>
+      <li>
+        <a href="#Anchor_158289989_h3_2">Migrating From NW4F</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_158289989_h1_2">Audio Effects</h1>
+<p>The <code>atk</code> library can apply effects like reverb and delay to sounds while they are playing.<br />The library can also use user effects to apply user-defined signal processing on sounds.</p>
+<p>This section describes how to use these audio effects. For more information, see the <span class="ApiLink_PageSampleAtkEffect">AtkEffect sample program</span>.</p>
+<h2 id="Anchor_158289989_h2_1">Audio Renderer Effects</h2>
+<p>The <code>atk</code> library can use the following effects that are implemented by the internally used <code><span class="ApiLink_nn__audio">nn::audio</span></code> audio renderer.</p>
+<ul>
+  <li>Reverb</li>
+  <li>Delay</li>
+  <li>I3DL2 Reverb</li>
+  <li>Lightweight emitter</li>
+</ul>
+<p>You can adjust the extent to which the effects are applied by changing their parameters.</p>
+<h2 id="Anchor_158289989_h2_2">User Effects</h2>
+<p>The user can use <code><span class="ApiLink_nn__atk__EffectAux">nn::atk::EffectAux</span></code> to implement the signal processing performed by the AUX bus.</p>
+<h3 id="Anchor_158289989_h3_1">Using User Effects</h3>
+<h4 id="Anchor_158289989_h4_1">Defining User Effects</h4>
+<p>To implement user effects, you must define the user effect class that inherits <code><span class="ApiLink_nn__atk__EffectAux">nn::atk::EffectAux</span></code>.<br />Override the <code><span class="ApiLink_nn__atkLLEffectAux__UpdateSamples">nn::atkLLEffectAux::UpdateSamples</span>()</code> function in the inherited class and implement the signal processing you want to apply in the AUX bus.</p>
+<h4 id="Anchor_158289989_h4_2">Managing User Effects</h4>
+<p>User effects must be managed as follows, as for the <code><span class="ApiLink_nn__atk__EffectReverb">nn::atk::EffectReverb</span></code> and <code><span class="ApiLink_nn__atk__EffectDelay">nn::atk::EffectDelay</span></code>.</p>
+<ul>
+  <li>Attach and detach management of the effect buffer's memory pool.</li>
+  <li>Use <code>IsRemovable()</code> to manage whether the effect can be cleared when it ends.</li>
+</ul>
+<p>For more information about implementation, see the <span class="ApiLink_PageSampleAtkEffect">AtkEffect sample program</span>.<br />For more information about memory pool management, see <a href="../Pages/Page_83956038.html">Memory Management</a>.</p>
+<h3 id="Anchor_158289989_h3_2">Migrating From NW4F</h3>
+<p>If you inherited <code>nw::snd::FxBasein</code> NW4F and implemented user effects, some of the specifications have changed in <code><span class="ApiLink_nn__atk__EffectAux">nn::atk::EffectAux</span></code>. See this section to perform migration.</p>
+<h4 id="Anchor_158289989_h4_3">nw::snd::FxBase::Initialize(), Finalize()</h4>
+<p>The specifications for these functions have not changed. Migrate the functions to the function with the same name in <code><span class="ApiLink_nn__atk__EffectAux">nn::atk::EffectAux</span></code>.</p>
+<h4 id="Anchor_158289989_h4_4">nw::snd::FxBase::UpdateBuffer()</h4>
+<p>Change the name to <code><span class="ApiLink_nn__atk__EffectAux__UpdateSamples">nn::atk::EffectAux::UpdateSamples</span>()</code>. The argument is changed along with the migration to <code><span class="ApiLink_nn__audio">nn::audio</span></code>. Support the specification changes using the following table as a reference.<br />At the end of this page is a list of examples of updated processing codes in NW4F and <code>atk</code>. Also check those examples.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>NW4F FxBase::UpdateBuffer() Argument</th>
+      <th>atk EffectAux::UpdateSamples() Argument</th>
+      <th>User-Side Support</th>
+      <th>Changes</th>
+    </tr>
+    <tr>
+      <td>int numChannels</td>
+      <td>int arg.channelCount</td>
+      <td style="text-align: center;">
+        <div class="content-wrapper">
+          <span class="status_macro_base status_macro_Green">Not required</span>
+        </div>
+      </td>
+      <td>None.</td>
+    </tr>
+    <tr>
+      <td>void* buffer[]</td>
+      <td>int32_t* pSamples</td>
+      <td style="text-align: center;">
+        <div class="content-wrapper">
+          <span class="status_macro_base status_macro_Red">Required</span>
+        </div>
+      </td>
+      <td>Changed how samples are stored.</td>
+    </tr>
+    <tr>
+      <td>unsigned long bufferSize</td>
+      <td>int arg.readSampleCount</td>
+      <td style="text-align: center;">
+        <div class="content-wrapper">
+          <span class="status_macro_base status_macro_Red">Required</span>
+        </div>
+      </td>
+      <td>Value changed from sample size to number of samples.</td>
+    </tr>
+    <tr>
+      <td>SampleFormat format</td>
+      <td>None.</td>
+      <td style="text-align: center;">
+        <div class="content-wrapper">
+          <span class="status_macro_base status_macro_Green">Not required</span>
+        </div>
+      </td>
+      <td>Deprecated as NW4F always contained <code>SAMPLE_FORMAT_PCM_S32</code>.</td>
+    </tr>
+    <tr>
+      <td>float sampleRate</td>
+      <td>int arg.sampleRate</td>
+      <td style="text-align: center;">
+        <div class="content-wrapper">
+          <span class="status_macro_base status_macro_Green">Not required</span>
+        </div>
+      </td>
+      <td>Changed only the type.</td>
+    </tr>
+    <tr>
+      <td>OutputMode mode</td>
+      <td>OutputMode arg.outputMode</td>
+      <td style="text-align: center;">
+        <div class="content-wrapper">
+          <span class="status_macro_base status_macro_Green">Not required</span>
+        </div>
+      </td>
+      <td>None.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Arguments equivalent to the <code><em>numChannels</em></code>, <code><em>sampleRate</em></code>, and <code><em>mode</em></code> parameters in NW4Fare contained in <code>atk</code>'s <code><span class="ApiLink_nn__atk__EffectAux__UpdateSamplesArg">nn::atk::EffectAux::UpdateSamplesArg</span> arg</code>. Replace them while referencing the preceding table.</p>
+<p>There is no argument to support NW4F's <code><em>format</em></code> parameter, but this argument was a fixed value in NW4F and is not required.</p>
+<h5 id="Anchor_158289989_h5_1">Storing Samples</h5>
+<p>Samples for each channel are passed as an array in NW4F. In <code>atk</code>, samples for all channels are passed with one pointer.</p>
+<p>As described in the following section, sometimes in <code>atk</code> multiple audio frame samples are passed at the same time. </p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_158289989/158503045.png" width="600" class="embedded-image" />
+  </span>
+</p>
+<h5 id="Anchor_158289989_h5_2">Number of Samples</h5>
+<p>In NW4F, a sample for a single audio frame (3 milliseconds) was always in each <code>UpdateBuffer()</code>.<br />Its size could be obtained by the <code>bufferSize</code> parameter.</p>
+<p>For this reason, it was possible to calculate the number of samples and perform signal processing for each channel<br />as (<em>number of samples per channel</em>) = <code><em>bufferSize</em></code> / (<code><em>numChannels</em></code> * <code>sizeof(s32)</code>). </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Calculate the number of samples.
+</span><span class="kt">int</span> <span class="n">sampleCount</span> <span class="o">=</span> <span class="n">bufferSize</span> <span class="o">/</span> <span class="p">(</span><span class="n">numChannels</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">s32</span><span class="p">));</span>
+&nbsp;
+<span class="c1">// Overwrite the samples for each channel.
+</span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">ch</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">ch</span> <span class="o">&lt;</span> <span class="n">numChannels</span><span class="p">;</span> <span class="o">++</span><span class="n">ch</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">s32</span><span class="o">*</span> <span class="n">pTargetSample</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">s32</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">buffer</span><span class="p">[</span><span class="n">ch</span><span class="p">]);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">sampleCount</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pTargetSample</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">...;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>atk</code> is not limited to containing a sample of a single audio frame (5 milliseconds) for each <code>UpdateSamples()</code>.<br />Sometimes there may be samples for multiple audio frames or no samples at all.</p>
+<p>For this reason, you must first calculate the number of audio frames that can be updated using the following formula.<br />(<em>Number of audio frames that can be updated</em>) = <code>arg.readSampleCount</code> / (<code>arg.sampleCountPerAudioFrame</code> * <code>arg.channelCount</code>)</p>
+<p>After calculating this formula, using (<em>number of samples per channel</em>) = <code>arg.<em>sampleCountPerAudioFrame</em></code>, perform signal processing for each channel.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Calculate how many audio frames were loaded.
+</span><span class="kt">int</span> <span class="n">readAudioFrameCount</span> <span class="o">=</span> <span class="n">arg</span><span class="p">.</span><span class="n">readSampleCount</span> <span class="o">/</span> <span class="p">(</span><span class="n">arg</span><span class="p">.</span><span class="n">sampleCountPerAudioFrame</span> <span class="o">*</span> <span class="n">arg</span><span class="p">.</span><span class="n">channelCount</span><span class="p">);</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">frame</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">frame</span> <span class="o">&lt;</span> <span class="n">readAudioFrameCount</span><span class="p">;</span> <span class="o">++</span><span class="n">frame</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get the first sample of each audio frame.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int32_t</span><span class="o">*</span> <span class="n">bufferBase</span> <span class="o">=</span> <span class="n">pSamples</span> <span class="o">+</span> <span class="n">frame</span> <span class="o">*</span> <span class="n">arg</span><span class="p">.</span><span class="n">sampleCountPerAudioFrame</span> <span class="o">*</span> <span class="n">arg</span><span class="p">.</span><span class="n">channelCount</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Overwrite the samples for each channel.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">ch</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">ch</span> <span class="o">&lt;</span> <span class="n">arg</span><span class="p">.</span><span class="n">channelCount</span><span class="p">;</span> <span class="o">++</span><span class="n">ch</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int32_t</span><span class="o">*</span> <span class="n">pTargetSample</span> <span class="o">=</span> <span class="n">bufferBase</span> <span class="o">+</span> <span class="n">ch</span> <span class="o">*</span> <span class="n">arg</span><span class="p">.</span><span class="n">sampleCountPerAudioFrame</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">i</span><span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span> <span class="n">arg</span><span class="p">.</span><span class="n">sampleCountPerAudioFrame</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pTargetSample</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">...;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_PageSampleAtkEffect', '../../../Api/HtmlNX/_page_sample_atk_effect.html' )
+SetUrl( 'ApiLink_nn__audio', '../../../Api/HtmlNX/namespacenn_1_1audio.html' )
+SetUrl( 'ApiLink_nn__atk__EffectAux', '../../../Api/HtmlNX/classnn_1_1atk_1_1_effect_aux.html' )
+// ApiLink_nn__atkLLEffectAux__UpdateSamples
+SetUrl( 'ApiLink_nn__atk__EffectReverb', '../../../Api/HtmlNX/classnn_1_1atk_1_1_effect_reverb.html' )
+SetUrl( 'ApiLink_nn__atk__EffectDelay', '../../../Api/HtmlNX/classnn_1_1atk_1_1_effect_delay.html' )
+SetUrl( 'ApiLink_nn__atk__EffectAux__UpdateSamples', '../../../Api/HtmlNX/classnn_1_1atk_1_1_effect_aux.html#a13f365869ae89e01dcab8016da37120a' )
+SetUrl( 'ApiLink_nn__atk__EffectAux__UpdateSamplesArg', '../../../Api/HtmlNX/structnn_1_1atk_1_1_effect_aux_1_1_update_samples_arg.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

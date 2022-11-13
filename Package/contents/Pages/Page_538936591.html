@@ -1,0 +1,1092 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Image Processing Features | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Image Processing Features -->
+<div class="pagetitle" id="PageId_538936591">Image Processing Features</div>
+<div class="text_separate">
+<h1 id="Anchor_538936591_h1_1">Overview</h1>
+<p>The <code>CaptureProcessor</code> library provides image processing features for detecting coordinates and other properties of the target object in the capture screen of the corresponding development hardware. Two types of main features are provided: a detection feature for detecting a specific object or string, and a filter feature used in pre-processing to increase the precision of the detection feature.</p>
+<p>This section describes the attributes of the image processing features and provides examples of effective filter feature combinations for pre-processing with the detection feature.</p>
+<h2 id="Anchor_538936591_h2_1">Samples</h2>
+<p>The <code>Samples\Sources\Tools\AutoTestAssistTools\ScriptSamples\ImageProcessSample.py</code> samples are provided to show how to use the image processing features.</p>
+<p>The samples show how to use the image processing features of the <code>CaptureProcessor</code> library, and how to implement user-specific image processing for capture images.</p>
+<h2 id="Anchor_538936591_h2_2">Adjusting Parameters</h2>
+<p>Use <a href="../Pages/Page_538936633.html">CaptureVisualizer</a> to adjust the parameters when executing the various filter features, and for verifying information such as the results of executing detected features.</p>
+<h1 id="Anchor_538936591_h1_2">Filter Features</h1>
+<p>Filter features allow you to use image processing filters to modify the target image using image processing.</p>
+<p>By using an image processing filter, you can remove unnecessary parts and reduce the impact of brightness changes from effects and so on to improve the precision of the detection feature (described later).</p>
+<h2 id="Anchor_538936591_h2_3">Color Region Filter</h2>
+<p>Leaves the locations within the color region specified by RGB, and fills everything else with black.</p>
+<ul>
+  <li>
+    <span class="ApiLink_CAPTUREPROCESSOR_API_CaptureResult_SetColorRangeFilter(FilterIdType_filterId|_Rgb24Color_lowerColor|_Rgb24Color_upperColor)">SetColorRangeFilter</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Overview</th>
+      <th>Conversion Example</th>
+    </tr>
+    <tr>
+      <td>Original Image</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936618.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>lowerColor = [0, 0, 200]</p>
+        <p>upperColor = [150, 150, 255]</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936617.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>lowerColor = [110, 110, 110]</p>
+        <p>upperColor = [130, 130, 130]</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936616.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>lowerColor = [0, 160, 150]</p>
+        <p>upperColor = [100, 240, 255]</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936615.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_538936591_h2_4">Binarization Filter</h2>
+<p>After converting to grayscale (Gray = Red * 0.299 + Green * 0.587 + Blue * 0.114) using the NTSC weighted average method, the locations with values exceeding the threshold are filled with white, and everywhere else is filled with black.</p>
+<ul>
+  <li>
+    <span class="ApiLink_CAPTUREPROCESSOR_API_CaptureResult_SetBinarizationFilter(FilterIdType_filterId|_int_binarizeThreshold)">SetBinarizationFilter</span>
+  </li>
+</ul>
+<table class="relative-table wrapped" style="width: 68.5185%;">
+  <colgroup>
+    <col style="width: 22.9508%;" />
+    <col style="width: 38.5246%;" />
+    <col style="width: 38.5246%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Overview</th>
+      <th>Conversion Example 1</th>
+      <th>Conversion Example 2</th>
+    </tr>
+    <tr>
+      <td>Original Image</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936628.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936623.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>binarizeThreshold = 64</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936627.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936622.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>binarizeThreshold = 128</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936626.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936621.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>binarizeThreshold = 192</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936625.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936620.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>binarizeThreshold = 255</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936624.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936619.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+  <br />
+</p>
+<h2 id="Anchor_538936591_h2_5">Morphology Conversion Filter</h2>
+<p>Dilates and erodes the brightness of coordinates for the entire target image.</p>
+<ul>
+  <li>
+    <span class="ApiLink_CAPTUREPROCESSOR_API_CaptureResult_SetMorphologyFilter(FilterIdType_filterId|_MorphologyConversionType_type|_int_iterations)">SetMorphologyFilter</span>
+  </li>
+</ul>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Overview</th>
+      <th>Conversion Example</th>
+    </tr>
+    <tr>
+      <td>Original</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936604.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Erosion (Erosion)</p>
+        <p>iterations = 5</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936603.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Dilation (Dilation)</p>
+        <p>iterations = 5</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936602.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<p>
+  <code>MorphologyConversionType_Opening</code> and <code>MorphologyConversionType_Closing</code> can remove noise by combining these processes.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Overview</th>
+      <th>Conversion Example</th>
+    </tr>
+    <tr>
+      <td>Original</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936601.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Opening (Erosion -&gt; Dilation)</p>
+        <p>iterations = 4</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936600.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Opening (Erosion -&gt; Dilation)</p>
+        <p>iterations = 6</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936599.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Opening (Erosion -&gt; Dilation)</p>
+        <p>iterations = 8</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936598.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Overview</th>
+      <th>Conversion Example</th>
+    </tr>
+    <tr>
+      <td>Original</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936594.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Closing (Dilation -&gt; Erosion)</p>
+        <p>iterations = 2</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936597.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Closing (Dilation -&gt; Erosion)</p>
+        <p>iterations = 4</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936596.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Closing (Dilation -&gt; Erosion)</p>
+        <p>iterations = 6</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936595.png" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<table class="relative-table wrapped" style="width: 97.8079%;">
+  <colgroup>
+    <col style="width: 34.7625%;" />
+    <col style="width: 31.0026%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Overview</th>
+      <th>Conversion Example</th>
+    </tr>
+    <tr>
+      <td>Original</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936609.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Erosion (Erosion)</p>
+        <p>iterations = 2</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936608.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Dilation (Dilation)</p>
+        <p>iterations = 2</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936607.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Opening (Erosion -&gt; Dilation)</p>
+        <p>iterations = 2</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936606.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>type = MorphologyConversionType_Closing (Dilation -&gt; Erosion)</p>
+        <p>iterations = 2</p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936605.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>When executing morphology conversion for a binarized image, erosion processing erodes the white regions and dilates the black regions. Dilation processing dilates the white regions and erodes the black regions.</p>
+  </div>
+</div>
+<h1 id="Anchor_538936591_h1_3">Detection Feature</h1>
+<h2 id="Anchor_538936591_h2_6">Template Matching</h2>
+<p>Template matching allows any template image to detect the displaying coordinates for the capture image on the corresponding development hardware.</p>
+<p>The average value of the dot product of the pixel values for the capture image and the template image is the degree of matching (0.0&ndash;1.0). The coordinates of the location where the degree of matching exceeds the specified threshold value and where the value is the greatest are the result.</p>
+<ul>
+  <li>
+    <span class="ApiLink_CAPTUREPROCESSOR_API_MatchingResult_DetectObject(int_*pOutX|_int_*pOutY|_ImageIdType_id|_double_threshold)">DetectObject</span>
+  </li>
+  <li>
+    <span class="ApiLink_CAPTUREPROCESSOR_API_MatchingResult_WaitDetectObject(int_*pOutX|_int_*pOutY|_ImageIdType_id|_double_threshold|_int_timeout)">WaitDetectObject</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_538936591/538936593.png" height="400" class="embedded-image" />
+  </span>
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Because the degree of matching is calculated by simply comparing the pixel values, there is a risk of reduced precision when detecting images with different sizes or images with different colors.</p>
+    <p>The resolution of the screenshot that is the detection target is the same resolution as the window size when capture was started. When an image with a different size, such as a screenshot obtained with the capture preview window resized, is made the template image, it is easier for matching to fail due to the size difference.</p>
+    <p>When the colors are different, it is sometimes possible to increase detection precision by using matching with an image processing filter (described in the following section).</p>
+  </div>
+</div>
+<h3 id="Anchor_538936591_h3_1">Matching With an Image Processing Filter</h3>
+<p>Matching with an image processing filter can execute template matching for the screenshot with an image processing filter applied. Using a color space filter or binarization filter, you can execute template matching in the converted state of locations other than the target object filled with black, and the target object color filled with white.</p>
+<ul>
+  <li>
+    <span class="ApiLink_CAPTUREPROCESSOR_API_MatchingResult_DetectObjectWithFilter(int_*pOutX|_int_*pOutY|_ImageIdType_id|_double_threshold|_FilterIdType_filterId)">DetectObjectWithFilter</span>
+  </li>
+  <li>
+    <span class="ApiLink_CAPTUREPROCESSOR_API_MatchingResult_WaitDetectObjectWithFilter(int_*pOutX|_int_*pOutY|_ImageIdType_id|_double_threshold|_int_timeout|_FilterIdType_filterId)">WaitDetectObjectWithFilter</span>
+  </li>
+</ul>
+<h2 id="Anchor_538936591_h2_7">Optical Character Recognition</h2>
+<p>Optical Character Recognition (OCR) can detect strings that are displayed on the screen.</p>
+<ul>
+  <li>
+    <span class="ApiLink_CAPTUREPROCESSOR_API_CaptureResult_ExecuteOcr(int_*pOutResultCount|_OcrResultHandleType_*pOutOcrResultHandle|_ImageIdType_id|_OcrSeparateLevel_separate|_OcrLanguage_language)">ExecuteOcr</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<p>You must specify the target language when executing OCR. The recognition rate is reduced for strings not in the target language. The following languages are currently supported.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>OCR Language</th>
+      <th>Language</th>
+    </tr>
+    <tr>
+      <td>OcrLanguage_Japanese</td>
+      <td>Japanese</td>
+    </tr>
+    <tr>
+      <td>OcrLanguage_English</td>
+      <td>English</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_538936591_h3_2">Tips</h3>
+<p>OCR may erroneously detect parts such as the background as a string. Detection may fail when the difference between the character color and the color around the characters is small, or when noise is included in characters. Using an image processing filter, you can improve the precision of OCR recognition by filling in unnecessary parts and removing noise.</p>
+<p>
+  <br />
+</p>
+<p>The following images show the difference in the result of executing OCR for a standard image, and executing OCR for an image with regions other than RGB (255,255,255) filled with black using an image processing filter.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Image Overview</th>
+      <th>Target Image</th>
+      <th>Result List</th>
+    </tr>
+    <tr>
+      <td>Original</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936632.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td rowspan="2">
+        <div class="content-wrapper">
+          <p>The following table shows the result of executing OCR for each image.</p>
+          <div class="expand-container" id="expander-538936591-1">
+            <div class="expand-control" id="expander-control-538936591-1">
+              <span class="expand-control-icon collapsed-icon"> </span>
+              <span class="expand-control-text">Click here to expand...</span>
+            </div>
+            <div class="expand-content expand-hidden" id="expander-content-538936591-1">
+              <table class="wrapped">
+                <tbody>
+                  <tr>
+                    <th>Original</th>
+                    <th>After Applying the Color Space Filter</th>
+                  </tr>
+                  <tr>
+                    <td>DevMenu:</td>
+                    <td>DevMenu:</td>
+                  </tr>
+                  <tr>
+                    <td>Application</td>
+                    <td>Application</td>
+                  </tr>
+                  <tr>
+                    <td>49%</td>
+                    <td>49%</td>
+                  </tr>
+                  <tr>
+                    <td>E</td>
+                    <td>l</td>
+                  </tr>
+                  <tr>
+                    <td>2:36</td>
+                    <td>2:36</td>
+                  </tr>
+                  <tr>
+                    <td>Application</td>
+                    <td>
+                      <br />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>(D</td>
+                  </tr>
+                  <tr>
+                    <td>Install</td>
+                    <td>Install</td>
+                  </tr>
+                  <tr>
+                    <td>from</td>
+                    <td>from</td>
+                  </tr>
+                  <tr>
+                    <td>SD</td>
+                    <td>SD</td>
+                  </tr>
+                  <tr>
+                    <td>Write</td>
+                    <td>Write</td>
+                  </tr>
+                  <tr>
+                    <td>to</td>
+                    <td>to</td>
+                  </tr>
+                  <tr>
+                    <td>Game</td>
+                    <td>Game</td>
+                  </tr>
+                  <tr>
+                    <td>Card</td>
+                    <td>Card</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Save</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Data</td>
+                  </tr>
+                  <tr>
+                    <td>DevMenu</td>
+                    <td>DevMenu</td>
+                  </tr>
+                  <tr>
+                    <td>Application</td>
+                    <td>Application</td>
+                  </tr>
+                  <tr>
+                    <td>Controller</td>
+                    <td>Controller</td>
+                  </tr>
+                  <tr>
+                    <td>ID:</td>
+                    <td>\D</td>
+                  </tr>
+                  <tr>
+                    <td>0x0100000000002065</td>
+                    <td>0x0100000000002065</td>
+                  </tr>
+                  <tr>
+                    <td>|</td>
+                    <td>\</td>
+                  </tr>
+                  <tr>
+                    <td>Version:</td>
+                    <td>Vemon</td>
+                  </tr>
+                  <tr>
+                    <td>1.0.0</td>
+                    <td>1</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>O</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Accounts</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Device</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Network</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Time</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Test</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Debug</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Error</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Shop</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>A:</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Launch</td>
+                  </tr>
+                  <tr>
+                    <td>_/+;</td>
+                    <td>_/+;</td>
+                  </tr>
+                  <tr>
+                    <td>option</td>
+                    <td>Option</td>
+                  </tr>
+                  <tr>
+                    <td>Builtin</td>
+                    <td>BuiIt-in</td>
+                  </tr>
+                  <tr>
+                    <td>57,625,760</td>
+                    <td>57.625.760</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>/</code>
+                    </td>
+                    <td>
+                      <code>/</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>57,643,504</td>
+                    <td>57.643.504</td>
+                  </tr>
+                  <tr>
+                    <td>KB</td>
+                    <td>KB</td>
+                  </tr>
+                  <tr>
+                    <td>SD</td>
+                    <td>SD</td>
+                  </tr>
+                  <tr>
+                    <td>Card</td>
+                    <td>Card</td>
+                  </tr>
+                  <tr>
+                    <td>Not</td>
+                    <td>Not</td>
+                  </tr>
+                  <tr>
+                    <td>inserted.</td>
+                    <td>inserted.</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <br />
+                    </td>
+                    <td>Firmware</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>After Applying the Color Space Filter</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936631.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Applying an image processing filter to the image subject to OCR may increase the precision of recognition. However, if the image after applying the image processing filter contains noise, there is a risk that words that could be recognized before the filter was applied will be misidentified after the filter is applied.</p>
+    <p>OCR processing takes time, so continuous execution is difficult for screens displaying images in real time. Reducing the size of the target region is effective at improving processing speed.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_538936591_h2_8">Labeling</h2>
+<p>Labeling groups regions within the target image where brightness is similar to detect regions in the image where similar colors are concatenated.</p>
+<p>In the pre-processing, the target image is converted to grayscale (Gray = Red * 0.299 + Green * 0.587 + Blue * 0.114) using the NTSC weighted average method.</p>
+<ul>
+  <li>
+    <span class="ApiLink_CAPTUREPROCESSOR_API_CaptureResult_ExecuteLabeling(int_*pOutResultAreaCount|_LabelingResultHandleType_*pOutLabelingResultHandle|_ImageIdType_imageId)">ExecuteLabeling</span>
+  </li>
+</ul>
+<h3 id="Anchor_538936591_h3_3">Tips</h3>
+<p>By executing labeling for the capture image, you can detect the location and number of objects. However, when labeling alone is executed for the capture image, a large number of unrelated objects may be detected. For this reason, we recommend applying an image processing filter (described later) to the target image beforehand, and executing labeling with objects other than the target object removed.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Image Overview</th>
+      <th>Images</th>
+      <th>Labeling Detection Result</th>
+    </tr>
+    <tr>
+      <td>Original</td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936614.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936613.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Remove unnecessary objects using an image processing filter</p>
+        <p>Color Region Filter</p>
+        <ul>
+          <li>
+            <p>lowerColor = [255, 0, 0]</p>
+          </li>
+          <li>
+            <p>upperColor = [255, 255, 255]</p>
+          </li>
+        </ul>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936630.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_538936591/538936629.png" height="400" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>In the pre-processing, the image is converted to grayscale using the NTSC weighted average method. At this time, labeling may not be able to detect objects normally for images where the base background part is not black, and images where the brightness difference between the target object and the base background is small.</p>
+    <p>For this reason, we recommend using a color region filter or binarization filter for the pre-processing and executing labeling with the background part filled with black beforehand.</p>
+  </div>
+</div>
+<p>
+  <br />
+  <br />
+</p>
+<div>
+  <br />
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_CAPTUREPROCESSOR_API_CaptureResult_SetColorRangeFilter(FilterIdType_filterId|_Rgb24Color_lowerColor|_Rgb24Color_upperColor)', '../../../Api/HtmlNX/_capture_processor_library_8h.html#ae5bc77bf2d5054deca70c426b91bbf38' )
+SetUrl( 'ApiLink_CAPTUREPROCESSOR_API_CaptureResult_SetBinarizationFilter(FilterIdType_filterId|_int_binarizeThreshold)', '../../../Api/HtmlNX/_capture_processor_library_8h.html#aa0ef9ca0847c2c76f3737bd3e974fc31' )
+SetUrl( 'ApiLink_CAPTUREPROCESSOR_API_CaptureResult_SetMorphologyFilter(FilterIdType_filterId|_MorphologyConversionType_type|_int_iterations)', '../../../Api/HtmlNX/_capture_processor_library_8h.html#ac1e20aee0e0594c33cd510735a596131' )
+SetUrl( 'ApiLink_CAPTUREPROCESSOR_API_MatchingResult_DetectObject(int_*pOutX|_int_*pOutY|_ImageIdType_id|_double_threshold)', '../../../Api/HtmlNX/_capture_processor_library_8h.html#a8625ebac36002bac3ae913625fe3a429' )
+SetUrl( 'ApiLink_CAPTUREPROCESSOR_API_MatchingResult_WaitDetectObject(int_*pOutX|_int_*pOutY|_ImageIdType_id|_double_threshold|_int_timeout)', '../../../Api/HtmlNX/_capture_processor_library_8h.html#a4c9db1b910cb7f1ecd900c69a09bb21a' )
+SetUrl( 'ApiLink_CAPTUREPROCESSOR_API_MatchingResult_DetectObjectWithFilter(int_*pOutX|_int_*pOutY|_ImageIdType_id|_double_threshold|_FilterIdType_filterId)', '../../../Api/HtmlNX/_capture_processor_library_8h.html#ada70672647d8dc5b65440c37c9fa7cfd' )
+SetUrl( 'ApiLink_CAPTUREPROCESSOR_API_MatchingResult_WaitDetectObjectWithFilter(int_*pOutX|_int_*pOutY|_ImageIdType_id|_double_threshold|_int_timeout|_FilterIdType_filterId)', '../../../Api/HtmlNX/_capture_processor_library_8h.html#ae43736064e33a8671a83a5ac55d3e320' )
+SetUrl( 'ApiLink_CAPTUREPROCESSOR_API_CaptureResult_ExecuteOcr(int_*pOutResultCount|_OcrResultHandleType_*pOutOcrResultHandle|_ImageIdType_id|_OcrSeparateLevel_separate|_OcrLanguage_language)', '../../../Api/HtmlNX/_capture_processor_library_8h.html#a13428ea715ffbdcf3350bf0d958a0b37' )
+SetUrl( 'ApiLink_CAPTUREPROCESSOR_API_CaptureResult_ExecuteLabeling(int_*pOutResultAreaCount|_LabelingResultHandleType_*pOutLabelingResultHandle|_ImageIdType_imageId)', '../../../Api/HtmlNX/_capture_processor_library_8h.html#a82f8729863e0ce8c02c1e039edb41472' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

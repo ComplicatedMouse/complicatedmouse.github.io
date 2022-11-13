@@ -1,0 +1,364 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Customizable Functions Within Custom Shaders | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Customizable Functions Within Custom Shaders -->
+<div class="pagetitle" id="PageId_218170764">Customizable Functions Within Custom Shaders</div>
+<div class="text_separate">
+<h1 id="Anchor_218170764_h1_1">Customizable Functions Within Custom Shaders</h1>
+<p>This list summarizes the effect standard functions that the user can independently customize within custom shaders.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table style="margin-left: 1.5em;" class="table">
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_83955731.html">Custom Shader Examples</a>
+      </th>
+      <td>Describes custom shaders.</td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_218170681.html">Variables and Macros Available Within Custom Shaders</a>
+      </th>
+      <td>Describes the variables and macros available to the user within custom shaders.</td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_86606325.html">Custom Fields</a>
+      </th>
+      <td>Describes custom fields.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_218170764_h2_1">Basic Approach to Custom Definitions</h2>
+<p>Basically, functions within customizable effect shaders are:</p>
+<ul>
+  <li>Implemented in a form that defines the function unless a specific preprocessor is enabled.</li>
+</ul>
+<p> In other words, the following happens:</p>
+<ul>
+  <li>If you write the independent definition of the function with a specific preprocessor enabled in advance, you can replace the function with that function.</li>
+</ul>
+<p> Consider this example:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#define USE_USR_FUNCTION_HOGE_HOGE
+</span><span class="kt">void</span> <span class="nf">HogeHoge</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Replace with custom implementation here.
+</span><span class="p">}</span>
+&nbsp;
+<span class="c1">// Code from here up with the custom shader.
+</span>&nbsp;
+<span class="p">...</span>
+&nbsp;
+<span class="c1">// From here down is an example of standard implementation of an effect shader.
+</span>
+<span class="cp">#ifndef USE_USR_FUNCTION_HOGE_HOGE
+</span><span class="kt">void</span> <span class="nf">HogeHoge</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Standard implementation by the effect runtime.
+</span><span class="p">}</span>
+<span class="cp">#endif
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This is the structure, so when defining custom implementation for a function, code the definition like the first half of the code sample above.</p>
+<p>The next section lists the customizable functions. Basically, if you use a combination of a supported function name and a preprocessor, the coding is the same as above.</p>
+<h2 id="Anchor_218170764_h2_2">Common to All Vertex Shaders and Pixel Shaders</h2>
+<table style="margin-left: 1.5em;" class="table">
+  <tbody>
+    <tr>
+      <th rowspan="2">Function Name　　　　　　　　　　　　　　</th>
+      <th rowspan="2">Preprocessor to Declare When Customizing</th>
+      <th colspan="3">Use With Each Shader (Yes/No)</th>
+      <th rowspan="2">Description</th>
+    </tr>
+    <tr>
+      <th>Vertex</th>
+      <th>Pixel</th>
+      <th>Compute</th>
+    </tr>
+    <tr>
+      <th>
+        <p>float GetDepthValue (vec4 position)</p>
+      </th>
+      <th>USE_USR_GET_DEPTH_VALUE</th>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>
+        <p>This function gets the depth values from depth buffer textures passed from the application. Pass <code>vec4</code> after projection conversion as an argument.</p>
+        <p>The default implementation performs linear conversion when getting the depth value.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>float GetDepthValueFromTexture (vec4 projection)</p>
+      </th>
+      <th>USE_USR_GET_DEPTH_VALUE_FROM_TEXTURE</th>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>
+        <p>This function gets the depth values from depth buffer textures passed from the application.<br />This passes <code>vec4</code> for projection as an argument to get the depth values using <code>texture2DProj()</code> internally. </p>
+        <p>The default implementation performs linear conversion when getting the depth values.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>vec3 GetLocalNormal()</th>
+      <th>USE_USR_GET_LOCAL_NORMAL</th>
+      <td>Yes</td>
+      <td>No</td>
+      <td>No</td>
+      <td>This function gets the normals.</td>
+    </tr>
+    <tr>
+      <th>
+        <p>vec3 GetLocalTangent()</p>
+      </th>
+      <th>USE_USR_GET_LOCAL_TANGENT</th>
+      <td>Yes</td>
+      <td>No</td>
+      <td>No</td>
+      <td>This function gets the tangents.</td>
+    </tr>
+    <tr>
+      <th>vec3 GetLocalBinormal()</th>
+      <th>USE_USR_GET_LOCAL_BINORMAL</th>
+      <td>Yes</td>
+      <td>No</td>
+      <td>No</td>
+      <td>This function gets the binormals.</td>
+    </tr>
+    <tr>
+      <th>
+        <p>float CalcVertexSoftEdge()</p>
+      </th>
+      <th>USE_USR_VERTEX_SOFT_EDGE</th>
+      <td>Yes</td>
+      <td>No</td>
+      <td>No</td>
+      <td>This function is called during soft edge processing in the vertex shader.</td>
+    </tr>
+    <tr>
+      <th>void AdjustmentWorldPosition()</th>
+      <th>USE_USR_ADJUSTMENT_WORLD_POSITION</th>
+      <td>Yes</td>
+      <td>No</td>
+      <td>No</td>
+      <td>
+        <p>This function is called immediately after the world coordinates of the vertex are determined in the vertex shader.<br /><code>gl_Position</code> contains the coordinates not for the particle center, but for each particle or primitive vertex.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>void FinalAdjustmentVertexProcess()</th>
+      <th>USE_USR_FINAL_ADJUSTMENT_VERTEX_PROCSS</th>
+      <td>Yes</td>
+      <td>No</td>
+      <td>No</td>
+      <td>
+        <p>This function is called in the final stage of vertex shader processing.<br />Describes the colors and texture coordinates calculated to this point or the values sent independently to the fragment shader.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>GetTexture0Color (vec2 texCoord)</p>
+        <p>GetTexture1Color( vec2 texCoord )</p>
+        <p>GetTexture2Color( vec2 texCoord )</p>
+      </th>
+      <th>
+        <p>USE_USR_GET_TEXTURE_COLOR</p>
+        <p>USE_USR_GET_TEXTURE1_COLOR</p>
+        <p>USE_USR_GET_TEXTURE2_COLOR</p>
+      </th>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>
+        <p>Function to get texture color. Pass the UV coordinates in <code>vec2</code>.</p>
+        <p>To manipulate the specified texture color, overwrite and use.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>vec3 GetPrimitiveColor()</th>
+      <th>USE_USR_GET_PRIMITIVE_COLOR</th>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>This function gets the color of primitives.</td>
+    </tr>
+    <tr>
+      <th>
+        <p>float GetPrimitiveAlpha()</p>
+      </th>
+      <th>USE_USR_GET_PRIMITIVE_ALPHA</th>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>This function gets the alpha of primitives.</td>
+    </tr>
+    <tr>
+      <th>
+        <p>vec4 GetFrameBufferTextureColor (vec4 projection)</p>
+      </th>
+      <th>USE_USR_GET_FRAME_BUFFER_VALUE</th>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>
+        <p>This function gets the framebuffer RGBA from the framebuffer textures passed from the application.<br />This passes vec4 for projection as an argument to get the depth values using <code>texture2DProj()</code> internally. </p>
+        <p>The default implementation passes the argument as is to <code>texture2dProj()</code> and returns the result.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>vec3 GetFragmentColor (vec3 texture, vec3 vcolor0, vec3 vcolor1)</p>
+      </th>
+      <th>USE_USR_GET_FRAGMENT_COLOR</th>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No </td>
+      <td>
+        <p>This function is called in the stage to decide the final output color after blending textures 0, 1, and 2.</p>
+        <p>By customizing this to return a constant value, custom processing is possible to strip texture fetching and other processing in compile time optimization and render only the depth values.</p>
+        <p />
+        <p>
+          <code>
+            <em>texture</em>
+          </code> is passed to the texture RGB after blending, and EffectMaker color 0 and color 1 are passed respectively to <code><em>vcolor0</em></code> and <code><em>vcolor1</em></code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>float GetFragmentAlpha (float texture, float alpha0, float alpha1)</p>
+      </th>
+      <th>USE_USR_GET_FRAGMENT_ALPHA</th>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No </td>
+      <td>
+        <p>This function is called at the stage of deciding the final output alpha after blending textures 0, 1, and 2.</p>
+        <p>
+          <code>texture</code> is passed to the texture RGB after blending, and EffectMaker alpha 0 and alpha 1 are passed respectively to <code>alpha0</code> and <code>alpha1</code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>vec4 BlendTexture1Color (vec4 texture0, vec4 texture1)</p>
+      </th>
+      <th>
+        <p>USE_USR_BLEND_TEXTURE1_COLOR</p>
+      </th>
+      <td>No </td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>
+        <p>This function blends texture 0 and texture 1.</p>
+        <p>The texture 0 RGB is passed to <code>texture0</code>, and the texture 1 RGB is passed to <code>texture1</code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>vec4 BlendTexture2Color (vec4 texture, vec4 texture2)</th>
+      <th>USE_USR_BLEND_TEXTURE2_COLOR</th>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>
+        <p>This function blends the blend result of <code>BlendTexture1Color()</code> and texture 2.</p>
+        <p>The blended result RGB in <code>BlendTexture1Color()</code> is passed to <code>texture</code>, and the texture 2 RGB is passed to <code>texture2</code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>float CalculateSoftEdge()</p>
+      </th>
+      <th>USE_USR_SOFT_EDGE</th>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>This function is called during soft edge processing in the pixel shader.</td>
+    </tr>
+    <tr>
+      <th>
+        <p>void FinalAdjustmentFragmentColor()</p>
+      </th>
+      <th>USE_USR_FINAL_ADJUSTMENT_FRAGMENT_COLOR</th>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>
+        <p>This function is called at the end of pixel shader processing.</p>
+        <p>Calculation results up to this point are input into <code>OUTPUT_COLOR</code>, so independent results with respect to these are added.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>void AdjustmentStreamOutPosVec (inout vec3 outPos, inout vec3 outVec, inout float outParticleLife)</p>
+      </th>
+      <th>USE_USR_CUSTOM_FIELD</th>
+      <td>No</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>
+        <p>The function for implementing compute shaders for custom fields. Empty implementation is defined by default.<br />Vectors containing the position and speed calculation results from the basic feature field are stored individually in <code><em>outPos</em></code> and <code><em>outVec</em></code>, making it possible to add independent behavior when updating these values.</p>
+        <p>For more information about custom fields, see <a href="../Pages/Page_86606325.html">Custom Fields</a>.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div>
+  <p>
+    <br />
+    <br />
+  </p>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

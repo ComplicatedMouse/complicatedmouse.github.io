@@ -1,0 +1,231 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Transient Allocators | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Transient Allocators -->
+<div class="pagetitle" id="PageId_163289475">Transient Allocators</div>
+<div class="text_separate">
+<h1 id="Anchor_163289475_h1_1"> Transient Allocators</h1>
+<p>Transient allocators are mainly for managing graphics resources that are used in only one frame.</p>
+<p>The following classes are provided for managing individual resources.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Name</th>
+      <th>Header File</th>
+      <th>Usage</th>
+    </tr>
+    <tr>
+      <td>TransientMemoryPoolAllocator</td>
+      <td>nn/gfx/util/gfx_TransientMemoryPoolAllocator.h</td>
+      <td>Management of memory in a memory pool.</td>
+    </tr>
+    <tr>
+      <td>TransientBufferAllocator </td>
+      <td>nn/gfx/util/gfx_TransientBufferAllocator.h </td>
+      <td>Management of memory in a buffer. </td>
+    </tr>
+    <tr>
+      <td>TransientDescriptorPoolAllocator </td>
+      <td>nn/gfx/util/gfx_TransientDescriptorPoolAllocator.h </td>
+      <td>Management of descriptor pool slots. </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_163289475_h1_2">Overview</h1>
+<p> The basic procedure for using transient allocators is as follows.</p>
+<ol>
+  <li>Begin the process of creating the command buffer.</li>
+  <li>Call the <code>Begin()</code> function.</li>
+  <li>Call the <code>Allocate()</code> function any number of times.</li>
+  <li>Call the <code>End()</code> function.</li>
+  <li>End the process of creating the command buffer.</li>
+  <li>Wait for the execution of the command buffer.</li>
+  <li>Call the <code>Free()</code> function.</li>
+</ol>
+<p>Calling the <code>Free()</code> function frees all of the resources that were allocated by the <code>Allocate()</code> function during the time between the calls to <code>Begin()</code> and <code>End()</code>. If <code>Begin()</code> and <code>End()</code> are called repeatedly without calling <code>Free()</code>, the resources allocated during each interval are recorded to history. When <code>Free()</code> is called, the resources in that history are freed starting with the oldest. This provides an efficient way when double-buffering and triple-buffering to manage resources that are used temporarily in frames.</p>
+<h1 id="Anchor_163289475_h1_3">How to Use</h1>
+<p>This section describes the process from initialization to destruction of an allocator, using the <code>TransientMemoryPoolAllocator</code> class as an example.</p>
+<h2 id="Anchor_163289475_h2_1">Initialization</h2>
+<p>At initialization time, specify the space in the memory pool that will be managed by the transient allocator. If you need to specify an alignment for the memory space that will be allocated by the transient allocator, you must pass the maximum value for the required alignment at initialization time. The start of the memory space to be managed must comply with this maximum alignment.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::gfx::</span><span class="n">MemoryPool</span><span class="o">*</span> <span class="n">pMemoryPool</span><span class="p">;</span> <span class="c1">// The memory pool to manage.
+</span><span class="kt">ptrdiff_t</span> <span class="n">baseOffser</span><span class="p">;</span>             <span class="c1">// The offset to the start of the memory space to manage.
+</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">;</span>                      <span class="c1">// The length (in bytes) of the memory space to manage.
+</span><span class="kt">size_t</span> <span class="n">alignmentMax</span><span class="p">;</span>              <span class="c1">// The maximum alignment when memory is allocated by the transient allocator.
+</span><span class="kt">int</span> <span class="n">historyMax</span><span class="p">;</span>                   <span class="c1">// The maximum number of histories to record.
+</span>&nbsp;
+<span class="nn">nn::gfx::</span><span class="n">TransientMemoryPoolAllocator</span> <span class="n">transientAllocator</span><span class="p">;</span>
+<span class="c1">// Configure the working memory.
+</span><span class="kt">size_t</span> <span class="n">memorySize</span> <span class="o">=</span> <span class="nn">nn::gfx::TransientMemoryPoolAllocator::</span><span class="n">GetRequiredMemorySize</span><span class="p">(</span><span class="n">historyMax</span><span class="p">);</span>
+<span class="kt">size_t</span> <span class="n">memoryAlignment</span> <span class="o">=</span> <span class="nn">nn::gfx::TransientMemoryPoolAllocator::</span><span class="n">GetRequiredMemoryAlignment</span><span class="p">();</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">pMemory</span> <span class="o">=</span> <span class="n">aligned_alloc</span><span class="p">(</span><span class="n">memoryAlignment</span><span class="p">,</span> <span class="n">memorySize</span><span class="p">);</span>
+<span class="n">transientAllocator</span><span class="p">.</span><span class="n">SetMemory</span><span class="p">(</span><span class="n">pMemory</span><span class="p">,</span> <span class="n">memorySize</span><span class="p">);</span>
+<span class="c1">// Initialization.
+</span><span class="n">transientAllocator</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span><span class="n">pMemoryPool</span><span class="p">,</span> <span class="n">baseOffset</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">alignmentMax</span><span class="p">,</span> <span class="n">historyMax</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_163289475_h2_2">Using in Drawing Routines</h2>
+<p>
+  <br />
+</p>
+<p>If the number specified as the maximum for the history is the same as the maximum for the swap chain, your transient allocator history corresponds to individual frames if you call both <code>Begin()</code> and <code>End()</code> one time in each frame.</p>
+<p>In the following sample code, the resources used in rendered frames are freed at the start of each frame.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::gfx::</span><span class="n">Queue</span><span class="o">*</span> <span class="n">pQueue</span><span class="p">;</span>         <span class="c1">// The queue submitting the command buffer.
+</span><span class="nn">nn::gfx::</span><span class="n">SwapChain</span><span class="o">*</span> <span class="n">pSwapChain</span><span class="p">;</span> <span class="c1">// The swap chain for the display to render.
+</span>&nbsp;
+<span class="n">transientAllocator</span><span class="p">.</span><span class="n">FillHistory</span><span class="p">();</span> <span class="c1">// Fills the entire history with zeros.
+</span><span class="k">for</span><span class="p">(;;)</span> <span class="c1">// The render loop.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">transientAllocator</span><span class="p">.</span><span class="n">Free</span><span class="p">();</span> <span class="c1">// Frees the resources of rendered frames.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">transientAllocator</span><span class="p">.</span><span class="n">Begin</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">transientAllocator</span><span class="p">.</span><span class="n">Allocate</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">alignment</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">transientAllocator</span><span class="p">.</span><span class="n">End</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pQueue</span><span class="p">.</span><span class="n">ExecuteCommand</span><span class="p">(...);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pQueue</span><span class="p">.</span><span class="n">Present</span><span class="p">(</span><span class="n">pSwapChain</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>By filling the history at the beginning, the <code>Free()</code> function will free the resources corresponding to the rendered scan buffers. The <code>Allocate()</code> function can be called any number of times between <code>Begin()</code> and <code>End()</code>, or not called at all. In either case, a single history is recorded for the <code>Begin()</code> - <code>End()</code> pair, regardless of the number of resources that have been allocated.</p>
+<h2 id="Anchor_163289475_h2_3">Destroying the Allocator</h2>
+<p>Call the <code>Finalize()</code> function at any time to destroy the initialized allocator. At this time, no processing is done on the allocated resources.</p>
+<h1 id="Anchor_163289475_h1_4">Thread Safety</h1>
+<p>All of the transient allocators operate lock-free for simultaneous calls to the following functions.</p>
+<ul style="list-style-type: square;">
+  <li>Calls to the <code>Allocate()</code> functions from any number of threads</li>
+  <li>A call to <code>Free()</code> from a single thread</li>
+</ul>
+<p> The transient allocators are not thread-safe for calls to other functions like <code>Begin()</code> and <code>End()</code>. In addition, the behavior is undefined when <code>Free()</code> is called simultaneously from two or more threads.</p>
+<h1 id="Anchor_163289475_h1_5">Holder Class</h1>
+<p>You can use a <code>Holder</code> class for each transient allocator to omit the call to the <code>SetMemory()</code> function at initialization time.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">static</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">HistoryMax</span><span class="p">;</span>      <span class="c1">// Maximum number of histories to record (a constant ).
+</span><span class="nn">nn::gfx::</span><span class="n">MemoryPool</span><span class="o">*</span> <span class="n">pMemoryPool</span><span class="p">;</span> <span class="c1">// The memory pool to manage.
+</span><span class="kt">ptrdiff_t</span> <span class="n">baseOffser</span><span class="p">;</span>             <span class="c1">// The offset to the start of the memory space to manage.
+</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">;</span>                      <span class="c1">// The length (in bytes) of the memory space to manage.
+</span><span class="kt">size_t</span> <span class="n">alignmentMax</span><span class="p">;</span>              <span class="c1">// The maximum alignment when memory is allocated by the transient allocator.
+</span>&nbsp;
+<span class="nn">nn::gfx::</span><span class="n">TransientMemoryPoolAllocatorHolder</span><span class="o">&lt;</span><span class="n">HistoryMax</span><span class="o">&gt;</span> <span class="n">transientAllocatorHolder</span><span class="p">;</span>
+<span class="n">transientAllocatorHolder</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span><span class="n">pMemoryPool</span><span class="p">,</span> <span class="n">baseOffset</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">alignmentMax</span><span class="p">);</span>
+&nbsp;
+<span class="nn">nn::gfx::</span><span class="n">TransientMemoryPoolAllocator</span><span class="o">*</span> <span class="n">pTransientAllocator</span> <span class="o">=</span> <span class="n">transientAllocatorHolder</span><span class="p">.</span><span class="n">Get</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The allocator is initialized using the memory space in the <code>Holder</code> field. To destroy the object, call the <code>Holder</code> class <code>Finalize()</code> function.</p>
+<h1 id="Anchor_163289475_h1_6">API References</h1>
+<p>For more information, see the various classes in the <span class="ApiLink_nn__gfx__util"><code>nn::gfx::util</code> namespace</span>.</p>
+<ul style="list-style-type: square;">
+  <li>
+    <span class="ApiLink_nn__gfx__util__TransientMemoryPoolAllocator">
+      <code>TransientMemoryPoolAllocator </code> class</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__gfx__util__TransientDescriptorAllocator">
+      <code>TransientDescriptorAllocator</code> class</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__gfx__util__TransientBufferAllocator">
+      <code>TransientBufferAllocator</code> class</span>
+  </li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__util', '../../../Api/HtmlNX/namespacenn_1_1gfx_1_1util.html' )
+SetUrl( 'ApiLink_nn__gfx__util__TransientMemoryPoolAllocator', '../../../Api/HtmlNX/classnn_1_1gfx_1_1util_1_1_transient_memory_pool_allocator.html' )
+SetUrl( 'ApiLink_nn__gfx__util__TransientDescriptorAllocator', '../../../Api/HtmlNX/classnn_1_1gfx_1_1util_1_1_transient_descriptor_allocator.html' )
+SetUrl( 'ApiLink_nn__gfx__util__TransientBufferAllocator', '../../../Api/HtmlNX/classnn_1_1gfx_1_1util_1_1_transient_buffer_allocator.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,451 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Global File Data Cache | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Global File Data Cache -->
+<div class="pagetitle" id="PageId_313329665">Global File Data Cache</div>
+<div class="text_separate">
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p> Global file data cache is available in NX Add-On 5.4.0 and later.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>IN NX Add-On 10.0.0 and later, the global file data cache may be automatically enabled at application startup. To prevent this, refer to the following steps in order.</p>
+    <ul>
+      <li>
+        <a href="#Anchor_313329665_h2_4">Default Global File Data Cache</a>
+      </li>
+      <li>
+        <a href="#Anchor_313329665_h2_12">D. Do not use any global file data cache (NX Add-On 10.0.0 and later)</a>
+      </li>
+    </ul>
+  </div>
+</div>
+<p> <ul class="macro_toc"><li><a href="#Anchor_313329665_h1_1">Introduction</a></li><ul><li><a href="#Anchor_313329665_h2_1">Feature Overview</a></li><li><a href="#Anchor_313329665_h2_2">Restrictions</a></li></ul><li><a href="#Anchor_313329665_h1_2">Enabling Global File Data Cache Procedure and Associated Restrictions</a></li><ul><li><a href="#Anchor_313329665_h2_3">Overview</a></li><li><a href="#Anchor_313329665_h2_4">Default Global File Data Cache</a></li><li><a href="#Anchor_313329665_h2_5">Manual Global File Data Cache</a></li><li><a href="#Anchor_313329665_h2_6">Differences Between the Two Global File Data Caches</a></li><li><a href="#Anchor_313329665_h2_7">Selection Guidelines</a></li></ul><li><a href="#Anchor_313329665_h1_3">Specific Procedures</a></li><ul><li><a href="#Anchor_313329665_h2_8">Overview</a></li><li><a href="#Anchor_313329665_h2_9">A. Use the default global file data cache</a></li><li><a href="#Anchor_313329665_h2_10">B. Use manual global file data cache (NX Add-On 10.0.0 and later)</a></li><li><a href="#Anchor_313329665_h2_11">C. Use the manual global file data cache (NX Add-On 9.x and earlier)</a></li><li><a href="#Anchor_313329665_h2_12">D. Do not use any global file data cache (NX Add-On 10.0.0 and later)</a></li><li><a href="#Anchor_313329665_h2_13">E. Do not use any global file data cache (NX Add-On 9.x.x and earlier)</a></li></ul><li><a href="#Anchor_313329665_h1_4">Using the Manual Global File Data Cache</a></li><ul><li><a href="#Anchor_313329665_h2_14">Quick Start</a></li><li><a href="#Anchor_313329665_h2_15">Enabling Manual Global File Data Cache</a></li><li><a href="#Anchor_313329665_h2_16">Disabling Manual Global File Data Cache</a></li><li><a href="#Anchor_313329665_h2_17">Relationship Between Mounting and Unmounting File Systems and the File Data Cache</a></li></ul><li><a href="#Anchor_313329665_h1_5">Usage Tips</a></li><ul><li><a href="#Anchor_313329665_h2_18">Effects of Global File Data Cache</a></li><li><a href="#Anchor_313329665_h2_19">Optimal Cache Memory Size</a></li><li><a href="#Anchor_313329665_h2_20">Global File Data Cache and Speculative Reading</a></li></ul></ul> <br /> </p>
+<h1 id="Anchor_313329665_h1_1">
+  <span style="color: rgb(117,117,117);">Introduction</span>
+</h1>
+<h2 id="Anchor_313329665_h2_1">
+  <span style="color: rgb(117,117,117);">Feature Overview</span>
+</h2>
+<p>The file data cache feature that caches the file data for multiple file systems in a single memory is called a <em>global file data cache feature</em>.</p>
+<p>With global file data cache, file data is automatically cached according to file access by the application. Note that the application cannot participate in the caching operation. In other words, the application cannot do things like explicitly select which file data to cache or explicitly clear some of the cached file data from cache memory.</p>
+<p>An application can explicitly have only one global file data cache. This global file data cache is shared by all file systems for which file data cache can be used.</p>
+<p>You can use the FS access log to get information about which actual storage media the file data were read from relative to file access requests from the application. For more information, see fs Library &gt; Manual &gt; Features &gt; <a href="../Pages/Page_331387591.html">File Data Cache</a> &gt; <a href="../Pages/Page_331387591.html#Anchor_331387591_FileDataCache_FsAccessLog">fs Access Log</a>. The specifications for the internal algorithm for global file data cache are undefined. Avoid application implementations that assume specific behavior for global file data cache. For example, even if file access performance is optimized by reading files in a certain order when global file data cache is enabled for one version of NintendoSDK, you do not know whether the same result will be achieved with a future version of NintendoSDK.</p>
+<h2 id="Anchor_313329665_h2_2">
+  <span style="color: rgb(117,117,117);">Restrictions</span>
+</h2>
+<h3 id="Anchor_313329665_h3_1">Restrictions in the Windows Environment</h3>
+<p>No file data is cached in the Windows environment.</p>
+<h3 id="Anchor_313329665_h3_2">Restrictions in the NX Environment</h3>
+<p>There are restrictions on the file systems that global file data cache can be used with. The restrictions differ depending on whether the application is running in NSP format or in Raw format (NSPD). Refer to the following table.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>File System</th>
+      <th>Running in NSP Format</th>
+      <th>Running in Raw Format (NSPD)</th>
+    </tr>
+    <tr>
+      <td>The file system for resource data (ROM)</td>
+      <td class="highlight-green">Cached</td>
+      <td class="highlight-red">Not cached</td>
+    </tr>
+    <tr>
+      <td>The file system for downloadable content</td>
+      <td class="highlight-green">Cached</td>
+      <td class="highlight-green">Cached</td>
+    </tr>
+    <tr>
+      <td>Other file systems</td>
+      <td class="highlight-red">Not cached</td>
+      <td class="highlight-red">Not cached</td>
+    </tr>
+  </tbody>
+</table>
+<p>When you call <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> on a file system that uses global file data cache, the effect of the <a href="../Pages/Page_277373520.html">access priority</a> may not work as expected. For example, if thread B with <code>Realtime</code> priority begins to read source data after thread A with <code>Normal</code> priority has begun to read resource data, in some cases thread A finishes reading first, which would not be expected based on the priority settings of the two threads.</p>
+<h1 id="Anchor_313329665_h1_2">Enabling Global File Data Cache Procedure and Associated Restrictions</h1>
+<h2 id="Anchor_313329665_h2_3">Overview</h2>
+<p>There are two ways for application developers to use the global file data cache.</p>
+<ul>
+  <li>NintendoSDK uses a global file data cache, which is automatically enabled when the application starts.</li>
+  <li>Applications use a global file data cache that is explicitly enabled using the <code>fs</code> library functions.</li>
+</ul>
+<p>While each global file data cache provides the same functionality, the enable procedures and associated restrictions are different. For the sake of convenience, this document distinguishes between the two differently-restricted global file data caches by giving them the names <em>default global file data cache</em> and <code>manual global file data cache</code>.</p>
+<p>Because an application can only use one global file data cache, the default global file data cache and manual global file data cache cannot be used at the same time.</p>
+<p>Application developers must understand the differences between the two global file data caches and make the appropriate choice for the application under development.</p>
+<ul>
+  <li>Use the default global file data cache.</li>
+  <li>Use the manual global file data cache.</li>
+  <li>Do not use any global file data cache.</li>
+</ul>
+<h2 id="Anchor_313329665_h2_4">Default Global File Data Cache</h2>
+<p>The default global file data cache is a global file data cache that NintendoSDK automatically enables when an application starts. Although there are some constraints compared to the manual global file data cache, the application does not need to manage the global file data cache, making it easy to use. Default global file data cache is only enabled for NX Add-On 10.0.0 and later and on NX32 and NX64 platforms.</p>
+<p>The default global file data cache is enabled by the default <code>nninitStartup()</code> defined by the <code>init</code> library. The <code>nninitStartup()</code> function is called on application startup and can be <strong style="letter-spacing: 0.0px;">redefined within the application</strong>. For more information, see <a href="../Pages/Page_92310396.html">Starting and Initializing Programs</a>.</p>
+<p>If the application developer does not define <code>nninitStartup()</code>, the default <code>nninitStartup()</code> defined by the <code>init</code> library is linked into the application. As a result, the default <code>nninitStartup()</code> is called when the application starts, and the default global file data cache is enabled.</p>
+<p>If the application developer defines <code>nninitStartup()</code>, the developer-defined <code>nninitStartup()</code> is linked to the application instead of the default <code>nninitStartup()</code>. As a result, the <code>nninitStartup()</code> defined by the developer is called when the application starts, and the default global file data cache is not enabled.</p>
+<p>Note that using NX Add-On 9.x.x or earlier or in a Windows environment, default global file data cache is not enabled regardless of the <code>nninitStartup()</code> definition. See the following table.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>Using NX Add-On 10.0.0 or Later</th>
+      <th>Using NX Add-On 9.x.x or Earlier</th>
+    </tr>
+    <tr>
+      <th>Application-defined nninitStartup()</th>
+      <td class="highlight-red">Default global file data cache is not enabled.</td>
+      <td class="highlight-red">Default global file data cache is not enabled.</td>
+    </tr>
+    <tr>
+      <th>Non-application-defined nninitStartup()</th>
+      <td class="highlight-green">
+        <span title="">Default global file data cache is enabled (on NX32 and NX64 only).</span>
+        <br />
+      </td>
+      <td class="highlight-red">
+        <span title="">Default global file data cache is not enabled.</span>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Nintendo Switch console updates do not affect whether default global file data cache is enabled.<br />For example, starting an application built with NX Add-On 9.x.x or earlier on a console that has been updated to NintendoSDK Firmware for NX 10.0.0 or later does not enable the default global file data cache.<br />If you develop a patch for an application that uses NX Add-On 9.x.x or earlier and then update the NX Add-On version to 10.0.0 or later, there is a possibility that the default global file data cache will be enabled when the application is started with that patch.<br /> In any case, default global file data cache that depends on the firmware version is not enabled.</p>
+  </div>
+</div>
+<h2 id="Anchor_313329665_h2_5">Manual Global File Data Cache</h2>
+<p>The manual global file data cache is a global file data cache explicitly enabled by the application using the <code>fs</code> library functions. Although the application must manage the cache memory, it also allows for detailed control of global file data cache functions. Manual global file data cache is available in NX Add-On 5.4.0 and later.</p>
+<h2 id="Anchor_313329665_h2_6">
+  <span style="color: rgb(117,117,117);">Differences Between the Two Global File Data Caches</span>
+</h2>
+<p>Because default global file data cache is not something that is enabled by the application developer, there are restrictions compared to the manual global file data cache, such as having set parameters on enable. Refer to the following table.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Default Global File Data Cache</th>
+      <th>Manual Global File Data Cache</th>
+    </tr>
+    <tr>
+      <td class="highlight-yellow">
+        <p title="">The memory region that can be obtained by <code><span class="ApiLink_nn__os__AllocateMemoryBlock">nn::os::AllocateMemoryBlock</span>()</code> is used for the cache memory.</p>
+      </td>
+      <td class="highlight-green">The application <span title="">may specify any memory in the cache memory region.</span></td>
+    </tr>
+    <tr>
+      <td class="highlight-yellow">
+        <p title="">The cache memory size is 32 MB. It cannot be changed.</p>
+      </td>
+      <td class="highlight-green">
+        <span title="">The application can specify any cache memory size.</span>
+      </td>
+    </tr>
+    <tr>
+      <td class="highlight-yellow">
+        <span title="">The default global file data cache is enabled during the default <code>nninitStartup()</code> call.</span>
+      </td>
+      <td class="highlight-green">Applications can enable the manual global file data cache at any time.</td>
+    </tr>
+    <tr>
+      <td class="highlight-yellow">
+        <p title="">After it is activated, the default global file data cache cannot be disabled.</p>
+      </td>
+      <td class="highlight-green">Applications can disable the manual global file data cache at any time.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_313329665_h2_7">
+  <span style="color: rgb(117,117,117);">Selection Guidelines</span>
+</h2>
+<p>Using the default global file data cache is appropriate in the following cases.</p>
+<ul>
+  <li>You do not want to do the implementation for a global file data cache in the application.<ul><li>No implementation is required by the application developer to use the default global file data cache.</li></ul></li>
+  <li>You are trying to reduce the frequency of read operations from storage media in a simple manner, to comply with the Nintendo Switch guidelines.<ul><li>As stated in <a href="#Anchor_313329665_h2_19">Optimal Cache Memory Size</a>, Nintendo's research has shown that 32 MB of cache memory can sufficiently reduce the read frequency from storage media in many applications.</li></ul></li>
+</ul>
+<p>Using the manual global file data cache is appropriate in the following cases.</p>
+<ul>
+  <li>You want to optimize the balance between application file load speed and memory usage.<ul><li>For example, if you want to change the size of the cache memory or enable the global file data cache only at specific times, you must use the manual global file data cache.</li></ul></li>
+  <li>
+    <code>nninitStartup()</code> is defined in an application for the purposes of introducing an application-specific memory management mechanism.<ul><li>If <code>nninitStartup()</code> is defined in the application, the default global file data cache is not enabled because the default <code>nninitStartup()</code> is not called.</li></ul></li>
+  <li>You want to use the global file data cache with NX Add-On 9.x.x or earlier.<ul><li>The default global file data cache can only be used in NX Add-On 10.0.0 and later.</li></ul></li>
+  <li>You are attempting to migrate an application that uses global file data cache from NX Add-On version 9.x.x or earlier to 10.0.0.<ul><li><span style="letter-spacing: 0.0px;">To maintain the timing around enable of the global file data cache and the cache memory size, we recommend that you continue using the manual global file data cache, not default global file data cache.</span></li></ul></li>
+</ul>
+<p>We recommend avoiding use of any type of global file data cache in the following cases.</p>
+<ul>
+  <li>When the application developer has already implemented a file data cache function</li>
+  <li>When trying to maximize the memory size available to the application</li>
+  <li>When there are problems such as slow file read operations when using global file data cache</li>
+</ul>
+<h1 id="Anchor_313329665_h1_3">Specific Procedures</h1>
+<h2 id="Anchor_313329665_h2_8">Overview</h2>
+<p>The procedures application developers must implement vary depending on the type of global file data cache used and the version of NX Add-On. Refer to the following table.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>Using NX Add-On 10.0.0 or Later</th>
+      <th>Using NX Add-On 9.x.x or Earlier</th>
+    </tr>
+    <tr>
+      <th>Use the default global file data cache.</th>
+      <td>
+        <p>
+          <a href="#Anchor_313329665_h2_9">Procedure A</a>
+        </p>
+        <ul>
+          <li>Link the default <code>nninitStartup()</code> to the application.</li>
+        </ul>
+      </td>
+      <td class="highlight-grey" title="Background colour : Grey">N/A</td>
+    </tr>
+    <tr>
+      <th>Use the manual global file data cache</th>
+      <td>
+        <p>
+          <a href="#Anchor_313329665_h2_10">Procedure B</a>
+        </p>
+        <ul>
+          <li>Define <code>nninitStartup()</code> in the application.</li>
+          <li>Enable the global file data cache via API call.</li>
+        </ul>
+      </td>
+      <td>
+        <p>
+          <a href="#Anchor_313329665_h2_11">Procedure C</a>
+        </p>
+        <ul>
+          <li>Enable the global file data cache via API call.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>Do not use any global file data cache</th>
+      <td>
+        <p>
+          <a href="#Anchor_313329665_h2_12">Procedure D</a>
+        </p>
+        <ul>
+          <li>Define <code>nninitStartup()</code> in the application.</li>
+        </ul>
+      </td>
+      <td>
+        <p>
+          <a href="#Anchor_313329665_h2_13">Procedure E</a>
+        </p>
+        <ul>
+          <li>No action is required.</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For more information, click the Procedure A through Procedure E links at the start of each item in the table.</p>
+<h2 id="Anchor_313329665_h2_9">A. Use the default global file data cache</h2>
+<p>In NX Add-On 10.0.0 and later, do not define <code>nninitStartup()</code> in the application. Link the default <code>nninitStartup()</code> defined by the <code>init</code> library.</p>
+<p>You can check whether global file data cache is enabled in the FS access log (fs Library &gt; Manual &gt; Features &gt; <a href="../Pages/Page_331387591.html">File Data Cache</a> &gt; <a href="../Pages/Page_331387591.html#Anchor_331387591_FileDataCache_FsAccessLog">fs Access Log</a>.)</p>
+<p>Note that the default global file data cache cannot be used if either of the following conditions applies.</p>
+<ul>
+  <li>
+    <code>nninitStartup()</code> is defined in an application for the purposes of introducing an application-specific memory management mechanism.</li>
+  <li>The application already uses a manual global file data cache.</li>
+</ul>
+<p>For more information, see<a href="#Anchor_313329665_h2_10">B. Use manual global file data cache (NX Add-On 10.0.0 and later)</a> whether either of these conditions applies.</p>
+<h2 id="Anchor_313329665_h2_10">B. Use manual global file data cache (NX Add-On 10.0.0 and later)</h2>
+<p>To use the manual global file data cache with NX Add-On 10.0.0 and later, the default global file data cache must be prevented from being enabled. Define <code>nninitStartup()</code> in the application so that the default <code>nninitStartup()</code> defined by the <code>init</code> library is not linked to the application.</p>
+<p>For processing that should be defined by <code>nninitStartup()</code>, see <a href="../Pages/Page_92310396.html">Starting and Initializing Programs</a>. For more information, see the sample program in <code>NintendoSDK\Samples\Sources\Applications\FsFileDataCache\FsGlobalFileDataCacheManuallyEnabled</code>.</p>
+<p>You can check whether the default global file data cache was prevented from being enabled in the FS access log (fs Library &gt; Manual &gt; Features &gt; <a href="../Pages/Page_331387591.html">File Data Cache</a> &gt; <a href="../Pages/Page_331387591.html#Anchor_331387591_FileDataCache_FsAccessLog">fs Access Log</a>.)</p>
+<p>Replace the definition of <code>nninitStartup()</code> to enable the manual global file data cache. For the enable procedure, see <a href="#Anchor_313329665_h1_4">Using the Manual Global File Data Cache</a>. For more information, see the sample program in <code>NintendoSDK\Samples\Sources\Applications\FsFileDataCache\FsGlobalFileDataCacheManuallyEnabled</code>.</p>
+<h2 id="Anchor_313329665_h2_11">C. Use the manual global file data cache (NX Add-On 9.x and earlier)</h2>
+<p>The default global file data cache is not enabled in the case of NX Add-On 9.x.x and earlier, so the <code>nninitStartup()</code> definition does not have to be replaced. The manual global file data cache may be simply enabled without issue.</p>
+<p>For the enable procedure, see <a href="#Anchor_313329665_h1_4">Using the Manual Global File Data Cache</a>. For more information, see the sample program in <code>NintendoSDK\Samples\Sources\Applications\FsFileDataCache</code>.</p>
+<h2 id="Anchor_313329665_h2_12">D. Do not use any global file data cache (NX Add-On 10.0.0 and later)</h2>
+<p>If the global file data cache is not needed in NX Add-On 10.0.0 and later, the default global file data cache must be prevented from being enabled. Define <code>nninitStartup()</code> in the application so that the default <code>nninitStartup()</code> defined by the init library is not linked into the application.</p>
+<p>For processing that should be defined by <code>nninitStartup()</code>, see <a href="../Pages/Page_92310396.html">Starting and Initializing Programs</a>. <span style="letter-spacing: 0.0px;">For more information, see the sample program in <code>NintendoSDK\Samples\Sources\Applications\FsFileDataCache\FsGlobalFileDataCacheDefaultDisabled</code>.</span></p>
+<p>You can check whether the default global file data cache was prevented from being enabled in the FS access log (fs Library &gt; Manual &gt; Features &gt; <a href="../Pages/Page_331387591.html">File Data Cache</a> &gt; <a href="../Pages/Page_331387591.html#Anchor_331387591_FileDataCache_FsAccessLog">fs Access Log</a>.)</p>
+<h2 id="Anchor_313329665_h2_13">E. Do not use any global file data cache (NX Add-On 9.x.x and earlier)</h2>
+<p>The default global file data cache is not enabled in NX Add-On 9.x.x and earlier, so the <code>nninitStartup()</code> definition does not have to be replaced. No support is required in the application.</p>
+<h1 id="Anchor_313329665_h1_4">Using the Manual Global File Data Cache</h1>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Also see the <span class="ApiLink_void_nn__fs__EnableGlobalFileDataCache(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">API Reference</span>.</p>
+  </div>
+</div>
+<h2 id="Anchor_313329665_h2_14">
+  <span style="color: rgb(117,117,117);">Quick Start</span>
+</h2>
+<p>Call the <code><span class="ApiLink_nn__fs__EnableGlobalFileDataCache">nn::fs::EnableGlobalFileDataCache</span>()</code> function from the local application to enable manual global file data cache. For simplicity, we recommend calling this function right after the application starts, such as near the beginning of <code>nn Main()</code>. In addition, global file data cache must have memory allocated from the application. Allocate as much memory as possible in the application and pass it to the parameter of the  <code><span class="ApiLink_nn__fs__EnableGlobalFileDataCache">nn::fs::EnableGlobalFileDataCache</span>()</code> function.</p>
+<p>The following simple example shows how to use the manual global file data cache.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;cstdlib&gt;
+#include &lt;nn/fs.h&gt;
+</span>
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocate 32 MB of memory to use for manual global file data cache.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">size_t</span> <span class="n">fileDataCacheSize</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">void</span><span class="o">*</span> <span class="n">fileDataCache</span> <span class="o">=</span> <span class="nn">std::</span><span class="n">malloc</span><span class="p">(</span><span class="n">fileDataCacheSize</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Use the allocated memory to enable manual global file data cache.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::fs::</span><span class="n">EnableGlobalFileDataCache</span><span class="p">(</span><span class="n">fileDataCache</span><span class="p">,</span> <span class="n">fileDataCacheSize</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The application uses the necessary features of the fs library.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// While manual global file data cache is enabled, the resource data (ROM) and downloadable content file data 
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//loaded by the application are automatically cached and referenced when accessed later.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// After manual global file data cache is no longer necessary, it is disabled and the allocated memory is freed.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::fs::</span><span class="n">DisableGlobalFileDataCache</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">std::</span><span class="n">free</span><span class="p">(</span><span class="n">fileDataCache</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>After editing this source code, build the application image in <strong>NSP format</strong> and run it. Applications images in raw format (NSPD) and in the Windows environment use file systems for which the global file data cache feature does not work. For more information, see <a href="#Anchor_313329665_h2_2">Restrictions</a>.</p>
+<p>When the application is run in NSP format, file data for resource data (ROM) and for downloadable content is automatically cached.</p>
+<p>You can check how this actually operates in the sample program for global file data cache. </p>
+<ul>
+  <li>For NX Add-On 10.0.0 and later, see <code>NintendoSDK\Samples\Sources\Applications\FsFileDataCache\FsGlobalFileDataCacheManuallyEnabled</code>. </li>
+  <li>For NX Add-On 9.x.x and earlier, see <code>NintendoSDK\Samples\Sources\Applications\FsFileDataCached</code>. </li>
+</ul>
+<h2 id="Anchor_313329665_h2_15">Enabling Manual Global File Data Cache</h2>
+<p>Global file data cache is either enabled or disabled. File data caching takes place only when it is enabled.</p>
+<p>Use the <code><span class="ApiLink_nn__fs__EnableGlobalFileDataCache">nn::fs::EnableGlobalFileDataCache</span>()</code> function to provide memory for use as file data cache and to enable manual global file data cache.</p>
+<p>After that, whenever the application uses the <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> function to read a resource data file or a downloadable content file, that read file data is a target for automatic caching.</p>
+<p>The easiest way to use the feature is by calling <code><span class="ApiLink_nn__fs__EnableGlobalFileDataCache">nn::fs::EnableGlobalFileDataCache</span>()</code> right after the application starts, such as near the beginning of <code>nnMain()</code>, and continuing to use manual global file data cache until the application ends.</p>
+<p>The memory provided by the application for file data cache is used by the <code>fs</code> library while the manual global file data cache is enabled, so your application must not make any changes to this memory region during that time. To change the size of the file data cache memory, you must first disable the manual global file data cache.</p>
+<h2 id="Anchor_313329665_h2_16">Disabling Manual Global File Data Cache</h2>
+<p>To disable manual global file data cache, call the <code><span class="ApiLink_nn__fs__DisableGlobalFileDataCache">nn::fs::DisableGlobalFileDataCache</span>()</code> function. When you disable manual global file data cache this way, the memory provided by the application for file data cache is freed from the <code>fs</code> library.</p>
+<p>Note that the default global file data cache cannot be disabled with <code><span class="ApiLink_nn__fs__DisableGlobalFileDataCache">nn::fs::DisableGlobalFileDataCache</span>()</code>.</p>
+<h2 id="Anchor_313329665_h2_17">Relationship Between Mounting and Unmounting File Systems and the File Data Cache</h2>
+<p>There are no restrictions on the calling order between the functions to mount and unmount file systems and the functions to enable and disable manual global file data cache. The file data of resource data files and downloadable content files accessed while manual global file data cache is enabled is the target of caching.</p>
+<p>The identity of the cache is distinguished by the file system mount name. You must be careful when mounting the same file system with many different mount names at the same time. Even if a file is essentially the same, if the mount name is different it will be cached as a different set of file data.</p>
+<p>If you call the <code> <span class="ApiLink_nn__fs__Unmount">nn::fs::Unmount</span>()</code> function to unmount a file system while the global file data cache is enabled, the cache associated with that file system's mount name is entirely destroyed.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>You must pass memory to the functions that mount the file systems for resource data and for downloadable content (the <code><span class="ApiLink_nn__fs__MountRom">nn::fs::MountRom</span>()</code> and <code><span class="ApiLink_nn__fs__MountAddOnContent">nn::fs::MountAddOnContent</span>()</code> functions), but that memory has no relevance to file data cache. The memory passed to the file system mount function is used by the <code>fs</code> library to store information for managing the file system. The size of the memory to pass is specified by the corresponding query function (<code><span class="ApiLink_nn__fs__QueryMountRomCacheSize">nn::fs::QueryMountRomCacheSize</span>()</code> or <code><span class="ApiLink_nn__fs__QueryMountAddOnContentCacheSize">nn::fs::QueryMountAddOnContentCacheSize</span>()</code>. The application must provide memory that is at least as large as the size specified by these functions.</p>
+    <p>On the other hand, the application can allocate pretty much any memory size for file data cache. (For more information about the preconditions, see the <span class="ApiLink_void_nn__fs__EnableGlobalFileDataCache(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">API reference</span>. Also, file data cache does not need to be enabled when a file system is mounted.</p>
+  </div>
+</div>
+<h1 id="Anchor_313329665_h1_5">Usage Tips</h1>
+<h2 id="Anchor_313329665_h2_18">Effects of Global File Data Cache</h2>
+<p>Using the global file data cache is not certain to improve the performance of file access or reduce the frequency of read operations to storage media for all applications. The extent of these effects differs depending on the implementation of the application. For some applications, the use of global file data cache shows no effect.</p>
+<p>If improving the performance of file access and reducing the frequency of read operations to storage media is really important for your application, consider using <a href="../Pages/Page_331387295.html">individual file data caching</a> or implementing an application-specific resource caching feature rather than using file data cache. The caching algorithm designed for global file data cache is a general-purpose algorithm, so you are very likely to achieve a greater effect from a caching algorithm implemented specifically for the file access patterns of your application.</p>
+<p>For a general description of ways to improve file access performance, see fs Library &gt; <a href="../Pages/Page_185130689.html">Performance</a>. Also see that documentation.</p>
+<h2 id="Anchor_313329665_h2_19">Optimal Cache Memory Size</h2>
+<p>The optimal size of the memory for global file data cache is highly dependent on the implementation of the application. It also differs depending on the purpose for using global file data cache.</p>
+<p>If you are using global file data cache to help comply with the guidelines for the frequency of reading from storage, consider that a Nintendo study found that a cache memory size of around 32 MB can be expected to produce the desired effect for most applications. On the other hand, if you are using global file data cache to improve the performance of file access, for some applications providing even 128 MB of cache memory does not improve the speed.</p>
+<p>The easiest way to allocate the appropriate size of cache memory is to simply allocate all unused memory in the application to global file data cache. Generally speaking, the larger the size of cache memory, the higher the cache hit rate, so you could argue that it is best to allocate as much memory as possible and assign it to global file data cache. On the other hand, the cache hit rate is highly dependent on the application's file access pattern, so increasing the cache memory above a certain size may not contribute any more to the cache hit rate.</p>
+<p>The optimal cache memory size is a value that depends on the implementation of the application, and you must find the right balance between the size of cache memory that the application is capable of providing and the size of the effect gained from global file data cache of a particular size.</p>
+<h2 id="Anchor_313329665_h2_20">Global File Data Cache and Speculative Reading</h2>
+<p>When you enable global file data cache, the <code>fs</code> library sometimes reads larger regions of the file than the application requests. This behavior is normal; global file data cache speculatively reads file data based on the application's file access pattern.</p>
+<p>However, depending on the implementation of the application, performance can suffer due to this speculative reading. If enabling global file data cache has adverse effects on the behavior of the application, such as increasing the file read time, we recommend not using global file data cache.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__ReadFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a90b280140b3e9d7eb83af3e807e4c0c3' )
+SetUrl( 'ApiLink_nn__os__AllocateMemoryBlock', '../../../Api/HtmlNX/namespacenn_1_1os.html#a875bf6b3129f06654e641513c63017dd' )
+SetUrl( 'ApiLink_void_nn__fs__EnableGlobalFileDataCache(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a1cb2578c957151c15e7a61836173bdc2' )
+SetUrl( 'ApiLink_nn__fs__EnableGlobalFileDataCache', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a1cb2578c957151c15e7a61836173bdc2' )
+SetUrl( 'ApiLink_nn__fs__DisableGlobalFileDataCache', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a31f154d34fd5f9d2d9bc0d742d745b6a' )
+SetUrl( 'ApiLink_nn__fs__Unmount', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac8a95249afd4a87a55d319dfecb0466c' )
+SetUrl( 'ApiLink_nn__fs__MountRom', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2e453fe1fbf8f818dc45bbd2897105cd' )
+SetUrl( 'ApiLink_nn__fs__MountAddOnContent', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ad92caf5815857651653369e760f85a66' )
+SetUrl( 'ApiLink_nn__fs__QueryMountRomCacheSize', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a5df6e3385c795a5bd046790ef7f17f2d' )
+SetUrl( 'ApiLink_nn__fs__QueryMountAddOnContentCacheSize', '../../../Api/HtmlNX/namespacenn_1_1fs.html#afcb1fa310028d36752df80ff69beec4c' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

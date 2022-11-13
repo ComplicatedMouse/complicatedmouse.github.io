@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>TextureShader | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- TextureShader -->
+<div class="pagetitle" id="PageId_126918987">TextureShader</div>
+<div class="text_separate">
+<h1 id="Anchor_126918987_h1_1">TextureShader</h1>
+<h2 id="Anchor_126918987_h2_1">Overview</h2>
+<p>
+  <code>
+    <span class="ApiLink_nn__mii__TextureShader">nn::mii::TextureShader</span>
+  </code> is the shader class to render the face outline texture and mask texture.</p>
+<p>
+  <code>TextureShader</code> uses the shader provided in the Face Library and provides features to render textures to any texture. If you use <a href="../Pages/Page_126918978.html">DrawParam</a>, which can be obtained from each class, you can render textures using an original shader without using <code>TextureShader</code>.</p>
+<h2 id="Anchor_126918987_h2_2">TextureShaderInfo</h2>
+<p>
+  <code>
+    <span class="ApiLink_nn__mii__TextureShaderInfo">nn::mii::TextureShaderInfo</span>
+  </code> is the class to set information needed to use <code>TextureShader</code>.</p>
+<p>The following values can be set in <code>TextureShaderInfo</code>.</p>
+<ul>
+  <li>Image format of the face outline texture to render to.</li>
+  <li>Format of the mask texture to render to.</li>
+  <li>Specify whether to leave the alpha during face outline texture generation in the texture.<br />Specify this according to the shader of the application that renders the face model. When using <a href="../Pages/Page_157463941.html">IconShader</a> provided in the Face Library and rendering a Mii icon, specify leaving the alpha in the face outline texture.</li>
+</ul>
+<h2 id="Anchor_126918987_h2_3">Preparing the Shader File</h2>
+<p>Before <code>TextureShader</code> initialization, you must prepare the shader file that is used.</p>
+<p>Load the shader file below.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>$(NINTENDO_SDK_ROOT)/Resources/Mii/$(platform)/shader/TextureShader.bnsh</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Cast the loaded data to <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> and initialize.</p>
+<h2 id="Anchor_126918987_h2_4">Initializing and Finalizing</h2>
+<p>The following are notes regarding initialization and finalization. You can also view the API reference for each function.</p>
+<h3 id="Anchor_126918987_h3_1">Initialization</h3>
+<p>Use the <code><span class="ApiLink_nn__mii__TextureShader__Initialize">nn::mii::TextureShader::Initialize</span>()</code> function to perform initialization.</p>
+<p>Following the shader file preparation procedure, pass the initialized <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> and <code><span class="ApiLink_nn__gfx__ShaderCodeType">nn::gfx::ShaderCodeType</span>,</code> obtained in the process of initialization, to the <code>Initialize()</code> function.</p>
+<p>You can use the <code><span class="ApiLink_nn__mii__TextureShader__CalculateMemorySize">nn::mii::TextureShader::CalculateMemorySize</span>()</code> and <code><span class="ApiLink_nn__mii__TextureShader__CalculateMemoryAlignment">nn::mii::TextureShader::CalculateMemoryAlignment</span>()</code> functions to get the memory size and alignment required in initialization. <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code>, <code><span class="ApiLink_nn__gfx__ShaderCodeType">nn::gfx::ShaderCodeType</span></code>, and <code>TextureShaderInfo</code> passed to these functions, must be the same as those passed when initializing. <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> must be initialized.</p>
+<p>The shader for rendering the texture is composed from <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> and <code>TextureShaderInfo</code> passed during initialization. The initialized content cannot be changed until the object is finalized.</p>
+<p>Memory used during initialization and <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span>,</code> must be maintained until you call termination processing.</p>
+<h3 id="Anchor_126918987_h3_2">Finalization</h3>
+<p>Call <code><span class="ApiLink_nn__mii__TextureShader__Finalize">nn::mii::TextureShader::Finalize</span>()</code> to perform termination processing. After termination processing, you can destroy the memory and <code><span class="ApiLink_nn__gfx__ResShaderFile">nn::gfx::ResShaderFile</span></code> used in initialization.</p>
+<h2 id="Anchor_126918987_h2_5">Rendering the Face Outline Texture</h2>
+<p>Prepare the constant buffer required in texture rendering and <code><span class="ApiLink_nn__mii__FacelineGpuBuffer">nn::mii::FacelineGpuBuffer</span></code>, which contains the color target view.</p>
+<p>Use the following procedure to prepare to pass <code>FacelineGpuBuffer</code> to the <code><span class="ApiLink_nn__mii__TextureShader__DrawFaceline">nn::mii::TextureShader::DrawFaceline</span>()</code> function. It is assumed that <code><span class="ApiLink_nn__mii__Faceline">nn::mii::Faceline</span></code> and the face outline texture to render to (normally the <code>Faceline</code> texture contained in <code><span class="ApiLink_nn__mii__CharModel">nn::mii::CharModel</span></code>) have already been prepared.</p>
+<ol>
+  <li>Call the <code><span class="ApiLink_nn__mii__FacelineGpuBuffer__Initialize">nn::mii::FacelineGpuBuffer::Initialize</span>()</code> function and perform initialization.<br />Use each <code>Calculate</code> function in <code>FacelineGpuBuffer</code> for the memory and memory pool size.</li>
+  <li>Use the <code><span class="ApiLink_nn__mii__FacelineGpuBuffer__SetFaceline">nn::mii::FacelineGpuBuffer::SetFaceline</span>()</code> function to set the <code><span class="ApiLink_nn__mii__Faceline">nn::mii::Faceline</span></code> that you want to render.<br />If the memory pool properties passed during initialization are <code>CpuCached</code>, you must flush the memory pool after calling this function.</li>
+  <li>Use the <code><span class="ApiLink_nn__mii__FacelineGpuBuffer__SetColorTarget">nn::mii::FacelineGpuBuffer::SetColorTarget</span>()</code> function to set the texture to render to.<br />Set the texture to render to width, height, number of mipmaps, and <code>TextureShaderInfo</code> passed during initialization of the <code>TextureShader</code> that is used.</li>
+</ol>
+<p>After calling the additional functions to the command buffer, call the <code><span class="ApiLink_nn__mii__TextureShader__DrawFaceline">nn::mii::TextureShader::DrawFaceline</span>()</code> function.</p>
+<p>Pass the command buffer, prepared <code>FacelineGpuBuffer</code>, and sampler to the <code>DrawFaceline</code> function. For the sampler, pass the sampler created using <code><span class="ApiLink_nn__mii__GetSamplerInfo">nn::mii::GetSamplerInfo</span>()</code>.</p>
+<p>Within the <code>DrawFaceline()</code> function, add a command to render the face outline texture to the command buffer passed as a parameter. After calling the <code>DrawFaceline()</code> function, call the command termination function to the command buffer and execute the command.</p>
+<p>When the command for rendering the face outline texture is complete, <code>FacelineGpuBuffer</code> and <code>Faceline</code> can be destroyed if they are not needed.</p>
+<h2 id="Anchor_126918987_h2_6">Rendering Mask Textures</h2>
+<p>First, prepare the constant buffer required in texture rendering and <code><span class="ApiLink_nn__mii__MaskGpuBuffer">nn::mii::MaskGpuBuffer</span></code>, which contains the color target view.</p>
+<p>Use the following procedure to prepare to pass <code><span class="ApiLink_nn__mii__MaskGpuBuffer">nn::mii::MaskGpuBuffer</span></code> to the <code><span class="ApiLink_nn__mii__TextureShader__DrawMask">nn::mii::TextureShader::DrawMask</span>()</code> function. It is assumed that <code><span class="ApiLink_nn__mii__Mask">nn::mii::Mask</span></code> and the face outline texture to render to (normally the <code>Mask</code> texture contained in <code><span class="ApiLink_nn__mii__CharModel">nn::mii::CharModel</span></code>) have already been prepared.</p>
+<ol>
+  <li>Call the <code><span class="ApiLink_nn__mii__MaskGpuBuffer__Initialize">nn::mii::MaskGpuBuffer::Initialize</span>()</code> function and perform initialization.<br />Use the <code>Calculate</code> functions in <code><span class="ApiLink_nn__mii__MaskGpuBuffer">nn::mii::MaskGpuBuffer</span></code> for the memory and memory pool size.</li>
+  <li>Use the <code><span class="ApiLink_nn__mii__MaskGpuBuffer__SetMask">nn::mii::MaskGpuBuffer::SetMask</span>()</code> function to set <a href="../Pages/Page_126918972.html">Mask</a> and the expression type you want to render.<br />The specified expression type must be an expression that includes the expression flags set during <code>Mask</code> initialization. If the memory pool properties passed during initialization are <code>CpuCached</code>, you must flush the memory pool after calling this function.</li>
+  <li>Use the <code><span class="ApiLink_nn__mii__MaskGpuBuffer__SetColorTarget">nn::mii::MaskGpuBuffer::SetColorTarget</span>()</code> function to set the texture to render to.<br />Set the texture to render to width, height, number of mipmaps, and <code>TextureShaderInfo</code> passed during initialization of the <code>TextureShader</code> that is used.</li>
+</ol>
+<p>After calling the command additional function to the command buffer, call the <code><span class="ApiLink_nn__mii__TextureShader__DrawMask">nn::mii::TextureShader::DrawMask</span>()</code> function.</p>
+<p>Pass the command buffer, <code>MaskGpuBuffer</code>, and sampler to the <code>DrawMask()</code> function. For the sampler, pass the sampler created using <code><span class="ApiLink_nn__mii__GetSamplerInfo">nn::mii::GetSamplerInfo</span>()</code>.</p>
+<p>In the <code>DrawMask()</code> function, add a command to render the <code>Mask</code> texture to the command buffer passed as a parameter. After calling the <code>DrawMask()</code> function, call the command termination function to the command buffer and execute the command.</p>
+<p>When the command for rendering the <code>Mask</code> texture is complete, <code>MaskGpuBuffer</code> and <code>Mask</code> can be destroyed if they are not needed.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__mii__TextureShader', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader.html' )
+SetUrl( 'ApiLink_nn__mii__TextureShaderInfo', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader_info.html' )
+SetUrl( 'ApiLink_nn__gfx__ResShaderFile', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_res_shader_file.html' )
+SetUrl( 'ApiLink_nn__mii__TextureShader__Initialize', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader.html#a4a0a83bf2c8695381b482a6b74695489' )
+SetUrl( 'ApiLink_nn__gfx__ShaderCodeType', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ad67937775401e7564a312a54dedf6455' )
+SetUrl( 'ApiLink_nn__mii__TextureShader__CalculateMemorySize', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader.html#a865b97c77e39e1327b9d3d4b8645feef' )
+SetUrl( 'ApiLink_nn__mii__TextureShader__CalculateMemoryAlignment', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader.html#a005caf75648db242f8dd7e4d0a5e066a' )
+SetUrl( 'ApiLink_nn__mii__TextureShader__Finalize', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader.html#a13c162a8817d443e688c80f33aa39c8b' )
+SetUrl( 'ApiLink_nn__mii__FacelineGpuBuffer', '../../../Api/HtmlNX/classnn_1_1mii_1_1_faceline_gpu_buffer.html' )
+SetUrl( 'ApiLink_nn__mii__TextureShader__DrawFaceline', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader.html#a5afa8087e7bca441159195dd32567314' )
+SetUrl( 'ApiLink_nn__mii__Faceline', '../../../Api/HtmlNX/classnn_1_1mii_1_1_faceline.html' )
+SetUrl( 'ApiLink_nn__mii__CharModel', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model.html' )
+SetUrl( 'ApiLink_nn__mii__FacelineGpuBuffer__Initialize', '../../../Api/HtmlNX/classnn_1_1mii_1_1_faceline_gpu_buffer.html#a3bb8dff5bf7a953882e040f151dacea1' )
+SetUrl( 'ApiLink_nn__mii__FacelineGpuBuffer__SetFaceline', '../../../Api/HtmlNX/classnn_1_1mii_1_1_faceline_gpu_buffer.html#a869866d810adfbeb6094167e1fe4b578' )
+SetUrl( 'ApiLink_nn__mii__FacelineGpuBuffer__SetColorTarget', '../../../Api/HtmlNX/classnn_1_1mii_1_1_faceline_gpu_buffer.html#a38eb4f496f382ff3739668bc055dc891' )
+SetUrl( 'ApiLink_nn__mii__GetSamplerInfo', '../../../Api/HtmlNX/namespacenn_1_1mii.html#a7b31fffe1758ba0a5ec80843410a0549' )
+SetUrl( 'ApiLink_nn__mii__MaskGpuBuffer', '../../../Api/HtmlNX/classnn_1_1mii_1_1_mask_gpu_buffer.html' )
+SetUrl( 'ApiLink_nn__mii__TextureShader__DrawMask', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader.html#af4637e08073f1598162a266af3bd3cbd' )
+SetUrl( 'ApiLink_nn__mii__Mask', '../../../Api/HtmlNX/classnn_1_1mii_1_1_mask.html' )
+SetUrl( 'ApiLink_nn__mii__MaskGpuBuffer__Initialize', '../../../Api/HtmlNX/classnn_1_1mii_1_1_mask_gpu_buffer.html#afbb0b50516bd080ea64643a0df87e313' )
+SetUrl( 'ApiLink_nn__mii__MaskGpuBuffer__SetMask', '../../../Api/HtmlNX/classnn_1_1mii_1_1_mask_gpu_buffer.html#a42f7a9fcb1796fa7eadd700a64543bb8' )
+SetUrl( 'ApiLink_nn__mii__MaskGpuBuffer__SetColorTarget', '../../../Api/HtmlNX/classnn_1_1mii_1_1_mask_gpu_buffer.html#a33228d259ca8937d9a1a6f5591f8cb4e' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

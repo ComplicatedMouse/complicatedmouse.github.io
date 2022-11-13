@@ -1,0 +1,359 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>HID Emulation Settings | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- HID Emulation Settings -->
+<div class="pagetitle" id="PageId_89983199">HID Emulation Settings</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_89983199_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_89983199_h1_2">DebugPad HID Emulation Settings</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_89983199_h2_1">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_89983199_h2_2">Resolving the Emulation Settings in a Windows Environment</a>
+      </li>
+      <li>
+        <a href="#Anchor_89983199_h2_3">Manipulating the Emulation Settings</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_89983199_h1_3">Npad HID Emulation Settings</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_89983199_h2_4">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_89983199_h2_5">Resolving the Emulation Settings in a Windows Environment</a>
+      </li>
+      <li>
+        <a href="#Anchor_89983199_h2_6">Manipulating the Emulation Settings</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_89983199_h1_1">Introduction</h1>
+<p>If the HID API is used in the host environment, the HID being controlled is emulated in the host environment as a generic gamepad or keyboard.</p>
+<p>The HID emulation settings feature is for specifying the mapping of a generic gamepad or keyboard in the HID emulation.</p>
+<p>The HID emulation settings values do not have any effect outside of the host environment.</p>
+<h1 id="Anchor_89983199_h1_2">DebugPad HID Emulation Settings</h1>
+<h2 id="Anchor_89983199_h2_1">Overview</h2>
+<p>
+  <a href="../Pages/Page_83955511.html">DebugPad</a> is an interface that is configured by the HID emulation settings. The following devices can be used with DebugPad emulation.</p>
+<ul style="list-style-type: square;">
+  <li>Generic Gamepad</li>
+  <li>Keyboard</li>
+</ul>
+<p>The generic gamepad itself, the digital buttons of the generic gamepad, the coordinate axes of the generic gamepad, and the keys of a keyboard can all be simultaneously mapped to multiple settings.</p>
+<p>If multiple digital buttons of a generic gamepad or keys of a keyboard are mapped to the same digital button, the logical OR of the pressed states becomes the logical OR of that digital button.</p>
+<p>For a generic gamepad, if the emulation settings are not clearly specified, the mapping is automatically resolved using an internal procedure defined for each platform.</p>
+<p>The emulation settings are only resolved at the time they are required. This happens at the following times.</p>
+<ul style="list-style-type: square;">
+  <li>The <span class="ApiLink_void_nn__hid__InitializeDebugPad()_NN_NOEXCEPT">InitializeDebugPad</span> function is called for the first time on the system.</li>
+  <li>The <span class="ApiLink_void_nn__settings__GetDebugPadGenericPadMap(DebugPadGenericPadMap_*outValue)_noexcept">GetDebugPadGenericPadMap</span> function is called for the first time on the system.</li>
+</ul>
+<p>For a keyboard, if the emulation settings are not clearly specified, the keys are simply handled as being unmapped.</p>
+<p>
+  <br />
+</p>
+<p>When specifying the emulation settings in DebugPad, call <span class="ApiLink_void_nn__settings__SetDebugPadGenericPadMap(const_DebugPadGenericPadMap_&value)_noexcept">SetDebugPadGenericPadMap</span> or <span class="ApiLink_void_nn__settings__SetDebugPadKeyboardMap(const_DebugPadKeyboardMap_&value)_noexcept">SetDebugPadKeyboardMap</span>.</p>
+<p>The first maps a generic gamepad to the DebugPad, and the second maps a keyboard to the DebugPad.</p>
+<p>To restore the mapping to the default values, call <span class="ApiLink_void_nn__settings__ResetDebugPadGenericPadMap()_noexcept">ResetDebugPadGenericPadMap</span> and <span class="ApiLink_void_nn__settings__ResetDebugPadKeyboardMap()_noexcept">ResetDebugPadKeyboardMap</span>, respectively.</p>
+<p>The emulation settings are set or reset immediately after the function call returns.</p>
+<p>To get the setting value, call <span class="ApiLink_void_nn__settings__GetDebugPadGenericPadMap(DebugPadGenericPadMap_*outValue)_noexcept">GetDebugPadGenericPadMap</span> and <span class="ApiLink_void_nn__settings__GetDebugPadKeyboardMap(DebugPadKeyboardMap_*outValue)_noexcept">GetDebugPadKeyboardMap</span>, respectively.</p>
+<h2 id="Anchor_89983199_h2_2">Resolving the Emulation Settings in a Windows Environment</h2>
+<p>A generic gamepad is mapped by specifying its identifier for <span class="ApiLink_nn__settings__DebugPadGenericPadMap__genericPadId">DebugPadGenericPadMap::genericPadId</span>.</p>
+<p>As long as you are using an XInput-compatible controller, this identifier corresponds to the <code><em>dwUserIndex</em></code> parameter of the <code>XInputGetState()</code> function.</p>
+<p>If you are also using another HID-compliant game controller, the detection order of the controller (starting with 0) is used as the identifier for the generic gamepad. If controllers have been detached, the values can be reused, starting from the smaller value.</p>
+<p>The relationship between the generic gamepad and its identifier is managed in shared memory, so you can use that identifier as a way to exclusively use a generic gamepad among different executable files.</p>
+<p>If no identifier has been explicitly mapped, the identifier with the lowest value among those that are not mapped to any HID emulation will be mapped to DebugPad.</p>
+<p>If you are using an HID-compliant game controller, the mappings of the digital buttons and the coordinate axes would be done as follows, assuming you are using the ELECOM JC-W01UWH or the ELECOM JC-W02UWH.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonA</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_4</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonB</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_3</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonX</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_2</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonY</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_1</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonL</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_5</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonR</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_6</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonZL</span>          <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_7</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonZR</span>          <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_8</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonStart</span>       <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_10</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonSelect</span>      <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_9</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonLeft</span>        <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_Left</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonUp</span>          <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_Up</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonRight</span>       <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_Right</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">buttonDown</span>        <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_Down</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">axisAnalogStickRX</span> <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadAxis_Z</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">axisAnalogStickRY</span> <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadAxis_R</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">axisAnalogStickLX</span> <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadAxis_X</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">axisAnalogStickLY</span> <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadAxis_Y</span><span class="p">;</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsXAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsYAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsZAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsRAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsUAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="nn">DebugPadGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsVAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_89983199_h2_3">Manipulating the Emulation Settings</h2>
+<p>Generic Gamepad mapping is manipulated as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/settings/settings_DebugPad.h&gt;
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">DebugPadGenericPadMap</span> <span class="n">map</span><span class="p">;</span>            <span class="c1">// Variable that stores the mapping.
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">GetDebugPadGenericPadMap</span><span class="p">(</span><span class="o">&amp;</span><span class="n">map</span><span class="p">);</span>       <span class="c1">// Get the internally resolved value.
+</span>&nbsp;
+<span class="n">map</span><span class="p">.</span><span class="n">genericPadId</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                               <span class="c1">// Specifies the mapping of the first generic gamepad detected.
+</span><span class="n">map</span><span class="p">.</span><span class="n">buttonA</span> <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_16</span><span class="p">;</span>    <span class="c1">// If the generic gamepad is not XInput-compatible, map the 16th button to the A Button on DebugPad.
+</span><span class="nn">nn::settings::</span><span class="n">SetDebugPadGenericPadMap</span><span class="p">(</span><span class="n">map</span><span class="p">);</span>        <span class="c1">// Apply the mapping.
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">ResetDebugPadGenericPadMap</span><span class="p">();</span>         <span class="c1">// Reset to default values if necessary. (Values other than DebugPadGenericPadMap::genericPadId are reset.)
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Keyboard mapping is manipulated as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid/hid_KeyboardKey.h&gt;
+#include &lt;nn/settings/settings_DebugPad.h&gt;
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">DebugPadKeyboardMap</span> <span class="n">map</span><span class="p">;</span>                  <span class="c1">// Variable that stores the mapping.
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">GetDebugPadKeyboardMap</span><span class="p">(</span><span class="o">&amp;</span><span class="n">map</span><span class="p">);</span>             <span class="c1">// Get the internally resolved value.
+</span>&nbsp;
+<span class="n">map</span><span class="p">.</span><span class="n">buttonUp</span> <span class="o">=</span> <span class="nn">nn::hid::KeyboardKey::UpArrow::</span><span class="n">Index</span><span class="p">;</span>    <span class="c1">// Map the UP ARROW key to up on the +Control Pad of the DebugPad.
+</span><span class="nn">nn::settings::</span><span class="n">SetDebugPadKeyboardMap</span><span class="p">(</span><span class="n">map</span><span class="p">);</span>              <span class="c1">// Apply the mapping.
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">ResetDebugPadKeyboardMap</span><span class="p">();</span>               <span class="c1">// Reset to default values if necessary.
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_89983199_h1_3">Npad HID Emulation Settings</h1>
+<h2 id="Anchor_89983199_h2_4">Overview</h2>
+<p>The <a href="../Pages/Page_124018876.html">Npad</a> operating mode modeled on the Switch Pro Controller, NpadStyleFullKey, is an interface that targets the HID emulation settings. The following devices can be used with controller emulations that correspond to NpadFullKeyStyle.</p>
+<ul style="list-style-type: square;">
+  <li>Generic Gamepad</li>
+  <li>Keyboard</li>
+</ul>
+<p>The generic gamepad itself, the digital buttons of the generic gamepad, the coordinate axes of the generic gamepad, and the keys of a keyboard can all be simultaneously mapped to multiple settings.</p>
+<p>If multiple digital buttons of a generic gamepad or keys of a keyboard are mapped to the same digital button, the logical OR of the pressed states becomes the logical OR of that digital button.</p>
+<p>For a generic gamepad, if the emulation settings are not clearly specified, the mapping is automatically resolved using an internal procedure defined for each platform.</p>
+<p>The emulation settings are only resolved at the time they are required. This happens at the following times. </p>
+<ul style="list-style-type: square;">
+  <li>The <span class="ApiLink_void_nn__hid__InitializeNpad()_NN_NOEXCEPT">InitializeNpad()</span> function is called for the first time on the system.</li>
+  <li>The <code>GetFullKeyGenericPadMap()</code> function is called for the first type on the system.</li>
+</ul>
+<p>For a keyboard, if the emulation settings are not clearly specified, the keys are simply handled as being unmapped.</p>
+<p>
+  <br />
+</p>
+<p>When the emulation setting is specified in <code>NpadFullKeyStyle</code>, the <code>SetFullKeyGenericPadMap()</code> or <code>SetFullKeyKeyboardMap()</code> function is called.</p>
+<p>The first API maps a generic gamepad to <code>NpadFullKeyStyle</code>, and the second maps a keyboard to <code>NpadFullKeyStyle</code>.</p>
+<p>To restore the mapping to the default values, call <code>ResetFullKeyGenericPadMap()</code> and <code>ResetFullKeyKeyboardMap()</code>, respectively.</p>
+<p>The emulation settings are set or reset immediately after the function call returns.</p>
+<p>Call the <code>GetFullKeyGenericPadMap()</code> and <code>GetFullKeyKeyboardMap()</code> functions to get the setting values.</p>
+<h2 id="Anchor_89983199_h2_5">Resolving the Emulation Settings in a Windows Environment</h2>
+<p>A generic gamepad is mapped by specifying its identifier for <code>FullKeyGenericPadMap::genericPadId</code>.</p>
+<p>As long as you are using an XInput-compatible controller, the identifier of the generic gamepad corresponds to the <code><em>dwUserIndex</em></code> parameter of the <code>XInputGetState()</code> function.</p>
+<p>If you are also using another HID-compliant game controller, the detection order of the controller (starting with 0) is used as the identifier for the generic gamepad. If controllers have been detached, the values can be reused, starting from the smaller value.</p>
+<p>The relationship between the generic gamepad and its identifier is managed in shared memory, so you can use that identifier as a way to exclusively use a generic gamepad among different executable files.</p>
+<p>If no identifier has been explicitly mapped, the identifier with the lowest value among those that are not mapped to any HID emulation ismapped to <code>FullKey</code>.</p>
+<p>If you are using an HID-compliant game controller, the mappings of the digital buttons and the coordinate axes would be done as follows.</p>
+<ul>
+  <li>Behavior Effective From NintendoSDK 3.2.0.</li>
+</ul>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonA</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_4</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonB</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_3</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonX</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_2</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonY</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_1</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonStickL</span>      <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_11</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonStickR</span>      <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_12</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonL</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_5</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonR</span>           <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_6</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonZL</span>          <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_7</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonZR</span>          <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_8</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonStart</span>       <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_10</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonSelect</span>      <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_9</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonLeft</span>        <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_Left</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonUp</span>          <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_Up</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonRight</span>       <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_Right</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">buttonDown</span>        <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_Down</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">axisAnalogStickRX</span> <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadAxis_Z</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">axisAnalogStickRY</span> <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadAxis_R</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">axisAnalogStickLX</span> <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadAxis_X</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">axisAnalogStickLY</span> <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadAxis_Y</span><span class="p">;</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsXAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsYAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsZAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsRAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsUAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="nn">FullKeyGenericPadMap::</span><span class="n">attributes</span><span class="p">.</span><span class="n">Set</span><span class="o">&lt;</span><span class="nn">nn::settings::GenericPadAxisAttribute::</span><span class="n">IsVAxisInverted</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_89983199_h2_6">
+  <br />Manipulating the Emulation Settings</h2>
+<p>Generic Gamepad mapping is manipulated as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/settings/settings_FullKey.h&gt;
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">FullKeyGenericPadMap</span> <span class="n">map</span><span class="p">;</span>           <span class="c1">// Variable that stores the mapping.
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">GetFullKeyGenericPadMap</span><span class="p">(</span><span class="o">&amp;</span><span class="n">map</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>        <span class="c1">// Get the internally resolved value for player number 0.
+</span>&nbsp;
+<span class="n">map</span><span class="p">.</span><span class="n">genericPadId</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                               <span class="c1">// Specifies the mapping of the first generic gamepad detected.
+</span><span class="n">map</span><span class="p">.</span><span class="n">buttonA</span> <span class="o">=</span> <span class="nn">nn::settings::</span><span class="n">GenericPadButton_16</span><span class="p">;</span>    <span class="c1">// If the generic gamepad is not XInput-compatible, map the 16th button to the A Button on DebugPad.
+</span><span class="nn">nn::settings::</span><span class="n">SetFullKeyGenericPadMap</span><span class="p">(</span><span class="n">map</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>         <span class="c1">// Apply the mapping for player number 0.
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">ResetFullKeyGenericPadMap</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>            <span class="c1">// Reset to default values if necessary. (Values other than FullKeyGenericPadMap::genericPadId are reset.)
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Keyboard mapping is manipulated as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid/hid_KeyboardKey.h&gt;
+#include &lt;nn/settings/settings_FullKey.h&gt;
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">FullKeyKeyboardMap</span> <span class="n">map</span><span class="p">;</span>                 <span class="c1">// Variable that stores the mapping.
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">GetFullKeyKeyboardMap</span><span class="p">(</span><span class="o">&amp;</span><span class="n">map</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>              <span class="c1">// Get the internally resolved value for player number 0.
+</span>&nbsp;
+<span class="n">map</span><span class="p">.</span><span class="n">buttonUp</span> <span class="o">=</span> <span class="nn">nn::hid::KeyboardKey::UpArrow::</span><span class="n">Index</span><span class="p">;</span>    <span class="c1">// Map the UP ARROW key to up on the +Control Pad of the FullKey.
+</span><span class="nn">nn::settings::</span><span class="n">SetFullKeyKeyboardMap</span><span class="p">(</span><span class="n">map</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>               <span class="c1">// Apply the mapping for player number 0.
+</span>&nbsp;
+<span class="nn">nn::settings::</span><span class="n">ResetFullKeyKeyboardMap</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>                  <span class="c1">// Reset to default values if necessary.
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__hid__InitializeDebugPad()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a52f910e37e347a944be54f6860a8ed11' )
+SetUrl( 'ApiLink_void_nn__settings__GetDebugPadGenericPadMap(DebugPadGenericPadMap_*outValue)_noexcept', '../../../Api/HtmlNX/namespacenn_1_1settings.html#a7c9984e2dcfdac87d5e4c5a8fa7369ff' )
+SetUrl( 'ApiLink_void_nn__settings__SetDebugPadGenericPadMap(const_DebugPadGenericPadMap_&value)_noexcept', '../../../Api/HtmlNX/namespacenn_1_1settings.html#abd17429662e4669e06994b8d3313a8f1' )
+SetUrl( 'ApiLink_void_nn__settings__SetDebugPadKeyboardMap(const_DebugPadKeyboardMap_&value)_noexcept', '../../../Api/HtmlNX/namespacenn_1_1settings.html#a587f72d281c2ea03b20e8388df404fc7' )
+SetUrl( 'ApiLink_void_nn__settings__ResetDebugPadGenericPadMap()_noexcept', '../../../Api/HtmlNX/namespacenn_1_1settings.html#a1822dd7c5af231c45a5e1883e01a64bd' )
+SetUrl( 'ApiLink_void_nn__settings__ResetDebugPadKeyboardMap()_noexcept', '../../../Api/HtmlNX/namespacenn_1_1settings.html#a565bdaed345190a802a2c61849e67d9b' )
+SetUrl( 'ApiLink_void_nn__settings__GetDebugPadKeyboardMap(DebugPadKeyboardMap_*outValue)_noexcept', '../../../Api/HtmlNX/namespacenn_1_1settings.html#a1e96831e46ee03c734e5f81570c8df66' )
+SetUrl( 'ApiLink_nn__settings__DebugPadGenericPadMap__genericPadId', '../../../Api/HtmlNX/structnn_1_1settings_1_1_debug_pad_generic_pad_map.html#a63864e69bf381281356af2444eb98514' )
+SetUrl( 'ApiLink_void_nn__hid__InitializeNpad()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a54ad6953b9cef17b4d79171e819b0048' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,343 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Managing Memory Referenced by the GPU | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Managing Memory Referenced by the GPU -->
+<div class="pagetitle" id="PageId_107345117">Managing Memory Referenced by the GPU</div>
+<div class="text_separate">
+<h1 id="Anchor_107345117_h1_1">Managing Memory Referenced by the GPU</h1>
+<p>This section describes how to manage memory for the vertex and constant buffers accessed from the GPU (<em>GPU buffers</em>) used by the <code>font</code> and <code>layout</code> libraries.</p>
+<h2 id="Anchor_107345117_h2_1">Mechanism for GPU Buffer Management</h2>
+<p>The <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code> class is used to manage the GPU buffers within the <code>font</code> and <code>layout</code> libraries.<br />This class includes <code><span class="ApiLink_nn__gfx__Buffer">nn::gfx::Buffer</span></code> and offers a feature known as multibuffering, which is achieved through the management of use regions within <code><span class="ApiLink_nn__gfx__Buffer">nn::gfx::Buffer</span></code> and the switching of <code><span class="ApiLink_nn__gfx__Buffer">nn::gfx::Buffer</span></code>.</p>
+<h3 id="Anchor_107345117_h3_1">nn::font::GpuBuffer Processes</h3>
+<ol>
+  <li>Create <code><span class="ApiLink_nn__gfx__MemoryPool">nn::gfx::MemoryPool</span></code>, which is managed by <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code>.</li>
+  <li>Initialize by passing <code><span class="ApiLink_nn__fgx__MemoryPool">nn::fgx::MemoryPool</span></code> to <code><span class="ApiLink_nn__font__GpuBuffer__Initialize">nn::font::GpuBuffer::Initialize</span></code>.<ul><li>Specifying a memory pool offset at this point will enable a single <code><span class="ApiLink_nn__gfx__MemoryPool">nn::gfx::MemoryPool</span></code> to be used by multiple <code>GpuBuffer</code> instances.</li></ul></li>
+  <li>(Subsequent processes occur within the main loop.)</li>
+  <li>Write preparations with <code><span class="ApiLink_nn__font__GpuBuffer__Map">nn::font::GpuBuffer::Map</span></code>.<ul><li>To specify which data buffer to update, use the buffer index as an argument.</li></ul></li>
+  <li>Call the function for updating <code>GpuBuffer</code>.<ul><li>With the <code>font</code> library, use <code>BuildConstantBuffer</code> to allocate memory from <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code> and write the required data.</li><li>With the <code>ui2d</code> library, call <code>Calculate</code> to allocate memory from <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code> and write the data.</li></ul></li>
+  <li>Finalize writes with <code><span class="ApiLink_nn__font__GpuBuffer__Unmap">nn::font::GpuBuffer::Unmap</span></code>.</li>
+  <li>Use <code><span class="ApiLink_nn__font__GpuBuffer__SetGpuAccessBufferIndex">nn::font::GpuBuffer::SetGpuAccessBufferIndex</span></code> to set the index of the buffer that the GPU will reference when rendering.</li>
+  <li>Perform the rendering process.</li>
+  <li>(Main loop processing ends here.)</li>
+  <li>Use <code><span class="ApiLink_nn__font__GpuBuffer__Finalize">nn::font::GpuBuffer::Finalize</span></code> to finalize.</li>
+  <li>Free <code><span class="ApiLink_nn__gfx__MemoryPool">nn::gfx::MemoryPool</span></code>.</li>
+</ol>
+<p>Because the mapping and unmapping of buffers and buffer switching can be implemented to suit the needs of your application, you can flexibly control when your buffers are updated.</p>
+<h3 id="Anchor_107345117_h3_2">Handling GpuBuffer Created in a CPU Cache-Enabled Region</h3>
+<p>When <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code> is created in a memory pool for which <code><span class="ApiLink_nn__gfx__MemoryPoolProperty_CpuCached">nn::gfx::MemoryPoolProperty_CpuCached</span></code> has been specified, you must flush the CPU cache before referencing the region written to by the GPU.</p>
+<p>Because cache operations require that cache be mapped, call <code><span class="ApiLink_nn__font__GpuBuffer__FlushMappedRange">nn::font::GpuBuffer::FlushMappedRange</span></code> and flush the cache before writing data to <code>GpuBuffer</code> and calling <code><span class="ApiLink_nn__font__GpuBuffer__Unmap">nn::font::GpuBuffer::Unmap</span></code>.</p>
+<p>Because you normally use the region managed by <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code> starting from the head end, flush the used region as shown in the following example code.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">pGpuBuffer</span><span class="o">-&gt;</span><span class="n">FlushMappedRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pGpuBuffer</span><span class="o">-&gt;</span><span class="n">GetAllocatedFromHeadSize</span><span class="p">());</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Some <code>ui2d</code> features (such as vector graphics textures and picture pane shapes) use the region managed by <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code> starting from the tail end. In those cases you must flush the size of the used region from the tail.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">pGpuBuffer</span><span class="o">-&gt;</span><span class="n">FlushMappedRange</span><span class="p">(</span><span class="n">pGpuBuffer</span><span class="o">-&gt;</span><span class="n">GetBufferSize</span><span class="p">()</span> <span class="o">-</span> <span class="n">pGpuBuffer</span><span class="o">-&gt;</span><span class="n">GetAllocatedFromTailSize</span><span class="p">(),</span> <span class="n">pGpuBuffer</span><span class="o">-&gt;</span><span class="n">GetAllocatedFromTailSize</span><span class="p">());</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_107345117_h2_2">Font Library</h2>
+<p>With the <code>font</code> library, the GPU buffer is used for the constant buffer.<br />The <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code> instance for the GPU buffers used by the library must be created and managed by the application.</p>
+<h3 id="Anchor_107345117_h3_3">Working With Constant Buffers</h3>
+<p>Write necessary values to the constant buffer by using <code><span class="ApiLink_nn__font__DispStringBuffer__BuildConstantBuffer">nn::font::DispStringBuffer::BuildConstantBuffer</span></code> within the <code>font</code> library.</p>
+<p>The following pseudocode indicates the update process.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Map to update the constant buffer.
+// In the following code, the buffer to map is switched by the frame due to the use of multibuffering.
+</span><span class="n">g_ConstantBuffer</span><span class="p">.</span><span class="n">Map</span><span class="p">(</span><span class="n">g_FrameCount</span> <span class="o">%</span> <span class="n">g_ConstantBufferCount</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Write values to the constant buffer.
+</span><span class="n">g_DispStringBuffer</span><span class="p">.</span><span class="n">BuildConstantBuffer</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Projection</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&amp;</span><span class="n">additionalContent</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Unmap because updates to the constant buffer have ended.
+</span><span class="n">g_ConstantBuffer</span><span class="p">.</span><span class="n">Unmap</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// Set the buffer index referenced when the GPU renders.
+// In the following code, settings are made to reference the buffer written to in this frame.
+</span><span class="n">g_ConstantBuffer</span><span class="p">.</span><span class="n">SetGpuAccessBufferIndex</span><span class="p">(</span><span class="n">g_FrameCount</span> <span class="o">%</span> <span class="n">g_ConstantBufferCount</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You must put the buffer in a writable state by calling <code><span class="ApiLink_nn__font__GpuBuffer__Map">nn::font::GpuBuffer::Map</span></code> before calling <code><span class="ApiLink_nn__font__DispStringBuffer__BuildConstantBuffer">nn::font::DispStringBuffer::BuildConstantBuffer</span></code>.</p>
+<h3 id="Anchor_107345117_h3_4">Calculating Buffer Sizes Needed by the Library</h3>
+<p>You can get the buffer sizes needed by the library with the following member functions.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__font__DispStringBuffer__GetRequiredConstantBufferSize">nn::font::DispStringBuffer::GetRequiredConstantBufferSize</span>
+  </li>
+</ul>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::font::DispStringBuffer::</span><span class="n">InitializeArg</span> <span class="n">initializeArg</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The following settings affect the required size for the constant buffer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">initializeArg</span><span class="p">.</span><span class="n">SetCharCountMax</span><span class="p">(</span> <span class="n">CharCount</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">initializeArg</span><span class="p">.</span><span class="n">SetShadowEnabled</span><span class="p">(</span> <span class="nb">false</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">initializeArg</span><span class="p">.</span><span class="n">SetPerCharacterTransformEnabled</span><span class="p">(</span> <span class="nb">false</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">initializeArg</span><span class="p">.</span><span class="n">SetDoubleDrawnBorder</span><span class="p">(</span> <span class="nb">false</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">size_t</span> <span class="n">constantBufferSize</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">=</span> <span class="nn">nn::font::DispStringBuffer::</span><span class="n">GetRequiredConstantBufferSize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">initializeArg</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Multiply the values obtained by these member functions by the multibuffering number (which would be two (2) for double buffering, or three (3) for triple buffering) to get the required buffer size. </p>
+<p>Use that information when creating <code><span class="ApiLink_nn__gfx__MemoryPool">nn::gfx::MemoryPool</span></code> to allocate the required size.<br /><br /></p>
+<h2 id="Anchor_107345117_h2_3">Layout Library</h2>
+<p>The <code>layout</code> library uses GPU buffers for the following two types of data.</p>
+<ul>
+  <li>Constant buffers for the <code>layout</code> library.</li>
+  <li>Constant buffers for the <code>font</code> library.</li>
+</ul>
+<p>The <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code> instance for the GPU buffers for these must be created by the application that uses the library and settings made to <code><span class="ApiLink_nn__ui2d__DrawInfo">nn::ui2d::DrawInfo</span></code>.</p>
+<h3 id="Anchor_107345117_h3_5">Working With the Different Buffers</h3>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_107345117/125193448.png" width="500" alt="GpuBfferUsage" title="GpuBfferUsage" class="embedded-image" />
+  </span>
+</p>
+<p>When the <code><span class="ApiLink_nn__ui2d__Layout__Calculate">nn::ui2d::Layout::Calculate</span></code> function is called, the <code>Layout</code> class allocates a constant buffer from <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code> to use when drawing that layout data, and writes the data. (Above image)<br />This includes the constant buffer for fonts used within ui2d.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Map the GpuBuffer which maintains the DrawInfo needed to update the various buffers.
+</span><span class="n">g_DrawInfo</span><span class="p">.</span><span class="n">Map</span><span class="p">(</span><span class="n">g_Ui2dConstantBufferIndex</span><span class="p">);</span>
+<span class="c1">// Update to render the data configured to g_pLayout.
+// As this occurs, allocate memory from GpuBuffer and write the constant buffer data.
+</span><span class="n">g_pLayout</span><span class="o">-&gt;</span><span class="n">Calculate</span><span class="p">(</span><span class="n">g_DrawInfo</span><span class="p">);</span>
+<span class="c1">// Unmap GpuBuffer because buffer updates have ended.
+</span><span class="n">g_DrawInfo</span><span class="p">.</span><span class="n">Unmap</span><span class="p">();</span>
+<span class="c1">// When rendering, set the index of the buffer that the GPU references to the buffer updated in this frame.
+</span><span class="n">g_DrawInfo</span><span class="p">.</span><span class="n">SetGpuAccessBufferIndex</span><span class="p">(</span><span class="n">g_Ui2dConstantBufferIndex</span><span class="p">);</span>
+<span class="c1">// Set the render command to the command buffer.
+</span><span class="n">g_pLayout</span><span class="o">-&gt;</span><span class="n">Draw</span><span class="p">(</span><span class="n">g_DrawInfo</span><span class="p">,</span> <span class="n">g_CommandBuffer</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />Before you call <code><span class="ApiLink_nn__ui2d__Layout__Calculate">nn::ui2d::Layout::Calculate</span></code>, you must put the buffer in a writable state by calling <code><span class="ApiLink_nn__ui2d__DrawInfo__Map">nn::ui2d::DrawInfo::Map</span></code>.</p>
+<h3 id="Anchor_107345117_h3_6">Calculating GPU Memory for the Buffers</h3>
+<p>To get the size of the GPU buffer needed as a constant buffer for rendering one layout, check the information collected in the <code><span class="ApiLink_nn__ui2d__BuildResultInformation">nn::ui2d::BuildResultInformation</span></code> structure by the <code><span class="ApiLink_nn__ui2d__Layout__Build">nn::ui2d::Layout::Build</span></code> member function.<br />This structure includes the sizes of the various buffers needed to display the data that called the <code><span class="ApiLink_nn__ui2d__Layout__Build">nn::ui2d::Layout::Build</span></code> member function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Set up the layout data and collect the required buffer sizes.
+</span><span class="nn">nn::ui2d::</span><span class="n">BuildResultInformation</span>   <span class="n">buildResultInformation</span><span class="p">;</span>
+<span class="n">buildResultInformation</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">();</span>
+
+<span class="n">pLayout</span><span class="o">-&gt;</span><span class="n">BuildWithName</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&amp;</span><span class="n">buildResultInformation</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pResourceAccessor</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">NULL</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">NULL</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">option</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">&quot;simple.bflyt&quot;</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This size accommodates the data for displaying one layout. To display the data for multiple layouts at the same time, create a buffer whose size totals all the sizes that will be used.<br />Note that the memory is allocated from <code><span class="ApiLink_nn__font__GpuBuffer">nn::font::GpuBuffer</span></code> only for the layout data on which <code><span class="ApiLink_nn__ui2d__Layout__Calculate">nn::ui2d::Layout::Calculate</span></code> was called.<br />Combining layout data displayed in the same frame processes will affect that amount. Adjust the size along with what the application needs.</p>
+<h4 id="Anchor_107345117_h4_1">GPU Memory Needed When Dynamically Adding Panes</h4>
+<p>The required buffer size described in Calculating GPU Memory for the Buffers is the buffer size needed when displaying layout data as is.<br /><strong>Note that the GPU memory size needed to display panes that have been dynamically added and changed is not included.</strong> </p>
+<p>The following cases apply.</p>
+<ul>
+  <li>The user independently creates a Picture Pane and creates a relationship such as a parent&ndash;child relationship in the layout data.</li>
+  <li>The user independently creates a Window Pane and creates a relationship such as a parent&ndash;child relationship in the layout data.</li>
+  <li>The user independently creates a TextBox Pane and creates a relationship such as a parent&ndash;child relationship in the layout data.</li>
+  <li>Called <code><span class="ApiLink_nn__ui2d__TextBox__AllocateStringBuffer">nn::ui2d::TextBox::AllocateStringBuffer</span></code> and changed the displayable string length to display strings different from strings included in the data in the TextBox Pane.</li>
+</ul>
+<p>The following indicates the size of the constant buffer consumed by each pane.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>Constant Buffers</th>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__ui2d__Picture">nn::ui2d::Picture</span>
+      </th>
+      <td>
+        <ul>
+          <li>Basic materials<ul><li>The size of the <code>ConstantBufferForVertexShader</code> of <code><span class="ApiLink_nn__ui2d__Material">nn::ui2d::Material</span></code>.</li><li>The size of the <code>ConstantBufferForPixelShader</code> of <code><span class="ApiLink_nn__ui2d__Materia">nn::ui2d::Materia</span></code>.</li><li>The code in <code><span class="ApiLink_nn__ui2d__Picture__Calculate">nn::ui2d::Picture::Calculate</span></code> for allocating memory using <code><span class="ApiLink_nn__ui2d__Material__AllocateConstantBuffer">nn::ui2d::Material::AllocateConstantBuffer</span></code>.</li></ul></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__ui2d__Window">nn::ui2d::Window</span>
+      </th>
+      <td>
+        <ul>
+          <li>Basic materials<ul><li>The size of the <code>ConstantBufferForVertexShader</code> of <code><span class="ApiLink_nn__ui2d__Material">nn::ui2d::Material</span></code>.</li><li>The size of the <code>ConstantBufferForPixelShader</code> of <code><span class="ApiLink_nn__ui2d__Materia">nn::ui2d::Materia</span></code>.</li><li>The code in <code><span class="ApiLink_nn__ui2d__Window__Calculate">nn::ui2d::Window::Calculate</span></code> for allocating memory using <code><span class="ApiLink_nn__ui2d__Material__AllocateConstantBuffer">nn::ui2d::Material::AllocateConstantBuffer</span></code>.</li></ul></li>
+          <li>Materials for frames<ul><li>When there are frames, these same settings are necessary for the number of frames.</li></ul></li>
+          <li>Upper-left window common material emulation<ul><li>Depending on the frame mode, the size of the <code>ConstantBufferForVertexShader</code> of <code><span class="ApiLink_nn__ui2d__Material">nn::ui2d::Material</span></code> must be <code>1</code> or <code>3</code>.</li><li>There is code related to the <code>InitializeUseLeftTopMaterialEmulation</code> of <code><span class="ApiLink_nn__ui2d__Window">nn::ui2d::Window</span></code>.</li></ul></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_nn__ui2d__TextBox">nn::ui2d::TextBox</span>
+      </th>
+      <td>
+        <ul>
+          <li>Basic information<br /><ul><li>Normally the size of the <code>ShaderParam</code> of <code><span class="ApiLink_nn__font__DispStringBuffer">nn::font::DispStringBuffer</span></code>, but twice that size is necessary when using outline rendering.</li></ul></li>
+          <li>Character level data<ul><li>For normal strings, use <code>sizeof(<span class="ApiLink_nn__font__detail__VertexShaderCharAttribute">nn::font::detail::VertexShaderCharAttribute</span>)</code>.<br />To perform matrix conversion at the character level, use <code>sizeof(<span class="ApiLink_nn__font__detail__VertexShaderCharAttributeWithTransform">nn::font::detail::VertexShaderCharAttributeWithTransform</span>)</code>.<br />This size requires a size multiplied by the number of characters to display. </li></ul></li>
+          <li>There is calculation code in <code><span class="ApiLink_nn__font__DispStringBuffer__GetRequiredConstantBufferSize">nn::font::DispStringBuffer::GetRequiredConstantBufferSize</span>()</code>.</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Because aligning is also necessary, the required buffer size is comprised of the values of the sizes in this table adjusted by using the alignment for the constant buffer.</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<div> <br /></div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__font__GpuBuffer', '../../../Api/HtmlNX/classnn_1_1font_1_1_gpu_buffer.html' )
+SetUrl( 'ApiLink_nn__gfx__Buffer', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a8721c66f238e6505cbf9ca0eb71d3e85' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPool', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ad620d8208dd309eb7c4dd5973a6aeee5' )
+// ApiLink_nn__fgx__MemoryPool
+SetUrl( 'ApiLink_nn__font__GpuBuffer__Initialize', '../../../Api/HtmlNX/classnn_1_1font_1_1_gpu_buffer.html#afad85cf1e04cf213745a9ebac5ad0dbb' )
+SetUrl( 'ApiLink_nn__font__GpuBuffer__Map', '../../../Api/HtmlNX/classnn_1_1font_1_1_gpu_buffer.html#a27323229b032ac7bfe206e047527bbf3' )
+SetUrl( 'ApiLink_nn__font__GpuBuffer__Unmap', '../../../Api/HtmlNX/classnn_1_1font_1_1_gpu_buffer.html#aae5d4be63b373546581015fc92adfaf7' )
+SetUrl( 'ApiLink_nn__font__GpuBuffer__SetGpuAccessBufferIndex', '../../../Api/HtmlNX/classnn_1_1font_1_1_gpu_buffer.html#af0e0c42eeaaee9918088f56d90c56bfe' )
+SetUrl( 'ApiLink_nn__font__GpuBuffer__Finalize', '../../../Api/HtmlNX/classnn_1_1font_1_1_gpu_buffer.html#afe03d966c5c9692a07e2369225881af9' )
+SetUrl( 'ApiLink_nn__gfx__MemoryPoolProperty_CpuCached', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a9bad749884304c5882d4c54e57818623a663a11b1bc56170998d3ca281574e1f1' )
+SetUrl( 'ApiLink_nn__font__GpuBuffer__FlushMappedRange', '../../../Api/HtmlNX/classnn_1_1font_1_1_gpu_buffer.html#a8d2ad42fcb9829bd9fa3642139e47972' )
+SetUrl( 'ApiLink_nn__font__DispStringBuffer__BuildConstantBuffer', '../../../Api/HtmlNX/classnn_1_1font_1_1_disp_string_buffer.html#abfc2fb2cb07d49d009d8f5c4420940d9' )
+SetUrl( 'ApiLink_nn__font__DispStringBuffer__GetRequiredConstantBufferSize', '../../../Api/HtmlNX/classnn_1_1font_1_1_disp_string_buffer.html#a8942fef997ae2ca87ed0c71f1d1b3e8c' )
+SetUrl( 'ApiLink_nn__ui2d__DrawInfo', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_draw_info.html' )
+SetUrl( 'ApiLink_nn__ui2d__Layout__Calculate', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_layout.html#a59a23fbf33217c59eba47bba35630cb9' )
+SetUrl( 'ApiLink_nn__ui2d__DrawInfo__Map', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_draw_info.html#a766bb7a246a224021e2121f0c223c3ad' )
+SetUrl( 'ApiLink_nn__ui2d__BuildResultInformation', '../../../Api/HtmlNX/structnn_1_1ui2d_1_1_build_result_information.html' )
+SetUrl( 'ApiLink_nn__ui2d__Layout__Build', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_layout.html#a9425160676571060fde40546763213c3' )
+SetUrl( 'ApiLink_nn__ui2d__TextBox__AllocateStringBuffer', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_text_box.html#a62100f4aca4a2f7f3492b247608aa74d' )
+SetUrl( 'ApiLink_nn__ui2d__Picture', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_picture.html' )
+SetUrl( 'ApiLink_nn__ui2d__Material', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_material.html' )
+// ApiLink_nn__ui2d__Materia
+SetUrl( 'ApiLink_nn__ui2d__Picture__Calculate', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_picture.html#a62f2b817aeb84aed6af2fa170b5d47a0' )
+SetUrl( 'ApiLink_nn__ui2d__Material__AllocateConstantBuffer', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_material.html#a8b05c7207ff75558d49ddb5beb0ea2b1' )
+SetUrl( 'ApiLink_nn__ui2d__Window', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_window.html' )
+SetUrl( 'ApiLink_nn__ui2d__Window__Calculate', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_window.html#a07e648d86e2a17012ae0a90287c7057a' )
+SetUrl( 'ApiLink_nn__ui2d__TextBox', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_text_box.html' )
+SetUrl( 'ApiLink_nn__font__DispStringBuffer', '../../../Api/HtmlNX/classnn_1_1font_1_1_disp_string_buffer.html' )
+SetUrl( 'ApiLink_nn__font__detail__VertexShaderCharAttribute', '../../../Api/HtmlNX/structnn_1_1font_1_1detail_1_1_vertex_shader_char_attribute.html' )
+SetUrl( 'ApiLink_nn__font__detail__VertexShaderCharAttributeWithTransform', '../../../Api/HtmlNX/structnn_1_1font_1_1detail_1_1_vertex_shader_char_attribute_with_transform.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,268 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Unit Heap | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Unit Heap -->
+<div class="pagetitle" id="PageId_89102305">Unit Heap</div>
+<div class="text_separate">
+<h1 id="Anchor_89102305_h1_1">UnitHeap Feature</h1>
+<h2 id="Anchor_89102305_h2_1">Feature Overview</h2>
+<p>A unit heap is a memory allocator that can only allocate and free memory blocks of a predetermined size.</p>
+<p>Although it is not as flexible as an expanded heap, it runs that much faster.</p>
+<p>It also uses memory more efficiently because it does not require a management region in the memory block like a frame heap does.</p>
+<h3 id="Anchor_89102305_h3_1">Unit</h3>
+<p>A memory block of a fixed size that is handled in a unit heap is called a <em>unit</em>.</p>
+<p>A unit heap splits the heap memory region into units based on the unit size specified at the time of initialization.</p>
+<p>When allocating memory blocks, these segmented units are assigned.</p>
+<h2 id="Anchor_89102305_h2_2">Using UnitHeap</h2>
+<p>Allocate the memory region to be managed, and use <span class="ApiLink_HeapHandle_nn__lmem__CreateUnitHeap(void_*startAddress|_size_t_size|_size_t_unitSize|_int_option)_NN_NOEXCEPT"><code>nn::lmem::CreateUnitHeap</code></span> to create a unit heap.</p>
+<p>The memory region that is passed to the unit heap must be statically or dynamically allocated beforehand. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;cstdlib&gt;
+#include &lt;nn/lmem/lmem_UnitHeap.h&gt;
+</span>&nbsp;&nbsp;
+<span class="k">const</span> <span class="kt">size_t</span> <span class="n">MemoryHeapSize</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>     <span class="c1">// This example passes a region of 32 MiB to the unit heap.
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">heap</span> <span class="o">=</span> <span class="nn">std::</span><span class="n">malloc</span><span class="p">(</span><span class="n">MemoryHeapSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;
+<span class="c1">// Initialize the unit heap.
+// As an example, consider dividing a 32-MiB heap into 128-byte units and using it as a unit heap.
+</span><span class="nn">nn::lmem::</span><span class="n">HeapHandle</span> <span class="n">heapHandle</span><span class="p">;</span>
+<span class="kt">size_t</span> <span class="n">unitSize</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>
+<span class="n">heapHandle</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">CreateUnitHeap</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="n">MemoryHeapSize</span><span class="p">,</span> <span class="n">unitSize</span><span class="p">,</span> <span class="nn">nn::lmem::</span><span class="n">CreationOption_NoOption</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span><span class="n">heapHandle</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialization of the unit heap failed.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>You can specify the alignment of the memory block at the time of initialization.</p>
+<p>Unlike an expanded heap or frame heap, you cannot specify the alignment when allocating memory.<br /></p>
+<p>In addition, you can choose whether the unit heap creates the heap management region at the beginning of the heap or the end of the heap.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Initialize the unit heap.
+</span><span class="nn">nn::lmem::</span><span class="n">HeapHandle</span> <span class="n">heapHandle</span><span class="p">;</span>
+<span class="nn">nn::lmem::</span><span class="n">HeapCommonHead</span> <span class="n">heapHead</span><span class="p">;</span>  <span class="c1">// Heap management region.
+</span><span class="kt">size_t</span> <span class="n">unitSize</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">alignment</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>            <span class="c1">// Create a unit heap with 4-KiB alignment.
+// Place the heap management region at the end of the memory region.
+</span><span class="n">heapHandle</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">CreateUnitHeap</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">heap</span><span class="p">),</span> <span class="n">MemoryHeapSize</span><span class="p">,</span> <span class="n">unitSize</span><span class="p">,</span> <span class="nn">nn::lmem::</span><span class="n">CreationOption_NoOption</span><span class="p">,</span> <span class="n">alignment</span><span class="p">,</span> <span class="n">InfoPlacement_Tail</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>It is also possible to pass the heap management region as an argument at the time of initialization.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Initialize the unit heap.
+</span><span class="nn">nn::lmem::</span><span class="n">HeapHandle</span> <span class="n">heapHandle</span><span class="p">;</span>
+<span class="nn">nn::lmem::</span><span class="n">HeapCommonHead</span> <span class="n">heapHead</span><span class="p">;</span>  <span class="c1">// Heap management region.
+</span><span class="kt">size_t</span> <span class="n">unitSize</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">alignment</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>
+<span class="n">heapHandle</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">CreateUnitHeap</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">heap</span><span class="p">),</span> <span class="n">MemoryHeapSize</span><span class="p">,</span> <span class="n">unitSize</span><span class="p">,</span> <span class="nn">nn::lmem::</span><span class="n">CreationOption_NoOption</span><span class="p">,</span> <span class="n">alignment</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">heapHead</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Use <span class="ApiLink_void_*_nn__lmem__AllocateFromUnitHeap(HeapHandle_heapHandle)_NN_NOEXCEPT"><code>nn::lmem::AllocateFromUnitHeap</code></span> to allocate the memory block after initialization.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">address</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">AllocateFromUnitHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">);</span>        <span class="c1">// Allocate a memory block of the size specified when the heap was created.
+</span><span class="k">if</span><span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocation of the memory fails.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>When you have finished using the allocated region, deallocate it by using <span class="ApiLink_void_nn__lmem__FreeToUnitHeap(HeapHandle_heapHandle|_void_*pBlock)_NN_NOEXCEPT"><code>nn::lmem::FreeToUnitHeap</code></span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::lmem::</span><span class="n">FreeToUnitHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="n">address</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>When you have finished using the heap, free it by using <span class="ApiLink_void_nn__lmem__DestroyUnitHeap(HeapHandle_heapHandle)_NN_NOEXCEPT"><code>nn::lmem::DestroyUnitHeap</code></span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::lmem::</span><span class="n">DestroyUnitHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>For more information about other functions, see the API reference for each.</p>
+<h2 id="Anchor_89102305_h2_3">UnitHeap API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_HeapHandle_nn__lmem__CreateUnitHeap(void_*startAddress|_size_t_size|_size_t_unitSize|_int_option)_NN_NOEXCEPT">nn::lmem::CreateUnitHeap (No alignment, no management region specified)</span>
+  </li>
+  <li>
+    <span class="ApiLink_HeapHandle_nn__lmem__CreateUnitHeap(void_*startAddress|_size_t_size|_size_t_unitSize|_int_option|_int_alignment|_InfoPlacement_placement)_NN_NOEXCEPT">nn::lmem::CreateUnitHeap (With alignment, management region position specified in the heap)</span>
+  </li>
+  <li>
+    <span class="ApiLink_HeapHandle_nn__lmem__CreateUnitHeap(void_*startAddress|_size_t_size|_size_t_unitSize|_int_option|_int_alignment|_HeapCommonHead_*pHeapHead)_NN_NOEXCEPT">nn::lmem::CreateUnitHeap (With alignment, heap management region passed from outside the heap)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__DestroyUnitHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::DestroyUnitHeap</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__InvalidateUnitHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::InvalidateUnitHeap</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_*_nn__lmem__AllocateFromUnitHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::AllocateFromUnitHeap</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__FreeToUnitHeap(HeapHandle_heapHandle|_void_*pBlock)_NN_NOEXCEPT">nn::lmem::FreeToUnitHeap</span>
+  </li>
+  <li>
+    <span class="ApiLink_size_t_nn__lmem__GetUnitHeapUnitSize(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::GetUnitHeapUnitSize</span>
+  </li>
+  <li>
+    <span class="ApiLink_int_nn__lmem__GetUnitHeapAllocatableCount(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::GetUnitHeapAllocatableCount</span>
+  </li>
+  <li>
+    <span class="ApiLink_int_nn__lmem__GetUnitHeapAllocatedCount(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::GetUnitHeapAllocatedCount</span>
+  </li>
+  <li>
+    <span class="ApiLink_int_nn__lmem__GetUnitHeapAlignment(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::GetUnitHeapAlignment</span>
+  </li>
+  <li>
+    <span class="ApiLink_size_t_nn__lmem__GetRequiredUnitHeapSize(size_t_unitSize|_int_unitNum|_int_alignment|_bool_hasHeadInternally)_NN_NOEXCEPT">nn::lmem::GetRequiredUnitHeapSize</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__DumpUnitHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::DumpUnitHeap</span>
+  </li>
+</ul>
+<h2 id="Anchor_89102305_h2_4">Notes About Using UnitHeap</h2>
+<h3 id="Anchor_89102305_h3_2">Heap Management Region</h3>
+<p>The heap management region requires 100 bytes in a 32-bit environment, and 176 bytes in a 64-bit environment.</p>
+<p>Consequently, if the heap management region is created internally, you cannot create a unit heap in a memory region smaller than these sizes.</p>
+<h3 id="Anchor_89102305_h3_3">Minimum Allocatable Memory Block Size</h3>
+<p>Allocated memory blocks must be aligned to a 4-byte boundary at minimum.</p>
+<p>Consequently, even if you allocate a 1-byte memory block, it consumes 4 bytes of memory.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_HeapHandle_nn__lmem__CreateUnitHeap(void_*startAddress|_size_t_size|_size_t_unitSize|_int_option)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a7d3359350e669a5fcc493ce5df5d010c' )
+SetUrl( 'ApiLink_void_*_nn__lmem__AllocateFromUnitHeap(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a1d1eec8ea87ca5a847eae04fb21c7a36' )
+SetUrl( 'ApiLink_void_nn__lmem__FreeToUnitHeap(HeapHandle_heapHandle|_void_*pBlock)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#ab190d0a00216c4d8cd2e3134680d3a45' )
+SetUrl( 'ApiLink_void_nn__lmem__DestroyUnitHeap(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a03e9905bd641416421fb108f487b5d4f' )
+SetUrl( 'ApiLink_HeapHandle_nn__lmem__CreateUnitHeap(void_*startAddress|_size_t_size|_size_t_unitSize|_int_option|_int_alignment|_InfoPlacement_placement)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a37e408afe1b891b1827d340897319386' )
+SetUrl( 'ApiLink_HeapHandle_nn__lmem__CreateUnitHeap(void_*startAddress|_size_t_size|_size_t_unitSize|_int_option|_int_alignment|_HeapCommonHead_*pHeapHead)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a48a0b4af7e50ed9ce91b68df40225bdf' )
+SetUrl( 'ApiLink_void_nn__lmem__InvalidateUnitHeap(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a4ca8ffeb524244ca4f9968d116817257' )
+SetUrl( 'ApiLink_size_t_nn__lmem__GetUnitHeapUnitSize(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a4f73af475a54358322fe7b3c8bf78ef6' )
+SetUrl( 'ApiLink_int_nn__lmem__GetUnitHeapAllocatableCount(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#abe2b6be8b9c2077fec92fb19c5e8aeb1' )
+SetUrl( 'ApiLink_int_nn__lmem__GetUnitHeapAllocatedCount(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#aaa1ae99b4baab79444c503a383345154' )
+SetUrl( 'ApiLink_int_nn__lmem__GetUnitHeapAlignment(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a8a08003a1b715eded61e040c3cd087a9' )
+SetUrl( 'ApiLink_size_t_nn__lmem__GetRequiredUnitHeapSize(size_t_unitSize|_int_unitNum|_int_alignment|_bool_hasHeadInternally)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a8ac10912318a3d5f45687fa1885c89be' )
+SetUrl( 'ApiLink_void_nn__lmem__DumpUnitHeap(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a1deefa949a2c36e348db0fe808cad2de' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

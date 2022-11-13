@@ -1,0 +1,3110 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>File I/O | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- File I/O -->
+<div class="pagetitle" id="PageId_106358756">File I/O</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_106358756_h1_1">posix function interface</a>
+    </li>
+    <ul>
+      <ul>
+        <ul>
+          <li>
+            <a href="#Anchor_106358756_h4_1">open()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_2">creat()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_3">read()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_4">write()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_5">lseek()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_6">pread()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_7">pwrite()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_8">close()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_9">ftruncate()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_10">fstat(), stat()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_11">access()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_12">telldirrename()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_13">remove()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_14">mkdir()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_15">rmdir()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_16">opendir()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_17">readdir() and readdir_r()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_18">rewinddir()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_19">telldir()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_20">dirfd()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_21">closedir()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_22">open_memstream() and open_wmemstream()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_23">fmemopen()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_24">fdopendir()</a>
+          </li>
+          <li>
+            <a href="#Anchor_106358756_h4_25">flockfile(), ftrylockfile(), and funlockfile()</a>
+          </li>
+        </ul>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_106358756_h1_2">Functions Currently Not Implemented</a>
+    </li>
+    <li>
+      <a href="#Anchor_106358756_h1_3">Low Level Interface to NintendoSDK FS API</a>
+    </li>
+  </ul>
+</p>
+<p>
+  <br />
+</p>
+<div class="section">
+  <h1 id="Anchor_106358756_h1_1">posix function interface</h1>
+</div>
+<div class="section">
+  <p>
+    <br />
+  </p>
+  <div class="info_new">
+    <div class="info_new_left">Info</div>
+    <div class="info_new_right">
+      <p>Under the &quot;Errno&quot; section, we list all the errno that standards define for each function. NX supports only the errno in black, but not the errno in gray.</p>
+    </div>
+  </div>
+  <table class="wrapped">
+    <colgroup>
+      <col />
+      <col />
+    </colgroup>
+    <tbody>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_1">open()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int&nbsp;<strong>open</strong>&nbsp;(const char *pathname, int flags, &hellip;)</p>
+          <p>
+            <br />
+          </p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <div class="section">
+              <strong>
+                <u>Description</u>
+              </strong>
+            </div>
+            <div class="section">Given a&nbsp;<em>pathname</em>&nbsp;for a file,&nbsp;<strong>open</strong>() returns a file descriptor, a small, nonnegative integer for use in subsequent system calls (<em><strong><a href="http://linux.die.net/man/2/read">read</a></strong>(2)</em>,&nbsp;<em><strong><a href="http://linux.die.net/man/2/write">write</a></strong>(2)</em>,&nbsp;<em><strong><a href="http://linux.die.net/man/2/lseek">lseek</a></strong>(2)</em>, <em><strong><a href="http://linux.die.net/man/2/fcntl">fcntl</a></strong>(2)</em>, etc.). The file descriptor returned by a successful call will be the lowest-numbered file descriptor not currently open for the process.</div>
+            <div class="section">The argument&nbsp;<em>flags</em>&nbsp;must include one of the following&nbsp;<em>access modes</em>:&nbsp;<strong>O_RDONLY</strong>,&nbsp;<strong>O_WRONLY</strong>, or&nbsp;<strong>O_RDWR</strong>. These request opening the file read-only, write-only, or read/write, respectively.</div>
+            <div class="section">NX also supports opening &quot;/dev/stdin&quot;, &quot;/dev/stdout&quot;, &quot;/dev/stderr&quot;, and &quot;/dev/null&quot;.</div>
+            <div class="section">
+              <br />
+            </div>
+            <div class="section">
+              <p>
+                <u>
+                  <strong>ANSI C</strong>
+                </u>
+              </p>
+              <p>ANSI C function <strong>fopen</strong>() calls <strong>open</strong>().</p>
+            </div>
+            <div class="section">
+              <br />
+            </div>
+            <div class="section">
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </div>
+            <div class="section">Only O_RDONLY, O_WRONLY, O_RDWR, O_APPEND, O_CREAT, O_EXCL and O_TRUNC flags are being taken care of.</div>
+            <div class="section">Currently 256 file descriptors are allowed at the same time.</div>
+            <div class="section">
+              <p>
+                <br />
+              </p>
+              <div class="info_new">
+                <div class="info_new_left">Info</div>
+                <div class="info_new_right">
+                  <p>NX does not allow opening an already opened file, or EBUSY will be returned as the errno. If the file has been open with the O_RDONLY mode, no error will be returned.</p>
+                </div>
+              </div>
+              <p>
+                <br />
+              </p>
+            </div>
+            <div class="section">
+              <u>
+                <u>
+                  <strong>&nbsp;</strong>
+                </u>
+              </u>
+              <!--Remove-->
+              <u>
+                <strong>
+                  <br />
+                </strong>
+              </u>
+            </div>
+            <div class="section">
+              <u>
+                <strong>Errno</strong>
+              </u>&nbsp;</div>
+            <div class="section">
+              <p>The&nbsp;<em>open</em>() function shall fail if:</p>
+              <p>
+                <strong>EEXIST</strong>&nbsp;O_CREAT and O_EXCL are set, and the named file exists.</p>
+              <p>
+                <strong>ENAMETOOLONG</strong>&nbsp;The length of the&nbsp;path&nbsp;argument exceeds {PATH_MAX} or a pathname component is longer than {NAME_MAX}.</p>
+              <p>
+                <strong>ENFILE</strong>&nbsp;The maximum allowable number of files is currently open in the system.</p>
+              <p>
+                <strong>ENOENT</strong>&nbsp;O_CREAT is not set and the named file does not exist; or O_CREAT is set and either the path prefix does not exist or the&nbsp;path&nbsp;argument points to an empty string.</p>
+              <p>
+                <strong>EOVERFLOW</strong>&nbsp;The named file is a regular file and the size of the file cannot be represented correctly in an object of type&nbsp;off_t.</p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>
+                    <span style="color: rgb(153,153,153);">EACCES<span style="color: rgb(153,153,153);">&nbsp;</span></span>
+                  </strong>
+                  <span style="color: rgb(153,153,153);">
+                    <span style="color: rgb(153,153,153);">Search permission is denied on a component of the path prefix, or the file exists and the permissions specified byoflag&nbsp;are denied, or the file does not exist and write permission is denied for the parent directory of the file to be created, or O_TRUNC is specified and write permission is denied.</span>
+                  </span>
+                </span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>
+                    <span style="color: rgb(153,153,153);">EISDIR&nbsp;</span>
+                  </strong>
+                  <span style="color: rgb(153,153,153);">The named file is a directory and&nbsp;oflag&nbsp;includes O_WRONLY or O_RDWR.</span>
+                </span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <span style="color: rgb(153,153,153);">
+                    <strong>EMFILE</strong>
+                    <span style="color: rgb(153,153,153);">&nbsp;{OPEN_MAX} file descriptors are currently open in the calling process.</span>
+                  </span>
+                </span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>ENOSR</strong>&nbsp;The&nbsp;path&nbsp;argument names a STREAMS-based file and the system is unable to allocate a STREAM.</span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>ENOSPC</strong>&nbsp;The directory or file system that would contain the new file cannot be expanded, the file does not exist, and O_CREAT is specified.</span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>ENOTDIR<span style="color: rgb(153,153,153);">&nbsp;</span></strong>
+                  <span style="color: rgb(153,153,153);">A component of the path prefix is not a directory.</span>
+                </span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>ENXIO</strong>&nbsp;O_NONBLOCK is set, the named file is a FIFO, O_WRONLY is set, and no process has the file open for reading.</span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>ENXIO</strong>&nbsp;The named file is a character special or block special file, and the device associated with this special file does not exist.</span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>ELOOP</strong>&nbsp;A loop exists in symbolic links encountered during resolution of the&nbsp;path&nbsp;argument.</span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>EROFS</strong>&nbsp;The named file resides on a read-only file system and either O_WRONLY, O_RDWR, O_CREAT (if the file does not exist), or O_TRUNC is set in the&nbsp;oflag&nbsp;argument.</span>
+              </p>
+              <p>
+                <br />
+              </p>
+              <p>The&nbsp;<em>open</em>() function may fail if:</p>
+              <p>
+                <strong>EINVAL</strong>&nbsp;The value of the&nbsp;oflag&nbsp;argument is not valid.</p>
+              <p>
+                <strong>ENOMEM</strong>&nbsp;The&nbsp;path&nbsp;argument names a STREAMS file and the system is unable to allocate resources.</p>
+              <p>&nbsp;</p>
+            </div>
+            <div class="section">
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>EAGAIN<span style="color: rgb(153,153,153);">&nbsp;</span></strong>
+                  <span style="color: rgb(153,153,153);">The&nbsp;path&nbsp;argument names the slave side of a pseudo-terminal device that is locked.</span>
+                </span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>EINTRA</strong>&nbsp;signal was caught during&nbsp;open().</span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>EINVAL</strong>&nbsp;The implementation does not support synchronized I/O for this file.</span>
+              </p>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>EIO</strong>&nbsp;The&nbsp;path&nbsp;argument names a STREAMS file and a hangup or error occurred during the&nbsp;open().</span>
+              </p>
+              <div class="section">
+                <p>
+                  <span style="color: rgb(153,153,153);">
+                    <strong>ELOOP</strong>
+                  </span>
+                  <span style="color: rgb(153,153,153);">&nbsp;More than {SYMLOOP_MAX} symbolic links were encountered during resolution of the&nbsp;path&nbsp;argument.</span>&nbsp;</p>
+                <p>
+                  <span style="color: rgb(153,153,153);">
+                    <strong>ENAMETOOLONG<span style="color: rgb(153,153,153);">&nbsp;</span></strong>
+                    <span style="color: rgb(153,153,153);">As a result of encountering a symbolic link in resolution of the&nbsp;path&nbsp;argument, the length of the substituted pathname string exceeded {PATH_MAX}.</span>
+                  </span>
+                </p>
+                <p>
+                  <span style="color: rgb(153,153,153);">
+                    <strong>ETXTBSY</strong>
+                  </span>
+                  <span style="color: rgb(153,153,153);">&nbsp;The file is a pure procedure (shared text) file that is being executed and&nbsp;oflag&nbsp;is O_WRONLY or O_RDWR.</span>
+                </p>
+                <div>
+                  <span style="color: rgb(153,153,153);">
+                    <br />
+                  </span>
+                </div>
+              </div>
+              <div class="section">NX provides the following additional errno information:</div>
+              <div class="section">
+                <strong>EBUSY</strong> The resource is busy and is unavailable to be written to.</div>
+              <div class="section">
+                <strong>ENOMEM</strong> There is insufficient system memory for the operation.</div>
+              <div class="section">
+                <strong>ENOSPC</strong> There is insufficient space for the operation.</div>
+              <div class="section">
+                <strong>EPERM</strong> Unidentified error.</div>
+              <div>
+                <span style="color: rgb(153,153,153);">
+                  <br />
+                </span>
+              </div>
+            </div>
+            <div class="section">
+              <u>
+                <strong>More info</strong>
+              </u>
+            </div>
+            <div class="section">
+              <a href="http://linux.die.net/man/2/open">http://linux.die.net/man/2/open</a>
+            </div>
+            <div class="section">
+              <br />
+            </div>
+            <div class="warn_new">
+              <div class="warn_new_left">Warning</div>
+              <div class="warn_new_right">
+                <p>open when the O_CREAT flag is set has a 3rd option</p>
+                <p>which sets the fie permissions, using unix modes</p>
+                <p>(666 = read+write world, read+write group, read+write user).</p>
+                <p>The function currently does not support this parameter</p>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_2">creat()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>creat </strong>(const char *path, mode_t mode)</p>
+        </td>
+        <td>
+          <p>
+            <u>
+              <strong>Description</strong>
+            </u>
+          </p>
+          <p>Call<strong> open</strong>(path, O_CREAT|O_TRUNC|O_WRONLY, t_mode)</p>
+          <p>Note this function just calls open with the above flags.</p>
+          <p>
+            <br />
+          </p>
+          <p>
+            <u>
+              <strong>Errno</strong>
+            </u>
+          </p>
+          <p>Refer to open() above.</p>
+          <p>
+            <strong>
+              <br />
+            </strong>
+          </p>
+          <p>
+            <u>
+              <strong>More info</strong>
+            </u>
+          </p>
+          <p>
+            <a href="http://linux.die.net/man/2/creat">http://linux.die.net/man/2/creat</a>
+          </p>
+          <p>
+            <br />
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_3">read()</h4>
+          <p>
+            <br />
+          </p>
+          <p>ssize_t <strong>read</strong>(int fd, void *buf, size_t count);</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>
+              <strong>read</strong>() attempts to read up to&nbsp;<em>count</em>&nbsp;bytes from file descriptor&nbsp;<em>fd</em>&nbsp;into the buffer starting at&nbsp;<em>buf</em>.</p>
+            <p>On files that support seeking, the read operation commences at the current file offset, and the file offset is incremented by the number of bytes read. If the current file offset is at or past the end of file, no bytes are read, and&nbsp;<strong>read</strong>() returns zero.</p>
+            <p>If&nbsp;<em>count</em>&nbsp;is zero,&nbsp;<strong>read</strong>()&nbsp;<em>may</em>&nbsp;detect the errors described below. In the absence of any errors, or if&nbsp;<strong>read</strong>() does not check for errors, a&nbsp;<strong>read</strong>() with a&nbsp;<em>count</em>&nbsp;of 0 returns zero and has no other effects.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>ANSI C</strong>
+              </u>
+            </p>
+            <p>ANSI C functions <strong>fdopen</strong>(), <strong>fread</strong>(), <strong>freopen</strong>(), <strong>fscanf</strong>(), <strong>vsscanf</strong>(), <strong>vswscanf</strong>(), <strong>wcstox</strong>() and <strong>wcstoxl</strong>() call <strong>read</strong>().</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>When the file descriptor indicates it is an NX file, it reads the file.</p>
+            <p>When the file descriptor indicates it is console (&quot;STDIN_FILENO&quot;), this function always returns -1 since console read isn't supported on NintendoSDK.</p>
+            <p>If the file descriptor doesn't match those, then EBADF is set and -1 is returned.</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<em>read</em>() and&nbsp;<em>pread</em>() functions shall fail if:</p>
+            <p>
+              <strong>EBADF</strong> The&nbsp;fildes&nbsp;argument is not a valid file descriptor open for reading.</p>
+            <p>
+              <strong>EISDIR</strong> The&nbsp;fildes&nbsp;argument refers to a directory and the implementation does not allow the directory to be read using&nbsp;read() or&nbsp;pread(). The&nbsp;readdir() function should be used instead.</p>
+            <p>
+              <strong>EOVERFLOW</strong> The file is a regular file,&nbsp;nbyte&nbsp;is greater than 0, the starting position is before the end-of-file, and the starting position is greater than or equal to the offset maximum established in the open file description associated with&nbsp;fildes.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EAGAIN</strong>
+                <span style="color: rgb(153,153,153);"> The O_NONBLOCK flag is set for the file descriptor and the process would be delayed.</span>
+              </span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EBADMSG</strong> The file is a STREAM file that is set to control-normal mode and the message waiting to be read includes a control part.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINTR</strong> The read operation was terminated due to the receipt of a signal, and no data was transferred.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINVAL</strong> The STREAM or multiplexer referenced by&nbsp;fildes&nbsp;is linked (directly or indirectly) downstream from a multiplexer.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO</strong> The process is a member of a background process attempting to read from its controlling terminal, the process is ignoring or blocking the SIGTTIN signal, or the process group is orphaned. This error may also be generated for implementation-defined reasons.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>read</em>() function shall fail if:</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EAGAIN</strong> or <strong>EWOULDBLOCK</strong> The file descriptor is for a socket, is marked O_NONBLOCK, and no data is waiting to be received.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ECONNRESET</strong> A read was attempted on a socket and the connection was forcibly closed by its peer.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOTCONN</strong> A read was attempted on a socket that is not connected.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ETIMEDOUT</strong> A read was attempted on a socket and a transmission timeout occurred</span>.</p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>read</em>() and&nbsp;<em>pread</em>() functions may fail if:</p>
+            <p>
+              <strong>ENOMEM</strong> Insufficient memory was available to fulfill the request.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO</strong> A physical I/O error has occurred.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOBUFS</strong> Insufficient resources were available in the system to perform the operation.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENXIO</strong> A request was made of a nonexistent device, or the request was outside the capabilities of the device.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>pread</em>() function shall fail, and the file pointer shall remain unchanged, if:</p>
+            <p>
+              <strong>EINVAL</strong> The&nbsp;offset&nbsp;argument is invalid. The value is negative.</p>
+            <p>
+              <strong>EOVERFLOW</strong> The file is a regular file and an attempt was made to read at or beyond the offset maximum associated with the file.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENXIO</strong> A request was outside the capabilities of the device.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ESPIPE</strong> fildes&nbsp;is associated with a pipe or FIFO.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <div class="section">NX provides the following additional errno information:</div>
+            <div class="section">
+              <strong>ENOSPC</strong> There is insufficient space for the operation.</div>
+            <div class="section">
+              <strong>EPERM</strong> Unidentified error.</div>
+            <p>
+              <u>
+                <strong>
+                  <br />
+                </strong>
+              </u>
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/2/read">http://linux.die.net/man/2/read</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_4">write()</h4>
+          <p>
+            <br />
+          </p>
+          <p>ssize_t <strong>write</strong>(int fd, const void *buf, size_t count)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>write() writes up to&nbsp;<em>count</em>&nbsp;bytes from the buffer pointed <em>buf</em>&nbsp;to the file referred to by the file descriptor&nbsp;<em>fd</em>.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>ANSI C</strong>
+              </u>
+            </p>
+            <p>ANSI C functions <strong>fdopen</strong>(), <strong>fflush</strong>(), <strong>freopen</strong>(), <strong> fseek</strong>(), <strong>fwrite</strong>(), <strong>printf</strong>(), <strong>vdprintf</strong>(), <strong>vfprintf</strong>(), <strong>vsnprintf</strong>() and <strong>vswprintf</strong>() call <strong>write</strong>().</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>When the file descriptor indicates it is a NX file, it writes the file. When the file descriptor indicates it is console, it write to console. Error otherwise.</p>
+            <p>This function always passes <strong><span class="ApiLink_nn__fs__WriteOptionFlag_Flush">nn::fs::WriteOptionFlag_Flush</span></strong> to <strong><span class="ApiLink_nn__fs__WriteFile">nn::fs::WriteFile</span></strong>()</p>
+            <p>This function must keep track of the current file position.</p>
+            <div class="warn_new">
+              <div class="warn_new_left">Warning</div>
+              <div class="warn_new_right">
+                <p>The low level <strong>write</strong>() interface does not hold a lock while waiting for the OS write to finish,so updating the file position after a <strong>write</strong>() is not thread safe.</p>
+                <p>
+                  <br />
+                </p>
+                <p>The high-level interface <strong>fwrite</strong>() does hold a lock (mutex) so it is safe.</p>
+              </div>
+            </div>
+            <p>Attempts to read past the end of the file don't return an error but return a count of zero.</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<em>write</em>() and&nbsp;<em>pwrite</em>() functions shall fail if:</p>
+            <p>
+              <strong>EBADF</strong> The&nbsp;fildes&nbsp;argument is not a valid file descriptor open for writing.<span style="color: rgb(153,153,153);">&nbsp;</span></p>
+            <p>
+              <strong>ENOSPC</strong> There was no free space remaining on the device containing the file.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EAGAIN</strong> The O_NONBLOCK flag is set for the file descriptor and the thread would be delayed in the&nbsp;write() operation.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">&nbsp;</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EFBIG</strong> An attempt was made to write a file that exceeds the implementation-defined maximum file size or the process' file size limit, and there was no room for any bytes to be written.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">&nbsp;</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EFBIG</strong> The file is a regular file,&nbsp;nbyte&nbsp;is greater than 0, and the starting position is greater than or equal to the offset maximum established in the open file description associated with&nbsp;fildes.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINTR</strong> The write operation was terminated due to the receipt of a signal, and no data was transferred.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO</strong> The process is a member of a background process group attempting to write to its controlling terminal, TOSTOP is set, the process is neither ignoring nor blocking SIGTTOU, and the process group of the process is orphaned. This error may also be returned under implementation-defined conditions.</span>
+            </p>
+            <p>
+              <strong>EPIPE</strong>
+              <span style="color: rgb(153,153,153);"> An attempt is made to write to a pipe or FIFO that is not open for reading by any process, or that only has one end open. A SIGPIPE signal shall also be sent to the thread.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ERANGE</strong>
+              </span>
+              <span style="color: rgb(153,153,153);"> The transfer request size was outside the range supported by the STREAMS file associated with&nbsp;fildes.</span>&nbsp;</p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>write</em>() function shall fail if:</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EAGAIN</strong> or <strong>EWOULDBLOCK</strong> The file descriptor is for a socket, is marked O_NONBLOCK, and write would block.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ECONNRESETA</strong> write was attempted on a socket that is not connected.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EPIPEA</strong> write was attempted on a socket that is shut down for writing, or is no longer connected. In the latter case, if the socket is of type SOCK_STREAM, the SIGPIPE signal is generated to the calling process.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>write</em>() and&nbsp;<em>pwrite</em>() functions may fail if:</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINVAL</strong> The STREAM or multiplexer referenced by&nbsp;fildes&nbsp;is linked (directly or indirectly) downstream from a multiplexer.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIOA</strong> physical I/O error has occurred.ENOBUFSInsufficient resources were available in the system to perform the operation.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENXIOA</strong> request was made of a nonexistent device, or the request was outside the capabilities of the device.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENXIOA</strong> hangup occurred on the STREAM being written to.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <div class="section">NX provides the following additional errno information:</div>
+            <div class="section">
+              <strong>ENOMEM</strong> There is insufficient system memory for the operation.</div>
+            <div class="section">
+              <strong>EPERM</strong> Unidentified error.</div>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/2/write">http://linux.die.net/man/2/write</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_5">lseek()</h4>
+          <p>
+            <br />
+          </p>
+          <p>off_t <strong>lseek </strong>(int fd, off_t offset, int whence)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<strong>lseek</strong>() function repositions the offset of the open file associated with the file descriptor&nbsp;<em>fd</em>&nbsp;to the argument&nbsp;<em>offset</em>&nbsp;according to the directive&nbsp;<em>whence</em>&nbsp;as follows:</p>
+            <ul>
+              <li>SEEK_SET The offset is set to&nbsp;offset&nbsp;bytes.</li>
+              <li>SEEK_CUR The offset is set to its current location plus&nbsp;offsetbytes.</li>
+              <li>SEEK_END The offset is set to the size of the file plus&nbsp;offsetbytes.</li>
+            </ul>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>ANSI C</strong>
+              </u>
+            </p>
+            <p>ANSI C functions <strong>rewinddir</strong>(), <strong>seekdir</strong>() call <strong>lseek</strong>().</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>When the file descriptor indicates it is a NX file, it will set the file position. When the file descriptor indicates it is a NX directory, it will call internal function.</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <div class="info_new">
+              <div class="info_new_left">Info</div>
+              <div class="info_new_right">
+                <p>The OS does not have a concept of seek, so the library records the location.</p>
+                <p>For seeking relative to the end of the file, the shim uses an internal function</p>
+                <p>when seeking relative to the end of the file.</p>
+                <p>
+                  <br />
+                </p>
+              </div>
+            </div>
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<em>lseek</em>() function shall fail if:</p>
+            <p>
+              <strong>EBADF</strong> The&nbsp;fildes&nbsp;argument is not an open file descriptor.</p>
+            <p>
+              <strong>EOVERFLOW</strong> The resulting file offset would be a value which cannot be represented correctly in an object of type&nbsp;off_t.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINVAL</strong>
+                <span style="color: rgb(153,153,153);"> The&nbsp;whence&nbsp;argument is not a proper value, or the resulting file offset would be negative for a regular file, block special file, or directory.</span>
+              </span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ESPIPE</strong> The&nbsp;fildes&nbsp;argument is associated with a pipe, FIFO, or socket.</span>
+            </p>
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <div class="section">NX provides the following additional errno information:</div>
+            <div class="section">
+              <strong>ENOMEM</strong> There is insufficient system memory for the operation.</div>
+            <div class="section">
+              <strong>ENOSPC</strong> There is insufficient space for the operation.</div>
+            <div class="section">
+              <strong>EPERM</strong> Unidentified error.</div>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/2/lseek">http://linux.die.net/man/2/lseek</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_6">pread()</h4>
+          <p>
+            <br />
+          </p>
+          <p>ssize_t <strong>pread</strong>(int fd, void *buf, size_t count, off_t offset);</p>
+          <p>
+            <br />
+          </p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>
+              <strong>pread</strong>
+              <span style="color: rgb(68,68,68);">() reads up to&nbsp;</span>
+              <em>count</em>
+              <span style="color: rgb(68,68,68);">&nbsp;bytes from file descriptor&nbsp;</span>
+              <em>fd</em>
+              <span style="color: rgb(68,68,68);">&nbsp;at offset&nbsp;</span>
+              <em>offset</em>
+              <span style="color: rgb(68,68,68);">&nbsp;(from the start of the file) into the buffer starting at&nbsp;</span>
+              <em>buf</em>
+              <span style="color: rgb(68,68,68);">. The file offset is not changed.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>When the file descriptor indicates it is a NX file, it reads the file. Error otherwise.</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<em>read</em>() and&nbsp;<em>pread</em>() functions shall fail if:</p>
+            <p>
+              <strong>EBADF</strong> The&nbsp;fildes&nbsp;argument is not a valid file descriptor open for reading.</p>
+            <p>
+              <strong>EISDIR</strong> The&nbsp;fildes&nbsp;argument refers to a directory and the implementation does not allow the directory to be read using&nbsp;read() or&nbsp;pread(). The&nbsp;readdir() function should be used instead.</p>
+            <p>
+              <strong>EOVERFLOW</strong> The file is a regular file,&nbsp;nbyte&nbsp;is greater than 0, the starting position is before the end-of-file, and the starting position is greater than or equal to the offset maximum established in the open file description associated with&nbsp;fildes.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EAGAIN</strong> The O_NONBLOCK flag is set for the file descriptor and the process would be delayed.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EBADMSG</strong> The file is a STREAM file that is set to control-normal mode and the message waiting to be read includes a control part.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINTR</strong> The read operation was terminated due to the receipt of a signal, and no data was transferred.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINVAL</strong> The STREAM or multiplexer referenced by&nbsp;fildes&nbsp;is linked (directly or indirectly) downstream from a multiplexer.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO</strong> The process is a member of a background process attempting to read from its controlling terminal, the process is ignoring or blocking the SIGTTIN signal, or the process group is orphaned. This error may also be generated for implementation-defined reasons.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>read</em>() function shall fail if:</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EAGAIN</strong> or <strong>EWOULDBLOCK</strong> The file descriptor is for a socket, is marked O_NONBLOCK, and no data is waiting to be received.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ECONNRESET</strong> A read was attempted on a socket and the connection was forcibly closed by its peer.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOTCONN</strong> A read was attempted on a socket that is not connected.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ETIMEDOUT</strong> A read was attempted on a socket and a transmission timeout occurred</span>.</p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>read</em>() and&nbsp;<em>pread</em>() functions may fail if:</p>
+            <p>
+              <strong>ENOMEM</strong> Insufficient memory was available to fulfill the request.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO</strong> A physical I/O error has occurred.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOBUFS</strong> Insufficient resources were available in the system to perform the operation.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENXIO</strong> A request was made of a nonexistent device, or the request was outside the capabilities of the device.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>pread</em>() function shall fail, and the file pointer shall remain unchanged, if:</p>
+            <p>
+              <strong>EINVAL</strong> The&nbsp;offset&nbsp;argument is invalid. The value is negative.</p>
+            <p>
+              <strong>EOVERFLOW</strong> The file is a regular file and an attempt was made to read at or beyond the offset maximum associated with the file.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENXIO</strong> A request was outside the capabilities of the device.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ESPIPE</strong> fildes&nbsp;is associated with a pipe or FIFO.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <div class="section">NX provides the following additional errno information:</div>
+            <div class="section">
+              <strong>ENOSPC</strong> There is insufficient space for the operation.</div>
+            <div class="section">
+              <strong>EPERM</strong> Unidentified error.</div>
+            <p>
+              <u>
+                <strong>
+                  <br />
+                </strong>
+              </u>
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="https://linux.die.net/man/2/pwrite">https://linux.die.net/man/2/pwrite</a>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Available for</strong>
+              </u>
+            </p>
+            <p>NX Addon 3.0.0</p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_7">pwrite()</h4>
+          <p>
+            <br />
+          </p>
+          <p>ssize_t <strong>pwrite</strong>(int fd, const void *buf, size_t count, off_t offset);</p>
+          <p>
+            <br />
+          </p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>
+              <strong>pwrite</strong>() writes up to&nbsp;<em>count</em>&nbsp;bytes from the buffer starting at&nbsp;<em>buf</em>&nbsp;to the file descriptor&nbsp;<em>fd</em>&nbsp;at offset&nbsp;<em>offset</em>. The file offset is not changed.</p>
+            <p>The file referenced by&nbsp;<em>fd</em>&nbsp;must be capable of seeking.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>When the file descriptor indicates it is a NX file, it writes the file. Error otherwise.</p>
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>This function always passes&nbsp;<strong><span class="ApiLink_nn__fs__WriteOptionFlag_Flush">nn::fs::WriteOptionFlag_Flush</span></strong>&nbsp;to&nbsp;<strong><span class="ApiLink_nn__fs__WriteFile">nn::fs::WriteFile</span></strong>()</p>
+            <p>
+              <br />
+            </p>
+            <p>Attempts to read past the end of the file don't return an error but return a count of zero.</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<em>write</em>() and&nbsp;<em>pwrite</em>() functions shall fail if:</p>
+            <p>
+              <strong>EBADF</strong>&nbsp;The&nbsp;fildes&nbsp;argument is not a valid file descriptor open for writing.<span style="color: rgb(153,153,153);">&nbsp;</span></p>
+            <p>
+              <strong>ENOSPC</strong>&nbsp;There was no free space remaining on the device containing the file.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EAGAIN</strong>&nbsp;The O_NONBLOCK flag is set for the file descriptor and the thread would be delayed in the&nbsp;write() operation.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">&nbsp;</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EFBIG</strong>&nbsp;An attempt was made to write a file that exceeds the implementation-defined maximum file size or the process' file size limit, and there was no room for any bytes to be written.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">&nbsp;</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EFBIG</strong>&nbsp;The file is a regular file,&nbsp;nbyte&nbsp;is greater than 0, and the starting position is greater than or equal to the offset maximum established in the open file description associated with&nbsp;fildes.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINTR</strong>&nbsp;The write operation was terminated due to the receipt of a signal, and no data was transferred.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO</strong>&nbsp;The process is a member of a background process group attempting to write to its controlling terminal, TOSTOP is set, the process is neither ignoring nor blocking SIGTTOU, and the process group of the process is orphaned. This error may also be returned under implementation-defined conditions.</span>
+            </p>
+            <p>
+              <strong>EPIPE</strong>
+              <span style="color: rgb(153,153,153);">&nbsp;An attempt is made to write to a pipe or FIFO that is not open for reading by any process, or that only has one end open. A SIGPIPE signal shall also be sent to the thread.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ERANGE</strong>
+              </span>
+              <span style="color: rgb(153,153,153);">&nbsp;The transfer request size was outside the range supported by the STREAMS file associated with&nbsp;fildes.</span>&nbsp;</p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>write</em>() function shall fail if:</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EAGAIN</strong>&nbsp;or&nbsp;<strong>EWOULDBLOCK</strong>&nbsp;The file descriptor is for a socket, is marked O_NONBLOCK, and write would block.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ECONNRESETA</strong>&nbsp;write was attempted on a socket that is not connected.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EPIPEA</strong>&nbsp;write was attempted on a socket that is shut down for writing, or is no longer connected. In the latter case, if the socket is of type SOCK_STREAM, the SIGPIPE signal is generated to the calling process.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>write</em>() and&nbsp;<em>pwrite</em>() functions may fail if:</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINVAL</strong>&nbsp;The STREAM or multiplexer referenced by&nbsp;fildes&nbsp;is linked (directly or indirectly) downstream from a multiplexer.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIOA</strong>&nbsp;physical I/O error has occurred.ENOBUFSInsufficient resources were available in the system to perform the operation.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENXIOA</strong>&nbsp;request was made of a nonexistent device, or the request was outside the capabilities of the device.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENXIOA</strong>&nbsp;hangup occurred on the STREAM being written to.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <div class="section">NX provides the following additional errno information:</div>
+            <div class="section">
+              <strong>ENOMEM</strong>&nbsp;There is insufficient system memory for the operation.</div>
+            <div class="section">
+              <strong>EPERM</strong>&nbsp;Unidentified error.</div>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="https://linux.die.net/man/2/pwrite">https://linux.die.net/man/2/pwrite</a>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Available for</strong>
+              </u>
+            </p>
+            <p>NX Addon 3.0.0</p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_8">close()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>close</strong> (int files)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>
+              <strong>close</strong>() closes a file descriptor, so that it no longer refers to any file and may be reused.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>ANSI C</strong>
+              </u>
+            </p>
+            <p>ANSI C functions <strong>closedir</strong>(), <strong>fopen</strong>(), <strong>fclose</strong>(), <strong>fdopen</strong>(), <strong>fscanf</strong>(), <strong>freopen</strong>() call <strong>close</strong>().</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>NX Specific</u>
+              </strong>
+            </p>
+            <ul>
+              <li>When the file descriptor indicates it is a NX file, it will close the file. When the file descriptor indicates it is a NX directory, it will internal function.<br /></li>
+              <li>When a NX file is writable, it will flush the file.</li>
+            </ul>
+            <div class="warn_new">
+              <div class="warn_new_left">Warning</div>
+              <div class="warn_new_right">
+                <p>This function does not call flush. The posix interface does not support&nbsp;NintendoSDK <strong>FlushWrite</strong>(). The posix interface passes the flag to all <strong>WriteFile</strong>() calls to flush the output.</p>
+              </div>
+            </div>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<em>close</em>() function shall fail if:</p>
+            <p>
+              <strong>EBADF </strong>The&nbsp;fildes&nbsp;argument is not a valid file descriptor.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINTR </strong>The&nbsp;close() function was interrupted by a signal.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>close</em>() function may fail if:</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO</strong> An I/O error occurred while reading from or writing to the file system.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/2/close">http://linux.die.net/man/2/close</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_9">ftruncate()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>ftruncate</strong> (int fd, off_t length)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<strong>truncate</strong>() and&nbsp;<strong>ftruncate</strong>() functions cause the regular file named by&nbsp;<em>path</em>&nbsp;or referenced by&nbsp;<em>fd</em>&nbsp;to be truncated to a size of precisely&nbsp;<em>length</em>&nbsp;bytes.</p>
+            <p>If the file previously was larger than this size, the extra data is lost. If the file previously was shorter, it is extended, and the extended part reads as null bytes ('\0').</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>None</p>
+            <!--Remove-->
+            <p>
+              <u>
+                <strong>
+                  <br />
+                </strong>
+              </u>
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<em>ftruncate</em>() function shall fail if:</p>
+            <p>
+              <strong>EFBIG</strong> <span style="color: rgb(153,153,153);">or </span><strong><span style="color: rgb(153,153,153);">EINVAL</span> </strong>The&nbsp;length&nbsp;argument was greater than the maximum file size.</p>
+            <p>
+              <strong>EFBIG </strong>The file is a regular file and&nbsp;length&nbsp;is greater than the offset maximum established in the open file description associated with&nbsp;fildes.</p>
+            <p>
+              <strong>EBADF</strong>
+              <span style="color: rgb(153,153,153);"> or </span>
+              <strong>
+                <span style="color: rgb(153,153,153);">EINVAL</span> </strong>The&nbsp;fildes&nbsp;argument is not a file descriptor open for writing.</p>
+            <p>
+              <strong>EINVAL </strong>The&nbsp;fildes&nbsp;argument references a file that was opened without write permission.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINVAL </strong>
+                <span style="color: rgb(153,153,153);">The&nbsp;length&nbsp;argument was less than 0.</span>
+              </span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINTR</strong> A signal was caught during execution.</span>
+              <span style="color: rgb(153,153,153);">&nbsp;</span>
+            </p>
+            <div>
+              <p>
+                <span style="color: rgb(153,153,153);">
+                  <strong>EIO </strong>An I/O error occurred while reading from or writing to a file system.</span>
+              </p>
+            </div>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EROFS </strong>The named file resides on a read-only file system.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <div class="section">NX provides the following additional errno information:</div>
+            <div class="section">
+              <strong>ENOENT</strong> The file does not exist.</div>
+            <div class="section">
+              <strong>ENOMEM</strong> There is insufficient system memory for the operation.</div>
+            <div class="section">
+              <strong>EOVERFLOW </strong>The result file is out of range.</div>
+            <div class="section">
+              <strong>ENOSPC</strong> There is insufficient space for the operation.</div>
+            <div class="section">
+              <strong>EPERM</strong> Unidentified error.</div>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/2/ftruncate">http://linux.die.net/man/2/ftruncate</a>
+            </p>
+            <p>
+              <br />
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_10">fstat(), stat()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>fstat</strong>(int fd, struct stat *buf)</p>
+          <p>int <strong>stat</strong>(const char* path, struct stat* buf)<br /></p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <strong>
+                <u>Description</u>
+              </strong>
+            </p>
+            <p>These functions return information about a file.</p>
+            <p>
+              <strong>stat</strong>() stats the file pointed to by&nbsp;<em>path</em>&nbsp;and fills in&nbsp;<em>buf</em>.</p>
+            <p>
+              <strong>lstat</strong>() is identical to&nbsp;<strong>stat</strong>(), except that if&nbsp;<em>path</em>&nbsp;is a symbolic link, then the link itself is stat-ed, not the file that it refers to.</p>
+            <p>
+              <strong>fstat</strong>() is identical to&nbsp;<strong>stat</strong>(), except that the file to be stat-ed is specified by the file descriptor&nbsp;<em>fd</em>.</p>
+            <p>&nbsp;</p>
+            <p>
+              <u>
+                <strong>ANSI C</strong>
+              </u>
+            </p>
+            <p>ANSI C function <strong>fdopendir</strong>() call <strong>fstat</strong>().</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>NX Specific</u>
+              </strong>
+            </p>
+            <p>For NX files, the size is the NX file size. The mode has a fixed value of 0666 | S_IFREG.</p>
+            <p>For NX directories, the size is the number of directory entries. The mode has a fixed value of 0666 | S_IFDIR.</p>
+            <p>
+              <br />
+            </p>
+            <p>For other fields, they have the fixed values of:</p>
+            <p>st-&gt;st_dev = 0<br />st-&gt;st_ino = 0<br />st-&gt;st_nlink = 1<br />st-&gt;st_uid = 99<br />st-&gt;st_gid = -1<br />st-&gt;st_rdev = 0<br />st-&gt;st_atime = 0<br />st-&gt;st_mtime = 0<br />st-&gt;st_ctime = 0</p>
+            <p>
+              <strong>
+                <u>
+                  <br />
+                </u>
+              </strong>
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>Errno</u>
+              </strong>
+            </p>
+            <p>The&nbsp;<em>fstat</em>() or <em>stat</em>() functions shall fail if:</p>
+            <p>
+              <strong>EBADF</strong> The&nbsp;fildes&nbsp;argument is not a valid file descriptor.</p>
+            <p>
+              <strong>EOVERFLOW</strong> The file size in bytes or the number of blocks allocated to the file or the file serial number cannot be represented correctly in the structure pointed to by&nbsp;buf.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO</strong> An I/O error occurred while reading from the file system.</span>
+            </p>
+            <p>The&nbsp;<em>fstat</em>() and <em>stat</em>() functions may fail if:</p>
+            <p>
+              <strong>EOVERFLOW</strong> One of the values is too large to store into the structure pointed to by the&nbsp;buf&nbsp;argument.</p>
+            <p>
+              <br />
+            </p>
+            <p>The <em>stat</em>() function shall fail if:</p>
+            <p>Refer to open() above.</p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>stat</em>() function may fail if:</p>
+            <p>Refer to open() above.</p>
+            <p>
+              <br />
+            </p>
+            <div class="section">NX provides the following additional errno information after calling <em>fstat</em>() or <em>stat</em>():<br /><strong>ENOMEM</strong> There is insufficient system memory for the operation.<br /><strong>ENOSPC</strong> There is insufficient space for the operation.<br /><strong>EPERM</strong> Unidentified error.</div>
+            <div class="section">
+              <br />
+            </div>
+            <div class="section">NX provides the following additional errno information after calling <em>fstat</em>():</div>
+            <div class="section">
+              <strong>ENOENT</strong> The file does not exist.</div>
+            <p>NX provides the following additional errno information after calling <em>stat</em>():<br />Refer to open() above.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>More Info</u>
+              </strong>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/2/fstat">http://linux.die.net/man/2/fstat</a>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Available for</strong>
+              </u>
+            </p>
+            <p>stat(): NX Addon 7.1.0<br /></p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_11">access()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>access</strong> (const char *path, int amode)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <strong>Description</strong>
+            </p>
+            <p>Check user's permissions for a file. </p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>NX Specific</u>
+              </strong>
+            </p>
+            <p>None</p>
+            <div class="info_new">
+              <div class="info_new_left">Info</div>
+              <div class="info_new_right">
+                <p>NX does not allow opening an already opened file, or EBUSY will be returned as the errno. If the file has been open with the O_RDONLY mode, no error will be returned.</p>
+              </div>
+            </div>
+            <p>
+              <strong>
+                <u>
+                  <br />
+                </u>
+              </strong>
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>
+              <em>access() </em>shall fail if:<span style="color: rgb(153,153,153);">&nbsp;</span></p>
+            <p>
+              <strong>ENOENT</strong> A component of&nbsp;pathname&nbsp;does not exist or is a dangling symbolic link.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EACCES</strong>
+                <span style="color: rgb(153,153,153);"> The requested access would be denied to the file, or search permission is denied for one of the directories in the path prefix of&nbsp;pathname. (See also&nbsp;path_resolution(7).)</span>
+              </span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENAMETOOLONG</strong>
+                <span style="color: rgb(153,153,153);"> pathname&nbsp;is too long.</span>
+              </span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOTDIR</strong> A component used as a directory in&nbsp;pathname&nbsp;is not, in fact, a directory.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ELOOP</strong> Too many symbolic links were encountered in resolving&nbsp;pathname.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EROFS</strong> Write permission was requested for a file on a read-only file system.</span>
+            </p>
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>
+              <em>access()</em> may fail if:</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOMEM</strong> Insufficient kernel memory was available.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EFAULT</strong> pathname&nbsp;points outside your accessible address space.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINVAL</strong> mode&nbsp;was incorrectly specified.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO</strong> An I/O error occurred.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ETXTBSY</strong> Write access was requested to an executable which is being executed.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <div class="section">NX provides the following additional errno information:</div>
+            <div class="section">
+              <strong>EBUSY</strong> The resource is busy and is unavailable to be written to.</div>
+            <div class="section">
+              <strong>ENOMEM</strong> There is insufficient system memory for the operation.</div>
+            <div class="section">
+              <strong>ENOSPC</strong> There is insufficient space for the operation.</div>
+            <div class="section">
+              <strong>EPERM</strong> Unidentified error.</div>
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>More Info</u>
+              </strong>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/2/access" style="text-decoration: underline;">http://linux.die.net/man/2/access</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_12">
+            <span style="color: rgb(23,43,77);">telldir</span>rename()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>rename</strong> (const char *old, const char *new)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>
+              <strong>rename</strong>() renames a file, moving it between directories if required. Any other hard links to the file (as created using&nbsp;<em><a href="http://linux.die.net/man/2/link">link</a>(2)</em>) are unaffected. Open file descriptors for <em>oldpath</em>&nbsp;are also unaffected.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>NX Specific</u>
+              </strong>
+            </p>
+            <p>NX does not support renaming to an existing file. When <em>new</em> is set to an existing file name, errno EPERM will be returned.</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>Errno</u>
+              </strong>
+            </p>
+            <p>The&nbsp;<em>rename</em>() function shall fail if:</p>
+            <p>
+              <strong>EACCES</strong> A component of either path prefix denies search permission; or one of the directories containing&nbsp;old&nbsp;or&nbsp;new&nbsp;denies write permissions; or, write permission is required and is denied for a directory pointed to by the&nbsp;old&nbsp;or&nbsp;new&nbsp;arguments.</p>
+            <p>
+              <strong>EBUSY </strong>
+              <span style="color: rgb(0,51,102);">The directory named by&nbsp;old&nbsp;or&nbsp;new&nbsp;is currently in use by the system or another process, and the implementation considers this an error.</span>
+            </p>
+            <p>
+              <strong>EEXIST</strong> or <strong>ENOTEMPTY</strong> The link named by&nbsp;new&nbsp;is a directory that is not an empty directory.</p>
+            <p>
+              <strong>EINVAL</strong> The&nbsp;new&nbsp;directory pathname contains a path prefix that names the&nbsp;old&nbsp;directory.</p>
+            <p>
+              <strong>EMLINK</strong> The file named by&nbsp;old&nbsp;is a directory, and the link count of the parent directory of&nbsp;new&nbsp;would exceed {LINK_MAX}.</p>
+            <p>
+              <strong>ENAMETOOLONG</strong> The length of the&nbsp;old&nbsp;or&nbsp;new&nbsp;argument exceeds {PATH_MAX} or a pathname component is longer than {NAME_MAX}.</p>
+            <p>
+              <strong>ENOENT</strong> The link named by&nbsp;old&nbsp;does not name an existing file, or either&nbsp;old&nbsp;or&nbsp;new&nbsp;points to an empty string.</p>
+            <p>
+              <strong>ENOTDIR</strong> A component of either path prefix is not a directory; or the&nbsp;old&nbsp;argument names a directory and&nbsp;new&nbsp;argument names a non-directory file.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO </strong>A physical I/O error has occurred.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EISDIR</strong> The&nbsp;new&nbsp;argument points to a directory and the&nbsp;old&nbsp;argument points to a file that is not a directory.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ELOOP</strong> A loop exists in symbolic links encountered during resolution of the&nbsp;path&nbsp;argument.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOSPC</strong> The directory that would contain&nbsp;new&nbsp;cannot be extended.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EPERM</strong> or <strong>EACCES</strong> The S_ISVTX flag is set on the directory containing the file referred to by&nbsp;old&nbsp;and the caller is not the file owner, nor is the caller the directory owner, nor does the caller have appropriate privileges; or&nbsp;new&nbsp;refers to an existing file, the S_ISVTX flag is set on the directory containing this file, and the caller is not the file owner, nor is the caller the directory owner, nor does the caller have appropriate privileges.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EROFS</strong> The requested operation requires writing in a directory on a read-only file system.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EXDEV</strong> The links named by&nbsp;new&nbsp;and&nbsp;old&nbsp;are on different file systems and the implementation does not support links between file systems.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>The&nbsp;<em>rename</em>() function may fail if:</p>
+            <p>
+              <strong>ENAMETOOLONG</strong> As a result of encountering a symbolic link in resolution of the&nbsp;path&nbsp;argument, the length of the substituted pathname string exceeded {PATH_MAX}.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EBUSY</strong> The file named by the&nbsp;old&nbsp;or&nbsp;new&nbsp;arguments is a named STREAM.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ELOOP</strong> More than {SYMLOOP_MAX} symbolic links were encountered during resolution of the&nbsp;path&nbsp;argument.</span>
+            </p>
+            <p>
+              <strong>ETXTBSY</strong>
+              <span style="color: rgb(153,153,153);"> The file to be renamed is a pure procedure (shared text) file that is being executed.</span>
+            </p>
+            <p>
+              <u>
+                <strong>
+                  <br />
+                </strong>
+              </u>
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/rename">http://linux.die.net/man/3/rename</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_13">remove()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>remove </strong>(const char *filename)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <strong>
+                <u>Description</u>
+              </strong>
+            </p>
+            <p>
+              <strong>remove</strong>() deletes a name from the file system. It calls<em><a href="http://linux.die.net/man/2/unlink">unlink</a>(2)</em>&nbsp;for files, and&nbsp;<em><a href="http://linux.die.net/man/2/rmdir">rmdir</a>(2)</em>&nbsp;for directories.</p>
+            <p>
+              <strong>
+                <u>
+                  <br />
+                </u>
+              </strong>
+            </p>
+            <p>
+              <strong>
+                <u>NX Specific</u>
+              </strong>
+            </p>
+            <p>None</p>
+            <p>
+              <strong>
+                <u>
+                  <br />
+                </u>
+              </strong>
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>Errno</u>
+              </strong>
+            </p>
+            <p>
+              <strong>EBUSY </strong>The file&nbsp;<em>pathname</em>&nbsp;cannot be unlinked because it is being used by the system or another process; for example, it is a mount point or the NFS client software created it to represent an active but otherwise nameless inode (&quot;NFS silly renamed&quot;).</p>
+            <p>
+              <strong>EINVAL</strong> <em>pathname</em>&nbsp;has&nbsp;<em>.</em>&nbsp;as last component.</p>
+            <p>
+              <strong>ENOENT </strong>A component in&nbsp;<em>pathname</em>&nbsp;does not exist or is a dangling symbolic link, or&nbsp;<em>pathname</em>&nbsp;is empty.</p>
+            <p>
+              <strong>ENOMEM </strong>Insufficient kernel memory was available.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EACCES </strong>
+                <span style="color: rgb(153,153,153);">Write access to the directory containing&nbsp;</span>
+                <em>pathname</em>
+                <span style="color: rgb(153,153,153);">&nbsp;is not allowed for the process's effective UID, or one of the directories in&nbsp;</span>
+                <em>pathname</em>
+                <span style="color: rgb(153,153,153);">&nbsp;did not allow search permission. (See also&nbsp;</span>
+                <em>
+                  <a href="http://linux.die.net/man/7/path_resolution">
+                    <span style="color: rgb(153,153,153);">path_resolution</span>
+                  </a>(7)</em>
+                <span style="color: rgb(153,153,153);">.)</span>
+              </span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EFAULT </strong>
+                <em>pathname</em>&nbsp;points outside your accessible address space.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EIO </strong>An I/O error occurred.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EISDIR </strong>
+                <em>pathname</em>
+                <span style="color: rgb(153,153,153);">&nbsp;refers to a directory. (This is the non-POSIX value returned by Linux since 2.1.132.)</span>
+              </span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ELOOP </strong>Too many symbolic links were encountered in translating&nbsp;<em>pathname</em>.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENAMETOOLONG </strong>
+                <em>pathname</em>
+                <span style="color: rgb(153,153,153);">&nbsp;was too long.</span>
+              </span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOTDIR </strong>A component used as a directory in&nbsp;<em>pathname</em>&nbsp;is not, in fact, a directory.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOTEMPTY </strong>
+                <em>pathname</em>&nbsp;contains entries other than&nbsp;<em>.</em>&nbsp;and&nbsp;<em>..</em>&nbsp;; or,&nbsp;<em>pathname</em>&nbsp;has&nbsp;<em>..</em>&nbsp;as its final component. POSIX.1-2001 also allows <strong>EEXIST</strong>&nbsp;for this condition.</span>
+            </p>
+            <p>
+              <strong>EPERM </strong>
+              <span style="color: rgb(153,153,153);">The system does not allow unlinking of directories, or unlinking of directories requires privileges that the calling process doesn't have. (This is the POSIX prescribed error return; as noted above, Linux returns&nbsp;</span>
+              <strong>EISDIR</strong>
+              <span style="color: rgb(153,153,153);">&nbsp;for this case.)</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EPERM</strong>&nbsp;(Linux only)The file system does not allow unlinking of files.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EPERM</strong>&nbsp;or&nbsp;<strong>EACCES </strong>The directory containing&nbsp;<em>pathname</em>&nbsp;has the sticky bit (<strong>S_ISVTX</strong>) set and the process's effective UID is neither the UID of the file to be deleted nor that of the directory containing it, and the process is not privileged (Linux: does not have the&nbsp;<strong>CAP_FOWNER</strong>&nbsp;capability).</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EROFS </strong>
+                <em>pathname</em>&nbsp;refers to a file on a read-only file system.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <div class="section">NX provides the following additional errno information:</div>
+            <div class="section">
+              <strong>ENOSPC</strong> There is insufficient space for the operation.</div>
+            <div class="section">
+              <strong>EPERM</strong> Unidentified error.</div>
+            <p>
+              <strong>
+                <u>
+                  <br />
+                </u>
+              </strong>
+            </p>
+            <p>
+              <strong>
+                <u>More Info</u>
+              </strong>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/remove">http://linux.die.net/man/3/remove</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_14">mkdir()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>mkdir </strong>(const char *path, mode_t mode)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+              <br />The <strong>mkdir</strong>() function shall create a new directory with name <em>path</em>.</p>
+            <p>
+              <u>
+                <br />
+              </u>
+            </p>
+            <p>
+              <strong>
+                <u>NX Specfic</u>
+              </strong>
+            </p>
+            <p>None</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>
+              <strong>EEXIST </strong>
+              <em>pathname</em>&nbsp;already exists (not necessarily as a directory). This includes the case where&nbsp;<em>pathname</em>&nbsp;is a symbolic link, dangling or not.</p>
+            <p>
+              <strong>EFAULT </strong>
+              <em>pathname</em>&nbsp;points outside your accessible address space.</p>
+            <p>
+              <strong>EMLINK </strong>The number of links to the parent directory would exceed&nbsp;<strong>LINK_MAX</strong>.</p>
+            <p>
+              <strong>ENAMETOOLONG </strong>
+              <em>pathname</em>&nbsp;was too long.</p>
+            <p>
+              <strong>ENOENT </strong>A directory component in&nbsp;<em>pathname</em>&nbsp;does not exist or is a dangling symbolic link.</p>
+            <p>
+              <strong>ENOMEM </strong>Insufficient kernel memory was available.</p>
+            <p>
+              <strong>ENOSPC </strong>The device containing&nbsp;<em>pathname</em>&nbsp;has no room for the new directory.</p>
+            <p>
+              <strong>ENOSPC </strong>The new directory cannot be created because the user's disk quota is exhausted.</p>
+            <p>
+              <strong>ENOTDIR </strong>A component used as a directory in&nbsp;<em>pathname</em>&nbsp;is not, in fact, a directory.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">&nbsp;</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EACCES </strong>The parent directory does not allow write permission to the process, or one of the directories in&nbsp;<em>pathname</em>&nbsp;did not allow search permission. (See also&nbsp;<em><strong><a href="http://linux.die.net/man/7/path_resolution"><span style="color: rgb(153,153,153);">path_resolution</span></a></strong>(7)</em>.)</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">&nbsp;</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EDQUOT </strong>The user's quota of disk blocks or inodes on the file system has been exhausted.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">&nbsp;</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ELOOP </strong>Too many symbolic links were encountered in resolving&nbsp;<em>pathname</em>.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EPERM </strong>The file system containing&nbsp;<em>pathname</em>&nbsp;does not support the creation of directories.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EROFS </strong>
+                <em>pathname</em>&nbsp;refers to a file on a read-only file system.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>More Info</u>
+              </strong>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/2/mkdir">http://linux.die.net/man/2/mkdir</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_15">rmdir()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>rmdir </strong>(const char *path)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <strong>
+                <u>Description</u>
+              </strong>
+            </p>
+            <p>The&nbsp;<strong>rmdir</strong>() function shall remove a directory whose name is given by&nbsp;<em>path</em>. The directory shall be removed only if it is an empty directory.</p>
+            <p>
+              <strong>
+                <u>
+                  <br />
+                </u>
+              </strong>
+            </p>
+            <p>
+              <strong>
+                <u>NX Specific</u>
+              </strong>
+            </p>
+            <p>None<strong><br /></strong></p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EFAULT </strong>
+                <em>pathname</em>&nbsp;points outside your accessible address space.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINVAL </strong>
+                <em>pathname</em>&nbsp;has&nbsp;<em>.</em>&nbsp;as last component.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENAMETOOLONG </strong>
+                <em>pathname</em>&nbsp;was too long.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOENT </strong>A directory component in&nbsp;<em>pathname</em>&nbsp;does not exist or is a dangling symbolic link.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOMEM </strong>Insufficient kernel memory was available.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOTDIR </strong>
+                <em>pathname</em>, or a component used as a directory in&nbsp;<em>pathname</em>, is not, in fact, a directory.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ENOTEMPTY </strong>
+                <em>pathname</em>&nbsp;contains entries other than&nbsp;<em>.</em>&nbsp;and&nbsp;<em>..</em>&nbsp;; or,&nbsp;<em>pathname</em>&nbsp;has&nbsp;<em>..</em>&nbsp;as its final component. POSIX.1-2001 also allows <strong>EEXIST</strong>&nbsp;for this condition.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EACCES </strong>Write access to the directory containing <em>pathname</em>&nbsp;was not allowed, or one of the directories in the path prefix of&nbsp;<em>pathname</em>&nbsp;did not allow search permission. (See also<em><strong><a href="http://linux.die.net/man/7/path_resolution"><span style="color: rgb(153,153,153);">path_resolution</span></a></strong>(7)</em>.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EBUSY </strong>
+                <em>pathname</em>&nbsp;is currently in use by the system or some process that prevents its removal. On Linux this means&nbsp;<em>pathname</em>&nbsp;is currently used as a mount point or is the root directory of the calling process</span>.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>ELOOP </strong>Too many symbolic links were encountered in resolving&nbsp;<em>pathname</em>.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EPERM </strong>The directory containing&nbsp;<em>pathname</em>&nbsp;has the sticky bit (<strong>S_ISVTX</strong>) set and the process's effective user ID is neither the user ID of the file to be deleted nor that of the directory containing it, and the process is not privileged (Linux: does not have the&nbsp;<strong>CAP_FOWNER</strong>&nbsp;capability).</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EPERM </strong>The file system containing&nbsp;<em>pathname</em>&nbsp;does not support the removal of directories.</span>
+            </p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EROFS </strong>
+                <em>pathname</em>&nbsp;refers to a directory on a read-only file system.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>More Info</u>
+              </strong>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/2/rmdir">http://linux.die.net/man/2/rmdir</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_16">opendir()</h4>
+          <p>
+            <br />
+          </p>
+          <p>DIR *<strong>opendir </strong>(const char *name)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <strong>
+                <u>Description</u>
+              </strong>
+            </p>
+            <p>The&nbsp;<strong>opendir</strong>() function opens a directory stream corresponding to the directory&nbsp;<em>name</em>, and returns a pointer to the directory stream. The stream is positioned at the first entry in the directory.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <ul>
+              <li>In linux opendir() just calls open(), but with the NintendoSDK API it needs to<br />call a different routine.</li>
+              <li>Limitations of this function may have an effect on scandir()<ul><li>int scandir(const char *, struct dirent ***, int (*)(const struct dirent *), int (*)(const struct dirent **, const struct dirent **));</li><li><a href="http://linux.die.net/man/3/scandir">http://linux.die.net/man/3/scandir</a><br /><br /></li></ul></li>
+            </ul>
+            <div class="warn_new">
+              <div class="warn_new_left">Warning</div>
+              <div class="warn_new_right">
+                <p>
+                  <strong>opendir</strong>() allocates the DIR * structure using calloc()</p>
+              </div>
+            </div>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>
+              <strong>EBADF </strong>
+              <em>fd</em>&nbsp;is not a valid file descriptor opened for reading.</p>
+            <div>
+              <p>
+                <strong>EMFILE </strong>Too many file descriptors in use by process.</p>
+            </div>
+            <div>
+              <p>
+                <strong>ENFILE </strong>Too many files are currently open in the system.</p>
+            </div>
+            <div>
+              <p>
+                <strong>ENOENT </strong>Directory does not exist, or&nbsp;<em>name</em>&nbsp;is an empty string.</p>
+            </div>
+            <div>
+              <p>
+                <strong>ENOMEM </strong>Insufficient memory to complete the operation.</p>
+            </div>
+            <p>
+              <strong>ENOTDIR </strong>
+              <em>name</em>&nbsp;is not a directory.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EACCES </strong>Permission denied.</span>
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/opendir">http://linux.die.net/man/3/opendir</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_17">readdir() and readdir_r()</h4>
+          <p>
+            <br />
+          </p>
+          <p>struct dirent *<strong>readdir</strong>(DIR *dirp)</p>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>readdir_r</strong>(DIR *restrict dirp, struct dirent *restrict entry, struct dirent **restrict result)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<strong>readdir</strong>() function returns a pointer to a&nbsp;<em>dirent</em>&nbsp;structure representing the next directory entry in the directory stream pointed to by&nbsp;<em>dirp</em>. It returns NULL on reaching the end of the directory stream or if an error occurred.</p>
+            <p>The&nbsp;<strong>readdir_r</strong>() function is a reentrant version of&nbsp;<strong>readdir</strong>(). It reads the next directory entry from the directory stream&nbsp;<em>dirp</em>, and returns it in the caller-allocated buffer pointed to by&nbsp;<em>entry</em>.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Note</strong>
+              </u>
+            </p>
+            <p>readdir() pass dir-&gt;buf as the struct dirent * parameter something like:</p>
+            <table class="codeblock">
+              <tbody>
+                <tr>
+                  <td class="code">
+                    <div class="codeblock"><pre>struct dirent *readdir(DIR *dir)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;int result = __nnmusl_FileReaddir(dir-&gt;fd,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(struct dirent *) dir-&gt;buf);
+&nbsp;&nbsp;&nbsp;&nbsp;if (result == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return (struct dirent *) dir-&gt;buf;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;return NULL;
+}</pre></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              <br />
+            </p>
+            <p>Unlike <strong>readdir</strong>(), <strong>readdir_r</strong>() requires the developer to pass in the buffer:</p>
+            <table class="codeblock">
+              <tbody>
+                <tr>
+                  <td class="code">
+                    <div class="codeblock"><pre>int readdir_r(DIR *restrict dir,
+&nbsp;&nbsp;&nbsp;&nbsp;struct dirent *restrict buf,
+&nbsp;&nbsp;&nbsp;&nbsp;struct dirent **restrict result)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;int error = __nnmusl_FileReaddir(dir-&gt;fd, buf);
+&nbsp;&nbsp;&nbsp;&nbsp;if (error == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*result = buf;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;return error;
+}</pre></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>Need to make sure  buf (currenlty 2048) can hold a full struct <strong>dirent</strong></p>
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>&nbsp;</p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>
+              <strong>EBADF</strong>&nbsp;Invalid directory stream descriptor&nbsp;<em>dirp</em>.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <u>More Info</u>
+              </strong>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/readdir">http://linux.die.net/man/3/readdir</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_18">rewinddir()</h4>
+          <p>
+            <br />
+          </p>
+          <p>void <strong>rewinddir</strong>(DIR *dirp)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<strong>rewinddir</strong>() function resets the position of the directory stream&nbsp;<em>dirp</em>&nbsp;to the beginning of the directory.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Note</strong>
+              </u>
+            </p>
+            <div class="note_new">
+              <div class="note_new_left">Note</div>
+              <div class="note_new_right">
+                <p>For NX offset must be a multiple of <strong>sizeof</strong>(<strong>nn::fs::DirectoryEntry</strong>)</p>
+                <p>
+                  <br />
+                </p>
+                <p>Like <strong>lseek</strong>() there is no&nbsp;NintendoSDK API equlivent:</p>
+                <p>
+                  <br />
+                </p>
+                <p>nnmsl records the location, and divides it by <strong>sizeof</strong>(<strong>nn::fs::DirectoryEntry</strong>) to determine the index to pass to ReadDirectory</p>
+                <p>
+                  <br />
+                </p>
+                <p>The developer should not try to generate an offset based on <strong>sizeof(nn::fs::DirectoryEntry)</strong>, instead they should use an offset returned by <strong>telldir()</strong></p>
+                <p>
+                  <br />
+                </p>
+              </div>
+            </div>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>None</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>None</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/rewinddir">http://linux.die.net/man/3/rewinddir</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_19">telldir()</h4>
+          <p>
+            <br />
+          </p>
+          <p>long <strong>telldir</strong>(DIR *dirp)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<strong>telldir</strong>() function returns the current location associated with the directory stream&nbsp;<em>dirp</em></p>
+            <p>
+              <em>
+                <br />
+              </em>
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>None</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>None</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/telldir">http://linux.die.net/man/3/telldir</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_20">dirfd()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>dirfd</strong>(DIR *dirp)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>The function&nbsp;<strong>dirfd</strong>() returns the file descriptor associated with the directory stream&nbsp;<em>dirp</em>.</p>
+            <p>
+              <em>
+                <br />
+              </em>
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>None</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>None</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/dirfd">http://linux.die.net/man/3/dirfd</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_21">closedir()</h4>
+          <p>
+            <br />
+          </p>
+          <p>int <strong>closedir </strong>(DIR *dirp)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<strong>closedir</strong>() function closes the directory stream associated with&nbsp;<em>dirp</em>.</p>
+            <p>
+              <em>
+                <br />
+              </em>
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>None</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>
+              <strong>EBADF </strong>Invalid directory stream descriptor&nbsp;<em>dirp</em></p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/closedir">http://linux.die.net/man/3/closedir</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_22">open_memstream() and open_wmemstream()</h4>
+          <p>
+            <br />
+          </p>
+          <p>FILE *<strong>open_memstream</strong>(char **bufp, size_t *sizep);</p>
+          <p>
+            <br />
+          </p>
+          <p>FILE *<strong>open_wmemstream</strong>(wchar_t **bufp, size_t *sizep)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<strong>open_memstream</strong>() and <strong>open_wmemstream</strong>() function shall create an I/O stream associated with a dynamically allocated memory buffer. The stream shall be opened for writing and shall be seekable.</p>
+            <p>It is not by design for the stream to be read from - only to be written to. So reading is not supported for the stream these functions return.</p>
+            <div class="note_new">
+              <div class="note_new_left">Note</div>
+              <div class="note_new_right">
+                <p>As of Clang for NX 1.2.4, these functions allocate an additional sizeof char* to fix a bug that ensures 'bufp' is a valid pointer when a stream is opened and closed without any writes.</p>
+                <p>This may cause the allocator to allocate a full pool (4096 bytes), which may cause issues in low-memory environments.</p>
+              </div>
+            </div>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>None</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <br />
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>
+              <strong>EMFILE '</strong>
+              <em>FOPEN_MAX'</em> amount of streams are currently open in the calling process</p>
+            <p>
+              <strong>ENOMEM </strong>Memory for the stream or the buffer could not be allocated</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINVAL</strong> <em>bufp</em> or <em>sizep</em> are NULL</span>
+            </p>
+            <div class="note_new">
+              <div class="note_new_left">Note</div>
+              <div class="note_new_right">
+                <p>The implementations of <strong>open_memstream</strong>() and <strong>open_wmemstream</strong>() don't set errno to EINVAL if either the <em>bufp</em> or <em>sizep</em> parameters are passed in as NULL.</p>
+                <p>If either argument is passed in as NULL, then the program will crash once the stream is written to.</p>
+              </div>
+            </div>
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/open_memstream">http://linux.die.net/man/3/open_memstream</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_23">fmemopen()</h4>
+          <p>
+            <br />
+          </p>
+          <p>FILE *<strong>fmemopen</strong>(void *restrict buf, size_t size, const char *restrict mode)</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<strong>fmemopen</strong>() function opens a stream that permits the access specified by&nbsp;<em>mode</em>. The stream allows I/O to be performed on the string or memory buffer pointed to by&nbsp;<em>buf</em>. This buffer must be at least&nbsp;<em>size</em>&nbsp;bytes long</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <p>None</p>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <u>
+                <strong>
+                  <br />
+                  <br />Errno</strong>
+              </u>
+            </p>
+            <p>
+              <strong>EINVAL</strong> The&nbsp;size&nbsp;argument specifies a buffer size of zero</p>
+            <p>
+              <strong>EINVAL </strong>The value of the&nbsp;mode&nbsp;argument is not valid</p>
+            <p>
+              <strong>ENOMEM </strong>The&nbsp;buf&nbsp;argument is a null pointer and the allocation of a buffer of length&nbsp;size&nbsp;has failed</p>
+            <p>
+              <strong>EMFILE</strong> '<em>FOPEN_MAX'</em> streams are currently open in the calling process.</p>
+            <p>
+              <span style="color: rgb(153,153,153);">
+                <strong>EINVAL</strong> The&nbsp;<em>buf</em>&nbsp;argument is a null pointer and the&nbsp;mode&nbsp;argument does not include a&nbsp;'+'&nbsp;character</span>
+            </p>
+            <div class="note_new">
+              <div class="note_new_left">Note</div>
+              <div class="note_new_right">
+                <p>This implementation of <strong>fmemopen</strong>() will crash if <em>mode</em> is passed in as NULL.</p>
+                <p>
+                  <br />
+                </p>
+                <p>Passing NULL in for the <em>buf</em> argument is allowed (won't return EINVAL), but not including a '+' character in the <em>mode</em> string isn't useful since there isn't a way to put data into the buffer (&quot;r&quot; mode) or to read data from the buffer (&quot;w&quot; or &quot;a&quot; modes). Only the '+' forms (&quot;r+&quot;, &quot;w+&quot;, &quot;a+&quot;) allow both reading and writing.</p>
+              </div>
+            </div>
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/fmemopen">http://linux.die.net/man/3/fmemopen</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_24">fdopendir()</h4>
+          <p>
+            <br />
+          </p>
+          <p>DIR *<strong>fdopendir</strong>(int);</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>The&nbsp;<strong>fdopendir</strong>() function is like&nbsp;<strong>opendir</strong>(), but returns a directory stream for the directory referred to by the open file descriptor&nbsp;<em>fd</em></p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <div class="warn_new">
+              <div class="warn_new_left">Warning</div>
+              <div class="warn_new_right">
+                <p>This function is not implemented and simply returns NULL</p>
+              </div>
+            </div>
+            <!--Remove-->
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>Errno</strong>
+              </u>
+            </p>
+            <p>N/A</p>
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/fdopendir">http://linux.die.net/man/3/fdopendir</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h4 id="Anchor_106358756_h4_25">flockfile(), ftrylockfile(), and funlockfile()</h4>
+          <p>
+            <br />
+          </p>
+          <p>void <strong>flockfile</strong>(FILE *filehandle);<br />int <strong>ftrylockfile</strong>(FILE *filehandle);<br />void <strong>funlockfile</strong>(FILE *filehandle);</p>
+        </td>
+        <td>
+          <div class="content-wrapper">
+            <p>
+              <u>
+                <strong>Description</strong>
+              </u>
+            </p>
+            <p>&nbsp;</p>
+            <p>The&nbsp;<strong>flockfile</strong>() function waits for&nbsp;<em>*filehandle</em>&nbsp;to be no longer locked by a different thread, then makes the current thread owner of&nbsp;<em>*filehandle</em>,</p>
+            <p>and increments the lockcount.</p>
+            <p>&nbsp;</p>
+            <p>The&nbsp;<strong>funlockfile</strong>() function decrements the lock count.</p>
+            <p>&nbsp;</p>
+            <p>The&nbsp;<strong>ftrylockfile</strong>() function is a nonblocking version of&nbsp;<strong>flockfile</strong>(). It does nothing in case some other thread owns<em>*filehandle</em>,</p>
+            <p>and it obtains ownership and increments the lockcount otherwise.</p>
+            <p>
+              <br />
+            </p>
+            <p>
+              <u>
+                <strong>NX Specific</strong>
+              </u>
+            </p>
+            <ul>
+              <li>None</li>
+            </ul>
+            <p>
+              <br />
+            </p>
+            <!--Remove-->
+            <p>
+              <u>
+                <strong>
+                  <br />Errno</strong>
+              </u>
+            </p>
+            <p>N/A</p>
+            <p>
+              <strong>
+                <br />
+              </strong>
+            </p>
+            <p>
+              <u>
+                <strong>More Info</strong>
+              </u>
+            </p>
+            <p>
+              <a href="http://linux.die.net/man/3/flockfile">http://linux.die.net/man/3/flockfile</a>
+              <br />
+              <a href="http://linux.die.net/man/3/ftrylockfile">http://linux.die.net/man/3/ftrylockfile</a>
+              <br />
+              <a href="http://linux.die.net/man/3/funlockfile">http://linux.die.net/man/3/funlockfile</a>
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <br />
+        </td>
+        <td>
+          <br />
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+</div>
+<div class="section">
+  <h1 id="Anchor_106358756_h1_2">Functions Currently Not Implemented</h1>
+  <table class="wrapped">
+    <colgroup>
+      <col />
+      <col />
+      <col />
+      <col />
+    </colgroup>
+    <tbody>
+      <tr>
+        <th>posix style function</th>
+        <th>interface function</th>
+        <th>Description/Notes</th>
+        <th>
+          <br />
+        </th>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            <strong>int fsync(</strong>int&nbsp;<em>fd</em><strong>);</strong></p>
+          <p>
+            <strong>int fdatasync(</strong>int&nbsp;<em>fd</em><strong>);</strong></p>
+        </td>
+        <td>
+          <strong>Not Implemented</strong>
+        </td>
+        <td>
+          <p>see manual page:&nbsp;<a href="http://linux.die.net/man/2/fsync">http://linux.die.net/man/2/fsync</a></p>
+          <p>NintendoSDK does not have an equivalent</p>
+        </td>
+        <td>
+          <br />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>int fdatasync(</strong>int&nbsp;<em>fd</em><strong>);</strong></td>
+        <td>
+          <strong>Not Implemented</strong>
+        </td>
+        <td>see manual page:&nbsp;<a href="http://linux.die.net/man/2/fcntl">http://linux.die.net/man/2/fcntl</a></td>
+        <td>
+          <br />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>int</strong>&nbsp;<strong>fcntl</strong>(int filedes, int cmd, &hellip;)</td>
+        <td>
+          <strong>Not Implemented</strong>
+        </td>
+        <td>see manual page:&nbsp;<a href="http://linux.die.net/man/2/fcntl">http://linux.die.net/man/2/fcntl</a></td>
+        <td>
+          <br />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>int</strong>&nbsp;<strong>glob</strong>(const char *pattern, int flags, int (*errfunc) (const char *epath, int eerrno), glob_t *pglob)</td>
+        <td>
+          <strong>Not Implemented</strong>
+        </td>
+        <td>see manual page: <a href="https://linux.die.net/man/3/glob">https://linux.die.net/man/3/glob</a></td>
+        <td>
+          <br />
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h1 id="Anchor_106358756_h1_3">Low Level Interface to&nbsp;NintendoSDK FS API</h1>
+  <p>The function fstat() has to translate&nbsp;NintendoSDK file information into a posix&nbsp;stat structure:</p>
+  <table class="wrapped">
+    <tbody>
+      <tr>
+        <th>Field</th>
+        <th>NintendoSDK info</th>
+        <th>Notes</th>
+      </tr>
+      <tr>
+        <td>&nbsp;dev_t <strong>st_dev</strong></td>
+        <td>&nbsp;0</td>
+        <td>
+          <br />
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;ino_t <strong>st_ino</strong></td>
+        <td>&nbsp;0</td>
+        <td>
+          <br />
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;mode_t <strong>st_mode</strong></td>
+        <td>&nbsp;0666</td>
+        <td>
+          <br />
+        </td>
+      </tr>
+      <tr>
+        <td>nlink_t <strong>st_nlink</strong></td>
+        <td>1</td>
+        <td>A file has at least one link</td>
+      </tr>
+      <tr>
+        <td>uid_t <strong>st_uid</strong></td>
+        <td>99</td>
+        <td>
+          <p>(99 is __unknown on my mac)</p>
+          <p>don't use 0 as 0 == root</p>
+        </td>
+      </tr>
+      <tr>
+        <td>gid_t <strong>st_gid</strong></td>
+        <td>-1</td>
+        <td>(-1 is no group on my mac)</td>
+      </tr>
+      <tr>
+        <td>dev_t <strong>st_rdev</strong></td>
+        <td>0</td>
+        <td>Does not apply</td>
+      </tr>
+      <tr>
+        <td>off_t <strong>st_size</strong></td>
+        <td>
+          <strong>GetFileSize()</strong>
+        </td>
+        <td>Use&nbsp;NintendoSDK API to get file size</td>
+      </tr>
+      <tr>
+        <td>blksize_t <strong>st_blksize</strong></td>
+        <td>undefined</td>
+        <td>
+          <br />
+        </td>
+      </tr>
+      <tr>
+        <td>blkcnt_t <strong>st_blocks</strong></td>
+        <td>undefined</td>
+        <td>
+          <br />
+        </td>
+      </tr>
+      <tr>
+        <td>time_t <strong>st_atime</strong></td>
+        <td>0</td>
+        <td>Does not support</td>
+      </tr>
+      <tr>
+        <td>time_t <strong>st_mtime</strong></td>
+        <td>0</td>
+        <td>Does not support</td>
+      </tr>
+      <tr>
+        <td>time_t <strong>st_ctime</strong></td>
+        <td>0</td>
+        <td>Does not support</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+  <p>The function readdir and readdir_r needs to translate from a&nbsp;NintendoSDK <strong>DirectoryEntry</strong>&nbsp;into a POSIX&nbsp;<strong>dirent</strong>:</p>
+  <table class="wrapped">
+    <tbody>
+      <tr>
+        <th>dirent</th>
+        <th>DirectoryEntry</th>
+        <th>Notes</th>
+      </tr>
+      <tr>
+        <td>ino_t <strong>d_ino</strong></td>
+        <td>0</td>
+        <td>index of file info in disk catalog for now always 0</td>
+      </tr>
+      <tr>
+        <td>off_t <strong>d_off</strong></td>
+        <td>set to current directory index * sizeof(<strong>dirent</strong>)</td>
+        <td>NintendoSDK uses indexes, while POSIX uses variable sized offsets</td>
+      </tr>
+      <tr>
+        <td>unsigned int <strong>d_reclen</strong></td>
+        <td>sizeof(<strong>dirent</strong>)</td>
+        <td>For now always treat records size as same as sizeof(<strong>dirent</strong>)</td>
+      </tr>
+      <tr>
+        <td>unsigned char <strong>d_type</strong></td>
+        <td>int8_t <strong>directoryEntryType</strong></td>
+        <td>Translate the&nbsp;NintendoSDK <strong>directoryEntryType</strong> into either: <strong>DT_DIR</strong> or <strong>DT_REG</strong></td>
+      </tr>
+      <tr>
+        <td>char <strong>d_name</strong>[256]</td>
+        <td>char <strong>name</strong>[EntryNameLengthMax + 1]</td>
+        <td>
+          <div class="content-wrapper">
+            <div class="warn_new">
+              <div class="warn_new_left">Warning</div>
+              <div class="warn_new_right">
+                <p>Need to make sure sizeof(<strong>d_name</strong>) &gt;= sizeof(<strong>name</strong>)</p>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+</div>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__WriteOptionFlag_Flush', '../../../Api/HtmlNX/namespacenn_1_1fs.html#afb4fdd50e0892400c07232f714caa14da2956e16dac576b2b7eff3142e18ac2c0' )
+SetUrl( 'ApiLink_nn__fs__WriteFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ab4351ff3a319e9a63093324a669492ab' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

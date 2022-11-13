@@ -1,0 +1,279 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Event | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Event -->
+<div class="pagetitle" id="PageId_83955790">Event</div>
+<div class="text_separate">
+<p>
+  <br />
+</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955790_h1_1">Event Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955790_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955790_h3_1">Auto-Clear Mode</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955790_h3_2">Manual­Clear Mode</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_83955790_h2_2">Using an Event</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955790_h2_3">Specific Example of Using an Event</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955790_h2_4">Event API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955790_h2_5">Notes About Using Events</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955790_h3_3">Waiting For Multiple Events</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955790_h3_4">Auto­Clear Mode</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955790_h3_5">Manual­Clear Mode</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955790_h3_6">Blocking When Signaling</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83955790_h1_1">Event Feature</h1>
+<h2 id="Anchor_83955790_h2_1">Feature Overview</h2>
+<p>The event feature uses a 1-bit binary value representing a signaled and non-signaled state as a way to synchronize <a href="../Pages/Page_83955697.html">threads</a>.</p>
+<p>You can specify the initial state of an event to be either signaled or non-signaled. You can also choose whether to automatically clear an event to a non-signaled state when a <a href="../Pages/Page_83955697.html">thread</a> that is waiting for the event wakes up.</p>
+<p>In addition, this event functionality can be specified as a target for <a href="../Pages/Page_83955865.html">multiple wait</a>, using functions like <code>os::WaitAny()</code>. If multiple waiting is unnecessary, use a <a href="../Pages/Page_182617471.html">lightweight event</a>.</p>
+<h3 id="Anchor_83955790_h3_1">Auto-Clear Mode</h3>
+<p>Specify <span class="ApiLink_void_nn__os__InitializeEvent(EventType_*event|_bool_initiallySignaled|_EventClearMode_clearMode)_NN_NOEXCEPT">nn::os::EventClearMode_AutoClear</span> when calling the <span class="ApiLink_nn__os__EventClearMode_AutoClear">nn::os::InitializeEvent()</span> function to enable auto-clear mode for that event.</p>
+<p>When auto-clear mode is enabled, if <span class="ApiLink_void_nn__os__WaitEvent(EventType_*event)_NN_NOEXCEPT">nn::os::WaitEvent()</span> is called while the event is in a signaled state, the calling <a href="../Pages/Page_83955697.html">thread</a> continues to execute without waiting for the event. At this time, the event is automatically cleared to a non-signaled state. If the event is in the non-signaled state when <span class="ApiLink_void_nn__os__WaitEvent(EventType_*event)_NN_NOEXCEPT">nn::os::WaitEvent()</span> is called, the thread waits for the event.</p>
+<p>If <span class="ApiLink_void_nn__os__SignalEvent(EventType_*event)_NN_NOEXCEPT">nn::os::SignalEvent()</span> is called on an event for which one or more <a href="../Pages/Page_83955697.html">threads</a> are waiting, only one of the waiting <a href="../Pages/Page_83955697.html">threads</a> wakes up, and at the same time the event is automatically cleared to a non-signaled state. If there are no waiting threads, the event enters a signaled state.</p>
+<p>When auto-clear mode is enabled, there is never a case where multiple threads stop waiting at the same time.</p>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_83955790_h3_2">Manual&shy;Clear Mode</h3>
+<p>Specify <span class="ApiLink_void_nn__os__InitializeEvent(EventType_*event|_bool_initiallySignaled|_EventClearMode_clearMode)_NN_NOEXCEPT">nn::os::EventClearMode_ManualClear</span> when calling the <span class="ApiLink_nn__os__EventClearMode_ManualClear">nn::os::InitializeEvent()</span> function to enable manual-clear mode for that event.</p>
+<p>When manual-clear mode is enabled, if <span class="ApiLink_void_nn__os__WaitEvent(EventType_*event)_NN_NOEXCEPT">nn::os::WaitEvent()</span> is called while the event is in the signaled state, the calling <a href="../Pages/Page_83955697.html">thread</a> continues to execute without waiting for the event. At this time, the event maintains its signaled state. If the event is in the non-signaled state when <span class="ApiLink_void_nn__os__WaitEvent(EventType_*event)_NN_NOEXCEPT">nn::os::WaitEvent()</span> is called, the thread waits for the event.</p>
+<p>If <span class="ApiLink_void_nn__os__SignalEvent(EventType_*event)_NN_NOEXCEPT">nn::os::SignalEvent()</span> is called on the event while one or more threads are waiting, all of the waiting threads wake up. The event also maintains its signaled state after the threads wake up.</p>
+<p>Call the <span class="ApiLink_void_nn__os__ClearEvent(EventType_*event)_NN_NOEXCEPT">nn::os::ClearEvent()</span> function to clear the event to a non-signaled state.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955790_h2_2">Using an Event</h2>
+<p>To use an event, you must prepare an <span class="ApiLink_nn__os__EventType">nn::os::EventType</span> structure object as follows.<br />There are no restrictions on where the object can be defined.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="nn">nn::os::</span><span class="n">EventType</span>    <span class="n">g_Event</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Use the defined object according to the following procedure.</p>
+<ol>
+  <li>
+    <p>You must initialize the event before use.<br />Specify the initial state of the event in the second parameter and the clear mode in the third parameter.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Event</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">EventClearMode_AutoClear</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Wait for the event as necessary.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">WaitEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Event</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Set (signal) the event as necessary.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">SignalEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Event</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>When you have finished using the event, free the object.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FinalizeEvent</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Event</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_83955790_h2_3">Specific Example of Using an Event</h2>
+<p>For a specific example of events in use, see the <span class="ApiLink_PageSampleOsEvent">Event Feature Sample Program</span>.</p>
+<h2 id="Anchor_83955790_h2_4">Event API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeEvent(EventType_*event|_bool_initiallySignaled|_EventClearMode_clearMode)_NN_NOEXCEPT">nn::os::InitializeEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeEvent(EventType_*event)_NN_NOEXCEPT">nn::os::FinalizeEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__WaitEvent(EventType_*event)_NN_NOEXCEPT">nn::os::WaitEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryWaitEvent(EventType_*event)_NN_NOEXCEPT">nn::os::TryWaitEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TimedWaitEvent(EventType_*event|_TimeSpan_timeout)_NN_NOEXCEPT">nn::os::TimedWaitEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SignalEvent(EventType_*event)_NN_NOEXCEPT">nn::os::SignalEvent</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__ClearEvent(EventType_*event)_NN_NOEXCEPT">nn::os::ClearEvent</span>
+  </li>
+</ul>
+<h2 id="Anchor_83955790_h2_5">Notes About Using Events</h2>
+<h3 id="Anchor_83955790_h3_3">Waiting For Multiple Events</h3>
+<p>If you are waiting for multiple events (<span class="ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT">nn::os::WaitAny</span>) and one of the target events is signaled, that event will no longer be a wait target but it will not be automatically cleared, even if set to auto-clear mode (<span class="ApiLink_nn__os__EventClearMode_AutoClear">nn::os::EventClearMode_AutoClear</span>).</p>
+<p>The multiple wait feature does not change the state of an object made into a signal. For this reason, you must use some function like <span class="ApiLink_bool_nn__os__TryWaitEvent(EventType_*event)_NN_NOEXCEPT">nn::os::TryWaitEvent()</span> after getting the signaled <code><span class="ApiLink_nn__os__MultiWaitHolderType">nn::os::MultiWaitHolderType</span></code> to wait for the target event. The targeted event then clears automatically. If there is a chance that another thread will call a function like <span class="ApiLink_bool_nn__os__TryWaitEvent(EventType_*event)_NN_NOEXCEPT">nn::os::TryWaitEvent()</span> on that target event during that time, you must check the value returned by that function and take some action like repeating the multi-wait process.</p>
+<h3 id="Anchor_83955790_h3_4">Auto&shy;Clear Mode</h3>
+<p>In most cases, when using auto-clear mode (<span class="ApiLink_nn__os__EventClearMode_AutoClear">nn::os::EventClearMode_AutoClear</span>) make sure that you do not use <span class="ApiLink_void_nn__os__ClearEvent(EventType_*event)_NN_NOEXCEPT">nn::os::ClearEvent()</span> more than necessary to control when events are cleared.</p>
+<p>In auto-clear mode, if the <span class="ApiLink_void_nn__os__SignalEvent(EventType_*event)_NN_NOEXCEPT">nn::os::SignalEvent()</span> function starts a temporary thread and then <span class="ApiLink_void_nn__os__ClearEvent(EventType_*event)_NN_NOEXCEPT">nn::os::ClearEvent()</span> is called before the CPU gets execution rights for that thread, the thread immediately returns the waiting state as soon as it actually becomes usable because the target event is in the non-signaled state. When using auto-clear mode, events are automatically cleared when a function such as <span class="ApiLink_void_nn__os__WaitEvent(EventType_*event)_NN_NOEXCEPT">nn::os::WaitEvent()</span> starts a new thread, so normally you do not need to manually call the <span class="ApiLink_void_nn__os__ClearEvent(EventType_*event)_NN_NOEXCEPT">nn::os::ClearEvent()</span> function.</p>
+<h3 id="Anchor_83955790_h3_5">Manual&shy;Clear Mode</h3>
+<p>You must also be careful about using the <span class="ApiLink_nn__os__EventClearMode_ManualClear">nn::os::ClearEvent()</span> function in manual clear mode (<span class="ApiLink_void_nn__os__ClearEvent(EventType_*event)_NN_NOEXCEPT">nn::os::EventClearMode_ManualClear</span>).</p>
+<p>Specifically, make sure that <span class="ApiLink_void_nn__os__WaitEvent(EventType_*event)_NN_NOEXCEPT">nn::os::ClearEvent()</span> is not called at nearly the same time as calls on another thread to <span class="ApiLink_void_nn__os__SignalEvent(EventType_*event)_NN_NOEXCEPT">nn::os::WaitEvent()</span> or <span class="ApiLink_void_nn__os__ClearEvent(EventType_*event)_NN_NOEXCEPT">nn::os::SignalEvent()</span>. In those kinds of situations, the order of operation in the threads is undefined, and there is no assurance that events will be waited for, set, and cleared in that order.</p>
+<p>If this kind of situation arises, reconsider your design and its use of the event feature.</p>
+<h3 id="Anchor_83955790_h3_6">Blocking When Signaling</h3>
+<p>Although this event functionality can be specified as a multiple wait target, mutual exclusion occurs within each function. As a result, for example, when <code>os::SignalEvent()</code> and <code>os::WaitEvent()</code> are simultaneously running on multiple cores, blocking can occur as a result of internal processing for core threads triggered by <code>os::SignalEvent()</code>.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__os__InitializeEvent(EventType_*event|_bool_initiallySignaled|_EventClearMode_clearMode)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#af07abef747ac6b51112b9e800ba9632c' )
+SetUrl( 'ApiLink_nn__os__EventClearMode_AutoClear', '../../../Api/HtmlNX/namespacenn_1_1os.html#a11ab71d44973a4135958c420e5682452a31f6133098296b3ddb7e14da3dc695cc' )
+SetUrl( 'ApiLink_void_nn__os__WaitEvent(EventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#aabdcb2de0b5dbdd64a0ec3d7e65c72f4' )
+SetUrl( 'ApiLink_void_nn__os__SignalEvent(EventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a9b959a51c1d28b76894597695fd3d081' )
+SetUrl( 'ApiLink_nn__os__EventClearMode_ManualClear', '../../../Api/HtmlNX/namespacenn_1_1os.html#a11ab71d44973a4135958c420e5682452a8b702480f5120eeeb01e7102227285da' )
+SetUrl( 'ApiLink_void_nn__os__ClearEvent(EventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a46abbb4e59711874cfec72fe97b58e36' )
+SetUrl( 'ApiLink_nn__os__EventType', '../../../Api/HtmlNX/structnn_1_1os_1_1_event_type.html' )
+SetUrl( 'ApiLink_PageSampleOsEvent', '../../../Api/HtmlNX/_page_sample_os_event.html' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeEvent(EventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#adae3d14bd5e37dd1feee56bbf1717e37' )
+SetUrl( 'ApiLink_bool_nn__os__TryWaitEvent(EventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a679439764fa7d9544094a0246ab6eebb' )
+SetUrl( 'ApiLink_bool_nn__os__TimedWaitEvent(EventType_*event|_TimeSpan_timeout)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a9fba39baba3e475cae08127a632cab07' )
+SetUrl( 'ApiLink_MultiWaitHolderType_*_nn__os__WaitAny(MultiWaitType_*multiWait)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ab9b837eb53fa2c8a9610cec2b69666fd' )
+SetUrl( 'ApiLink_nn__os__MultiWaitHolderType', '../../../Api/HtmlNX/structnn_1_1os_1_1_multi_wait_holder_type.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

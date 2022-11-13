@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>JSON Compatibility Check Feature | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- JSON Compatibility Check Feature -->
+<div class="pagetitle" id="PageId_823372389">JSON Compatibility Check Feature</div>
+<div class="text_separate">
+<h1 id="Anchor_823372389_h1_1">Overview</h1>
+<p>This development support feature can verify whether the application is handling JSON properly and whether there would be any issues with adding JSON elements in a future server update. This feature is provided by adding dummy elements that do not exist in the original response to a response JSON obtained from the shop service server.</p>
+<p>It can be used for purposes like the following.</p>
+<ul>
+  <li>Checking whether the application is complying with the guidelines when it uses the feature to access the shop item catalog service server</li>
+  <li>Checking whether the work buffer specified during <code><span class="ApiLink_nn__ec__ShopServiceAccessor">nn::ec::ShopServiceAccessor</span></code> initialization is sufficient</li>
+</ul>
+<p>In DEV MODE, this feature adds dummy elements equal to 50% of the response size obtained from the shop service server. The size of the dummy element to add can be changed.<br />The JSON compatibility check feature is not available to use in PROD MODE.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>
+      <span style="color: rgb(23,43,77);">At our discretion, Nintendo may add additional elements and increase data size of the response JSON obtained from the shop service server.</span>
+    </p>
+    <p>The following additional elements and size increases are possible.</p>
+    <ul>
+      <li>Up to a maximum of 5 key values could be added to a single element.</li>
+      <li>The maximum size of each additional key value is 1 KB, so a total of 5 KB could be added.</li>
+    </ul>
+    <p>The feature uses a dummy response containing these additions to verify whether the application is working.</p>
+  </div>
+</div>
+<h2 id="Anchor_823372389_h2_1">Conditions for Using the Feature</h2>
+<p>This development support feature works when the following conditions are satisfied.</p>
+<ul>
+  <li>
+    <span style="color: rgb(51,51,51); letter-spacing: 0.0px;">In DEV MODE. Does not work in PROD MODE.</span>
+  </li>
+  <li>
+    <span style="color: rgb(51,51,51); letter-spacing: 0.0px;">The JSON compatibility check feature is set to something other than <strong>None</strong>.<br /></span>
+  </li>
+  <li>The shop service server is accessed via <code><span class="ApiLink_nn__ec__ShopServiceAccessor">nn::ec::ShopServiceAccessor</span></code>.</li>
+  <li>The obtained response is in JSON format.<br /></li>
+</ul>
+<h2 id="Anchor_823372389_h2_2">Notes When Using This Feature</h2>
+<p>Note the following information when using this development support feature.</p>
+<ul>
+  <li>Accessing the shop service server with added dummy elements require a larger work buffer and response buffer compared to a normal access.<br />Because the response JSON content is subject to change, ensure that the allocated work buffer and response buffer are sufficient for the application to run with the dummy elements added.</li>
+  <li>If the added dummy element is equal to 50% of the response size, a response with a size of 10 KB has 5 KB of dummy elements added, which means 15 KB is returned to the application.<br />If the response size is small and the dummy element to add is less than 1024 bytes, round up to 1024 bytes and add it to the total size.</li>
+  <li>Dummy elements are not added to responses registered using the response simulation feature.<br /></li>
+  <li>Updating the firmware automatically enables this feature. For this reason, running a released application using a firmware supporting this feature can sometimes result in insufficient memory or parse errors because of this feature. If that happens, you can avoid the errors by configuring settings to not add dummy elements.<br />However, applications that trigger these errors potentially have compatibility issues, so consider patching.<br /></li>
+</ul>
+<h1 id="Anchor_823372389_h1_2">Using the JSON Compatibility Check Feature</h1>
+<ol>
+  <li>Use either DevMenuCommand or DevMenu to set the mode of the JSON compatibility check feature to <strong>Fixed</strong> or <strong>Random</strong>.</li>
+  <li>Access the shop service server via <code> <span class="ApiLink_nn__ec__ShopServiceAccessor">nn::ec::ShopServiceAccessor</span></code> in the running application.</li>
+  <li>Verify that <code><span class="ApiLink_nn__ec__ShopServiceAccessor">nn::ec::ShopServiceAccessor</span></code> does not return <code><span class="ApiLink_nn__ec__ResultShopServiceAccessInsufficientWorkMemory">nn::ec::ResultShopServiceAccessInsufficientWorkMemory</span></code> and that the application runs normally.</li>
+</ol>
+<h2 id="Anchor_823372389_h2_3">Configuration Using DevMenuCommand</h2>
+<p>See <a href="../Pages/Page_424130890.html">Shop Features</a> &gt; Configuring JSON Compatibility Check Feature.</p>
+<h2 id="Anchor_823372389_h2_4">Configuration Using DevMenu</h2>
+<h3 id="Anchor_823372389_h3_1">JSON Compatibility Check</h3>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_823372389/822406009.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<h4 id="Anchor_823372389_h4_1">JSON Dummy Element Mode</h4>
+<p>The mode can be set to <strong>None</strong>, <strong>Fixed</strong>, or <strong>Random</strong>. The default is None.<br />When <strong>None</strong> is set, dummy elements are not added. When <strong>Fixed</strong> or <strong>Random</strong> is set, dummy elements are added.<br />For more information about the size of the added dummy elements, see the information about configuring the dummy element size in <a href="../Pages/Page_424130890.html">Shop Features</a> &gt; JSON Compatibility Check Feature.</p>
+<h4 id="Anchor_823372389_h4_2">Addition Rate</h4>
+<p>If the mode is set to <strong>Fixed</strong>, you can click the <strong>Edit</strong> button to change the percentage used in calculating the size of the dummy elements.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__ec__ShopServiceAccessor', '../../../Api/HtmlNX/classnn_1_1ec_1_1_shop_service_accessor.html' )
+SetUrl( 'ApiLink_nn__ec__ResultShopServiceAccessInsufficientWorkMemory', '../../../Api/HtmlNX/classnn_1_1ec_1_1_result_shop_service_access_insufficient_work_memory.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Measuring Processing Time | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Measuring Processing Time -->
+<div class="pagetitle" id="PageId_165356762">Measuring Processing Time</div>
+<div class="text_separate">
+<h1 id="Anchor_165356762_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_165356762_h2_1">Measuring Processing Time Using a Sound Profile</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_165356762_h3_1">Registering nn::atk::ProfileReader</a>
+      </li>
+      <li>
+        <a href="#Anchor_165356762_h3_2">Reading the Profile Results</a>
+      </li>
+      <li>
+        <a href="#Anchor_165356762_h3_3">Unregistering nn::atk::ProfileReader</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_165356762_h2_2">Measuring Processing Time Using Spy</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_165356762_h1_2">Measuring Processing Time</h1>
+<p>The section describes how to use the Sound Profile feature to measure the CPU processing time of the sound thread and the processing time of the internally used <code><span class="ApiLink_nn__audio">nn::audio</span></code> audio renderer.</p>
+<h2 id="Anchor_165356762_h2_1">Measuring Processing Time Using a Sound Profile</h2>
+<p>The <code>atk</code> library provides a Sound Profile feature for measuring the processing time of the <a href="../Pages/Page_162560000.html">sound thread</a> and the audio renderer.<br />To use the sound profile feature, you must register a <code><span class="ApiLink_nn__atk__ProfileReader">nn::atk::ProfileReader</span></code> object to the sound system and read the profile results in the main loop of the application.</p>
+<p>This section describes the process of using the sound profile feature. For more information, see the <span class="ApiLink_PageSampleAtkProfile">AtkProfile sample</span>. </p>
+<h3 id="Anchor_165356762_h3_1">Registering nn::atk::ProfileReader</h3>
+<p>Initially, when you initialize the sound system, you must set the flag to enable the sound profiler in the initialization parameters.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// Initialize SoundSystem.
+nn::atk::SoundSystem::SoundSystemParam param;
+param.enableProfiler = true;
+...
+nn::atk::SoundSystem::Initialize( param, ... ) ;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Next, register <code><span class="ApiLink_nn__atk__ProfileReader">nn::atk::ProfileReader</span></code> to the sound system.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::atk::ProfileReader profileReader;
+nn::atk::SoundSystem::RegisterProfileReader(profileReader);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_165356762_h3_2">Reading the Profile Results</h3>
+<p>When you have completed the registration process, read the appropriate profile results in the main loop of the application.<br />To read the profile results, use <code><span class="ApiLink_nn__atk__ProfileReader__Read">nn::atk::ProfileReader::Read</span></code>. </p>
+<p>The following sample code dumps the total processing time of the internally used <code><span class="ApiLink_nn__audio">nn::audio</span></code> audio renderer.<br />For more information about the various processing times, see the <code><span class="ApiLink_nn__atk__SoundProfile">nn::atk::SoundProfile</span></code> API references.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>int SoundProfileCountMax = 32;
+nn::atk::SoundProfile soundProfile[SoundProfileCountMax];
+&nbsp;
+int profileCount = profileReader.Read(soundProfile, SoundProfileCountMax);
+for ( auto i = 0; i &lt; profileCount; i++ )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::atk::SoundProfile profile = soundProfile[i];
+&nbsp;&nbsp;&nbsp;&nbsp;NN_LOG(&quot;%8lld\n&quot;, profile.rendererFrameProcess.GetSpan().GetMicroSeconds());
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Profile results are stored for each update cycle of audio on the sound thread.</p>
+<p> </p>
+<p>The audio update cycle varies depending on the platform, but it is in the range of 3 to 5 milliseconds. As a result, for an application playing at 60 fps (about 16 milliseconds) about three to six sets of profile results are stored for each run through the main loop.<br /></p>
+<p> </p>
+<p>An array of <code><span class="ApiLink_nn__atk__SoundProfile">nn::atk::SoundProfile</span></code> objects must be passed to the parameter of the <code><span class="ApiLink_nn__atk__ProfileReader__Read">nn::atk::ProfileReader::Read</span></code> function. For this reason, prepare an array of sufficient length to store the profile results, taking into consideration the update cycle of the main loop of the application.<br /><br />The <code><span class="ApiLink_nn__atk__ProfileReader__Read">nn::atk::ProfileReader::Read</span></code> function returns the number of profile results that it obtained. Take this into consideration for the length of the array.</p>
+<h3 id="Anchor_165356762_h3_3">Unregistering nn::atk::ProfileReader</h3>
+<p>When it is time to end the application, unregister <code><span class="ApiLink_nn__atk__ProfileReader">nn::atk::ProfileReader</span></code> before you finalize the sound system.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::atk::SoundSystem::UnregisterProfileReader(profileReader);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_165356762_h2_2">Measuring Processing Time Using Spy</h2>
+<p>By embedding <code><span class="ApiLink_nn__spy__atk">nn::spy::atk</span></code> in the application, you can use the GUI tool <code>Spy.exe</code> to check the processing time and other information.</p>
+<p>For more information, see the <a href="../Pages/Page_159227283.html">Spy</a> documentation.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__audio', '../../../Api/HtmlNX/namespacenn_1_1audio.html' )
+SetUrl( 'ApiLink_nn__atk__ProfileReader', '../../../Api/HtmlNX/classnn_1_1atk_1_1_profile_reader.html' )
+SetUrl( 'ApiLink_PageSampleAtkProfile', '../../../Api/HtmlNX/_page_sample_atk_profile.html' )
+SetUrl( 'ApiLink_nn__atk__ProfileReader__Read', '../../../Api/HtmlNX/classnn_1_1atk_1_1_profile_reader.html#a57ee3e0b1aab6781316b8cedc7559edb' )
+SetUrl( 'ApiLink_nn__atk__SoundProfile', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_profile.html' )
+SetUrl( 'ApiLink_nn__spy__atk', '../../../Api/HtmlNX/namespacenn_1_1spy_1_1atk.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,293 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Control Over Idle State Actions | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Control Over Idle State Actions -->
+<div class="pagetitle" id="PageId_198946139">Control Over Idle State Actions</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_198946139_h1_1">Actions Automatically Invoked When Idle State Detected</a>
+    </li>
+    <li>
+      <a href="#Anchor_198946139_h1_2">Development Support Feature for Idle State Control</a>
+    </li>
+    <ul>
+      <ul>
+        <li>
+          <a href="#Anchor_198946139_h3_1">Controlling the Idle State Detection Mode</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_198946139_h1_3">Application Features For Controlling Idle State Actions</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_198946139_h2_1">Common Important Information</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_198946139_h3_2">(NintendoSDK Firmware for NX 12.x.x and earlier only) Auto-sleep activates at the moment nn::oe::SetUserInactivityDetectionTimeExtended(false) or nn::oe::SetUserInactivityDetectionTimeExtended() is called.</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_198946139_h1_1">Actions Automatically Invoked When Idle State Detected</h1>
+<p>To protect the  screen from burn-in and conserve power, the NX has features that run automatically when the system is idle for a specified period of time without any operations from the user.</p>
+<p>The following features are triggered when the system enters the idle state.</p>
+<ol>
+  <li>Screen Burn-In Reduction (Screen Brightness Reduction)<ul><li>To protect the TV screen, the pixel brightness is decreased to dim the screen.</li><li>Theoretically, screen burn-in is impossible while the system screen is on, but this feature also reduces the brightness of the system backlight when triggered.</li></ul></li>
+  <li>Auto-Sleep<ul><li>The system transitions to the sleep state.</li></ul></li>
+</ol>
+<p>The duration of idle time before the onset of these actions varies and is dependent on the system settings and the gameplay operation mode. For more information, see System Applications &gt; System Settings &gt; Auto-Sleep in the <em>System Features Guide</em>.</p>
+<h1 id="Anchor_198946139_h1_2">Development Support Feature for Idle State Control</h1>
+<h3 id="Anchor_198946139_h3_1">Controlling the Idle State Detection Mode</h3>
+<p>In the development environment, the Auto-Sleep and Screen Burn-In Reduction features are <strong>disabled</strong> by default, regardless of the system settings. (<a href="../Pages/Page_186060673.html">If the development hardware is initialized using the PROD MODE firmware </a>, they are <strong>enabled</strong> by default.)</p>
+<p>You can check and change whether Idle State Detection Mode is enabled or disabled using the <strong>Device</strong> &gt; <strong>Idle Time Detection</strong> option in <strong><a href="../Pages/Page_310878221.html#Anchor_310878221_h3_23">DevMenu</a></strong>. (Note that this option is not found in the HOME Menu.)</p>
+<p>You can also get and change this option from <a href="../Pages/Page_325711330.html">DevMenuCommand</a>.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ Tools\CommandLineTools\RunOnTarget.exe TargetTools\NX-NXFP2-a64\DevMenuCommand\Release\DevMenuCommand.nsp -- debug set-idle-time-detect-mode off
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_198946139_h1_3">Application Features For Controlling Idle State Actions</h1>
+<p>The <code>oe</code> library provides features that the application can use to control the onset of these actions, to a certain extent.</p>
+<p>The following list includes these types of features.</p>
+<p>Some functions have important considerations associated with their use, so make sure that you check the notes.</p>
+<p>For more information about the various functions, see the API reference for the <code>oe</code> library.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>During media playback using the <a href="../Pages/Page_231477348.html">Offline Web Applet</a>, the system controls screen burn-in reduction and the delay for automatically entering sleep mode using dedicated policies. For this reason, the application does not need to independently control idle state actions.</p>
+    <p>The user can disable auto-sleep during media playback by opening the system settings and selecting <strong>Suspend Auto-Sleep While Playing Media Content</strong>.</p>
+  </div>
+</div>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Function</th>
+      <th>Features and Usage</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <th>
+        <span class="ApiLink_void_nn__oe__SetUserInactivityDetectionTimeExtended(bool_isExtended)_NN_NOEXCEPT">nn::oe::SetUserInactivityDetectionTimeExtended()</span>
+      </th>
+      <td>This function can be used to temporarily delay the onset of these actions in scenes where the user is expected to be idle, such as when the closing credits are rolling.</td>
+      <td>
+        <p>There are no considerations specific to this function. For more information, see <a href="#Anchor_198946139_common_notes">Common Important Information</a>.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <div class="content-wrapper">
+          <p>
+            <span class="ApiLink_void_nn__oe__SetUserInactivityDetectionTimeExtendedUnsafe(bool_isExtended)_NN_NOEXCEPT">nn::oe::SetUserInactivityDetectionTimeExtendedUnsafe()</span>
+          </p>
+          <p>(From NX Add-On 3.0.0 and later.)</p>
+        </div>
+      </th>
+      <td>
+        <p>This function can be used to set a longer inactivity detection time extension when a sufficiently long extension cannot be set using <code><span class="ApiLink_nn__oe__SetUserInactivityDetectionTimeExtended">nn::oe::SetUserInactivityDetectionTimeExtended</span>()</code>.</p>
+      </td>
+      <td>
+        <p>
+          <strong>This feature disables the screen burn-in reduction feature, and for that reason use of this feature is subject to additional guidelines.</strong>
+        </p>
+        <ul>
+          <li>To avoid TV screen burn-in by the application, you must implement measures so that pixels do not remain permanently displayed while this feature is in use.</li>
+          <li>It is important to remember that this feature must be released when the images on the screen stop changing, due for example to an error or a pause in play.</li>
+          <li>For more information about these guidelines, see the Nintendo Switch Guidelines.</li>
+        </ul>
+        <p>
+          <br />
+        </p>
+        <p>For more information, see <a href="#Anchor_198946139_common_notes">Common Important Information</a>.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>
+          <span class="ApiLink_void_nn__oe__ReportUserIsActive()_NN_NOEXCEPT">nn::oe::ReportUserIsActive()</span>
+        </p>
+        <p>(From NX Add-On 1.1.0 and later.)</p>
+      </th>
+      <td>
+        <p>This function can be used, at any time, to reset the count of continuous idle time.</p>
+        <p>
+          <br />
+        </p>
+        <p>It is designed for use by applications that use special play formats that cannot be detected as operations by the system itself, such as use of dedicated accessories.</p>
+      </td>
+      <td>
+        <p>
+          <strong>Using this function for retail products requires approval because special considerations are required when using it.</strong>
+        </p>
+        <p>
+          <strong>In addition, you must comply with additional guidelines when using this function.</strong>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p>For more information, see <a href="../Pages/Page_292495029.html">the notes about using the feature to reset the count of continuous idle time.</a>.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <p>
+          <span class="ApiLink_void_nn__oe__BeginAutoSleepDisabledSection()_NN_NOEXCEPT">nn::oe::BeginAutoSleepDisabledSection()</span>
+        </p>
+        <p>
+          <span class="ApiLink_void_nn__oe__EndAutoSleepDisabledSection()_NN_NOEXCEPT">nn::oe::EndAutoSleepDisabledSection()</span>
+        </p>
+        <p>(From NX Add-On 5.2.0 and later.)</p>
+      </th>
+      <td>
+        <p>Temporarily disables auto-sleep.</p>
+        <p>
+          <br />
+        </p>
+        <p>This function is designed for situations where the system may operate for a long period of time while the user is not operating the system, for example music play mode.</p>
+        <p>
+          <br />
+        </p>
+        <p>These functions do not affect the screen burn-in reduction feature.</p>
+        <p>To also disable screen burn-in reduction, use <span class="ApiLink_nn__oe__SetUserInactivityDetectionTimeExtended">nn::oe::SetUserInactivityDetectionTimeExtended</span>() or <span class="ApiLink_nn__oe__SetUserInactivityDetectionTimeExtendedUnsafe">nn::oe::SetUserInactivityDetectionTimeExtendedUnsafe</span>() at the same time.</p>
+      </td>
+      <td>
+        <p>
+          <strong>Using this function for retail products requires approval because special considerations are required when using it.</strong>
+        </p>
+        <p>
+          <strong>In addition, you must comply with additional guidelines when using this function.</strong>
+        </p>
+        <p>
+          <br />
+        </p>
+        <p>For more information, see <a href="../Pages/Page_292494778.html">the notes about using the feature to disable auto-sleep</a>.</p>
+        <p>
+          <br />
+        </p>
+        <p>For more information, see <a href="#Anchor_198946139_common_notes">Common Important Information</a>.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_198946139_common_notes"></a>
+</p>
+<h2 id="Anchor_198946139_h2_1">Common Important Information</h2>
+<p>There are no common considerations for SDK 13.0.0 / NintendoSDK Firmware for NX 13.0.0 and later.</p>
+<h3 id="Anchor_198946139_h3_2">(NintendoSDK Firmware for NX 12.x.x and earlier only) Auto-sleep activates at the moment nn::oe::SetUserInactivityDetectionTimeExtended(false) or nn::oe::SetUserInactivityDetectionTimeExtended() is called.</h3>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>This information only applies if the application is NX Add-On 12.x.x or earlier, and running on NintendoSDK Firmware for NX 12.x.x and earlier.</p>
+    <p>In SDK 13.0.0 / NintendoSDK Firmware for NX 13.0.0 and later, a grace period of up to 90 seconds can be established to prevent the system from going to sleep immediately, so special notice is not required.</p>
+  </div>
+</div>
+<p>For functions for controlling idle state actions other than <code>nn:oe::ReportUserIsActive()</code>, the idle state time counter is assured to not be reset by API calls.</p>
+<p>For this reason, after a temporary change to the screen burn-in reduction and automatic sleep trigger conditions using <code><span class="ApiLink_nn__oe__SetUserInactivityDetectionTimeExtended">nn::oe::SetUserInactivityDetectionTimeExtended</span>()</code> or <code><span class="ApiLink_nn__oe__BeginAutoSleepDisabledSection">nn::oe::BeginAutoSleepDisabledSection</span>()</code>, the policy returns to its original state. If the inactivity timer has already exceeded the specified time, screen burn-in reduction and automatic sleep are activated immediately.</p>
+<p>Specifically, this applies to the moment the following API calls are made.</p>
+<ul>
+  <li>When canceling the extension by calling <code><span class="ApiLink_nn__oe__SetUserInactivityDetectionTimeExtended">nn::oe::SetUserInactivityDetectionTimeExtended</span>(false)</code></li>
+  <li>When canceling the temporary disabling of auto-sleep by calling <code><span class="ApiLink_nn__oe__EndAutoSleepDisabledSection">nn::oe::EndAutoSleepDisabledSection</span>()</code></li>
+</ul>
+<p>If the screen immediately becoming dark or automatically sleeping becomes an issue for game specifications, consider countermeasures such as setting a brief timer prior to restoring the previously changed policy.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__oe__SetUserInactivityDetectionTimeExtended(bool_isExtended)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a7c22abba7b05db494231a2893edfcf91' )
+SetUrl( 'ApiLink_void_nn__oe__SetUserInactivityDetectionTimeExtendedUnsafe(bool_isExtended)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ad3513ab7afd7048df84376b4f684fdf1' )
+SetUrl( 'ApiLink_nn__oe__SetUserInactivityDetectionTimeExtended', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a7c22abba7b05db494231a2893edfcf91' )
+SetUrl( 'ApiLink_void_nn__oe__ReportUserIsActive()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a42c00e7bc82aa57851ad3ac1af529c69' )
+SetUrl( 'ApiLink_void_nn__oe__BeginAutoSleepDisabledSection()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1oe.html#aa8d7caeaf62f2833c9795d42613eea02' )
+SetUrl( 'ApiLink_void_nn__oe__EndAutoSleepDisabledSection()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a27c0216977d28375878821613332bb6d' )
+SetUrl( 'ApiLink_nn__oe__SetUserInactivityDetectionTimeExtendedUnsafe', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ad3513ab7afd7048df84376b4f684fdf1' )
+SetUrl( 'ApiLink_nn__oe__BeginAutoSleepDisabledSection', '../../../Api/HtmlNX/namespacenn_1_1oe.html#aa8d7caeaf62f2833c9795d42613eea02' )
+SetUrl( 'ApiLink_nn__oe__EndAutoSleepDisabledSection', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a27c0216977d28375878821613332bb6d' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

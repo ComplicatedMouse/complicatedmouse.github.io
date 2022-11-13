@@ -1,0 +1,422 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Mesh Trimming Optimization | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Mesh Trimming Optimization -->
+<div class="pagetitle" id="PageId_242405100">Mesh Trimming Optimization</div>
+<div class="text_separate">
+<p>
+  <br />
+</p>
+<h1 id="Anchor_242405100_h1_1">Introduction</h1>
+<p>The layout converter tool LayoutConverter has an option to perform a process of <em>mesh trimming optimization</em> to reduce the number of pixels drawn in a picture pane.<br />For more information about specifying this option, see <a href="../Pages/Page_83955930.html">Layout Binary Converter</a>.<br />This section describes the features of this option in detail.</p>
+<h1 id="Anchor_242405100_h1_2">About Mesh Trimming Optimization</h1>
+<p>A layout picture pane is drawn by mapping textures onto square-shaped meshes comprised of two triangular shapes. If UVs have not been adjusted by a tool such as LayoutEditor, the entire texture is rendered to this square-shaped mesh by UV mapping.<br />As a result, even texture pixels with an alpha of 0 are rasterized by the GPU and worked on by the shader. Because ultimately nothing will be rendered to the screen for these pixels, it is a waste of GPU resources that must be minimized.<br />The mesh trimming optimization process performed by LayoutConverter automatically trims the mesh shapes so these meaningless pixels with an alpha of 0 are not rendered. There are many ways of trimming the meshes, and each has its own advantages and disadvantages.</p>
+<h1 id="Anchor_242405100_h1_3">Types of Optimized Shapes</h1>
+<p>The following figure shows the picture pane before optimization has been applied to the image.<br />To better understand the effect visually, the regions where the alpha value is 0 are shown in black.<br />The orange lines indicate the shapes of the meshes, and all of the images are screenshots of the same size.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_242405100/242406272.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>The different types of optimized shapes are presented in the following table.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <th>Type</th>
+      <th>Usefulness</th>
+    </tr>
+    <tr>
+      <td>AABB</td>
+      <td>
+        <div class="content-wrapper">
+          <p>Creates an optimized mesh from the smallest bounding box in the xy-plane that could contain the opaque area of the texture (an axis-aligned bounding box).</p>
+          <p>This type is useful when the texture data includes transparent blank areas on the top, bottom, and sides.</p>
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_242405100/242406145.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>OBB</td>
+      <td>
+        <div class="content-wrapper">
+          <p>Creates an optimized mesh from the smallest oriented bounding box that could contain the opaque area of the texture.</p>
+          <p>This type is useful when the texture data includes an opaque area that leans relative to the axes, and has transparent blank areas positioned diagonally, such as in the upper-left and lower-right corners.</p>
+          <p>Depending on the shape of the opaque area, the drawing area may become larger than it was before optimization, in which case the OBB optimized mesh will not be created.</p>
+          <div>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_242405100/242406149.png" height="250" class="embedded-image" />
+            </span>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_242405100_h1_4">Added Resources for Mesh Trimming Optimization</h1>
+<p>When mesh trimming optimization is applied, the CPU processing load is increased by several percent to render the optimized meshes, and the size of the layout binary data also increases.<br />OBB optimized shapes place a greater load on the CPU than ABBB optimized shapes.<br />The increase in the amount of binary data is included in the optimization report.</p>
+<h1 id="Anchor_242405100_h1_5">Limitations</h1>
+<p>Note that the optimized result may not be exactly the same dot-by-dot to the non-optimized image, due to computational errors and the like.<br />In addition, there may be data that cannot be optimized depending on the optimization algorithm and the data format.<br />The optimization report may include information that you can check to determine why optimization was not applied to such data.</p>
+<h1 id="Anchor_242405100_h1_6">Mesh Trimming Optimization Report</h1>
+<p>
+  <span class="option">The optimization report is divided into overall information relating to the specified directory, and information about each type of layout data.</span>
+</p>
+<h2 id="Anchor_242405100_h2_1">
+  <span class="option">Overall Information</span>
+</h2>
+<p>
+  <span class="option">Overall statistics for the analyzed layout data are added at the start of the report.</span>
+</p>
+<p>
+  <strong>
+    <span class="option">Sample:</span>
+  </strong>
+</p>
+<p style="margin-left: 60.0px;">
+  <span class="option">Overall information for <code>C:\NintendoSdk\Samples\Sources\Resources\Ui2d</code><br /><strong>Number of layout files: 49</strong><br /><br /><strong>Time of output: 2017/06/23 11:07:48</strong><br /><br /><strong>Number of layout files: 49</strong><br /><strong>Percentage subject to mesh trimming optimization: 24.50593%</strong><br /><strong>Number of virtual pixels target of mesh trimming optimization: 3,310,690 pixels</strong><br /><strong>Number of virtual pixels after mesh trimming optimization: 2,703,998 pixels</strong><br /><strong>Area ratio after mesh trimming optimization: 81.67475%</strong></span>
+</p>
+<p style="margin-left: 60.0px;">
+  <br />
+</p>
+<p>The following table describes the various items in the report.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Number of layout files</td>
+      <td>The analyzed number of layout files.</td>
+    </tr>
+    <tr>
+      <td>Percentage subject to mesh trimming optimization</td>
+      <td>The percentage of the picture pane to which mesh trimming optimization was applied, expressed as a fraction of the analyzed layout files.</td>
+    </tr>
+    <tr>
+      <td>Number of virtual pixels target of mesh trimming optimization</td>
+      <td>
+        <p>The number of virtual pixels (the number of pixels of the texture) in the picture pane for which mesh trimming optimization was attempted.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Number of virtual pixels after mesh trimming optimization</td>
+      <td>The number of virtual pixels (the number of pixels of the texture) in the picture pane after mesh trimming optimization was applied.</td>
+    </tr>
+    <tr>
+      <td>Area ratio after mesh trimming optimization</td>
+      <td>The proportion of virtual pixels after mesh trimming optimization. If this value is less than 100% it means that the drawing area has been reduced as a result of mesh trimming optimization.</td>
+    </tr>
+  </tbody>
+</table>
+<p style="margin-left: 60.0px;">
+  <br />
+</p>
+<h2 id="Anchor_242405100_h2_2">
+  <span class="option">Layout-Specific Information</span>
+</h2>
+<p>This part of the report presents optimization information for each layout file.</p>
+<p>
+  <strong>
+    <span class="option">Sample:</span>
+  </strong>
+</p>
+<p style="margin-left: 60.0px;">
+  <span class="option">Write_Sample.flyt<br /><strong>Numbers of panes</strong><br /></span>
+</p>
+<table class="wrapped" style="margin-left: 30.0px;">
+  <tbody style="margin-left: 30.0px;">
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">Picture</td>
+      <td style="margin-left: 30.0px;">Text</td>
+      <td style="margin-left: 30.0px;">Window</td>
+      <td style="margin-left: 30.0px;">Parts</td>
+      <td style="margin-left: 30.0px;">Bounding</td>
+      <td style="margin-left: 30.0px;">Null</td>
+      <td style="margin-left: 30.0px;">Total</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">10</td>
+      <td style="margin-left: 30.0px;">0</td>
+      <td style="margin-left: 30.0px;">0</td>
+      <td style="margin-left: 30.0px;">0</td>
+      <td style="margin-left: 30.0px;">0</td>
+      <td style="margin-left: 30.0px;">6</td>
+      <td style="margin-left: 30.0px;">16</td>
+    </tr>
+  </tbody>
+</table>
+<p style="margin-left: 60.0px;">
+  <span class="option">
+    <br />
+    <strong>Percentage subject to mesh trimming optimization: 6/10(60%)</strong>
+    <br />
+    <br />
+    <br />
+    <strong>Increase in size of layout binary file size: 156 Bytes</strong> <br /><strong>Number of virtual pixels target of mesh trimming optimization: 393,216 pixels</strong><br /><strong>Number of virtual pixels after mesh trimming optimization: 164,279 pixels</strong><br /><strong>Area ratio after mesh trimming optimization: 41.77831%</strong><br /><br /><strong>Optimization information by pane</strong> </span>
+</p>
+<table class="wrapped" style="margin-left: 30.0px;">
+  <tbody style="margin-left: 30.0px;">
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">Picture Pane Name</td>
+      <td style="margin-left: 30.0px;">Number of Virtual Pixels</td>
+      <td style="margin-left: 30.0px;">Optimization Result</td>
+      <td style="margin-left: 30.0px;">Optimization Constraint</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">P_fontN_00</td>
+      <td style="margin-left: 30.0px;">0 pixels (0&times;0)</td>
+      <td style="margin-left: 30.0px;">-</td>
+      <td style="margin-left: 30.0px;">AlphaTestAnimation</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">P_fontWS_00</td>
+      <td style="margin-left: 30.0px;">0 pixels (0&times;0)</td>
+      <td style="margin-left: 30.0px;">-</td>
+      <td style="margin-left: 30.0px;">VertexColorAnimation</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">P_fontW_00<br />(expression/texture/common/tr_fontW_00.tga)</td>
+      <td style="margin-left: 30.0px;">65,536 pixels (256&times;256)</td>
+      <td style="margin-left: 30.0px;">
+        <strong>45.401% (AABB)</strong>
+        <br />29,754 pixels (171&times;174)</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">P_font4S_00<br />(expression/texture/common/tr_font4_00.tga)</td>
+      <td style="margin-left: 30.0px;">65,536 pixels (256&times;256)</td>
+      <td style="margin-left: 30.0px;">
+        <strong>36.3266% (OBB)</strong>
+        <br />23,807 pixels (179&times;133)</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">P_font4_00<br />(expression/texture/common/tr_font4_00.tga)</td>
+      <td style="margin-left: 30.0px;">65,536 pixels (256&times;256)</td>
+      <td style="margin-left: 30.0px;">
+        <strong>36.3266% (OBB)</strong>
+        <br />23,807 pixels (179&times;133)</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">P_fontFS_00<br />(expression/texture/common/tr_fontF_00.tga)</td>
+      <td style="margin-left: 30.0px;">65,536 pixels (256&times;256)</td>
+      <td style="margin-left: 30.0px;">
+        <strong>41.86249% (AABB)</strong>
+        <br />27,435 pixels (155&times;177)</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">P_fontF_00<br />(expression/texture/common/tr_fontF_00.tga)</td>
+      <td style="margin-left: 30.0px;">65,536 pixels (256&times;256)</td>
+      <td style="margin-left: 30.0px;">
+        <strong>41.86249% (AABB)</strong>
+        <br />27,435 pixels (155&times;177)</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">P_fontNS_00<br />(expression/texture/common/tr_fontN_00.tga)</td>
+      <td style="margin-left: 30.0px;">65,536 pixels (256&times;256)</td>
+      <td style="margin-left: 30.0px;">
+        <strong>48.89069% (AABB)</strong>
+        <br />32,041 pixels (179&times;179)</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">P_Light_00</td>
+      <td style="margin-left: 30.0px;">0 pixels (0&times;0)</td>
+      <td style="margin-left: 30.0px;">-</td>
+      <td style="margin-left: 30.0px;">NoAlphaChannel</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">P_Light_01</td>
+      <td>0 pixels (0&times;0)</td>
+      <td>-</td>
+      <td>NoAlphaChannel</td>
+    </tr>
+  </tbody>
+</table>
+<p>The following table describes the various items in the report.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Layout filename</td>
+      <td>A link to the analyzed layout file.</td>
+    </tr>
+    <tr>
+      <td>Numbers of panes</td>
+      <td>The number of panes of each type in the layout file.</td>
+    </tr>
+    <tr>
+      <td>Percentage subject to mesh trimming optimization</td>
+      <td>The percentage of the picture pane to which mesh trimming optimization was applied, expressed as a fraction of the analyzed layout files.</td>
+    </tr>
+    <tr>
+      <td>Increase in size of layout binary</td>
+      <td>The amount by which the layout binary file has increased in size due to the additional data for optimized meshes.</td>
+    </tr>
+    <tr>
+      <td>Number of virtual pixels target of mesh trimming optimization</td>
+      <td>
+        <p>The number of virtual pixels (the number of pixels of the texture) in the picture pane for which mesh trimming optimization was attempted.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Number of virtual pixels after mesh trimming optimization</td>
+      <td>The number of virtual pixels (the number of pixels of the texture) in the picture pane after mesh trimming optimization was applied.</td>
+    </tr>
+    <tr>
+      <td>Area ratio after mesh trimming optimization</td>
+      <td>The proportion of virtual pixels after mesh trimming optimization. If this value is less than 100% it means that the drawing area has been reduced as a result of mesh trimming optimization.</td>
+    </tr>
+    <tr>
+      <td>Optimization information by pane</td>
+      <td>Presents information for each individual pane and the constraint if optimization was not possible. The following table includes various constraints that make optimization impossible.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <span class="option">
+    <br />
+    <strong>List of Constraints That Can Prevent Mesh Trimming Optimization:</strong>
+  </span>
+</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <th>Optimization Constraint</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <p>InvalidShapeType</p>
+      </td>
+      <td>The picture pane is set to a shape other than a square.</td>
+    </tr>
+    <tr>
+      <td>MultiTexture</td>
+      <td>Multiple textures are being used.</td>
+    </tr>
+    <tr>
+      <td>NoTexture</td>
+      <td>A texture is not being used.</td>
+    </tr>
+    <tr>
+      <td>NoAlphaChannel</td>
+      <td>The texture does not have an alpha channel.</td>
+    </tr>
+    <tr>
+      <td>TransparentImage</td>
+      <td>The texture does not have any opaque pixels.</td>
+    </tr>
+    <tr>
+      <td>OpaquePixelInEdgeForOBB</td>
+      <td>There are opaque pixels in the edges of the texture stretched in the mesh created using OBB.</td>
+    </tr>
+    <tr>
+      <td>DetailedCombiner</td>
+      <td>A detailed combiner is being used.</td>
+    </tr>
+    <tr>
+      <td>VertexColorAnimation</td>
+      <td>Vertex animation is being used.</td>
+    </tr>
+    <tr>
+      <td>VertexColor</td>
+      <td>Vertex color is being used.</td>
+    </tr>
+    <tr>
+      <td>TextureSRTAnimation</td>
+      <td>A texture SRT animation has been set.</td>
+    </tr>
+    <tr>
+      <td>IndTextureSRTAnimation</td>
+      <td>An indirect texture SRT animation has been set.</td>
+    </tr>
+    <tr>
+      <td>TexturePatternAnimation</td>
+      <td>A texture pattern animation has been set.</td>
+    </tr>
+    <tr>
+      <td>TextureMatrix</td>
+      <td>A texture matrix has been set.</td>
+    </tr>
+    <tr>
+      <td>TextureProjection</td>
+      <td>A projection texture is being used.</td>
+    </tr>
+    <tr>
+      <td>ComplexTextureCoordinate</td>
+      <td>The UV coordinates have been set to values other than <code>0-</code> and <code>1</code>.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>FragmentBlendSettingIsNotDefault</p>
+      </td>
+      <td>The fragment operation blend setting has been changed from the default.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>BlackColorAlphaIsNotZero</p>
+      </td>
+      <td>The black color alpha is set to a value other than <code>0</code>.</td>
+    </tr>
+    <tr>
+      <td> BlackColorAlphaAnimation</td>
+      <td>A black color alpha animation has been set.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,375 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Common Features | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Common Features -->
+<div class="pagetitle" id="PageId_112902609">Common Features</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_112902609_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_112902609_h1_2">Common Features</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_112902609_h2_1">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902609_h2_2">Initializing and Finalizing</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902609_h2_3">Starting and Ending Each Mode</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902609_h2_4">Dynamically Switching Modes and Parameters</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902609_h2_5">Getting the IR Motion Camera State</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902609_h2_6">IR Motion Camera Settings</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902609_h2_7">IR Motion Camera External Light Filter</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902609_h2_8">Coordinates for IR Motion Camera Data</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_112902609_h1_1">Introduction</h1>
+<p>This page describes the common features for using the various IR Motion Camera modes.</p>
+<h1 id="Anchor_112902609_h1_2">Common Features</h1>
+<h2 id="Anchor_112902609_h2_1">Overview</h2>
+<p>This page describes how to initialize and finalize the <code>irsensor</code> library, and how to start and end each mode.</p>
+<p>It also describes the coordinate system for the data in each mode.</p>
+<h2 id="Anchor_112902609_h2_2">Initializing and Finalizing</h2>
+<p>To initialize the IR Motion Camera, call the <code><span class="ApiLink_nn__irsensor__GetIrCameraHandle">nn::irsensor::GetIrCameraHandle</span></code> function on an instance of <code><span class="ApiLink_nn__hid__NpadIdType">nn::hid::NpadIdType</span></code> to get the corresponding <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code>.<br /></p>
+<p>
+  <br />
+</p>
+<p>Next, pass the obtained handle to the <code><span class="ApiLink_nn__irsensor__Initialize">nn::irsensor::Initialize</span></code> function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/irsensor.h&gt;
+</span>&nbsp;
+<span class="nn">nn::irsensor::</span><span class="n">IrCameraHandle</span> <span class="n">handle</span> <span class="o">=</span> <span class="nn">nn::irsensor::</span><span class="n">GetIrCameraHandle</span><span class="p">(</span><span class="n">npadIdType</span><span class="p">);</span>
+<span class="nn">nn::irsensor::</span><span class="n">Initialize</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>To finalize the IR Motion Camera, pass the handle of the IR Motion Camera you want to end to the <code><span class="ApiLink_nn__irsensor__Finalize">nn::irsensor::Finalize</span></code> function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">Finalize</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Calling this function frees the handle.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>For the sake of system consistency, if the <code><span class="ApiLink_nn__irsensor__StopImageProcessorAsync">nn::irsensor::StopImageProcessorAsync</span></code> function (newly added in NX Add-On 4.2.0) is called to asynchronously stop the processor and this is immediately followed by a call to <code><span class="ApiLink_nn__irsensor__Finalize">nn::irsensor::Finalize</span></code>, the function is blocked until the internal processor has ended.<br />To avoid this blocking, use the <code><span class="ApiLink_nn__irsensor__GetImageProcessorStatus">nn::irsensor::GetImageProcessorStatus</span></code> function to confirm that the internal processor has stopped before you call <code><span class="ApiLink_nn__irsensor__Finalize">nn::irsensor::Finalize</span></code>.</p>
+  </div>
+</div>
+<h2 id="Anchor_112902609_h2_3">Starting and Ending Each Mode</h2>
+<p>To use the various features of the IR Motion Camera, you must start one of the modes after initializing the IR Motion Camera.<br />The basic workflow for using each mode is as follows.</p>
+<ol>
+  <li>
+    <p>Call the appropriate <code>Run**Processor</code> function, specifying the desired initial settings and the required resources. (Call the function that corresponds to the mode you want to use.)</p>
+  </li>
+  <li>
+    <p>Use the appropriate <code>Get**ProcessorState</code> function to get the IR sensor data.　(Call the <code>Get**ProcessorState</code> function corresponding to the mode you want to use.)</p>
+  </li>
+  <li>
+    <p>Call the <code><span class="ApiLink_nn__irsensor__StopImageProcessor">nn::irsensor::StopImageProcessor</span></code> function to stop capturing data and free up the allocated resources.</p>
+  </li>
+</ol>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The <code><span class="ApiLink_nn__irsensor__StopImageProcessor">nn::irsensor::StopImageProcessor</span></code> function is a synchronous function that blocks while it is waiting for the internal processor to stop. (The exception is the <code>StopImageProcessor</code> function in the NX Add-On 4.0.0 and 4.1.0 packages, which behaves differently. See the separate documentation for more information.)<br />With the release of NX Add-On 4.2.0, the <code><span class="ApiLink_nn__irsensor__StopImageProcessorAsync">nn::irsensor::StopImageProcessorAsync</span></code> function has been added that is called asynchronously and stops the processor asynchronously.<br />Also added is the <code><span class="ApiLink_nn__irsensor__GetImageProcessorStatus">nn::irsensor::GetImageProcessorStatus</span></code> function as a way to check the status of the internal processor. Use this together with the asynchronous function to wait for the completion of the stopping of the internal processor.</p>
+  </div>
+</div>
+<p>For more detailed workflows, see the documentation for each mode.</p>
+<h2 id="Anchor_112902609_h2_4">Dynamically Switching Modes and Parameters</h2>
+<p>This feature is available in NX Add-On 4.0.0 and later.</p>
+<p>You now can call the <code>Run**Processor</code> functions even while a processor is running to dynamically shift modes and change parameters.<br />In addition, the <code><span class="ApiLink_nn__irsensor__ResultIrsensorDeviceNotReady">nn::irsensor::ResultIrsensorDeviceNotReady</span></code> error is returned if the called <code>Get**ProcessorState</code> function does not match the running processor.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In NX Add-On versions 1.x and 3.x, the processing would abort if a mismatched <code>Get**ProcessorState</code> function was called on a running processor.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>Previously, to change the mode or some parameter, it was necessary to first call the <code><span class="ApiLink_nn__irsensor__StopImageProcessor">nn::irsensor::StopImageProcessor</span></code> function and wait for the IR Motion Camera to fully stop before reconfiguring the settings. With this new feature, the mode and parameters can be changed more quickly.<br /></p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Note that shifting to another mode while using image transfer mode, or changing the parameters for that mode, results in the release of the work buffer registered up to that point.</p>
+  </div>
+</div>
+<h2 id="Anchor_112902609_h2_5">Getting the IR Motion Camera State</h2>
+<p>Get the IR Motion Camera state from the return value of data retrieval functions such as the <code><span class="ApiLink_nn__irsensor__GetIrCameraStatus">nn::irsensor::GetIrCameraStatus</span></code> function and<br />the <code><span class="ApiLink_nn__irsensor__GetMomentProcessorStates">nn::irsensor::GetMomentProcessorStates</span></code> function, and handle data during normal operation as appropriate.<br />By correctly handling these states, you can use the IR Motion Camera without paying attention to the various <code>Npad</code> controller styles and their changes.</p>
+<p>The following example uses <code>GetIrCameraStatus</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::irsensor::IrCameraStatus irCameraStatus = nn::irsensor::GetIrCameraStatus(handle);
+if (irCameraStatus == nn::irsensor::IrCameraStatus_Available)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// IR Motion Camera is available.
+}
+else if (irCameraStatus == nn::irsensor::IrCameraStatus_Unsupported)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// No IR Motion Camera is included.
+}
+else if (irCameraStatus == nn::irsensor::IrCameraStatus_Unconnected)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;// No device is connected.
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_112902609_h2_6">IR Motion Camera Settings</h2>
+<p>The IR Motion Camera has the following settings.<br />These settings are available in every mode.　Some of the settings have predefined default values for each mode.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+      <th>Default Value</th>
+      <th>Defined Range</th>
+    </tr>
+    <tr>
+      <td>exposureTime</td>
+      <td>The IR Motion Camera&rsquo;s exposure time, in microseconds (&mu;s).</td>
+      <td>
+        <p>300 [&mu;s] @Moment Mode</p>
+        <p>200 [&mu;s] @Clustering Mode</p>
+        <p>300 [&mu;s] @Image Transfer Mode</p>
+      </td>
+      <td>
+        <p>Within the range inclusive of the values set in each mode for</p>
+        <p>
+          <code>ExposureTimeMin</code> and <code>ExposureTimeMax</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td>lightTarget</td>
+      <td>
+        <p>Specifies the IR LEDs to use. The IR Motion Camera includes two narrow-angle LEDs with half angles of 75&deg; and two wide-angle LEDs with half angles of 130&deg;, and all four can be turned on and off individually.<br /><br />Specify one of the following predefined combinations.</p>
+      </td>
+      <td>
+        <code>IrCameraLightTarget_AllObjects </code> (Common to all modes.)</td>
+      <td>
+        <p>
+          <code>IrCameraLightTarget_AllObjects</code> (Illuminate both groups of LEDs.)</p>
+        <p>
+          <code>IrCameraLightTarget_FarObjects</code> (Illuminates just the narrow angle LEDs.)</p>
+        <p>
+          <code>IrCameraLightTarget_NearObjects</code> (Illuminates just the wide angle LEDs.)</p>
+        <p>
+          <code>IrCameraLightTarget_None</code> (Turns off both groups of LEDs.)</p>
+      </td>
+    </tr>
+    <tr>
+      <td>gain</td>
+      <td>
+        <p>Specifies the digital gain of the IR Motion Camera.<br />Changing the digital gain changes the sensitivity of the IR Motion Camera, which changes the brightness and degree of noise present in images.<br /> Increasing the digital gain makes images brighter but increases the amount of noise.<br /> Conversely, decreasing the digital gain makes images darker but decreases the amount of noise.</p>
+        <p>Specify a value from 1 to 16.</p>
+      </td>
+      <td>
+        <p>8 @Moment Mode</p>
+        <p>2 @Clustering Mode</p>
+        <p>8 @Image Transfer Mode</p>
+      </td>
+      <td>
+        <code>IrCameraGainMin</code> (1) to <code>IrCameraGainMax</code> (16)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>isNegativeImageUsed</code>
+      </td>
+      <td>This flag specifies whether to invert black and white in the images captured by the IR Motion Camera.<br />When black/white inversion is enabled, a pixel with brightness <code><em>x</em></code> is converted to a brightness of <code>255 - <em>x</em></code>.</td>
+      <td>
+        <code>false</code> (Common to all modes.)</td>
+      <td>
+        <code>true</code> or <code>false</code></td>
+    </tr>
+  </tbody>
+</table>
+<p>These settings are stored as members of the <code><span class="external-link"><span class="ApiLink_nn__irsensor__IrCameraConfig">nn::irsensor::IrCameraConfig</span></span></code> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">IrCameraConfig</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">::</span><span class="nn">nn::</span><span class="n">TimeSpanType</span> <span class="n">exposureTime</span><span class="p">;</span> <span class="c1">//!&lt; The exposure time when taking images (ExposureTimeMin to ExposureTimeMax (These values are set for each image processing mode.)).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IrCameraLightTarget</span> <span class="n">lightTarget</span><span class="p">;</span> <span class="c1">//!&lt; The LED illumination settings to use when taking images.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">gain</span><span class="p">;</span>                        <span class="c1">//!&lt; The digital gain to use when taking images (IrCameraGainMin to IrCameraGainMax).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">bool</span> <span class="n">isNegativeImageUsed</span><span class="p">;</span>        <span class="c1">//!&lt; Specifies whether to invert black and white in captured images.
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The desired values for each setting can be specified when starting one of the camera modes to start that camera mode with those settings.</p>
+<h2 id="Anchor_112902609_h2_7">IR Motion Camera External Light Filter</h2>
+<p>When the IR Motion Camera is being used to detect objects or markers, it can be subjected to noise in the form of IR light generated by objects themselves, including the sun and LED lights. (This light is called <em>external light</em> to distinguish it from the light emitted by the LEDs of the IR Motion Camera itself.) To deal with this noise, the IR Motion Camera has a feature for filtering external light.<br /></p>
+<p>Enabling the filter makes it possible to remove some of the external light. However, if the external light is too strong or if the object is overlapping with the light source, for example, the external light cannot be filtered out completely and noise may still be present.<br />This type of noise is known as <em>ambient noise</em>, and the current ambient noise level can be obtained along with the current sensor data in each of the IR Motion Camera modes. <br />Application developers can use this data to notify users whether their current play environment is good or bad in terms of the ambient noise level and to instruct users to change their play environment if the current ambient noise level is excessive.</p>
+<p>Note that disabling the external light filter feature also disables measurement of the ambient noise level.</p>
+<p>
+  <code>
+    <span class="ApiLink_nn__irsensor__IrCameraAmbientNoiseLevel">nn::irsensor::IrCameraAmbientNoiseLevel</span>
+  </code> defines all of the ambient noise level states.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">enum</span> <span class="n">IrCameraAmbientNoiseLevel</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IrCameraAmbientNoiseLevel_Low</span><span class="p">,</span>     <span class="c1">//!&lt; The ambient noise level is low, and the IR processor can be used normally.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IrCameraAmbientNoiseLevel_Middle</span><span class="p">,</span>  <span class="c1">//!&lt; The ambient noise level is moderate and may start to affect the behavior of the IR processor.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IrCameraAmbientNoiseLevel_High</span><span class="p">,</span>    <span class="c1">//!&lt; The ambient noise level is high, and the IR processor cannot be used normally.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IrCameraAmbientNoiseLevel_Unknown</span><span class="p">,</span> <span class="c1">//!&lt; Ambient noise level measurement is currently disabled, so the current noise level is not known.
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_112902609_h2_8">Coordinates for IR Motion Camera Data</h2>
+<p>Because the Joy-Con may be held differently depending on the application, you must be careful about the coordinate system for data read from the IR Motion Camera.</p>
+<p>This section describes the coordinate system for the data in the different IR Motion Camera modes (clustering, moment, and image transfer).</p>
+<p>The coordinate system for data from the sensor is mapped as follows relative to the orientation of the Joy-Con.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_112902609/125174600.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p>In clustering mode and moment mode, the output coordinate system is mapped as shown in the preceding image.</p>
+<p>In image transfer mode, this mapping is used to store data to the buffer in the format shown in the following image.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_112902609/125174603.png" width="200" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__irsensor__GetIrCameraHandle', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a4772960359a06fcd86d2b9ffe85059fc' )
+SetUrl( 'ApiLink_nn__hid__NpadIdType', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a5923008962b52bf501f91b30013aedd6' )
+SetUrl( 'ApiLink_nn__irsensor__IrCameraHandle', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_ir_camera_handle.html' )
+SetUrl( 'ApiLink_nn__irsensor__Initialize', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a43c18eac7fe6430f1c9620e29169cf1a' )
+SetUrl( 'ApiLink_nn__irsensor__Finalize', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a6265f5c6e6d6fc0e67fc6882a8945284' )
+SetUrl( 'ApiLink_nn__irsensor__StopImageProcessorAsync', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a2777438798de9cf9a3bfebbeb48251b0' )
+SetUrl( 'ApiLink_nn__irsensor__GetImageProcessorStatus', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a07eb18481070f89065809a60a5928bcb' )
+SetUrl( 'ApiLink_nn__irsensor__StopImageProcessor', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a3052171f2c63aafc0e4a164366ae22d7' )
+SetUrl( 'ApiLink_nn__irsensor__ResultIrsensorDeviceNotReady', '../../../Api/HtmlNX/classnn_1_1irsensor_1_1_result_irsensor_device_not_ready.html' )
+SetUrl( 'ApiLink_nn__irsensor__GetIrCameraStatus', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#acf66c625dc12cd1fb0d06e79eb1d32a5' )
+SetUrl( 'ApiLink_nn__irsensor__GetMomentProcessorStates', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a54d616f420145c9b7ac415d3c3d93523' )
+SetUrl( 'ApiLink_nn__irsensor__IrCameraConfig', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_ir_camera_config.html' )
+SetUrl( 'ApiLink_nn__irsensor__IrCameraAmbientNoiseLevel', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a703533208b1dbc28e3cdaab0273feb57' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,298 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Mutexes | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Mutexes -->
+<div class="pagetitle" id="PageId_83955800">Mutexes</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955800_h1_1">Mutex</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955800_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955800_h3_1">Recursive Lock Feature</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955800_h3_2">Priority Inheritance</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955800_h3_3">Lock Level Feature</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_83955800_h2_2">Using Mutex</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955800_h2_3">Example of Using Mutexes</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955800_h2_4">Mutex API References</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83955800_h1_1">Mutex</h1>
+<h2 id="Anchor_83955800_h2_1">Feature Overview</h2>
+<p>Mutex is a synchronization feature that allows mutual exclusion of shared resources that are being used among multiple <a href="../Pages/Page_83955697.html">threads</a>.</p>
+<p>The <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">LockMutex()</span> function locks the mutex and the <span class="ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT">UnlockMutex()</span> function unlocks it. A locked mutex can only be unlocked by the thread that set the lock. This provides for mutual exclusion of other threads that try to call <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">LockMutex</span> on that same mutex while it is locked.</p>
+<p>The mutex mechanism also provides a recursive lock feature and a lock level feature. The following sections describe these features.</p>
+<p>If a mutex is locked and the locking thread is ended, the state of that mutex is undefined. Before ending a thread, make sure that you properly unlock the mutex.<br /></p>
+<h3 id="Anchor_83955800_h3_1">Recursive Lock Feature</h3>
+<p>Recursive locking is a feature that allows the same thread to acquire a lock multiple times.</p>
+<p>If recursive locks are permitted, a thread that has locked a mutex can lock that mutex again and again. To completely unlock that mutex, it must be unlocked as many times as it was locked.</p>
+<p>The setting to permit recursive locks is specified when a mutex is initialized.</p>
+<h3 id="Anchor_83955800_h3_2">Priority Inheritance</h3>
+<p>In the Mutex feature, problems such as priority inversion may occur when multiple threads lock the same mutex. The priority inheritance feature can be activated to alleviate these problems. For example, assume a situation where, when thread A attempts to lock a mutex, thread B with a lower priority than thread A has already locked that mutex. This feature temporarily raises the priority of thread B to match that of thread A, which allows processing for thread B to be completed as soon as possible. Thread B's priority is restored to the original value after thread B unlocks the mutex. These priority changes are all performed automatically.</p>
+<p>The detailed algorithm for priority inheritance is implemented and defined. In other words, it is not strictly defined in public specifications, and an algorithm different from the conventional one may be applied along with a firmware update. (Changes to the algorithm are performed while taking into account compatibility with various applications that have previously undergone master submission.) For this reason, do not implement programs that assume when priority inheritance is activated or canceled, or any specific priority values ​​before and after that. (You usually do not have to be this careful.)</p>
+<p>Also, there is a feature in OS-API to get thread priorities, and it is designed to return different priorities as follows. These return values identical to when priority inheritance is not activated.</p>
+<ul>
+  <li>
+    <code>
+      <span class="ApiLink_nn__os__GetThreadCurrentPriority">nn::os::GetThreadCurrentPriority</span>()</code> ... Returns the current thread priority, taking into account priority inheritance.</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__os__GetThreadPriority">nn::os::GetThreadPriority</span>()</code> ... Returns the original thread priority when priority inheritance is not activated.</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Priority inheritance may sometimes be activated even when an application is not explicitly using the mutex feature. This happens when features equivalent to mutex are used internally in SDK-API. This is automatically activated and canceled, so application developers do not usually have to be aware of these operations.</p>
+  </div>
+</div>
+<h3 id="Anchor_83955800_h3_3">Lock Level Feature</h3>
+<p>The lock level feature is a debug feature for monitoring the lock/unlock order for a mutex.<br />This feature can be used in the Debug build and the Develop build.<br />In the Release build, the lock level feature is disabled to improve processing speed.<br /></p>
+<p>You can use this feature to detect an improper lock order that differs from the norm, or sequences such as when locks are unlocked in reverse order of their locking.<br /></p>
+<p>Lock levels are detected using a mechanism like the following one.</p>
+<ul>
+  <li>Specify a lock level value for each mutex when it is initialized.<ul><li>Set the lock level value in the range from <span class="ApiLink_nn__os__MutexLockLevelMin">nn::os::MutexLockLevelMin</span> to <span class="ApiLink_nn__os__MutexLockLevelMax">nn::os::MutexLockLevelMax</span>.</li><li>Specify <code>0</code> to disable the lock level feature for that mutex.</li></ul></li>
+</ul>
+<ul>
+  <li>Manage the current lock level and the lock history for each thread.<ul><li>The current lock level is initialized to 0 when the thread is created.</li><li>The lock history is managed as a 32-bit bit pattern, with each bit corresponding to a lock level value.<ul><li>If a mutex is locked successfully, the corresponding bit in the lock history is set to <code>1</code>.</li><li>If a mutex is unlocked successfully, the corresponding bit in the lock history is cleared to <code>0</code>.</li></ul></li><li>The current lock level and the lock history are changed by the various functions when the <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">LockMutex()</span> and <span class="ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT">UnlockMutex()</span> functions are called.<br /></li></ul></li>
+</ul>
+<ul>
+  <li>When a thread calls the <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">LockMutex</span> function, the current lock level is controlled in the following ways.<ul><li>If the lock level is set to <code>0</code> for the mutex, lock-level detection is not performed.  </li><li>If the lock level value set for the mutex is larger than the current lock level, the lock succeeds and the lock history is updated.</li><li>If the lock level value set for the mutex is smaller than the current lock level, the process fails on an assertion.</li><li>If the mutex is successfully locked, the current lock level is changed to the lock level value.</li></ul></li>
+</ul>
+<ul>
+  <li>When a thread calls the <span class="ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT">UnlockMutex</span> function, the current lock level is controlled in the following ways.<br /><ul><li>If the lock level is set to <code>0</code> for the mutex, lock-level detection is not performed.  </li><li>If the lock level value set for the mutex is the same as the current lock level, the lock succeeds and the lock history is updated.  </li><li>If the lock level value set for the mutex differs from the current lock level, the process fails on an assertion.</li><li>If the mutex is successfully unlocked, the current lock level reverts to the lock level value before that lock.</li></ul></li>
+</ul>
+<p>
+  <br />
+</p>
+<p>This same behavior for <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">LockMutex</span> also takes place for the <span class="ApiLink_bool_nn__os__TryLockMutex(MutexType_*mutex)_NN_NOEXCEPT">TryLockMutex</span> function.</p>
+<p>To use this lock level feature, you must decided ahead to time what lock level value to set for each individual mutex used by the application.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955800_h2_2">Using Mutex</h2>
+<p>To use a mutex, prepare an <span class="ApiLink_nn__os__MutexType">nn::os::MutexType</span> structure object as follows.<br />There are no restrictions on where the object can be defined.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="nn">nn::os::</span><span class="n">MutexType</span>    <span class="n">g_Mutex</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Use the defined object according to the following procedure.</p>
+<ol>
+  <li>
+    <p>Before you use a mutex, you must initialize it.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="mi">0</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Instead of dynamic initialization as described later, you can use a macro in a static initialization. The lock level will always be 0 in this case.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>&nbsp;<span class="nn">nn::os::</span><span class="n">MutexType</span> <span class="n">g_Mutex</span> <span class="o">=</span> <span class="n">NN_OS_MUTEX_INITIALIZER</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Lock the mutex as needed.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">LockMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Unlock the mutex as needed.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">UnlockMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>When you have finished using the mutex, free it.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FinalizeMutex</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Mutex</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_83955800_h2_3">Example of Using Mutexes</h2>
+<p>For an actual example of using mutexes, see the <span class="ApiLink_PageSampleOsMutex">Mutex Feature Sample Program</span>.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955800_h2_4">Mutex API References</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeMutex(MutexType_*mutex|_bool_recursive|_int_lockLevel)_NN_NOEXCEPT">nn::os::InitializeMutex</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeMutex(MutexType_*mutex)_NN_NOEXCEPT">nn::os::FinalizeMutex</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">nn::os::LockMutex</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__TryLockMutex(MutexType_*mutex)_NN_NOEXCEPT">nn::os::TryLockMutex</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT">nn::os::UnlockMutex</span>
+  </li>
+  <li>
+    <span class="ApiLink_bool_nn__os__IsMutexLockedByCurrentThread(const_MutexType_*mutex)_NN_NOEXCEPT">nn::os::IsMutexLockedByCurrentThread</span>
+  </li>
+  <li>
+    <span class="ApiLink_NN_OS_MUTEX_INITIALIZER">NN_OS_MUTEX_INITIALIZER</span> (macro)</li>
+</ul>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8d4678856d87c3faea21f47ced342bb6' )
+SetUrl( 'ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#aa661a7036a18c378a694ad67941cd75e' )
+SetUrl( 'ApiLink_nn__os__GetThreadCurrentPriority', '../../../Api/HtmlNX/namespacenn_1_1os.html#a9b6b2e5e1968e008dde27d6c4762b33d' )
+SetUrl( 'ApiLink_nn__os__GetThreadPriority', '../../../Api/HtmlNX/namespacenn_1_1os.html#a912a6d5e17c206344f177bc192cb1e50' )
+SetUrl( 'ApiLink_nn__os__MutexLockLevelMin', '../../../Api/HtmlNX/namespacenn_1_1os.html#aafb8cce9509759efcb7b1080b20ca960' )
+SetUrl( 'ApiLink_nn__os__MutexLockLevelMax', '../../../Api/HtmlNX/namespacenn_1_1os.html#a20b0e2596b8091c49374130b049168f6' )
+SetUrl( 'ApiLink_bool_nn__os__TryLockMutex(MutexType_*mutex)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#af32963cc501eefcb10a0ebb993080b9f' )
+SetUrl( 'ApiLink_nn__os__MutexType', '../../../Api/HtmlNX/structnn_1_1os_1_1_mutex_type.html' )
+SetUrl( 'ApiLink_PageSampleOsMutex', '../../../Api/HtmlNX/_page_sample_os_mutex.html' )
+SetUrl( 'ApiLink_void_nn__os__InitializeMutex(MutexType_*mutex|_bool_recursive|_int_lockLevel)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8d0a550df15490a884932a062dc26533' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeMutex(MutexType_*mutex)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8ce43d38754bf3049ab8d60b9d9e0046' )
+SetUrl( 'ApiLink_bool_nn__os__IsMutexLockedByCurrentThread(const_MutexType_*mutex)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3a2107dd611741af2a44adf2dad29c74' )
+SetUrl( 'ApiLink_NN_OS_MUTEX_INITIALIZER', '../../../Api/HtmlNX/os___mutex_api_8h.html#a90be4df5dbd89de101035979076507a8' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,604 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Loading Resources | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Loading Resources -->
+<div class="pagetitle" id="PageId_203559814">Loading Resources</div>
+<div class="text_separate">
+<h1 id="Anchor_203559814_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <ul>
+      <li>
+        <a href="#Anchor_203559814_h3_1">Using Sound Archives</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_203559814_h4_1">MemorySoundArchive</a>
+        </li>
+        <li>
+          <a href="#Anchor_203559814_h4_2">FsSoundArchive</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_203559814_h3_2">Loading Using Add-On Sound Archives</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_203559814_h4_3">Specification for Add-On Sound Archives</a>
+        </li>
+        <li>
+          <a href="#Anchor_203559814_h4_4">Using Add-On Sound Archives</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_203559814_h3_3">Loading Using a Group</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_203559814_h4_5">Group Differences</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_203559814_h1_2">Loading Resources</h1>
+<p>To play back sound data, you must load the sound data from resource files into memory.</p>
+<p>The sound data that is used in the <span class="ApiLink_PageSampleAtkSimple"><code>AtkSimple</code> sample</span> is loaded individually from <code><span class="ApiLink_nn__atk__FsSoundArchive">nn::atk::FsSoundArchive</span></code> using <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code>. Various scenarios are possible for actual games, however, including placing all sound data from a small resource file in memory, and loading all the sound data at one time to use in a game scene.<br /><br /></p>
+<p>This section describes functionality for loading resources of this kind.</p>
+<h3 id="Anchor_203559814_h3_1">Using Sound Archives</h3>
+<p>There are two general formats for the <code>atk</code> library to use the sound archive (BFSAR) files created with SoundMaker: <code><span class="ApiLink_nn__atk__MemorySoundArchive">nn::atk::MemorySoundArchive</span></code> and <code><span class="ApiLink_nn__atk__FsSoundArchive">nn::atk::FsSoundArchive</span></code>.<br /></p>
+<p>(There are also sound archives in the form of <code><span class="ApiLink_nn__atk__AddonSoundArchive">nn::atk::AddonSoundArchive</span></code> objects, but they are described separately in Loading Using Add-On Sound Archives.)<br /><br /></p>
+<p>Resources are loaded differently depending on the format of the sound archive. Choose the format based on your game because the differences affect memory use and file access.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>MemorySoundArchive</th>
+      <th>FsSoundArchive</th>
+    </tr>
+    <tr>
+      <td>Handling BFSAR Files</td>
+      <td>Place All BFSAR Files in Memory</td>
+      <td>Only Place Needed Data From BFSAR Files in Memory</td>
+    </tr>
+    <tr>
+      <td>Recommended Uses</td>
+      <td>
+        <p>The BFSAR files are small, or there is room in memory.</p>
+      </td>
+      <td>Need to keep memory use low.</td>
+    </tr>
+    <tr>
+      <td>Memory Use</td>
+      <td>Large</td>
+      <td>
+        <strong>Low - Medium</strong>
+      </td>
+    </tr>
+    <tr>
+      <td>File access</td>
+      <td>
+        <strong>Only occurs the first time placing in memory.</strong>
+      </td>
+      <td>An appropriate amount of sound date is loaded.</td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_203559814_h4_1">MemorySoundArchive</h4>
+<p>Places all sound archive files in memory.</p>
+<p>Placing all sound data in memory eliminates the need to load data before playback, but memory use increases. </p>
+<p>This is a good choice when the resource files are small, there is sufficient space in memory, or when you do not want to manage resource loading in detail.</p>
+<h5 id="Anchor_203559814_h5_1">Using MemorySoundArchive</h5>
+<p>To use <code>MemorySoundArchive</code>, you must load the BFSAR sound archive file into memory before initializing the sound archive.</p>
+<div class="expand-container" id="expander-203559814-1">
+  <div class="expand-control" id="expander-control-203559814-1">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Loading Sound Archives Into Memory</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-203559814-1">
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::fs::</span><span class="n">FileHandle</span> <span class="n">fileHandle</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">OpenFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fileHandle</span><span class="p">,</span> <span class="s">&quot;content:/Common.bfsar&quot;</span><span class="p">,</span> <span class="nn">nn::fs::</span><span class="n">OpenMode_Read</span><span class="p">);</span>
+<span class="n">NN_ABORT_UNLESS</span><span class="p">(</span> <span class="n">result</span><span class="p">,</span> <span class="s">&quot;cannot open SoundArchive</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+
+<span class="kt">int64_t</span> <span class="n">fileSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">GetFileSize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fileSize</span><span class="p">,</span> <span class="n">fileHandle</span><span class="p">);</span>
+<span class="n">NN_ABORT_UNLESS</span><span class="p">(</span> <span class="n">result</span><span class="p">,</span> <span class="s">&quot;cannot get FileSize</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+
+
+<span class="kt">void</span><span class="o">*</span> <span class="n">pMemoryForMemorySoundArchive</span> <span class="o">=</span> <span class="nn">nns::atk::</span><span class="n">AllocateForMemoryPool</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fileSize</span><span class="p">),</span> <span class="nn">nn::atk::SoundDataManager::</span><span class="n">BufferAlignSize</span><span class="p">)</span>
+
+<span class="kt">size_t</span> <span class="n">readSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">ReadFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">readSize</span><span class="p">,</span> <span class="n">fileHandle</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pMemoryForMemorySoundArchive</span><span class="p">,</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fileSize</span><span class="p">));</span>
+<span class="n">NN_ABORT_UNLESS</span><span class="p">(</span> <span class="n">result</span><span class="p">,</span> <span class="s">&quot;cannot read SoundArchive</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="nn">nn::fs::</span><span class="n">CloseFile</span><span class="p">(</span><span class="n">fileHandle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p>After loading the BFSAR files into memory, pass the address where the BFSAR files were loaded to <code><span class="ApiLink_nn__atk__MemorySoundArchive__Initialize">nn::atk::MemorySoundArchive::Initialize</span></code>.</p>
+<div class="expand-container" id="expander-203559814-2">
+  <div class="expand-control" id="expander-control-203559814-2">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">MemorySoundArchive Initialization</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-203559814-2">
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::atk::</span><span class="n">MemorySoundArchive</span> <span class="n">memorySoundArchive</span><span class="p">;</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">memorySoundArchive</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span><span class="n">pMemoryForMemorySoundArchive</span><span class="p">);</span>
+<span class="n">NN_ABORT_UNLESS</span><span class="p">(</span> <span class="n">result</span><span class="p">,</span> <span class="s">&quot;cannot initialize SoundArchive</span><span class="se">\n</span><span class="s">&quot;</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p>The playback of sounds within BFSAR files is possible without calling <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code> if the basic initialization of the <code>atk</code> library is complete.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>You cannot play stream sounds back when using <code>MemorySoundArchive</code>.<br />You must set an appropriate root directory to <code><span class="ApiLink_nn__atk__SoundArchive__SetExternalFileRoot">nn::atk::SoundArchive::SetExternalFileRoot</span></code> to play back stream sounds.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h4 id="Anchor_203559814_h4_2">FsSoundArchive</h4>
+<p>Only the necessary sound data is loaded from sound archive files and placed in memory.</p>
+<p>You can limit memory usage by placing only the needed sound data in memory, but this requires that you manage resource loading to control which sound data is loaded and when.<br /></p>
+<p>Use this option to place only necessary sound data in memory and to manage memory use.<br />It may be easier to manage resource loading when you combine heaps introduced in <a href="../Pages/Page_83956038.html">Memory Management</a>, and group features, described in the following section.<br />Use these features depending on the needs of your game. </p>
+<h5 id="Anchor_203559814_h5_2">Using FsSoundArchive</h5>
+<p>For more information, see the description in the Initializing Sound Archives section in the <em><a href="../Pages/Page_83956051.html">Quick Start</a></em>.</p>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_203559814_h3_2">Loading Using Add-On Sound Archives</h3>
+<p>An <em>add-on sound archive</em> is an archive that can be used to add sound items after <code>SoundArchivePlayer</code> has been initialized in combination with the <code>FsSoundArchive</code> and <code>MemorySoundArchive</code> objects that were configured at the time of initialization.<br />(From now on, <code>FsSoundArchive</code> and <code>MemorySoundArchive</code> will be referred to as the <em>main sound archives</em>.)<br />By combining the main sound archives with add-on sound archives, you can use a single <code>SoundArchivePlayer</code> to handle multiple sound archives.</p>
+<p>You can create add-on sound archives for sounds that are used only in a certain game scene, or for sounds that are included in downloadable content. By adding these archives to a sound archive player, you can add sound items when they are needed.<br /></p>
+<p>In addition, you can clear out sound items by removing add-on sound archives from the sound archive player after they are finished being used, which reduces the number of resident sound items and cuts down on memory usage.<br /></p>
+<p>The following sections describe the specification for add-on sound archives, and how to use them.</p>
+<h4 id="Anchor_203559814_h4_3">Specification for Add-On Sound Archives</h4>
+<p>Add-on sound archives (<code><span class="ApiLink_nn__atk__AddonSoundArchive">nn::atk::AddonSoundArchive</span></code>) inherit <code>MemorySoundArchive</code>, so they are used in the same way, which is by loading sound archive files into memory.<br />As a result, operations such as reading resources, accessing files, and loading strings for items are all handled the same way as with <code>MemorySoundArchive</code>.</p>
+<p>For more information about handling add-on sound archives, see <a href="../Pages/Page_164358046.html">Guide &gt; Add-On Sound Archives</a>.</p>
+<h4 id="Anchor_203559814_h4_4">Using Add-On Sound Archives</h4>
+<p>First, specify the maximum number of add-on sound archives that can be used and initialize SoundArchivePlayer. </p>
+<div class="expand-container" id="expander-203559814-3">
+  <div class="expand-control" id="expander-control-203559814-3">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Initializing SoundArchivePlayer</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-203559814-3">
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Initializing SoundArchivePlayer (specify the AddonSoundArchive count and initialize).
+</span><span class="nn">nn::atk::</span><span class="n">SoundArchivePlayer</span> <span class="n">soundArchivePlayer</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">AddonSoundArchiveCount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="nn">std::</span><span class="kt">size_t</span> <span class="n">memSizeForSoundArchivePlayer</span> <span class="o">=</span> <span class="n">soundArchivePlayer</span><span class="p">.</span><span class="n">GetRequiredMemSize</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SoundArchive</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">AddonSoundArchiveCount</span> <span class="p">);</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">pMemoryForSoundArchivePlayer</span> <span class="o">=</span> <span class="nn">nns::atk::</span><span class="n">Allocate</span><span class="p">(</span> <span class="n">memSizeForSoundArchivePlayer</span><span class="p">,</span> <span class="nn">nn::atk::SoundArchivePlayer::</span><span class="n">BufferAlignSize</span> <span class="p">);</span>
+
+<span class="nn">nn::atk::SoundArchivePlayer::</span><span class="n">InitializeParam</span> <span class="n">initializeParam</span><span class="p">;</span>
+<span class="n">initializeParam</span><span class="p">.</span><span class="n">pSoundArchive</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">g_SoundArchive</span><span class="p">;</span>
+<span class="n">initializeParam</span><span class="p">.</span><span class="n">pSoundDataManager</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">g_SoundDataManager</span><span class="p">;</span>
+<span class="n">initializeParam</span><span class="p">.</span><span class="n">pSetupBuffer</span> <span class="o">=</span> <span class="n">pMemoryForSoundArchivePlayer</span><span class="p">;</span>
+<span class="n">initializeParam</span><span class="p">.</span><span class="n">setupBufferSize</span> <span class="o">=</span> <span class="n">memSizeForSoundArchivePlayer</span><span class="p">;</span>
+<span class="n">initializeParam</span><span class="p">.</span><span class="n">pStreamBuffer</span> <span class="o">=</span> <span class="n">g_pMemoryForStreamBuffer</span><span class="p">;</span>
+<span class="n">initializeParam</span><span class="p">.</span><span class="n">streamBufferSize</span> <span class="o">=</span> <span class="n">g_MemSizeForStreamBuffer</span><span class="p">;</span>
+<span class="n">initializeParam</span><span class="p">.</span><span class="n">addonSoundArchiveCount</span> <span class="o">=</span> <span class="n">AddonSoundArchiveCount</span><span class="p">;</span>
+<span class="n">soundArchivePlayer</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span> <span class="n">initializeParam</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p>Next, load the sound archive file (BFSAR file), that will become the add-on sound archive, into memory. This is the same procedure as for MemorySoundArchive.</p>
+<div class="expand-container" id="expander-203559814-4">
+  <div class="expand-control" id="expander-control-203559814-4">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Loading the Sound Archive Into Memory</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-203559814-4">
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Load the archive into memory.
+</span><span class="nn">nn::fs::</span><span class="n">FileHandle</span> <span class="n">fileHandle</span><span class="p">;</span>
+<span class="nn">nn::fs::</span><span class="n">OpenFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fileHandle</span><span class="p">,</span> <span class="s">&quot;content:/Addon.bfsar&quot;</span><span class="p">,</span> <span class="nn">nn::fs::</span><span class="n">OpenMode_Read</span><span class="p">);</span>
+
+<span class="kt">int64_t</span> <span class="n">fileSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">GetFileSize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fileSize</span><span class="p">,</span> <span class="n">fileHandle</span><span class="p">);</span>
+<span class="n">NN_ABORT_UNLESS</span><span class="p">(</span> <span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="p">);</span>
+
+<span class="c1">// The archive loaded into memory contains waveforms, so the memory must be allocated from a heap managed by the memory pool.
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">pMemoryForAddonSoundArchive</span> <span class="o">=</span> <span class="nn">nns::atk::</span><span class="n">AllocateForMemoryPool</span><span class="p">(</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fileSize</span><span class="p">)</span> <span class="p">);</span>
+
+<span class="c1">// Read the file.
+</span><span class="kt">size_t</span> <span class="n">readSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">ReadFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">readSize</span><span class="p">,</span> <span class="n">fileHandle</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pMemoryForAddonSoundArchive</span><span class="p">,</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fileSize</span><span class="p">));</span>
+<span class="n">NN_ABORT_UNLESS</span><span class="p">(</span> <span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="p">);</span>
+<span class="nn">nn::fs::</span><span class="n">CloseFile</span><span class="p">(</span><span class="n">fileHandle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p>After the BFSAR file has been loaded into memory, initialize the add-on sound archive and <code>SoundDataManager</code> object that will be used with it.</p>
+<div class="expand-container" id="expander-203559814-5">
+  <div class="expand-control" id="expander-control-203559814-5">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Initializing the Add-On Sound Archive and SoundDataManager</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-203559814-5">
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Initialize the add-on sound archive.
+</span><span class="nn">nn::atk::</span><span class="n">AddonSoundArchive</span> <span class="n">addonSoundArchive</span><span class="p">;</span>
+<span class="n">addonSoundArchive</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span><span class="n">pMemoryForAddonSoundArchive</span><span class="p">);</span>
+<span class="n">addonSoundArchive</span><span class="p">.</span><span class="n">SetExternalFileRoot</span><span class="p">(</span><span class="s">&quot;content:/&quot;</span><span class="p">);</span>
+
+<span class="c1">// Initialize SoundDataManager for the add-on sound archive.
+</span><span class="nn">nn::atk::</span><span class="n">SoundDataManager</span> <span class="n">addonSoundDataManager</span><span class="p">;</span>
+<span class="kt">size_t</span> <span class="n">memSizeForAddonSoundDataManager</span> <span class="o">=</span> <span class="n">addonSoundDataManager</span><span class="p">.</span><span class="n">GetRequiredMemSize</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">addonSoundArchive</span> <span class="p">);</span>
+<span class="kt">void</span><span class="o">*</span> <span class="n">pMemoryForAddonSoundDataManager</span> <span class="o">=</span> <span class="nn">nns::atk::</span><span class="n">Allocate</span><span class="p">(</span> <span class="n">memSizeForAddonSoundDataManager</span><span class="p">,</span> <span class="nn">nn::atk::SoundDataManager::</span><span class="n">BufferAlignSize</span> <span class="p">);</span>
+<span class="kt">bool</span> <span class="n">isSuccess</span> <span class="o">=</span> <span class="n">addonSoundDataManager</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&amp;</span><span class="n">addonSoundArchive</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pMemoryForAddonSoundDataManager</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memSizeForAddonSoundDataManager</span> <span class="p">);</span>
+<span class="n">NN_ABORT_UNLESS</span><span class="p">(</span> <span class="n">isSuccess</span><span class="p">,</span> <span class="s">&quot;cannot initialize SoundDataManager&quot;</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p>Next, add the add-on sound archive to an initialized <code>SoundArchivePlayer</code>.</p>
+<div class="expand-container" id="expander-203559814-6">
+  <div class="expand-control" id="expander-control-203559814-6">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Adding the Add-On Sound Archive to a SoundArchivePlayer </span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-203559814-6">
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">soundArchivePlayer</span><span class="p">.</span><span class="n">AddAddonSoundArchive</span><span class="p">(</span><span class="s">&quot;Addon&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">addonSoundArchive</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">addonSoundDataManager</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p>This step makes it possible to play the sounds inside the add-on sound archive.<br />To actually play the sounds inside the add-on sound archive, specify the name of the add-on sound archive as an argument during playback.<br />Add-on sound archives work the same way as <code>MemorySoundArchive</code>, so you do not need to call <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code>.</p>
+<div class="expand-container" id="expander-203559814-7">
+  <div class="expand-control" id="expander-control-203559814-7">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Playing a Sound Item in an Add-on Sound Archive</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-203559814-7">
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">soundArchivePlayer</span><span class="p">.</span><span class="n">StartSound</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SoundHandle</span><span class="p">,</span> <span class="n">soundName</span><span class="p">,</span> <span class="s">&quot;Addon&quot;</span> <span class="p">).</span><span class="n">IsSuccess</span><span class="p">();</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p>After you finish using an add-on sound archive, remove it from SoundArchivePlayer.</p>
+<div class="expand-container" id="expander-203559814-8">
+  <div class="expand-control" id="expander-control-203559814-8">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Removing From SoundArchivePlayer in the Add-On Sound Archive</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-203559814-8">
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">soundArchivePlayer</span><span class="p">.</span><span class="n">RemoveAddonSoundArchive</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">addonSoundArchive</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p>After removing the add-on sound archive, finalize the add-on sound archive and the SoundDataManager object that will be used with it, and free the memory.</p>
+<div class="expand-container" id="expander-203559814-9">
+  <div class="expand-control" id="expander-control-203559814-9">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Finalizing the Add-on Sound Archive and SoundDataManager</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-203559814-9">
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">addonSoundDataManager</span><span class="p">.</span><span class="n">Finalize</span><span class="p">();</span>
+<span class="n">addonSoundArchive</span><span class="p">.</span><span class="n">Finalize</span><span class="p">();</span>
+
+<span class="nn">nns::atk::</span><span class="n">Free</span><span class="p">(</span> <span class="n">pMemoryForAddonSoundDataManager</span> <span class="p">);</span>
+<span class="nn">nns::atk::</span><span class="n">FreeForMemoryPool</span><span class="p">(</span> <span class="n">pMemoryForAddonSoundArchive</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In comparison with groups (described in the following section), add-on sound archives offer several advantages including easier handling of add-on content such as downloadable content and the ability to manage sound archives on a per-archive basis, which makes sound archive management more intuitive.<br /><br /></p>
+    <p>Meanwhile, loading using groups makes it possible to achieve more fine-tuned control by working on a per-item basis, for example.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_203559814_h3_3">Loading Using a Group</h3>
+<p>You can combine data to load at the same time, into a group.<br />You cannot only use groups to avoid the issue of loading sound data separately, but combining data can also increase loading efficiency.</p>
+<h4 id="Anchor_203559814_h4_5">Group Differences</h4>
+<p>Choose the format for groups configured using SoundMaker to suit your game. There are differences, including whether any data is duplicated and how loading occurs.<br />(For more information about how to configure groups using SoundMaker, see <a href="../Pages/Page_83955760.html">Groups</a> within the SoundMaker documentation.)<br />(For differences in how groups are loaded in a program, see <span class="ApiLink_PageSampleAtkGroup">AtkGroup Sample</span>.) </p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>Embedded Groups</th>
+      <th>Linked Groups</th>
+      <th>User-Managed Groups</th>
+      <th>No Groups</th>
+    </tr>
+    <tr>
+      <td>Handling Sound Data</td>
+      <td>Embedded in groups that are included in the BFSAR file.</td>
+      <td>Included in the BFSAR file in an area that is not a group. The group only includes the reference information.<br /></td>
+      <td>Exported to a separate BFGRP file.</td>
+      <td>
+        <p>Included outside of a BFSAR group.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Recommended Uses</td>
+      <td>For more efficient file loading.</td>
+      <td>To reduce duplicate data and keep sizes smaller.</td>
+      <td>Controls file access processing within the game.</td>
+      <td>Loads data separately.</td>
+    </tr>
+    <tr>
+      <td>Duplicate Data?</td>
+      <td>The data is present in each group and there can be duplicates of the data in the BFSAR file.<br /></td>
+      <td>
+        <p>Data can straddle groups, but there are <strong>no duplicates</strong> in the BFSAR file.</p>
+        <p />
+      </td>
+      <td>
+        <p>Every BFGRP file contains data, and the data may be duplicated in a BFSAR file or another BFGRP file.</p>
+        <p />
+      </td>
+      <td>
+        <p>The data is not in a group, so there might be duplicate data in another group.</p>
+        <p />
+      </td>
+    </tr>
+    <tr>
+      <td>Loading Data</td>
+      <td>
+        <strong>Loaded with other data within the group.</strong>
+      </td>
+      <td>
+        <p>Data specified with a link can be loaded separately from a group.<br /> </p>
+      </td>
+      <td>
+        <p>
+          <strong>Load with other data within the BFGRP file.</strong>
+        </p>
+        <p>Must be loaded by the game, but it is a separate file, so it <strong>can be archived with non-audio files</strong>.</p>
+        <p />
+      </td>
+      <td>Loading occurs at the sound data level.</td>
+    </tr>
+  </tbody>
+</table>
+<h5 id="Anchor_203559814_h5_3">Embedded Groups</h5>
+<p>Includes target sound data within a group.</p>
+<p>Duplicates of the data can arise among groups because the data is included in each group that it is associated with. However, all data in a group is loaded together, so you can expect better file access efficiency compared to separate loading.<br /></p>
+<p>Use this option to improve file access efficiency when there is a certain number of resource files and a certain amount of memory available.</p>
+<p>
+  <img src="../Attachments/Attach_203559814/218183388.png"></img>
+</p>
+<h6 id="Anchor_203559814_h6_1">Loading Sound Data Included in Embedded Groups</h6>
+<p>Load groups that include the target sound data by using <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_SoundDataManager</span><span class="p">.</span><span class="n">LoadData</span><span class="p">(</span> <span class="n">GROUP_EMBEDDED</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_SoundHeap</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h5 id="Anchor_203559814_h5_4">Linked Groups</h5>
+<p>Puts the target sound data in a BFSAR sound archive file without including it in a group.</p>
+<p>You can avoid data duplicates when data is associated with multiple groups, but there will be more accessing of files compared to embedded groups because other data within the group is loaded separately.<br /></p>
+<p>Use this option to conserve resource files, and memory, when a certain amount of file access is acceptable.</p>
+<p>
+  <img src="../Attachments/Attach_203559814/218183898.png"></img>
+</p>
+<h6 id="Anchor_203559814_h6_2">Loading Sound Data Included in Linked Groups</h6>
+<p>Load groups, as with embedded groups, that include the target sound data by using <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_SoundDataManager</span><span class="p">.</span><span class="n">LoadData</span><span class="p">(</span> <span class="n">GROUP_LINKED</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_SoundHeap</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h5 id="Anchor_203559814_h5_5">User-Managed Groups</h5>
+<p>Exports the target sound data as a separate BFGRP group file and manages group files within the game.</p>
+<p>The characteristics for data duplication and loading are similar to those for embedded groups. The use of separate files enables control over file access in the game.<br /></p>
+<p>The efficiency of file access can be improved compared to embedded groups if you do things like create an archive from all the graphics files and sound group files used in a particular game scene and load that archive.<br /></p>
+<p>Use this option to manage file access from within the game.</p>
+<p>
+  <img src="../Attachments/Attach_203559814/218183949.png"></img>
+</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>You cannot use a player heap for playback when sound items are only within a user-managed group.<br />Adjust so that the target sound items meet one of the following conditions to use the player heap for playback.</p>
+    <ul>
+      <li>Not included in a user-managed group.</li>
+      <li>Included in a user-managed group, but also included in a separate embedded or linked group </li>
+    </ul>
+  </div>
+</div>
+<h6 id="Anchor_203559814_h6_3">Loading Sound Data Included in User-Managed Groups</h6>
+<p>Set the address where a BFGRP group file, that includes the target sound data, was loaded to <code><span class="ApiLink_nn__atk__SoundDataManager__SetFileAddressInGroupFile">nn::atk::SoundDataManager::SetFileAddressInGroupFile</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_SoundDataManager</span><span class="p">.</span><span class="n">SetFileAddressInGroupFile</span><span class="p">(</span> <span class="n">g_pMemoryForGroupFile</span><span class="p">,</span> <span class="n">g_GroupFileSize</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h5 id="Anchor_203559814_h5_6">No Groups</h5>
+<p>Sound data is used without including it in any groups.</p>
+<p>Use this option to load sound data separately.</p>
+<p>
+  <img src="../Attachments/Attach_203559814/218183979.png"></img>
+</p>
+<h6 id="Anchor_203559814_h6_4">Loading Sound Data Not Included in a Group</h6>
+<p>Load the target sound data by using <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code>.<br />Load sound data using this method in the <span class="ApiLink_PageSampleAtkSimple">AtkSimple Sample</span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_SoundDataManager</span><span class="p">.</span><span class="n">LoadData</span><span class="p">(</span> <span class="n">SE_YOSHI</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_SoundHeap</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_PageSampleAtkSimple', '../../../Api/HtmlNX/_page_sample_atk_simple.html' )
+SetUrl( 'ApiLink_nn__atk__FsSoundArchive', '../../../Api/HtmlNX/classnn_1_1atk_1_1_fs_sound_archive.html' )
+SetUrl( 'ApiLink_nn__atk__SoundDataManager__LoadData', '../../../Api/HtmlNX/classnn_1_1atk_1_1detail_1_1_sound_archive_loader.html#a3c8676a9807a4940a79a5c39546ab4f0' )
+SetUrl( 'ApiLink_nn__atk__MemorySoundArchive', '../../../Api/HtmlNX/classnn_1_1atk_1_1_memory_sound_archive.html' )
+SetUrl( 'ApiLink_nn__atk__AddonSoundArchive', '../../../Api/HtmlNX/classnn_1_1atk_1_1_addon_sound_archive.html' )
+SetUrl( 'ApiLink_nn__atk__MemorySoundArchive__Initialize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_memory_sound_archive.html#a7f08bdd4e7dcf0b135795f4a18ec50f5' )
+SetUrl( 'ApiLink_nn__atk__SoundArchive__SetExternalFileRoot', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive.html#a49664c47660e8c9e0193a0dc06c6020d' )
+SetUrl( 'ApiLink_PageSampleAtkGroup', '../../../Api/HtmlNX/_page_sample_atk_group.html' )
+SetUrl( 'ApiLink_nn__atk__SoundDataManager__SetFileAddressInGroupFile', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_data_manager.html#ae0d5197b5f263c5b17fa4455bfaa0674' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

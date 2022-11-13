@@ -1,0 +1,338 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Shader Compiler | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Shader Compiler -->
+<div class="pagetitle" id="PageId_89981854">Shader Compiler</div>
+<div class="text_separate">
+<h1 id="Anchor_89981854_h1_1">Overview</h1>
+<h2 id="Anchor_89981854_h2_1">Objective</h2>
+<p>GFX ShaderCompiler abstracts the low-level shader compiler in the same way that the <code>gfx</code> library abstracts low-level graphics APIs.<br />In other words, it generates shaders for different target hardware based on the same input and interface.<br />Internally, GFX ShaderCompiler calls the low-level shader compilers.</p>
+<p>GFX ShaderCompiler provides a variation mechanism (see the <a href="#Anchor_89981854_Variation">Variations</a> section later in this document).<br />Currently, the variation mechanism is most often used by developers who work with shaders, and providing variations at the GFX layer removes the need to provide them at a higher level such as in middleware and applications.<br />If variations are not required, using one variation results in approximately the same level of functionality.</p>
+<h3 id="Anchor_89981854_h3_1">Conceptual Input/Output Diagram</h3>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_89981854/90144854.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_89981854_h2_2">Policy</h2>
+<p>There are numerous differences between low-level shader compilers and shader languages, and these resources do not have equivalent functionality or input/output interfaces.<br />GFX ShaderCompiler attempts to abstract away these differences wherever possible, but it does not attempt to abstract features that are unique to a particular low-level shader compiler. Instead, it adds the feature as a proprietary input or output for that compiler.</p>
+<p>GFX ShaderCompiler does not handle file input and output.<br />It is designed to complete all API calls in memory.</p>
+<p>GFX ShaderCompiler is designed to minimize excess processing in consideration of the overall process flow including usage.<br />For instance, it avoids processes such as repeated analysis of source code whenever possible. </p>
+<h2 id="Anchor_89981854_h2_3">How the Tool Is Provided</h2>
+<p>GFX ShaderCompiler is provided as a DLL file and a corresponding PDB file.</p>
+<p>Depending on the low-level hardware, a 32-bit runtime might require the 32-bit version and a 64-bit runtime might require the 64-bit version. </p>
+<h3 id="Anchor_89981854_h3_2">How to Use</h3>
+<p>Get the functions declared in the header files from the DLL and call them.</p>
+<h2 id="Anchor_89981854_h2_4">Location</h2>
+<h3 id="Anchor_89981854_h3_3">32-Bit Binary</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/Graphics/GraphicsTools/x86/ShaderCompiler.pdb
+Tools/Graphics/GraphicsTools/x86/ShaderCompiler.dll</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_89981854_h3_4">64-Bit Binary</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Tools/Graphics/GraphicsTools/ShaderCompiler.pdb
+Tools/Graphics/GraphicsTools/ShaderCompiler.dll</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_89981854_h3_5">Header File</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Include/nn/gfxTool/gfxTool_ShaderCompilerApi.h</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_89981854_h1_2">Overall Specification<a name="Anchor_89981854_spec_overview"></a></h1>
+<p>Each feature is provided as one or more functions and definitions of the input and output for those functions.</p>
+<h2 id="Anchor_89981854_h2_5">Function</h2>
+<p>Functions are written using C style.</p>
+<p>Note that there are limitations on the call order and parallel execution of functions that take a handle as an argument (described later).<br />For more information about the conditions, see the reference for each function.</p>
+<h2 id="Anchor_89981854_h2_6">Input</h2>
+<p> The input to the functions consists of a handle and a structure.</p>
+<h3 id="Anchor_89981854_h3_6">Handles</h3>
+<p>The handle represents the context of GFX ShaderCompiler.<br />The overall usage flow is as follows: create a handle, perform operations on the handle, and then delete the handle.</p>
+<p>One limitation is that functions that take the same handle as an argument cannot be called in parallel. <br />In addition, no more operations can be performed on a handle after it is deleted.</p>
+<h3 id="Anchor_89981854_h3_7">Structures</h3>
+<p> The structure is the argument of the function call.</p>
+<p>It is assured to be a POD type and includes reserved space for future expansion.</p>
+<p>Unused fields and the reserved space are required to be zero-initialized.</p>
+<h2 id="Anchor_89981854_h2_7">Output</h2>
+<p>The output from the function is a result code and a structure.</p>
+<h3 id="Anchor_89981854_h3_8">Result Code</h3>
+<p>If the operation was successful, the function returns <code>nngfxToolResultCode_Success</code>, which has a value of <code>0</code>.</p>
+<p>If it failed, the function returns a nonzero value based on the details of the failure.</p>
+<h3 id="Anchor_89981854_h3_9">Structures</h3>
+<p>When the function allocates memory for the output, it returns a pointer to a structure.<br />The output structure persists even if the handle is deleted.<br />To delete the output structure, call the dedicated function that corresponds to the output type.</p>
+<p>Output that does not require dynamic memory allocation is included directly in the structure that is returned.</p>
+<h1 id="Anchor_89981854_h1_3">Features</h1>
+<h2 id="Anchor_89981854_h2_8">Creating a Handle</h2>
+<p>The <code>nngfxToolShaderCompilerCreateHandle</code> function is used to create a handle that represents the GFX ShaderCompiler context.</p>
+<p>Other operations, such as compiling, are performed on the created handle.<br />Consequently, you must create a handle to use GFX ShaderCompiler.</p>
+<h3 id="Anchor_89981854_h3_10">Input</h3>
+<p>Currently, an empty structure with no settings is entered. This structure is provided for future expansion.</p>
+<h3 id="Anchor_89981854_h3_11">Output</h3>
+<p>The created handle is output.</p>
+<h2 id="Anchor_89981854_h2_9">Resetting Handles</h2>
+<p>The <code>nngfxToolShaderCompilerResetHandle</code> function is used to reset a GFX ShaderCompiler handle.</p>
+<p>All operations performed on the handle up to that point are reset, and the handle is restored to its initial state after creation.<br />In some cases, this is more efficient than creating a new handle.</p>
+<h3 id="Anchor_89981854_h3_12">Input</h3>
+<p> The only input is the target handle.</p>
+<h2 id="Anchor_89981854_h2_10">Shader Compilation</h2>
+<p>The <code>nngfxToolShaderCompilerCompile</code> function is used to compile the shader.</p>
+<h3 id="Anchor_89981854_h3_13">Input</h3>
+<p>
+  <strong>Source Code</strong>
+</p>
+<p>One of the inputs is the source code for each shader stage.<br />A null input for a shader stage means that stage does not exist.</p>
+<p>
+  <strong>File I/O Callback</strong>
+</p>
+<p>The shader compiler does not handle the input and output of files, so specify the callback to use for dealing with file input/output.<br />Note that it may be called in parallel.<br />If <code>NULL</code> is specified for the callback, the feature is not used.</p>
+<p>
+  <strong>Target Information</strong>
+</p>
+<p>This input specifies the hardware target for which to compile the shader.<br />The information is used to determine which low-level shader compiler to use internally.<br />To specify GL, the operating environment must be OpenGL 4.3 or later.</p>
+<p>
+  <strong>Variation Information</strong>
+</p>
+<p>This input specifies the variation information.<br />If no variation is necessary, specify <code>NULL</code> to compile only one shader.<br />For more information about variations, see the <a href="#Anchor_89981854_Variation">Variations</a> section later in this document.</p>
+<p>
+  <strong>Compilation Options</strong>
+</p>
+<p>You can add compilation options.<br />Options specific to a low-level shader compiler are specified here.<br />You cannot specify multiple options of the same type.<br />When inputting GLSL source code, use the <code>nngfxToolShaderCompilerCompileOptionGlsl</code> compilation options for <code>#version</code> and <code>#extension</code> rather than hard-coding them directly in the source code files.</p>
+<h3 id="Anchor_89981854_h3_14">Output</h3>
+<p>
+  <strong> Variation Structure</strong>
+</p>
+<p>The output structure is based on the input variations and shader stage structure.</p>
+<p>
+  <strong>GFX Shader Information</strong>
+</p>
+<p>This <code><span class="ApiLink_nn__gfx__ShaderInfo">nn::gfx::ShaderInfo</span></code> object is used as input in the <code>Initialize</code> function of <code><span class="ApiLink_nn__gfx__Shader">nn::gfx::Shader</span></code>.<br />The number of objects is the quantity required for the variations and shader stage structure.<br />The shader code is stored at the location pointed to by <code><em>pCode</em></code>.<br />Different variations might point to the same address if the shader code is identical. </p>
+<p>
+  <strong>Additional Information</strong>
+</p>
+<p>Addition information is output based on the compilation options and other factors.</p>
+<h2 id="Anchor_89981854_h2_11">Deleting Handles</h2>
+<p>The <code>nngfxToolShaderCompilerDeleteHandle</code> function is used to delete a GFX ShaderCompiler handle.</p>
+<h3 id="Anchor_89981854_h3_15">Input</h3>
+<p>The only input is the handle to delete.</p>
+<h2 id="Anchor_89981854_h2_12">Deleting Compiled Output</h2>
+<p>The <code>nngfxToolShaderCompilerDeleteCompileOutput</code> function is used to delete the compiled output created by the <code>nngfxToolShaderCompilerCompile</code> function.</p>
+<p>Because this process does not depend on the handle, it can be run after the handle is deleted. </p>
+<h3 id="Anchor_89981854_h3_16">Input</h3>
+<p>The only input is the compiled output to delete.</p>
+<h1 id="Anchor_89981854_h1_4">Nonessential Features</h1>
+<h2 id="Anchor_89981854_h2_13">Log Output Stream Settings</h2>
+<p>You can use the <code>nngfxToolShaderCompilerSetLogStream</code> function to set the destination for log output to a location other than standard output.</p>
+<h3 id="Anchor_89981854_h3_17">Input</h3>
+<p>
+  <strong>Parameters for Setting Log Output Destination</strong>
+</p>
+<p>These parameters specify the log output type that is the target of the settings, and the handle for where the log will be output.</p>
+<h2 id="Anchor_89981854_h2_14">Getting Version Information</h2>
+<p>Use the <code>nngfxToolShaderCompilerGetApiVersion</code> function to get the shader compiler version information.</p>
+<h3 id="Anchor_89981854_h3_18">Output</h3>
+<p>
+  <strong>Version Information</strong>
+</p>
+<p>Behavior is not assured if the major version that is obtained differs from <code>nngfxToolShaderCompilerVersion_Major</code>.</p>
+<p>Behavior is not assured if the minor version that is obtained is earlier than <code>nngfxToolShaderCompilerVersion_Minor</code>.</p>
+<h1 id="Anchor_89981854_h1_5">Variations<a name="Anchor_89981854_Variation"></a></h1>
+<p>
+  <span style="color: rgb(51,51,51);">A variation represents differences in shader processing.</span>
+</p>
+<p>You can improve runtime efficiency by using a separate shader as a variation rather than writing a conditional branch in a single shader.</p>
+<p>A variation consists of variation constants, preprocessor definitions, or a combination of the two.</p>
+<p>Each variation consists of one definition and a list of values based on that definition.<br />For instance, to create 20 types of variations, you would create a list of 20 values.</p>
+<h2 id="Anchor_89981854_h2_15">Variation Constants</h2>
+<p>A variation constant is a variation mechanism that uses a constant buffer.<br />Variations are created by handling variables specified in the constant buffer as static constants.</p>
+<p>When the output is intermediate language representation, variation constants can be managed separately from the shader depending on the low-level target hardware.<br />A single shader is used regardless of the number of variations, which has the potential to greatly improve memory efficiency and offline compilation speed.<br />For binary representation, the respective variations are compiled after they are made into intermediate language representation internally. This may greatly improve offline compilation speed for shaders that handle a large number of variations.<br />Consequently, we recommend using variation constants rather than preprocessor definitions when creating a variation.</p>
+<h3 id="Anchor_89981854_h3_19">Examples</h3>
+<p>Write the variation as a constant buffer in the shader source.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>layout( std140 ) uniform VariationConstant
+{
+&nbsp;&nbsp;&nbsp;&nbsp;vec3 a;
+&nbsp;&nbsp;&nbsp;&nbsp;int b;
+&nbsp;&nbsp;&nbsp;&nbsp;mat4x4 c;
+};</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In this example, <code>a</code> could have the following two variations.</p>
+<ul>
+  <li>( 1.0, 1.5, 2.0 )</li>
+  <li>( 0.5, 0.0, -4.0 )</li>
+</ul>
+<p>When these variations are created, <code>a</code> does not need to be bound and set at run time.</p>
+<h3 id="Anchor_89981854_h3_20">Restrictions</h3>
+<p>In the GL4 version, variation constants are achieved through emulation, but currently, if the preprocess option (<code>nngfxToolShaderCompilerCompileOptionCommon::isPreprocessEnabled</code> or the <a href="../Pages/Page_89982392.html">shader converter</a> <code>--preprocess</code> option) is not used, the variation constant buffer is analyzed without preprocessing.<br />Consequently, if macros or comments are used in the variation constant buffer, the GFX ShaderCompiler analysis might fail.<br />Additionally, if the preprocess option is not used, constants inserted using emulation is inserted after the <code>#version</code> description, but may not be inserted after the <code>#extension</code> description. A compiling error occurs if they are inserted prior to the <code>#extension</code> description. To avoid this situation, either use the preprocess option, or specify the <code>#extension</code> in an option (the <code>--extension</code> option for <code>nngfxToolShaderCompilerCompileOptionGlsl</code> or the <a href="../Pages/Page_89982392.html">shader converter</a>) instead of in the shader.</p>
+<h3 id="Anchor_89981854_h3_21">When Input Is SPIR-V</h3>
+<p>When the input is SPIR-V, the variation constants correspond to SPIR-V specialization constants.<br />In this case, you cannot use the constant buffer to create variations.<br />The target variable is specified by <code>constant_id</code> modified by a layout qualifier, not a symbol.<br />Other specialization constant specifications conform to SPIR-V specifications.</p>
+<p>Example:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>layout( constant_id = 1 ) const bool useTexture=bool(1);
+layout( constant_id = 2 ) const bool useMaterial=bool(1);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In this example, <code>constant_id = 1</code> can create the following two variations.</p>
+<ul>
+  <li>
+    <code>true</code>
+  </li>
+  <li>
+    <code>false</code>
+  </li>
+</ul>
+<h2 id="Anchor_89981854_h2_16">Preprocessor Definitions</h2>
+<p>A preprocessor definition is a variation mechanism that uses the <code>#define</code> feature.</p>
+<p>A different <code>#define</code> directive is added to the source code for each of the specified variations.<br />Unlike variation constants, this results in separate shaders.</p>
+<h3 id="Anchor_89981854_h3_22">Examples</h3>
+<p> The preprocessor definition named <code>VARIATION_MACRO( x )</code> is used to create the following two variations.</p>
+<ul>
+  <li>( x ## _Position )</li>
+  <li>( x ## _TexCoord )</li>
+</ul>
+<p>This results in the following two variation shaders being generated.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>#define VARIATION_MACRO( x ) ( x ## _Position )</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>#define VARIATION_MACRO( x ) ( x ## _TexCoord )</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_89981854_h2_17">Variation Definitions</h2>
+<p>A variation definition is the equivalent of the key part of a key-value pair.<br />The variation definition is shared by all variations and so only one is specified.</p>
+<p>
+  <strong>With Variation Constants</strong>
+</p>
+<p>Specify the variable name, type, and other related information.</p>
+<p>
+  <strong>With Preprocessor Definitions</strong>
+</p>
+<p>Specify the first space-delimited string after the <code>#define</code> part. </p>
+<h2 id="Anchor_89981854_h2_18">Variation Values</h2>
+<p>This is the value part of a variation definition.<br />A value is listed for each of the variations. </p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__ShaderInfo', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_shader_info.html' )
+SetUrl( 'ApiLink_nn__gfx__Shader', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a134193f9c28fadc8dfd08e80f55677b1' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

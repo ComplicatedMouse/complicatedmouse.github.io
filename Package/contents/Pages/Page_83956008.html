@@ -1,0 +1,518 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>htcs Library | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- htcs Library -->
+<div class="pagetitle" id="PageId_83956008">htcs Library</div>
+<div class="text_separate">
+<h1 id="Anchor_83956008_h1_1">Overview</h1>
+<p>HTCS, short for Host-Target-Communication Socket, is a socket interface for the <a href="../Pages/Page_95685000.html">htc</a> library.</p>
+<p>It has the same interface as &quot;stream sockets&quot; type (<code>SOCK_STREAM</code>) in Berkeley sockets.</p>
+<p>However, it has the following differences:</p>
+<ul>
+  <li>Namespace is <code><span class="ApiLink_nn__htcs">nn::htcs</span></code></li>
+  <li>All constant values are prefixed with <code>HTCS_</code></li>
+  <li>Uses dedicated socket address structure (<code>SockAddrHtcs</code>)<ul><li>Address family is <code>HTCS_AF_HTCS</code></li><li>The address is specified using a concatenation of strings for <code>&lt;peer name&gt;</code> + <code>&lt;port name&gt;</code><br /><ul><li>This corresponds to the <code>&lt;IP address&gt;</code> + <code>&lt;port number&gt;</code> scheme used by <code>sockaddr_in</code></li></ul></li></ul></li>
+  <li>Does not support OOB data</li>
+  <li>Does not support signals</li>
+  <li>Returns detailed error values via the <code>GetLastError</code> function</li>
+</ul>
+<p>The supported interfaces are as follows:</p>
+<ul>
+  <li>
+    <code>socket</code>
+  </li>
+  <li>
+    <code>bind</code>
+  </li>
+  <li>
+    <code>listen</code>
+  </li>
+  <li>
+    <code>accept</code>
+  </li>
+  <li>
+    <code>connect</code>
+  </li>
+  <li>
+    <code>send</code>
+  </li>
+  <li>
+    <code>recv</code>
+  </li>
+  <li>
+    <code>select</code>
+  </li>
+  <li>
+    <code>close</code>
+  </li>
+  <li>
+    <code>fcntl</code>
+    <ul>
+      <li>Only setting/getting in non-blocking mode</li>
+    </ul>
+  </li>
+  <li>
+    <code>GetLastError</code>
+  </li>
+</ul>
+<h2 id="Anchor_83956008_h2_1">API References</h2>
+<p>See the <span class="ApiLink_nn__htcs">nn::htcs Library API Reference</span>.</p>
+<h2 id="Anchor_83956008_h2_2">How the htcs Library Is Provided</h2>
+<p>See the following pages.</p>
+<ul>
+  <li>
+    <a href="../Pages/Page_95685382.html">How the Libraries Are Provided and How to Use Them</a>
+  </li>
+</ul>
+<h2 id="Anchor_83956008_h2_3">htcs Library Restrictions</h2>
+<p>These features can be used only in the development environment. They cannot be used in the production environment.</p>
+<p>In addition, the <code>htcs</code> library generates a compiler error when building if the build type is <strong>Release</strong>.<br />To use the library with release builds, you must define <code><span class="ApiLink_NN_ENABLE_HTC">NN_ENABLE_HTC</span></code>.</p>
+<p>Note that the samples that use the <code>htc</code> and <code>htcs</code> libraries define <code><span class="ApiLink_NN_ENABLE_HTC">NN_ENABLE_HTC</span></code> in the <strong>Release</strong> property sheet of the solution configuration.</p>
+<p>In the Windows environment, if you are using the <code>htc</code> and <code>htcs</code> libraries, you must initialize <a href="../Pages/Page_107338335.html">SOCKET Library</a> before initializing the <code>htc</code> and <code>htcs</code> libraries.<br />For more information about how to initialize <a href="../Pages/Page_107338335.html">SOCKET Library</a>, see the linked document.</p>
+<h1 id="Anchor_83956008_h1_2">Terminology</h1>
+<h2 id="Anchor_83956008_h2_4">Peer Name</h2>
+<p>An null-terminated ASCII string up to 32-characters long.<br /><br />If the peer is a target, this name is uniquely determined by the device.<br />By default, this string is a serial number that is determined during the manufacturing process. However, users can set it to a value of their choosing by using a configuration tool.</p>
+<p>If the peer is a host PC, this string is the name specified by the user during registration.</p>
+<h2 id="Anchor_83956008_h2_5">HTCS Port Name</h2>
+<p>This identifier determines which port to connect to when using HTCS.<br />An null-terminated ASCII string up to 32-characters long.</p>
+<h1 id="Anchor_83956008_h1_3">Connection Sequence</h1>
+<h2 id="Anchor_83956008_h2_6">Introduction</h2>
+<p>Targets establish connections by using the HTCS API in essentially the same way as Berkeley sockets.<br />The differences are as follows.</p>
+<ul>
+  <li>Address family is <code>HTCS_AF_HTCS</code></li>
+  <li>Addresses used to identify targets are proprietary</li>
+</ul>
+<p>Hosts also connect using sockets for the most part, but the socket interface requires connecting to the HTCS interface, which requires these conversions.<br />The conversion amounts to determining the corresponding TCP port number based on the name of the target you want to connect to and the HTCS port name.<br />For more information about getting the TCP port number of the connection target, see <a href="#Anchor_83956008_h1_6">Port Mapping</a>.</p>
+<p>Prior to establishing a connection between a host and a target using HTCS, you must start <code>TargetManager.exe</code>.</p>
+<!--Remove-->
+<div class="platform_nx">
+  <p>For more information about Target Manager, see <a href="../Pages/Page_93359711.html">here</a>.</p>
+</div>
+<p>For more information about these procedures, see the following.<br />For a coding example, see <code>NintendoSDK\Samples\Sources\Applications\Htcs</code>.</p>
+<h2 id="Anchor_83956008_h2_7">Revision to Behavior When Target Manager Not Connected</h2>
+<h3 id="Anchor_83956008_h3_1">Behavior Prior to NX Add-On 1.0.0</h3>
+<p>If Target Manager is not connected, <code>Socket</code>, <code>Close</code>, <code>Connect</code>, <code>Bind</code>, <code>Listen</code>, <code>Accept</code>, <code>Recv</code>, <code>Send</code>, <code>Shutdown</code>, and <code>Fcntl</code> will fail until a connection is established.</p>
+<h3 id="Anchor_83956008_h3_2">Behavior Effective From NX Add-On 1.0.0</h3>
+<p>
+  <code>Socket</code>, <code>Close</code>, <code>Bind</code>, <code>Listen</code>, <code>Fcntl</code> and <code>Accept</code> will work even if a connection is not established, to match the behavior of <code>bsdsocket</code>.</p>
+<p>However, if Target Manager is connected and then disconnected, the socket that was used up to that point can no longer be used and you must create a socket again.</p>
+<p>In accordance with this change in behavior, memory can now be allocated from the allocator specified by <code><span class="ApiLink_nn__htcs__Initialize">nn::htcs::Initialize</span></code>.</p>
+<h2 id="Anchor_83956008_h2_8">Revising the Behavior of the Target During Sleep Mode</h2>
+<h3 id="Anchor_83956008_h3_3">Behavior Prior to NX Add-On 3.0.0</h3>
+<p>All HTCS connections are disconnected when the system has entered sleep mode.</p>
+<h3 id="Anchor_83956008_h3_4">Behavior Effective From NX Add-On 3.0.0</h3>
+<p>The HTCS connections that were established prior to sleep mode are maintained, and they are resumed after the system wakes from sleep mode.</p>
+<h2 id="Anchor_83956008_h2_9">If the Target Application Is a Server</h2>
+<h3 id="Anchor_83956008_h3_5">Target Implementation</h3>
+<ol>
+  <li>Call the <code>Socket</code> function to create a socket descriptor.</li>
+  <li>Call the <code>Bind</code> function to assign an address to the socket descriptor you just created.<br /><ul><li>Specify <code>SockAddrHtcs</code> as the address.</li></ul></li>
+  <li>Call the <code>Listen</code> function to start receiving connections.<ol><li>After receiving, Target Manager opens the corresponding TCP port on the host.</li><li>At the same time, a new <code>PortMapItem</code> is registered in the <code>PortMap</code>, and its members are as follows.<ul><li><code>HtcsPeerName</code> and <code>HtcsPortName</code> are the members of <code>SockAddrHtcs</code> you specified in step 2.</li><li><code>IPAddress</code> and <code>TcpPortNumber</code> are the TCP port values you created in step 3a.</li></ul></li></ol></li>
+  <li>Call the <code>Accept</code> function. <br /><ul><li>An empty port name is always output to the output address.</li></ul></li>
+</ol>
+<h3 id="Anchor_83956008_h3_6">Host implementation</h3>
+<ol>
+  <li>Get a list of the port mappings from Target Manager.<br />If DLLs are available, use functions such as <code><span class="ApiLink_nn__tm__GetHtcsAddresses">nn::tm::GetHtcsAddresses</span>()</code> in <a href="../Pages/Page_242387866.html">tm Library</a>.<br />For more information about completing socket processing, see <a href="#Anchor_83956008_h1_6">Port Mapping</a>.</li>
+  <li>Establish a connection for the IP address and port number associated with the intended target name and port name using a socket protocol.</li>
+</ol>
+<h3 id="Anchor_83956008_h3_7">Communication Flow Until a Connection Is Established (When Using the tm Library)</h3>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956008/1190456513.PNG" height="400" class="embedded-image" />
+  </span>
+</p>
+<ol>
+  <li>Target App calls <code>Socket</code> and <code>Bind</code> to create a socket with the assigned <code><em>portName</em></code> and <code><em>peerName</em></code>.<ol><li>In this example, <code>TargetName1:TargetPort1</code> is assigned to the created socket.</li></ol></li>
+  <li>Target App calls <code>Listen</code> and the created socket is registered in Target Manager.</li>
+  <li>Target Manager creates a TCP/IP socket based on the <code>listen</code> operation of the target and registers it to the port map at the same time.<br /><ol><li>In this example, <code>127.0.0.1:10000</code> is assigned to the TCP/IP socket.<ol><li>The port number can be configured to be a fixed port number. (Reference: <a href="#Anchor_83956008_h2_16">Fixing Port Maps</a>)</li></ol></li></ol></li>
+  <li>Host App uses the <code>tm</code> library to get the Target Manager port information.<br /><ol><li>Call <code>GetHtcsEntryEndPoints(buffer, &amp;num, sizeof(buffer), &quot;TargetName1&quot;, &quot;TargetPort1&quot;)</code> to get <code>127.0.0.1:10000</code>.</li><li>If you want to conclude socket processing without using the <code>tm</code> library, Host App can connect to the control port and get the mapping list. (Reference: <a href="#Anchor_83956008_h1_6">Port Mapping</a>)</li></ol></li>
+  <li>Host App creates a socket and calls <code>connect</code> on Target Manager's TCP port.</li>
+  <li>Target App calls <code>Accept</code>, and Target Manager notifies Host App that the <code>accept</code> has been executed and the connection is established.</li>
+</ol>
+<h2 id="Anchor_83956008_h2_10">If the Target Application Is a Client</h2>
+<h3 id="Anchor_83956008_h3_8">Target Implementation</h3>
+<ol>
+  <li>Call the <code>Socket</code> function to create a socket descriptor.</li>
+  <li>Call the <code>Connect</code> function.</li>
+  <li>Target Manager receives this call and establishes a connection with the corresponding TCP port based on the information registered by the host application through port name resolution.</li>
+</ol>
+<h3 id="Anchor_83956008_h3_9">Host implementation</h3>
+<ol>
+  <li>Open the listening port with the appropriate operations in a socket protocol.</li>
+  <li>Register the port mapping for Target Manager.<br />If DLLs are available, use functions such as <code><span class="ApiLink_nn__tm__RegisterHtcsEntry">nn::tm::RegisterHtcsEntry</span>()</code> in <a href="../Pages/Page_242387866.html">tm Library</a>.<br />For more information about completing socket processing, see <a href="#Anchor_83956008_h1_6">Port Mapping</a>. </li>
+  <li>Perform the <code>accept</code> operation.</li>
+</ol>
+<h3 id="Anchor_83956008_h3_10">Communication Flow Until a Connection Is Established (When Using the tm Library)</h3>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956008/1190456517.PNG" height="400" class="embedded-image" />
+  </span>
+</p>
+<ol>
+  <li>Host App opens the port to listen to.</li>
+  <li>Host App uses the <code>tm</code> library to register a new port mapping to Target Manager.<ol><li> In this example, <code>HostName1:HostPort1</code> is specified for the Htcs address, and <code>127.0.0.1:23445</code> is specified for the port.</li><li>To register the port mapping of &quot;HostName1:HostPort1&quot; &larr;&rarr; &quot;127.0.0.1:23445&quot;, you would call <code>RegisterHtcsEntry(&quot;HostName1&quot;, &quot;HostPort1&quot;, &quot;127.0.0.1:23445&quot;)</code>.</li><li>To conclude socket processing without using the <code>tm</code> library, Host App connects to the control port and registers the new port mapping to Target Manager. (Reference: <a href="#Anchor_83956008_h1_6">Port Mapping</a>)</li></ol></li>
+  <li>Target App calls <code>Socket</code> and creates a socket descriptor.</li>
+  <li>Target App calls <code>Connect</code>, specifying <code>HostName1:HostPort1</code>, to register it to Target Manager.</li>
+  <li>Target Manager opens a TCP/IP port based on the content registered by the target.<ol><li>In this example, <code>127.0.0.1:53446</code> is assigned for the TCP/IP port.<ol><li>The port number can be configured to be a fixed port number. (Reference: <a href="#Anchor_83956008_h2_16">Fixing Port Maps</a>)</li></ol></li></ol></li>
+  <li>Target Manager searches for the TCP/IP port corresponding to the <code>HtcsPeerName</code> and <code>HtcsPortName</code> specified by Target App when <code>Connect</code> was called, and performs the <code>connect</code> operation.</li>
+  <li>Host App performs <code>accept</code> for the <code>connect</code> requested by Target Manager.</li>
+  <li>Target Manager notifies Target App that <code>accept</code> was performed, and a connection is established.</li>
+</ol>
+<h2 id="Anchor_83956008_h2_11">Example of Communication Paths</h2>
+<p>The following figure presents an example of the communication paths for transmitting a date between the target and host.</p>
+<p>You can register any number of port mappings to Target Manager, providing there are no duplicate combinations of port name and peer name, or TCP address and port number.</p>
+<p>In the following example, the same port name (PortForToolA) is registered for connection for both applications Target1 and Target2, but they are treated as separate ports because the peer names are different.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956008/1190456537.png" height="400" class="embedded-image" />
+  </span>
+</p>
+<h1 id="Anchor_83956008_h1_4">Sending and Receiving</h1>
+<p>When a connection has been established, there is no difference between the server and the client.<br />On the target, use <code>htcs::Send</code> and <code>htcs::Recv</code>. On the host, use <code>send</code> and <code>recv</code>.</p>
+<h1 id="Anchor_83956008_h1_5">Disconnecting</h1>
+<h2 id="Anchor_83956008_h2_12">Close</h2>
+<p>You can close a target by calling <code>Close()</code>. Closed sockets cannot be used to send or receive data afterward.</p>
+<p>Calling <code>Close()</code> on either socket causes the other <code>Recv()</code> to receive successfully with a read size of <code>0</code>.</p>
+<p>If the return value of <code>Recv()</code> is <code>0</code>, you have disconnected from the peer, so close the socket.</p>
+<h2 id="Anchor_83956008_h2_13">Shutdown </h2>
+<p>The <code>Shutdown()</code> function declares that no sending, receiving, or combinations of both will occur any longer, without closing the socket.<br />If <code>HTCS_SHUT_WR</code> is specified, the peer's <code>Recv()</code> will receive successfully with a read size of <code>0</code>.<br />Make sure that you tear down the socket properly by calling <code>Close()</code>, because sockets that have already shut down (with <code>Shutdown()</code>) can still receive data. Close the socket after receiving notification that the remote host has called <code>Close()</code> or <code>Shutdown()</code>, or when you have received a &quot;teardown&quot; flag that had been previously agreed upon.</p>
+<h1 id="Anchor_83956008_h1_6">
+  <a name="Anchor_83956008_PortMapping"></a>Port Mapping</h1>
+<p>The application on the host connects to a specific Target Manager port to get the HTC ports opened by the target application and to register the TCP ports opened by the host application.<br />This specific port is called the <em>control port</em>.<br />This section describes the text protocol used to get and register ports.<br />It is convenient to use the <code>tm</code> library in NX Add-On 6.3.0 and later. For more information, see the API References for <a href="../Pages/Page_242387866.html">tm Library</a> or <code><span class="ApiLink_nn__tm__RegisterHtcsEntry">nn::tm::RegisterHtcsEntry</span>()</code>, and the <span class="ApiLink_PageSampleHtcs">HTCS sample</span>.</p>
+<p>The control port opens TCP 8003 by default, and waits for a connection from the host application.<br />Host applications connect to this control port, and then use the following text protocol to get and register ports.<br />For more information about changing the TCP port used by the control port, see <a href="../Pages/Page_93359711.html#Anchor_93359711_h4_11">Controlling the Development Hardware &gt; Target Manager &gt; HTCS</a>.</p>
+<p>In all of the examples, line breaks have been added for readability sake, but in practice this data is sent as a single line. <br />The encoding is UTF-8 without BOM. </p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In versions earlier than NX Add-On 9.0, a DLL sample that performs port mapping is found at <code>NintendoSDK/Samples/Sources/Applications/Htcs/Htcsdll</code>.</p>
+    <p>To inspect this sample, see <a href="../Pages/Page_83955799.html">Htcs.dll</a>. </p>
+  </div>
+</div>
+<h2 id="Anchor_83956008_h2_14">Receiving From Target Manager</h2>
+<p>The HTC port and TCP port mapping lists are received as single lines in XML format like the following. This data is received during the initial connection and each time mappings are added or removed.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;HtcsInfo&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;TargetList&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Target&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;PeerType&gt;</span>HTCS<span class="nt">&lt;/PeerType&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;HtcsPeerName&gt;</span>TargetName1<span class="nt">&lt;/HtcsPeerName&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Target&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Target&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- omitted --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Target&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;/TargetList&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;PortMap&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;PortMapItem&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;HtcsPeerName&gt;</span>TargetName1<span class="nt">&lt;/HtcsPeerName&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;HtcsPortName&gt;</span>PortName1<span class="nt">&lt;/HtcsPortName&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;IPAddress&gt;</span>127.0.0.1<span class="nt">&lt;/IPAddress&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;TcpPortNumber&gt;</span>50867<span class="nt">&lt;/TcpPortNumber&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/PortMapItem&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;PortMapItem&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- omitted --&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/PortMapItem&gt;</span>
+&nbsp;&nbsp;<span class="nt">&lt;/PortMap&gt;</span>
+<span class="nt">&lt;/HtcsInfo&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83956008_h3_11">Parameters</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <p>Parameter Name</p>
+      </th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>PeerType</code>
+        </p>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <!--Remove-->
+          <div class="platform_nx">
+            <p>Values corresponding to the target spec and platform have been specified.</p>
+            <p>The possible values are as follows.</p>
+            <p>
+              <br />
+            </p>
+            <table class="wrapped">
+              <tbody>
+                <tr>
+                  <th>Platform and Spec</th>
+                  <th>Generic</th>
+                  <th>NX</th>
+                </tr>
+                <tr>
+                  <td>x86, x64</td>
+                  <td>Generic_Windows</td>
+                  <td>NX-Windows</td>
+                </tr>
+                <tr>
+                  <td>NX</td>
+                  <td class="highlight-grey">
+                    <br />
+                  </td>
+                  <td>NX-NX</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>HtcsPeerName</code>
+        </p>
+      </td>
+      <td>
+        <p>Set to a unique value for each target hardware. For NX-NX, this value is equal to the serial number.</p>
+        <p>The <code>TargetList.Target</code> and <code>PortMap.PortMapItem</code> values are equal for the same target hardware.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>HtcsPortName</code>
+        </p>
+      </td>
+      <td>Set to the value specified when opening the HTCS port on the target.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>IPAddress</code>
+        </p>
+      </td>
+      <td>Specify this IP address when connecting to the port indicated by <code>HtcsPeerName</code> and <code>HtcsPortName</code>.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>TcpPortNumber</code>
+        </p>
+      </td>
+      <td>Specify this TCP port number when connecting to the port indicated by <code>HtcsPeerName</code> and <code>HtcsPortName</code>.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83956008_h2_15">Sending to Target Manager</h2>
+<h3 id="Anchor_83956008_h3_12">Registering a New Port Mapping</h3>
+<p>The following XML data is sent as a single line when a new port mapping is registered.</p>
+<p>If the connection to the control port is cut, all registrations done through this control port are deleted.<br />Consequently, you must maintain the connection with the control port, while listening, after opening a server port.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;RegisterPortMapCommand&gt;</span>
+&nbsp;&nbsp;&nbsp;<span class="nt">&lt;PortMapItem&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;HtcsPeerName&gt;</span>MyPcName<span class="nt">&lt;/HtcsPeerName&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;HtcsPortName&gt;</span>MyHostServiceName<span class="nt">&lt;/HtcsPortName&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;IPAddress&gt;</span>127.0.0.1<span class="nt">&lt;/IPAddress&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;TcpPortNumber&gt;</span>51174<span class="nt">&lt;/TcpPortNumber&gt;</span>
+&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/PortMapItem&gt;</span>
+&nbsp;&nbsp;&nbsp;<span class="nt">&lt;RequestName&gt;</span>MyRequest1<span class="nt">&lt;/RequestName&gt;</span>
+<span class="nt">&lt;/RegisterPortMapCommand&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The <code>RequestName</code> parameter can be omitted.</p>
+<p>The same value is returned during the Ack returned by Target Manager, so it can be used as an identifier for the registration request. </p>
+<p>The following response is returned by Target Manager after it has received a registration.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;CommandResult&gt;</span>
+&nbsp;&nbsp;&nbsp;<span class="nt">&lt;RequestName&gt;</span>MyRequest1<span class="nt">&lt;/RequestName&gt;</span>
+&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Value&gt;</span>0<span class="nt">&lt;/Value&gt;</span>
+<span class="nt">&lt;/CommandResult&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+  <code>RequestName</code> contains the same value that was specified during registration.</p>
+<div>
+  <p>
+    <code>Value</code> contains the results of the registration. If successful, the value is <code>0</code>.</p>
+  <h3 id="Anchor_83956008_h3_13">Unregistering a Port Mapping</h3>
+  <p>By closing the control port, all registrations requested from this port will be automatically unregistered.</p>
+  <p>The following XML data is sent as a single line when an individual port mapping is unregistered.</p>
+  <p>
+    <br />
+  </p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="nt">&lt;UnregisterPortMapCommand&gt;</span>
+&nbsp;&nbsp;&nbsp;<span class="nt">&lt;HtcsPeerName&gt;&lt;/HtcsPeerName&gt;</span>
+&nbsp;&nbsp;&nbsp;<span class="nt">&lt;HtcsPortName&gt;</span>MyHostServiceName<span class="nt">&lt;/HtcsPortName&gt;</span>
+&nbsp;&nbsp;&nbsp;<span class="nt">&lt;RequestName&gt;</span>MyRequest2<span class="nt">&lt;/RequestName&gt;</span>
+<span class="nt">&lt;/UnregisterPortMapCommand&gt;</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>The <code>RequestName</code> parameter can be omitted.</p>
+</div>
+<div>
+  <p>The same value is returned during the Ack returned by Target Manager, so it can be used as an identifier for the registration deletion request.<br /> </p>
+  <p>The following response is returned by Target Manager after it has received a registration.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="nt">&lt;CommandResult&gt;</span>
+&nbsp;&nbsp;&nbsp;<span class="nt">&lt;RequestName&gt;</span>MyRequest2<span class="nt">&lt;/RequestName&gt;</span>
+&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Value&gt;</span>0<span class="nt">&lt;/Value&gt;</span>
+<span class="nt">&lt;/CommandResult&gt;</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <code>RequestName</code> contains the same value that was specified during unregistration.<br /><code>Value</code> contains the results of the unregistration. If successful, the value is <code>0</code>.</p>
+  <h2 id="Anchor_83956008_h2_16">Fixing Port Maps</h2>
+  <p>
+    <a name="Anchor_83956008_FixHtcsPortMapping"></a>
+  </p>
+  <p>You can fix the port map for a particular <code>HtcsPortName</code> by selecting <strong>Tools</strong> &gt; <strong>HTCS Port Mapping</strong> in Target Manager and editing the configuration file.<br />In the following example configuration file, where <code>PeerName</code> specifies which ports are opened on the target, the port named <code>PortName1</code> is fixed to port number <code>10000</code> and <code>PeerName</code> is fixed to port number <code>12345</code>.</p>
+  <div style="border-width: 1px;" class="preformatted panel">
+    <div class="preformattedContent panelContent">
+      <pre># HtcsPeerName, HtcsPortName, TcpPortNumber
+PeerName, PortName1, 10000
+PeerName, PortName2, 12345</pre>
+    </div>
+  </div>
+  <p>For <code>PeerName</code>, you can check the HCTS entry peer names found in Target Manager. The serial number is usually the peer name.<br />If an empty string is specified for <code>PeerName</code>, the port number will be fixed to the first target that matches <code>PortName</code>. </p>
+  <p>The following code shows an actual example.<br />In this example, port numbers are fixed for the ports named <code>Log</code> and <code>Application</code> for the targets with the serial numbers XAWF0111100001 and XAWF0111100002.<br />The port numbers 10002 and 12347 are used when targets with any other serial number open an HTSC port named Log or Application.</p>
+  <div style="border-width: 1px;" class="preformatted panel">
+    <div class="preformattedContent panelContent">
+      <pre># HtcsPeerName, HtcsPortName, TcpPortNumber
+XAWF0111100001, Log,          10000
+XAWF0111100001, Application,  12345
+XAWF0111100002, Log,          10001
+XAWF0111100002, Application,  12346
+              , Log,          10002
+              , Application,  12347</pre>
+    </div>
+  </div>
+  <h1 id="Anchor_83956008_h1_7">Disconnection Emulation</h1>
+  <p>Disconnection emulation is a feature for testing application behavior when the application is not connected to Target Manager.<br />When this feature is enabled, each of the HTC and HTCS functions return errors as if the application were always in a disconnected state, even when connected to Target Manager.</p>
+  <p>For more information about using disconnection emulation, see HTC Disconnection Emulation Mode in <a href="../Pages/Page_310879077.html">DevMenu - Development Assistance Settings</a>.</p>
+  <h1 id="Anchor_83956008_h1_8">Assured Number of Hardware Devices</h1>
+  <p>The specifications place no upper limit on the number of HTCS ports and hardware devices that can be operated at the same time.<br />However, operations can be tested for up to 14 devices, and problems may arise when more than this number of devices are operated at the same time.</p>
+  <h1 id="Anchor_83956008_h1_9">Using HTCS With the Library</h1>
+  <p>You must note the following when using HTCS with the library.</p>
+  <h2 id="Anchor_83956008_h2_17">Do not call Initialize() or Finalize() within the library.</h2>
+  <p>Calling <code>Finalize</code> within the library can crash other threads using HTCS when HTCS was in use by the application or another library.<br />We recommend an implementation that makes sure whether HTCS is available for the library, using <code>IsInitialized()</code>, because <code>Initialize()</code> and <code>Finalize()</code> only run within the application.</p>
+  <h2 id="Anchor_83956008_h2_18">During Initialize(), allocate enough memory for a linked library to use HTCS functionality.</h2>
+  <p>There might be a crash as a result of a lack of memory when the amount of memory to use by the application for HTCS occurs during <code>Initialize()</code> because sharing that memory with the library can result in that lack of memory even when there is enough console memory remaining.<br />For the application, consider the number of sockets in use by the library before allocating memory.</p>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__htcs', '../../../Api/HtmlNX/namespacenn_1_1htcs.html' )
+// ApiLink_NN_ENABLE_HTC
+SetUrl( 'ApiLink_nn__htcs__Initialize', '../../../Api/HtmlNX/namespacenn_1_1htcs.html#a7eab72b8843a2a9ff763f52b78da680e' )
+SetUrl( 'ApiLink_nn__tm__GetHtcsAddresses', '../../../Api/HtmlNX/namespacenn_1_1tm.html#a65d88b6f94720e2151cca902d73efb67' )
+SetUrl( 'ApiLink_nn__tm__RegisterHtcsEntry', '../../../Api/HtmlNX/namespacenn_1_1tm.html#a676f047a474fb78d1e3c62ce3ac143d4' )
+SetUrl( 'ApiLink_PageSampleHtcs', '../../../Api/HtmlNX/_page_sample_htcs.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

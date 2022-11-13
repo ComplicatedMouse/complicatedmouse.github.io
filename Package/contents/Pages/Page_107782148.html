@@ -1,0 +1,479 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Save Data (NX Add-On) | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Save Data (NX Add-On) -->
+<div class="pagetitle" id="PageId_107782148">Save Data (NX Add-On)</div>
+<div class="text_separate">
+<p>The specifications for save data in NX applications are the same as those for <a href="../Pages/Page_107320205.html">save data in the Windows environment</a>, with the exceptions described on this page.</p>
+<p>Before using save data, carefully review the overview and operations described in <a href="../Pages/Page_227085130.html">Save Data</a>.</p>
+<h1 id="Anchor_107782148_h1_1">Save Data Types and Mounting</h1>
+<p>This section describes the types of save data that can be used by NX applications and how that save data is mounted.</p>
+<ul>
+  <li>User Account Save Data<ul><li>Application save data that can be created for each user account. Mount it using the <code><span class="ApiLink_nn__fs__MountSaveData">nn::fs::MountSaveData</span>()</code> function. For more information, see the <span class="ApiLink_PageSampleFs">sample program</span>.</li></ul></li>
+  <li>Save Data for Debugging<ul><li>One set of this kind of save data can be created for each application. Mount it using the <code><span class="ApiLink_nn__fs__MountSaveDataForDebug">nn::fs::MountSaveDataForDebug</span>()</code> function. For more information, see the <span class="ApiLink_PageSampleFsSaveDataForDebug">sample program</span>.</li><li>Both the data save area and the journaling area are set to 32 MiB by default for this save data used for debugging. To create these areas with specified sizes, call the <code><span class="ApiLink_nn__fs__EnsureSaveDataForDebug">nn::fs::EnsureSaveDataForDebug</span>()</code> function before mounting.<p><br /></p><div class="warn_new"><div class="warn_new_left">Warning</div><div class="warn_new_right"><p>The save data used for debugging cannot be used in the production environment.<br />For more information, see Using Debugging APIs in <a href="../Pages/Page_83956190.html#Anchor_83956190_fsApiForDebug">fs Library &gt; Development Overview</a>.</p></div></div></li></ul></li>
+</ul>
+<p>NX applications can mount a total of up to 10 different sets of save data at the same time. They cannot mount multiple sets of the same save data at the same time.</p>
+<h1 id="Anchor_107782148_h1_2">Creating Application-Specific Save Data<a name="Anchor_107782148_savedata_creation_by_application"></a></h1>
+<p>You must run <code><span class="ApiLink_nn__fs__EnsureSaveData">nn::fs::EnsureSaveData</span>()</code> to create the save data for applications that do not use <a href="../Pages/Page_166503043.html#Anchor_166503043_h3_14">Console account selection at startup</a>, and for applications designed to switch between multiple user accounts and access the different save data.<br />For more information about Console account selection at startup, see the Account Guide and <a href="../Pages/Page_166503043.html#Anchor_166503043_h3_14">Features &gt; Building &gt; Creating Application Images &gt; Writing NMETA Files &gt; Console Account Selection at Startup</a>.<br />The size of created save data can also be extended when <code><span class="ApiLink_nn__fs__EnsureSaveData">nn::fs::EnsureSaveData</span>()</code> is running. See Updating Save Data Sizes as Coded in NMETA Files, later in this document.<br />When the <code><span class="ApiLink_nn__fs__EnsureSaveData">nn::fs::EnsureSaveData</span>()</code> function is called, there will be occasions when there is insufficient free space to create or extend the save data. See Save Data Error Handling, later in this document.</p>
+<p>When the application starts, the system creates save data for the user account selected, without requiring a call to <code><span class="ApiLink_nn__fs__EnsureSaveData">nn::fs::EnsureSaveData</span>()</code>, in the application using <a href="../Pages/Page_166503043.html#Anchor_166503043_h3_14">Console account selection at startup</a>. Applications do not start when save data cannot be created, such as when there is not enough capacity.</p>
+<p>
+  <strong>To create user account save data, regardless of whether <a href="../Pages/Page_166503043.html#Anchor_166503043_h3_14">Console Account Selection at Startup</a> is used, some settings must be configured in the NMETA file.</strong> For more information, see <a href="#Anchor_107782148_savedata_meta">Save Data Settings</a>.</p>
+<h1 id="Anchor_107782148_h1_3">Deleting Save Data</h1>
+<p>You can delete save data by using <a href="../Pages/Page_310878092.html">DevMenu</a> or <a href="../Pages/Page_424117446.html">DevMenuCommand</a>.</p>
+<h1 id="Anchor_107782148_h1_4">Emulating Save Data Locations</h1>
+<p>A save data emulation directory is generated on the specified host PC when mounting save data after specifying the path on the host PC after the Nintendo Switch&trade; application runs <code><span class="ApiLink_nn__fs__SetSaveDataRootPath">nn::fs::SetSaveDataRootPath</span>()</code>. This enables emulation of the content of the save data file system, using the host PC's file system.<br />The save data is placed in a path like the following one. <code>0000000000000001</code> is an ID that is assigned to each set of save data.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>＜Path on the host PC as specified by the nn::fs::SetSaveDataRootPath() function＞/0000000000000001/0/</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Note that the content of the existing save data kept in system memory is not synchronized with the content in the emulation directory.</p>
+<h1 id="Anchor_107782148_h1_5">
+  <span style="color: rgb(117,117,117);">Save Data Characteristics</span>
+</h1>
+<h2 id="Anchor_107782148_h2_1">Protecting Data With Journaling</h2>
+<p>File operations such as creating, deleting, and writing are temporarily recorded in the update history, and are confirmed when <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code> is called. This location where updates are temporarily recorded is called <em>journaling area</em>. The size of the journaling are can be set by a developer when creating save data anew.</p>
+<p>You can record the update up to the size of the journaling area until <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code> is called. Because you cannot record an update exceeding the size of the journaling region, you must handle this situation by specifying a journaling region size that is sufficient for sequential operations until the update is set and then calling <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code> right after you finish the series of operations.</p>
+<p>For versions of NX Add-On earlier than 5.1.0, use <code><span class="ApiLink_nn__fs__CommitSaveData">nn::fs::CommitSaveData</span>()</code> instead of <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code>.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>You cannot set update content during writing operations, so you cannot run <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code>. Calling <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code> before calling <code><span class="ApiLink_nn__fs__CloseFile">nn::fs::CloseFile</span>()</code> to close a file opened with <code><span class="ApiLink_nn__fs__OpenMode_Write">nn::fs::OpenMode_Write</span></code> corresponds to a precondition failure for an <a href="../Pages/Page_174247773.html#Anchor_174247773_ErrorsThatMustNotOccurInRetailProducts">error that should not occur with retail products</a>, so be careful to avoid such access.</p>
+  </div>
+</div>
+<h2 id="Anchor_107782148_h2_2">Assigning Blocks</h2>
+<p>Save data is managed by dividing the data save area and journaling area into blocks. A single block is 16 KiB.</p>
+<p>Blocks of the data save area are assigned and freed when files are created and resized. For files, one block is assigned for each 16 KiB of file data. If the size of a created file is not a multiple of 16 KiB, the required number of blocks are assigned after rounding up the value. Blocks of the data save area are also used to manage files and directories. One block is assigned for the first 168 files, another block is assigned if that number is exceeded, and for each additional 168 files. Blocks are similarly assigned for directories. The blocks that are assigned for the managing of files and directories are not freed by subsequent operations. The following are examples.</p>
+<ul>
+  <li>If a 32 KiB file is created, it is assigned two blocks of the data save area.</li>
+  <li>If a 45 KiB file is created, it is assigned three blocks of the data save area.</li>
+  <li>If a 45 KiB file is resized to 32 KiB, one block of the data save area is freed.</li>
+  <li>If only one new file (along with a directory) is created in empty save data, it is assigned two blocks of the data save area.</li>
+  <li>If a file of 0 bytes is added to save data consisting of one directory and 167 files, no additional block of the data save area is assigned.</li>
+  <li>If a file of 0 bytes is added to save data consisting of one directory and 168 files, one additional block of the data save area is assigned.</li>
+  <li>If one file is deleted from save data consisting of one directory and 169 files, no block of the data save area is freed.</li>
+</ul>
+<p>A block of the journaling area is assigned each time there is an operation like the creation, deletion, or writing of data to a file that involves rewriting of blocks of the data save area. The assigned block of the journaling area is freed by a call to the <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code> function. Because the required number of blocks for each operation varies depending on the state of the file system, we recommend configuring your settings to have a few surplus blocks of space. The following are examples.</p>
+<ul>
+  <li>If a directory is created or deleted, assign a maximum of two blocks of the journaling area.</li>
+  <li>If a file is deleted, assign a maximum of three blocks of the journaling area.</li>
+  <li>If a file of 0 bytes is created, assign a maximum of three blocks of the journaling area.</li>
+  <li>If a file with a size that is a multiple of 16 KiB is created and the content has not been rewritten, assign a maximum of three blocks of the journaling area.</li>
+  <li>If a file with a size that is not a multiple of 16 KiB is created and the content has not been rewritten, assign a maximum of four blocks of the journaling area.</li>
+  <li>If a 16 KiB file is created and the content has been rewritten, assign a maximum of four blocks of the journaling area.</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>Note that the size of the data save memory must include a minimum of two blocks of a file management block and a directory management block (32 KiB).</p>
+    <p>When creating, deleting, renaming, and changing the file size of files and directories, the file management block and directory management block are updated. For this reason, the size of the journaling area must also include a minimum of two blocks; a file management block and a directory management block (32 KiB).</p>
+    <p>When the file management blocks and the directory management blocks consist of multiple blocks, it is impossible to know which management blocks have been updated when files are created, deleted, renamed, and resized, so make sure to include all management blocks in the size of the journaling area.</p>
+    <p>The minimum size for the data saving area and the journaling area is three blocks each (the minimum two blocks plus one block for file data), or 48 KiB.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Blocks that have been allocated as file management blocks and directory management blocks are not freed, even after the files and directories are deleted. The blocks are reused when files and directories are later recreated.</p>
+    <p>Note that the memory region is not completely freed, even when all files and directories are deleted.</p>
+  </div>
+</div>
+<h2 id="Anchor_107782148_h2_3">
+  <br />File Content After Creation and Resizing</h2>
+<p>Immediately after a file is created, it is zero-filled.</p>
+<p>Even for the size expanded with <code><span class="ApiLink_nn__fs__SetFileSize">nn::fs::SetFileSize</span>()</code>, it is zero-filled.</p>
+<h2 id="Anchor_107782148_h2_4">Performance Declines Based on Number of Entries</h2>
+<p>Due to the file system specifications for save data, the performance of functions that specify the path gradually declines as the number of files and directories increases. The performance falls off dramatically when the number of entries exceeds twenty thousand.<br />We recommend keeping the number of files and directories in the hundreds.</p>
+<h1 id="Anchor_107782148_h1_6">Save Data Settings<a name="Anchor_107782148_savedata_meta"></a></h1>
+<p>Write save data settings in the NMETA file (<code>.nmeta</code>).</p>
+<p>The following settings can be configured.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item Name</th>
+      <th>Overview</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>
+        <code>NintendoSdkMeta/Application/UserAccountSaveDataSize</code>
+      </td>
+      <td>The data save memory size of the user account save data</td>
+      <td>Must be at least 48 KiB and a multiple of 16 KiB.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>NintendoSdkMeta/Application/UserAccountSaveDataJournalSize</code>
+      </td>
+      <td>The journaling memory size of the user account save data</td>
+      <td>Must be at least 48 KiB and a multiple of 16 KiB.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>To prevent a negative user experience because too much system memory is being used for save data, specify the minimum required amount for the save data size.<br />Contact Nintendo if 64 MiB is not large enough for the combined size of the data save area and the journaling area for the user account save data.</p>
+    <p>Provide the following information when contacting Nintendo.</p>
+    <ul>
+      <li>Data save area size and journaling area size</li>
+      <li>Breakdown of the data save area size (content of each element, size, and number of elements)</li>
+      <li>Does the data to be saved change greatly in size depending on how the user plays the game? (If the size does change greatly, use the save data size extension feature.)</li>
+      <li>Is there any data that does not need to be made permanent? (Place data that does not need to be made permanent in <a href="../Pages/Page_685577216.html">RamDisk</a> or <a href="../Pages/Page_224955140.html">Temporary Storage</a>.)</li>
+      <li>Is there any data that can be re-generated? (Place data that can be re-generated in<a href="../Pages/Page_224957652.html">Cache Storage</a>.)</li>
+      <li>Was the size optimized using compression or data format conversion without detracting from the gameplay?</li>
+    </ul>
+  </div>
+</div>
+<h2 id="Anchor_107782148_h2_5">
+  <br />Example Configurations</h2>
+<p>The following example of an NMETA file is configured with a data save memory size of 1 MiB and a journaling memory size of 256 KiB.</p>
+<p>In this case you can, for example, place one file with a size of 1 MiB &ndash; (16 KiB * 2) (file and directory management block portion) and you can rewrite the memory up to 256 KiB until committing.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;?xml <span class="nv">version</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span>? &gt;
+&lt;NintendoSdkMeta&gt;
+&nbsp;&nbsp;&lt;Core&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Name&gt;Application&lt;/Name&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ApplicationId&gt;0x0005000C10000000&lt;/ApplicationId&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Is64BitInstruction&gt;True&lt;/Is64BitInstruction&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ProcessAddressSpace&gt;AddressSpace64Bit&lt;/ProcessAddressSpace&gt;
+&nbsp;&nbsp;&lt;/Core&gt;
+&nbsp;&nbsp;&lt;Application&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;UserAccountSaveDataSize&gt;0x0000000000100000&lt;/UserAccountSaveDataSize&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;UserAccountSaveDataJournalSize&gt;0x0000000000040000&lt;/UserAccountSaveDataJournalSize&gt;
+&nbsp;&nbsp;&lt;/Application&gt;
+&lt;/NintendoSdkMeta&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />Currently, save data is created only if the application is started using any of the folllowing methods and either the system creates the save data because the option has been set to select a user before the application starts, or the save data is created by a call to the <code><span class="ApiLink_nn__fs__EnsureSaveData">nn::fs::EnsureSaveData</span>()</code> function.</p>
+<ul>
+  <li>When placing metadata created from an NMETA file written with save data settings in NSPD, and starting with application format = Raw from VSI<ul><li><p>For more information about creating metadata, see <a href="../Pages/Page_107320233.html#Anchor_107320233_h2_15">Features &gt; Building &gt; Creating Application Images &gt; Tool Reference &gt; AuthoringTool &gt; Creating Metadata to Place in NSPD Files</a>.</p></li><li><p>Metadata must placed as follows.</p><div style="border-width: 1px;" class="preformatted panel"><div class="preformattedContent panelContent"><pre>ApplicationXXX.nspd/program0.ncd/
+                    meta0.ncd/
+                    control0.ncd/</pre></div></div></li></ul></li>
+  <li>When placing metadata created from an NMETA file written with save data settings in NSPD, and starting the application by specifying NSPD in RunOnTarget</li>
+  <li>When specifying an NMETA file written with save data settings, and starting an application in NSP format from VSI</li>
+  <li>When specifying an NMETA file written with save data settings, and starting the created NSP file in RunOnTarget</li>
+  <li>When specifying an NMETA file written with save data settings, and starting the application after installing the created NSP file in NAND</li>
+</ul>
+<p>Note that save data is not created and mounting fails if an application in NCA format is started or if there is no metadata in the NSPD. </p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>Note that if save data has already been created, that save data will be used instead of being re-created, and any updates to the save data settings will not be applied.</p>
+    <p>For this reason, delete the save data when describing and modifying the save data settings.</p>
+  </div>
+</div>
+<h1 id="Anchor_107782148_h1_7">Extending the Size of Save Data<a name="Anchor_107782148_savedata_extension"></a></h1>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This feature is available in NX Add-On 3.1.0 and later.</p>
+  </div>
+</div>
+<p>You can extend the data save area and the journaling area for save data, by using either of the following methods. Whichever method is used, the save data contents before the expansion are maintained.</p>
+<ul>
+  <li>Create a patch based on the revised application with an updated save data size description in the <a href="../Pages/Page_166503043.html">NMETA file</a>.</li>
+  <li>Execute <code><span class="ApiLink_nn__fs__ExtendSaveData">nn::fs::ExtendSaveData</span>()</code> in the application.</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>Decreasing the size of save data is not supported. Avoid expanding save data to an unnecessary large size.</p>
+  </div>
+</div>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>The number of times save data can be expanded, is limited to 32 times, regardless of the expansion method. Expand save data accordingly so that the number of times it is expanded does not exceed this number.<br />Contact Nintendo if you are planning to expand save data more than this amount of times.</p>
+  </div>
+</div>
+<h2 id="Anchor_107782148_h2_6">Updating the Save Data Size in the NMETA File<a name="Anchor_107782148_savedata_extension_by_patch"></a></h2>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>You need pre-approval to change the save data size in the NMETA file if it is updated in a way that increases the combined size of the data save area and journaling area to more than 64 MiB. To apply, contact Nintendo.</p>
+    <p>Provide the following information when contacting Nintendo.</p>
+    <ul>
+      <li>Data save area size and journaling area size after updating.</li>
+      <li>Breakdown of the data save area size (content and size of each element, and number of elements) after updating</li>
+      <li>Does the data to be saved change greatly in size depending on how the user plays the game? (If the size does change greatly, use the save data size extension feature.)</li>
+      <li>Is there any data that does not need to be made permanent? (Place data that does not need to be made permanent in <a href="../Pages/Page_685577216.html">RamDisk</a> or <a href="../Pages/Page_224955140.html">Temporary Storage</a>.)</li>
+      <li>Is there any data that can be re-generated? (Place data that can be re-generated in<a href="../Pages/Page_224957652.html">Cache Storage</a>.)</li>
+      <li>Was the size optimized using compression or data format conversion without detracting from the gameplay?</li>
+    </ul>
+  </div>
+</div>
+<p>When save data already exists at the time the user account save data is created in the application and after the patch is applied, update the description of <code>NintendoSdkMeta/Application/UserAccountSaveDataSize</code> and <code>NintendoSdkMeta/Application/UserAccountSaveDataJournalSize</code> in the NMETA file to automatically expand the size according to the description in the NMETA file. </p>
+<p>As described in Creating Application-Specific Save Data, the system automatically creates and expands save data for applications that use <a href="../Pages/Page_166503043.html#Anchor_166503043_h3_14">Console account selection at startup</a>. These types of applications do not need to conduct error handling. Applications will not start when save data cannot be created or added to, such as when there is not enough capacity to do so.<br />For applications that do not use <a href="../Pages/Page_166503043.html#Anchor_166503043_h3_14">Console account selection at startup</a>, the size is enlarged when the <code><span class="ApiLink_nn__fs__EnsureSaveData">nn::fs::EnsureSaveData</span>()</code> function is called. In such cases, sometimes there will not be enough storage space. Error handling must be conducted, similar to when save data is created.</p>
+<p>The following restrictions apply, however, when updating the size of the NMETA file save data and then creating a patch.</p>
+<ul>
+  <li>After the change, the sizes of the data save area and the journaling area for the save data, both must be multiples of 1 MiB.</li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The size of <a href="../Pages/Page_194625008.html">data delivery cache storage</a> can be similarly expanded by updating the NMETA file (<code>NintendoSdkMeta/Application/BcatDeliveryCacheStorageSize</code>). The timing and the important considerations for extension are the same as those for extending user account save data.</p>
+  </div>
+</div>
+<h2 id="Anchor_107782148_h2_7">
+  <span style="color: rgb(117,117,117);">Expanding the Size of Save Data As Needed</span>
+</h2>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>Apply in advance if you plan to use the feature to expand the size of save data as needed. To apply, contact Nintendo.</p>
+    <p>Provide the following information when contacting Nintendo.</p>
+    <ul>
+      <li>The data save area size and the journaling area size when save data is created.</li>
+      <li>The maximum expanded data save area size and journaling area size</li>
+      <li>Breakdown of the data save area size (content and size of each element, and number of elements) when expanded to the maximum size</li>
+      <li>Is there any data that does not need to be made permanent? (Place data that does not need to be made permanent in <a href="../Pages/Page_685577216.html">RamDisk</a> or <a href="../Pages/Page_224955140.html">Temporary Storage</a>.)</li>
+      <li>Is there any data that can be re-generated? (Place data that can be re-generated in<a href="../Pages/Page_224957652.html">Cache Storage</a>.)</li>
+      <li>Was the size optimized using compression or data format conversion without detracting from the gameplay?</li>
+      <li>Under what conditions is the size expanded, and to what extent?<br />Is your application designed to allocate save data of the size needed by most users when new save data is created, and to appropriately expand that size according to how users play?</li>
+      <li>What is the maximum number of times the size is expanded until the limit has been reached?</li>
+      <li>Are there plans to extend the size of expansion even further in future updates?</li>
+    </ul>
+  </div>
+</div>
+<p>You can use the <code><span class="ApiLink_nn__fs__ExtendSaveData">nn::fs::ExtendSaveData</span>()</code> function to expand the data save area and the journaling area to the specified sizes for the user account save data. </p>
+<p>By using this feature, you can expand the size of save data depending on changes in how users play the game to sizes exceeding those written in <code>NintendoSdkMeta/Application/UserAccountSaveDataSize</code> and <code>NintendoSdkMeta/Application/UserAccountSaveDataJournalSize</code>. There is no merit in expanding the save data size on an as-needed basis up to the size required for the way most players are expected to play the game. Rather, set <code>NintendoSdkMeta/Application/UserAccountSaveDataSize</code> and <code>NintendoSdkMeta/Application/UserAccountSaveDataJournalSize</code> to values that reflect the size that most players will need for save data, and allocate space when creating new save data based on those values. For example, the size of save data required at the end of a stage like that used in the tutorial is the size required by most users, so you would want to allocate a size when creating new save data would not hinder the progress in the game. </p>
+<p>To use this functionality, you must configure the following values. You cannot extend save data to sizes beyond these values.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 436.0px;" />
+    <col style="width: 395.0px;" />
+    <col style="width: 234.0px;" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>
+        <p>Item Name</p>
+      </th>
+      <th>
+        <p>Overview</p>
+      </th>
+      <th>
+        <p>Notes</p>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>NintendoSdkMeta/Application/UserAccountSaveDataSizeMax</td>
+      <td>Upper Expansion Limit on Data Save Memory Sizes for User Account Save Data</td>
+      <td>Must be a multiple of 1 MiB.</td>
+    </tr>
+    <tr>
+      <td>NintendoSdkMeta/Application/UserAccountSaveDataJournalSizeMax</td>
+      <td>Limit on Expansion of the Journaling Area Size for User Account Save Data</td>
+      <td>Must be a multiple of 1 MiB.</td>
+    </tr>
+  </tbody>
+</table>
+<p>User account save data must be unmounted before running <code><span class="ApiLink_nn__fs__ExtendSaveData">nn::fs::ExtendSaveData</span>()</code>.</p>
+<p>When the <code><span class="ApiLink_nn__fs__ExtendSaveData">nn::fs::ExtendSaveData</span>()</code> function is called, there will be occasions when there is insufficient free space to extend the size of the save data. See Save Data Error Handling, later in this document.</p>
+<h1 id="Anchor_107782148_h1_8">Save Data Error Handling</h1>
+<p>Error handling from within the application is necessary in the following save data operation scenarios.</p>
+<ul>
+  <li>When creating or extending the size of save data, running <code><span class="ApiLink_nn__fs__EnsureSaveData">nn::fs::EnsureSaveData</span>()</code> within the application</li>
+  <li>When extending the size of the save data, running <code><span class="ApiLink_nn__fs__ExtendSaveData">nn::fs::ExtendSaveData</span>()</code> within the application</li>
+</ul>
+<p>In either scenario, sometimes there is insufficient free space to create or extend the save data. When this happens, the system automatically displays the following message.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Could not create save data.
+Insufficient system memory.
+From the HOME Menu, open Settings &gt; Data Management and delete unnecessary data.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>After this message appears, you are prompted to resolve the issue of insufficient memory. The <code><span class="ApiLink_nn__fs__ResultUsableSpaceNotEnough">nn::fs::ResultUsableSpaceNotEnough</span></code> value is returned when no resolution occurs.<br />When this happens, save data might not be created as intended or its size settings changed as intended. Interrupt the save data operations to handle the error appropriately.</p>
+<ul>
+  <li>For example: <code><span class="ApiLink_nn__fs__EnsureSaveData">nn::fs::EnsureSaveData</span>()</code> is called from a scene in which the user selects a user account that returns <code><span class="ApiLink_nn__fs__ResultUsableSpaceNotEnough">nn::fs::ResultUsableSpaceNotEnough</span></code>. In this case, the application cancels the user account&ndash;selection operation and returns to the previous scene.</li>
+</ul>
+<p>You can fill the NAND free space using <a href="../Pages/Page_310879077.html">DevMenu</a> or <a href="../Pages/Page_325711330.html">DevMenuCommand</a>. After creating a state of insufficient free space, make sure that <code><span class="ApiLink_nn__fs__ResultUsableSpaceNotEnough">nn::fs::ResultUsableSpaceNotEnough</span></code> can handle the operations correctly.</p>
+<p>The error handling for other save data operations is identical to that for other file system operations. See <a href="../Pages/Page_174247773.html">Error Handling</a>.</p>
+<h1 id="Anchor_107782148_h1_9">Referencing Save Data From Other Applications</h1>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Contact Nintendo if there is a need to mount with the save data from other applications in a writable state.</p>
+  </div>
+</div>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>To use this feature with the save data of another company's application, consult in advance with regards to the settings for <code>NintendoSdkMeta/Core/FsAccessControlData/SaveDataOwnerIds</code>. To apply, contact Nintendo.</p>
+  </div>
+</div>
+<p>Use the <code><span class="ApiLink_nn__fs__MountSaveDataReadOnly">nn::fs::MountSaveDataReadOnly</span>()</code> function to mount and reference another application's save data in read-only format.<br />To determine whether there is any save data for some other application, use <code><span class="ApiLink_bool_nn__fs__IsSaveDataExisting(const_nn__ApplicationId_applicationId|_const_nn__account__Uid_&user)_NN_NOEXCEPT">nn::fs::IsSaveDataExisting</span>(const <span class="ApiLink_nn__ApplicationId">nn::ApplicationId</span> <em>applicationId</em>, const <span class="ApiLink_nn__account__Uid">nn::account::Uid</span>&amp; <em>user</em>)</code>.</p>
+<p>To use these functions, you must describe the application IDs of the applications with the save data that you want to access in the <code>NintendoSdkMeta/Core/FsAccessControlData/SaveDataOwnerIds</code> element of the NMETA file in advance.</p>
+<p>The following snippet is a sample for accessing the save data of application IDs 0x0100000000010001 and 0x0100000000010002.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;?xml <span class="nv">version</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span>? &gt;
+&lt;NintendoSdkMeta&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Core&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Name&gt;Application&lt;/Name&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ApplicationId&gt;0x0100000000010000&lt;/ApplicationId&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;FsAccessControlData&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;FlagPresets&gt;Debug&lt;/FlagPresets&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;SaveDataOwnerIds&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Accessibility&gt;Read&lt;/Accessibility&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Id&gt;0x0100000000010001&lt;/Id&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/SaveDataOwnerIds&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;SaveDataOwnerIds&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Accessibility&gt;Read&lt;/Accessibility&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Id&gt;0x0100000000010002&lt;/Id&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/SaveDataOwnerIds&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/FsAccessControlData&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Core&gt;
+&lt;/NintendoSdkMeta&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>When you specify <code>NintendoSdkMeta/Core/FsAccessControlData/FsAccessControlData/SaveDataOwnerIds</code>, in most cases, you must also specify <code>/NintendoSdkMeta/Core/FsAccessControlData/FlagPresets/Debug</code>, as shown in the following code example.</p>
+    <p>As described in the Using Debugging APIs section in <a href="../Pages/Page_83956190.html#Anchor_83956190_fsApiForDebug">fs Library &gt; Development Overview</a>, omitting the <code>FlagPresets</code> element in <code>FsAccessControlData</code> is equivalent to enabling the setting for restricting debugging functions and as a result will disable use of debugging functions. The default <code>FlagPresets</code> element is in <code>Desc/Default/FsAccessControlData/FlagPresets</code> in the application's DESC file. If elements other than Debug are added to FlagPresets in the future, those elements may also need to be included.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_107782148_h1_10">Save Data Backup</h1>
+<p>The following two methods are available for backing up save data.</p>
+<ul>
+  <li>Save data backup feature in <a href="../Pages/Page_310878092.html">DevMenu</a>, <a href="../Pages/Page_424117446.html">DevMenuCommand</a></li>
+  <li>Backup to PC using the <a href="../Pages/Page_165349096.html">BackupSaveData</a> tool</li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__MountSaveData', '../../../Api/HtmlNX/namespacenn_1_1fs.html#afdbda9f24e47b02bb74da4558bbd0760' )
+SetUrl( 'ApiLink_PageSampleFs', '../../../Api/HtmlNX/_page_sample_fs.html' )
+SetUrl( 'ApiLink_nn__fs__MountSaveDataForDebug', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a767e38eb403bd2ebb4374c5214dc0e95' )
+SetUrl( 'ApiLink_PageSampleFsSaveDataForDebug', '../../../Api/HtmlNX/_page_sample_fs_save_data_for_debug.html' )
+SetUrl( 'ApiLink_nn__fs__EnsureSaveDataForDebug', '../../../Api/HtmlNX/namespacenn_1_1fs.html#aa8c23b8227d3d07d54779875f565d698' )
+SetUrl( 'ApiLink_nn__fs__EnsureSaveData', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ae5f48fe542ce22263e1399e3b50190e8' )
+SetUrl( 'ApiLink_nn__fs__SetSaveDataRootPath', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a90c27aaf70aec66968715663cd8c5415' )
+SetUrl( 'ApiLink_nn__fs__Commit', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac90e600c3fc51adb6823a4ef900fad3a' )
+SetUrl( 'ApiLink_nn__fs__CommitSaveData', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac2f25cffd056f24d6facfda13f977fa6' )
+SetUrl( 'ApiLink_nn__fs__CloseFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac8bd9e828751bd4f953acfa765278f84' )
+SetUrl( 'ApiLink_nn__fs__OpenMode_Write', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a4c97b79cce78a95c2333dbc9053b9393a0ee257dbba840301b0e656f6d1345c03' )
+SetUrl( 'ApiLink_nn__fs__SetFileSize', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ab469b77c1d8c44eaedb9b6d658aba6c6' )
+SetUrl( 'ApiLink_nn__fs__ExtendSaveData', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ab83b2cf5e8413aa2833c8df5d2771bf9' )
+SetUrl( 'ApiLink_nn__fs__ResultUsableSpaceNotEnough', '../../../Api/HtmlNX/classnn_1_1fs_1_1_result_usable_space_not_enough.html' )
+SetUrl( 'ApiLink_nn__fs__MountSaveDataReadOnly', '../../../Api/HtmlNX/namespacenn_1_1fs.html#adf5b846d93790ec79b2d6fee53e97db9' )
+SetUrl( 'ApiLink_bool_nn__fs__IsSaveDataExisting(const_nn__ApplicationId_applicationId|_const_nn__account__Uid_&user)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a28b9a47a0c5c176a39f0cf240a91f31c' )
+SetUrl( 'ApiLink_nn__ApplicationId', '../../../Api/HtmlNX/structnn_1_1_application_id.html' )
+SetUrl( 'ApiLink_nn__account__Uid', '../../../Api/HtmlNX/structnn_1_1account_1_1_uid.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

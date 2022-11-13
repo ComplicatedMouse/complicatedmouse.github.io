@@ -1,0 +1,436 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Quick Start | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Quick Start -->
+<div class="pagetitle" id="PageId_124022352">Quick Start</div>
+<div class="text_separate">
+<p>This page describes the flow of the program up to the display of text on the screen using the <code><span class="ApiLink_nn__font">nn::font</span></code> module.</p>
+<p>For an overview of <code><span class="ApiLink_nn__font">nn::font</span></code>, see <a href="../Pages/Page_124022331.html">Overview</a>.</p>
+<h1 id="Anchor_124022352_h1_1">General Flow</h1>
+<p>Programs using <code><span class="ApiLink_nn__font">nn::font</span></code> to display text on the screen use the following general process flow.<br />Each step is described after the list.</p>
+<ol>
+  <li>Preparing the Font</li>
+  <li>Initialization</li>
+  <li>Update Processing<ol><li>Updating Constant Buffers</li><li>Issuing Commands</li></ol></li>
+  <li>Finalization<br /><br /></li>
+</ol>
+<p>The following code is an excerpt for descriptive purposes only. It cannot be used as is.<br />It is based on the source code of the attached sample demo <code>FontSimple</code>. For actual implementation information, see the source code for <code>FontSimple</code>. </p>
+<h1 id="Anchor_124022352_h1_2">Bitmap Fonts</h1>
+<h2 id="Anchor_124022352_h2_1">Preparing the Font</h2>
+<p>Prepare the FFNT font file. For more information about creating FFNT files, see <a href="../Pages/Page_126211299.html">Bitmap Fonts Not Dependent on the Target Platform</a>.</p>
+<p>When using bitmap fonts, generate the file in advance using FontConverter.<br />For example, you can use a command like the following to generate a font. (For more information, see <a href="../Pages/Page_83955995.html">here</a>.)</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">FontConverterConsole</span><span class="p">.</span><span class="n">exe</span> <span class="o">-</span><span class="n">i</span> <span class="n">ffnt</span> <span class="o">-</span><span class="k">if</span> <span class="n">color</span><span class="p">.</span><span class="n">ffnt</span> <span class="o">-</span><span class="n">o</span> <span class="n">bffnt</span> <span class="o">-</span><span class="n">of</span> <span class="n">color</span><span class="p">.</span><span class="n">bffnt</span> <span class="o">-</span><span class="n">tile</span><span class="o">-</span><span class="n">mode</span> <span class="n">Linear</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_124022352_h2_2">Initialization</h2>
+<h3 id="Anchor_124022352_h3_1">Loading and Initializing the Font</h3>
+<p>Read <code>bffnt</code> from the file and configure the <code><span class="ApiLink_nn__font__ResFont">nn::font::ResFont</span></code> class.</p>
+<p>After configuration, initialize the descriptor slots. (For more information, see <a href="../Pages/Page_108531266.html">Descriptor Pool</a>.)</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">//-----------------------------------------
+// Load and initialize the font.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Load from file.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">void</span><span class="o">*</span> <span class="n">binary</span> <span class="o">=</span> <span class="n">LoadFont</span><span class="p">(</span><span class="s">&quot;test_font.bffnt&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialize the font.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_ResFont</span><span class="p">.</span><span class="n">SetResource</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">binary</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Descriptor slot settings.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_ResFont</span><span class="p">.</span><span class="n">RegisterTextureViewToDescriptorPool</span><span class="p">(</span><span class="n">RegisterSlotForTexture_</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="p">}</span>       </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_124022352_h3_2">Initializing RectDrawer</h3>
+<p>Initialize the rendering class.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">//-----------------------------------------
+// Initialize RectDrawer.
+</span><span class="k">const</span> <span class="kt">size_t</span> <span class="n">workBufferSize</span> <span class="o">=</span> <span class="nn">nn::font::RectDrawer::</span><span class="n">GetWorkBufferSize</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">CharCount</span> <span class="p">);</span>
+<span class="n">g_RectDrawer</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">AllocateFromApplicationHeap</span><span class="p">(</span><span class="n">workBufferSize</span><span class="p">),</span> <span class="n">CharCount</span> <span class="p">);</span>
+<span class="n">g_RectDrawer</span><span class="p">.</span><span class="n">RegisterSamplerToDescriptorPool</span><span class="p">(</span><span class="n">RegisterSlotForSampler_</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>            </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_124022352_h3_3">Initializing DispStringBuffer</h3>
+<p>Initialize the <code>DispStringBuffer</code> that manages the data used to display the font.<br /><code>DispStringBuffer</code> is controlled internally by a class called <code>GpuBuffer</code> and used for the constant buffer. For this reason, these classes are also initialized at the same time.</p>
+<p>(For more information about the memory referenced by the GPU, <span class="sv-ti-title-text">see</span> <a href="../Pages/Page_107345117.html">here</a>.)</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">//-----------------------------------------
+// Initialize the DispStringBuffer.
+</span>
+<span class="c1">// Initialize the DispStringBuffer that manages the data used to display the font.
+</span><span class="nn">nn::font::DispStringBuffer::</span><span class="n">InitializeArg</span> <span class="n">initializeArg</span><span class="p">;</span>
+<span class="n">initializeArg</span><span class="p">.</span><span class="n">SetCharCountMax</span><span class="p">(</span> <span class="n">CharCount</span> <span class="p">);</span>
+
+<span class="c1">// Allocate a buffer for the specified number of characters.
+</span><span class="k">const</span> <span class="kt">size_t</span> <span class="n">drawBufSize</span> <span class="o">=</span> <span class="nn">nn::font::DispStringBuffer::</span><span class="n">GetRequiredDrawBufferSize</span><span class="p">(</span> <span class="n">initializeArg</span> <span class="p">);</span>
+<span class="n">initializeArg</span><span class="p">.</span><span class="n">SetDrawBuffer</span><span class="p">(</span><span class="n">AllocateFromApplicationHeap</span><span class="p">(</span><span class="n">drawBufSize</span><span class="p">));</span>
+
+<span class="c1">// Then initialize the buffer that controls the rendering data, called the GpuBuffer. 
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::font::GpuBuffer::</span><span class="n">InitializeArg</span>  <span class="n">arg</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetGpuAccessFlag</span><span class="p">(</span><span class="nn">nn::gfx::</span><span class="n">GpuAccess_ConstantBuffer</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocate two buffers for double buffering, to update the constant buffer every frame.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_ConstantBufferCount</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Various size calculations.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">size_t</span> <span class="n">constantBufferSize</span> <span class="o">=</span> <span class="nn">nn::font::DispStringBuffer::</span><span class="n">GetRequiredConstantBufferSize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">initializeArg</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">size_t</span> <span class="n">memoryPoolGranularity</span> <span class="o">=</span> <span class="nn">nn::gfx::MemoryPool::</span><span class="n">GetPoolMemorySizeGranularity</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">memPoolInfo</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">size_t</span> <span class="n">memoryPoolSize</span> <span class="o">=</span> <span class="nn">nn::util::</span><span class="n">align_up</span><span class="p">(</span><span class="n">constantBufferSize</span> <span class="o">*</span> <span class="n">g_ConstantBufferCount</span><span class="p">,</span> <span class="n">memoryPoolGranularity</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">size_t</span> <span class="n">MemoryPoolAlignment</span> <span class="o">=</span> <span class="nn">nn::gfx::MemoryPool::</span><span class="n">GetPoolMemoryAlignment</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">memPoolInfo</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initialize the memory pool for buffers related to rendering.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">MemoryPoolInfo</span> <span class="n">memPoolInfo</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memPoolInfo</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memPoolInfo</span><span class="p">.</span><span class="n">SetMemoryPoolProperty</span><span class="p">(</span> <span class="nn">nn::gfx::</span><span class="n">MemoryPoolProperty_CpuUncached</span> <span class="o">|</span> <span class="nn">nn::gfx::</span><span class="n">MemoryPoolProperty_GpuCached</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memPoolInfo</span><span class="p">.</span><span class="n">SetPoolMemory</span><span class="p">(</span><span class="n">AllocateFromApplicationHeap</span><span class="p">(</span><span class="n">memoryPoolSize</span><span class="p">,</span> <span class="n">MemoryPoolAlignment</span><span class="p">),</span> <span class="n">memoryPoolSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_FontDrawMemoryPool</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">memPoolInfo</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Create GpuBuffer for a constant buffer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetBufferSize</span><span class="p">(</span><span class="n">constantBufferSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetBufferCount</span><span class="p">(</span><span class="n">g_ConstantBufferCount</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetMemoryPool</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_FontDrawMemoryPool</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetMemoryPoolOffset</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetAllocator</span><span class="p">(</span><span class="n">GpuBufferAllocateFunction</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetAllocateSyncFlag</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_ConstantBuffer</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">arg</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Set the created GpuBuffer and initialize the displayed string buffer.
+</span><span class="n">initializeArg</span><span class="p">.</span><span class="n">SetConstantBuffer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_ConstantBuffer</span><span class="p">);</span>
+<span class="kt">bool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">g_DispStringBuffer</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">initializeArg</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_124022352_h2_3">Creating Data for the String to Display</h2>
+<pre>Use the TextWriter class to generate data for rendering from the string.</pre>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Creates information for string rendering.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Render settings.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::font::</span><span class="n">WideTextWriter</span> <span class="n">writer</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">SetDispStringBuffer</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_DispStringBuffer</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Set the font.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">SetFont</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_ResFont</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Set the rendering position and size.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">SetCursor</span><span class="p">(</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">50</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">SetScale</span><span class="p">(</span> <span class="mf">1.0f</span><span class="p">,</span> <span class="mf">1.0f</span> <span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// This can be used to configure the top and bottom colors of the characters.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Because these settings are stored in the top and bottom color string rendering information,
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// note that the Print processing must reoccur if you want to change the color.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//nn::util::Unorm8x4 topColor = {0, 255, 0, 255};
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//nn::util::Unorm8x4 bottomColor = {0, 255, 0, 255};
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//writer.SetTextColor(topColor, bottomColor);
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">StartPrint</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">Print</span><span class="p">(</span> <span class="n">FONT_SAMPLE_LITERAL</span><span class="p">(</span><span class="s">&quot;SAMPLE: FontSimple</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">Print</span><span class="p">(</span> <span class="n">FONT_SAMPLE_LITERAL</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">));</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">Print</span><span class="p">(</span> <span class="n">FONT_SAMPLE_LITERAL</span><span class="p">(</span><span class="s">&quot;abcdefghijklmnopqrstuvwxyz{|}~</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">Print</span><span class="p">(</span> <span class="n">FONT_SAMPLE_LITERAL</span><span class="p">(</span><span class="s">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">Print</span><span class="p">(</span> <span class="n">FONT_SAMPLE_LITERAL</span><span class="p">(</span><span class="s">&quot;Kanji &quot;</span><span class="n">Today</span> <span class="n">is</span> <span class="n">a</span> <span class="n">clear</span> <span class="n">day</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">EndPrint</span><span class="p">();</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_124022352_h2_4">Updating Constant Buffers</h2>
+<p>Update the constant buffer that defines parameters such as the character color. This processing is not required for each frame if the character color is not updated.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">g_ConstantBuffer</span><span class="p">.</span><span class="n">Map</span><span class="p">(</span><span class="n">g_FrameCount</span> <span class="o">%</span> <span class="n">g_ConstantBufferCount</span><span class="p">);</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Generate a constant buffer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The constant buffer is specified with a projection matrix and nn::font::ConstantBufferAdditionalContent.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Additional render parameters such as black and white color blending are applied.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The constant buffer must be re-generated when the contents of the projection matrix or additional rendering parameters change.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::font::</span><span class="n">ConstantBufferAdditionalContent</span> <span class="n">additionalContent</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Black and white color blending color:
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Because the TextWriter::Print processing has such a high load,
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// using the constant buffer black and white color blending for color animations when re-generating the buffer is not required
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// would be advantageous for performance.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::util::</span><span class="n">Unorm8x4</span> <span class="n">black</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">}};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::util::</span><span class="n">Unorm8x4</span> <span class="n">white</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">}};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">additionalContent</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">.</span><span class="n">SetInterpolateBlack</span><span class="p">(</span> <span class="n">black</span> <span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">.</span><span class="n">SetInterpolateWhite</span><span class="p">(</span> <span class="n">white</span> <span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">.</span><span class="n">SetInterpolateAlpha</span><span class="p">(</span> <span class="n">g_FrameCount</span> <span class="o">%</span> <span class="mi">256</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_DispStringBuffer</span><span class="p">.</span><span class="n">BuildConstantBuffer</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_Projection</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&amp;</span><span class="n">additionalContent</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_ConstantBuffer</span><span class="p">.</span><span class="n">Unmap</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_ConstantBuffer</span><span class="p">.</span><span class="n">SetGpuAccessBufferIndex</span><span class="p">(</span><span class="n">g_FrameCount</span> <span class="o">%</span> <span class="n">g_ConstantBufferCount</span><span class="p">);</span>    
+<span class="p">}</span>       </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_124022352_h2_5">Issuing Commands</h2>
+<pre>Use RectDrawer to write the prepared DispStringBuffer content to the command buffer.<br />Be careful as it is necessary to set the render state in advance.</pre>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">g_CommandBuffer</span><span class="p">.</span><span class="n">Begin</span><span class="p">();</span>
+
+<span class="c1">//------------------------------------------------------------------------------
+// Set the render state.
+//
+// Fonts are basically rendered with no depth test and no culling.
+// These settings are not set in the font itself, so you must set them before calling Draw.
+// Conversely, the Alpha Test and friend settings will be rewritten within the font, so be careful.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_CommandBuffer</span><span class="p">.</span><span class="n">ClearColor</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pTarget</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="mf">0.2f</span> <span class="cm">/*red*/</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="mf">0.2f</span> <span class="cm">/*green*/</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="mf">0.2f</span> <span class="cm">/*blue*/</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="mf">1.0f</span> <span class="cm">/*alpha*/</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">NULL</span> <span class="cm">/*pArrayRange*/</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_CommandBuffer</span><span class="p">.</span><span class="n">ClearDepthStencil</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&amp;</span><span class="n">g_DepthStencilView</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="mf">1.0f</span> <span class="cm">/*depth*/</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="mi">0</span> <span class="cm">/*stencil*/</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::gfx::</span><span class="n">DepthStencilClearMode_DepthStencil</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">NULL</span> <span class="cm">/*pArrayRange*/</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_CommandBuffer</span><span class="p">.</span><span class="n">SetRenderTargets</span><span class="p">(</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pTarget</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_DepthStencilView</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_CommandBuffer</span><span class="p">.</span><span class="n">SetViewportScissorState</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_ViewportScissorState</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_CommandBuffer</span><span class="p">.</span><span class="n">SetBlendState</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_BlendState</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_CommandBuffer</span><span class="p">.</span><span class="n">SetDepthStencilState</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_DepthStencilState</span> <span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_CommandBuffer</span><span class="p">.</span><span class="n">SetRasterizerState</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_RasterizerState</span> <span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Write the command to the command buffer.
+</span><span class="n">g_RectDrawer</span><span class="p">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">g_CommandBuffer</span><span class="p">,</span> <span class="n">g_DispStringBuffer</span><span class="p">);</span>
+
+
+<span class="n">g_CommandBuffer</span><span class="p">.</span><span class="n">End</span><span class="p">();</span>
+
+<span class="c1">// Execute command
+</span><span class="n">g_Queue</span><span class="p">.</span><span class="n">ExecuteCommand</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">g_Fence</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_124022352_h2_6">Finalization</h2>
+<p> Termination processing is performed in reverse order from generation processing.</p>
+<h1 id="Anchor_124022352_h1_3">Scalable Fonts</h1>
+<p>To use scalable fonts, we recommend creating and using FCPX files. For more information, see <a href="../Pages/Page_126562941.html">Composite Fonts</a>.</p>
+<p>The next section introduces a procedure for loading scalable fonts directly to the program without the use of FCPX files.</p>
+<h2 id="Anchor_124022352_h2_7">Initialization</h2>
+<p>The <code><span class="ApiLink_nn__font__ScalableFont">nn::font::ScalableFont</span></code> class is used in combination with the <code><span class="ApiLink_nn__font__TextureCache">nn::font::TextureCache</span></code> class.</p>
+<p>Load the scalable font into the <code>TextureCache</code> (<code>g_pScalableFontBinary</code> in the following example).</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Initialize the texture cache.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::font::TextureCache::</span><span class="n">InitializeArg</span> <span class="n">arg</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">allocateFunction</span> <span class="o">=</span> <span class="n">AllocateForScalableFont</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">textureCacheWidth</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">textureCacheHeight</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">pFontDatas</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">g_pScalableFontBinary</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span> 
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">pFontDataSizes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">g_FontBinarySize</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">fontCount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// Number of FontFaces.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">fontListCount</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// Number of fonts linked to FontFace number 0.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Enable border rendering of the font.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">pBorderWidths</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_TextureCache</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_Device</span><span class="p">,</span> <span class="n">arg</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_TextureCache</span><span class="p">.</span><span class="n">RegisterTextureViewToDescriptorPool</span><span class="p">(</span><span class="n">RegisterSlotForTexture_</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Initialize the scalable font.
+// Set the g_TextureCache that was initialized earlier as the parameters.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::font::ScalableFont::</span><span class="n">InitializeArg</span>   <span class="n">arg</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">pTextureCache</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">g_TextureCache</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">fontSize</span> <span class="o">=</span> <span class="mi">40</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">fontFace</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint16_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">i</span><span class="p">);</span> 
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// By default, characters that were not plotted will be always be replaced with alternate characters (as a default?).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// However, in this state, the GetCharWidth of characters that were not plotted
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// will always return the width of the alternate characters when called, so &quot;characters that were not plotted
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// shall be replaced with alternate characters so long as they are not contained in the font, and if they are contained in the font,
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// handle them as white space of the same width as the characters that would have originally been displayed&quot; settings are recommended.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">arg</span><span class="p">.</span><span class="n">isAlternateCharSpaceWithOriginalWidthForNotReadyChar</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_ScFont</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">Initialize</span><span class="p">(</span><span class="n">arg</span><span class="p">);</span>
+<span class="p">}</span>    </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_124022352_h2_8">Registering Characters and Generating Textures</h2>
+<p>Separate processing is required for preparing textures for display.<br />Register the character ( RegisterGlyph() ) and use UpdateTextureCache() and CompleteTextureCache().</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Register the characters to be used in the font engine.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// All ASCII characters are registered here.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span><span class="p">(</span> <span class="kt">uint16_t</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">255</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span> <span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_ScFont</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">RegisterGlyph</span><span class="p">(</span><span class="n">j</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Register Japanese.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_ScFont</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">RegisterGlyphs</span><span class="p">(</span><span class="n">FONT_SAMPLE_LITERAL</span><span class="p">(</span><span class="s">&quot;Kanji &quot;</span><span class="n">Today</span> <span class="n">is</span> <span class="n">a</span> <span class="n">clear</span> <span class="n">day</span><span class="s">&quot; &quot;</span><span class="p">));</span>
+<span class="p">}</span>
+<span class="c1">// Perform glyph rendering for the CPU memory.
+</span><span class="n">g_TextureCache</span><span class="p">.</span><span class="n">UpdateTextureCache</span><span class="p">();</span>
+<span class="c1">// Make it possible to use the glyph image rendered to the CPU memory as a texture.
+</span><span class="n">g_TextureCache</span><span class="p">.</span><span class="n">CompleteTextureCache</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_124022352_h2_9">Using</h2>
+<p>After the preparations are complete, the scalable font can be used in the same way as bitmap fonts.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">writer</span><span class="p">.</span><span class="n">SetFont</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_ScFont</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="n">writer</span><span class="p">.</span><span class="n">StartPrint</span><span class="p">();</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">writer</span><span class="p">.</span><span class="n">Print</span><span class="p">(</span> <span class="n">FONT_SAMPLE_LITERAL</span><span class="p">(</span><span class="s">&quot;ScalableFont </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span> <span class="p">);</span>
+<span class="p">}</span>
+<span class="n">writer</span><span class="p">.</span><span class="n">EndPrint</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_124022352_h2_10">More Information About Scalable Fonts</h2>
+<p>For more information, see <a href="../Pages/Page_83956048.html">Here</a>.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__font', '../../../Api/HtmlNX/namespacenn_1_1font.html' )
+SetUrl( 'ApiLink_nn__font__ResFont', '../../../Api/HtmlNX/classnn_1_1font_1_1_res_font.html' )
+SetUrl( 'ApiLink_nn__font__ScalableFont', '../../../Api/HtmlNX/classnn_1_1font_1_1_scalable_font.html' )
+SetUrl( 'ApiLink_nn__font__TextureCache', '../../../Api/HtmlNX/classnn_1_1font_1_1_texture_cache.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

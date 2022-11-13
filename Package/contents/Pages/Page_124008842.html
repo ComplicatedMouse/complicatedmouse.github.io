@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Mouse | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Mouse -->
+<div class="pagetitle" id="PageId_124008842">Mouse</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_124008842_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_124008842_h1_2">Structure in the Windows Environment</a>
+    </li>
+    <li>
+      <a href="#Anchor_124008842_h1_3">How to Use</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_124008842_h1_1">Introduction</h1>
+<p>This is the API for implementing mouse operations.</p>
+<p>You can get the following input states.</p>
+<ul style="list-style-type: square;">
+  <li>Left Button, Right Button, Center Button, Forward Button, Back Button</li>
+  <li>Wheel Rotation</li>
+  <li>Cursor Position</li>
+</ul>
+<p>The input state is updated in intervals of 8 ms or greater based on the most recent sample values at that time.</p>
+<p>The screen coordinates representing the cursor position are stored in units of pixels in <span class="ApiLink_nn__hid__MouseState__x">MouseState::x</span> and <span class="ApiLink_nn__hid__MouseState__y">MouseState::y</span>, with the origin (0, 0) in the upper-left corner.</p>
+<p>These values always indicate enabled on-screen coordinates. The initial position is defined for each platform.</p>
+<p>
+  <span class="ApiLink_nn__hid__MouseState__deltaX">MouseState::deltaX</span> and <span class="ApiLink_nn__hid__MouseState__deltaY">MouseState::deltaY</span> record the distance moved by the mouse.</p>
+<p>Note that this difference is not in the position of the cursor, but the physical distance moved by the mouse.</p>
+<p>Even if the cursor position does not change, delta values will be recorded if the mouse is operated.</p>
+<p>Mouse wheel rotation is stored in <span class="ApiLink_nn__hid__MouseState__wheelDelta">MouseState::wheelDelta</span>. From the position of the mouse user, the back is positive and the front is negative, and the rotation unit is 0.125 degrees.</p>
+<p>Many mouse wheels rotate in 15-degree increments, so 120 is one guideline.</p>
+<p>
+  <br />
+</p>
+<p>To use the API, you must first initialize it using the <span class="ApiLink_void_nn__hid__InitializeMouse()_NN_NOEXCEPT">InitializeMouse()</span> function.</p>
+<p>The following functions have been prepared to get the input state: <span class="ApiLink_void_nn__hid__GetMouseState(MouseState_*pOutValue)_NN_NOEXCEPT">GetMouseState()</span> and <span class="ApiLink_int_nn__hid__GetMouseStates(MouseState_outValues[]|_int_count)_NN_NOEXCEPT">GetMouseStates()</span>.</p>
+<p>Use <span class="ApiLink_void_nn__hid__GetMouseState(MouseState_*pOutValue)_NN_NOEXCEPT">GetMouseState()</span> to get the latest input state.</p>
+<p>Use <span class="ApiLink_int_nn__hid__GetMouseStates(MouseState_outValues[]|_int_count)_NN_NOEXCEPT">GetMouseStates()</span> to get a number of input states, starting with the latest and tracing backward. You can trace back through a maximum of <span class="ApiLink_nn__hid__MouseStateCountMax">MouseStateCountMax</span> states.</p>
+<p>
+  <span style="color: rgb(23,43,77);">Getting input states does not change the internal state. For this reason, if you call the same function repeatedly, you get the same values each time unless the input state has been updated in the interim.</span>
+</p>
+<p>The input state is assigned a number (<span class="ApiLink_nn__hid__MouseState__samplingNumber">MouseState::samplingNumber</span>), which is incremented by 1 each time the input state is updated. This number can be used to determine the obtained input state.</p>
+<p>Attributes for input states are set in <span class="ApiLink_nn__hid__MouseState__attributes">MouseState::attributes</span>. This exists to implement special operations and normally does not require handling.</p>
+<p>
+  <br />
+</p>
+<p>The API can always be used independent of the connection state of the mouse.</p>
+<p>If sampling fails because a mouse is not connected or for another similar reason, the input state at that time is deemed to have no input, as though no buttons are being pressed, there is no wheel rotation, and there has been no movement from the last coordinates sampled.</p>
+<p>After <span class="ApiLink_void_nn__hid__InitializeMouse()_NN_NOEXCEPT">InitializeMouse()</span> has been called, even if the mouse is disconnected and reconnected, it can continue to be used without re-initialization.</p>
+<p>When you need to determine whether the mouse is connected, reference the <span class="ApiLink_nn__hid__MouseState">IsConnected</span> flag of the <span class="ApiLink_nn__hid__MouseState__attributes">attributes</span> member variable of the <span class="ApiLink_nn__hid__MouseAttribute__IsConnected">MouseState</span> structure.</p>
+<h1 id="Anchor_124008842_h1_2">Structure in the Windows Environment</h1>
+<p>Input states are determined for a &quot;screen&quot; defined by the client area of the window that is the <a href="../Pages/Page_83956134.html">gfx</a> output target.</p>
+<p>The center coordinates of the client area are used as the default position of the cursor.</p>
+<p>If the window loses focus for the cursor, the input state remains at the last-measured coordinates.</p>
+<p>The input states include only the left, middle, right, forward, and back button presses that are made in the window.</p>
+<p>In addition, the travel distance of the mouse and the rotation delta of the mouse wheel are included in the input states only when they take place when the window is in focus.</p>
+<p>However, releases of the left, middle, right, forward, and back buttons are always applied to the input state.</p>
+<p>You can determine from the <span class="ApiLink_nn__hid__MouseState__attributes">MouseAttribute::Transferable</span> of <span class="ApiLink_nn__hid__MouseAttribute__Transferable">MouseState::attributes</span> whether the window has lost focus for the cursor.</p>
+<h1 id="Anchor_124008842_h1_3">How to Use</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid/hid_Mouse.h&gt;
+</span>&nbsp;
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="c1">// 1. Initialize the Mouse object.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">InitializeMouse</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// 2. Get the input state as necessary.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">MouseState</span> <span class="n">state</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetMouseState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">buttons</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::MouseButton::</span><span class="n">Left</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The process when the left button is clicked.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+<span class="c1">// Reference the IsConnected flag to determine whether connected.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">attributes</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::MouseAttribute::</span><span class="n">IsConnected</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processes if connected.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">else</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processes if disconnected.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+<span class="c1">// Use GetMouseStates() if you want to get past input states in addition to the current input state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">MouseState</span> <span class="n">states</span><span class="p">[</span><span class="nn">nn::hid::</span><span class="n">MouseStateCountMax</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">stateCount</span> <span class="o">=</span> <span class="nn">nn::hid::</span><span class="n">GetMouseStates</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">states</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]));</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__MouseState__x', '../../../Api/HtmlNX/structnn_1_1hid_1_1_mouse_state.html#a6b1b5c3ea880a4f11309bca278bea150' )
+SetUrl( 'ApiLink_nn__hid__MouseState__y', '../../../Api/HtmlNX/structnn_1_1hid_1_1_mouse_state.html#a0771ebf41154d698aad1d66f3cb11b84' )
+SetUrl( 'ApiLink_nn__hid__MouseState__deltaX', '../../../Api/HtmlNX/structnn_1_1hid_1_1_mouse_state.html#ac62e4a1d259a7d35e91257cf88f33f4d' )
+SetUrl( 'ApiLink_nn__hid__MouseState__deltaY', '../../../Api/HtmlNX/structnn_1_1hid_1_1_mouse_state.html#a16f3e1ea9110a629f85d945e3b78b4bc' )
+SetUrl( 'ApiLink_nn__hid__MouseState__wheelDelta', '../../../Api/HtmlNX/structnn_1_1hid_1_1_mouse_state.html#a69f24bc32495b763f6734aa29cdc8ec3' )
+SetUrl( 'ApiLink_void_nn__hid__InitializeMouse()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a322597cf6f0cf7641113a59e4cfb3ccb' )
+SetUrl( 'ApiLink_void_nn__hid__GetMouseState(MouseState_*pOutValue)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a2e836e16eaa572da7ccbfc9c3b7de5bf' )
+SetUrl( 'ApiLink_int_nn__hid__GetMouseStates(MouseState_outValues[]|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a3c19c1a965e1aa4d45f608ed291fe4da' )
+SetUrl( 'ApiLink_nn__hid__MouseStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#adadbf2953432220ae3420da5e621d95b' )
+SetUrl( 'ApiLink_nn__hid__MouseState__samplingNumber', '../../../Api/HtmlNX/structnn_1_1hid_1_1_mouse_state.html#a22e993b51e2abd25fc85019f06cde0b7' )
+SetUrl( 'ApiLink_nn__hid__MouseState__attributes', '../../../Api/HtmlNX/structnn_1_1hid_1_1_mouse_state.html#a3e300f5c9cda7941685d0b9e5ff80c9c' )
+SetUrl( 'ApiLink_nn__hid__MouseState', '../../../Api/HtmlNX/structnn_1_1hid_1_1_mouse_state.html' )
+SetUrl( 'ApiLink_nn__hid__MouseAttribute__IsConnected', '../../../Api/HtmlNX/structnn_1_1hid_1_1_mouse_attribute.html#a6f0733eaed88c2b93b31b3bcb843e6a4' )
+SetUrl( 'ApiLink_nn__hid__MouseAttribute__Transferable', '../../../Api/HtmlNX/structnn_1_1hid_1_1_mouse_attribute.html#a072a190418df98e2f785ec24945edf7c' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

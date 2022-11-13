@@ -1,0 +1,375 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>CMDL Converter | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- CMDL Converter -->
+<div class="pagetitle" id="PageId_187883213">CMDL Converter</div>
+<div class="text_separate">
+<p>This section describes the usage and considerations for the CMDL converter (<code>%NINTENDO_SDK_ROOT%\Tools\Graphics\3dTools\3dCmdlConverter.exe</code>).</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_187883213_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_187883213_h1_2">Command-Line Options</a>
+    </li>
+    <li>
+      <a href="#Anchor_187883213_h1_3">Features</a>
+    </li>
+    <li>
+      <a href="#Anchor_187883213_h1_4">Usage Examples</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_187883213_h1_1">Overview</h1>
+<p>The CMDL Converter converts NintendoWare for CTR (NW4C) graphics intermediate files (models, textures, and animations) to NintendoSDK NintendoWare 3D intermediate files.</p>
+<p>Settings such as <strong>Color</strong>, <strong>Texture</strong>, and <strong>Enable compression</strong> are converted for materials.<br />This converter does not assign shaders, so the texture combiner settings are not applied to the FMD file.</p>
+<h1 id="Anchor_187883213_h1_2">Command-Line Options</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dCmdlConverter.exe [input file] [--args-file &quot;&quot;] [--job-list &quot;&quot;] [--version] [-h] [-s]
+[--project-root &quot;&quot;] [--disable-file-info] [--disable-original-image]
+[-o &quot;&quot;] [-n &quot;&quot;] [-g &quot;&quot;] [-d] [-a] [--gpu-encoding &quot;&quot;] [-x] [--mip-gen-filter &quot;&quot;] [-l &quot;&quot;] [-c &quot;&quot;]
+[--use-fcl-fts-ftp] [--separate-material-anim] [--comment &quot;&quot;]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Input File</strong>
+  <br />Specifies the intermediate file for NW4C. Files with the following filename extensions are supported.<br /> 　.cmdl / .ctex / .cskla / .cmdla / .cmata / .cmcla / .cmtsa / .cmtpa<br />　.ccam / .clgt / .cfog / .cenv / .cres<br /><br />CMDLA files that bind to the index are not supported.</p>
+<p>
+  <strong>--args-file &quot;&quot;</strong>
+  <br />You can use the contents in the parameter file to specify arguments.<br /> The parameter file allows you to specify each option over several lines.<br /> Lines starting with a number sign (#) are treated as comments.<br />Newline characters cannot be included in escape sequences used in option specifications that appear between quotation marks (&quot;).</p>
+<p>
+  <strong>--job-list &quot;&quot;</strong>
+  <br />Specifies the job list file.<br />When you use the job list, multiple conversion processes can be executed with one instance of process startup.<br />The job list file writes each process argument in a newline.<br />When specifying arguments other than <code>--job-list</code> at the same time, it results in the same operation as if you added arguments specified in each line of the job list file after the arguments other than <code>--job-list</code>.<br /> Lines starting with a number sign (#) are treated as comments. <br />In the job list file, the <code>--version</code>, <code>-h</code>, <code>-s</code>, and <code>--job-list</code> options cannot be specified.</p>
+<p>
+  <strong>--version</strong>
+  <br />Displays version information.</p>
+<p>
+  <strong>-h --help</strong>
+  <br />Displays Help.</p>
+<p>
+  <strong>-s --silent</strong>
+  <br />Suppresses the display of messages during processing.</p>
+<p>
+  <strong>--project-root &quot;&quot;</strong>
+  <br />Specifies the project's root folder.<br />If this is specified, the relative path from the root folder will be output to <code>src_path</code> in <code>&lt;create&gt;</code> in the intermediate file.</p>
+<p>
+  <strong>--disable-file-info</strong>
+  <br />Specifies the intermediate file merge option.</p>
+<p>
+  <strong>--disable-original-image</strong>
+  <br />
+</p>
+<p>Specifying this option omits the original image data prior to encoding from the intermediate texture file.</p>
+<p>
+  <strong>-o &quot;&quot; --output &quot;&quot;</strong>
+  <br />Specifies the output file.<br /> If the extension is omitted, the filename extension of the output file corresponds to the filename extension of the input file.<br />If this option is not specified, the file with the different extension is saved to the same folder that contains the input file.<br /> If the output file ends with a backslash (\) or a slash mark (/), it will be treated as an output folder. In this case, the output filename will be the same as the input filename.<br /><br /> If the input file is a CRES file and the output filename extension is omitted, NintendoSDK 3D intermediate files will be output that correspond to each of the models and animations in the input file.<br /> If the output filename extension is specified, only 3D intermediate files of the specified type will be output.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Input File</th>
+      <th>Default Output File</th>
+      <th>Other Output Files That Can Be Specified</th>
+    </tr>
+    <tr>
+      <td>.cmdl</td>
+      <td>FMDB</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>.ctex</td>
+      <td>FTXB</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>.cskla</td>
+      <td>.fskb</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>.cmdla</td>
+      <td>.fvbb</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>.cmata</td>
+      <td>fmab</td>
+      <td>.fclb / .ftsb / .ftpb</td>
+    </tr>
+    <tr>
+      <td>.cmcla</td>
+      <td>fmab</td>
+      <td>.fclb</td>
+    </tr>
+    <tr>
+      <td>.cmtsa</td>
+      <td>fmab</td>
+      <td>.ftsb</td>
+    </tr>
+    <tr>
+      <td>.cmtpa</td>
+      <td>fmab</td>
+      <td>.ftpb</td>
+    </tr>
+    <tr>
+      <td>.ccam / .clgt / .cfog / .cenv</td>
+      <td>.fsnb</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>.cres</td>
+      <td>.fmdb / .fskb / .fvbb / .fmab / .fsnb</td>
+      <td>.fclb / .ftsb / .ftpb</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>-n &quot;&quot; --name &quot;&quot;</strong>
+  <br /> Specifies the name of the element to convert if the NW4C intermediate file contains multiple model, animation, or texture elements.<br />If this option is not specified, the prefix element will be converted.</p>
+<p>
+  <strong>-g &quot;&quot; --magnify &quot;&quot;</strong>
+  <br />Specifies the multiplier applied to the vertex coordinates and translation values of the model.<br />If this option is not specified, the output values will be unchanged.</p>
+<p>
+  <strong>-d --disable-texture</strong>
+  <br />If this option is specified, the textures (CTEX files) referenced by the input files (CMDL, CMATA, CMTPA, CRES files) are not converted to FTX files.<br />If this option is not specified, the textures referenced by the input files will be converted to FTX files.</p>
+<p>
+  <strong>-a --all-textures</strong>
+  <br />Specifying this option converts all of the CTEX files in the input file folder and the <code>Textures</code> folder under it when converting CMDL and CRES files.<br />If this option is not specified, only the CTEX files referenced by the input files will be converted.<br />If the <code>-d</code> option is specified, the files will not be converted even if this option is specified.</p>
+<p>
+  <strong>--gpu-encoding &quot;&quot;</strong>
+  <br />
+</p>
+<p>Sets whether to encode in the GPU when converting a texture to a particular format.<br />In the current environment, if you specify <code>true</code>, encoding takes place in the GPU if possible, or otherwise an error is generated.<br />Specify <code>false</code> to use CPU encoding.<br />If you specify <code>auto</code>, encoding takes place in the GPU if possible, or in the CPU otherwise.<br />When this option is not specified, the behavior will be the same as if <code>true</code> was specified.</p>
+<p>
+  <strong>-x --max-mipmap</strong>
+  <br />Specifying this option ignores the mipmap images in the CTEX file and mandates the creation of mipmaps up to the level where the width and height are 1.<br />If this option is not specified, the mipmaps (image and number of levels) in the CTEX files will be applied to the FTX files.</p>
+<p>
+  <strong>--mip-gen-filter &quot;&quot;</strong>
+  <br />Specifies the filter (<code>point</code>, <code>linear</code>, <code>cubic</code>, or <code>cubic_sharp</code>) when generating a mipmap. <br />If this option is not specified, linear will be used.</p>
+<p>
+  <strong>-l &quot;&quot; --linear-texture &quot;&quot;</strong>
+  <br />Specifies whether to convert the gamma from sRGB to linear for each of the RGBA texture components.<br />Specify <code>1</code> or <code>0</code> for RGBA, in that order, to indicate the components for linear gamma conversion. <code>1</code> specifies conversion, and <code>0</code> specifies no conversion.<br />For example, if you specify the option as <code>-l 1110</code>, the R, G, and B components are converted to linear, but the A component is not.<br />If you do not specify this option, no components are converted to linear.<br />If the CTEX file format is <code>Hilo8</code>, none of the components are converted to linear.<br />If 1110 or 1111 is specified and the CTEX file format is <code>Rgb8</code>, <code>Rgba8</code>, <code>Etc1</code>, or <code>Etc1_a4</code>, the files will be output in <code>srgb_*</code> format.<br />If the CTEX file uses mipmaps, when converting to linear, create mipmaps to force the width and height to the level where it becomes 1, ignoring the mipmap images in the CTEX file (calculated in linear space).</p>
+<p>
+  <strong>-c &quot;&quot; --linear-vertex-color &quot;&quot;</strong>
+  <br />Specifies whether to convert the gamma from sRGB to gamma for each of the vertex color RGBA components.<br />Specify <code>1</code> or <code>0</code> for RGBA, in that order, to indicate the components for linear gamma conversion. <code>1</code> specifies conversion, and <code>0</code> specifies no conversion.<br />For example, if you specify the option as <code>-l 1110</code>, the R, G, and B components are converted to linear, but the A component is not.<br />If you do not specify this option, no components are converted to linear.</p>
+<p>
+  <strong>--use-fcl-fts-ftp</strong>
+  <br />Specify this option to output 3D intermediate files with different extensions for each type of material animation (color animations generate FCL files, texture SRT animations generate FTS files, and texture pattern animations generate FTP files).<br />If this option is not specified, all of the material animations will be output as FMA files.<br />If the output filename extension is specified with the <code>-o</code> option, the 3D intermediate file, with the specified extension, will be output, regardless of the information specified in this option.</p>
+<p>
+  <strong>--separate-material-anim</strong>
+  <br />Specify this option to output individual FMA files for each type of material animation. A default suffix is added to the name of the output file (<code>_fcl</code> for color animations, <code>_fts</code> for SRT animations, or <code>_ftp</code> for texture pattern animations).<br />If this option is not specified, all of the material animations will be output in one FMA file.<br />This option is ignored if the <code>--use-fcl-fts-ftp</code> option is specified.</p>
+<p>
+  <strong>--comment &quot;&quot;</strong>
+  <br />Specifies editing comments for the intermediate file.</p>
+<h1 id="Anchor_187883213_h1_3">Features</h1>
+<h2 id="Anchor_187883213_h2_1">User Vertex Attributes</h2>
+<p>The user vertex attributes for the CMDL file are output to the FMD file as hint information color1 to color3 vertex attributes.</p>
+<h2 id="Anchor_187883213_h2_2">Textures</h2>
+<p>If the input file is a CMDL, CMATA, CMTPA, or CRES file, the textures referenced by the input file (CTEX files) are converted to FTX files and output to the <code>(<em>output file folder</em>)/textures</code> folder. (They are not output if the <code>-d</code> option is specified.)<br /><br /> If the input file is a CMDL or CRES file, the FTX file hint information will be normal for a normal map, reflection for an environment map, and albedo for other maps.<br /> If the input file is a CMATA or CMTPA file, the FTX file hint information will always be albedo.<br /> If the input file is a CTEX file, the FTX file hint information will be normal for <code>Hilo8</code> format and albedo for formats other than <code>Hilo8</code>.<br /><br />The texture formats will be changed as follows.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>CTEX File</th>
+      <th>FTX File</th>
+    </tr>
+    <tr>
+      <td>L4 / L8 / A4 / A8</td>
+      <td>unorm_8</td>
+    </tr>
+    <tr>
+      <td>La4 / La8</td>
+      <td>unorm_8_8</td>
+    </tr>
+    <tr>
+      <td>Hilo8</td>
+      <td>snorm_bc5</td>
+    </tr>
+    <tr>
+      <td>Rgb565</td>
+      <td>unorm_5_6_5</td>
+    </tr>
+    <tr>
+      <td>Rgb5_a1</td>
+      <td>unorm_5_5_5_1</td>
+    </tr>
+    <tr>
+      <td>Rgba4</td>
+      <td>unorm_4_4_4_4</td>
+    </tr>
+    <tr>
+      <td>Rgb8 / Rgba8</td>
+      <td>unorm_8_8_8_8 or srgb_8_8_8_8</td>
+    </tr>
+    <tr>
+      <td>Etc1</td>
+      <td>unorm_bc1 or srgb_bc1</td>
+    </tr>
+    <tr>
+      <td>Etc1_a4</td>
+      <td>unorm_bc3 or srgb_bc3</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_187883213_h2_3">Color animation</h2>
+<p>The CTR-specific color animations for CMATA and CMCLA files will be output with the following hint information.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>CMATA / CMCLA Files</th>
+      <th>FMA / FCL Files</th>
+    </tr>
+    <tr>
+      <td>Specular1</td>
+      <td>specular1</td>
+    </tr>
+    <tr>
+      <td>RGB component of Constant0 to 5</td>
+      <td>constant0 ~ constant5</td>
+    </tr>
+    <tr>
+      <td>A component of Constant0 to 5</td>
+      <td>constant0_opacity to constant5_opacity（target=&quot;color_r&quot;）</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_187883213_h1_4">Usage Examples</h1>
+<h2 id="Anchor_187883213_h2_4">Intermediate File Conversion</h2>
+<p>Convert <code>model.cmdl</code> to create <code>model.fmdb</code>.<br />If <code>model.cmdl</code> references a texture, FTX files will be created in the <code>textures</code> folder.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dCmdlConverter.exe model.cmdl -o model.fmdb</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Convert <code>face.ctex</code> to create <code>face.ftxb</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dCmdlConverter.exe face.ctex -o face.ftxb</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Batch conversion is possible using the job list file.<br /><code>human.fmdb</code>, <code>walk.fskb</code>, and <code>run.fskb</code> are output at 10 times the size, and <code>dog.fmdb</code> is output at five times the size.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>list.txt
+
+human.cmdl -o human.fmdb
+walk.cskla -o walk.fskb
+run.cskla -o run.fskb
+dog.cmdl -o dog.fmdb --magnify 5</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dCmdlConverter.exe --job-list list.txt --magnify 10 --linear-texture 1110</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_187883213_h2_5">Executing Intermediate File Optimizer</h2>
+<p>This example shows the batch file that executes the intermediate file optimizer, after conversion to NintendoSDK 3D intermediate files.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>ConvertAndOptimize.bat
+
+if &quot;%~x1&quot; == &quot;.cmdl&quot; set ext=.fmdb
+if &quot;%~x1&quot; == &quot;.cskla&quot; set ext=.fskb
+if &quot;%~x1&quot; == &quot;.cmdla&quot; set ext=.fvbb
+&quot;%NINTENDO_SDK_ROOT%\Tools\Graphics\3dTools\3dCmdlConverter.exe&quot; &quot;%~1&quot;
+if %ERRORLEVEL% NEQ 0 pause &amp; goto :eof
+set optimizer=%NINTENDO_SDK_ROOT%\Tools\Graphics\3dTools\3dIntermediateFileOptimizer.exe
+set opts=--quantization-analysis
+if &quot;%~x1&quot; == &quot;.cmdl&quot; set opts=%opts% --optimize-primitive --optimize-primitive-options=&quot;--mode=Normal&quot;
+&quot;%optimizer%&quot; &quot;%~dpn1%ext%&quot; %opts%</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>ConvertAndOptimize.bat model.cmdl
+ConvertAndOptimize.bat anim.cskla</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

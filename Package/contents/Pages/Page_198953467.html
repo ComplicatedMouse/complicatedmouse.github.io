@@ -1,0 +1,417 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Restrictions and Notes | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Restrictions and Notes -->
+<div class="pagetitle" id="PageId_198953467">Restrictions and Notes</div>
+<div class="text_separate">
+<h1 id="Anchor_198953467_h1_1">Specifications</h1>
+<h2 id="Anchor_198953467_h2_1">Restrictions on Sizes and Numbers</h2>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Item</th>
+      <th style="text-align: center;">Maximum Value</th>
+      <th style="text-align: center;">Notes</th>
+    </tr>
+    <tr>
+      <td>Number of data delivery cache storage regions.</td>
+      <td>One at most</td>
+      <td>The application has only one data delivery cache storage region.</td>
+    </tr>
+    <tr>
+      <td>Size of data delivery cache storage.</td>
+      <td>Up to 64 MiB</td>
+      <td>
+        <strong>4 MiB is allocated as the management region</strong>. The actual size of this management region varies depending on the number of files being delivered. However, allocate 4 MiB so there is extra in case the system specifications change in the future.</td>
+    </tr>
+    <tr>
+      <td>Number of directories.</td>
+      <td>Up to 100 directories</td>
+      <td>Directories can only be one level deep.</td>
+    </tr>
+    <tr>
+      <td>Directory size (total size of files in one directory).</td>
+      <td>Up to 60 MiB</td>
+      <td>
+        <p>The total size is calculated by rounding up the size of each file in the directory to 16 KiB (the file system block size).</p>
+        <p>
+          <br />
+        </p>
+        <p>We recommend the smallest possible size. The larger the directory, the longer it takes to write the files, prolonging the time during which the data delivery cache storage cannot be mounted.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Number of files in one directory.</td>
+      <td>
+        <p>Up to 100 files</p>
+      </td>
+      <td>
+        <p>You can create an empty directory to which no files have been delivered.</p>
+        <p>Even empty directories are recognized by the system and listed.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Total number of files in all directories.</td>
+      <td>Up to 2000 files</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Size of one file.</td>
+      <td>
+        <p>Up to 60 MiB</p>
+      </td>
+      <td>
+        <p>The same as the maximum size of a directory.</p>
+        <p>
+          <br />
+        </p>
+        <p>Empty files (with a size of zero) cannot be registered on the server.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For example, you could create up to three directories that each store 20 files that are 1 MiB each in size.</p>
+<h2 id="Anchor_198953467_h2_2">Access Rights</h2>
+<p>The application can only load data from a data delivery cache storage that was created by the application itself.</p>
+<p>It cannot load data from a data delivery cache storage created by other applications (with different applications IDs).</p>
+<h2 id="Anchor_198953467_h2_3">Granularity of Commits</h2>
+<p>Data is committed (applied) to the system in units of directories.</p>
+<p>When a directory is updated, it affects all files being delivered in that directory. The directory is updated to the latest state.</p>
+<p>However, the following points must be kept in mind.</p>
+<h3 id="Anchor_198953467_h3_1">Missing Directories</h3>
+<p>Even if directory A has been updated to the latest state, there is no assurance that directory B will be updated to the latest state or that directory B even exists.</p>
+<p>
+  <br />
+</p>
+<p>Consider taking one of these measures.</p>
+<ul>
+  <li>Design your application so it can operate without issues, even if a certain directory is not in the system.</li>
+  <li>Until immediate synchronization has completed, do not read directory lists and data after the application starts.</li>
+</ul>
+<p>
+  <br />
+</p>
+<p>Use the following methods to perform emulation during debugging, when some of the directories are missing.</p>
+<ul>
+  <li>Use the test delivery feature described later to stop delivery of specific directories or files to specific consoles.</li>
+  <li>Change the server delivery schedule and stop delivery of specific directories or files to all consoles.</li>
+</ul>
+<h3 id="Anchor_198953467_h3_2">Duplicate Files</h3>
+<p>If file X, which has been delivered inside directory A, is stopped for some reason and redelivered inside directory B.</p>
+<p>There is a chance that in some systems, directory B will be updated but directory A will not. In those systems, there will be duplicates of file X.</p>
+<p>
+  <br />
+</p>
+<p>Consider taking one of these measures.</p>
+<ul>
+  <li>Design your application so that it can operate without issues, even if the same file is duplicated in different directories.</li>
+  <li>(For example, when updating the application through a patch) Do not change the directory where a particular file is expected to exist.</li>
+</ul>
+<h2 id="Anchor_198953467_h2_4">Persistence</h2>
+<h3 id="Anchor_198953467_h3_3">No Assurance of Persistence</h3>
+<p>Data that has been received is not necessarily permanent and will be deleted from the system in the following situations.</p>
+<ul>
+  <li>When the user performs a special operation from the HOME Menu to delete data delivery cache storage.</li>
+  <li>For directories: The next time the system communicates with the server, after the directory has been deleted on the server.</li>
+  <li>For files: The next time the system communicates with the server, after the file delivery period has expired.</li>
+</ul>
+<p>
+  <br />
+</p>
+<p>When designing your application, consider the possibilities that the next time the application starts, there may be data that no longer exists, and that data delivery cache storage may now be empty (reverting to the same state as when the application started for the first time).</p>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The &quot;special operation&quot; performed by the user to delete data delivery cache storage, refers to operations such as the following.</p>
+    <ul>
+      <li>From the HOME Menu, select <strong>System Settings</strong> &gt; <strong>Data Management</strong> &gt; <strong>Archive Software</strong>.</li>
+      <li>From the HOME Menu, select <strong>System Settings</strong> &gt; <strong>Data Management</strong> &gt; <strong>Delete Software</strong>.</li>
+      <li>From the HOME Menu, select <strong>System Settings</strong> &gt; <strong>System</strong> &gt; <strong>Initialize Console</strong>.</li>
+      <li>In Maintenance Mode, select <strong>Initialize Console Without Deleting Save Data</strong>.</li>
+    </ul>
+    <p>Deleting the user account save data does not delete the data delivery cache storage.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>When the system is started from DevMenu, you can delete the data delivery cache storage for individual applications by selecting BCAT items in the <strong>Type</strong> column in the <strong>Save Data</strong> tab.</p>
+  </div>
+</div>
+<h3 id="Anchor_198953467_h3_4">Ensuring Persistence</h3>
+<p>If you want to ensure persistence (such as for data that is only delivered for a limited time), save the data by copying it to user account save data.</p>
+<p>If you set and save a file digest value at that time, it will be easier to detect future updates to the files.</p>
+<p>To get the file digest value, use the <code><span class="ApiLink_nn__bcat__DeliveryCacheFile__GetDigest">nn::bcat::DeliveryCacheFile::GetDigest</span>()</code> function.</p>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>When there is no data for limited time delivery, it is possible to implement the application simply by not loading data until the immediate synchronization is complete.</p>
+  </div>
+</div>
+<h3 id="Anchor_198953467_h3_5">
+  <span style="color: rgb(117,117,117);">Risks of Ensuring Permanence</span>
+</h3>
+<p>Note the following risks when copying delivered data to user account save data.</p>
+<ul>
+  <li>The application may change to an inoperable state, depending on the application sequence, if data in an invalid format is accidentally delivered.</li>
+  <li>After data is delivered in an invalid format, even if you later deliver the data in the correct format, depending on the application sequences involved, there is a possibility that the invalid data cannot be overwritten and the application itself will be in an unrecoverable state.</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Consider a case where an individual piece of data is distributed under the following conditions.</p>
+    <ul>
+      <li>The data is delivered for a limited time.</li>
+      <li>The data is copied to the user account save data.</li>
+      <li>The data format is invalid.</li>
+    </ul>
+    <p>Note that to deliver the correct version of this data to all users, you would need to stop limited time delivery and make that data permanently available.</p>
+  </div>
+</div>
+<h2 id="Anchor_198953467_h2_5">
+  <span style="color: rgb(117,117,117);">Usable Names for Directories and Files</span>
+</h2>
+<p>There are restrictions on how names for directories and files are set. The following are some examples.</p>
+<ul>
+  <li>Names must be no longer than 31 characters (or 32 characters including the terminator).</li>
+  <li>Filenames cannot end with periods.</li>
+</ul>
+<p>For more information, see the function references for the <code><span class="ApiLink_nn__bcat__FileName">nn::bcat::FileName</span></code> structure and the <code><span class="ApiLink_nn__bcat__DirectoryName">nn::bcat::DirectoryName</span></code> structure.</p>
+<!--Remove-->
+<h2 id="Anchor_198953467_h2_6">Settings Changeable with a Patch</h2>
+<p>There are both important considerations and prohibitions when using patches to change data delivery cache storage values.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Enlarging the size</th>
+      <td>
+        <div class="content-wrapper">
+          <p>Possible.</p>
+          <p>
+            <br />
+          </p>
+          <p>Although a system that has been updated with the latest patch may be able to receive the data, a system that has not yet installed the patch may not be able to receive the data because of insufficient space.</p>
+          <p>The data that cannot be received (the directories cannot be updated) is not defined. Keep this in mind.</p>
+          <p>
+            <br />
+          </p>
+          <div class="info_new">
+            <div class="info_new_left">Info</div>
+            <div class="info_new_right">
+              <p>The limit on the number of times that data delivery cache storage can be enlarged is the same as the limit for save data.</p>
+              <p>For more information, see <a href="../Pages/Page_107782148.html">Expanding Save Data With a Patch</a>.</p>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>Reducing the size</th>
+      <td>
+        <p>Prohibited.</p>
+      </td>
+    </tr>
+    <tr>
+      <th>Setting the initial value using a patch</th>
+      <td>
+        <p>Possible.</p>
+        <p>
+          <br />
+        </p>
+        <p>You can use a patch to change the data delivery cache storage value from <strong>Not set (zero size)</strong> to <strong>Set (Non-zero size)</strong>.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_198953467_h2_7">Design for Specification Changes by Patches</h2>
+<p>If a patch extends the features of an application, new directories or files may be added that the initial version of the application did not anticipate.</p>
+<p>
+  <br />
+</p>
+<p>Prepare for this by taking the following types of measures.</p>
+<ul>
+  <li>Design your application so there are no issues if it encounters directories or files that are unknown to the current version of the application, when it accesses data delivery cache storage.</li>
+  <li>Design your application so the size of data delivery cache storage is slightly larger than the estimated necessary size.</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Also see the following feature descriptions when making changes that are not compatible with a patch.</p>
+    <ul>
+      <li>The description of <strong>Required Application Version</strong> in the BCAT Management Tool Usage Manual.<ul><li>Data synchronization only succeeds with release versions of the application that are the same or later than the specified version.</li></ul></li>
+      <li>The description of <a href="../Pages/Page_185137959.html">Required Versions</a> in the Patches document.<br /></li>
+    </ul>
+  </div>
+</div>
+<h2 id="Anchor_198953467_h2_8">Designing for Rollbacks</h2>
+<p>When a user performs the <strong>Transfer Your User Data</strong> operation, the data delivery cache storage might appear to have been rolled back, from the perspective of the user account save data.</p>
+<p>Consider the possibility of a data rollback the next time an application is started.</p>
+<h1 id="Anchor_198953467_h1_2">Usage</h1>
+<h2 id="Anchor_198953467_h2_9">Delivery Size Restrictions</h2>
+<p>There is a restriction on the total file size that can be delivered within a certain period.</p>
+<p>For more information, see <em>BCAT Data Delivery Guide</em>.</p>
+<p>
+  <br />
+</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>If you do not contact Nintendo in advance, and we determine that this limit is being exceeded in the production environment, we may discuss stopping data delivery.</p>
+  </div>
+</div>
+<h2 id="Anchor_198953467_h2_10">
+  <span style="color: rgb(117,117,117);">Data Whose Delivery Might Be Prohibited</span>
+</h2>
+<p>The guidelines and other rules might prohibit delivering the following kinds of data. Keep this in mind.</p>
+<ul>
+  <li style="list-style-type: none; background-image: none;">
+    <ul>
+      <li>Data that pertains to advertising.</li>
+      <li>Data whose content exceeds the rating of the application.</li>
+    </ul>
+  </li>
+</ul>
+<h2 id="Anchor_198953467_h2_11">Registering Data for Lotcheck</h2>
+<p>When it is time to submit the master ROM of your application to Nintendo for Lotcheck, register data for testing to the BCAT management tool in the Lotcheck environment (SD1 and SP1).</p>
+<p>For more information, see <em>BCAT Data Delivery Guide</em>.</p>
+<h2 id="Anchor_198953467_h2_12">Data Registration for Retail Units</h2>
+<p>Before the application is released, you can register data to the BCAT management tool in the production environment (<code>lp1</code> environment).</p>
+<p>However, you receive the data after getting the application by operating a retail unit, and can then confirm that there are no errors in data registration. Keep this in mind.</p>
+<p>
+  <br />
+</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>We recommend distributing the data required for specific sequences in the application in the production environment prior to the application release date.</p>
+    <p>In addition, we recommend implementing a design where the application operations would not stop even if this data is not distributed.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_198953467_h1_3">Implementation</h1>
+<h2 id="Anchor_198953467_h2_13">Using in the Windows Environment</h2>
+<p>While the Windows environment does not provide a feature for synchronizing server data, it does provide a data access emulation feature instead.</p>
+<h3 id="Anchor_198953467_h3_6">Data Access Emulation</h3>
+<p>If a directory named <code>bcat-dc</code> is placed in the current directory, the <code><span class="ApiLink_nn__bcat__MountDeliveryCacheStorage">nn::bcat::MountDeliveryCacheStorage</span>()</code> function will mount that directory.</p>
+<p>By placing directories and files under <code>bcat-dc</code>, it becomes possible to access them from <code><span class="ApiLink_nn__bcat__DeliveryCacheDirectory">nn::bcat::DeliveryCacheDirectory</span></code> and <code><span class="ApiLink_nn__bcat__DeliveryCacheFile">nn::bcat::DeliveryCacheFile</span></code>.</p>
+<p>
+  <br />
+</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Because the digest value of the file is not calculated, the digest value obtained with <code><span class="ApiLink_nn__bcat__DeliveryCacheDirectoryEntry__digest">nn::bcat::DeliveryCacheDirectoryEntry::digest</span></code> or <code><span class="ApiLink_nn__bcat__DeliveryCacheFile__GetDigest">nn::bcat::DeliveryCacheFile::GetDigest</span>()</code> will be the <code>0</code> cleared value.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__bcat__DeliveryCacheFile__GetDigest', '../../../Api/HtmlNX/classnn_1_1bcat_1_1_delivery_cache_file.html#a2deae736a085a6e8def365b330e13267' )
+SetUrl( 'ApiLink_nn__bcat__FileName', '../../../Api/HtmlNX/structnn_1_1bcat_1_1_file_name.html' )
+SetUrl( 'ApiLink_nn__bcat__DirectoryName', '../../../Api/HtmlNX/structnn_1_1bcat_1_1_directory_name.html' )
+SetUrl( 'ApiLink_nn__bcat__MountDeliveryCacheStorage', '../../../Api/HtmlNX/namespacenn_1_1bcat.html#a85d0404aec6ba31824bd7c40f8e856cf' )
+SetUrl( 'ApiLink_nn__bcat__DeliveryCacheDirectory', '../../../Api/HtmlNX/classnn_1_1bcat_1_1_delivery_cache_directory.html' )
+SetUrl( 'ApiLink_nn__bcat__DeliveryCacheFile', '../../../Api/HtmlNX/classnn_1_1bcat_1_1_delivery_cache_file.html' )
+SetUrl( 'ApiLink_nn__bcat__DeliveryCacheDirectoryEntry__digest', '../../../Api/HtmlNX/structnn_1_1bcat_1_1_delivery_cache_directory_entry.html#a454d93a93be2bb52b01c9fa88dda791f' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

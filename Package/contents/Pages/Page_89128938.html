@@ -1,0 +1,240 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>TouchScreen | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- TouchScreen -->
+<div class="pagetitle" id="PageId_89128938">TouchScreen</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_89128938_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_89128938_h1_2">Structure in the Windows Environment</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_89128938_h2_1">Emulation With the Mouse</a>
+      </li>
+      <li>
+        <a href="#Anchor_89128938_h2_2">Emulation With Touch Message</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_89128938_h1_3">How to Use</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_89128938_h1_1">Introduction</h1>
+<p>This function is provided to operate the built-in touch screen.</p>
+<p>A maximum of <span class="ApiLink_nn__hid__TouchStateCountMax">TouchStateCountMax</span> touches can be used to get the following input states.</p>
+<ul style="list-style-type: square;">
+  <li>Touch identifier</li>
+  <li>Touch coordinates</li>
+  <li>Contact area described by an ellipse</li>
+  <li>Orientation of the contact area</li>
+</ul>
+<p>The input state is updated in intervals of 4 milliseconds or greater based on the most recent sample values at that time.</p>
+<p>The identifier for tracing the movement of a finger or stylus is stored in <span class="ApiLink_nn__hid__TouchState__fingerId">TouchState::fingerId</span>. This value starts at 0, increases with each touch detected, and returns again to 0 when all touches are released.</p>
+<p>The LCD coordinates indicating the touch position are stored in <span class="ApiLink_nn__hid__TouchState__x">TouchState::x</span> and <span class="ApiLink_nn__hid__TouchState__y">TouchState::y</span> in dot units with the upper-left edge as the origin (0, 0).</p>
+<p>The x-axis and y-axis diameters of the region defined with an ellipse are stored in <span class="ApiLink_nn__hid__TouchState__diameterX">TouchState::diameterX</span> and <span class="ApiLink_nn__hid__TouchState__diameterY">TouchState::diameterY</span>, and the angle of rotation of the contact area with positive in the clockwise direction is stored in <span class="ApiLink_nn__hid__TouchState__rotationAngle">TouchState::rotationAngle</span>.</p>
+<p>In addition to user-based touch operations, increases and decreases in the number of touches can occur for reasons such as system-based focus control.</p>
+<p>When you need to check that the touch start and end were the result of user operations, use <span class="ApiLink_nn__hid__TouchState__attributes">TouchAttribute::Start</span> and <span class="ApiLink_nn__hid__TouchAttribute__Start">TouchAttribute::End</span> in <span class="ApiLink_nn__hid__TouchAttribute__End">TouchState::attributes</span>.</p>
+<p>
+  <br />
+</p>
+<p>When using the API, you must first call <span class="ApiLink_void_nn__hid__InitializeTouchScreen()_NN_NOEXCEPT">InitializeTouchScreen()</span> to initialize it.</p>
+<p>The <span class="ApiLink_void_nn__hid__GetTouchScreenState(TouchScreenState__N___*pOutValue)_NN_NOEXCEPT">GetTouchScreenState()</span> and <span class="ApiLink_int_nn__hid__GetTouchScreenStates(TouchScreenState__N___*outStates|_int_count)_NN_NOEXCEPT">GetTouchScreenStates()</span> functions have been prepared to get the input state.</p>
+<p>Use <span class="ApiLink_void_nn__hid__GetTouchScreenState(TouchScreenState__N___*pOutValue)_NN_NOEXCEPT">GetTouchScreenState()</span> to get the latest input state.</p>
+<p>Use <span class="ApiLink_int_nn__hid__GetTouchScreenStates(TouchScreenState__N___*outStates|_int_count)_NN_NOEXCEPT">GetTouchScreenStates()</span> to get multiple input states retroactively from the latest input state. A maximum of <span class="ApiLink_nn__hid__TouchScreenStateCountMax">TouchScreenStateCountMax</span> can be retroactively obtained.</p>
+<p>
+  <span style="color: rgb(23,43,77);">Getting input states does not change the internal state. For this reason, if you call the same function repeatedly, you get the same values each time unless the input state has been updated in the interim.</span>
+</p>
+<p>The input state contains a number (<span class="ApiLink_nn__hid__TouchScreenState__samplingNumber">TouchScreenState::samplingNumber</span>) that increments with each update. This number can be used to determine the obtained input state.</p>
+<h1 id="Anchor_89128938_h1_2">Structure in the Windows Environment</h1>
+<h2 id="Anchor_89128938_h2_1">Emulation With the Mouse</h2>
+<p>Determines the input state of the touch screen, which is taken to be the client region of the window to which the <code>gfx</code> library is sending its output.</p>
+<p>If the left button is pressed in the region, a touch with coordinates where the cursor is positioned is generated until the left button is released.</p>
+<p>If the cursor is moved outside the region while the left button is pressed, the input state retains the touch coordinates last measured.</p>
+<h2 id="Anchor_89128938_h2_2">
+  <span style="color: rgb(69,69,69);">Emulation With Touch Message</span>
+</h2>
+<p>
+  <span style="color: rgb(69,69,69);">When the system supports touch message, in addition to emulation with the mouse, as mentioned previously, input from touch messages can be detected as taps.</span>
+</p>
+<p>
+  <span style="color: rgb(69,69,69);">Use the following method to determine whether your system supports touch message.</span>
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/nn_Windows.h&gt;
+</span>&nbsp;
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">GetSystemMetrics</span><span class="p">(</span><span class="n">SM_DIGITIZER</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Touch messages are available.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_89128938_h1_3">How to Use</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/nn_Log.h&gt;
+#include &lt;nn/hid.h&gt;
+</span>&nbsp;
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="c1">// 1. Initialize TouchScreen.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">InitializeTouchScreen</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// 2. Get the input state as necessary.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">TouchScreenState</span><span class="o">&lt;</span><span class="nn">nn::hid::</span><span class="n">TouchStateCountMax</span><span class="o">&gt;</span> <span class="n">state</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetTouchScreenState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">);</span>
+&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">state</span><span class="p">.</span><span class="n">count</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processing for each touch.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+<span class="c1">// Use GetTouchScreenStates() if you want to get past input states in addition to the current input state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">TouchScreenState</span><span class="o">&lt;</span><span class="nn">nn::hid::</span><span class="n">TouchStateCountMax</span><span class="o">&gt;</span> <span class="n">states</span><span class="p">[</span><span class="nn">nn::hid::</span><span class="n">TouchScreenStateCountMax</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// At least one input state can be obtained.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">stateCount</span> <span class="o">=</span> <span class="nn">nn::hid::</span><span class="n">GetTouchScreenStates</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">states</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]));</span>
+&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// If a touch is detected, go back TouchScreenStateCountMax touches and calculate the contact time of the first touch.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int64_t</span> <span class="n">microSeconds</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">stateCount</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">bool</span> <span class="n">found</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">count</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">touches</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">fingerId</span> <span class="o">==</span> <span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">touches</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">fingerId</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Adds to the elapsed time if one is found that matches the touch identifier.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">found</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">microSeconds</span> <span class="o">+=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">touches</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">deltaTime</span><span class="p">.</span><span class="n">GetMicroSeconds</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">found</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;%lld</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">microSeconds</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__TouchStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#aa57dc264ce1e69e6a8b8091ce9e57b6f' )
+SetUrl( 'ApiLink_nn__hid__TouchState__fingerId', '../../../Api/HtmlNX/structnn_1_1hid_1_1_touch_state.html#a128984cae0039666450b6c3cfc017a23' )
+SetUrl( 'ApiLink_nn__hid__TouchState__x', '../../../Api/HtmlNX/structnn_1_1hid_1_1_touch_state.html#aaef5929f0a4a89d4d6e542225f2038b2' )
+SetUrl( 'ApiLink_nn__hid__TouchState__y', '../../../Api/HtmlNX/structnn_1_1hid_1_1_touch_state.html#acdc09f8c5bdb3a50894efc81032c22e3' )
+SetUrl( 'ApiLink_nn__hid__TouchState__diameterX', '../../../Api/HtmlNX/structnn_1_1hid_1_1_touch_state.html#a8276ab1ba0f923886812150e4b446bdc' )
+SetUrl( 'ApiLink_nn__hid__TouchState__diameterY', '../../../Api/HtmlNX/structnn_1_1hid_1_1_touch_state.html#ac95a8453ebd77d18d13b5f7164bf0ada' )
+SetUrl( 'ApiLink_nn__hid__TouchState__rotationAngle', '../../../Api/HtmlNX/structnn_1_1hid_1_1_touch_state.html#a85bd4c376ee62fd9f22b41aa8b08fa53' )
+SetUrl( 'ApiLink_nn__hid__TouchState__attributes', '../../../Api/HtmlNX/structnn_1_1hid_1_1_touch_state.html#a98a4d1fb0144d6f883eed4b30f25a2ee' )
+SetUrl( 'ApiLink_nn__hid__TouchAttribute__Start', '../../../Api/HtmlNX/structnn_1_1hid_1_1_touch_attribute.html#a15111dcbe20eeb00e2eb7525815480ce' )
+SetUrl( 'ApiLink_nn__hid__TouchAttribute__End', '../../../Api/HtmlNX/structnn_1_1hid_1_1_touch_attribute.html#a0e41f0d80acf7261156c03e72106a009' )
+SetUrl( 'ApiLink_void_nn__hid__InitializeTouchScreen()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a1d814d34915eac7cfc9b9f92ac3ccc40' )
+SetUrl( 'ApiLink_void_nn__hid__GetTouchScreenState(TouchScreenState__N___*pOutValue)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a8057a5f2f1aacdacc9b51dbaee418847' )
+SetUrl( 'ApiLink_int_nn__hid__GetTouchScreenStates(TouchScreenState__N___*outStates|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a25c328faac65ac47bec4b4cf6a2e1422' )
+SetUrl( 'ApiLink_nn__hid__TouchScreenStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a7db16ac9c181d3161217197457a165a9' )
+SetUrl( 'ApiLink_nn__hid__TouchScreenState__samplingNumber', '../../../Api/HtmlNX/structnn_1_1hid_1_1_touch_screen_state.html#a53ffd7b8ff4ae54b8baca962de641a87' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

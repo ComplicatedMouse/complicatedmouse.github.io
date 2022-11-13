@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Assembling Character Codes | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Assembling Character Codes -->
+<div class="pagetitle" id="PageId_261988450">Assembling Character Codes</div>
+<div class="text_separate">
+<h1 id="Anchor_261988450_h1_1">Feature Overview</h1>
+<p>Provides a feature for resolving character input comprised of the input from multiple keys and composing character code arrays (UTF-16).</p>
+<p>Use  <span class="ApiLink_nn__kpr__GetKeyCode">GetKeyCode()</span> to specify the target format for converting character codes.</p>
+<p>
+  <br />
+</p>
+<p>When composing character codes, first create an instance of the <span class="ApiLink_nn__kpr__KeyCodeComposer">KeyCodeComposer</span> class.</p>
+<p>
+  <span class="ApiLink_nn__kpr__KeyCodeComposer">KeyCodeComposer</span> supports the composition modes in the following table. Use <span class="ApiLink_void_nn__kpr__KeyCodeComposer__SetMode(KeyCodeComposerMode_mode)_noexcept">KeyCodeComposer::SetMode()</span> to specify the mode based on its purpose.</p>
+<p>Use <span class="ApiLink_nn__kpr__KeyCodeComposer__GetMode">KeyCodeComposer::GetMode()</span> to verify the current assembly mode. Changing the composition mode destroys the string that is currently being composed.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 291.0px;" />
+    <col style="width: 328.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Composition Mode</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__kpr__KeyCodeComposerMode__Default">KeyCodeComposerMode::Default</span>
+      </td>
+      <td>Processes the entered character code as is.</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__kpr__KeyCodeComposerMode__DeadKey">KeyCodeComposerMode::DeadKey</span>
+      </td>
+      <td>Processes the dead key modifiers.</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__kpr__KeyCodeComposerMode__RomajiHiragana">KeyCodeComposerMode::RomajiHiragana</span>
+      </td>
+      <td>Processes Japanese romaji (hiragana) input.</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__kpr__KeyCodeComposerMode__RomajiKatakana">KeyCodeComposerMode::RomajiKatakana</span>
+      </td>
+      <td>Processes Japanese romaji (katakana) input.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <span class="ApiLink_nn__kpr__KeyCodeComposer">KeyCodeComposer</span> is the length for storing the character code. It is stored in the  <span class="ApiLink_nn__kpr__KeyCodeCompositionCountMax">KeyCodeCompositionCountMax</span> queue, and then the key inputs specified in <span class="ApiLink_int_nn__kpr__KeyCodeComposer__Enqueue(const_uint16_t_buffer[]|_int_count)_noexcept">KeyCodeComposer::Enqueue()</span> are added to the end one at a time, and composition processing progresses each time.</p>
+<p />
+<p>Adding to the queue stops when the first character code in the queue is confirmed as the value that ends assembly.</p>
+<p>Check the return value of the <span class="ApiLink_int_nn__kpr__KeyCodeComposer__Enqueue(const_uint16_t_buffer[]|_int_count)_noexcept">KeyCodeComposer::Enqueue()</span> function to determine whether key input was accepted.</p>
+<p>Call the <span class="ApiLink_int_nn__kpr__KeyCodeComposer__Dequeue(uint16_t_outBuffer[]|_int_count)_noexcept">KeyCodeComposer::Dequeue()</span> function to extract the composed character code array.</p>
+<p>You can use the <span class="ApiLink_int_nn__kpr__KeyCodeComposer__Enqueue(const_uint16_t_buffer[]|_int_count)_noexcept">KeyCodeComposer::Enqueue()</span> function to add key input after all of the confirmed character codes are extracted.</p>
+<p>Use <span class="ApiLink_int_nn__kpr__KeyCodeComposer__Dequeue(uint16_t_outBuffer[]|_int_count)_noexcept">GetDequeueableCount()</span> to get the number of character codes that can be extracted with <span class="ApiLink_nn__kpr__KeyCodeComposer__GetDequeueableCount">KeyCodeComposer::Dequeue()</span>.</p>
+<p>Use <span class="ApiLink_nn__kpr__KeyCodeComposer__GetComposition">KeyCodeComposer::GetComposition()</span> and <span class="ApiLink_nn__kpr__KeyCodeComposer__GetCompositionCount">KeyCodeComposer::GetCompositionCount()</span> to reference the content and length of the queue, respectively.</p>
+<p>Call the <span style="color: rgb(112,112,112);"><span class="ApiLink_int_nn__kpr__KeyCodeComposer__Remove(uint16_t_outBuffer[]|_int_count)_noexcept">KeyCodeComposer::Remove()</span> function to remove unconfirmed portions from the character codes in the queue.</span></p>
+<p>Call the <span class="ApiLink_void_nn__kpr__KeyCodeComposer__Flush()_noexcept">KeyCodeComposer::Flush()</span> function to forcibly confirm the character codes in the queue.</p>
+<p>Call the <span class="ApiLink_void_nn__kpr__KeyCodeComposer__Clear()_noexcept">KeyCodeComposer::Clear()</span> function to destroy the character codes in the queue.</p>
+<h1 id="Anchor_261988450_h1_2">How to Use</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/nn_Common.h&gt;
+#include &lt;nn/nn_Log.h&gt;
+#include &lt;nn/kpr/kpr_KeyCodeComposer.h&gt;
+#include &lt;nn/util/util_CharacterEncoding.h&gt;
+</span>
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">uint16_t</span> <span class="n">src</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="sc">'k'</span><span class="p">,</span> <span class="sc">'o'</span><span class="p">,</span> <span class="sc">'n'</span><span class="p">,</span> <span class="sc">'n'</span><span class="p">,</span> <span class="sc">'n'</span><span class="p">,</span> <span class="sc">'i'</span><span class="p">,</span> <span class="sc">'c'</span><span class="p">,</span> <span class="sc">'h'</span><span class="p">,</span> <span class="sc">'i'</span><span class="p">,</span> <span class="sc">'h'</span><span class="p">,</span> <span class="sc">'a'</span> <span class="p">};</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">uint16_t</span> <span class="n">dst</span><span class="p">[</span><span class="n">NN_ARRAY_SIZE</span><span class="p">(</span><span class="n">src</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{};</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">srcHead</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">dstHead</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="c1">// 1. Create an instance of the KeyCodeComposer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::kpr::</span><span class="n">KeyCodeComposer</span> <span class="n">composer</span><span class="p">;</span>
+
+<span class="c1">// 2. Specify the composition mode.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">composer</span><span class="p">.</span><span class="n">SetMode</span><span class="p">(</span><span class="nn">nn::kpr::KeyCodeComposerMode::</span><span class="n">RomajiHiragana</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">while</span> <span class="p">(</span><span class="n">srcHead</span> <span class="o">&lt;</span> <span class="n">NN_ARRAY_SIZE</span><span class="p">(</span><span class="n">src</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+<span class="c1">// 3. Advance composition processing.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">srcHead</span> <span class="o">+=</span> <span class="n">composer</span><span class="p">.</span><span class="n">Enqueue</span><span class="p">(</span><span class="o">&amp;</span><span class="n">src</span><span class="p">[</span><span class="n">srcHead</span><span class="p">],</span> <span class="n">NN_ARRAY_SIZE</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="o">-</span> <span class="n">srcHead</span><span class="p">);</span>
+
+<span class="c1">// 4. Extract the composed character code array.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">dstHead</span> <span class="o">+=</span> <span class="n">composer</span><span class="p">.</span><span class="n">Dequeue</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst</span><span class="p">[</span><span class="n">dstHead</span><span class="p">],</span> <span class="n">NN_ARRAY_SIZE</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span> <span class="o">-</span> <span class="n">dstHead</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">utf8</span><span class="p">[</span><span class="n">NN_ARRAY_SIZE</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::util::</span><span class="n">ConvertStringUtf16NativeToUtf8</span><span class="p">(</span><span class="n">utf8</span><span class="p">,</span> <span class="n">NN_ARRAY_SIZE</span><span class="p">(</span><span class="n">utf8</span><span class="p">),</span> <span class="n">dst</span><span class="p">,</span> <span class="n">dstHead</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">utf8</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__kpr__GetKeyCode', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#aa4db9ff402126de12437f59f91c1dddc' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeComposer', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html' )
+SetUrl( 'ApiLink_void_nn__kpr__KeyCodeComposer__SetMode(KeyCodeComposerMode_mode)_noexcept', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html#a277b544175fa1a2e8cdf94e48fefa658' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeComposer__GetMode', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html#a8414ed348d16cf2c18db8c1c88a37ce5' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeComposerMode__Default', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a2019caaa0bfe50fda946e0e9128d48d5a7a1920d61156abc05a60135aefe8bc67' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeComposerMode__DeadKey', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a2019caaa0bfe50fda946e0e9128d48d5a8bdfad6cc3c36a023ad672ec705a6c5e' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeComposerMode__RomajiHiragana', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a2019caaa0bfe50fda946e0e9128d48d5a92d985fa21d3f205dc3df8294ee8a317' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeComposerMode__RomajiKatakana', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a2019caaa0bfe50fda946e0e9128d48d5a2950fac9e6e67a7247eb8f223cd91af8' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeCompositionCountMax', '../../../Api/HtmlNX/namespacenn_1_1kpr.html#a0efb4a8bddb15b3058d0ccf2993726b7' )
+SetUrl( 'ApiLink_int_nn__kpr__KeyCodeComposer__Enqueue(const_uint16_t_buffer[]|_int_count)_noexcept', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html#af61a8f1fc667ae7c0d421250cc2c0eac' )
+SetUrl( 'ApiLink_int_nn__kpr__KeyCodeComposer__Dequeue(uint16_t_outBuffer[]|_int_count)_noexcept', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html#ad4b42723dea429487e00d84743a12be4' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeComposer__GetDequeueableCount', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html#acf32c93abb753599659f79ecd81d35d7' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeComposer__GetComposition', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html#a89377fb1ba180174e9ad3d1339697714' )
+SetUrl( 'ApiLink_nn__kpr__KeyCodeComposer__GetCompositionCount', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html#af0644e5d6184f9d2adc1d42f3a638c7a' )
+SetUrl( 'ApiLink_int_nn__kpr__KeyCodeComposer__Remove(uint16_t_outBuffer[]|_int_count)_noexcept', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html#a7f54f9fc145d4c84d530e80f8a2dc736' )
+SetUrl( 'ApiLink_void_nn__kpr__KeyCodeComposer__Flush()_noexcept', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html#a505ce0cde460aebb45b786611767766a' )
+SetUrl( 'ApiLink_void_nn__kpr__KeyCodeComposer__Clear()_noexcept', '../../../Api/HtmlNX/classnn_1_1kpr_1_1_key_code_composer.html#a4607aa459506f9226da023c11180d79c' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

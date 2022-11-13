@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['j_11004',['J',['../structnn_1_1hid_1_1_keyboard_key.html#a84cb3f54faa162af844c89f3b916330a',1,'nn::hid::KeyboardKey']]],
+  ['ja_11005',['ja',['../structnn_1_1friends_1_1_friend_invitation_game_mode_description.html#a8c9fde2ae4612fc98e8396afae83accb',1,'nn::friends::FriendInvitationGameModeDescription']]],
+  ['jam_11006',['Jam',['../classnn_1_1os_1_1_light_message_queue.html#af9f6750e4ae2ee62f87408df516c26f1',1,'nn::os::LightMessageQueue::Jam()'],['../classnn_1_1os_1_1_message_queue.html#ac9761c1ac40faa8a10cf93f886a2c13b',1,'nn::os::MessageQueue::Jam()']]],
+  ['jamlightmessagequeue_11007',['JamLightMessageQueue',['../namespacenn_1_1os.html#ae544b7a419a19f766d0d5fc22dbb89a9',1,'nn::os']]],
+  ['jammessagequeue_11008',['JamMessageQueue',['../namespacenn_1_1os.html#a7a47bc9d914dbdf48011deeb859cb877',1,'nn::os']]],
+  ['japanese_11009',['Japanese',['../structnn_1_1settings_1_1_language_code.html#aa76d109dc7f768fe7bd555880544428f',1,'nn::settings::LanguageCode']]],
+  ['journey_11010',['journey',['../structnn_1_1vfx_1_1detail_1_1_super_stripe_instance.html#ab80b2448124de40806a6f863a17d6552',1,'nn::vfx::detail::SuperStripeInstance']]],
+  ['jpegdecoder_11011',['JpegDecoder',['../classnn_1_1image_1_1_jpeg_decoder.html#a6888d15b35b2257c5c8f9b363cef0882',1,'nn::image::JpegDecoder::JpegDecoder()'],['../classnn_1_1image_1_1_jpeg_decoder.html',1,'nn::image::JpegDecoder']]],
+  ['jpegencoder_11012',['JpegEncoder',['../classnn_1_1image_1_1_jpeg_encoder.html#a5f8f5ddaa42cfb5de184be6c31cbcedd',1,'nn::image::JpegEncoder::JpegEncoder()'],['../classnn_1_1image_1_1_jpeg_encoder.html',1,'nn::image::JpegEncoder']]],
+  ['jpegsamplingratio_11013',['JpegSamplingRatio',['../namespacenn_1_1image.html#ac9106d5a0df8b9453f48ec618cf0850e',1,'nn::image']]],
+  ['jpegsamplingratio_5f420_11014',['JpegSamplingRatio_420',['../namespacenn_1_1image.html#ac9106d5a0df8b9453f48ec618cf0850ea2575ed66bbafcccad163adcc13c2cf95',1,'nn::image']]],
+  ['jpegsamplingratio_5f422_11015',['JpegSamplingRatio_422',['../namespacenn_1_1image.html#ac9106d5a0df8b9453f48ec618cf0850eaba2e1ec1cc9aa9fca34701b1f1c22de6',1,'nn::image']]],
+  ['jpegsamplingratio_5f444_11016',['JpegSamplingRatio_444',['../namespacenn_1_1image.html#ac9106d5a0df8b9453f48ec618cf0850ea5ff0e6b73867b9eb10cdbdf083374664',1,'nn::image']]],
+  ['jpegstatus_11017',['JpegStatus',['../namespacenn_1_1image.html#a8c78190141f5d2997ea6dfdaac0730e3',1,'nn::image']]],
+  ['jpegstatus_5fok_11018',['JpegStatus_Ok',['../namespacenn_1_1image.html#a8c78190141f5d2997ea6dfdaac0730e3a2f99a50104618a54e9d4e3bfa4e35ffc',1,'nn::image']]],
+  ['jpegstatus_5foutofmemory_11019',['JpegStatus_OutOfMemory',['../namespacenn_1_1image.html#a8c78190141f5d2997ea6dfdaac0730e3ad4e1063e46f1d81cbe1f8551d168af82',1,'nn::image']]],
+  ['jpegstatus_5foutputoverabounds_11020',['JpegStatus_OutputOverabounds',['../namespacenn_1_1image.html#a8c78190141f5d2997ea6dfdaac0730e3a8555609ba8a5e8f6f61e61b15a5db680',1,'nn::image']]],
+  ['jpegstatus_5fshortoutput_11021',['JpegStatus_ShortOutput',['../namespacenn_1_1image.html#a8c78190141f5d2997ea6dfdaac0730e3ae620d8f647aed850da0669fd1da2edc5',1,'nn::image']]],
+  ['jpegstatus_5funsupportedformat_11022',['JpegStatus_UnsupportedFormat',['../namespacenn_1_1image.html#a8c78190141f5d2997ea6dfdaac0730e3ad1803e0673b13c21b3d858764a11a390',1,'nn::image']]],
+  ['jpegstatus_5fwrongformat_11023',['JpegStatus_WrongFormat',['../namespacenn_1_1image.html#a8c78190141f5d2997ea6dfdaac0730e3a1308872f653d3d1b6fcd42dabf5a392a',1,'nn::image']]]
+];

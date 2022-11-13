@@ -1,0 +1,285 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Overview for Development | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Overview for Development -->
+<div class="pagetitle" id="PageId_83956190">Overview for Development</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83956190_h1_1">Features Provided by the fs Library</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956190_h2_1">Data Access</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956190_h2_2">Common Interface</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_83956190_h1_2">fs Library Restrictions</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956190_h2_3">Path Strings</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956190_h2_4">Case-Sensitivity (Distinguishing Between Uppercase and Lowercase)</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956190_h2_5">Number of Open Files and Directories</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956190_h2_6">Using APIs for Debugging</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83956190_h3_1">Settings for Restricting Debugging Functions</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83956190_h1_1">Features Provided by the fs Library</h1>
+<h2 id="Anchor_83956190_h2_1">Data Access</h2>
+<p>The <code>fs</code> library can be used to operate on the following kinds of data.</p>
+<ul>
+  <li>Application resource data</li>
+  <li>Application downloadable content</li>
+  <li>Application save data</li>
+  <li>Data on the SD card (for debugging only)</li>
+  <li>Data on the host PC (for debugging only)</li>
+</ul>
+<h2 id="Anchor_83956190_h2_2">Common Interface</h2>
+<p>Basic operations on entries with the <code>fs</code> library are performed using the same interface.</p>
+<h1 id="Anchor_83956190_h1_2">fs Library Restrictions</h1>
+<p>For more information about the restrictions on the various functions of the file system library, see the <span class="ApiLink_nn__fs">API reference for the nn::fs library</span>.</p>
+<h2 id="Anchor_83956190_h2_3">Path Strings</h2>
+<p>The <code>fs</code> library uses path strings to identify target directories and files. The characters that can be used for path strings are restricted. For more information, see the <a href="../../../Api/HtmlNX/namespacenn_1_1fs.html#entry_path">nn::fs Library API Reference</a>. These restrictions are the same when working with the development hardware, host PC, and file systems of other devices. There may be other separate restrictions depending on the file system. For more information about separate restrictions, see the manual for each feature.</p>
+<h2 id="Anchor_83956190_h2_4">Case-Sensitivity (Distinguishing Between Uppercase and Lowercase)</h2>
+<p>The library is case-sensitive (distinguishes between uppercase and lowercase, can place entries with names with uppercase and lowercase distinctions in the same directory).</p>
+<p>However, in the Windows application environment and the authoring tool environment, the library may in some cases act like it is case-insensitive, depending on the Windows file system and the setting for that file system. (When its behavior is case-insensitive, it does not distinguish between uppercase and lowercase and can open target files even if the wrong case is used when specifying the path.) To facilitate porting to case-sensitive file systems, be careful and use uppercase and lowercase correctly when specifying paths for actions like opening files.</p>
+<p>Because the Windows environment and the authoring tool environment are case-insensitive, and a tool to export save data content to the host PC is possible in the future, we do not recommend assuming case-sensitivity and placing entry names with uppercase and lowercase distinctions under the same directory.</p>
+<h2 id="Anchor_83956190_h2_5">Number of Open Files and Directories</h2>
+<p>The maximum number of files and directories that can be open simultaneously in the save data is 256. The cumulative number of files and directories open in all save data mounted by the application is counted.</p>
+<p>There is no restriction on the number of files and directories open simultaneously in resource data. As long as memory can be allocated by the allocator specified in <code><span class="ApiLink_nn__fs__SetAllocator">nn::fs::SetAllocator</span>()</code> (by <code>malloc()</code> when <code><span class="ApiLink_nn__fs__SetAllocator">nn::fs::SetAllocator</span>()</code> is not executed), any number can be open simultaneously.</p>
+<p>
+  <br />
+</p>
+<div class="platform_nx">
+  <h2 id="Anchor_83956190_h2_6">Using APIs for Debugging<a name="Anchor_83956190_fsApiForDebug"></a></h2>
+  <p>Some APIs are prohibited in the production environment. Even if they are executed, they will not work correctly. For more information, see the following list.</p>
+  <table class="wrapped">
+    <colgroup>
+      <col />
+      <col />
+      <col />
+    </colgroup>
+    <tbody>
+      <tr>
+        <th> Function</th>
+        <th>Overview</th>
+        <th>Response When Executed in the Production Environment (*)</th>
+      </tr>
+      <tr>
+        <td>
+          <span class="ApiLink_Result_nn__fs__MountHost(const_char_*name|_const_char_*rootPath)_NN_NOEXCEPT">nn::fs::MountHost()</span>
+        </td>
+        <td rowspan="2">Mounts the host PC file system.</td>
+        <td rowspan="3">Returns an undefined error.</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="ApiLink_Result_nn__fs__MountHostRoot()_NN_NOEXCEPT">nn::fs::MountHostRoot()</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="ApiLink_Result_nn__fs__MountSdCardForDebug(const_char_*name)_NN_NOEXCEPT">nn::fs::MountSdCardForDebug()</span>
+        </td>
+        <td>Mounts the SD card file system to save files for debugging.</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="ApiLink_Result_nn__fs__MountSaveDataForDebug(const_char_*name)_NN_NOEXCEPT">nn::fs::MountSaveDataForDebug()</span>
+        </td>
+        <td>Mounts the save data file system for debugging.</td>
+        <td rowspan="2">The program stops.</td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            <span class="ApiLink_void_nn__fs__SetSaveDataRootPath(const_char_*rootPath)_NN_NOEXCEPT">nn::fs::SetSaveDataRootPath()</span>
+          </p>
+        </td>
+        <td>Sets the host PC path that is used as the save data location.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="warn_new">
+    <div class="warn_new_left">Warning</div>
+    <div class="warn_new_right">
+      <p>(*) When these API symbols are included in the program, the application cannot be submitted. For this reason, these functions cannot be executed on the retail unit.</p>
+    </div>
+  </div>
+  <h3 id="Anchor_83956190_h3_1">Settings for Restricting Debugging Functions</h3>
+  <p>When running an application on the development hardware, you can use the following procedure to reproduce the responses of the application when executed in the production environment as listed in the preceding table. We strongly recommend checking the application's behavior in this state before submitting the application.</p>
+  <ol>
+    <li>
+      <p>Copy <code>Desc/Default/FsAccessControlData</code> from the DESC file used in <a href="../Pages/Page_107320222.html">Creating Application Images</a> to the NMETA file as <code>NintendoSdkMeta/Core/FsAccessControlData</code>. In the child elements, delete the <code>FlagPresets</code> elements that have the <code>Debug</code> value.<br />At this time, be careful not to confuse this with <code>Desc/FsAccessControl<span style="color: rgb(255,0,0);">Descriptor</span></code>.<br />Do not delete <code>FlagPresets</code> elements that have values other than <code>Debug</code>.<br />You must place an empty <code>NintendoSdkMeta/Core/FsAccessControlData</code> element even if there are no longer any <code>NintendoSdkMeta/Core/FsAccessControlData</code> child elements as a result of deleting <code>FlagPresets</code> elements that have the <code>Debug</code> value.</p>
+      <p>If any elements other than the <code>FlagPresets</code> element have been added to <code>NintendoSdkMeta/Core/FsAccessControlData</code> to enable features such as the feature for mounting save data from other applications, do not delete those elements.</p>
+      <p>The following are some code examples.</p>
+      <p>
+        <br />
+      </p>
+      <ol>
+        <li>
+          <p>desc File Content</p>
+          <table class="codeblock">
+            <tbody>
+              <tr>
+                <td class="code">
+                  <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot;? &gt;
+<span class="nt">&lt;Desc&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Default&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;FsAccessControlData&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;FlagPresets&gt;</span>Debug<span class="nt">&lt;/FlagPresets&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/FsAccessControlData&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Default&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;...
+<span class="nt">&lt;/Desc&gt;</span></pre></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </li>
+        <li>
+          <p>NMETA File Code Example</p>
+          <table class="codeblock">
+            <tbody>
+              <tr>
+                <td class="code">
+                  <div class="codeblock"><pre><span class="err">&lt;</span>?xml version=&quot;1.0&quot;? &gt;
+<span class="nt">&lt;NintendoSdkMeta&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Core&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Name&gt;</span>Application<span class="nt">&lt;/Name&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;ApplicationId&gt;</span>0x0100000000002802<span class="nt">&lt;/ApplicationId&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;FsAccessControlData&gt;&lt;/FsAccessControlData&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Core&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;Application&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nt">&lt;/Application&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;...
+<span class="nt">&lt;/NintendoSdkMeta&gt;</span></pre></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="tip">
+            <div class="tip_left">Info</div>
+            <div class="tip_right">
+              <p>We recommend using this setting as standard for the NMETA file that is input when building the application for final submission.</p>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </li>
+    <li>Build and run the application.</li>
+  </ol>
+</div>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs', '../../../Api/HtmlNX/namespacenn_1_1fs.html' )
+SetUrl( 'ApiLink_nn__fs__SetAllocator', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac021c163ba94a44a2b53cb848c462930' )
+SetUrl( 'ApiLink_Result_nn__fs__MountHost(const_char_*name|_const_char_*rootPath)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a1b85bf3f3cf038cb67a991a3e3304751' )
+SetUrl( 'ApiLink_Result_nn__fs__MountHostRoot()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2ea39d2487ac28bc767cd699eeeebe11' )
+SetUrl( 'ApiLink_Result_nn__fs__MountSdCardForDebug(const_char_*name)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a196ef874060b922b93756ddff212fefa' )
+SetUrl( 'ApiLink_Result_nn__fs__MountSaveDataForDebug(const_char_*name)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a767e38eb403bd2ebb4374c5214dc0e95' )
+SetUrl( 'ApiLink_void_nn__fs__SetSaveDataRootPath(const_char_*rootPath)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a90c27aaf70aec66968715663cd8c5415' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

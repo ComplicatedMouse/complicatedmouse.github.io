@@ -1,0 +1,281 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Npad | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Npad -->
+<div class="pagetitle" id="PageId_124018876">Npad</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_124018876_h1_1">Introduction</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_124018876_h2_1">Getting the Configured Style of Operation</a>
+      </li>
+      <li>
+        <a href="#Anchor_124018876_h2_2">Getting the Input State for Each Style of Operation</a>
+      </li>
+      <li>
+        <a href="#Anchor_124018876_h2_3">Styles of Operation in the Generic Environment</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_124018876_h1_2">Using Npad</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_124018876_h1_1">Introduction</h1>
+<p>
+  <code>Npad</code> is an interface for controlling a variety of styles of operation patterned after the controller models defined by the platform.</p>
+<p>
+  <code>Npad</code> uses <em>Npad IDs</em> to handle the controllers handled by the system. To use <code>Npad</code>, begin by calling the <span class="ApiLink_void_nn__hid__InitializeNpad()_NN_NOEXCEPT">InitializeNpad()</span> function to initialize the target represented by that Npad ID.<br />The standard supported Npad IDs are as follows.</p>
+<ul>
+  <li>
+    <code>Npad</code> objects assigned controller numbers (<span class="ApiLink_nn__hid__NpadId__No1">NpadId::No1</span> to <span class="ApiLink_nn__hid__NpadId__No8">NpadId::No8</span>)<br />Handles <code>Npad</code> objects assigned controller numbers 1 through 8. Controller numbers are assigned in ascending order as controllers are attached.</li>
+  <li>
+    <code>Npad</code> objects for directly handling buttons and sticks attached to handheld controllers (<span class="ApiLink_nn__hid__NpadId__Handheld">NpadId::Handheld</span>).<br />Use when you want to handle the input from handheld controllers separately. For example, use when a wireless controller is attached to a handheld controller and you want to handle input from the system's button and sticks independently. </li>
+</ul>
+<p>The <code>Npad</code> interface supports several different styles of operation for each individual <code>Npad</code> object specified by an Npad ID. The styles of operation vary, depending on the type of the actual physical controller associated with the <code>Npad</code> object.<br />For more information about the <code>Npad</code> styles of operation that can be used with a particular platform, see the documentation for that platform.</p>
+<p>For more information about the styles of operation that can be used in the Generic environment, see <a href="#Anchor_124018876_h2_3">Styles of Operation in the Generic Environment</a>.</p>
+<h2 id="Anchor_124018876_h2_1">Getting the Configured Style of Operation</h2>
+<p>The <span class="ApiLink_void_nn__hid__SetSupportedNpadStyleSet(NpadStyleSet_style)_NN_NOEXCEPT">SetSupportedNpadStyleSet()</span> function sets the styles of operation that the application supports. To get the style of operation that is currently set for the <code>Npad</code> object associated with a specific Npad ID, use the <span class="ApiLink_NpadStyleSet_nn__hid__GetNpadStyleSet(const_NpadIdType_&id)_NN_NOEXCEPT">GetNpadStyleSet()</span> function.<br />The style of operation varies depending on the type of controller that is connected. Notification of a change in the style of operation is received from the <span class="ApiLink_nn__hid__BindNpadStyleSetUpdateEvent">SystemEventType</span> passed by the <span class="ApiLink_nn__os__SystemEventType">BindNpadStyleSetUpdateEvent()</span> function.</p>
+<h2 id="Anchor_124018876_h2_2">Getting the Input State for Each Style of Operation</h2>
+<p>The following functions have been prepared to get the input state. <span class="ApiLink_void_nn__hid__GetNpadState(NpadFullKeyState_*pOutValue|_const_NpadIdType_&id)_NN_NOEXCEPT">GetNpadState()</span> and <span class="ApiLink_int_nn__hid__GetNpadStates(NpadFullKeyState_*pOutValues|_int_count|_const_NpadIdType_&id)_NN_NOEXCEPT">GetNpadStates()</span>.<br />Use <span class="ApiLink_void_nn__hid__GetNpadState(NpadFullKeyState_*pOutValue|_const_NpadIdType_&id)_NN_NOEXCEPT">GetNpadState()</span> to get the latest input state.<br />Use <span class="ApiLink_int_nn__hid__GetNpadStates(NpadFullKeyState_*pOutValues|_int_count|_const_NpadIdType_&id)_NN_NOEXCEPT">GetNpadStates()</span> to get several input states, starting with the latest and tracing backward. You can trace back through a maximum of <span class="ApiLink_nn__hid__NpadStateCountMax">NpadStateCountMax</span> states.<br /><span style="color: rgb(23,43,77);">Getting input states does not change the internal state of <code>Npad</code>. For this reason, if you call the same function repeatedly, you get the same values each time unless the input state has been updated in the interim.</span><br /> <span style="color: rgb(23,43,77);">The input state contains a number that increments by 1 with each update as a sampling number. This number can be used to determine the obtained input state.</span></p>
+<p>The input state contains attributes. These attributes include information about both the connection state and the wired connection state of the controller with the system.</p>
+<ul>
+  <li>The connection state (<span class="ApiLink_nn__hid__NpadJoyAttribute__IsConnected">NpadAttribute::isConnected</span>)<ul><li>Indicates that the controller is connected to the system and communication is possible.</li></ul></li>
+  <li>The wired connection state (<span class="ApiLink_nn__hid__NpadJoyAttribute__IsWired">NpadAttributes::isWired</span>)<ul><li>Indicates that the controller has a wired connection and is attached to the system or a charger with a cable.<br />Indicates that the game console is connected to something, including a charger, via a cable when using a handheld controller (<code>NpadStyleHandheld</code>).</li><li>It is dangerous to deal with data from the six-axis sensor if the controller is being operated with a wired connection, so instruct the user to unplug the cable.</li></ul></li>
+</ul>
+<p>The <code>Npad</code> input state is always obtainable, regardless of the connection status of the gamepad.<br />After <span class="ApiLink_void_nn__hid__InitializeNpad()_NN_NOEXCEPT">InitializeNpad()</span> has been called, the <code>Npad</code> object can continue to be used without reinitialization even if the gamepad is disconnected and reconnected.</p>
+<h2 id="Anchor_124018876_h2_3">Styles of Operation in the Generic Environment</h2>
+<p>The following two styles of operation can be used in the Generic environment of the NintendoSDK.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Defined Npad Style of Operation</th>
+      <th style="text-align: center;">Description</th>
+      <th style="text-align: center;">Supported Controllers / Holding Method</th>
+      <th style="text-align: center;">Input States</th>
+      <th>Vibration Device</th>
+      <th>Other Features</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__NpadStyleFullKey">NpadStyleFullKey</span>
+      </td>
+      <td>
+        <p>Style of operation modeled after the Switch Pro Controller.</p>
+        <p>
+          <br />
+        </p>
+      </td>
+      <td>
+        <ul>
+          <li>Switch Pro Controller</li>
+          <li>XInput-compatible controllers.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>
+            <span class="ApiLink_nn__hid__NpadFullKeyState">NpadFullKeyState</span> <br />+Control Pad and A/B/X/Y Buttons<br />ZL/ZR Buttons and L/R Buttons<br />+ Button and &minus; Button<br />Control sticks</li>
+          <li>Six-axis sensor: One</li>
+        </ul>
+      </td>
+      <td>HD rumble: Two</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__NpadStyleFullKey">NpadStyleHandheld</span>
+      </td>
+      <td>
+        <p>Style of operation modeled after the controller operations of a handheld system.</p>
+        <p>
+          <br />
+        </p>
+      </td>
+      <td>
+        <ul>
+          <li>None<br />There currently are no devices that can be assigned as a handheld system controller in the Generic environment.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>
+            <span class="ApiLink_nn__hid__NpadHandheldState">NpadHandheldState</span> <br />Directional buttons and A/B/X/Y Buttons<br />ZL/ZR Buttons and L/R Buttons<br />+ Button and &minus; Button<br />Control sticks</li>
+          <li>Six-axis sensor: One</li>
+        </ul>
+      </td>
+      <td>HD rumble: Two</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_124018876_h1_2">Using Npad</h1>
+<p>
+  <br />
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid/hid_Npad.h&gt;
+</span>&nbsp;
+<span class="c1">//  Defines the Npad IDs to use.
+</span><span class="nn">nn::hid::</span><span class="n">NpadIdType</span> <span class="n">g_NpadIds</span><span class="p">[]</span> <span class="o">=</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::NpadId::</span><span class="n">No1</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::NpadId::</span><span class="n">No2</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::NpadId::</span><span class="n">No3</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::NpadId::</span><span class="n">No4</span>
+<span class="p">};</span>
+&nbsp;
+<span class="k">const</span> <span class="kt">int</span> <span class="n">NpadIdCount</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">g_NpadIds</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">g_NpadIds</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+&nbsp;
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Initializes the Npad.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">InitializeNpad</span><span class="p">();</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Sets the style of operation to use.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SetSupportedNpadStyleSet</span><span class="p">(</span><span class="nn">nn::hid::NpadStyleFullKey::</span><span class="n">Mask</span> <span class="o">|</span> <span class="nn">nn::hid::NpadStyleHandheld::</span><span class="n">Mask</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Sets the Npad to use.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SetSupportedNpadIdType</span><span class="p">(</span><span class="n">g_NpadIds</span><span class="p">,</span> <span class="n">NpadIdCount</span><span class="p">);</span>
+
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Gets the input state as necessary.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">NpadFullKeyState</span> <span class="n">state</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetNpadState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">,</span> <span class="n">g_NpadIds</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">buttons</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">Npad::NpadButton::</span><span class="n">A</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Handle presses of the A Button
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Use GetNpadStates() if you want to get past input states in addition to the current input state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">NpadFullKeyState</span> <span class="n">states</span><span class="p">[</span><span class="nn">nn::hid::</span><span class="n">NpadStateCountMax</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// At least one input state can be obtained.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">stateCount</span> <span class="o">=</span> <span class="nn">nn::hid::</span><span class="n">GetNpadStates</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">states</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">g_NpadIds</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Compute the average coordinate values of the right control stick for past input states (maximum of 16 samples)
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">stateCount</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">x</span> <span class="o">+=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">analogStickR</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">y</span> <span class="o">+=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">analogStickR</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">x</span> <span class="o">/=</span> <span class="n">stateCount</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">y</span> <span class="o">/=</span> <span class="n">stateCount</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__hid__InitializeNpad()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a54ad6953b9cef17b4d79171e819b0048' )
+SetUrl( 'ApiLink_nn__hid__NpadId__No1', '../../../Api/HtmlNX/structnn_1_1hid_1_1_npad_id.html#aa0b93745c1c6de72c1fd2174f35c8ed9' )
+SetUrl( 'ApiLink_nn__hid__NpadId__No8', '../../../Api/HtmlNX/structnn_1_1hid_1_1_npad_id.html#a67fe4452e1380bd82a290ecc0252dd72' )
+SetUrl( 'ApiLink_nn__hid__NpadId__Handheld', '../../../Api/HtmlNX/structnn_1_1hid_1_1_npad_id.html#afc19a9a80ac740645b567fc7e1dc36cf' )
+SetUrl( 'ApiLink_void_nn__hid__SetSupportedNpadStyleSet(NpadStyleSet_style)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#ac04a55a989058f9d69c5c3e4e29c4480' )
+SetUrl( 'ApiLink_NpadStyleSet_nn__hid__GetNpadStyleSet(const_NpadIdType_&id)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a50e56789aa106765d43935bb1838c797' )
+SetUrl( 'ApiLink_nn__hid__BindNpadStyleSetUpdateEvent', '../../../Api/HtmlNX/namespacenn_1_1hid.html#aee99658f6af775470baa85ed17135c5b' )
+SetUrl( 'ApiLink_nn__os__SystemEventType', '../../../Api/HtmlNX/structnn_1_1os_1_1_system_event_type.html' )
+SetUrl( 'ApiLink_void_nn__hid__GetNpadState(NpadFullKeyState_*pOutValue|_const_NpadIdType_&id)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a1ea1131389075ff5c5d5911dd6da9b8f' )
+SetUrl( 'ApiLink_int_nn__hid__GetNpadStates(NpadFullKeyState_*pOutValues|_int_count|_const_NpadIdType_&id)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a5ce232e78c3098d144e001a546fd0781' )
+SetUrl( 'ApiLink_nn__hid__NpadStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#ae80d5949e5e28f82067ae4d9d0e14aca' )
+SetUrl( 'ApiLink_nn__hid__NpadJoyAttribute__IsConnected', '../../../Api/HtmlNX/structnn_1_1hid_1_1_npad_attribute.html#a43fa7c0a0a7f76f4842b790cca2f85c0' )
+SetUrl( 'ApiLink_nn__hid__NpadJoyAttribute__IsWired', '../../../Api/HtmlNX/structnn_1_1hid_1_1_npad_attribute.html#a1ebd3d4da36850daf5dad50aabe024f4' )
+SetUrl( 'ApiLink_nn__hid__NpadStyleFullKey', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a594f4eed71a6821bd28283ce0a273fb1' )
+SetUrl( 'ApiLink_nn__hid__NpadFullKeyState', '../../../Api/HtmlNX/structnn_1_1hid_1_1_npad_full_key_state.html' )
+SetUrl( 'ApiLink_nn__hid__NpadHandheldState', '../../../Api/HtmlNX/structnn_1_1hid_1_1_npad_handheld_state.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

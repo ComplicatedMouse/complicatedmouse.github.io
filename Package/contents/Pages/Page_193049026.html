@@ -1,0 +1,338 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Gesture | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Gesture -->
+<div class="pagetitle" id="PageId_193049026">Gesture</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_193049026_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_193049026_h1_2">Parameters</a>
+    </li>
+    <li>
+      <a href="#Anchor_193049026_h1_3">State Machine</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_193049026_h1_1">Introduction</h1>
+<p>This API is provided for implementing gesture operations. You can implement typical dialog box operations to create consistency with the system.</p>
+<p>The following gestures are supported.</p>
+<ul style="list-style-type: square;">
+  <li>Touch</li>
+  <li>Press</li>
+  <li>Tap (including double tap)</li>
+  <li>Pan</li>
+  <li>Swipe</li>
+  <li>Two-finger touch</li>
+  <li>Two-finger tap (including double-tap)</li>
+  <li>Two-finger pan</li>
+  <li>Two-finger swipe</li>
+  <li>Two-finger pinch<br /></li>
+  <li>Two-finger rotation<br /></li>
+</ul>
+<p>The gesture type is determined from the <span class="ApiLink_GestureType_nn__hid__GestureState__GetGestureType()_const_NN_NOEXCEPT">GestureType</span> enumerated type return value of <span class="ApiLink_nn__hid__GestureType">GestureState::GetGestureType()</span>.</p>
+<p>Gesture updates conform to <a href="#Anchor_193049026_h1_3">State Machine</a>, described later. New gestures are accepted after an interval of at least 4 milliseconds.</p>
+<p>Gestures are grouped together as a sequence of contexts from the start until the end of gesture recognition.</p>
+<p>The context can be identified using the <span class="ApiLink_nn__hid__GestureState__contextNumber">GestureState::contextNumber</span> value. This value is incremented each time <span class="ApiLink_nn__hid__GestureType">Idle</span> or <span class="ApiLink_nn__hid__GestureType">Touch</span> is detected.</p>
+<p>Within the same context, <span class="ApiLink_nn__hid__GestureState__points">GestureState::points</span> represents the same points, and the <span class="ApiLink_nn__hid__GestureState__pointCount">GestureState::pointCount</span> value does not change after the state transitions to <span class="ApiLink_nn__hid__GestureType">Touch</span>.</p>
+<p>The context end can be determined using <span class="ApiLink_nn__hid__GestureType">Complete</span>. When gesture recognition is halted for reasons such as an interruption from a gesture with a different number of touches or a focus transition, <span class="ApiLink_nn__hid__GestureType">Cancel</span> is obtained instead.</p>
+<p>For more information about referencing the detailed information for each gesture, see <a href="#Anchor_193049026_h1_2">Parameters</a>.</p>
+<p>
+  <br />
+</p>
+<p>When using the <code>Gesture</code> interface, you must first call <span class="ApiLink_void_nn__hid__InitializeGesture()_NN_NOEXCEPT">InitializeGesture()</span> to initialize it.</p>
+<p>
+  <span class="ApiLink_int_nn__hid__GetGestureStates(GestureState_outValues[]|_int_count)_NN_NOEXCEPT">GetGestureStates()</span> is provided as a function to get the gesture state. The function can get gestures from the newest gesture back to a maximum of <span class="ApiLink_nn__hid__GestureStateCountMax">GestureStateCountMax</span>.</p>
+<p>Getting gestures does not change the state of the state machine, so if you call the same function repeatedly, you get the same value each time unless the gesture has been updated in the interim.</p>
+<p>For the gesture state, a number (<span class="ApiLink_nn__hid__GestureState__eventNumber">GestureState::eventNumber</span>) is assigned that is incremented each time the state is updated. This number can be used to determine redundancy of the obtained state.</p>
+<h1 id="Anchor_193049026_h1_2">Parameters</h1>
+<p>Gestures take the following parameters.</p>
+<ul>
+  <li>Constituent points (<span class="ApiLink_nn__hid__GestureState__pointCount">GestureState::pointCount</span>, <span class="ApiLink_nn__hid__GestureState__points">GestureState::points</span>)</li>
+  <li>Coordinates (<span class="ApiLink_nn__hid__GestureState__x">GestureState::x</span>, <span class="ApiLink_nn__hid__GestureState__y">GestureState::y</span>)</li>
+  <li>Coordinate delta (<span class="ApiLink_nn__hid__GestureState__deltaX">GestureState::deltaX</span>, <span class="ApiLink_nn__hid__GestureState__deltaY">GestureState::deltaY</span>)</li>
+  <li>Speed (<span class="ApiLink_nn__hid__GestureState__velocity">GestureState::velocity</span>)</li>
+  <li>Scale (<span class="ApiLink_nn__hid__GestureState__scale">GestureState::scale</span>)</li>
+  <li>Rotation angle (<span class="ApiLink_nn__hid__GestureState__rotationAngle">GestureState::rotationAngle</span>)</li>
+  <li>Direction (<span class="ApiLink_GestureDirection_nn__hid__GestureState__GetGestureDirection()_const_NN_NOEXCEPT">GestureState::GetGestureDirection()</span>)</li>
+  <li>Attributes (<span class="ApiLink_nn__hid__GestureState__attributes">GestureState::attributes</span>)</li>
+</ul>
+<p> </p>
+<p>At this time, coordinates are recorded in dot units with the upper-left edge as the origin (0, 0), speed is recorded in delta per second, and degrees are recorded with the positive value in the clockwise direction.</p>
+<p>As shown in the following table, the parameters represent different things for each gesture. Unused parameters are zero-initialized.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">Gesture</th>
+      <th style="text-align: center;">Constituent Points</th>
+      <th style="text-align: center;">Coordinates</th>
+      <th style="text-align: center;">Coordinate Delta</th>
+      <th style="text-align: center;">Speed</th>
+      <th style="text-align: center;">Scale</th>
+      <th style="text-align: center;">Rotation Angle</th>
+      <th style="text-align: center;">Direction</th>
+      <th style="text-align: center;">Attributes</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__GestureType">Idle</span>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__GestureType">Complete</span>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__GestureType">Cancel</span>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__GestureType">Touch</span>
+      </td>
+      <td style="text-align: center;">1 point/2 points</td>
+      <td>Center position</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td>
+        <span class="ApiLink_nn__hid__GestureAttribute__IsNewTouch">GestureAttribute::IsNewTouch</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__GestureType">Press</span>
+      </td>
+      <td style="text-align: center;">1 point</td>
+      <td>Center position</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__GestureType">Tap</span>
+      </td>
+      <td style="text-align: center;">1 point/2 points</td>
+      <td>Center position (release position)</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td>
+        <span class="ApiLink_nn__hid__GestureAttribute__IsDoubleTap">GestureAttribute::IsDoubleTap</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__GestureType">Pan</span>
+      </td>
+      <td style="text-align: center;">1 point/2 points</td>
+      <td>Center position</td>
+      <td>Center position movement difference</td>
+      <td>Center position movement speed</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__GestureType">Swipe</span>
+      </td>
+      <td style="text-align: center;">1 point/2 points</td>
+      <td>Center position (release position)</td>
+      <td>Center position movement difference</td>
+      <td>Center position movement speed</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td>Swipe direction</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__GestureType">Pinch</span>
+      </td>
+      <td style="text-align: center;">2 points</td>
+      <td>Center position</td>
+      <td>Center position movement difference</td>
+      <td>Center position movement speed</td>
+      <td>Distance ratio between the two points (before and after the gesture)</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__hid__GestureType">Rotate</span>
+      </td>
+      <td style="text-align: center;">2 points</td>
+      <td>Center position</td>
+      <td>Center position movement difference</td>
+      <td>Center position movement speed</td>
+      <td style="text-align: center;">-</td>
+      <td>
+        <p>Rotation angle around the center position</p>
+      </td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">-</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_193049026_h1_3">State Machine</h1>
+<p>Gestures are determined according to the state machine. When the state transitions, the new state is adopted as the gesture.  </p>
+<p>The state machine has backward compatibility, so even applications built to earlier state machine specifications can operate on the new state machine.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_193049026/1235417934.png" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_GestureType_nn__hid__GestureState__GetGestureType()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#a0c2cf079e4cb741ecda84bbc65af5e81' )
+SetUrl( 'ApiLink_nn__hid__GestureType', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a258b0d78215e9aef289f8d784495159a' )
+SetUrl( 'ApiLink_nn__hid__GestureState__contextNumber', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#a0fdcee3fe1cfdba12396d0f6ea9a519f' )
+SetUrl( 'ApiLink_nn__hid__GestureState__points', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#a38d704cc4b3a752b490210c32ff70472' )
+SetUrl( 'ApiLink_nn__hid__GestureState__pointCount', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#a3dc247ddde08094288f229512c8703b3' )
+SetUrl( 'ApiLink_void_nn__hid__InitializeGesture()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#ac48d26c15ce9679154f2f16266d167c8' )
+SetUrl( 'ApiLink_int_nn__hid__GetGestureStates(GestureState_outValues[]|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a2f5382d841a4e81da4b0dcde9746ca16' )
+SetUrl( 'ApiLink_nn__hid__GestureStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a24b79de093540a8277a268f50c23d9d8' )
+SetUrl( 'ApiLink_nn__hid__GestureState__eventNumber', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#a90083be10b1a6156ce8f0426ecb39de2' )
+SetUrl( 'ApiLink_nn__hid__GestureState__x', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#a5f9bf4d8d3a429a0b02e58d51301ef53' )
+SetUrl( 'ApiLink_nn__hid__GestureState__y', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#adfdea27cc2b945ccf9df48da49624cf5' )
+SetUrl( 'ApiLink_nn__hid__GestureState__deltaX', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#a1be9cd3ccbee04a2e1e2893328a25fb5' )
+SetUrl( 'ApiLink_nn__hid__GestureState__deltaY', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#a9b8601cf4124d5435f5ad2d9eecec285' )
+SetUrl( 'ApiLink_nn__hid__GestureState__velocity', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#aa76fd026d8bf7fd3f4237b869ffb69af' )
+SetUrl( 'ApiLink_nn__hid__GestureState__scale', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#aaf0018607dadb5f99c9bcb5b5d5cc106' )
+SetUrl( 'ApiLink_nn__hid__GestureState__rotationAngle', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#a30e18279b968e09585b2a116bfb966e1' )
+SetUrl( 'ApiLink_GestureDirection_nn__hid__GestureState__GetGestureDirection()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#a37bbfbeb604bf4d55d188860bc5b9ea4' )
+SetUrl( 'ApiLink_nn__hid__GestureState__attributes', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_state.html#aacc0d19d0dd7827519a3395b213e5026' )
+SetUrl( 'ApiLink_nn__hid__GestureAttribute__IsNewTouch', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_attribute.html#ad42d1e9f0fc8f11875dc9b3c698fdf57' )
+SetUrl( 'ApiLink_nn__hid__GestureAttribute__IsDoubleTap', '../../../Api/HtmlNX/structnn_1_1hid_1_1_gesture_attribute.html#a87c8a7820654829990bdfdfe9dd8b4f1' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

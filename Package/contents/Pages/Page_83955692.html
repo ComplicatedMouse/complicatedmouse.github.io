@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Thread-Local Storage | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Thread-Local Storage -->
+<div class="pagetitle" id="PageId_83955692">Thread-Local Storage</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955692_h1_1">Thread-Local Storage Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83955692_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_83955692_h3_1">Thread-Local Storage Limit</a>
+        </li>
+        <li>
+          <a href="#Anchor_83955692_h3_2">Destructor When Thread Ends</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_83955692_h2_2">Using Thread-Local Storage</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955692_h2_3">Specific Example of Using Thread-Local Storage</a>
+      </li>
+      <li>
+        <a href="#Anchor_83955692_h2_4">Thread-Local Storage API Reference</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83955692_h1_1">Thread-Local Storage Feature</h1>
+<h2 id="Anchor_83955692_h2_1">Feature Overview</h2>
+<p style="color: rgb(51,51,51);">The thread-local storage (TLS) feature provides a small block of memory where each <a href="../Pages/Page_83955697.html">thread</a> can store different data.</p>
+<p style="color: rgb(51,51,51);">TLS is accessed through a slot number called a TLS slot. Each <a href="../Pages/Page_83955697.html">thread</a> can read and write different data in the same slot number.</p>
+<p style="color: rgb(51,51,51);">The program allocates the required number of TLS slots during the initialization stage. After a TLS slot is allocated, it remains accessible to all <a href="../Pages/Page_83955697.html">threads</a> until it is explicitly freed.</p>
+<p style="color: rgb(51,51,51);">Each TLS slot can only hold a single TLS value of type <code>uintptr_t</code>.<br />In addition, the TLS value for a <a href="../Pages/Page_83955697.html">thread</a> defaults to <code>0</code> when the thread is first created.</p>
+<p style="color: rgb(51,51,51);">
+  <br />
+</p>
+<h3 style="color: rgb(51,51,51);" id="Anchor_83955692_h3_1">Thread-Local Storage Limit</h3>
+<p style="color: rgb(51,51,51);">There is an upper limit on the number of TLS slots for thread-local storage that can be created.</p>
+<p style="color: rgb(51,51,51);">This upper limit value is represented by <span class="ApiLink_nn__os__TlsSlotCountMax">nn::os::TlsSlotCountMax</span>. A <code>Result</code> value indicating an error is returned if the <span class="ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT">nn::os::AllocateTlsSlot()</span> function tries to allocate TLS slots exceeding this limit.</p>
+<!--Remove-->
+<h3 style="color: rgb(51,51,51);" id="Anchor_83955692_h3_2">Destructor When Thread Ends</h3>
+<p style="color: rgb(51,51,51);">The TLS feature allows the registration of a destructor function that is called when a <a href="../Pages/Page_83955697.html">thread</a> ends.</p>
+<p style="color: rgb(51,51,51);">It entails registering a TLS destructor function when allocating a TLS slot by using the <span class="ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT">AllocateTlsSlot()</span> function. When the <a href="../Pages/Page_83955697.html">thread</a> ends, the registered TLS destructor function is called. The TLS destructor function is called in the context of the thread that ended. The TLS value in the affected TLS slot is directly passed as an argument to the TLS destructor function.</p>
+<p style="color: rgb(51,51,51);">Because the size of a TLS value is limited to the <code>uintptr_t</code> type, if you want to have each <a href="../Pages/Page_83955697.html">thread</a> store data larger than that, you are expected to dynamically allocate memory and store the beginning address of the memory block as the TLS value. For this type of use case, you can register a TLS destructor function in advance. When the <a href="../Pages/Page_83955697.html">thread</a> ends, the TLS destructor function registered for each slot is called and the memory can be freed.</p>
+<p style="color: rgb(51,51,51);">If TLS destructor functions are registered for multiple TLS slots, the order in which they are called is undefined.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955692_h2_2">Using Thread-Local Storage</h2>
+<p>Begin by defining the TLS destructor function to use on the thread-local storage. This function takes the TLS value as an argument.<br /> This step is unnecessary if you do not register a TLS destructor function in <span class="ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT">AllocateTlsSlot</span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;cstdlib&gt;
+</span>
+<span class="kt">void</span>   <span class="nf">TlsDestructorFunction</span><span class="p">(</span><span class="kt">uintptr_t</span> <span class="n">address</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">std::</span><span class="n">free</span><span class="p">(</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>After preparations are complete, use the TLS according to the following procedure.</p>
+<ol>
+  <li>
+    <p>Begin by allocating a TLS slot from the main thread or other thread.<br />The TLS slot number allocated here is valid until <span class="ApiLink_void_nn__os__FreeTlsSlot(TlsSlot_tlsSlot)_NN_NOEXCEPT">FreeTlsSlot</span> is called.<br /> Register <code>TlsDestructorFunction</code> as the TLS destructor function.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">TlsSlot</span> <span class="n">g_tlsSlot</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span>      <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">AllocateTlsSlot</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_tlsSlot</span><span class="p">,</span> <span class="n">TlsDestructorFunction</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Thread-local storage allocation failed.
+</span><span class="p">}</span> 
+<span class="c1">// Thread-local storage allocation succeeded.
+</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>After a thread is created, set a value in the TLS slot allocated earlier.<br />In this example, we dynamically allocate enough memory to hold an <code>InfoStructure</code> structure and set the address in the TLS slot.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">address</span> <span class="o">=</span> <span class="nn">std::</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">InfoStructure</span><span class="p">));</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">address</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Memory allocation failed.
+</span><span class="p">}</span>
+
+<span class="nn">nn::os::</span><span class="n">SetTlsValue</span><span class="p">(</span><span class="n">g_tlsSlot</span><span class="p">,</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">uintptr_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">address</span><span class="p">));</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>In the process running on the thread, get the TLS value as follows and perform the required processing.<br />The TLS slot contains the address of the dynamically allocated memory for each thread, so the address must be cast to the appropriate pointer type before use.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">InfoStructure</span><span class="o">*</span> <span class="n">info</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">InfoStructure</span><span class="o">*&gt;</span><span class="p">(</span><span class="nn">nn::os::</span><span class="n">GetTlsValue</span><span class="p">(</span><span class="n">g_tlsSlot</span><span class="p">));</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>When the thread ends, the TLS destructor function (<code>TlsDestructorFunction</code>) is automatically called, and the memory that is no longer needed is deallocated (see the <code>TlsDestructorFunction</code> function).<br /> </li>
+  <li>
+    <p>When the TLS slot is no longer needed, use the following statement to free it.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FreeTlsSlot</span><span class="p">(</span><span class="n">g_tlsSlot</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955692_h2_3">Specific Example of Using Thread-Local Storage</h2>
+<p>For a specific usage example, see the <span class="ApiLink_PageSampleOsThreadLocalStorage">sample program of the thread-local storage feature</span>.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_83955692_h2_4">Thread-Local Storage API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT">nn::os::AllocateTlsSlot</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FreeTlsSlot(TlsSlot_tlsSlot)_NN_NOEXCEPT">nn::os::FreeTlsSlot</span>
+  </li>
+  <li>
+    <span class="ApiLink_uintptr_t_nn__os__GetTlsValue(TlsSlot_tlsSlot)_NN_NOEXCEPT">nn::os::GetTlsValue</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SetTlsValue(TlsSlot_tlsSlot|_uintptr_t_value)_NN_NOEXCEPT">nn::os::SetTlsValue</span>
+  </li>
+  <li>
+    <span class="ApiLink_int_nn__os__GetUsedTlsSlotCount()_NN_NOEXCEPT">nn::os::GetUsedTlsSlotCount</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__TlsSlotCountMax', '../../../Api/HtmlNX/namespacenn_1_1os.html#a59fab4470b957077f8605c71502c9f2f' )
+SetUrl( 'ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2a67ebeb78e5d624b45ec27d66bdf0b2' )
+SetUrl( 'ApiLink_void_nn__os__FreeTlsSlot(TlsSlot_tlsSlot)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#afded66e76230ba96acc86ba3d48d76c4' )
+SetUrl( 'ApiLink_PageSampleOsThreadLocalStorage', '../../../Api/HtmlNX/_page_sample_os_thread_local_storage.html' )
+SetUrl( 'ApiLink_uintptr_t_nn__os__GetTlsValue(TlsSlot_tlsSlot)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a452445507fba4dc49cb9cfb77b4c88c1' )
+SetUrl( 'ApiLink_void_nn__os__SetTlsValue(TlsSlot_tlsSlot|_uintptr_t_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8f54d6581f3380bc9b6b7d92c9855acd' )
+SetUrl( 'ApiLink_int_nn__os__GetUsedTlsSlotCount()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#aa0db5a1ab770f99f96e327aeb5c653ce' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

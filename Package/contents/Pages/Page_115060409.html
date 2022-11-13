@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Features of the Versions of ui2d/font Supporting UTF-8 | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Features of the Versions of ui2d/font Supporting UTF-8 -->
+<div class="pagetitle" id="PageId_115060409">Features of the Versions of ui2d/font Supporting UTF-8</div>
+<div class="text_separate">
+<h1 id="Anchor_115060409_h1_1">Introduction</h1>
+<p>This section describes the features of the versions of  the <code>ui2d</code> and <code>font</code> libraries that support UTF-8 character encoding.</p>
+<h1 id="Anchor_115060409_h1_2">Features of the Versions Supporting UTF-8</h1>
+<p>
+  <code>ui2d/font</code> is designed based on UTF-16, but it partially also supports using UTF-8 for handling emoji and other characters in the surrogate pair area. The details are as follows.</p>
+<ul>
+  <li>The features of <code><span class="ApiLink_nn__font">nn::font</span></code> support UTF-8.</li>
+  <li>You can specify UTF-8 to be handled in <code><span class="ApiLink_nn__ui2d">nn::ui2d</span></code> when you initialize <code>TextBox</code>.</li>
+  <li>When you build the layout from BFLYT in <code><span class="ApiLink_nn__ui2d">nn::ui2d</span></code>, text set in <code>TextBox</code> is automatically converted to UTF-8 and loaded. (Not currently supported but future support is planned.)</li>
+</ul>
+<p>However, note that UTF-8 strings cannot be handled by LayoutEditor, and that UTF-8 text cannot be included in BFLYT files. We assume a workflow of using UTF-16 in principle, and setting UTF-8 mode in the program only for text boxes where you want to handle emoji and other characters in the surrogate pair area.</p>
+<h1 id="Anchor_115060409_h1_3">Compatibility and Changes</h1>
+<p>Basically speaking, the features have been expanded, retaining compatibility so UTF-16 can continue to be used while enabling those who want to use UTF-8 to do so.</p>
+<p>The basic policy is as follows.</p>
+<ol>
+  <li>The specification has been changed so parts handled as single characters are handled as UTF-32, and the same functions are used for UTF-16 and UTF-8.</li>
+  <li>Parts handled as strings are handled as UTF-16 and UTF-8 using different functions. The names of UTF-8 functions end with the suffix <code>Utf8</code>.</li>
+</ol>
+<p>For example, with the conventional <code><span class="ApiLink_nn__font__Font__GetCharWidth">nn::font::Font::GetCharWidth</span>(char16_t)</code> function that deals with single characters, you pass a UTF-16 value as the argument. But now with the <code><span class="ApiLink_nn__font__Font__GetCharWidth">nn::font::Font::GetCharWidth</span>(uint32_t)</code> function, you pass a UTF-32 value as the argument. When you convert a single UTF-16 character to a single UTF-32 character, you simply cast. No special conversion process is required and you can just pass the value. To convert UTF-8 to UTF-32, use the <code><span class="ApiLink_nn__font__ConvertCharUtf8ToUtf32">nn::font::ConvertCharUtf8ToUtf32</span></code> function.</p>
+<p>Parts handled as single characters have become UTF-32, so slightly more memory is consumed compared to UTF-16. For example, when you load the sample file <code>simple.flyt</code>, 365.6 KB of memory is used, compared to 360.9 KB before. (Of this amount, the binary size of <code>sample.bffnt</code> increases from 266.9 KB to 268.7 KB.) The loads on the CPU and GPU basically do not change.</p>
+<h1 id="Anchor_115060409_h1_4">Detailed Description</h1>
+<h2 id="Anchor_115060409_h2_1">nn::fontll</h2>
+<p>No particular changes were made to <code><span class="ApiLink_nn__fontll">nn::fontll</span></code>, because it was already using UTF-32.</p>
+<h2 id="Anchor_115060409_h2_2">nn::font</h2>
+<p>The majority of the <code><span class="ApiLink_nn__font">nn::font</span></code> functions use single characters for parameters and return values, and changes have been introduced to all of them to expand from UTF-16 to UTF-32.</p>
+<p>If you want to exchange UTF-16 characters with these functions, just cast them.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>char16_t utf16Character = 'A';
+int width = pFont-&gt;GetCharWidth(static_cast&lt;uint32_t&gt;(utf16Character));</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>To pass UTF-8 characters to these functions, convert them using the <code><span class="ApiLink_nn__font__ConvertCharUtf8ToUtf32">nn::font::ConvertCharUtf8ToUtf32</span></code> function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>char utf8Character[] = u8&quot;A&quot;;
+int width = pFont-&gt;GetCharWidth(nn::font::ConvertCharUtf8ToUtf32(utf8Character));</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>To pass UTF-8 strings to functions that take strings as parameters, call the versions of the function whose names end with <code>Utf8</code>. For example, a version of <code>RegisterGlyphsWithLength</code> named <code>RegisterGlyphsWithLengthUtf8</code> has been prepared to take UTF-8 for the parameter.</p>
+<h2 id="Anchor_115060409_h2_3">nn::ui2d</h2>
+<p>There are two ways to create a <code>TextBox</code> object that handles UTF-8. One way is to specify <code>true</code> for the parameter of the <code>Layout</code> class member function <code>Build</code> or <code>BuildWithName</code>. The other way is to specify <code>true</code> for the <code>buildArgSet.isUtf8</code> parameter of the <code>TextBox</code> class constructor. With the first method, the character encoding is set to UTF-8 for all <code>TextBox</code> objects in the layout. With the latter method, you can set UTF-8 for a particular <code>TextBox</code> object.</p>
+<p>To specify the length of a string, with UTF-16 you specify the number of characters, whereas with UTF-8 you specify the number of bytes. The exception is the <code>TextBox</code> class member function <code>AllocateStringBuffer</code>, where even the length of a UTF-8 string is specified as a number of characters. To determine whether to specify string lengths in terms of characters or bytes, see the descriptions of functions in the API reference.</p>
+<h1 id="Anchor_115060409_h1_5">Important Information</h1>
+<ul>
+  <li>Do not convert the character encoding of strings that contain tag processors. If you pass a string that contains a tag processor to a conversion function like <code><span class="ApiLink_nn__util__ConvertCharacterUtf16NativeToUtf8">nn::util::ConvertCharacterUtf16NativeToUtf8</span></code>, the conversion process will not work and the result will be an error or corruption of the string. If you want to pass a string that contains a tag processor to the UTF-8 version of a function, prepare the string as UTF-8 in the first place, rather than trying to convert a UTF-16 string.</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__font', '../../../Api/HtmlNX/namespacenn_1_1font.html' )
+SetUrl( 'ApiLink_nn__ui2d', '../../../Api/HtmlNX/namespacenn_1_1ui2d.html' )
+SetUrl( 'ApiLink_nn__font__Font__GetCharWidth', '../../../Api/HtmlNX/classnn_1_1font_1_1_font.html#af7aa571a02e9a4ff940f9d35abc69d62' )
+SetUrl( 'ApiLink_nn__font__ConvertCharUtf8ToUtf32', '../../../Api/HtmlNX/namespacenn_1_1font.html#ac250e6a02fab85b785ab860d03cc0b6a' )
+SetUrl( 'ApiLink_nn__fontll', '../../../Api/HtmlNX/namespacenn_1_1fontll.html' )
+SetUrl( 'ApiLink_nn__util__ConvertCharacterUtf16NativeToUtf8', '../../../Api/HtmlNX/namespacenn_1_1util.html#a8357717235709d3c38484e0a0eec89ed' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

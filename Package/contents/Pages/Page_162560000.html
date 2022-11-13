@@ -1,0 +1,391 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Threads | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Threads -->
+<div class="pagetitle" id="PageId_162560000">Threads</div>
+<div class="text_separate">
+<h1 id="Anchor_162560000_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_162560000_h2_1">Sound and Task Threads</a>
+    </li>
+    <li>
+      <a href="#Anchor_162560000_h2_2">Process-Derived Commands and the Command Buffer</a>
+    </li>
+    <li>
+      <a href="#Anchor_162560000_h2_3">Generating Commands</a>
+    </li>
+    <li>
+      <a href="#Anchor_162560000_h2_4">Flushing Commands</a>
+    </li>
+    <li>
+      <a href="#Anchor_162560000_h2_5">Task Processing</a>
+    </li>
+    <li>
+      <a href="#Anchor_162560000_h2_6">Priority of Task Thread</a>
+    </li>
+    <li>
+      <a href="#Anchor_162560000_h2_7">Functions That Require Mutual Exclusion</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_162560000_h1_2">Threads</h1>
+<p>Multiple threads are in use within the <code>atk</code> library.</p>
+<p>The following is a description of the role of each thread and the buffer each thread uses.</p>
+<h2 id="Anchor_162560000_h2_1">Sound and Task Threads</h2>
+<p>Two threads are created internally when the <code>atk</code> library is initialized: the <em>sound thread</em> and the <em>task thread</em>.</p>
+<p>Generally, the process of updating parameters such as those for audio must run more often than the update cycle of the application thread. For this reason, these update processes are carried out on a separate (sound) thread from the application thread in the <code>atk</code> library.<br /></p>
+<p>Because noise can result if waveforms are switched or parameters are not finished being updated within the period of audio update cycle, heavy processes, such as the loading of files, are run on a separate thread from the sound thread.<br /></p>
+<p>These heavy processes are run on the task thread.</p>
+<p>Consider this example:</p>
+<ul>
+  <li>Loading sound stream files and decoding compressed audio</li>
+  <li>Loading wave sound files and sequence sound files when player heaps are being used</li>
+</ul>
+<p>These processes are run on the task thread.</p>
+<!--Remove-->
+<!--Remove-->
+<p>
+  <br />
+</p>
+<h2 id="Anchor_162560000_h2_2">Process-Derived Commands and the Command Buffer</h2>
+<p>The <code>atk</code> library converts processes, such as those to play and stop sounds and change parameters into commands, and passes the list of commands via a queue to the sound thread to transfer those processes across threads.<br /><br />The list of commands that have finished processing in the sound thread are passed once more, via a separate queue, to the application thread, after which they are destroyed.<br /></p>
+<p>The commands used for these processes are allocated from a memory region named the <em>command buffer</em> and are maintained until they are are destroyed.<br /></p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_162560000/161437097.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>The preceding description refers to processes that involve passing data between the application thread and the sound thread. The same mechanism is used by processes that pass data between the sound thread and the task thread, and for this reason the <code>atk</code> library has two command buffers.<br /><br /></p>
+<h2 id="Anchor_162560000_h2_3">Generating Commands</h2>
+<p>Commands are allocated from the command buffer when functions such as <code><span class="ApiLink_nn__atk__SoundStartable__StartSound">nn::atk::SoundStartable::StartSound</span>()</code> are called by the application, and are added to the command list after parameters have been configured.<br /><br />If the command buffer has insufficient memory space, and the command cannot be allocated, the following procedures are run.</p>
+<ol>
+  <li>If at this time there is a command list waiting to be freed, that command list is released and another attempt is made to allocate the new command.</li>
+  <li>The commands accumulated up to this point are flushed, and after waiting for them to be processed, they are freed and then another attempt is made to allocate the new command.</li>
+</ol>
+<p>
+  <br />
+</p>
+<!--Remove-->
+<h2 id="Anchor_162560000_h2_4">Flushing Commands</h2>
+<p>Commands remain in the command list until they are flushed, at which time they are passed via the queue to the sound thread.<br />The flushed list of commands are all executed in the sound thread during one audio update cycle.  After which, they are passed via a different queue back to the originating thread.</p>
+<p>
+  <br />
+</p>
+<!--Remove-->
+<h2 id="Anchor_162560000_h2_5">Task Processing</h2>
+<p>If a process involves tasks such as the loading of files while commands are executing, these tasks are not run on the sound thread but instead are added to the task thread.<br />On the task thread, after these added tasks have been fetched and executed, a command is allocated from the task thread's command buffer and added to the list.<br />The list of commands is exchanged in the same manner described for the passing of data between the application thread and the sound thread, and the execution results are applied on the sound thread. </p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_162560000/161437780.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_162560000_h2_6">Priority of Task Thread</h2>
+<p>Because the task thread is used for the loading of stream sound files, if the thread priority is set too low, the process cannot keep ahead of file loading.<br />For this reason, the task thread must be set to a high priority.</p>
+<p>The default priority setting is not likely to cause any problems, but you can adjust the value using <code><span class="ApiLink_nn__atk__SoundSystem__SoundSystemParam">nn::atk::SoundSystem::SoundSystemParam</span></code>.</p>
+<h2 id="Anchor_162560000_h2_7">Functions That Require Mutual Exclusion</h2>
+<p>Some functions require mutual exclusion when operating at the same time as the <code>atk</code> API in multithreading or multicore environments.<br />If these functions are called without mutual exclusion, the contents of the commands used by the thread are corrupted and bugs such as assertion failures may occur.</p>
+<p>The following functions require mutual exclusion.<br />(It applies to all of these functions, even if they have different arguments.)</p>
+<ul>
+  <li>
+    <code>
+      <span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span>
+    </code>
+    <ul>
+      <li>
+        <code>Initialize()</code>
+      </li>
+      <li>
+        <code>Finalize()</code>
+      </li>
+      <li>
+        <code>Update()</code>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__atk__SoundStartable">nn::atk::SoundStartable</span>
+    </code> and classes that inherit it (<code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code>, <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code>, and <code><span class="ApiLink_nn__atk__Sound3DActor">nn::atk::Sound3DActor</span></code>)<ul><li><code>StartSound()</code></li><li><code>HoldSound()</code></li><li><code>Prepare()</code></li></ul></li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__atk__SoundDataManager">nn::atk::SoundDataManager</span>
+    </code>
+    <ul>
+      <li>
+        <code>Initialize()</code>
+      </li>
+      <li>
+        <code>Finalize()</code>
+      </li>
+      <li>
+        <code>InvalidateSoundData()</code>
+      </li>
+      <li>
+        <code>ClearFileAddresInFroupFile()</code>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__atk__SequenceSoundHandle">nn::atk::SequenceSoundHandle</span>
+    </code>
+    <ul>
+      <li>
+        <code>WriteVariable()</code>
+      </li>
+      <li>
+        <code>WriteGlobalVariable()</code>
+      </li>
+      <li>
+        <code>WriteTrackVariable()</code>
+      </li>
+      <li>
+        <code>SetTempoRatio()</code>
+      </li>
+      <li>
+        <code>SetChannelPriority()</code>
+      </li>
+      <li>
+        <code>SetTrackMute()</code>
+      </li>
+      <li>
+        <code>SetTrackSilence()</code>
+      </li>
+      <li>
+        <code>SetTrackVolume()</code>
+      </li>
+      <li>
+        <code>SetTrackPitch()</code>
+      </li>
+      <li>
+        <code>SetTrackBankIndex()</code>
+      </li>
+      <li>
+        <code>SetTrackTrancepose()</code>
+      </li>
+      <li>
+        <code>SetTrackVelocityRange()</code>
+      </li>
+      <li>
+        <code>SetTrackMixVolume()</code>
+      </li>
+      <li>
+        <code>SetTrackOutputPan()</code>
+      </li>
+      <li>
+        <code>SetTrackOutputSurroundPan()</code>
+      </li>
+      <li>
+        <code>SetTrackOutputMainSend()</code>
+      </li>
+      <li>
+        <code>SetTrackOutputFxSend()</code>
+        <ul>
+          <li>
+            <span style="color: rgb(33,33,33); text-decoration: none;">There is no <code>SoundHandle</code>, so this primarily applies to the <code>Set</code> functions provided specifically for <code>SequenceSoundHandle</code>.</span>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__atk__StreamSoundHandle">nn::atk::StreamSoundHandle</span>
+    </code>
+    <ul>
+      <li>
+        <code>SetTrackOutputLine()</code>
+      </li>
+      <li>
+        <code>ResetTrackOutputLine()</code>
+      </li>
+      <li>
+        <code>SetTrackMixVolume()</code>
+      </li>
+      <li>
+        <code>SetTrackOutputVolume()</code>
+      </li>
+      <li>
+        <code>SetTrackOutputPan()</code>
+      </li>
+      <li>
+        <code>SetTrackOutputSurroundPan()</code>
+      </li>
+      <li>
+        <code>SetTrackOutputMainSend()</code>
+      </li>
+      <li>
+        <code>SetTrackOutputEffectSend()</code>
+        <ul>
+          <li>
+            <span style="color: rgb(33,33,33); text-decoration: none;">There is no <code>SoundHandle</code>, so this primarily applies to the <code>Set</code> functions provided specifically for <code>StreamSoundHandle</code>.</span>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <span style="color: rgb(33,33,33); text-decoration: none;">
+      <span class="ApiLink_nn__atk__WaveSoundHandle">nn::atk::WaveSoundHandle</span>
+    </span>
+    <ul>
+      <li>
+        <span style="color: rgb(33,33,33); text-decoration: none;">SetChannelPriority()</span>
+        <ul>
+          <li>
+            <span style="color: rgb(33,33,33); text-decoration: none;">There is no <code>SoundHandle</code>, so this primarily applies to the <code>Set</code> functions provided specifically for <code>WaveSoundHandle</code>.</span>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__atk__SoundSystem">nn::atk::SoundSystem</span>
+    </code>
+    <ul>
+      <li>
+        <code>AppendEffect()</code>
+      </li>
+      <li>
+        <code>RemoveEffect()</code>
+      </li>
+      <li>
+        <code>ClearEffect()</code>
+      </li>
+      <li>
+        <code>SetOutputMode()</code>
+      </li>
+      <li>
+        <code>SetOutputDeviceFlag()</code>
+      </li>
+      <li>
+        <code>SetMasterVolume()</code>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__atk__SubMix">nn::atk::SubMix</span>, <span class="ApiLink_nn__atk__FinalMix">nn::atk::FinalMix</span></code>
+    <ul>
+      <li>
+        <code>AppendEffect()</code>
+      </li>
+      <li>
+        <code>RemoveEffect()</code>
+      </li>
+      <li>
+        <code>ClearEffect()</code>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<!--Remove-->
+<!--Remove-->
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk__SoundStartable__StartSound', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_startable.html#a9a075bc1dea627defdc533d514e50c33' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem__SoundSystemParam', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_system_1_1_sound_system_param.html' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html' )
+SetUrl( 'ApiLink_nn__atk__SoundStartable', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_startable.html' )
+SetUrl( 'ApiLink_nn__atk__SoundActor', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_actor.html' )
+SetUrl( 'ApiLink_nn__atk__Sound3DActor', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound3_d_actor.html' )
+SetUrl( 'ApiLink_nn__atk__SoundDataManager', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_data_manager.html' )
+SetUrl( 'ApiLink_nn__atk__SequenceSoundHandle', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sequence_sound_handle.html' )
+SetUrl( 'ApiLink_nn__atk__StreamSoundHandle', '../../../Api/HtmlNX/classnn_1_1atk_1_1_stream_sound_handle.html' )
+SetUrl( 'ApiLink_nn__atk__WaveSoundHandle', '../../../Api/HtmlNX/classnn_1_1atk_1_1_wave_sound_handle.html' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html' )
+SetUrl( 'ApiLink_nn__atk__SubMix', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sub_mix.html' )
+SetUrl( 'ApiLink_nn__atk__FinalMix', '../../../Api/HtmlNX/classnn_1_1atk_1_1_final_mix.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

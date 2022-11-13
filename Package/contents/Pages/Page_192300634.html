@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Using Texture Binaries | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Using Texture Binaries -->
+<div class="pagetitle" id="PageId_192300634">Using Texture Binaries</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_192300634_h1_1">Using Effect Binary and Texture Binary Separately</a>
+    </li>
+    <li>
+      <a href="#Anchor_192300634_h1_2">Sharing Textures Between Effect Binaries</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_192300634_h1_1">Using Effect Binary and Texture Binary Separately</h1>
+<p>The texture binary in the effect binary can be output as an individual file and used in combination with an effect binary that does not contain textures.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_192300634/198958315.png" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_192300634_h2_1">Outputting Texture Binary Files</h2>
+<p>To output the texture binary, specify <strong>--output-texture-binary</strong> in the binary conversion command-line argument. <br />The texture will be output as a BNTX binary file, and can also be used independently as a texture binary.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>EffectConverter.exe --output effectBinary.ptcl --convert-list ConvertList.xml --output-texture-binary effectTexture.bntx ...</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_192300634_h2_2">Binding to Effect Binary</h2>
+<p>The texture binary that was output must be bound to the effect binary.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// Initialize effect texture binary.
+nn::gfx::ResTextureFile* pResTextureFile = nn::gfx::ResTextureFile::ResCast( textureBinary );
+pResTextureFile-&gt;Initialize( pGfxDevice );
+
+int textureCount = pResTextureFile-&gt;GetTextureDic()-&gt;GetCount();
+for (int idxTexture = 0; idxTexture &lt; textureCount; ++idxTexture)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;pResTextureFile-&gt;GetResTexture(idxTexture)-&gt;Initialize( pGfxDevice );
+}
+&nbsp;
+// Allocate descriptor slot.
+for (int idxTexture = 0; idxTexture &lt; textureCount; ++idxTexture)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::gfx::ResTexture* resTexture = pResTextureFile-&gt;GetResTexture( idxTexture );
+&nbsp;&nbsp;&nbsp;&nbsp;nn::gfx::TextureView&amp; textureView = *(static_cast&lt;nn::gfx::TextureView*&gt;(resTexture-&gt;GetTextureView()));
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;nn::gfx::DescriptorSlot slot;
+&nbsp;&nbsp;&nbsp;&nbsp;AllocateDescriptorSlotForTexture(&amp;slot, textureView, &amp;g_GraphicsFramework);
+&nbsp;&nbsp;&nbsp;&nbsp;resTexture-&gt;SetUserDescriptorSlot(slot);
+}
+
+// Bind registered effect resources and textures.
+pVfxSystem-&gt;GetResource(resourceId)-&gt;BindExternalResTextureFile( pResTextureFile );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For more information, see the <code>VfxBinarySegmentation</code> sample.</p>
+<h1 id="Anchor_192300634_h1_2">Sharing Textures Between Effect Binaries</h1>
+<p>If the same texture overlaps in two effect binaries, managing the overlapping textures as a single texture can increase memory efficiency and reduce load times.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_192300634/199793572.png" class="embedded-image" />
+  </span>
+</p>
+<p> </p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_192300634/199793592.png" class="embedded-image" />
+  </span>
+</p>
+<p>This section shows how to generate the two binaries that are required for using this feature.</p>
+<ul>
+  <li>Binary that collects the overlapping textures</li>
+  <li>Effect binary with the overlapping textures omitted</li>
+</ul>
+<h2 id="Anchor_192300634_h2_3">Generating a Binary That Collects the Overlapping Textures</h2>
+<p>Use the texture converter to generate a binary that collects the duplicate textures.</p>
+<h2 id="Anchor_192300634_h2_4">Generating an Effect Binary With the Overlapping Textures Omitted</h2>
+<p>First, generate a list of overlapping textures.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Textures/Texture0.ftxb
+Textures/Texture1.ftxb</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the list created by the command-line option <code>resident-texture-list</code> and perform effect binary conversion to create an effect binary with the overlapping textures omitted.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>\EffectConverter.exe --resident-texture-list OverlapTextureList.txt ...</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_192300634_h2_5">Bind the binaries in the runtime</h2>
+<p>Bind each of the output binaries in the runtime.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// Initialize effect texture binary.
+nn::gfx::ResTextureFile* pResTextureFile = nn::gfx::ResTextureFile::ResCast( overlapTextureBinary );
+pOverlapResTextureFile-&gt;Initialize( pGfxDevice );
+
+int textureCount = pOverlapResTextureFile-&gt;GetTextureDic()-&gt;GetCount();
+for (int idxTexture = 0; idxTexture &lt; textureCount; ++idxTexture)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;pOverlapResTextureFile-&gt;GetResTexture(idxTexture)-&gt;Initialize( pGfxDevice );
+}
+&nbsp;
+// Allocate descriptor slot.
+for (int idxTexture = 0; idxTexture &lt; textureCount; ++idxTexture)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::gfx::ResTexture* resTexture = pOverlapResTextureFile-&gt;GetResTexture( idxTexture );
+&nbsp;&nbsp;&nbsp;&nbsp;nn::gfx::TextureView&amp; textureView = *(static_cast&lt;nn::gfx::TextureView*&gt;(resTexture-&gt;GetTextureView()));
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;nn::gfx::DescriptorSlot slot;
+&nbsp;&nbsp;&nbsp;&nbsp;AllocateDescriptorSlotForTexture(&amp;slot, textureView, &amp;g_GraphicsFramework);
+&nbsp;&nbsp;&nbsp;&nbsp;resTexture-&gt;SetUserDescriptorSlot(slot);
+}
+
+// Bind registered effect resources and textures.
+pVfxSystem-&gt;GetResource(resourceId)-&gt;BindExternalResTextureFile( pOverlapResTextureFile );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

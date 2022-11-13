@@ -1,0 +1,327 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Shader Variation Generator | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Shader Variation Generator -->
+<div class="pagetitle" id="PageId_286731115">Shader Variation Generator</div>
+<div class="text_separate">
+<p>This section describes how to use the Shader Variation Generator <code>(%NINTENDO_SDK_ROOT%\Tools\Graphics\3dTools\3dIntermediateFileShaderVariationGenerator.exe)</code>, and also addresses considerations when using the tool.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_286731115_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_286731115_h1_2">Command-Line Options</a>
+    </li>
+    <li>
+      <a href="#Anchor_286731115_h1_3">Process Description</a>
+    </li>
+    <li>
+      <a href="#Anchor_286731115_h1_4">Usage Examples</a>
+    </li>
+    <li>
+      <a href="#Anchor_286731115_h1_5">Callbacks</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_286731115_h1_1">Overview</h1>
+<p>This tool generates a shader variation (FSV) file based on the information gathered from the shader definition (FSD) file specified by <code>--shader-definition</code> and the shader options of the entered intermediate model (FMD) file.</p>
+<h1 id="Anchor_286731115_h1_2">Command-Line Options</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dIntermediateFileShaderVariationGenerator.exe [-h] [--version][--job]
+[--output &quot;&quot;][--args-file &quot;&quot;] [-s] [--shader-definition &quot;&quot;] [--skinning-count-option-id &quot;&quot;][-o &quot;&quot;][--callbacks &quot;&quot;] [--callback-user-argument &quot;&quot;] [--material-search-path &quot;&quot;] [--shader-graph-search-path &quot;&quot;] [--collection-mode &quot;&quot;] [intermediate model file]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Processes intermediate files using scripts.</p>
+<p>
+  <strong>--args-file &quot;&quot;</strong>
+</p>
+<p>Specifies the file.<br />You can use the contents in the parameter file to specify arguments.<br />The parameter file allows you to specify each option over several lines.<br />Lines starting with a number sign (#) are treated as comments.<br />Newline characters cannot be included in escape sequences used in option specifications that appear between quotation marks (&quot;).</p>
+<p>
+  <strong>--version</strong>
+</p>
+<p>Displays version information.</p>
+<p>
+  <strong>-h --help</strong>
+</p>
+<p>Displays Help.</p>
+<p>
+  <strong>-s --silent</strong>
+</p>
+<p>Suppresses the display of messages during processing.</p>
+<p>
+  <strong>--disable-file-info</strong>
+</p>
+<p>
+  <code>&lt;file_info&gt;</code> is not updated when updating intermediate files.</p>
+<p>
+  <strong>--jobs &quot;&quot;</strong>
+</p>
+<p>Specifies the number of jobs to run. When unspecified, the processor count is assigned.</p>
+<p>
+  <strong>--output &quot;&quot;</strong>
+</p>
+<p>Specify the path to the folder for saving the output shader variation file. The filename can be specified if at least one shader definition file has been imported by <code>--shader-definition</code>.</p>
+<p>
+  <strong>--shader-definition</strong>
+</p>
+<p>Specifies the shader definition (FSDB) file corresponding to the shader variation file being generated, or the folder containing the shader definition file.<br />If multiple shader definition files have been specified, multiple corresponding shader variation files are generated.<br />The tool works on intermediate model files to which the specified shader definition files have been assigned, so shader variation files corresponding to unassigned shader definition files are not generated.</p>
+<p>
+  <strong>--material-search-path &quot;&quot;</strong>
+</p>
+<p>The material search path. Used to resolve parent material references. If not specified, the processes applied to the parent material are skipped.</p>
+<p>
+  <strong>--shader-graph-search-path &quot;&quot;</strong>
+</p>
+<p>The path to search for the shader graph. Used to resolve shader graph references. If not specified, only the default folder is searched.</p>
+<p>
+  <strong>--disable-xsd-check</strong>
+</p>
+<p>Disables format checking of intermediate files using schemas (XSD files). File read and write times are improved.<br /></p>
+<p>
+  <strong>--skinning-count-option-id</strong>
+</p>
+<p>Specifies the dynamic option ID that shows the skinning count for the shape.<br />The FSD <code><em>choice</em></code> value is not set in the specified dynamic option <code><em>choice</em></code>. Instead, the <code>vertex_skinning_count</code> value of <code>&lt;shape_info&gt;</code> for the shape that references the material is set.</p>
+<p>
+  <strong>--collection-mode</strong>
+</p>
+<p>Specifies the collection mode.<br />The values you can specify are <strong>ModelFileOnly</strong> and <strong>MaterialFileOnly</strong>. The default when no value is specified is <strong>ModelFileOnly</strong>.<br />In ModelFileOnly mode, the collection target consists of intermediate model files (FMD files). If <code>--material-search-path</code> has been specified, the target of collection are the intermediate material files referenced by the intermediate model files.<br />In <strong>MaterialFileOnly</strong> mode, the target of collection are intermediate material files (FMT files).</p>
+<!--Remove-->
+<p>
+  <strong>Intermediate File | Folder</strong>
+  <br />
+</p>
+<p>Specifies intermediate model (FMD) files, intermediate material (FMT) files, or a folder as the collection target.<br />If a folder is specified, the tool gathers all intermediate model files and intermediate material files in that folder. Folders in that folder are recursively searched.</p>
+<h3 id="Anchor_286731115_h3_1">Options in Development</h3>
+<p>These options are under development and specifications may change without notice.</p>
+<p>
+  <strong>--callbacks &quot;&quot;</strong>
+</p>
+<p>Specifies the paths to DLL or C# source code (CS, CSX) that includes callback implementations for material preprocessing and texture conversion.</p>
+<p>
+  <strong>--callback-user-argument &quot;&quot;</strong>
+</p>
+<p>Specifies any string arguments to pass to callback processing.</p>
+<p>
+  <strong>--cache-directory &quot;&quot;</strong>
+</p>
+<p>Specifies the folder for saving the internally generated cache to speed up processing. When you specify this option, the cache is referenced during the second and subsequent changes, and changes are only made where they need to be made again.</p>
+<h1 id="Anchor_286731115_h1_3">Process Description</h1>
+<p>The shader variation generator runs the following processes.</p>
+<h4 id="Anchor_286731115_h4_1">(1). Search the material intermediate file.</h4>
+<p>If the model has no materials that reference shapes in the model intermediate file (FMD file) that is entered, a material intermediate file (FMT file) is searched and materials are bound to the model used in internal processing.</p>
+<h4 id="Anchor_286731115_h4_2">(2). Resolve material references.</h4>
+<p>If <code>--material-search-path</code> has been specified, resolve the material references.<br />This processing is the same processing that is used when an <code>apply-parent-material</code> subcommand is entered in the assign utility.<br />However, a model intermediate file using the parent material is not generated.</p>
+<h4 id="Anchor_286731115_h4_3">(3). Call the IPreprocessMaterial and IPreprocessMaterial callbacks.</h4>
+<p>These functions are called when the <code>--callbacks</code> option has been specified.<br />These callbacks are the same callbacks used for material preprocessing called with 3dIntermediateFileTextureCompositor. For more information, see 3dIntermediateFileTextureCompositor.</p>
+<h4 id="Anchor_286731115_h4_4">(4). Create &lt;shader_program&gt; elements for shapes.</h4>
+<p>Create shader variation intermediate file <code>&lt;shader_program&gt;</code> elements corresponding to all the shapes assigned by the shader definition file (FSD file) that was entered.<br />The way choice values are determined inside the <code>&lt;shader_program&gt;</code> differs depending on the type of shader option.</p>
+<table class="relative-table wrapped" style="width: 72.1893%;">
+  <colgroup>
+    <col style="width: 20.5292%;" />
+    <col style="width: 79.4708%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Shader Option Type</th>
+      <th>Process Description</th>
+    </tr>
+    <tr>
+      <th>static</th>
+      <td>
+        <div class="content-wrapper">
+          <p>Applies the default values defined in the shader definition file.</p>
+          <p>If there is option assignment information for materials in the model intermediate file, it applies the <code>&lt;shader_option_array&gt;</code> option values for the material.</p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>dynamic</th>
+      <td>
+        <p>Applies the <code>choice</code> value defined in the shader definition file.</p>
+        <p>
+          <strong>Note:</strong> In the future, we plan to make it possible to adjust the details of dynamic options with user-defined scripts.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_286731115_h4_5">(5). Call IPostprocessShaderProgram, IPostprocessShaderPrograms callbacks.</h4>
+<p>Call this function when the <code>--callbacks</code> option has been specified.<br />The callback describes post-processing for the <code>&lt;shader_program&gt;</code> created in step 4. The following step describes this processing.</p>
+<h4 id="Anchor_286731115_h4_6">(6). Generate the shader variation file (FSVA file).</h4>
+<p>After deleting a <code>&lt;shader_program&gt;</code> with multiple choices or deleting unnecessary elements, a shader variation file is generated in the specified output path.<br />When multiple shader definition files are used, their respective corresponding shader variation files are generated.<br />If the shader definition file has no assigned models, no corresponding shader definition file is generated.</p>
+<h1 id="Anchor_286731115_h1_4">Usage Examples</h1>
+<p>The following example shows how to generate a <code>town.fsva</code> file corresponding to all the models assigned by <code>town.fsdb</code> in the model intermediate files in <code>G3dDemo/Resources</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dIntermediateFileShaderVariationGenerator.exe　G3dDemo/Resources --shader-definition town.fsdb --output town.fsva --skinning-count-option-id &quot;skinning&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The generated shader variation file can be used as the input for <code>3dShaderConverter.exe</code> when creating a shader archive file (BFSHA file), as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dShaderConverter.exe --glsl-version 430 --api-type GL --code-type Binary_Source --output town.bfsha town.fsdb town.fsva --force-variation</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_286731115_h1_5">Callbacks</h1>
+<p>Description of the callback function called when the <code>--callbacks</code> option has been set.<br />This feature is under development and is subject to change in future.</p>
+<h2 id="Anchor_286731115_h2_1">Shader Program Post-Processing</h2>
+<p>By defining a class that inherits an interface called <code>IPostprocessShaderProgram</code> or <code>IPostprocessShaderPrograms</code>, you can execute the <code>&lt;shader_program&gt;</code> post-processing provisionally created in the shader variation generator. This callback is intended for adjusting shader program choices. The shader variation generator creates a dynamic option choice in all ranges defined by the shader definition file, so the callback performs adjustments such as narrowing the choice range of the dynamic option according to the user's discretion. The tool does not specify anything if a callback is not specified.</p>
+<p>The following example shows how to adjust the choice values for specified shader options from a particular shader program using IPostprocessShaderProgram.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">using</span> <span class="nn">_3dIntermediateFileCallbacks</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Nintendo.G3dTool.Entities</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">PostprocessShaderProgramCallback</span> <span class="p">:</span> <span class="n">IPostprocessShaderProgram</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">public</span> <span class="k">void</span> <span class="n">PostprocessShaderProgram</span><span class="p">(</span><span class="n">PostprocessShaderProgramArgument</span> <span class="n">argument</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// shaderProgram to be adjusted.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">ShaderProgram</span> <span class="n">shaderProgram</span> <span class="p">=</span> <span class="n">argument</span><span class="p">.</span><span class="n">Target</span><span class="p">.</span><span class="n">ShaderProgram</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Elements used for adjusting the shaderProgram.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Model</span> <span class="n">model</span> <span class="p">=</span> <span class="n">argument</span><span class="p">.</span><span class="n">Target</span><span class="p">.</span><span class="n">Model</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Shape</span> <span class="n">shape</span> <span class="p">=</span> <span class="n">argument</span><span class="p">.</span><span class="n">Target</span><span class="p">.</span><span class="n">Shape</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Material</span> <span class="n">material</span> <span class="p">=</span> <span class="n">argument</span><span class="p">.</span><span class="n">Target</span><span class="p">.</span><span class="n">Material</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// String passed by --callback-user-argument.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">string</span> <span class="n">userArg</span> <span class="p">=</span> <span class="n">argument</span><span class="p">.</span><span class="n">UserArgument</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">foreach</span><span class="p">(</span><span class="kt">var</span> <span class="n">option</span> <span class="k">in</span> <span class="n">shaderProgram</span><span class="p">.</span><span class="n">Options</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Example of setting the &quot;skinning&quot; choice with VertexSkinningCount of the shape.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span><span class="p">(</span><span class="n">option</span><span class="p">.</span><span class="n">Id</span><span class="p">.</span><span class="n">Equals</span><span class="p">(</span><span class="s">&quot;skinning&quot;</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">option</span><span class="p">.</span><span class="n">Choice</span><span class="p">.</span><span class="n">SetValue</span><span class="p">((</span><span class="n">shape</span><span class="p">.</span><span class="n">ShapeInfo</span><span class="p">.</span><span class="n">VertexSkinningCount</span><span class="p">).</span><span class="n">ToString</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Example of setting the &quot;coord&quot; choice to c_World when the shape is &quot;Skin__PierrotAllMat&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span><span class="p">(</span><span class="n">option</span><span class="p">.</span><span class="n">Id</span><span class="p">.</span><span class="n">Equals</span><span class="p">(</span><span class="s">&quot;coord&quot;</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span><span class="p">(</span><span class="n">shape</span><span class="p">.</span><span class="n">Name</span><span class="p">.</span><span class="n">Equals</span><span class="p">(</span><span class="s">&quot;Skin__PierrotAllMat&quot;</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">option</span><span class="p">.</span><span class="n">Choice</span><span class="p">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s">&quot;c_World&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Example of setting the choice for the option for the string passed by --callback-user-argument to 0.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span><span class="p">(</span><span class="n">option</span><span class="p">.</span><span class="n">Id</span><span class="p">.</span><span class="n">Equals</span><span class="p">(</span><span class="n">userArg</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">option</span><span class="p">.</span><span class="n">Choice</span><span class="p">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s">&quot;0&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following example uses IPostprocessShaderPrograms. It is used to perform processing in a batch when performing the same processing on all ShaderPrograms.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">using</span> <span class="nn">_3dIntermediateFileCallbacks</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Nintendo.G3dTool.Entities</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">GeneralPostprocessShaderProgramsCallback</span> <span class="p">:</span> <span class="n">IPostprocessShaderPrograms</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">public</span> <span class="k">void</span> <span class="n">PostprocessShaderPrograms</span><span class="p">(</span><span class="n">PostprocessShaderProgramsArgument</span> <span class="n">argument</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">string</span> <span class="n">userArg</span> <span class="p">=</span> <span class="n">argument</span><span class="p">.</span><span class="n">UserArgument</span><span class="p">;</span>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The Target information for each ShaderProgram is stored in a list.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">target</span> <span class="k">in</span> <span class="n">argument</span><span class="p">.</span><span class="n">Targets</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">ShaderProgram</span> <span class="n">shaderProgram</span> <span class="p">=</span> <span class="n">target</span><span class="p">.</span><span class="n">ShaderProgram</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Elements used for adjusting the shaderProgram.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Model</span> <span class="n">model</span> <span class="p">=</span> <span class="n">target</span><span class="p">.</span><span class="n">Model</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Shape</span> <span class="n">shape</span> <span class="p">=</span> <span class="n">target</span><span class="p">.</span><span class="n">Shape</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Material</span> <span class="n">material</span> <span class="p">=</span> <span class="n">target</span><span class="p">.</span><span class="n">Material</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">option</span> <span class="k">in</span> <span class="n">shaderProgram</span><span class="p">.</span><span class="n">Options</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">option</span><span class="p">.</span><span class="n">Id</span><span class="p">.</span><span class="n">Equals</span><span class="p">(</span><span class="s">&quot;enable_reflect&quot;</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">option</span><span class="p">.</span><span class="n">Choice</span><span class="p">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s">&quot;1&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">option</span><span class="p">.</span><span class="n">Id</span><span class="p">.</span><span class="n">Equals</span><span class="p">(</span><span class="n">userArg</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">option</span><span class="p">.</span><span class="n">Choice</span><span class="p">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s">&quot;1&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

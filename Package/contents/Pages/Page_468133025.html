@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>QueuingExecutor | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- QueuingExecutor -->
+<div class="pagetitle" id="PageId_468133025">QueuingExecutor</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_468133025_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_468133025_h1_2">How to Use</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_468133025_h2_1">Initializing QueuingExecutor</a>
+      </li>
+      <li>
+        <a href="#Anchor_468133025_h2_2">Asynchronous Execution</a>
+      </li>
+      <li>
+        <a href="#Anchor_468133025_h2_3">Destroying the QueuingExecutor</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_468133025_h1_1">Overview</h1>
+<p>
+  <span class="ApiLink_nn__async__QueuingExecutor">nn::async::QueuingExecutor</span> is an implementation of the <span class="ApiLink_nn__async__Executor">nn::async::Executor</span> class using a task queue.</p>
+<p>
+  <code>QueuingExecutor</code> manages objects (tasks) representing asynchronous processing via an internal queue, and provides a function that allows arbitrary threads to retrieve tasks and make them executable. <code>QueuingExecutor</code> itself does not have a thread resource for executing asynchronous processing. Asynchronous processing begins when the application selects the thread executing asynchronous processing and the thread retrieves the task from the queue and executes it.</p>
+<p>The application can use the <code>QueuingExecutor</code> object to perform the following operations.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Operation</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>TryExecuteOne</td>
+      <td>If there are tasks that can be executed tasks, fetch one and execute it.</td>
+    </tr>
+    <tr>
+      <td>LoopExecution</td>
+      <td>Repeat fetching and executing tasks.</td>
+    </tr>
+    <tr>
+      <td>ExecuteAll</td>
+      <td>Fetch and execute all tasks in the queue.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The following table shows the expected usage of each operation.</p>
+<ul>
+  <li>Select <strong>TryExecuteOne</strong> to execute asynchronous processing only when specific conditions are met. Each time the application fetches and executes one task, it checks whether an arbitrary condition is satisfied. If it is not satisfied, it stops the next query execution. With this method, threads are not occupied exclusively by fetching and executing tasks.</li>
+  <li>Select <strong>LoopExecution</strong> when a single thread can be secured for asynchronous processing. The thread executing the loop automatically fetches and executes the task in the <code>QueuingExecutor</code> queue, so no complicated implementation is required within the application.</li>
+  <li>Select <strong>ExecuteAll</strong> to explicitly empty the task queue. This operation is usually used before calling the <code>QueuingExecutor</code> destructor.</li>
+</ul>
+<h1 id="Anchor_468133025_h1_2">How to Use</h1>
+<h2 id="Anchor_468133025_h2_1">Initializing QueuingExecutor</h2>
+<p>QueuingExecutor requests the object that implements the <span class="ApiLink_nn__MemoryResource">nn::MemoryResource</span> interface. Prepare an appropriate <span class="ApiLink_nn__MemoryResource">nn::MemoryResource</span> instance in the application in advance, and provide it to the <code>QueueingExecutor</code> constructor. For more information, see <a href="../Pages/Page_468125898.html">Preparing to Use The Library</a>.</p>
+<h2 id="Anchor_468133025_h2_2">Asynchronous Execution</h2>
+<h3 id="Anchor_468133025_h3_1">TryExecuteOne</h3>
+<p>Use <span class="ApiLink_bool_nn__async__QueuingExecutor__TryExecuteOne()_NN_NOEXCEPT">TryExecuteOne()</span> to make an inquiry. If a task is retrieved and executed, <code>true</code> is returned as the return value of the function.</p>
+<p>See the following example.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// An application-defined function that returns whether asynchronous processing can continue.
+</span><span class="kt">bool</span> <span class="nf">CanKeepDispatching</span><span class="p">()</span><span class="p">;</span>
+
+<span class="c1">// Gets and executes tasks as long as the following two conditions are satisfied.
+// - CanKeepDispatching() returns true.
+// - Executable tasks exist.
+</span><span class="kt">void</span> <span class="nf">Dispatch</span><span class="p">(</span><span class="nn">nn::async::</span><span class="n">QueuingExecutor</span><span class="o">*</span> <span class="n">pExecutor</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">while</span> <span class="p">(</span><span class="n">CanKeepDispatching</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">pExecutor</span><span class="o">-&gt;</span><span class="n">TryExecuteOne</span><span class="p">())</span> <span class="p">{}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_468133025_h3_2">LoopExecution</h3>
+<p>Use <span class="ApiLink_void_nn__async__QueuingExecutor__LoopExecution()_NN_NOEXCEPT">LoopExecution()</span> to loop through. The calling thread repeatedly retrieves and executes the task in LoopExecution().</p>
+<p>To stop the loop, call <span class="ApiLink_void_nn__async__QueuingExecutor__RequestLoopExecutionExit()_NN_NOEXCEPT">RequestLoopExecutionExit()</span>. The <code>LoopExecution()</code> executing thread returns to the caller of <code>LoopExecution()</code> as soon as the running asynchronous processing is complete.</p>
+<p>After calling <code>RequestLoopExecutionExit()</code>, <code>LoopExecution()</code> cannot be called again to retrieve and execute the task. Use <code>RequestLoopExecutionExit()</code> immediately before destroying the <code>QueueingExecutor</code> object.</p>
+<p>Use <span class="ApiLink_bool_nn__async__QueuingExecutor__IsRequestedLoopExecutionExit()_NN_NOEXCEPT">IsRequestedLoopExecutionExit()</span> to check whether <code>RequestLoopExecutionExit()</code> has already been called (NX Add-On 9.2.0 and later only).</p>
+<p>The following example provides an implementation of loop execution.</p>
+<div class="expand-container" id="expander-468133025-1">
+  <div class="expand-control" id="expander-control-468133025-1">
+    <span class="expand-control-icon collapsed-icon"> </span>
+    <span class="expand-control-text">Click here to expand...</span>
+  </div>
+  <div class="expand-content expand-hidden" id="expander-content-468133025-1">
+    <p class="auto-cursor-target">
+      <br />
+    </p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/nn_Allocator.h&gt;
+#include &lt;nn/async.h&gt;
+#include &lt;nn/os.h&gt;
+</span>
+<span class="c1">// The class that implements the nn::MemoryResource interface used in the application.
+</span><span class="k">class</span> <span class="nc">AppMemoryResource</span> <span class="o">:</span> <span class="k">public</span> <span class="nn">nn::</span><span class="n">MemoryResource</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Omitted.
+</span><span class="p">};</span>
+
+<span class="c1">// Stack memory size of the thread executing the loop.
+</span><span class="k">const</span> <span class="kt">size_t</span> <span class="n">LoopThreadStackSize</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>
+
+<span class="c1">// Stack memory of the thread executing the loop.
+</span><span class="n">NN_OS_ALIGNAS_THREAD_STACK</span> <span class="kt">uint8_t</span> <span class="n">LoopThreadStack</span><span class="p">[</span><span class="n">LoopThreadStackSize</span><span class="p">];</span>
+
+<span class="c1">// Entry function of the thread executing the loop.
+</span><span class="kt">void</span> <span class="nf">LoopThreadFunc</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">arg</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">auto</span> <span class="n">pExecutor</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="nn">nn::async::</span><span class="n">QueuingExecutor</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">arg</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Executes the loop. Does not return to the caller until RequestLoopExecutionExit() is called from the main thread.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pExecutor</span><span class="o">-&gt;</span><span class="n">LoopExecution</span><span class="p">();</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Empties the task queue in the QueuingExecutor before exiting. (Also see Destroying the QueuingExecutor on this page.)
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pExecutor</span><span class="o">-&gt;</span><span class="n">ExecuteAll</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// Application's main function.
+</span><span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">AppMemoryResource</span> <span class="n">memoryResource</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Intializes QueuingExecutor.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::async::</span><span class="n">QueuingExecutor</span> <span class="n">executor</span><span class="p">(</span><span class="o">&amp;</span><span class="n">memoryResource</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Thread executing the loop and its priority.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">ThreadType</span> <span class="n">loopThread</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">loopThreadPriority</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">DefaultThreadPriority</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Creates the thread and starts execution.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">CreateThread</span><span class="p">(</span><span class="o">&amp;</span><span class="n">loopThread</span><span class="p">,</span> <span class="n">LoopThreadFunc</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">executor</span><span class="p">,</span> <span class="n">LoopThreadStack</span><span class="p">,</span> <span class="n">LoopThreadStackSize</span><span class="p">,</span> <span class="n">loopThreadPriority</span><span class="p">));</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">StartThread</span><span class="p">(</span><span class="o">&amp;</span><span class="n">loopThread</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Passes the QueuingExecutor object to the asynchronous API function for asynchronous processing.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The actual processing is done by the thread calling executor.LoopExecution().
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// When QueuingExecutor is complete, calls RequestLoopExecutionExit().
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Do not use QueuingExecutor for a new asynchronous API function call after this point.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">executor</span><span class="p">.</span><span class="n">RequestLoopExecutionExit</span><span class="p">();</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Waits for the thread executing the loop to empty the task queue in QueuingExecutor and exit.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">WaitThread</span><span class="p">(</span><span class="o">&amp;</span><span class="n">loopThread</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Destroys the thread.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">DestroyThread</span><span class="p">(</span><span class="o">&amp;</span><span class="n">loopThread</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The QueuingExecutor destructor is called.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The task queue must be empty at this point. (Also see Destroying the QueuingExecutor on this page.)
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="auto-cursor-target">
+      <br />
+    </p>
+  </div>
+</div>
+<h3 id="Anchor_468133025_h3_3">ExecuteAll</h3>
+<p>Use <span class="ApiLink_void_nn__async__QueuingExecutor__ExecuteAll()_NN_NOEXCEPT">ExecuteAll()</span> to execute all tasks. The calling thread is blocked until the task queue is empty.</p>
+<p>For usage examples, see the example implementation of loop execution.</p>
+<h3 id="Anchor_468133025_h3_4">Thread Safety</h3>
+<p>The member functions that retrieve and execute the tasks (<span class="ApiLink_bool_nn__async__QueuingExecutor__TryExecuteOne()_NN_NOEXCEPT">TryExecuteOne()</span>, <span class="ApiLink_void_nn__async__QueuingExecutor__LoopExecution()_NN_NOEXCEPT">LoopExecution()</span>, and<span class="ApiLink_void_nn__async__QueuingExecutor__ExecuteAll()_NN_NOEXCEPT">ExecuteAll()</span>) are all thread-safe. Multiple threads can call each member function simultaneously without issues.</p>
+<h2 id="Anchor_468133025_h2_3">Destroying the QueuingExecutor</h2>
+<p>When destroying the <code>QueuingExecutor</code>, the task queue inside the object must be empty. If the task queue is not empty when the destructor is called, it aborts with a precondition failure. Call <span class="ApiLink_void_nn__async__QueuingExecutor__ExecuteAll()_NN_NOEXCEPT">ExecuteAll()</span> as needed.</p>
+<p>When calling the destructor, check whether any threads are still executing asynchronous processing. Be particularly careful of the following.</p>
+<ul>
+  <li>Threads calling <span class="ApiLink_void_nn__async__QueuingExecutor__LoopExecution()_NN_NOEXCEPT">LoopExecution()</span> do not return to the calling function as long as <span class="ApiLink_void_nn__async__QueuingExecutor__RequestLoopExecutionExit()_NN_NOEXCEPT">RequestLoopExecutionExit()</span> is not called from another thread.</li>
+  <li>When calling each member function from multiple threads, make sure that all threads have returned before calling the destructor. Even if some threads have returned, other threads may still be executing tasks.</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__async__QueuingExecutor', '../../../Api/HtmlNX/classnn_1_1async_1_1_queuing_executor.html' )
+SetUrl( 'ApiLink_nn__async__Executor', '../../../Api/HtmlNX/classnn_1_1async_1_1_executor.html' )
+SetUrl( 'ApiLink_nn__MemoryResource', '../../../Api/HtmlNX/classnn_1_1_memory_resource.html' )
+SetUrl( 'ApiLink_bool_nn__async__QueuingExecutor__TryExecuteOne()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_queuing_executor.html#aa0b89ada4690f19fce5d7833ce7df5b0' )
+SetUrl( 'ApiLink_void_nn__async__QueuingExecutor__LoopExecution()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_queuing_executor.html#a2e2ec81d45960cf10dd715d9da9150f7' )
+SetUrl( 'ApiLink_void_nn__async__QueuingExecutor__RequestLoopExecutionExit()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_queuing_executor.html#a0fe361d9530e55de2d6b1203e4a2c565' )
+SetUrl( 'ApiLink_bool_nn__async__QueuingExecutor__IsRequestedLoopExecutionExit()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_queuing_executor.html#aa687cbdfca3c991f8b5076073d18313a' )
+SetUrl( 'ApiLink_void_nn__async__QueuingExecutor__ExecuteAll()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_queuing_executor.html#a53bb465dbce4967cb2cd2bb0e7620529' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

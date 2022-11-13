@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Audio Input | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Audio Input -->
+<div class="pagetitle" id="PageId_89991491">Audio Input</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_89991491_h1_1">Audio Input</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_89991491_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_89991491_h3_1">Control</a>
+        </li>
+        <li>
+          <a href="#Anchor_89991491_h3_2">Getting Information</a>
+        </li>
+        <li>
+          <a href="#Anchor_89991491_h3_3">Waveform Buffer Operations</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_89991491_h2_2">Usage Examples</a>
+      </li>
+      <li>
+        <a href="#Anchor_89991491_h2_3">API Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_89991491_h2_4">Important Information</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_89991491_h3_4">Differences Between the PC Development Environment and the Development Hardware Environment</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_89991491_h1_1">Audio Input</h1>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The audio input feature is similar to <a href="../Pages/Page_89991490.html">audio output</a> except for the direction of the audio signal.</p>
+  </div>
+</div>
+<div class="platform_nx">
+  <div class="info_new">
+    <div class="info_new_left">Info</div>
+    <div class="info_new_right">
+      <p>We recommend using the Nintendo Switch Online application voice chat feature, provided by the NEX library, to implement voice chat features. For more information, see the voice chat guide for Nintendo Switch Online.</p>
+      <p>Use this feature if you need to implement voice chat on the Nintendo Switch system itself.</p>
+    </div>
+  </div>
+</div>
+<h2 id="Anchor_89991491_h2_1">Feature Overview</h2>
+<p>The audio input feature is for recording audio data from a device. Because this feature only provides the ability to transmit data, it cannot be used to control volume or otherwise change the data.</p>
+<p>Audio input is managed using the <span class="ApiLink_nn__audio__AudioIn"><code>AudioIn</code></span> structure. Operations related to audio input can be divided into three main types.</p>
+<ul>
+  <li>Control (initialize, start recording, stop recording, close)</li>
+  <li>Information retrieval (sampling rate, number of channels, and so on)</li>
+  <li>Waveform Buffer Operations</li>
+</ul>
+<h3 id="Anchor_89991491_h3_1">Control</h3>
+<p>Each audio input has a name. Information about the audio inputs that are available on the system can be retrieved by using the <span class="ApiLink_int_nn__audio__ListAudioIns(AudioInInfo_*outAudioIns|_int_count)_NN_NOEXCEPT"><code>ListAudioIns</code></span> function.</p>
+<div class="platform_nx">
+  <div class="info_new">
+    <div class="info_new_left">Info</div>
+    <div class="info_new_right">
+      <p>On the NX platform, the system's audio jack is listed under the name &quot;BuiltinHeadset&quot;. The correspondence between device and name is assured, even if more devices are retrieved by the <code>ListAudioIn()</code> function in the future.</p>
+    </div>
+  </div>
+</div>
+<p>Initialization is performed by using <span class="ApiLink_Result_nn__audio__OpenAudioIn(AudioIn_*pOutAudioIn|_const_char_*name|_const_AudioInParameter_&parameter)_NN_NOEXCEPT"><code>OpenAudioIn</code></span> or <span class="ApiLink_Result_nn__audio__OpenDefaultAudioIn(AudioIn_*pOutAudioIn|_const_AudioInParameter_&parameter)_NN_NOEXCEPT"><code>OpenDefaultAudioIn</code></span>. Specify the name (and sampling rate) in the parameters. To start recording, call the <span class="ApiLink_Result_nn__audio__StartAudioIn(AudioIn_*pAudioIn)_NN_NOEXCEPT"><code>StartAudioIn</code></span> function. Stop recording and close the audio input by calling the <span class="ApiLink_void_nn__audio__StopAudioIn(AudioIn_*pAudioIn)_NN_NOEXCEPT"><code>StopAudioIn</code></span> and <span class="ApiLink_void_nn__audio__CloseAudioIn(AudioIn_*pAudioIn)_NN_NOEXCEPT"><code>CloseAudioIn</code></span> functions, respectively.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_89991491/90147820.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<h3 id="Anchor_89991491_h3_2">Getting Information</h3>
+<p>The following information can be retrieved.</p>
+<ul>
+  <li>Status</li>
+  <li>Name</li>
+  <li>Sample rate (Hz)</li>
+  <li>Number of Channels</li>
+  <li>Sample format</li>
+</ul>
+<h3 id="Anchor_89991491_h3_3">Waveform Buffer Operations</h3>
+<p>The buffer to use for recording is managed in the <span class="ApiLink_nn__audio__AudioInBuffer"><code>AudioInBuffer</code></span> structure (audio input buffer). After specifying the data buffer and its size, call the <span class="ApiLink_bool_nn__audio__AppendAudioInBuffer(AudioIn_*pAudioIn|_AudioInBuffer_*pAudioInBuffer)_NN_NOEXCEPT"><code>AppendAudioInBuffer</code></span> function to write them to the <span class="ApiLink_nn__audio__AudioIn"><code>AudioIn</code></span> structure. Data from the audio input is recorded to the registered buffers in the order in which they were registered. Use the <span class="ApiLink_AudioInBuffer_*_nn__audio__GetReleasedAudioInBuffer(AudioIn_*pAudioIn)_NN_NOEXCEPT"><code>GetReleasedAudioInBuffer</code></span> function to determine when data recording is complete.</p>
+<p>The audio input buffer data must be configured according to the following parameters of the audio input.</p>
+<ul>
+  <li>Sample rate (Hz)</li>
+  <li>Sample format</li>
+  <li>Number of channels (<code>ChannelCount</code>)</li>
+</ul>
+<p>The following diagram shows an example of the audio input buffer configuration for two channels (left and right).<br />The audio input buffer size must be set to a multiple of <span class="ApiLink_size_t_nn__audio__GetSampleByteSize(SampleFormat_sampleFormat)_NN_NOEXCEPT"><code>GetSampleByteSize</code></span> (sample format) &times; <code>ChannelCount</code>.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_89991491/90147766.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p>The number of samples to include in the audio input buffer (per channel) can be calculated as follows.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>(Number of samples per-channel in the audio input buffer) = (Byte size of the audio input buffer) / (Number of channels) x (Date size per-sample as determined by the sample format)</pre>
+  </div>
+</div>
+<p>You can calculate the period of the time between when the audio input buffer can be retrieved from the audio input buffer sample count (per channel) and the sample rate.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>(Period of time before audio input buffer is retrievable) = (audio input buffer sample count (per channel)) / (sample rate)</pre>
+  </div>
+</div>
+<p>For example, if the sample rate is 48,000 Hz and the audio input buffer holds 480 samples, the period is 480 / 48,000 = 0.01 seconds = 10 milliseconds.</p>
+<p>If no buffer is registered or recording to all of the registered buffers is complete, the audio input discards the recorded waveform. To avoid cutting off audio recording, the library user must appropriately register an audio input buffer.</p>
+<h2 id="Anchor_89991491_h2_2">Usage Examples</h2>
+<p>See the <span class="ApiLink_PageSampleAudioAudioEchoback">Simultaneous Audio Input/Output Feature Sample</span>.</p>
+<h2 id="Anchor_89991491_h2_3">API Reference</h2>
+<p>For more information, in the reference for the <span class="ApiLink_nn__audio"><code>nn::audio</code> namespace</span>, see Functions &gt; Audio Input.</p>
+<h2 id="Anchor_89991491_h2_4">Important Information</h2>
+<h3 id="Anchor_89991491_h3_4">Differences Between the PC Development Environment and the Development Hardware Environment</h3>
+<p>In the PC development environment, the Windows operating system sound drivers are used for audio input. As a result, the timing of hardware interrupts in particular can vary significantly between environments. (In general, the fluctuations in the intervals between hardware interrupts tends to be larger than on the development hardware.) These differences in timing may potentially cause audio data to skip or get cut off when using <code>AudioInBuffer</code> objects that only contain a small number of samples.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__audio__AudioIn', '../../../Api/HtmlNX/structnn_1_1audio_1_1_audio_in.html' )
+SetUrl( 'ApiLink_int_nn__audio__ListAudioIns(AudioInInfo_*outAudioIns|_int_count)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a183262306a7103d73852c3842af67e8a' )
+SetUrl( 'ApiLink_Result_nn__audio__OpenAudioIn(AudioIn_*pOutAudioIn|_const_char_*name|_const_AudioInParameter_&parameter)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#af6ca7def0d62477aa4f20f27fd9c70c6' )
+SetUrl( 'ApiLink_Result_nn__audio__OpenDefaultAudioIn(AudioIn_*pOutAudioIn|_const_AudioInParameter_&parameter)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ac1bfdd6f316ddd864046026095f83fcc' )
+SetUrl( 'ApiLink_Result_nn__audio__StartAudioIn(AudioIn_*pAudioIn)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#af72d3c3851733f838d4c7e72a26b307d' )
+SetUrl( 'ApiLink_void_nn__audio__StopAudioIn(AudioIn_*pAudioIn)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a29049cc380b643521d79d058a62d9e93' )
+SetUrl( 'ApiLink_void_nn__audio__CloseAudioIn(AudioIn_*pAudioIn)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aea9b579f0edf49dfce4ea62938317b06' )
+SetUrl( 'ApiLink_nn__audio__AudioInBuffer', '../../../Api/HtmlNX/structnn_1_1audio_1_1_audio_in_buffer.html' )
+SetUrl( 'ApiLink_bool_nn__audio__AppendAudioInBuffer(AudioIn_*pAudioIn|_AudioInBuffer_*pAudioInBuffer)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a2c217d690202ef43230d4409852f3c1d' )
+SetUrl( 'ApiLink_AudioInBuffer_*_nn__audio__GetReleasedAudioInBuffer(AudioIn_*pAudioIn)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a4fe3341bdd916299f38a8eaa2c8de534' )
+SetUrl( 'ApiLink_size_t_nn__audio__GetSampleByteSize(SampleFormat_sampleFormat)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a20de4a3eb5e5c4fba0f3b45e0b9e24c8' )
+SetUrl( 'ApiLink_PageSampleAudioAudioEchoback', '../../../Api/HtmlNX/_page_sample_audio_audio_echoback.html' )
+SetUrl( 'ApiLink_nn__audio', '../../../Api/HtmlNX/namespacenn_1_1audio.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

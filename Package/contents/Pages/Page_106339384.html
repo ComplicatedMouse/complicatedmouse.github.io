@@ -1,0 +1,844 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Differences in Application Development Environments (NX Add-On) | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Differences in Application Development Environments (NX Add-On) -->
+<div class="pagetitle" id="PageId_106339384">Differences in Application Development Environments (NX Add-On)</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_106339384_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_106339384_h1_2">Feature Differences</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_106339384_h2_1">General</a>
+      </li>
+      <li>
+        <a href="#Anchor_106339384_h2_2">Library</a>
+      </li>
+      <li>
+        <a href="#Anchor_106339384_h2_3">Host Tools Library</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_106339384_h1_1">Overview</h1>
+<p>Starting with NintendoSDK NX Add-On 0.4.0, NX application development will be possible in two environments: an NX application development environment on the PC (referred to as the PC environment), and an NX application development environment that uses the SDEV (referred to as the SDEV environment).</p>
+<p>We will clarify the differences between the two environments and review where caution is needed when implementing applications.</p>
+<h1 id="Anchor_106339384_h1_2">Feature Differences</h1>
+<!--Remove-->
+<h2 id="Anchor_106339384_h2_1">General</h2>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>PC Environment</th>
+      <th>SDEV Environment</th>
+      <th>Notes When Changing Environments</th>
+    </tr>
+    <tr>
+      <td>Performance</td>
+      <td>
+        <ul>
+          <li>Dependent on the CPU, GPU, and memory of the PC you are using to run the environment.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>The performance of the NX in itself will occur.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>You must use the SDEV for performance tuning.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Build System</td>
+      <td>
+        <ul>
+          <li>Build targeting the Win32/x64 platform in Visual Studio.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li style="text-align: left;">In Visual Studio, you must install NX VSI.</li>
+          <li style="text-align: left;">Build targeting the NX32/NX64 platform that was added by NX VSI.</li>
+        </ul>
+      </td>
+      <td>
+        <p style="text-align: left;">
+          <br />
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>Compiler/Linker</td>
+      <td>
+        <ul>
+          <li>Your Visual C++ is used.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>Clang for NX is used.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>The warnings and errors at build time differ between Visual C++ and Clang.</li>
+          <li>We recommend periodically building with Clang for the NX, even when predominantly working in a PC environment.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>How the Libraries Are Provided and How to Use Them</td>
+      <td>
+        <ul>
+          <li>The library files are broken down at the feature level into static libraries (LIB files).</li>
+          <li>Applications make use of the libraries they need with static links.<ul><li>For more information, see <a href="../Pages/Page_95685382.html">Specifying Library Files</a>.</li></ul></li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>Library files are basically available as SDK DLLs (<code>nnSdk.nso</code>), and are automatically dynamically linked to applications.</li>
+          <li>That said, applications must explicitly link to some libraries to use them without including them in SDK DLLs, depending on library specifications and how they are used.<ul><li>For more information, see <a href="../Pages/Page_95685382.html">Specifying Library Files</a>.</li></ul></li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Memory Size</td>
+      <td>
+        <div class="content-wrapper">
+          <ul>
+            <li>
+              <code>new</code> is called from within the SDK libraries and a maximum of roughly 200 MB of application memory is allocated. </li>
+          </ul>
+          <div class="warn_new">
+            <div class="warn_new_left">Warning</div>
+            <div class="warn_new_right">
+              <p>The SDK library sometimes calls <code>new</code> internally even if you use one of the API functions (such as <code>nn::fs::SetAllocator</code>) to explicitly set an allocator.</p>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <ul>
+          <li>
+            <code>new</code> is not called within the SDK libraries.</li>
+        </ul>
+      </td>
+      <td>
+        <p>
+          <br />
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>Running Your application</td>
+      <td>
+        <p>You can use any of the following methods:</p>
+        <ul>
+          <li>In Visual Studio, <strong>Start without Debug</strong>.</li>
+          <li>Directly run the application's EXE file.</li>
+        </ul>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>You can use any of the following methods:</p>
+          <ul>
+            <li>In Visual Studio, <strong>Start without Debug</strong>.</li>
+            <li>Select and run the NSP file by using Target Manager (the GUI tool).</li>
+            <li>Select and run the NSP file by using RunOnTarget (the CUI tool).</li>
+          </ul>
+          <p>
+            <br />
+          </p>
+          <div class="warn_new">
+            <div class="warn_new_left">Warning</div>
+            <div class="warn_new_right">
+              <p>To run from Visual Studio, you must install VSI.</p>
+              <p>For all three steps, you must have installed Target Manager in advance.</p>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Debugging</td>
+      <td>
+        <ul>
+          <li>There is no difference between the PC environment and the SDEV environment.</li>
+          <li>You can use <strong>Debug Start</strong> in Visual Studio.</li>
+        </ul>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <ul>
+            <li>You can use <strong>Debug Start</strong> in Visual Studio.</li>
+          </ul>
+          <div class="warn_new">
+            <div class="warn_new_left">Warning</div>
+            <div class="warn_new_right">
+              <p>You must have installed both VSI and Target Manager in advance.</p>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_93359711.html">Target Manager</a>
+      </td>
+      <td>
+        <p>An installation is not necessary when you are not using the following.</p>
+        <ul>
+          <li>Performing file system operations on a host PC.</li>
+          <li>HTC/HTCS.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>Installation is required.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_106339384_h2_2">Library</h2>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 78.0px;" />
+    <col style="width: 440.0px;" />
+    <col style="width: 442.0px;" />
+    <col style="width: 454.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>PC Environment</th>
+      <th>SDEV Environment</th>
+      <th>Notes When Changing Environments</th>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_89098335.html">audio</a>
+      </td>
+      <td>
+        <ul>
+          <li>Rendering occurs in the CPU.</li>
+          <li>Output is sent to the PC speaker.</li>
+        </ul>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <ul>
+            <li>Rendering is performed by the Audio DSP in the SoC.</li>
+            <li>Audio is output from the speakers built into the SDEV.</li>
+            <li>If an external audio output device is connected to the audio jack or elsewhere, the audio will be output from the external audio output.</li>
+            <li>If there is an HDMI connection, the audio will be output from the TV. However, if an external audio output device is connected, the audio will be output from the external audio output device.</li>
+          </ul>
+        </div>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_99804830.html">codec</a>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <ul>
+            <li>Compressed audio is decompressed by the CPU.</li>
+          </ul>
+          <p>
+            <br />
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <ul>
+            <li>Compressed audio is decompressed by the Audio DSP on the SoC or by the CPU.</li>
+            <li>The Audio DSP or the CPU is used for decompression depending on the decoder that is used. For more information, see <a href="../Pages/Page_99804990.html">codec Library &gt; Manual &gt; Features</a>.</li>
+          </ul>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <br />
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_107780810.html">crypto</a>
+      </td>
+      <td colspan="3">
+        <ul>
+          <li>There is no difference between the PC environment and the SDEV environment.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_107338327.html">curl</a>
+      </td>
+      <td colspan="3">
+        <ul>
+          <li>There is no difference between the PC environment and the SDEV environment.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_107325197.html">diag</a>
+      </td>
+      <td>
+        <ul>
+          <li>The log is sent to the command prompt window.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>The log is sent to the Log Window in Target Manager.</li>
+        </ul>
+      </td>
+      <td>
+        <p>The encoding of log strings uses UTF-8 in both the PC and SDEV environments.</p>
+        <p>However, because the default encoding for character literals in the PC environment depends on the Windows locale, explicitly specify UTF-8 encoding for the compiler.</p>
+        <p>The SDEV environment uses UTF-8 by default.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_181896261.html">ec</a>
+      </td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>The PC environment is not supported.</li>
+        </ul>
+      </td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>All features are available.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_107779618.html">fontll</a>
+      </td>
+      <td colspan="3">
+        <ul>
+          <li>There is no difference between the PC environment and the SDEV environment.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_83956192.html">fs</a>
+      </td>
+      <td>
+        <ul>
+          <li>Save data is created within the save directory, in the same directory as the EXE files.</li>
+          <li>Resource data references the data within the data directory, in the same directory as the EXE files.</li>
+          <li>The size to be allocated from the allocator configured for the <code>fs</code> library is larger than the SDEV environment.</li>
+        </ul>
+      </td>
+      <td>
+        <ul style="list-style-type: square;">
+          <li>Save data is created in NAND on the console.</li>
+          <li>Resource data accesses data archived in the NCA file.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_83956134.html">gfx</a>
+      </td>
+      <td>
+        <ul>
+          <li>(Conforms to the NVN item.)</li>
+          <li>Uses the Windows API for the display features.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>(Conforms to the NVN item.)</li>
+          <li>Uses VI for the display features.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_83955661.html">hid</a>
+      </td>
+      <td>
+        <ul>
+          <li>For gamepad controls, use an XInput-capable gamepad or keyboard.</li>
+          <li>For touch screen controls, use a device or mouse that can send touch messages.</li>
+          <li>For debugging gamepad controls, use an ELECOM-JC-W01UWH, an ELECOM-JC-W02UWH, or a keyboard.</li>
+          <li>For the keyboard, use an actual keyboard.</li>
+          <li>For the mouse, use an actual mouse.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>For gamepad controls, use <a href="../Pages/Page_107320681.html">Input Director</a>.</li>
+          <li>Touch screen operations use the touch screen.<ul><li>Up to 10 taps can be detected at the same time.</li><li>The roughly 15 pixels of the periphery return coordinates clamped to the interior.</li></ul></li>
+          <li>For debugging gamepad controls, use a debug controller.</li>
+          <li>For the keyboard, use a USB keyboard or <a href="../Pages/Page_107320681.html">Input Director</a>.<br /></li>
+          <li>For the mouse, use a USB mouse or <a href="../Pages/Page_107320681.html">Input Director</a>.<br /></li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_95685000.html">htc</a>
+      </td>
+      <td colspan="3">
+        <ul>
+          <li>There is no difference between the PC environment and the SDEV environment.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_83956008.html">htcs</a>
+      </td>
+      <td>
+        <ul>
+          <li>No limitation on the number of APIs that can operate simultaneously.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <p>In NintendoSDK 12.3.2 and later, serial numbers can also be used in the PC environment by setting the serial number to a <a href="../Pages/Page_124013919.html">target environment variable</a>.</p>
+        <p>In earlier versions, identification using serial numbers was not supported in the PC environment.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_107780149.html">init</a>
+      </td>
+      <td>
+        <ul>
+          <li>For more information about memory capacity and memory space with Windows, see <a href="../Pages/Page_93357496.html">Application Operating Environment (Windows Environment)</a>.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>For more information about memory capacity and memory space with the development hardware, see <a href="../Pages/Page_107776143.html">Application Operating Environment (Development Hardware Environment)</a>.</li>
+        </ul>
+      </td>
+      <td>
+        <p>You must allocate memory heaps and initialize memory allocators with the different memory capacities and memory spaces being considered.</p>
+        <p>For more information about memory capacity and memory space, see the links to the left. To read how to initialize the memory allocators, see <a href="../Pages/Page_92310396.html">Starting and Initializing Programs</a>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_83955994.html">image</a>
+      </td>
+      <td colspan="3">
+        <ul>
+          <li>There is no difference between the PC environment and the SDEV environment.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_89096920.html">mem</a>
+      </td>
+      <td colspan="3">
+        <ul>
+          <li>There is no difference between the PC environment and the SDEV environment.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_165042993.html">ngc</a>
+      </td>
+      <td>
+        <ul>
+          <li>The PC environment is not supported.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>The profanity check feature is available.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_104465190.html">nifm</a>
+      </td>
+      <td>
+        <ul>
+          <li>Network connections in the PC environment are maintained as is.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>The network connection will switch as needed.</li>
+        </ul>
+      </td>
+      <td>
+        <p>In the current version, the only wireless infrastructure connections supported in the SDEV environment are access points that use open system authentication without encryption.</p>
+        <p>In the PC environment, the existing network connection is maintained as is.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_87937845.html">nvn</a>
+      </td>
+      <td>
+        <ul>
+          <li>There is no difference in the API between the PC environment and the SDEV environment.</li>
+          <li>Dependent on WGL in the PC environment.</li>
+          <li>A supporting graphics board and a dedicated graphics driver are needed.<br /><ul><li>Some features may not be supported, depending on the age of the GPU.</li></ul></li>
+          <li>Performance will depend on the GPU installed.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>All features will be available.</li>
+          <li>You can expect the same performance as that of the NX, itself.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_107339118.html">oe</a>
+      </td>
+      <td>
+        <ul>
+          <li>The PC environment is not supported.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>Lets you select among performance profiles offered by the NX.</li>
+          <li>Controls the state changes of programs on the NX system.</li>
+        </ul>
+      </td>
+      <td>In the current version, branched implementation by the preprocessor is required if the same source files are being used in both the PC and SDEV environments.</td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_83955869.html">os</a>
+      </td>
+      <td>
+        <ul>
+          <li>Thread priority is ignored.</li>
+          <li>The thread's priority core number is ignored.</li>
+          <li>Uses the stack region provided by Windows instead of the stack region specified by the <code><span class="ApiLink_nn__os__CreateThread">nn::os::CreateThread</span>()</code> function.</li>
+          <li>Uses the stack region provided by Windows instead of the stack region specified by the <code><span class="ApiLink_nn__os__InitializeFiber">nn::os::InitializeFiber</span>()</code> function.</li>
+          <li>Does not support the user exception handler feature.</li>
+          <li>The <code><span class="ApiLink_nn__os__">nn::os::</span></code><code>QueryMemoryInfo()</code> function will sometimes return a value that is not the actual value measured on the PC.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>For thread priority, you can use a value in the range from 0 through 31.</li>
+          <li>For the thread's priority core, you can use a number in the range from 0 through 2.</li>
+          <li>The stack region specified by the <code><span class="ApiLink_nn__os__">nn::os::</span></code><code>CreateThread()</code> function is mirrored and used in a state that is adjacent to a guarded space.</li>
+          <li>You can use the <code><span class="ApiLink_nn__os__">nn::os::</span></code><code>InitializeFiber()</code> function to select whether there is a stack guard.</li>
+          <li>Can use the user exception handler feature.</li>
+        </ul>
+      </td>
+      <td>
+        <p>There are other differences in specification details besides those mentioned to the left. For more information, see the various API references.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_165352576.html">pctl</a>
+      </td>
+      <td colspan="2">
+        <ul>
+          <li>There is no difference between the PC environment and the SDEV environment.<ul><li>At present, changing settings is not supported. If it is supported in the future, how settings are changed will either be different between the PC environment and the SDEV environment, or support will only be available in the SDEV environment.</li></ul></li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_165032140.html">pl</a>
+      </td>
+      <td>
+        <ul>
+          <li>There are some features not supported in the PC environment.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>You can use features that were customized for the Development hardware environment.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_89980935.html">Settings</a>
+      </td>
+      <td colspan="3">
+        <ul>
+          <li>There is no difference between the PC environment and the SDEV environment.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_107338335.html">socket</a>
+      </td>
+      <td>
+        <ul>
+          <li>There is no difference in the API between the PC environment and the SDEV environment.</li>
+          <li>WinSock is used on the back end in the PC environment.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>A proprietary protocol stack is used on the back end in the SDEV environment.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_107324677.html">time</a>
+      </td>
+      <td>
+        <ul>
+          <li>Uses the PC clock to measure elapsed time. As a result, when the PC clock is used to control something, the time derived by using the <code>time</code> library is off by the duration of that control.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>The time value derived by using the <code>time</code> library might differ between the PC and SDEV environments.</td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_99806705.html">util</a>
+      </td>
+      <td colspan="2">
+        <ul>
+          <li>
+            <p>When the implementation in the SDEV environment uses the ARM NEON, the matrix and vector-related APIs are automatically selected for fast processing.</p>
+          </li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_107785724.html">vi</a>
+      </td>
+      <td>
+        <ul>
+          <li>The PC environment is not supported.</li>
+          <li>In the PC environment, the display is accessed using the Windows API.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>All features will be available.</li>
+        </ul>
+      </td>
+      <td>In the current version, branched implementation by the preprocessor is required if the same source files are being used in both environments.</td>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_97489914.html">zlib</a>
+      </td>
+      <td colspan="3">
+        <ul>
+          <li>There is no difference between the PC environment and the SDEV environment.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Library applets</td>
+      <td>
+        <ul>
+          <li>Library applets cannot be used.</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>Library applets can be used.</li>
+        </ul>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<!--Remove-->
+<h2 id="Anchor_106339384_h2_3">Host Tools Library</h2>
+<p>There is also a library in NX Add-On for tools that work on the host, in addition to the libraries for applications.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Functionality</th>
+    </tr>
+    <tr>
+      <td>
+        <a href="../Pages/Page_242387866.html">tm</a>
+      </td>
+      <td>
+        <ul>
+          <li>Controls the various Target Manager features.</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__CreateThread', '../../../Api/HtmlNX/namespacenn_1_1os.html#a1e7db66d31e254873b613d4eadd0d716' )
+SetUrl( 'ApiLink_nn__os__InitializeFiber', '../../../Api/HtmlNX/namespacenn_1_1os.html#a9f0b5787e55da6b3b0e089d6b3ee6816' )
+SetUrl( 'ApiLink_nn__os__', '../../../Api/HtmlNX/namespacenn_1_1os.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Priority Operations | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Priority Operations -->
+<div class="pagetitle" id="PageId_83955833">Priority Operations</div>
+<div class="text_separate">
+<h1 id="Anchor_83955833_h1_1">Priority Operations</h1>
+<h2 id="Anchor_83955833_h2_1">Priority Types</h2>
+<h3 id="Anchor_83955833_h3_1">Player Priority</h3>
+<p>Player priority is a value that determines playback priority when playing sounds. The higher the value, the higher the priority.</p>
+<h3 id="Anchor_83955833_h3_2">Voicing Priority</h3>
+<p>Voicing priority is a value that determines voicing priority when each sound actually plays a voice. The higher the value, the higher the priority.</p>
+<h2 id="Anchor_83955833_h2_2">Operational Specifications</h2>
+<h3 id="Anchor_83955833_h3_3">Player Priority</h3>
+<p>For each sound, a SoundMaker player priority is set with a value in the range from <code>0</code> through <code>127</code>. However, the program can change this value.</p>
+<h4 id="Anchor_83955833_h4_1">Player Priority Determination</h4>
+<p>In situations where you need to determine player priority, if multiple sounds are already playing and the player priority of the sound to be played (Sound A) is lower than that of the sound with the lowest priority among the playing sounds (Sound B), Sound A will fail to play. Otherwise, Sound A will successfully play and Sound B will stop.</p>
+<p>The state where player priority determination is performed is for the following three cases.</p>
+<ul>
+  <li>
+    <strong>When playing a sound where the sound limit set for each player is exceeded</strong>
+    <br />
+The maximum number of sounds that can be simultaneously played (sound limit) can be set for each player. When this value is exceeded and a sound is played, player priority determination is performed on the sounds that are being played with the same player.</li>
+  <li>
+    <strong>When playing a sound that exceeds the maximum number set by the system</strong>
+    <br />A maximum number that can be played by the overall system is set for each stream sound, sequence sound, and wave sound. When this value is exceeded and a sound is played, player priority determination is performed on all sounds that are playing.</li>
+  <li>
+    <strong>When attempting to use a sequence sound with a number of tracks greater than the maximum number set by the system</strong>
+    <br />The system sets an upper limit on the total number of sequence sound tracks that can be played at the same time. When attempting to play a number of sequence tracks greater than this value, player priority determination is performed on all sounds that are playing. <br /> However, because there can be single sounds that require multiple tracks, priority determination is repeated until all tracks can be allocated.</li>
+</ul>
+<h4 id="Anchor_83955833_h4_2">Voicing Priority Settings</h4>
+<p>The voicing priority is determined for each sound as follows.</p>
+<ul>
+  <li>Stream Sounds<br />
+This value is a special value unique to the system and cannot be changed.</li>
+  <li>Sequence Sounds<br /> 
+SoundMaker channel priority is set with a value in the range from <code>0</code> through <code>127</code>. In addition, this value can be set with a sequence command or a MIDI control change, and the priority for each track can be changed with a sequence track voicing priority (which has a value from <code>0</code> through <code>127</code>, and a default value of <code>64</code>). <br /> The final priority value is found by the following equation. <br />　(final priority) = (priority of overall sequence) + (priority of each track)</li>
+  <li>Wave Sounds<br /> 
+SoundMaker channel priority is set with a value in the range from <code>0</code> through <code>127</code>. <br />The final priority value is found by the following equation. <br />　(final priority) = (the value set Channel Priority in SoundMaker) + 64)</li>
+</ul>
+<h4 id="Anchor_83955833_h4_3">Sound Priority Determination</h4>
+<p>A determination of sound priority is conducted in the following cases.</p>
+<ul>
+  <li>When attempting to sound a voice exceeding the maximum number of simultaneous sounds<br />
+The sound priority is determined when an attempt is made to sound a voice that exceeds the maximum number of simultaneous sounds (96 by default). <br /> If multiple voices are playing and the sound priority of the voice to be played (Voice A) is lower than that of the voice with the lowest priority among the playing voices (Voice B), then Voice A will fail to play. <br /> If this situation does not apply, the playback of Voice A succeeds, and Voice B stops.</li>
+  <li>
+    <strong>When a voice is forcibly stopped by an audio renderer overprocess</strong>
+    <br />
+When an audio renderer overprocess occurs, several voices are forced to stop. <br /> Of the voices already playing, the voices are stopped in order from the lower voicing priority.</li>
+</ul>
+<h3 id="Anchor_83955833_h3_4">Priority Determination Between Targets With the Same Conditions</h3>
+<p>For all of the processing of priorities, there is no feature for lowering the priority of target sounds or voices as a variable of time. However, when there are multiple sounds (voices) with the exact same priority, then sounds that started playback sooner are determined to have lower priority.</p>
+<h3 id="Anchor_83955833_h3_5">Special Priority Determination Processing</h3>
+<h4 id="Anchor_83955833_h4_4">Voicing Priority in Release Phase</h4>
+<p>Voices in the envelope release phase have the lowest priority among all voicing priorities, and a special voicing priority is automatically applied.</p>
+<p>This operation can be suppressed by setting the fix priority at release option with SoundMaker.</p>
+<h4 id="Anchor_83955833_h4_5">Stream Sound Voicing Priority</h4>
+<p>Stream Sound voices have the highest priority of all voicing priorities, and a special voicing priority is automatically applied.</p>
+<p>Voices being played with stream sounds will never be forcibly stopped.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

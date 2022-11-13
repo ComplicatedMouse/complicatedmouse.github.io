@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Vibration Nodes | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Vibration Nodes -->
+<div class="pagetitle" id="PageId_104489019">Vibration Nodes</div>
+<div class="text_separate">
+<h1 id="Anchor_104489019_h1_1">Vibration Nodes</h1>
+<h2 id="Anchor_104489019_h2_1">Overview</h2>
+<p>Vibration nodes are a feature made available to create digraphs (directed graphs for vibration value flows) that control the flow of <a href="../Pages/Page_104489003.html">vibration values</a>.</p>
+<p>The base class for vibration nodes is <span class="ApiLink_nn__hid__VibrationNode">VibrationNode</span>.<br />Instances of classes that inherit <span class="ApiLink_nn__hid__VibrationNode">VibrationNode</span> act as vertices (nodes) on the directed graph that follows the vibrations.</p>
+<p>Each vibration node has an internal vibration value. You can get the current vibration value with the <span class="ApiLink_VibrationValue_nn__hid__VibrationWriter__GetCurrentVibration()_const_NN_NOEXCEPT">VibrationNode::GetCurrentVibration()</span> function.<br />The following are derived classes: <span class="ApiLink_nn__hid__VibrationPlayer">VibrationPlayer</span> and <span class="ApiLink_nn__hid__VibrationWriter">VibrationWriter</span>, which function as sources for vibration, <span class="ApiLink_nn__hid__VibrationMixer">VibrationMixer</span>, which functions as a vibration mixer, and <span class="ApiLink_nn__hid__VibrationTarget">VibrationTarget</span>, which functions as a vibration send target.</p>
+<p>Connecting between vibration nodes is a way to transmit a vibration value from one vibration node to another.<br />The connections between vibration nodes are represented by the <span class="ApiLink_nn__hid__VibrationNodeConnection">VibrationNodeConnection</span> class.<br />You can establish an adjustment factor for each connection. This enables the vibration value sent from a single vibration node to be different for each target.</p>
+<p>All vibration nodes generated within a program belong to a single digraph. Call the <span class="ApiLink_static_void_nn__hid__VibrationWriter__Update()_NN_NOEXCEPT">VibrationNode::Update()</span> function to update all of them at the same time.<br />If an instance of the <span class="ApiLink_nn__hid__VibrationTarget">VibrationTarget</span> class that corresponds to the <a href="../Pages/Page_104488991.html">VibrationDevice</a> is included in the directed graph, vibration values are sent to the <a href="../Pages/Page_104488991.html">VibrationDevice</a> automatically when the <span class="ApiLink_static_void_nn__hid__VibrationWriter__Update()_NN_NOEXCEPT">VibrationNode::Update()</span> function is called.<br />We recommend calling the <span class="ApiLink_nn__hid__VibrationWriter__DefaultVibrationSampleInterval">VibrationNode::Update()</span> function at <span class="ApiLink_static_void_nn__hid__VibrationWriter__Update()_NN_NOEXCEPT">VibrationNode::DefaultVibrationSampleInterval</span> intervals.</p>
+<h2 id="Anchor_104489019_h2_2">Using Vibration Nodes</h2>
+<ol>
+  <li>
+    <p>To create the vibration flow digraph, generate the vibration nodes you want to use and the instances that will connect them.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/hid/hid_Vibration.h&gt;
+</span>&nbsp;
+<span class="nn">nn::hid::</span><span class="n">VibrationDeviceHandle</span> <span class="n">vibrationDeviceA</span><span class="p">;</span>
+<span class="nn">nn::hid::</span><span class="n">VibrationDeviceHandle</span> <span class="n">vibrationDeviceB</span><span class="p">;</span>
+&nbsp;
+<span class="cm">/* Process for getting VibrationDeviceHandle */</span>
+&nbsp;
+<span class="c1">// Create the instances of the vibration nodes.
+</span><span class="nn">nn::hid::</span><span class="n">VibrationPlayer</span> <span class="n">player</span><span class="p">;</span>
+<span class="nn">nn::hid::</span><span class="n">VibrationWriter</span> <span class="n">writer</span><span class="p">;</span>
+<span class="nn">nn::hid::</span><span class="n">VibrationMixer</span> <span class="n">mixer</span><span class="p">;</span>
+<span class="nn">nn::hid::</span><span class="n">VibrationTarget</span> <span class="n">targetA</span><span class="p">(</span><span class="n">vibrationDeviceA</span><span class="p">);</span>
+<span class="nn">nn::hid::</span><span class="n">VibrationTarget</span> <span class="n">targetB</span><span class="p">(</span><span class="n">vibrationDeviceB</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Create the connection instances.
+</span><span class="nn">nn::hid::</span><span class="n">VibrationNodeConnection</span> <span class="n">connectionFromPlayerToMixer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">player</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">mixer</span><span class="p">);</span>
+<span class="nn">nn::hid::</span><span class="n">VibrationNodeConnection</span> <span class="n">connectionFromWriterToMixer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">writer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">mixer</span><span class="p">);</span>
+<span class="nn">nn::hid::</span><span class="n">VibrationNodeConnection</span> <span class="n">connectionFromMixerToTargetA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mixer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">targetA</span><span class="p">);</span>
+<span class="nn">nn::hid::</span><span class="n">VibrationNodeConnection</span> <span class="n">connectionFromMixerToTargetB</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mixer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">targetB</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>At this point, you have created a digraph like the one shown in the following figure.<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_104489019/112035258.png" class="embedded-image" /></span><br /><br /></p>
+  </li>
+  <li>
+    <p>Prepare a thread for vibration node updates, and then enable the <span class="ApiLink_static_void_nn__hid__VibrationWriter__Update()_NN_NOEXCEPT">VibrationNode::Update()</span> function to be called at every <span class="ApiLink_nn__hid__VibrationWriter__DefaultVibrationSampleInterval">VibrationNode::DefaultVibrationSampleInterval</span> interval.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">TimerEventType</span> <span class="n">timerEvent</span><span class="p">;</span>
+&nbsp;
+<span class="c1">// Function that runs the thread for updating the vibration nodes.
+</span><span class="kt">void</span> <span class="nf">ThreadFunction</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">arg</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span><span class="p">(;;)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::os::</span><span class="n">WaitTimerEvent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">timerEvent</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::VibrationNode::</span><span class="n">Update</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+&nbsp;
+<span class="cm">/* ============================================= */</span>
+&nbsp;
+<span class="cm">/* Start the thread to execute the ThreadFunction function. */</span>
+&nbsp;
+<span class="c1">// Set the timer for updating vibration nodes.
+</span><span class="nn">nn::os::</span><span class="n">InitializeTimerEvent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">timerEvent</span><span class="p">,</span> <span class="nn">nn::os::</span><span class="n">EventClearMode_AutoClear</span><span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">StartPeriodicTimerEvent</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&amp;</span><span class="n">timerEvent</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::VibrationNode::</span><span class="n">DefaultVibrationSampleInterval</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::VibrationNode::</span><span class="n">DefaultVibrationSampleInterval</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Set the respective vibration nodes as necessary, at the desired timing.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Example: controlling VibrationPlayer.
+</span><span class="n">player</span><span class="o">-&gt;</span><span class="n">Play</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// Example: controlling VibrationWriter.
+</span><span class="n">writer</span><span class="o">-&gt;</span><span class="n">Write</span><span class="p">(</span><span class="n">vibrationValue</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Example: controlling the adjustment factors.
+</span><span class="n">mixer</span><span class="o">-&gt;</span><span class="n">SetModulationTo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">targetA</span><span class="p">,</span> <span class="n">modulationA</span><span class="p">);</span>
+<span class="n">mixer</span><span class="o">-&gt;</span><span class="n">SetModulationTo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">targetB</span><span class="p">,</span> <span class="n">modulationB</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_104489019_h2_3">Vibration Node Samples</h2>
+<p> See <span class="ApiLink_NN_APILINK_HID_VIB_PLAY">Controlling the Vibration Motor Using a Vibration File</span> (Samples/Sources/Applications/HidVibrationPlayer) included in the SDK.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_104489019_h2_4">Considerations When Using Vibration Nodes</h2>
+<p>Performs update processing for all <code>VibrationNode</code> derived classes in the <span class="ApiLink_static_void_nn__hid__VibrationWriter__Update()_NN_NOEXCEPT">VibrationNode::Update()</span> function.<br />Update processing occurs even if each node is not connected, and processing time increases accordingly when generating large numbers of instances.<br />Avoid generating unnecessary instances.</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__VibrationNode', '../../../Api/HtmlNX/classnn_1_1hid_1_1_vibration_node.html' )
+SetUrl( 'ApiLink_VibrationValue_nn__hid__VibrationWriter__GetCurrentVibration()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1hid_1_1_vibration_node.html#aab4cd7a0eda977da43c004174c575a00' )
+SetUrl( 'ApiLink_nn__hid__VibrationPlayer', '../../../Api/HtmlNX/classnn_1_1hid_1_1_vibration_player.html' )
+SetUrl( 'ApiLink_nn__hid__VibrationWriter', '../../../Api/HtmlNX/classnn_1_1hid_1_1_vibration_writer.html' )
+SetUrl( 'ApiLink_nn__hid__VibrationMixer', '../../../Api/HtmlNX/classnn_1_1hid_1_1_vibration_mixer.html' )
+SetUrl( 'ApiLink_nn__hid__VibrationTarget', '../../../Api/HtmlNX/classnn_1_1hid_1_1_vibration_target.html' )
+SetUrl( 'ApiLink_nn__hid__VibrationNodeConnection', '../../../Api/HtmlNX/classnn_1_1hid_1_1_vibration_node_connection.html' )
+SetUrl( 'ApiLink_static_void_nn__hid__VibrationWriter__Update()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1hid_1_1_vibration_node.html#a73ea3eaf1cd9063985edcfa008e6796f' )
+SetUrl( 'ApiLink_nn__hid__VibrationWriter__DefaultVibrationSampleInterval', '../../../Api/HtmlNX/classnn_1_1hid_1_1_vibration_node.html#a86dbfc4b0d07247170570f9cf8d2456a' )
+SetUrl( 'ApiLink_NN_APILINK_HID_VIB_PLAY', '../../../Api/HtmlNX/_page_sample_hid_vibration_player.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

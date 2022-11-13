@@ -1,0 +1,287 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>SixAxisSensor | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- SixAxisSensor -->
+<div class="pagetitle" id="PageId_162930620">SixAxisSensor</div>
+<div class="text_separate">
+<h1 id="Anchor_162930620_h1_1">Six-Axis Sensor</h1>
+<h2 id="Anchor_162930620_h2_1">Overview</h2>
+<p>
+  <code>SixAxisSensor</code> is a mechanism for operating the three-axis accelerometer and the three-axis gyro sensor incorporated in various gamepad controllers.</p>
+<p>You can get the following input states from <code>SixAxisSensor</code> for as many as <span class="ApiLink_nn__hid__SixAxisSensorStateCountMax">SixAxisSensorStateCountMax</span> sensor values.</p>
+<ul>
+  <li>The time that has elapsed between the previous sampling and the current sampling</li>
+  <li>The sampling number each time the six-axis sensor input state is sampled</li>
+  <li>The acceleration (in units of G force) in each direction.</li>
+  <li>The angular velocity in each direction (360dps = 1.0).</li>
+  <li>The angle of rotation, calculated by summing the angular velocity in each direction (360 degrees = 1.0)</li>
+  <li>The orientation of the gamepad, expressed in quaternions.</li>
+</ul>
+<h3 id="Anchor_162930620_h3_1">Direction of Sensor Axes</h3>
+<p>The directions of the sensor axes are defined as right-handed orthogonal coordinate axes as shown in Figure 1. The yellow arrow shows the input acceleration and the arrows around each axis show the angular velocity.</p>
+<p>
+  <span class="ApiLink_nn__hid__SixAxisSensorState__acceleration">SixAxisSensorState::acceleration</span> is the acceleration (G) along each axis, and <span class="ApiLink_nn__hid__SixAxisSensorState__angularVelocity">SixAxisSensorState::angularVelocity</span> is the angular velocity around each axis (with 360 dps as a unit of 1.0).</p>
+<p>The positive direction for angular velocity is the right-handed screw direction for the positive direction along each axis.</p>
+<p>
+  <br />
+</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_104493475/113148995.png" width="300" class="embedded-image" />
+            </span>
+          </p>
+          <p style="text-align: center;">Figure 1. Correspondence Between Acceleration and Angular Velocity</p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_162930620_h3_2">Range of Values</h3>
+<p>The six-axis sensor in the Npad can measure acceleration in the range from &plusmn;7.0 G, and angular velocity in the range from &plusmn;1800 dps.</p>
+<p> The maximum absolute value that can be taken for the various <span class="ApiLink_nn__hid__SixAxisSensorState__acceleration">SixAxisSensorState::acceleration</span> member variables is <span class="ApiLink_nn__hid__AccelerometerMax">nn::hid::AccelerometerMax</span>. The maximum absolute value that can be taken for the various <span class="ApiLink_nn__hid__SixAxisSensorState__angularVelocity">SixAxisSensorState::angularVelocity</span> member variables is <span class="ApiLink_nn__hid__AngularVelocityMax">nn::hid::AngularVelocityMax</span>.</p>
+<h3 id="Anchor_162930620_h3_3">Rotation Angle</h3>
+<p>The angle of rotation of the gamepad follows the right hand screw rule: it is positive when rotated clockwise while facing in the positive direction along each axis</p>
+<p>The angle of rotation is a value that is saved in the system and is not reset when the application starts and ends.</p>
+<h3 id="Anchor_162930620_h3_4">Attitude Values</h3>
+<p>The three-dimensional position (<em>attitude</em>) of the gamepad is expressed by a combination of three vectors in an orthonormal system.</p>
+<p>When the gamepad is connected, the following values are set as the reference attitude of the device.</p>
+<ul>
+  <li>SixAxisSensorState::direction::x =&nbsp;{1.0, 0.0, 0.0}</li>
+  <li>SixAxisSensorState::direction::y =&nbsp;{0.0, 1.0, 0.0}</li>
+  <li>SixAxisSensorState::direction::z =&nbsp;{0.0, 0.0, 1.0}</li>
+</ul>
+<p>After the gamepad has been connected, its attitude is calculated by sampling the acceleration and angular velocity.</p>
+<p>The attitude is a value that is saved in the system and is not reset when the application starts and ends.</p>
+<h2 id="Anchor_162930620_h2_2">Using SixAxisSensor</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/nn_Log.h&gt;
+</span>
+<span class="cp">#include &lt;nn/hid/hid_Npad.h&gt;
+#include &lt;nn/hid/hid_NpadSixAxisSensor.h&gt;
+</span>
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">void</span> <span class="n">nnMain</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Target Npad ID.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::hid::</span><span class="n">NpadIdType</span> <span class="n">NpadIds</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::NpadId::</span><span class="n">No1</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::NpadId::</span><span class="n">No2</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::NpadId::</span><span class="n">No3</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::NpadId::</span><span class="n">No4</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="kt">int</span> <span class="n">NpadIdCountMax</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">NpadIds</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">NpadIds</span><span class="p">[</span><span class="mi">0</span><span class="p">]));</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Target play format.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">NpadStyleSet</span> <span class="n">Style</span> <span class="o">=</span> <span class="nn">nn::hid::NpadStyleFullKey::</span><span class="n">Mask</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Npad Initialization.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">InitializeNpad</span><span class="p">();</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SetSupportedNpadStyleSet</span><span class="p">(</span><span class="n">Style</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SetSupportedNpadIdType</span><span class="p">(</span><span class="n">NpadIds</span><span class="p">,</span> <span class="n">NpadIdCountMax</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Six-axis sensor handle.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SixAxisSensorHandle</span> <span class="n">handles</span><span class="p">[</span><span class="n">NpadIdCountMax</span><span class="p">][</span><span class="nn">nn::hid::</span><span class="n">NpadSixAxisSensorHandleCountMax</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">handleCounts</span><span class="p">[</span><span class="n">NpadIdCountMax</span><span class="p">];</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">NpadIdCountMax</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Gets the six-axis sensor handle.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">handleCounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nn">nn::hid::</span><span class="n">GetSixAxisSensorHandles</span><span class="p">(</span><span class="n">handles</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">NpadSixAxisSensorHandleCountMax</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NpadIds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Style</span><span class="p">);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;NpadId = %x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">NpadIds</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">handleCounts</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Starts six-axis sensor sampling.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">StartSixAxisSensor</span><span class="p">(</span><span class="n">handles</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(;;)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Gets the six-axis sensor input state.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">NpadIdCountMax</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">handleCounts</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SixAxisSensorState</span> <span class="n">states</span><span class="p">[</span><span class="nn">nn::hid::</span><span class="n">SixAxisSensorStateCountMax</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">GetSixAxisSensorStates</span><span class="p">(</span><span class="n">states</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::hid::</span><span class="n">SixAxisSensorStateCountMax</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">handles</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]);</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">Style</span><span class="p">.</span><span class="n">Test</span><span class="o">&lt;</span><span class="nn">nn::hid::</span><span class="n">NpadStyleFullKey</span><span class="o">&gt;</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;handle = %x, accelerometer = (%f, %f, %f)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">handles</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">acceleration</span><span class="p">.</span><span class="n">x</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">acceleration</span><span class="p">.</span><span class="n">y</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">acceleration</span><span class="p">.</span><span class="n">z</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+&nbsp;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Gets the <span class="ApiLink_int_nn__hid__GetSixAxisSensorHandles(SixAxisSensorHandle_*pOutValues|_int_count|_const_NpadIdType_&id|_NpadStyleSet_style)_NN_NOEXCEPT">SixAxisSensorHandle</span> value that corresponds to the target play format, using <span class="ApiLink_nn__hid__SixAxisSensorHandle">GetSixAxisSensorHandles()</span>.</p>
+<p>
+  <span class="ApiLink_nn__hid__SixAxisSensorHandle">SixAxisSensorHandle</span> is statically calculated from a combination of <span class="ApiLink_nn__hid__NpadStyleSet">NpadStyleSet</span> and <span class="ApiLink_nn__hid__NpadIdType">NpadIdType</span>. As such, it does not need to be reacquired, even after changing the connection configuration.</p>
+<p>You can get the <span class="ApiLink_nn__hid__NpadSixAxisSensorHandleCountMax">SixAxisSensorHandle</span> value for as many as <span class="ApiLink_nn__hid__SixAxisSensorHandle">NpadSixAxisSensorHandleCountMax</span> from one Npad.</p>
+<p>The number of <span class="ApiLink_nn__hid__SixAxisSensorHandle">SixAxisSensorHandle</span> that can be obtained is decided according to the play format.</p>
+<p>
+  <span class="ApiLink_nn__hid__NpadStyleFullKey">NpadStyleFullKey</span> and <span class="ApiLink_nn__hid__NpadStyleHandheld">NpadStyleHandheld</span> can get one <span class="ApiLink_nn__hid__SixAxisSensorHandle">SixAxisSensorHandle</span>.</p>
+<p>You can call <span class="ApiLink_nn__hid__SixAxisSensorHandle">GetSixAxisSensorState()</span> for the obtained <span class="ApiLink_void_nn__hid__GetSixAxisSensorState(SixAxisSensorState_*outValue|_const_SixAxisSensorHandle_&handle)_NN_NOEXCEPT">SixAxisSensorHandle</span> to get <span class="ApiLink_nn__hid__SixAxisSensorState">SixAxisSensorState</span>, the input state obtained from the latest six-axis sensor.</p>
+<p>To get a number of past input states, starting from the latest state, use <span class="ApiLink_int_nn__hid__GetSixAxisSensorStates(SixAxisSensorState_*outStates|_int_count|_const_SixAxisSensorHandle_&handle)_NN_NOEXCEPT">GetSixAxisSensorStates()</span>. You can get as many as <span class="ApiLink_nn__hid__SixAxisSensorStateCountMax">SixAxisSensorStateCountMax</span> past input states.</p>
+<p>Getting input states does not change the state of <code>SixAxisSensor</code>, so if you call the same function repeatedly, you get the same values each time unless the input state has been updated in the interim.</p>
+<p>The input state contains a number (<span class="ApiLink_nn__hid__SixAxisSensorState__samplingNumber">SixAxisSensorState::samplingNumber</span>) that increments with each update. This number can be used to determine the obtained input state.</p>
+<h3 id="Anchor_162930620_h3_5">Usable Styles of Operation</h3>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Style of Operation</th>
+      <th>NpadStyleSet Definition</th>
+      <th>Overview</th>
+    </tr>
+    <tr>
+      <td>Switch Pro Controller Play</td>
+      <td>
+        <span class="ApiLink_nn__hid__NpadStyleFullKey">NpadStyleFullKey</span>
+      </td>
+      <td>
+        <p>The play format (the style of operation) that models the Switch Pro Controller.<br />Compatible with a variety of different kinds of controllers.</p>
+        <p>If you call <span class="ApiLink_nn__hid__NpadStyleFullKey">GetSixAxisSensorHandles()</span> with the play format for the handle to get as <span class="ApiLink_int_nn__hid__GetSixAxisSensorHandles(SixAxisSensorHandle_*pOutValues|_int_count|_const_NpadIdType_&id|_NpadStyleSet_style)_NN_NOEXCEPT">NpadStyleFullKey</span>, <span class="ApiLink_nn__hid__SixAxisSensorHandle">SixAxisSensorHandle</span> for the Switch Pro Controller will be stored to the output pointer <code><em>pOutValues[0]</em></code>.</p>
+        <p />
+      </td>
+    </tr>
+    <tr>
+      <td>Handheld Controller Operations</td>
+      <td>
+        <span class="ApiLink_nn__hid__NpadStyleHandheld">NpadStyleHandheld</span>
+      </td>
+      <td>
+        <p>The style of operation for handling the buttons and sticks on a handheld game console.</p>
+        <p>
+          <br />
+        </p>
+        <p>If you call <span class="ApiLink_nn__hid__NpadStyleHandheld">GetSixAxisSensorHandles()</span> with the play format for the handle to get as <span class="ApiLink_int_nn__hid__GetSixAxisSensorHandles(SixAxisSensorHandle_*pOutValues|_int_count|_const_NpadIdType_&id|_NpadStyleSet_style)_NN_NOEXCEPT">NpadStyleHandheld</span>, the <span class="ApiLink_nn__hid__SixAxisSensorHandle">SixAxisSensorHandle</span> for the handheld controller will be stored to the output pointer, <code><em>pOutValues[0]</em></code>.</p>
+        <p />
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__hid__SixAxisSensorStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a80a9a791e140caca11257e5a1a33b286' )
+SetUrl( 'ApiLink_nn__hid__SixAxisSensorState__acceleration', '../../../Api/HtmlNX/structnn_1_1hid_1_1_six_axis_sensor_state.html#aa66ff48ea73363a4c112b65df7d39d60' )
+SetUrl( 'ApiLink_nn__hid__SixAxisSensorState__angularVelocity', '../../../Api/HtmlNX/structnn_1_1hid_1_1_six_axis_sensor_state.html#ad72278b7dd3bb8c5410d33eca1fe59a8' )
+SetUrl( 'ApiLink_nn__hid__AccelerometerMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a87d16cb0d039a8f0f0476acd206adf46' )
+SetUrl( 'ApiLink_nn__hid__AngularVelocityMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#aed9852ed5443cbe820a40b00322455f0' )
+SetUrl( 'ApiLink_int_nn__hid__GetSixAxisSensorHandles(SixAxisSensorHandle_*pOutValues|_int_count|_const_NpadIdType_&id|_NpadStyleSet_style)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a1afbbfec7a9390e95451faaaa0c43f0b' )
+SetUrl( 'ApiLink_nn__hid__SixAxisSensorHandle', '../../../Api/HtmlNX/structnn_1_1hid_1_1_six_axis_sensor_handle.html' )
+SetUrl( 'ApiLink_nn__hid__NpadStyleSet', '../../../Api/HtmlNX/namespacenn_1_1hid.html#ace65233620edda5185ed73112ca9805f' )
+SetUrl( 'ApiLink_nn__hid__NpadIdType', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a5923008962b52bf501f91b30013aedd6' )
+SetUrl( 'ApiLink_nn__hid__NpadSixAxisSensorHandleCountMax', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a0cdcd232368e229046b7341c30b0fa6f' )
+SetUrl( 'ApiLink_nn__hid__NpadStyleFullKey', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a594f4eed71a6821bd28283ce0a273fb1' )
+SetUrl( 'ApiLink_nn__hid__NpadStyleHandheld', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a162751ccfcb8408b822ee308ebe7a2c9' )
+SetUrl( 'ApiLink_void_nn__hid__GetSixAxisSensorState(SixAxisSensorState_*outValue|_const_SixAxisSensorHandle_&handle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#ae3fb413f442f5c150025765fd6c2cfb8' )
+SetUrl( 'ApiLink_nn__hid__SixAxisSensorState', '../../../Api/HtmlNX/structnn_1_1hid_1_1_six_axis_sensor_state.html' )
+SetUrl( 'ApiLink_int_nn__hid__GetSixAxisSensorStates(SixAxisSensorState_*outStates|_int_count|_const_SixAxisSensorHandle_&handle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a398156ef7f9aa6f9e7478f08260d88ff' )
+SetUrl( 'ApiLink_nn__hid__SixAxisSensorState__samplingNumber', '../../../Api/HtmlNX/structnn_1_1hid_1_1_six_axis_sensor_state.html#a6ccf04e3fbe49514265de2bc6f9e2e4d' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

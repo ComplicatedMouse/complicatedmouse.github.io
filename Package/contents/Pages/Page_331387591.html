@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>File Data Cache | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- File Data Cache -->
+<div class="pagetitle" id="PageId_331387591">File Data Cache</div>
+<div class="text_separate">
+<h1 id="Anchor_331387591_h1_1">Introduction</h1>
+<h2 id="Anchor_331387591_h2_1">File Data Cache</h2>
+<p>The file data cache feature caches file data accessed by the application in the <code>fs</code> library.</p>
+<p>The file data cache is provided for the following purposes.</p>
+<ul>
+  <li>
+    <strong>Improving File Access Performance</strong> <br />Caching file data in main memory tries to decrease the number of times that storage media is accessed and shorten the <code>fs</code> library&rsquo;s response time. File data caching can be enabled from the application by allocating memory and existing file operations can be used without major modifications, making it an easy way to improve file access performance.</li>
+  <li>
+    <strong>Reducing the Frequency of Read Operations From Storage</strong> <br />For the NX platform, applications must comply with the guidelines that stipulate how often storage media can be accessed per unit of time to preserve the data in storage media. (For more information, see the Nintendo Switch Guidelines and fs Library &gt; Debugging &gt; <a href="../Pages/Page_174228221.html">Checking the Frequency of Access </a>.) Caching the file data reduces the frequency of read operations from storage and helps the application comply with the guidelines.</li>
+</ul>
+<h2 id="Anchor_331387591_h2_2">
+  <span style="color: rgb(117,117,117);">Intended Audience</span>
+</h2>
+<p>The intended audience is all developers involved in application development. In particular, we recommend that the following developers consider using file data cache.</p>
+<ul>
+  <li>Developers investigating ways to improve file access performance</li>
+  <li>Developers investigating ways to reduce the frequency of read operations from storage</li>
+</ul>
+<h1 id="Anchor_331387591_h1_2">Overview</h1>
+<h2 id="Anchor_331387591_h2_3">Features</h2>
+<p>File data cache is provided as a feature of the <code>fs</code> library and works inside the application process. Note that this caching is not a feature provided by the system in the NX console.</p>
+<p>File data cache has the following characteristics.</p>
+<ul>
+  <li>
+    <strong>File caching functionality can be enabled and disabled by the application.</strong> <br />The file data cache function can be explicitly enabled or disabled by the application. Although some caching functionality is enabled by default when the application starts, it can be prevented.</li>
+  <li>
+    <strong>Use a portion of the memory available to the application for cache memory.</strong> <br />File data cache uses a portion of the memory available to the application as its cache memory. When the application enables file data cache, it must be allocate memory and explicitly provide it for use as file data cache.</li>
+  <li>
+    <strong>Cache operations use a portion of the CPU time available to the application.</strong> <br />Cache operations on file data cache are conducted inside the the <code>fs</code> library API when the application thread calls that API. This generates overhead associated with the cache operations that adds to the normal processing time for file access.</li>
+</ul>
+<p>You can use the FS access log to get information about what file data from storage is actually read by file data cache when the application makes file access requests. For more information, see the <a href="#Anchor_331387591_FileDataCache_FsAccessLog">fs Access Log</a> described below.</p>
+<h2 id="Anchor_331387591_h2_4">File Data Cache Types</h2>
+<p>The <code>fs</code> library provides the following types of file data caches, which can be differentiated by use case.</p>
+<ul>
+  <li>
+    <strong>Global File Data Cache</strong> <br />The <code>fs</code> library automatically caches file data according to file access by the application.<br />The caching functionality can be easily used because you do not have to know the file access patterns of an application in advance.<br />For more information, see fs Library &gt; Manual &gt; Features &gt; File Data Cache &gt; <a href="../Pages/Page_313329665.html">Global File Data Cache</a>.</li>
+  <li>
+    <strong>Individual File Data Cache</strong> <br />Individually caches data for files specified by the application to specified memory.<br />This feature is effective when you can specify files with high access frequency, and can allocate memory that is the size of those files.<br />For more information, see fs Library &gt; Manual &gt; Features &gt; File Data Cache &gt; <a href="../Pages/Page_331387295.html">Individual File Data Cache</a>.</li>
+</ul>
+<h2 id="Anchor_331387591_h2_5">File Data Cache Enabled on Application Start</h2>
+<p>In NX Add-On 10.0.0 and later, the global file data cache may be automatically enabled at application startup. For more information, see fs Library &gt; Manual &gt; Features &gt; File Data Cache &gt; <a href="../Pages/Page_313329665.html">Global File Data Cache</a>.</p>
+<p>The individual file data cache is not enabled on application start. It must always be explicitly enabled in the application.</p>
+<h2 id="Anchor_331387591_h2_6">Restrictions</h2>
+<p>File data cache does not work in the Windows environment. There are also cases where cache features would not work depending on the combination of the type of file data cache and the file system. For more information, see the restrictions for each file data cache.</p>
+<p>Note that the <code>fs</code> library does not return an error when file data is not cached due to any of these restrictions. To determine whether file data is actually cached, see the following section<a href="#Anchor_331387591_FileDataCache_FsAccessLog">fs Access Log</a>.</p>
+<h1 id="Anchor_331387591_h1_3">fs Access Log<a name="Anchor_331387591_FileDataCache_FsAccessLog"></a></h1>
+<p>The <code>fs</code> library provides the FS access log for purposes such as debugging the file system of the application and checking the frequency of access to storage media. For more information about getting the FS access log and other information, see fs Library &gt; Debugging &gt; <a href="../Pages/Page_174228221.html">Checking the Frequency of Access</a>.</p>
+<p>When the application uses file data cache, the following information is added to the FS access log.</p>
+<ul>
+  <li>The calls to <code><span class="ApiLink_nn__fs__EnableGlobalFileDataCache">nn::fs::EnableGlobalFileDataCache</span>()</code> and <code><span class="ApiLink_nn__fs__DisableGlobalFileDataCache">nn::fs::DisableGlobalFileDataCache</span>()</code></li>
+  <li>The calls to <code><span class="ApiLink_nn__fs__EnableIndividualFileDataCache">nn::fs::EnableIndividualFileDataCache</span>()</code> and <code><span class="ApiLink_nn__fs__DisableIndividualFileDataCache">nn::fs::DisableIndividualFileDataCache</span>()</code></li>
+  <li>The region of the file actually read from storage when the <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> function was called</li>
+  <li>The cache size, if global file data cache is automatically enabled at application startup</li>
+</ul>
+<h2 id="Anchor_331387591_h2_7">ReadFile() Access Log</h2>
+<p>Output from the <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> function uses the following format. This example includes line breaks to make it easier to understand, but in the actual FS access log this information appears on a single line.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>FS_ACCESS: {
+&nbsp;&nbsp;&nbsp;&nbsp;start:    10000,
+&nbsp;&nbsp;&nbsp;&nbsp;end:      10001,
+&nbsp;&nbsp;&nbsp;&nbsp;result:   0x00000000,
+&nbsp;&nbsp;&nbsp;&nbsp;handle:   0x1234567890ABCDEF,
+&nbsp;&nbsp;&nbsp;&nbsp;priority: Normal,
+&nbsp;&nbsp;&nbsp;&nbsp;function: &quot;ReadFile&quot;,
+&nbsp;&nbsp;&nbsp;&nbsp;offset:   0,
+&nbsp;&nbsp;&nbsp;&nbsp;size:     65536,
+&nbsp;&nbsp;&nbsp;&nbsp;fetched: [
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ offset: 0, size: 16384 },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ offset: 49152, size: 16384 }
+&nbsp;&nbsp;&nbsp;&nbsp;]
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The entry for <code>fetched</code> represents the region of the file that was actually read from storage. In the preceding example, the application requested the reading of 64 KB from the start of the file, but the <code>fs</code> library actually read only the first 16 KB and the last 16 KB. The middle 32 KB of data was returned to the application from the data cached in the library.</p>
+<p>Sometimes the entry for <code>fetched</code> is empty. That indicates that the entire file region requested by the application was already cached and there was no access to storage.</p>
+<p>If file data cache has not been enabled by the application or is not enabled due to one of the restrictions described in <a href="#Anchor_331387591_h2_6">Restrictions</a>, the entry for <code>fetched</code> is not added to the FS access log.</p>
+<p>If file data cache has been enabled, <a href="../Pages/Page_171997878.html">FsAccessLogChecker</a> (the tool for checking the frequency of access to storage media) determines the access frequency based only on the regions actually read from storage.</p>
+<h2 id="Anchor_331387591_h2_8">Global File Data Cache Access Log Enabled at Application Startup</h2>
+<p>A special FS access log is generated if global file data cache is automatically enabled at application start. When an application first calls the <code>fs</code> API with FS access log output, the <code>fs</code> library generates the following log at the head.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>FS_ACCESS: { sdk_version: 10.0.0, spec: NX }
+FS_ACCESS: { default_global_file_data_cache_size: 33554432 }
+...</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The <code>default_global_file_data_cache_size</code> entry indicates that global file data cache is automatically enabled at application start. The preceding example also shows that the cache size is 32 MB.</p>
+<p>If a <code>default_global_file_data_cache_size</code> entry is not generated, global file data cache is not enabled at application start.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__fs__EnableGlobalFileDataCache', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a1cb2578c957151c15e7a61836173bdc2' )
+SetUrl( 'ApiLink_nn__fs__DisableGlobalFileDataCache', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a31f154d34fd5f9d2d9bc0d742d745b6a' )
+SetUrl( 'ApiLink_nn__fs__EnableIndividualFileDataCache', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a2d72712742fd49f26a5bd36cce94d481' )
+SetUrl( 'ApiLink_nn__fs__DisableIndividualFileDataCache', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a774744bdd98a6a252de1262ce56f4ef6' )
+SetUrl( 'ApiLink_nn__fs__ReadFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a90b280140b3e9d7eb83af3e807e4c0c3' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

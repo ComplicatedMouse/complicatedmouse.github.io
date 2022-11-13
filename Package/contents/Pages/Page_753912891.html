@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Example 9: Take a Profile and Exit the Profiler | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Example 9: Take a Profile and Exit the Profiler -->
+<div class="pagetitle" id="PageId_753912891">Example 9: Take a Profile and Exit the Profiler</div>
+<div class="text_separate">
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre># Take a profile and exit the profiler
+#   1. Request the profiler to exit when the script finishes.
+#   2. Take a profile.
+#   3. Do some profile validation.
+# Note: This example assumes there is already a dev kit synced.
+
+
+# 1. Request the profiler to exit when the script finishes.
+Profiler-Exit 0 -WarningsAsErrors
+
+# 2. Take a profile.
+# Ensure that some specific settings are set.
+Profiler-Callstacks $true
+Profiler-NX-Cores 0 1 2
+
+# Wait for the UI to be able to take a profile
+Profiler-WaitFor ReadyToProfile
+
+Profiler-Start Sampled
+Start-Sleep 0.5
+
+# We silently continue here as Stop can produce errors if profiling has already finished.
+Profiler-Stop -ErrorAction SilentlyContinue
+
+# Wait for the profile to be received and loaded
+Profiler-WaitFor ProfileReceived
+
+# 3. Do some profile validation.
+$functions = Profiler-Copy Functions -NoClipboard
+$threads = Profiler-Copy Threads -NoClipboard
+Profiler-TreeControl CallTree ExpandAll
+$callTree = Profiler-Copy CallTree -ExtendedParam All -NoClipboard
+
+$functionCount = ($functions -split [System.Environment]::NewLine).Length - 3
+$threadCount = ($threads -split [System.Environment]::NewLine).Length - 5
+$callTreeCount = ($callTree -split [System.Environment]::NewLine).Length - 3
+
+if ($functionCount -le 0)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;Write-Error &quot;Did not see any functions.&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;exit
+}
+if ($threadCount -le 0)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;Write-Error &quot;Did not see any threads.&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;exit
+}
+if ($callTreeCount -le 0)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;Write-Error &quot;Did not contain any data in the call tree.&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;exit
+}
+
+Write-Output &quot;Everything is okay.&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

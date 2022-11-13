@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Callbacks | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Callbacks -->
+<div class="pagetitle" id="PageId_83956157">Callbacks</div>
+<div class="text_separate">
+<h1 id="Anchor_83956157_h1_1">Callbacks</h1>
+<p>A variety of callbacks have been prepared in the effect runtime for executing user-specific processes.</p>
+<ul>
+  <li>Callbacks that work with custom shaders and custom actions.</li>
+  <li>Rendering Pass Callback</li>
+  <li>Profiler callback for the render emitter.</li>
+</ul>
+<h2 id="Anchor_83956157_h2_1">Callbacks That Work With Custom Shaders and Custom Actions</h2>
+<p>There is a distinctive way to control calls to the callback function sets. You use the EffectMaker UI to specify which function in the registered callback function set to execute. Developers must implement contrivances in both EffectMaker and the effect runtime. For more information, see the documentation for custom shaders and for custom actions.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955583/108102073.png" width="800" class="embedded-image" />
+  </span>
+</p>
+<h3 id="Anchor_83956157_h3_1">Per Emitter</h3>
+<p>Callbacks that are invoked by emitter processes can be set for the following times.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Timing of Call</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <p>When initializing the emitter.</p>
+      </td>
+      <td>EmitterInitializeCallback</td>
+      <td>
+        <p>This callback function is invoked when the emitter is created.</p>
+        <p>It is used to prepare independent working memories for each emitter.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Emitter Finalization</td>
+      <td>EmitterFinalizeCallback</td>
+      <td>This callback function is invoked when the emitter is destroyed.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>Before Emitter Calculation</p>
+      </td>
+      <td>EmitterPreCalculateCallback</td>
+      <td>This callback function is invoked before the emitter calculations are processed.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>After Emitter Calculation</p>
+      </td>
+      <td>EmitterPostCalculateCallback</td>
+      <td>
+        <p>This callback function is invoked after the emitter calculations are processed.</p>
+        <p>It is used to access the information for all particles that have been calculated, etc.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Before Emitter Rendering</p>
+      </td>
+      <td>EmitterDrawCallback</td>
+      <td>
+        <p>This callback function is invoked before rendering the emitter.</p>
+        <p>You can cancel the rendering process of the emitter that invokes the callback by returning <code>true</code> in the callback function.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>After performing emitter rendering settings</p>
+      </td>
+      <td>RenderStateSetCallback</td>
+      <td>
+        <p>This callback function is called immediately before rendering the emitter.</p>
+        <p>Used in several situations. For example, it is used to set a proprietary constant buffer or texture when using a custom shader, or when canceling a default draw setting.</p>
+        <p />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <span class="status-macro aui-lozenge aui-lozenge-complete">Related Links</span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_83955731.html">Custom Shader Examples</a>
+      </th>
+      <td>The custom shader tutorial. There is a code sample that uses <code>RenderStateSetCallback</code>.</td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<h3 id="Anchor_83956157_h3_2">Per Particle</h3>
+<p>Callbacks that are invoked per particle can be set for the following times. Because these callbacks are invoked by every particle, take note of the number of particles being emitted. In CPU emitters, all callbacks are available, but in GPU and GPU-SO emitters, callbacks are available only when particles are emitted and die.</p>
+<p>Actions for particles occur via the <code><span class="ApiLink_nn__vfx__ParticleCalculateArg">nn::vfx::ParticleCalculateArg</span></code> class that is passed as an argument to the callback function. Various getters and setters, including particle position, speed, and color, are implemented in the <code><span class="ApiLink_nn__vfx__ParticleCalculateArg">nn::vfx::ParticleCalculateArg</span></code> class.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Timing of Call</th>
+      <th>Type</th>
+      <th>Limitations</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <p>When Particle is Emitted</p>
+      </td>
+      <td>ParticleEmitCallback</td>
+      <td style="text-align: left;">None</td>
+      <td>This callback is invoked for each emitted particle when particles are being emitted.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>When Particle Dies</p>
+      </td>
+      <td>ParticleRemoveCallback</td>
+      <td style="text-align: left;">None</td>
+      <td>This callback is invoked for each deleted particle when particles die.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>When Particle is Calculated</p>
+      </td>
+      <td>ParticleCalculateCallback</td>
+      <td style="text-align: left;">
+        <p>CPU Emitter</p>
+        <p>Only the time is enabled.</p>
+      </td>
+      <td>This callback is invoked for each particle when particle calculations take place.</td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<h3 id="Anchor_83956157_h3_3">Setting the Callbacks in the Runtime</h3>
+<p>To set a callback in the effect system, use the <code><span class="ApiLink_nn__vfx__CallbackSet">nn::vfx::CallbackSet</span></code> structure. Because there are callback function pointer members at both the emitter and particle level within the <code><span class="ApiLink_nn__vfx__CallbackSet">nn::vfx::CallbackSet</span></code> structure, you can initialize only the type of callback function pointer member you want to use, and then add it to the effect system.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>//  Particle calculation callback function.
+static void _ParticleCalcCallback( nn::vfx::ParticleCalcArg&amp; arg )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nw::math::VEC3 worldPos;
+&nbsp;&nbsp;&nbsp;&nbsp;arg.GetWorldPos( &amp;worldPos );
+&nbsp;&nbsp;&nbsp;&nbsp;worldPos.y += 1.0f;
+&nbsp;&nbsp;&nbsp;&nbsp;arg.SetWorldPos( worldPos );
+}
+
+// Set a particle calculation callback on custom action 1.
+nn::vfx::CallbackSet set;
+set.particleCalc = _ParticleCalcCallback;
+system-&gt;SetCallback( nw::vfx::CallbackId_CustomAction1, set );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__vfx__ParticleCalculateArg', '../../../Api/HtmlNX/namespacenn_1_1vfx.html#a95f3e019e5f461a972ee70d05f6cdd73' )
+SetUrl( 'ApiLink_nn__vfx__CallbackSet', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_callback_set.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

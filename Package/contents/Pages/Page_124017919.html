@@ -1,0 +1,282 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Filter | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Filter -->
+<div class="pagetitle" id="PageId_124017919">Filter</div>
+<div class="text_separate">
+<h1 id="Anchor_124017919_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_124017919_h2_1">Filter Type</a>
+    </li>
+    <li>
+      <a href="#Anchor_124017919_h2_2">Filter Settings</a>
+    </li>
+    <li>
+      <a href="#Anchor_124017919_h2_3">Biquad Filter Types Available as Presets</a>
+    </li>
+    <li>
+      <a href="#Anchor_124017919_h2_4">Using User-Defined Filters</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_124017919_h3_1">Make a Class for User-Defined Filters</a>
+      </li>
+      <li>
+        <a href="#Anchor_124017919_h3_2">Add the User-Defined Filter to nn::atk::SoundSystem</a>
+      </li>
+      <li>
+        <a href="#Anchor_124017919_h3_3">Call the Added Filter</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_124017919_h1_2">Filter</h1>
+<p>Sounds from beyond a wall or far away are more hollow than sounds heard up close.</p>
+<p>This section describes how to use filters to apply changes to the tone of sounds in real time.</p>
+<p>The filter sample code is located in the <code>AtkFilter.cpp</code> file in the <code>Samples\Sources\Applications\AtkFilter</code> directory.</p>
+<h2 id="Anchor_124017919_h2_1">Filter Type</h2>
+<p>Two types of filters, a low-pass filter or a biquad filter, may be applied for <code>atk</code>.</p>
+<p>Applying a low-pass filter produces a hollow sound.</p>
+<p>The biquad filter enables you to specify parameters to modify how the tone changes.</p>
+<p>Three filter presets are currently available: low-pass filters, high-pass filters, and bandpass filters.</p>
+<p>For more information, see <a href="#Anchor_124017919_PRESET_FILTER">Biquad Filter Types Available as Presets</a>.</p>
+<p>Other than the presets, the biquad filter can also be used as a user-defined filter.</p>
+<p>You can combine the low-pass filter and high-pass filter to combine the effects of both filters.</p>
+<h2 id="Anchor_124017919_h2_2">Filter Settings</h2>
+<p>Functions for filter settings are prepared in the <code><span class="ApiLink_nn__atk__SoundHandle">nn::atk::SoundHandle</span></code> class, <code><span class="ApiLink_nn__atk__SoundPlayer">nn::atk::SoundPlayer</span></code> class, and <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code> class.</p>
+<p>
+  <code>SetLowPassFilterFrequency()</code> is used for low-pass filter settings and <code>SetBiquadFilter()</code> is used for biquad filter settings.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Set LPF. (Set in the range from -1.0f to 0.0f.)
+</span><span class="n">g_SoundHandle</span><span class="p">.</span><span class="n">SetLowPassFilterFrequency</span><span class="p">(</span><span class="o">-</span><span class="mf">0.3f</span><span class="p">);</span>
+<span class="c1">// Set the biquad filter. (Set in the range from 0.0f to 1.0f.)
+</span><span class="n">g_SoundHandle</span><span class="p">.</span><span class="n">SetBiquadFilter</span><span class="p">(</span><span class="nn">nn::atk::</span><span class="n">BiquadFilterType_HighPassFilter</span><span class="p">,</span> <span class="mf">0.7f</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::atk::</span><span class="n">SoundPlayer</span><span class="o">&amp;</span> <span class="n">player</span> <span class="o">=</span> <span class="n">g_SoundArchivePlayer</span><span class="p">.</span><span class="n">GetSoundPlayer</span><span class="p">(</span><span class="n">PLAYER_DEFAULT</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Set LPF. (Set in the range from -1.0f to 0.0f.)
+</span><span class="n">player</span><span class="p">.</span><span class="n">SetLowPassFilterFrequency</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2f</span><span class="p">);</span>
+<span class="c1">// Set the biquad filter. (Set in the range from 0.0f to 1.0f.)
+</span><span class="n">player</span><span class="p">.</span><span class="n">SetBiquadFilter</span><span class="p">(</span><span class="nn">nn::atk::</span><span class="n">BiquadFilterType_LowPassFilter</span><span class="p">,</span> <span class="mf">0.8f</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Set LPF. (Set in the range from -1.0f to 0.0f.)
+</span><span class="n">g_SoundActor</span><span class="p">.</span><span class="n">SetLowPassFilterFrequency</span><span class="p">(</span><span class="o">-</span><span class="mf">0.7f</span><span class="p">);</span>
+<span class="c1">// Set the biquad filter. (Set in the range from 0.0f to 1.0f.)
+</span><span class="n">g_SoundActor</span><span class="p">.</span><span class="n">SetBiquadFilter</span><span class="p">(</span><span class="nn">nn::atk::</span><span class="n">BiquadFilterType_BandPassFilter512</span><span class="p">,</span> <span class="mf">0.2f</span><span class="p">)</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The default value when <code>SetLowPassFilterFrequency()</code> is not set is <code>0.0f</code>,</p>
+<p>and the default value when <code>SetBiquadFilter()</code> is not set is <code><span class="ApiLink_nn__atk__BiquadFilterType_Inherit">nn::atk::BiquadFilterType_Inherit</span></code>, <code>0.0f</code>.</p>
+<p>In addition, for operations when settings are configured for two or more of the <code><span class="ApiLink_nn__atk__SoundHandle">nn::atk::SoundHandle</span></code> class, <code><span class="ApiLink_nn__atk__SoundPlayer">nn::atk::SoundPlayer</span></code> class, and <code><span class="ApiLink_nn__atk__SoundActor">nn::atk::SoundActor</span></code> class,</p>
+<p>see the behavior specifications in the <a href="../Pages/Page_83955829.html">Sound Parameter Control Operations</a> page.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Noise can occur, depending on when the filter is configured, if the sound to configure is being played back.</p>
+    <p>You can avoid noise by either stopping the sound or fading out the sound volume.</p>
+  </div>
+</div>
+<h2 id="Anchor_124017919_h2_3">
+  <a name="Anchor_124017919_PRESET_FILTER"></a>Biquad Filter Types Available as Presets</h2>
+<p>The following presets are available as biquad filters that can be specified in <code>SetBiquadFilter()</code>.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>BiquadFilterType</th>
+      <th>
+        <p>Description</p>
+      </th>
+    </tr>
+    <tr>
+      <td>BiquadFilterType_Inherit</td>
+      <td>Use the filter parameters of lower-priority than the local host (dev).</td>
+    </tr>
+    <tr>
+      <td>BiquadFilterType_None</td>
+      <td>Setting to not apply any filter.</td>
+    </tr>
+    <tr>
+      <td>BiquadFilterType_LowPassFilter</td>
+      <td>This filter is a low-pass filter.</td>
+    </tr>
+    <tr>
+      <td>BiquadFilterType_HighPassFilter</td>
+      <td>This filter is a high-pass filter.</td>
+    </tr>
+    <tr>
+      <td>BiquadFilterType_BandPassFilter512</td>
+      <td>Band-pass filter with a center frequency of 512 Hz.</td>
+    </tr>
+    <tr>
+      <td>BiquadFilterType_BandPassFilter1024</td>
+      <td>Band-pass filter with a center frequency of 1024 Hz.</td>
+    </tr>
+    <tr>
+      <td>BiquadFilterType_BandPassFilter2048</td>
+      <td>Band-pass filter with a center frequency of 2048 Hz.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The way in which a preset biquad filter will be applied will vary with the renderer's sample rate. <br />Filters will be applied as they are in NW4F when the sample rate is 32 kHz.</p>
+  </div>
+</div>
+<h2 id="Anchor_124017919_h2_4">Using User-Defined Filters</h2>
+<p>In addition to the biquad filters that available by default, the user may also define and use biquad filters.</p>
+<p>This section describes how to use user-defined filters. Use the following workflow.</p>
+<h3 id="Anchor_124017919_h3_1">Make a Class for User-Defined Filters</h3>
+<p>Create a user-defined biquad filter class.</p>
+<p>More specifically, create a user-defined class that inherits the <code><span class="ApiLink_nn__atk__BiquadFilterCallback">nn::atk::BiquadFilterCallback</span></code> class, and override the <code>GetCoefficients()</code> function.</p>
+<p>Store the process results in the <code>pOutValue</code> parameter of the <code>GetCoefficients()</code> function to apply a filter with the coefficients set in <code>pOutValue</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">class</span> <span class="nc">UserFilter</span> <span class="o">:</span> <span class="k">public</span> <span class="nn">nn::atk::</span><span class="n">BiquadFilterCallback</span>
+<span class="p">{</span>
+<span class="p">...</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">virtual</span> <span class="kt">void</span> <span class="n">GetCoefficients</span><span class="p">(</span><span class="n">Coefficients</span><span class="o">*</span> <span class="n">pOutValue</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">float</span> <span class="n">value</span><span class="p">)</span> <span class="k">const</span> <span class="n">NN_NOEXCEPT</span> <span class="n">NN_OVERRIDE</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Code the desired process here, and then store the calculation results in pOutValue.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">...</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_124017919_h3_2">Add the User-Defined Filter to nn::atk::SoundSystem</h3>
+<p>Add the user-defined filter you created to <code><span class="ApiLink_nn__atk__SoundSystem">nn::atk::SoundSystem</span></code>. The user-defined filter can then be called from the corresponding <code><span class="ApiLink_nn__atk__SoundHandle">nn::atk::SoundHandle</span></code>.</p>
+<p>Use the <code><span class="ApiLink_nn__atk__SoundSystem__SetBiquadFilterCallback">nn::atk::SoundSystem::SetBiquadFilterCallback</span>()</code> function to add the user-defined filter to the sound system.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">UserFilter</span> <span class="n">userFilter0</span><span class="p">;</span>
+<span class="c1">// Add user-defined filter.
+</span><span class="nn">nn::atk::SoundSystem::</span><span class="n">SetBiquadFilterCallback</span><span class="p">(</span><span class="nn">nn::atk::</span><span class="n">BiquadFilterType_User0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">userFilter0</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_124017919_h3_3">Call the Added Filter</h3>
+<p>After playing a sound source, call the added filter from the <code>SetBiquadFilter()</code> function to apply the user-defined filter.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">g_SoundHandle</span><span class="p">.</span><span class="n">SetBiquadFilter</span><span class="p">(</span><span class="nn">nn::atk::</span><span class="n">BiquadFilterType_User0</span><span class="p">,</span> <span class="mf">0.2f</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk__SoundHandle', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_handle.html' )
+SetUrl( 'ApiLink_nn__atk__SoundPlayer', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_player.html' )
+SetUrl( 'ApiLink_nn__atk__SoundActor', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_actor.html' )
+SetUrl( 'ApiLink_nn__atk__BiquadFilterType_Inherit', '../../../Api/HtmlNX/namespacenn_1_1atk.html#a86fcc00c20e24b0f9620b5de37fca776a8bc5a22344cead67b7b6db809d93f17b' )
+SetUrl( 'ApiLink_nn__atk__BiquadFilterCallback', '../../../Api/HtmlNX/classnn_1_1atk_1_1_biquad_filter_callback.html' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem__SetBiquadFilterCallback', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html#a815ec150cb069969f831f10722ffaa9b' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

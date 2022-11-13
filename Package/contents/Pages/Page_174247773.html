@@ -1,0 +1,514 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Handling Errors | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Handling Errors -->
+<div class="pagetitle" id="PageId_174247773">Handling Errors</div>
+<div class="text_separate">
+<h1 id="Anchor_174247773_h1_1">
+  <span style="color: rgb(117,117,117);">Overview</span>
+</h1>
+<p>This page describes error handling for the file system.</p>
+<h2 id="Anchor_174247773_h2_1">Result Handling</h2>
+<p>The following three kinds of errors can occur in the file system.</p>
+<ul>
+  <li>Errors for the application to handle</li>
+  <li>Errors that must not occur in retail products</li>
+  <li>Fatal errors</li>
+</ul>
+<h3 id="Anchor_174247773_h3_1">Errors for the Application to Handle</h3>
+<p>These errors can arise for the following reasons.</p>
+<ul>
+  <li>A specified file or directory already exists.</li>
+  <li>A specified file or directory does not exist.</li>
+  <li>A specified file or directory is locked.</li>
+  <li>Child entries exist in a directory you want to delete.</li>
+  <li>Insufficient space.</li>
+  <li>Reading and writing to a file after writing has failed without first closing and reopening the file.</li>
+</ul>
+<p>If these errors occur, an error result is returned to the application and operation continues. Make sure that you implement error handling if these errors are expected to occur.</p>
+<p>To be specific, handle the errors as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="n">FunctionXXXXXX</span><span class="p">();</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultXXXXXX::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processing when an error occurs.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>When you are certain that errors that must be handled by the application, such as <code>OpenFile()</code> when the target file definitely exists, will not occur, it is fine for error handling implementation to cause exits by using a macro such as <code><span class="ApiLink_NN_ABORT_UNLESS_RESULT_SUCCESS">NN_ABORT_UNLESS_RESULT_SUCCESS</span>()</code>. Debug the application so that exits to not occur in the retail product.</p>
+<h3 id="Anchor_174247773_h3_2">Errors That Must Not Occur in Retail Products<a name="Anchor_174247773_ErrorsThatMustNotOccurInRetailProducts"></a></h3>
+<p>These errors can arise for the following reasons.</p>
+<ul>
+  <li>Illegal call by a parameter</li>
+  <li>A call that violates a precondition</li>
+  <li>Writing to a read-only file system</li>
+  <li>Insufficient journaling area for save data</li>
+  <li>Using unimplemented features</li>
+</ul>
+<p>No error result is returned for these kinds of errors. When these errors occur, the application is forcibly stopped by an abort in the library, and the system displays an error message.</p>
+<p>Do not let these kinds of errors occur in your retail product.</p>
+<h3 id="Anchor_174247773_h3_3">Fatal Errors</h3>
+<p>These errors can arise for the following reasons.</p>
+<ul>
+  <li>Data is corrupted.</li>
+  <li>Insufficient system memory.</li>
+  <li>No ROM.</li>
+  <li>The NCA file does not have a specific region.</li>
+  <li>Media error.</li>
+  <li>Unknown error.</li>
+</ul>
+<p>No error result is returned for these kinds of errors. When these errors occur, the application is forcibly stopped by an abort in the library, and the system displays an error message.</p>
+<p>You do not need to consider these kinds of errors when implementing your application.</p>
+<h2 id="Anchor_174247773_h2_2">Error Handling in File Systems</h2>
+<p>   </p>
+<div class="section">The simplified C++ code provides a guide for error handling in file systems.</div>
+<h3 id="Anchor_174247773_h3_4">File Systems That Handle Resource Data</h3>
+<h4 id="Anchor_174247773_h4_1">Mounting Process</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// When mounting a file system that handles resource data, you need a cache buffer prepared by the application.
+// A cache buffer cannot be released until it is unmounted. 
+</span>&nbsp;
+<span class="c1">// Gets the buffer size required for the cache.
+// When this fails, handling for an exit in the library is not necessary.
+</span><span class="kt">size_t</span> <span class="n">romCacheSize</span><span class="p">;</span>
+<span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">QueryMountRomCacheSize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">romCacheSize</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Allocates the cache buffer.
+</span><span class="kt">char</span><span class="o">*</span> <span class="n">romCacheBuffer</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">char</span><span class="p">[</span><span class="n">romCacheSize</span><span class="p">];</span>
+
+<span class="c1">// Mounts the file system.
+// There are no errors that must be handled in the retail product. // When there is a failure, cause an abort.
+</span><span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">MountRom</span><span class="p">(</span><span class="n">mountName</span><span class="p">,</span> <span class="n">romCacheBuffer</span><span class="p">,</span> <span class="n">romCacheSize</span><span class="p">);</span>
+<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span><span class="n">result</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_174247773_h4_2">Unmounting Process</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Unmounts the file system.
+// This function does not return a result.
+</span><span class="nn">nn::fs::</span><span class="n">Unmount</span><span class="p">(</span><span class="n">mountName</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// After unmounting, the cache buffer can be released.
+</span><span class="k">delete</span><span class="p">[]</span> <span class="n">romCacheBuffer</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_174247773_h4_3">Directory Operations</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Opens the directory.
+</span><span class="nn">nn::fs::</span><span class="n">DirectoryHandle</span> <span class="n">handle</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">OpenDirectory</span><span class="p">(</span><span class="o">&amp;</span><span class="n">handle</span><span class="p">,</span> <span class="n">directoryPath</span><span class="p">,</span> <span class="n">openDirectoryMode</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultPathNotFound::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: Directory does not exist for the directoryPath.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Verify that the path is correct and that the resource data has been built correctly.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span>&nbsp;
+<span class="c1">// Gets the number of entries in the directory.
+// When this fails, handling for an exit in the library is not necessary.
+</span><span class="kt">int64_t</span> <span class="n">entryCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">GetDirectoryEntryCount</span><span class="p">(</span><span class="o">&amp;</span><span class="n">entryCount</span><span class="p">,</span> <span class="n">handle</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Enumerates the entries in the directory.
+// Handling is not necessary because an error is never returned.
+</span><span class="kt">int64_t</span> <span class="n">readEntryCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="nn">nn::fs::</span><span class="n">DirectoryEntry</span> <span class="n">directoryEntryList</span><span class="p">[</span><span class="mi">20</span><span class="p">];</span>
+<span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">ReadDirectory</span><span class="p">(</span><span class="o">&amp;</span><span class="n">readEntryCount</span><span class="p">,</span> <span class="n">directoryEntryList</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Closes the directory.
+// This function does not return a result.
+</span><span class="nn">nn::fs::</span><span class="n">CloseDirectory</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_174247773_h4_4">File Operations</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Open file.
+</span><span class="nn">nn::fs::</span><span class="n">FileHandle</span> <span class="n">handle</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">OpenFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">handle</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">openFileMode</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultPathNotFound::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: File does not exist for the filePath.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Verify that the path is correct and that the resource data has been built correctly.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span>&nbsp;
+<span class="c1">// Gets the file size.
+// When this fails, handling for an exit in the library is not necessary.
+</span><span class="kt">int64_t</span> <span class="n">fileSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">GetFileSize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fileSize</span><span class="p">,</span> <span class="n">handle</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Loads the file in the buffer.
+// ReadFile is overloaded, but regardless, handling is not necessary because an error is never returned.
+</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">ReadFile</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">readBuffer</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Closes the file.
+// This function does not return a result.
+</span><span class="nn">nn::fs::</span><span class="n">CloseFile</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_174247773_h3_5">Save Data File Systems</h3>
+<div class="platform_nx">
+  <h4 id="Anchor_174247773_h4_5">Creating and Updating Sizes With the NMETA File</h4>
+  <p>For more information about the need to run <code><span class="ApiLink_nn__fs__EnsureSaveData">nn::fs::EnsureSaveData</span>()</code>, see the Creating Save Data With the Application section in <a href="../Pages/Page_107782148.html">Save Data (NX Add-On)</a>.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// Save data not created by the system must be created by the application before mounting.
+// When the size denoted in the NMETA file is larger than the size of the existing save data, this function extends the size of the save data.
+</span><span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">EnsureSaveData</span><span class="p">(</span><span class="n">userId</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultUsableSpaceNotEnough::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: Insufficient capacity to create save data or extend its size.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Messages indicating insufficient capacity are automatically displayed by the system in the error viewer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// When this error occurs, the required response would be for the application to cancel account selection operations and return to the previous scene, because the creation of save data did not occur as planned, or the new save data settings did not occur.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="Anchor_174247773_h4_6">Extending Size at Any Time</h4>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// Increases the save data size as desired.
+</span><span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">ExtendSaveData</span><span class="p">(</span><span class="n">userId</span><span class="p">,</span> <span class="n">saveDataSize</span><span class="p">,</span> <span class="n">saveDataJournalSize</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultUsableSpaceNotEnough::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: Insufficient capacity to extend the save data size.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Messages indicating insufficient capacity are automatically displayed by the system in the error viewer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// When this error occurs, the required response would be for the application to cancel account selection operations and return to the previous scene, because new save data settings did not occur.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<h4 id="Anchor_174247773_h4_7">Mounting Process</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// When mounting the save data file system, a user account identifier is required.
+// There are no errors that must be handled in the retail product. // When there is a failure, cause an abort.
+</span><span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">MountSaveData</span><span class="p">(</span><span class="n">mountName</span><span class="p">,</span> <span class="n">userId</span><span class="p">);</span>
+<span class="n">NN_ABORT_UNLESS_RESULT_SUCCESS</span><span class="p">(</span><span class="n">result</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_174247773_h4_8">Committing Process</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Commit the save data update.
+// When this fails, handling for an exit in the library is not necessary.
+</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">Commit</span><span class="p">(</span><span class="n">mountName</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_174247773_h4_9">Unmounting Process</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Unmounts the file system.
+// If you unmount without committing, the contents revert to the time of the previous commit.
+// This function does not return a result.
+</span><span class="nn">nn::fs::</span><span class="n">Unmount</span><span class="p">(</span><span class="n">mountName</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_174247773_h4_10">Directory Creation and Deletion</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Creates a directory.
+</span><span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">CreateDirectory</span><span class="p">(</span><span class="n">directoryPath</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultPathNotFound::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: The parent directory does not exist.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Perform the processing to create the parent directory. Or verify that the path is correct.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultPathAlreadyExists::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">||</span> <span class="nn">nn::fs::ResultTargetLocked::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: A directory with the same name already exists.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Perform processing appropriate when the directory you are trying to create already exists. Or verify that the path is correct.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultUsableSpaceNotEnough::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: Insufficient data save memory for save data.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span>&nbsp;
+<span class="c1">// Deletes the directory.
+</span><span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">DeleteDirectory</span><span class="p">(</span><span class="n">directoryPath</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultPathNotFound::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: The directory does not exist.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Verify that the path is correct.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultDirectoryNotEmpty::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: Cannot delete because child entries exist in the directory.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Delete the child entries and then retry.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultTargetLocked::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: Cannot delete because either the directory or child entries are open.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Close and then try again.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_174247773_h4_11">File Creation and Deletion</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Create a file.
+</span><span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">CreateFile</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">fileSize</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultPathNotFound::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: The parent directory does not exist.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Perform the processing to create the parent directory. Or verify that the path is correct.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultPathAlreadyExists::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">||</span> <span class="nn">nn::fs::ResultTargetLocked::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: A file with the same name already exists.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Perform processing appropriate when the file you are trying to create already exists. Or verify that the path is correct.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultUsableSpaceNotEnough::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: Insufficient data save memory for save data.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span>&nbsp;
+<span class="c1">// Deletes the file.
+</span><span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">DeleteFile</span><span class="p">(</span><span class="n">filePath</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultPathNotFound::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: The file does not exist.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Verify that the path is correct.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultTargetLocked::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: The file cannot be deleted because it is open.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Close and then try again.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_174247773_h4_12">Directory Operations</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Opens the directory.
+</span><span class="nn">nn::fs::</span><span class="n">DirectoryHandle</span> <span class="n">handle</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">OpenDirectory</span><span class="p">(</span><span class="o">&amp;</span><span class="n">handle</span><span class="p">,</span> <span class="n">directoryPath</span><span class="p">,</span> <span class="n">openDirectoryMode</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultPathNotFound::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: Directory does not exist for the directoryPath.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Perform the processing to create the directory. Or verify that the path is correct.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span>&nbsp;
+<span class="c1">// Gets the number of entries in the directory.
+// When this fails, handling for an exit in the library is not necessary.
+</span><span class="kt">int64_t</span> <span class="n">entryCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">GetDirectoryEntryCount</span><span class="p">(</span><span class="o">&amp;</span><span class="n">entryCount</span><span class="p">,</span> <span class="n">handle</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Enumerates the entries in the directory.
+// Handling is not necessary because an error is never returned.
+</span><span class="kt">int64_t</span> <span class="n">readEntryCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="nn">nn::fs::</span><span class="n">DirectoryEntry</span> <span class="n">directoryEntryList</span><span class="p">[</span><span class="mi">20</span><span class="p">];</span>
+<span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">ReadDirectory</span><span class="p">(</span><span class="o">&amp;</span><span class="n">readEntryCount</span><span class="p">,</span> <span class="n">directoryEntryList</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Closes the directory.
+// This function does not return a result.
+</span><span class="nn">nn::fs::</span><span class="n">CloseDirectory</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_174247773_h4_13">File Operations</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Open file.
+</span><span class="nn">nn::fs::</span><span class="n">FileHandle</span> <span class="n">handle</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">OpenFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">handle</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">openFileMode</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultPathNotFound::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: File does not exist for the filePath.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// When return of this error is anticipated, such as during initial startup, call nn::fs::CreateFile and then retry.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// When this error cannot occur, such as when having confirmed the existence of the file before calling the function,
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// It is an implementation error, so use NN_ABORT_UNLESS_RESULT_SUCCES to cause an exit.
+</span><span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultTargetLocked::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: The file is already open.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// When there is no chance that the file is already open, this error handling is unnecessary.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span>&nbsp;
+<span class="c1">// Gets the file size.
+// When this fails, handling for an exit in the library is not necessary.
+</span><span class="kt">int64_t</span> <span class="n">fileSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">GetFileSize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fileSize</span><span class="p">,</span> <span class="n">handle</span><span class="p">);</span>
+
+&nbsp;
+<span class="c1">// Changes the file size.
+</span><span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">SetFileSize</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">newFileSize</span><span class="p">);</span> 
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultUsableSpaceNotEnough::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: Insufficient data save memory for save data.
+</span><span class="p">}</span>
+
+<span class="c1">// Loads the file in the buffer.
+// ReadFile is overloaded, but regardless, handling is not necessary because an error is never returned.
+</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nn">nn::fs::</span><span class="n">ReadFile</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">readBuffer</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Writes from a buffer to the file.
+</span><span class="n">result</span> <span class="o">=</span> <span class="nn">nn::fs::</span><span class="n">WriteFile</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">writeBuffer</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="nn">nn::fs::WriteOption::</span><span class="n">MakeValue</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
+
+<span class="k">if</span><span class="p">(</span> <span class="nn">nn::fs::ResultUsableSpaceNotEnough::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Error: Insufficient data save memory for save data.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// This error is only returned when the file is opened with OpenMode_AllowAppend.
+</span><span class="p">}</span>
+<span class="c1">// When there is another type of failure, handling for an exit in the library is not necessary.
+</span>&nbsp;
+<span class="c1">// Closes the file.
+// This function does not return a result.
+</span><span class="nn">nn::fs::</span><span class="n">CloseFile</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_NN_ABORT_UNLESS_RESULT_SUCCESS', '../../../Api/HtmlNX/nn___abort_8h.html#a1e657a678a588533a020c2e947df7772' )
+SetUrl( 'ApiLink_nn__fs__EnsureSaveData', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ae5f48fe542ce22263e1399e3b50190e8' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

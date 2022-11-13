@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Scene Animation | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Scene Animation -->
+<div class="pagetitle" id="PageId_83955524">Scene Animation</div>
+<div class="text_separate">
+<p>Scene animations are configured by animating the camera, light, and fog attributes.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955524_h1_1">Camera</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955524_h1_2">Lights</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955524_h1_3">Fog</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_83955524_h1_1">Camera</h1>
+<p>This section describes the camera in scene animations.</p>
+<h2 id="Anchor_83955524_h2_1">Camera Types</h2>
+<p>The Maya plug-in supports the following cameras.</p>
+<p>One-node camera</p>
+<p>Two-node camera (Camera and Aim)</p>
+<p>Three-node camera (Camera, Aim, and Up)</p>
+<p>For one-node cameras, <code>euler_zxy</code> is used for the camera rotation mode in the intermediate file. For two-node and three-node cameras, the <code>aim</code> vector is used.<br /><code>ortho</code> is used in intermediate files for the camera projection mode when the <strong>Orthographic</strong> attribute of the camera node is ON, while <code>persp</code> is used if the attribute is OFF.</p>
+<h2 id="Anchor_83955524_h2_2">Cameras That Are Not Exported</h2>
+<p>A camera is not exported if the <strong>Visibility</strong> attribute of the camera's transform node is not selected, or the <strong>Template</strong> attribute is selected. (If an animation has been set, this is determined by the value of the start frame.)<br />The camera is also not exported if the <strong>Visibility</strong> attribute of the parent (ancestor) node, of the camera's transform node, is not selected. The camera is also not exported if the transform node or parent (ancestor) node is hidden in the display layer.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If <code>true</code> has been specified for <code>export_invisible_camera</code> in the <a href="../Pages/Page_83956186.html#Anchor_83956186_config_file">config file</a>, cameras are exported even if their <code>Visibility</code> attribute is not selected. (This feature is in Nintendo SDK version 9.1.0 and later.)</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the flag to disable compression has been set for a camera using the <a href="../Pages/Page_83955859.html">plug-in for disabling node compression</a>, the camera will always be exported, regardless of this condition. (This feature is in Nintendo SDK version 9.1.0 and later.)</p>
+  </div>
+</div>
+<h2 id="Anchor_83955524_h2_3">Rotate Order</h2>
+<p>For single-node cameras, we recommend using the z x y value for the <strong>Rotate Order</strong> attribute of the transform node. If this attribute is not z x y, the animation curve data is automatically created and output from the baked rotation data.</p>
+<h2 id="Anchor_83955524_h2_4">Camera Scale</h2>
+<p>Set the camera <strong>Scale</strong> attribute for the camera node to 1.0.</p>
+<h2 id="Anchor_83955524_h2_5">Aspect Ratio</h2>
+<p>The aspect ratio is configured by using the <strong>Horizontal/Vertical Film Aperture</strong> attribute of the camera node, or the <strong>Film Aspect Ratio</strong> of the Attribute Editor.</p>
+<h2 id="Anchor_83955524_h2_6">Angle of View</h2>
+<p>Set the angle of view using the camera node's <strong>Focal Length</strong> attribute, the attribute editor's <strong>Angle of View</strong> option, or the <a href="../Pages/Page_83955874.html">plug-in for setting the camera angle of view</a>.</p>
+<p> Note that <strong>Angle of View</strong> is the <em>angle of view in the horizontal direction</em>. It differs from <code><strong>persp_fovy</strong></code>, which is the <em>angle of view in the vertical direction</em> and is exported in the intermediate file. If you want the angle of view as configured using 3DEditor to be applied in Maya, use <a href="../Pages/Page_83955874.html">the plug-in for setting the camera angle of view</a>.</p>
+<p> The relationship between the angle of view in the horizontal direction and the angle of view in the vertical direction is determined by the aspect ratio.</p>
+<p>The following equation describes <strong>Fovy</strong>'s dependence on <strong>Vertical Film Aperture</strong> and <strong>Focal Length</strong>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>persp_fovy = 2 * atan(verticalFilmAperture * 0.5 / (focalLength * 0.03937))</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>(0.03937 is a coefficient used to convert <code>focalLength</code>, expressed in millimeters, to <code>verticalFilmAperture</code>, expressed in inches.)</p>
+<h2 id="Anchor_83955524_h2_7">Orthographic Camera View Volume</h2>
+<p>When <strong>Fit Resolution Gate</strong> is other than <code>Vertical</code>, the <strong>Orthographic Width</strong> attribute is taken as the width of the view volume, and the height (<strong>ortho_height</strong> in the intermediate file) is calculated from the aspect ratio and output.</p>
+<p>When <strong>Fit Resolution Gate</strong> is <strong>Vertical</strong>, the <strong>Orthographic Width</strong> attribute is taken as the view volume's height and exported without modification.</p>
+<h2 id="Anchor_83955524_h2_8">Attributes for Which Animation Can Be Set</h2>
+<p>The following list of attributes can be animated.</p>
+<ul>
+  <li>
+    <strong>Translate</strong> and <strong>Rotate</strong> of the camera's transform node (<code>Rotate</code> is for single-node cameras only)</li>
+  <li>
+    <strong>Translate</strong> of the aim locator's transform node (for two and three-node cameras)</li>
+  <li>
+    <strong>Translate</strong> of the up locator's transform node (for three-node cameras)</li>
+  <li>
+    <strong>Twist</strong> of the lookAt node (for two-node cameras)</li>
+  <li>
+    <strong>Horizontal/Vertical Film Aperture</strong>, <strong>Focal Length</strong>, <strong>Near/Far Clipping Plane</strong>, and <strong>Orthographic Width</strong> of the camera node.</li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <strong>Global coordinates</strong> are output for the camera's translation and rotation values.<br />If the transform node of a camera, aim locator, or up locator has a parent node; translation, rotation, and scaling are also applied to that parent.<br />If the parent node's translation and rotation are not <code>0</code> or if scale is not <code>1</code>, animation curve data will be generated automatically from the baked data and output.</p>
+  </div>
+</div>
+<h2 id="Anchor_83955524_h2_9">User Data</h2>
+<p>To set user data in the camera's transform node, use the <a href="../Pages/Page_83955877.html">Plug-In for Setting User Data</a>.</p>
+<h1 id="Anchor_83955524_h1_2">Lights</h1>
+<p>This section describes the lights in scene animations.</p>
+<h2 id="Anchor_83955524_h2_10">Light Types</h2>
+<p>Ambient lights, directional lights, point lights, and spot lights are supported.</p>
+<h2 id="Anchor_83955524_h2_11">Lights That Are Not Exported</h2>
+<p>A light is not exported if the <strong>Template</strong> attribute of the light's transform node is selected. (If an animation has been set, this is determined by the value of the start frame.)</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the flag to disable compression has been set for a light using the <a href="../Pages/Page_83955859.html">plug-in for disabling node compression</a>, the light will always be exported, regardless of this condition. (This feature is in Nintendo SDK version 9.1.0 and later.)</p>
+  </div>
+</div>
+<h2 id="Anchor_83955524_h2_12">Attributes for Which Animation Can Be Set</h2>
+<p>The following list of attributes can be animated.</p>
+<ul>
+  <li>
+    <strong>Translate</strong>, <strong>Rotate</strong>, and <strong>Visibility</strong> of a light's transform node<br /> (<strong>Translate</strong> is only for point lights and spot lights.)<br /> (<strong>Rotate</strong> is only for directional lights and spot lights.)<br /> Lights are exported with <strong>Visibility</strong> enabled.</li>
+  <li>
+    <strong>Color</strong> of a light's shape node</li>
+  <li>
+    <strong>Center of Illumination</strong>, <strong>Cone Angle</strong>, and <strong>Penumbra Angle</strong> of a light's shape node (<strong>Penumbra Angle</strong> is only for spot lights).<br /> The center of illumination is the distance from the light to the center of illumination. Its value influences <strong>aim_*</strong> attributes in the intermediate file.</li>
+  <li>Custom distance attenuation attributes added to the <a href="../Pages/Page_83955872.html">plug-in for setting light attributes</a></li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <strong>Global coordinate</strong> values are exported for the light position and direction.<br />If the transform node for the light has a parent node, the <strong>Translate</strong>, <strong>Rotate</strong>, and <strong>Scare</strong> settings of the parent node are also applied. These settings also include visibility of the parent node.<br />If the parent node's translation and rotation are not <code>0</code> or if scale is not <code>1</code>, animation curve data will be generated automatically from the baked data and output.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>When animation curve values connected to visibility are neither 0 nor 1, the animation curve data is automatically created and output from the baked data.</p>
+  </div>
+</div>
+<h2 id="Anchor_83955524_h2_13">User Data</h2>
+<p>To set user data in the light's transform node, use the <a href="../Pages/Page_83955877.html">Plug-In for Setting User Data</a>.</p>
+<h1 id="Anchor_83955524_h1_3">Fog</h1>
+<p>This section describes the fog in scene animations.</p>
+<h2 id="Anchor_83955524_h2_14">Fog Types</h2>
+<p>Environment fogs are supported.</p>
+<p> An environment fog is set by selecting <strong>Maya Software</strong> &gt; <strong>Render Options</strong> &gt; <strong>Environment Fog</strong> on the <strong>Render Settings</strong> window.<br />For environment fogs, only the <strong>Simple Fog</strong> type is supported. Clear (de-select) the <strong>Physical Fog</strong> attribute of the environment fog (Env Fog) material (the envFog node). The Env Fog material can be selected from Hypershade.</p>
+<h2 id="Anchor_83955524_h2_15">Fogs That Are Not Output</h2>
+<p>A fog is not exported if the <strong>Visibility</strong> attribute of the environment fog's transform node is not selected or the <strong>Template</strong> attribute is selected. (If an animation has been set, this is determined by the value of the start frame.)<br />A fog is also not exported if the <strong>Visibility</strong> attribute of the parent (ancestor) node, of the environment fog's transform node, is not selected. The environment fog is also not exported if the transform node or parent (ancestor) node is hidden in the display layer.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the flag to disable compression has been set for an environment fog using the <a href="../Pages/Page_83955859.html">plug-in for disabling node compression</a>, the environment fog will always be exported, regardless of this condition. (This feature is in Nintendo SDK version 9.1.0 and later.)</p>
+  </div>
+</div>
+<h2 id="Anchor_83955524_h2_16">Attributes for Which Animation Can Be Set</h2>
+<p>The following list of attributes can be animated.<br /><strong>Color</strong> and <strong>Fog Near/Far Distance</strong> of the Env Fog material (envFog node)</p>
+<h2 id="Anchor_83955524_h2_17">User Data</h2>
+<p>For more information about setting user data in the shading group for the environment fog, see <a href="../Pages/Page_83955877.html">Plug-In for Setting User Data</a>.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

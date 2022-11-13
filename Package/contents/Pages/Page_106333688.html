@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>LOD | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- LOD -->
+<div class="pagetitle" id="PageId_106333688">LOD</div>
+<div class="text_separate">
+<h1 id="Anchor_106333688_h1_1">Overview</h1>
+<p>The <code>g3d</code> library supports shape LOD.</p>
+<p>You can use the <code>g3d</code> library's shape LOD feature to switch just the <span class="ApiLink_nn__g3d__ResMesh">nn::g3d::ResMesh</span> according to the LOD level when rendering. Because there is a system for sharing materials, skeletons, shaders, animations, and the like between the base model and the LOD models, no additional initializations or other kinds of handling are required for LOD.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>const nn::g3d::ShapeObj* pShapeObj = ...;
+const nn::g3d::ResMesh* pResMesh = pShapeObj-&gt;GetResMesh(lodLevel);
+pResMesh-&gt;Draw();</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_106333688_h1_2">Preparing Data</h1>
+<p>There are two methods to prepare data that includes LOD models.</p>
+<h2 id="Anchor_106333688_h2_1">Automatically Create LOD Models Using Polygon Reduction</h2>
+<p>You can use the polygon reduction feature of the intermediate file optimizer to automatically add LOD models to model intermediate files. For more information about using polygon reduction, see the <a href="../Pages/Page_83955705.html#Anchor_83955705_polygon_reduction">section on polygon reduction</a> for intermediate file optimizers. For more information about features such as the reduction algorithms, see <a href="../Pages/Page_162186377.html">polygon reduction</a> in the 3D Programming Guide.</p>
+<p>LOD models are created with intact submesh boundaries when using polygon reduction. This enables you to switch LOD levels at the submesh level, when used together with view frustum culling, described later.</p>
+<h2 id="Anchor_106333688_h2_2">Merging Any LOD Model With the LOD Model Merge Feature</h2>
+<p>Merging the separately created intermediate files for the base model and LOD models, using the intermediate file optimizer LOD model merge feature, creates a new intermediate file that includes LOD models. Because the base model and LOD model share everything except the shapes themselves, the models must be created in such a way that they fulfill certain conditions. For more information, see <a href="../Pages/Page_83956044.html#Anchor_83956044_modeling_limitation">Modeling Restrictions</a> in the LOD Export section of the Maya plug-in documentation, or <a href="../Pages/Page_83955705.html#Anchor_83955705_unite_lod_model_limitation">Combining LOD Models</a> in the Intermediate File Optimizer documentation.</p>
+<p>Submesh boundaries are not maintained when using the LOD model merge feature. You can only switch the LOD level switching at the shape level when using it together with view frustum culling, described later.</p>
+<h1 id="Anchor_106333688_h1_3">Data Structure</h1>
+<p>The LOD models store the same model resources as the base model. The LOD models use all the same resources as the base model except for the shape. The vertex streams for the LOD models are appended to the end of the base model's vertex stream, so there is a single vertex stream encompassing the base model and all of the LOD models. The number of meshes is equal to the number of LOD levels. By switching the mesh, you can render using the index stream corresponding to the LOD level.</p>
+<h1 id="Anchor_106333688_h1_4">
+  <a name="Anchor_106333688_view_frustum_culling_combination"></a>Using LOD and View Frustum Culling Together</h1>
+<p>
+  <a href="../Pages/Page_106333662.html#Anchor_106333662_view_frustum_culling">View frustum culling</a> can be used together with LOD. Restrictions arise, depending on how data was created, when using LOD together with view frustum culling.</p>
+<h2 id="Anchor_106333688_h2_3">LOD Models Created Using Polygon Reduction</h2>
+<p>There are no restrictions for using view frustum culling and LOD together when using <a href="../Pages/Page_83955705.html#Anchor_83955705_polygon_reduction">polygon reduction</a>, because the submesh boundaries between base models where <a href="../Pages/Page_83955705.html#Anchor_83955705_divide_submesh">submesh division</a> occurred and LOD models remains intact. Using <span class="ApiLink_bool_nn__g3d__ShapeObj__TestSubMeshLodIntersection(CullingContext_*pCtx|_const_ViewVolume_&volume|_ICalculateLodLevelFunctor_&calcLodFunctor)_const_NN_NOEXCEPT"><code>nn::g3d::ShapeObj::TestSubMeshLodIntersection</code></span> enables the following processing.</p>
+<ul>
+  <li>View frustum culling at the submesh level.</li>
+  <li>LOD level switching at the submesh level.</li>
+</ul>
+<h2 id="Anchor_106333688_h2_4">LOD Model Merging was Used to Merge Any LOD Models</h2>
+<p>LOD level switching cannot occur at the submesh level when using <a href="../Pages/Page_83955705.html#Anchor_83955705_unite_lod_model">LOD  model merging</a> to merge any LOD model where <a href="../Pages/Page_83955705.html#Anchor_83955705_divide_submesh">submesh division</a> occurred, because submesh boundaries are not maintained between base models and LOD models. The use of <span class="ApiLink_bool_nn__g3d__ShapeObj__TestSubMeshIntersection(CullingContext_*pCtx|_const_ViewVolume_&volume|_int_meshIndex)_const_NN_NOEXCEPT">nn::g3d::ShapeObj::CalculateSubMeshBounding</span> enables the following processing.</p>
+<ul style="list-style-type: square;">
+  <li>View frustum culling at the submesh level.</li>
+  <li>LOD level switching at the shape level.</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__ResMesh', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_mesh.html' )
+SetUrl( 'ApiLink_bool_nn__g3d__ShapeObj__TestSubMeshLodIntersection(CullingContext_*pCtx|_const_ViewVolume_&volume|_ICalculateLodLevelFunctor_&calcLodFunctor)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html#ab64775081aa11a283658bfef401c7694' )
+SetUrl( 'ApiLink_bool_nn__g3d__ShapeObj__TestSubMeshIntersection(CullingContext_*pCtx|_const_ViewVolume_&volume|_int_meshIndex)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_shape_obj.html#afc539bbe698f6a400f2e9f4fb1daeaea' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

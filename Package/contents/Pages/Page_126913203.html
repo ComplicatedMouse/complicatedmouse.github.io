@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Rendering the Face Model | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Rendering the Face Model -->
+<div class="pagetitle" id="PageId_126913203">Rendering the Face Model</div>
+<div class="text_separate">
+<h1 id="Anchor_126913203_h1_1">Rendering the Face Model</h1>
+<p>This section describes the process flow for rendering a Mii face model. Read this section along with the sections that describe the various individual features.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_126913203_h1_1">Rendering the Face Model</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_126913203_h2_1">Preparing the Resource Object</a>
+      </li>
+      <li>
+        <a href="#Anchor_126913203_h2_2">Get the CharInfo Data Structure</a>
+      </li>
+      <li>
+        <a href="#Anchor_126913203_h2_3">Create a CharModel Object</a>
+      </li>
+      <li>
+        <a href="#Anchor_126913203_h2_4">Create a Faceline Object</a>
+      </li>
+      <li>
+        <a href="#Anchor_126913203_h2_5">Create a Mask Object</a>
+      </li>
+      <li>
+        <a href="#Anchor_126913203_h2_6">Give Descriptor Slots</a>
+      </li>
+      <li>
+        <a href="#Anchor_126913203_h2_7">Create a Texture Sampler</a>
+      </li>
+      <li>
+        <a href="#Anchor_126913203_h2_8">Rendering the Face Outline Texture</a>
+      </li>
+      <li>
+        <a href="#Anchor_126913203_h2_9">Rendering Mask Textures</a>
+      </li>
+      <li>
+        <a href="#Anchor_126913203_h2_10">Drawing CharModel Using the Application's Shader</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h2 id="Anchor_126913203_h2_1">Preparing the Resource Object</h2>
+<p>Prepare an instance of the <code><a href="../Pages/Page_126918946.html">Resource</a></code> class that will hold the shapes and the textures that will be used for rendering the Mii character. The other classes become available for use when you have initialized <code>Resource</code>.</p>
+<h2 id="Anchor_126913203_h2_2">Get the CharInfo Data Structure</h2>
+<p>Get the <code><a href="../Pages/Page_165752534.html">CharInfo</a></code> data structure with the parameters for the Mii you want to display. For more information about getting <code>CharInfo</code>, see <a href="../Pages/Page_162939097.html">Getting Mii Character Data</a>.</p>
+<h2 id="Anchor_126913203_h2_3">Create a CharModel Object</h2>
+<p>Create an instance of the <code><a href="../Pages/Page_126918954.html">CharModel</a></code> class to hold the necessary data for rendering the Mii face model.</p>
+<p>Initialize the <code>CharModel</code> object based on the initialized <code><a href="../Pages/Page_126918946.html">Resource</a></code> object, the obtained <code><span class="ApiLink_nn__mii__CharInfo">nn::mii::CharInfo</span></code> object, and the <code><span class="sv-pt-link"><span class="ApiLink_nn__mii__CharModelInfo">nn::mii::CharModelInfo</span></span></code> object holding the settings for the Mii face model. <code>CharModelInfo</code> holds the configured settings for the Mii face model, including the texture format, the number of facial expressions for the Mii character, and the Mii face model type for headwear. The amount of memory needed for initializing <code>CharModel</code> will vary, depending on the values set in <code>CharModelInfo</code>.</p>
+<p>Once <code>CharModel</code> has been initialized, you can get the data required for rendering shapes and textures according to the parameters in <code>CharInfo</code>. Although <code>CharModel</code> has face outline texture and mask texture when it is initialized, nothing gets rendered at this time. To render the textures held by <code>CharModel</code>, you need to use the <code><a href="../Pages/Page_126918959.html">Faceline</a></code> and <code><a href="../Pages/Page_126918972.html">Mask</a></code> objects.</p>
+<p>Each facial expression has a different mask texture, therefore <code>CharModel</code> can hold a number of these textures. If you want your Mii face model to have a number of expressions, you will need to render a mask texture for each expression.</p>
+<h2 id="Anchor_126913203_h2_4">Create a Faceline Object</h2>
+<p>Create an instance of the <code><a href="../Pages/Page_126918959.html">Faceline</a></code> class to hold the data that will be used to create the face outline texture.</p>
+<p>Initialize <code>Faceline</code> using the initialized <code><a href="../Pages/Page_126918946.html">Resource</a></code> object and <code><span class="ApiLink_nn__mii__CharInfo">nn::mii::CharInfo</span></code>. When <code>Faceline</code> has been initialized, you can get the data required for rendering the shapes and textures to create the face outline texture.</p>
+<h2 id="Anchor_126913203_h2_5">Create a Mask Object</h2>
+<p>Create an instance of the <code><a href="../Pages/Page_126918972.html">Mask</a></code> class to hold the data that will be used to create the mask texture.</p>
+<p>Initialize <code>Mask</code> using the initialized <code><a href="../Pages/Page_126918946.html">Resource</a></code> object, <code><span class="ApiLink_nn__mii__CharInfo">nn::mii::CharInfo</span></code>, and the expression type flags. Note that the amount of memory required to initialize <code>Mask</code> will vary depending on the expression flag settings.</p>
+<h2 id="Anchor_126913203_h2_6">Give Descriptor Slots</h2>
+<p>Set the textures of <code><a href="../Pages/Page_126918954.html">CharModel</a></code>, <code><a href="../Pages/Page_126918959.html">Faceline</a></code>, and <code><a href="../Pages/Page_126918972.html">Mask</a></code> in a descriptor table.</p>
+<p>Use the member function in each class that gets the texture view, and set those texture views in a descriptor table. Get descriptor slots from this configured descriptor table, and set slots for each pertinent <code>DrawType</code> object in each class.</p>
+<p>For more information about how to get texture views and set descriptor slots, see the description of each class feature in the subsections of the Description of Features section.</p>
+<h2 id="Anchor_126913203_h2_7">Create a Texture Sampler</h2>
+<p>To draw the Mii face model and render the face outline texture and mask texture, use a sampler that has been configured like the texture sampler provided by the Face Library.</p>
+<p>To get these sampler settings, use the <code><span class="ApiLink_nn__mii__GetSamplerInfo">nn::mii::GetSamplerInfo</span>()</code> function. Use the <code><span class="ApiLink_nn__gfx__SamplerInfo">nn::gfx::SamplerInfo</span></code> object obtained with this function to create a texture sampler.</p>
+<h2 id="Anchor_126913203_h2_8">Rendering the Face Outline Texture</h2>
+<p>Use the initialized <code><a href="../Pages/Page_126918959.html">Faceline</a></code> object to render the face outline texture of the <code><a href="../Pages/Page_126918954.html">CharModel</a></code> object.</p>
+<p>To render the same face outline texture as the Mii character created with the Create or Edit Mii applet, you can use the <code><a href="../Pages/Page_126918987.html">TextureShader</a></code> class provided by the Face Library.</p>
+<p>If you want to give your Mii character a unique skin tone, for example - a zombie, you can also prepare an application-specific shader and use that to render the face outline texture. Render using the <code><a href="../Pages/Page_126918978.html">DrawParam</a></code> object that can be obtained from the <code>Faceline</code> object.</p>
+<h2 id="Anchor_126913203_h2_9">Rendering Mask Textures</h2>
+<p>Use the initialized <code><a href="../Pages/Page_126918972.html">Mask</a></code> object to render the mask texture of the <code><a href="../Pages/Page_126918954.html">CharModel</a></code> object. If <code>CharModel</code> has the data for multiple facial expressions, render an expression mask for each mask texture.</p>
+<p>If you want to render the same mask texture as the Mii character created with the Create or Edit Mii applet, you can use the <code><a href="../Pages/Page_126918987.html">TextureShader</a></code> class provided by the Face Library.</p>
+<p>You can also render mask textures using an application-specific shader, as you can for <code>Faceline</code>. Render using the <code><a href="../Pages/Page_126918978.html">DrawParam</a></code> object that can be obtained from the <code>Mask</code> object.</p>
+<h2 id="Anchor_126913203_h2_10">Drawing CharModel Using the Application's Shader</h2>
+<p>Use the application's shader to draw <code><a href="../Pages/Page_126918954.html">CharModel</a></code>. Draw using the <code><a href="../Pages/Page_126918978.html">DrawParam</a></code> objects for each part obtained from <code>CharModel</code>.</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__mii__CharInfo', '../../../Api/HtmlNX/structnn_1_1mii_1_1_char_info.html' )
+SetUrl( 'ApiLink_nn__mii__CharModelInfo', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model_info.html' )
+SetUrl( 'ApiLink_nn__mii__GetSamplerInfo', '../../../Api/HtmlNX/namespacenn_1_1mii.html#a7b31fffe1758ba0a5ec80843410a0549' )
+SetUrl( 'ApiLink_nn__gfx__SamplerInfo', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_sampler_info.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

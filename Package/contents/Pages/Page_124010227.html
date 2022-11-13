@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Memory Pool | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Memory Pool -->
+<div class="pagetitle" id="PageId_124010227">Memory Pool</div>
+<div class="text_separate">
+<p>The memory pool (<code><span class="ApiLink_nn__audio__MemoryPoolType">nn::audio::MemoryPoolType</span></code>) represents the memory space used by the audio renderer.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_124010227_h2_1">Feature Overview</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_124010227_h3_1">Usage Cycle</a>
+      </li>
+      <li>
+        <a href="#Anchor_124010227_h3_2">Accessing Memory Maintained in the Memory Pool</a>
+      </li>
+      <li>
+        <a href="#Anchor_124010227_h3_3">Target Data</a>
+      </li>
+      <li>
+        <a href="#Anchor_124010227_h3_4">Performance Impacts</a>
+      </li>
+      <li>
+        <a href="#Anchor_124010227_h3_5">Data Range Check</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h2 id="Anchor_124010227_h2_1">Feature Overview</h2>
+<p>The audio renderer conducts its processing by using waveform data and effect work buffers in addition to other memory spaces and the various kinds of data that are included in those spaces and provided by the user. Memory holds a mixture of data for audio and graphics and various other purposes. Access controls are implemented according to the purpose for each kind of data. You must use a memory pool to ensure safe implementation of these purpose-specific access controls. The memory that the audio renderer accesses and manipulates must be contained inside the space specified by the memory pool.</p>
+<h3 id="Anchor_124010227_h3_1">Usage Cycle</h3>
+<p>Memory pools can take one of four states: <code>RequestAttach</code>, <code>Attached</code>, <code>RequestDetach</code>, and <code>Detached</code>. The following table shows the meanings of these states.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Status</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>RequestAttach</td>
+      <td>
+        <p>There is a request to attach the memory pool.</p>
+        <p>When the <code><span class="ApiLink_nn__audio__RequestAttachMemoryPool">nn::audio::RequestAttachMemoryPool</span>()</code> function is called for a detached memory pool, it transitions to this state.</p>
+        <p>A memory pool in this state becomes attached the next time the <code><span class="ApiLink_nn__audio__RequestUpdateAudioRenderer">nn::audio::RequestUpdateAudioRenderer</span>()</code> function is called.</p>
+        <p>If the <code><span class="ApiLink_nn__audio__RequestDetachMemoryPool">nn::audio::RequestDetachMemoryPool</span>()</code> function is called for a memory pool in the <code>RequestAttach</code> state, it reverts to the detached state.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Attached</td>
+      <td>The memory pool is attached to the audio renderer and can be used by the audio renderer.<br />There are restrictions on operations to directly write to the memory spaces retained in the memory pool. (Described later)</td>
+    </tr>
+    <tr>
+      <td>RequestDetach</td>
+      <td>
+        <p>There is a request to detach the memory pool.</p>
+        <p>When the <code><span class="ApiLink_nn__audio__RequestDetachMemoryPool">nn::audio::RequestDetachMemoryPool</span>()</code> function is called for an attached memory pool, it transitions to this state.</p>
+        <p>The next time the <code><span class="ApiLink_nn__audio__RequestUpdateAudioRenderer">nn::audio::RequestUpdateAudioRenderer</span>()</code> function is called, a memory pool in this state is checked to make sure it does not contain any data directly accessed by the audio renderer that is currently in use.</p>
+        <p>When it is determined by this check that the memory pool does not contain any data currently in use, it is detached and transitions to the detached state.</p>
+        <p>For more information about the data directly accessed by the audio renderer, see the Target Data section later in this document and the description for <code><span class="ApiLink_nn__audio__MemoryPoolType">nn::audio::MemoryPoolType</span></code>.</p>
+        <p>If the <code><span class="ApiLink_nn__audio__RequestAttachMemoryPool">nn::audio::RequestAttachMemoryPool</span>()</code> function is called for a memory pool in the <code>RequestDetach</code> state, it reverts to the attached state.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Detached</td>
+      <td>
+        <p>The memory pool is unattached to the audio renderer and cannot be used by the audio renderer.</p>
+        <p>Data can be freely written to the memory space retained in the memory pool.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>When the memory pool is first obtained by the <code><span class="ApiLink_nn__audio__AcquireMemoryPool">nn::audio::AcquireMemoryPool</span>()</code> function, it is in the detached state. To change the state, set a request using <code><span class="ApiLink_nn__audio__RequestAttachMemoryPool">nn::audio::RequestAttachMemoryPool</span>()</code> or <code><span class="ApiLink_nn__audio__RequestDetachMemoryPool">nn::audio::RequestDetachMemoryPool</span>(),</code> and then call the <code><span class="ApiLink_nn__audio__RequestUpdateAudioRenderer">nn::audio::RequestUpdateAudioRenderer</span>()</code> function to apply the setting. A memory pool can be freed by the <code><span class="ApiLink_nn__audio__ReleaseMemoryPool">nn::audio::ReleaseMemoryPool</span>()</code> function only when it is in the detached state.</p>
+<p>To get and check these states, call <code><span class="ApiLink_nn__audio__IsMemoryPoolAttached">nn::audio::IsMemoryPoolAttached</span>()</code> and <code><span class="ApiLink_nn__audio__GetMemoryPoolState">nn::audio::GetMemoryPoolState</span>()</code>.</p>
+<p>An attached memory pool is automatically detached by the audio renderer that added it when that audio renderer is freed by the <code><span class="ApiLink_nn__audio__CloseAudioRenderer">nn::audio::CloseAudioRenderer</span>()</code> function. For this reason, when the audio renderer is being released, the memory pool does not need to be explicitly detached and freed. For more information, <span class="typ">see the </span><span class="pun"><code><span class="ApiLink_nn__audio__RequestDetachMemoryPool">nn::audio::RequestDetachMemoryPool</span>()</code></span> function.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_124010227/124258282.png" width="800" class="embedded-image" />
+  </span>
+</p>
+<h3 id="Anchor_124010227_h3_2">Accessing Memory Maintained in the Memory Pool</h3>
+<p>When a memory pool is initialized by the <code><span class="ApiLink_nn__audio__AcquireMemoryPool">nn::audio::AcquireMemoryPool</span>()</code> function, it retains a memory space specified by <code>address</code> and <code>size</code> to manage. The memory spaces retained by memory pools cannot overlap.</p>
+<p>The memory space specified for the memory pool is not rewritten, so the user can use the entire range inside the memory space.</p>
+<p>Memory held in an attached memory pool can be overwritten using the following functions.</p>
+<ul>
+  <li>
+    <code>
+      <span class="ApiLink_nn__fs">nn::fs</span> file</code> reading functions</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__audio__CopyMemoryPoolData">nn::audio::CopyMemoryPoolData</span>()</code>
+  </li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__codec__OpusDecoder__DecodeInterleaved">nn::codec::OpusDecoder::DecodeInterleaved</span>()</code> output PCM buffer (NX Add-On 4.1.0 and later)</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__codec__HardwareOpusDecoder__DecodeInterleaved">nn::codec::HardwareOpusDecoder::DecodeInterleaved</span>()</code> output PCM buffer (NX Add-On 4.1.0 and later)</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__codec__OpusMultiStreamDecoder__DecodeInterleaved">nn::codec::OpusMultiStreamDecoder::DecodeInterleaved</span>()</code> output PCM buffer (NX Add-On 4.1.0 and later)</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__codec__HardwareOpusMultiStreamDecoder__DecodeInterleaved">nn::codec::HardwareOpusMultiStreamDecoder::DecodeInterleaved</span>()</code> output PCM buffer (NX Add-On 4.1.0 and later)</li>
+</ul>
+<p>Excluding the following functions, memory held in an attached memory pool cannot be specified as input data buffer for functions provided by the SDK.</p>
+<ul>
+  <li>
+    <code>
+      <span class="ApiLink_nn__codec__OpusDecoder__DecodeInterleaved">nn::codec::OpusDecoder::DecodeInterleaved</span>()</code> input data buffer (NX Add-On 7.2.0 and later)</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__codec__HardwareOpusDecoder__DecodeInterleaved">nn::codec::HardwareOpusDecoder::DecodeInterleaved</span>()</code> input data buffer (NX Add-On 7.2.0 and later)</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__codec__OpusMultiStreamDecoder__DecodeInterleaved">nn::codec::OpusMultiStreamDecoder::DecodeInterleaved</span>()</code> input data buffer (NX Add-On 7.2.0 and later)</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__codec__HardwareOpusMultiStreamDecoder__DecodeInterleaved">nn::codec::HardwareOpusMultiStreamDecoder::DecodeInterleaved</span>()</code> input data buffer (NX Add-On 7.2.0 and later)</li>
+</ul>
+<p>However, noise and unstable behavior can result if data is written to a memory space at the same time that the space is being accessed by the audio renderer. To access a space held in a memory pool, use one of the following procedures.</p>
+<ul>
+  <li>Operate on the memory space after calling the <code><span class="ApiLink_nn__audio__RequestDetachMemoryPool">nn::audio::RequestDetachMemoryPool</span>()</code> function to detach the memory pool.</li>
+  <li>When writing data to attached memory pools, use the preceding function in <code><span class="ApiLink_nn__fs">nn::fs</span></code>, <code><span class="ApiLink_nn__audio">nn::audio</span></code>, and <code><span class="ApiLink_nn__codec">nn::codec</span></code> to avoid regions that the audio renderer might be accessing.</li>
+</ul>
+<p>Avoid using any other way to operate on memory pools because this might destabilize the system.</p>
+<h3 id="Anchor_124010227_h3_3">Target Data</h3>
+<p>The following kinds of data used by the audio renderer must be contained in the memory pool.</p>
+<ul style="list-style-type: square;">
+  <li>Buffers specified in <code><span class="ApiLink_nn__audio__WaveBuffer">nn::audio::WaveBuffer</span>.buffer</code> and <code><span class="ApiLink_nn__audio__WaveBuffer">nn::audio::WaveBuffer</span>.pContext</code></li>
+  <li>Memory storing the data passed to <code><em>pParameter</em></code> by the <code><span class="ApiLink_nn__audio__AcquireVoiceSlot">nn::audio::AcquireVoiceSlot</span>()</code> function</li>
+  <li>The work buffer specified for <code><em>buffer</em></code> when the following effects are added.<ul style="list-style-type: square;"><li><span class="ApiLink_nn__audio__AddDelay">nn::audio::AddDelay</span>()</li><li><span class="ApiLink_nn__audio__AddReverb">nn::audio::AddReverb</span>()</li><li><span class="ApiLink_nn__audio__AddI3dl2Reverb">nn::audio::AddI3dl2Reverb</span>()</li><li><span class="ApiLink_nn__audio__AddLightLimiter">nn::audio::AddLightLimiter</span>()</li><li><span class="ApiLink_nn__audio__AddCapture">nn::audio::AddCapture</span>()</li></ul></li>
+  <li>The work buffers specified for <code><em>pSendBuffer</em></code> and <code><em>pReturnBuffer</em></code> in the <code><span class="ApiLink_nn__audio__AddAux">nn::audio::AddAux</span>()</code> function</li>
+  <li>The work buffer specified for <code><em>buffer</em></code> using <code><span class="ApiLink_nn__audio__AddCircularBufferSink">nn::audio::AddCircularBufferSink</span>()</code><br /><br /></li>
+</ul>
+<!--Remove-->
+<h3 id="Anchor_124010227_h3_4">Performance Impacts</h3>
+<p>The number of memory pools in use affects the system overhead.<br />For this reason, we recommend keeping the number of memory pools as low as possible, such as by using strategies that combine related data in a single memory pool.</p>
+<p>The maximum number of memory pools is currently restricted from the system end for <code><span class="ApiLink_nn__audio">nn::audio</span></code>, because of issues for the overhead with the processing load from too many memory pools.<br />That value is set during initialization along with the <code><span class="ApiLink_nn__audio__AudioRendererParameter">nn::audio::AudioRendererParameter</span></code> settings. You can get that value using <code><span class="ApiLink_nn__audio__GetReleasedMemoryPoolCount">nn::audio::GetReleasedMemoryPoolCount</span>()</code>.</p>
+<h3 id="Anchor_124010227_h3_5">Data Range Check</h3>
+<p>Starting with NintendoSDK 0.15.0, a check is performed to discover if the target data is contained in the memory pool.</p>
+<p>This check is performed while calling <code><span class="ApiLink_nn__audio__RequestUpdateAudioRenderer">nn::audio::RequestUpdateAudioRenderer</span>()</code>. If the target data is not contained in the memory pool, the following behavior occurs.</p>
+<ul>
+  <li>In the case of the buffers specified in <code><span class="ApiLink_nn__audio__WaveBuffer">nn::audio::WaveBuffer</span>.buffer</code> and <code><span class="ApiLink_nn__audio__WaveBuffer">nn::audio::WaveBuffer</span>.pContext,</code> or the memory storing the data to pass to <code><em>pParameter</em></code> by <code><span class="ApiLink_nn__audio__AcquireVoiceSlot">nn::audio::AcquireVoiceSlot</span>()</code>:<br /><ul><li>The <code><span class="ApiLink_nn__audio__VoiceType">nn::audio::VoiceType</span></code> waveform rendering that is tied to these buffers is skipped.</li><li>The target <code><span class="ApiLink_nn__audio__VoiceType">nn::audio::VoiceType</span></code> continues to be skipped until it is removed by <code><span class="ApiLink_nn__audio__ReleaseVoiceSlot">nn::audio::ReleaseVoiceSlot</span>()</code>.</li></ul></li>
+  <li>In the case of the work buffers specified for <code><em>buffer</em></code> by <code><span class="ApiLink_nn__audio__AddDelay">nn::audio::AddDelay</span>()</code>, <code><span class="ApiLink_nn__audio__AddReverb">nn::audio::AddReverb</span>()</code>, <code><span class="ApiLink_nn__audio__AddI3dl2Reverb">nn::audio::AddI3dl2Reverb</span>()</code>, <code><span class="ApiLink_nn__audio__AddLightLimiter">nn::audio::AddLightLimiter</span>()</code>, and <code><span class="ApiLink_nn__audio__AddCapture">nn::audio::AddCapture</span>()</code>, and the work buffers specified for <code><em>pSendBuffer</em></code> and <code><em>pReturnBuffer</em></code> by <code><span class="ApiLink_nn__audio__AddAux">nn::audio::AddAux</span>()</code>:<br /><ul><li>The <code><span class="ApiLink_nn__audio__DelayType">nn::audio::DelayType</span></code>, <code><span class="ApiLink_nn__audio__ReverbType">nn::audio::ReverbType</span></code>, <code><span class="ApiLink_nn__audio__I3dl2ReverbType">nn::audio::I3dl2ReverbType</span></code>, and <code><span class="ApiLink_nn__audio__AuxType">nn::audio::AuxType</span></code> effect processing tied to these buffers is skipped.</li><li>Each type of target effect continues to be skipped until they are respectively deleted.</li></ul></li>
+</ul>
+<p>At the same time, <code><span class="ApiLink_nn__audio">nn::audio</span></code> sends the addresses caught in the check to the console.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>[nn::audio] warning : &lt;Memory Address&gt; is not contained in nn::audio::MemoryPoolType.</pre>
+  </div>
+</div>
+<p>Memory addresses not contained in the memory pool that were caught in the check are displayed in the <code>&lt;Memory Address&gt;</code> section. If this message appears, some of the target data described previously has been passed to the audio renderer without being contained in a memory pool. Check the memory spaces that have been specified for memory pools and the locations in memory where the target data is stored.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In the current release, the following warning message is displayed on the console when data absent from the memory pool record is passed to the audio renderer.</p>
+    <div style="border-width: 1px;" class="preformatted panel">
+      <div class="preformattedContent panelContent">
+        <pre>[nn::audio] A memory pool has not been created. Using a memory pool is required.
+[nn::audio] Please prepare nn::audio::MemoryPoolType. See the nn::audio documents.</pre>
+      </div>
+    </div>
+    <p>This warning message is only displayed one time when the application starts. Warning messages for addresses caught in the preceding check are displayed on the console each time they occur.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__audio__MemoryPoolType', '../../../Api/HtmlNX/structnn_1_1audio_1_1_memory_pool_type.html' )
+SetUrl( 'ApiLink_nn__audio__RequestAttachMemoryPool', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a5f9484edc9f1bae6e41933993fbe09dc' )
+SetUrl( 'ApiLink_nn__audio__RequestUpdateAudioRenderer', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ac555128156197608dfaeeb5e824780a6' )
+SetUrl( 'ApiLink_nn__audio__RequestDetachMemoryPool', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a1d5341a5f593894f840b218eb1929a3b' )
+SetUrl( 'ApiLink_nn__audio__AcquireMemoryPool', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a8e7b32e31ba3ea6f61c00c752c3a90d0' )
+SetUrl( 'ApiLink_nn__audio__ReleaseMemoryPool', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a2bf0ab532748ef3c8f6d127f1800ec1b' )
+SetUrl( 'ApiLink_nn__audio__IsMemoryPoolAttached', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a84f83d98dfc603829790bb0fbce67549' )
+SetUrl( 'ApiLink_nn__audio__GetMemoryPoolState', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aec2896bdda770cd160dd31feb7e6dbf1' )
+SetUrl( 'ApiLink_nn__audio__CloseAudioRenderer', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ac008e23e04fb6c5efbb8796dd2aa9f38' )
+SetUrl( 'ApiLink_nn__fs', '../../../Api/HtmlNX/namespacenn_1_1fs.html' )
+SetUrl( 'ApiLink_nn__audio__CopyMemoryPoolData', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a2fb36e3fd0639be1a1ff056d8d80dcc5' )
+SetUrl( 'ApiLink_nn__codec__OpusDecoder__DecodeInterleaved', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_decoder.html#a63ce85f84facdd3256efc94e50b6ee4a' )
+SetUrl( 'ApiLink_nn__codec__HardwareOpusDecoder__DecodeInterleaved', '../../../Api/HtmlNX/classnn_1_1codec_1_1_hardware_opus_decoder.html#a5c5b85cf56d335ec26ce5a8947adf46c' )
+SetUrl( 'ApiLink_nn__codec__OpusMultiStreamDecoder__DecodeInterleaved', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_multi_stream_decoder.html#ad4841ee39d8a325cc1b9fe2c3ad11a45' )
+SetUrl( 'ApiLink_nn__codec__HardwareOpusMultiStreamDecoder__DecodeInterleaved', '../../../Api/HtmlNX/classnn_1_1codec_1_1_hardware_opus_multi_stream_decoder.html#ac43cb0bc28b027022504fe93b22feeee' )
+SetUrl( 'ApiLink_nn__audio', '../../../Api/HtmlNX/namespacenn_1_1audio.html' )
+SetUrl( 'ApiLink_nn__codec', '../../../Api/HtmlNX/namespacenn_1_1codec.html' )
+SetUrl( 'ApiLink_nn__audio__WaveBuffer', '../../../Api/HtmlNX/structnn_1_1audio_1_1_wave_buffer.html' )
+SetUrl( 'ApiLink_nn__audio__AcquireVoiceSlot', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a3cc31617500698ba14f0d1d5e20b7668' )
+SetUrl( 'ApiLink_nn__audio__AddDelay', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ad332d3b8805f5157ef98572a99a9f2a0' )
+SetUrl( 'ApiLink_nn__audio__AddReverb', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aa081b9cab7e4ca8d079093c1fc50bb4d' )
+SetUrl( 'ApiLink_nn__audio__AddI3dl2Reverb', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a88bff95c7242f9d37ae5f631e825648b' )
+SetUrl( 'ApiLink_nn__audio__AddLightLimiter', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a0bab4b3f6c0c1c7aa0011d2ee4b33919' )
+SetUrl( 'ApiLink_nn__audio__AddCapture', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ab3024a56e39831c3ba5fc8e52bca1a7e' )
+SetUrl( 'ApiLink_nn__audio__AddAux', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a086c8ae883a8dabacad2c3ff3e995f13' )
+SetUrl( 'ApiLink_nn__audio__AddCircularBufferSink', '../../../Api/HtmlNX/namespacenn_1_1audio.html#af781d15dcac44311d87e69ccab19cf57' )
+SetUrl( 'ApiLink_nn__audio__AudioRendererParameter', '../../../Api/HtmlNX/structnn_1_1audio_1_1_audio_renderer_parameter.html' )
+SetUrl( 'ApiLink_nn__audio__GetReleasedMemoryPoolCount', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a9d7175ef30c1e7c69de82769447ce241' )
+SetUrl( 'ApiLink_nn__audio__VoiceType', '../../../Api/HtmlNX/structnn_1_1audio_1_1_voice_type.html' )
+SetUrl( 'ApiLink_nn__audio__ReleaseVoiceSlot', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a88951e64989eabeb6ca689fb07932b68' )
+SetUrl( 'ApiLink_nn__audio__DelayType', '../../../Api/HtmlNX/structnn_1_1audio_1_1_delay_type.html' )
+SetUrl( 'ApiLink_nn__audio__ReverbType', '../../../Api/HtmlNX/structnn_1_1audio_1_1_reverb_type.html' )
+SetUrl( 'ApiLink_nn__audio__I3dl2ReverbType', '../../../Api/HtmlNX/structnn_1_1audio_1_1_i3dl2_reverb_type.html' )
+SetUrl( 'ApiLink_nn__audio__AuxType', '../../../Api/HtmlNX/structnn_1_1audio_1_1_aux_type.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

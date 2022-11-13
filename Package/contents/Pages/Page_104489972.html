@@ -1,0 +1,326 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Performance Information | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Performance Information -->
+<div class="pagetitle" id="PageId_104489972">Performance Information</div>
+<div class="text_separate">
+<p>The audio renderer has a feature for getting performance information. This information can be used to identify processing bottlenecks in the audio renderer and tweak performance.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_104489972_h2_1">Feature Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_104489972_h2_2">How to Use</a>
+    </li>
+    <li>
+      <a href="#Anchor_104489972_h2_3">Usage Example</a>
+    </li>
+  </ul>
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The information about the processing load obtained using this feature consists of values for the current release. The processing load may be improved in future releases.</p>
+  </div>
+</div>
+<h2 id="Anchor_104489972_h2_1">Feature Overview</h2>
+<p>The audio renderer has a feature to get information about how much time <em>rendering</em> of an <em>audio frame</em> takes. This time information is called <em>performance information</em>. By obtaining this information on a periodic basis, the user can inspect for bottlenecks in the rendering process. The following table describes the terminology used in this section.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Term</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Rendering</td>
+      <td>The series of processes completed by the audio renderer, including conducting tasks like waveform shaping, mixing multiple waveforms, and processing effects, and then sending the data to the audio device.</td>
+    </tr>
+    <tr>
+      <td>Audio Frame</td>
+      <td>The time interval, calculated as <span class="ApiLink_nn__audio__AudioRendererParameter__sampleCount"><code>nn::audio::AudioRendererParameter.sampleCount</code></span> / <span class="ApiLink_nn__audio__AudioRendererParameter__sampleRate"><code>nn::audio::AudioRendererParameter.sampleRate</code></span>.<br />In the samples that accompany NintendoSDK, the audio frame is set to 5 milliseconds.<p>The rendering by the audio renderer is repeated frame by frame, treating this time interval as one frame.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p>To realize audio playback with interruptions, the number of voices, the number of effects, and other aspects of the rendering process must be adjusted so the rendering fits inside each audio frame.</p>
+<p>Performance information is stored for each individual audio frame. A <em>performance frame</em> is one audio frame of performance information.<br />As shown in the following image, a performance frame is organized as three structures: <code><span class="ApiLink_nn__audio__PerformanceFrameHeader">nn::audio::PerformanceFrameHeader</span></code>, followed by <code><span class="ApiLink_nn__audio__PerformanceEntry">nn::audio::PerformanceEntry</span></code> and then <code><span class="ApiLink_nn__audio__PerformanceDetail">nn::audio::PerformanceDetail</span></code>.</p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_104489972/124257868.png" width="200" class="embedded-image" />
+  </span>
+</p>
+<p>The <code><span class="ApiLink_nn__audio__PerformanceEntry">nn::audio::PerformanceEntry</span></code> structure provides the time spent processing instances of <code>VoiceType</code>, <code>SubMixType</code>, and <code>FinalMixType</code>. The <span class="ApiLink_nn__audio__PerformanceFrameHeader"><code>nn::audio::PerformanceFrameHeader</code></span> structure provides data about the number of such instances and the average values in the performance frame. Performance frames are created and accumulated one at a time as rendering is performed by the audio renderer on individual audio frames. By constantly getting these performance frames, the user can monitor the audio renderer's performance information.</p>
+<h2 id="Anchor_104489972_h2_2">How to Use</h2>
+<p>To get performance information, you must configure these two kinds of settings ahead of time.</p>
+<ul>
+  <li>Set the number of performance frames and open the audio renderer.</li>
+  <li>Receive performance information from the audio renderer.</li>
+</ul>
+<p>Also, to use performance information, prepare an instance of the <code><span class="ApiLink_nn__audio__PerformanceInfo">nn::audio::PerformanceInfo</span></code> class. The following sections describe these procedures.</p>
+<h3 id="Anchor_104489972_h3_1">Setting the Number of Performance Frames and Opening the Audio Renderer</h3>
+<p>The audio renderer automatically gathers and accumulates performance information. You must configure the number of audio frames of information to gather.<br />Specify the required number of frames in <span class="ApiLink_nn__audio__AudioRendererParameter__performanceFrameCount"><code>nn::audio::AudioRendererParameter.performanceFrameCount</code></span> and open the audio renderer.</p>
+<p>The specified value is stored internally by the audio renderer and defines the maximum number of performance frames. Performance frames are created and accumulated one at a time because rendering is performed by the audio renderer on individual audio frames. These accumulated performance frames are received periodically from the audio renderer using the method described later in this document. The user must adjust the number set for <code>performaneFrameCount</code> according to how often (each <em>n</em> frames) the application will get performance frames. For an example of this in actual use, see the <span class="ApiLink_PageSampleAudioAudioPerformanceMetrics"><code> AudioPerformanceMetrics</code></span> sample program.</p>
+<h3 id="Anchor_104489972_h3_2">Receive performance information from the audio renderer.</h3>
+<p>To get performance information from the audio render, use the <code><span class="ApiLink_void_*_nn__audio__SetPerformanceFrameBuffer(AudioRendererConfig_*pOutConfig|_void_*buffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::audio::SetPerformanceFrameBuffer()</span></code> function. This function specifies a buffer for receiving performance information and returns the address to the previously specified buffer. To get the size required for the buffer being specified, use the <code><span class="ApiLink_size_t_nn__audio__GetRequiredBufferSizeForPerformanceFrames(const_AudioRendererParameter_&parameter)_NN_NOEXCEPT">nn::audio::GetRequiredBufferSizeForPerformanceFrames()</span></code> function. Performance frames are written to the specified buffer when the <code><span class="ApiLink_nn__audio__RequestUpdateAudioRenderer">nn::audio::RequestUpdateAudioRenderer</span>()</code> function is called.</p>
+<p>Performance frames are written in succession to the buffer that is returned by the audio renderer. Prepare an instance of the <code><span class="ApiLink_nn__audio__PerformanceInfo">nn::audio::PerformanceInfo</span></code> class to get the performance information from this buffer. The user can extract data from the performance information with member functions like <code><span class="ApiLink_nn__audio__PerformanceInfo__GetEntries">nn::audio::PerformanceInfo::GetEntries</span>()</code> and <code><span class="ApiLink_nn__audio__PerformanceInfo__GetDetails">nn::audio::PerformanceInfo::GetDetails</span>()</code> by initializing with the <code><span class="ApiLink_void_*_nn__audio__SetPerformanceFrameBuffer(AudioRendererConfig_*pOutConfig|_void_*buffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::audio::PerformanceInfo::SetBuffer()</span></code> function using the buffer returned by the <code><span class="ApiLink_bool_nn__audio__PerformanceInfo__SetBuffer(const_void_*frameBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::audio::SetPerformanceFrameBuffer()</span></code> function as its parameter.</p>
+<h2 id="Anchor_104489972_h2_3">Usage Example</h2>
+<p>The following simple example shows how to use these processes. Review this code and the <span class="ApiLink_PageSampleAudioAudioPerformanceMetrics">sample program code</span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21<br />
+22<br />
+23<br />
+24<br />
+25<br />
+26<br />
+27<br />
+28<br />
+29<br />
+30<br />
+31<br />
+32<br />
+33<br />
+34<br />
+35<br />
+36<br />
+37<br />
+38<br />
+39<br />
+40<br />
+41<br />
+42<br />
+43<br />
+44<br />
+45<br />
+46<br />
+47<br />
+48<br />
+49<br />
+50<br />
+51<br />
+52<br />
+53<br />
+54<br />
+55<br />
+56<br />
+57<br />
+58<br />
+59<br />
+60<br />
+61<br />
+62<br />
+63<br />
+64<br />
+65<br />
+66<br />
+67<br />
+68<br />
+69<br />
+70<br />
+71<br />
+72<br />
+73<br />
+74<br />
+75</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// The performance information obtained by nn::audio::SetPerformanceFrameBuffer() stores the performance frames that were accumulated between the previous and subsequent call to the nn::audio::RequestUpdateAudioRenderer() function.
+//  The specified performanceFrameCount is determined based on the implementation policy of the application.
+// To prevent performance information from being dropped due to factors like slowdowns, it is safer to set performanceCount to a value larger than is actually required.
+// For example, in the case where nn::audio::RequestUpdateAudioRenderer() is called in every audio frame,
+// you must specify a value of at least 2 ( = the frame for which the audio renderer is writing data + one frame of past information).
+// However, if for some reason the call to the nn::audio::RequestUpdateAudioRenderer() function is delayed, this &quot;one frame of past information&quot; would be destroyed before it could be obtained, and a performance frame would be missing.
+// The amount of margin in frames to specify depends on the implementation of the application, but in this case we specify a value of 5, providing a margin of three frames.
+// You can get the number of performance frames included in any single update by recording the number of times that the nn::audio::PerformaceInfo::MoveNext() function (described later) succeeds.
+// For this reason, we recommend that you begin by setting a large value, and make it smaller later as needed.
+</span><span class="nn">nn::audio::</span><span class="n">AudioRendererParameter</span> <span class="n">parameter</span><span class="p">;</span>
+<span class="n">parameter</span><span class="p">.</span><span class="n">performanceFrameCount</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+
+<span class="c1">// ...
+</span>
+<span class="c1">// Opens the audio renderer after setting a value in performanceFrameCount.
+</span><span class="nn">nn::audio::</span><span class="n">OpenAudioRenderer</span><span class="p">(</span> <span class="cm">/* ... */</span> <span class="p">);</span>
+
+<span class="c1">// ...
+</span>
+<span class="c1">// Prepares a buffer for storing the performance frames.
+// Specifies the parameter to use when the audio renderer opens and gets the size.
+</span><span class="kt">size_t</span> <span class="n">bufferSize</span> <span class="o">=</span> <span class="nn">nn::audio::</span><span class="n">GetRequiredBufferSizeForPerformanceFrames</span><span class="p">(</span><span class="n">parameter</span><span class="p">);</span>
+<span class="c1">// Allocates two buffers to pass using nn::audio::SetPerformanceFrameBuffer().
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">performanceDataBuffer</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="n">performanceDataBuffer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">BufferAllocator</span><span class="p">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">);</span>
+<span class="n">performanceDataBuffer</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">BufferAllocator</span><span class="p">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">bufferIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="c1">// Specifies the first buffer as the one for getting the data.
+</span><span class="nn">nn::audio::</span><span class="n">SetPerformanceFrameBuffer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="p">,</span> <span class="n">performanceDataBuffer</span><span class="p">[</span><span class="n">bufferIndex</span><span class="p">],</span> <span class="n">bufferSize</span><span class="p">);</span>
+
+<span class="c1">// ...
+</span>&nbsp;&nbsp;
+<span class="c1">// After this is specified, the buffer for getting the data is applied to nn::audio::RequestUpdateAudioRenderer().
+</span><span class="n">result</span> <span class="o">=</span> <span class="nn">nn::audio::</span><span class="n">RequestUpdateAudioRenderer</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">config</span><span class="p">);</span>
+<span class="n">NN_ABORT_UNLESS</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">());</span>
+
+<span class="c1">// ...
+</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">appRunning</span><span class="p">)</span> <span class="c1">// The main loop.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Gets the performance information for the interval between the last call to nn::audio::RequestUpdateAudioRenderer() and the present, and passes it to the next performance buffer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">auto</span> <span class="n">lastBuffer</span> <span class="o">=</span> <span class="nn">nn::audio::</span><span class="n">SetPerformanceFrameBuffer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="p">,</span> <span class="n">performanceDataBuffer</span><span class="p">[</span><span class="n">bufferIndex</span><span class="p">],</span> <span class="n">bufferSize</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">bufferIndex</span> <span class="o">=</span> <span class="o">!</span><span class="n">bufferIndex</span><span class="p">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The buffer returned by nn::audio::SetPerformanceFrameBuffer() is filled with performance information.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Extract this information using the nn::audio::PerformanceInfo class.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::audio::</span><span class="n">PerformanceInfo</span> <span class="n">performanceInfo</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">performanceInfo</span><span class="p">.</span><span class="n">SetBuffer</span><span class="p">(</span><span class="n">lastBuffer</span><span class="p">,</span> <span class="n">bufferSize</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(;;)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">auto</span> <span class="n">entries</span> <span class="o">=</span> <span class="n">performanceInfo</span><span class="p">.</span><span class="n">GetEntries</span><span class="p">(</span><span class="o">&amp;</span><span class="n">count</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Reading by nn::audio::PerformanceEntry.        
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">auto</span> <span class="n">pEntry</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">entries</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// If lastBuffer contains multiple performance frames, advance performanceInfo to the next frame.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Count the number of successes to get how many performance frames are in lastBuffer.    
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">performanceInfo</span><span class="p">.</span><span class="n">MoveNext</span><span class="p">()</span> <span class="o">==</span> <span class="nb">false</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// ...
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__audio__AudioRendererParameter__sampleCount', '../../../Api/HtmlNX/structnn_1_1audio_1_1_audio_renderer_parameter.html#a1c8b7223c7e2ce641691f4e4f93000dd' )
+SetUrl( 'ApiLink_nn__audio__AudioRendererParameter__sampleRate', '../../../Api/HtmlNX/structnn_1_1audio_1_1_audio_renderer_parameter.html#a1e47a1581c947e7587b50b6213251c3d' )
+SetUrl( 'ApiLink_nn__audio__PerformanceFrameHeader', '../../../Api/HtmlNX/structnn_1_1audio_1_1_performance_frame_header.html' )
+SetUrl( 'ApiLink_nn__audio__PerformanceEntry', '../../../Api/HtmlNX/structnn_1_1audio_1_1_performance_entry.html' )
+SetUrl( 'ApiLink_nn__audio__PerformanceDetail', '../../../Api/HtmlNX/structnn_1_1audio_1_1_performance_detail.html' )
+SetUrl( 'ApiLink_nn__audio__PerformanceInfo', '../../../Api/HtmlNX/classnn_1_1audio_1_1_performance_info.html' )
+SetUrl( 'ApiLink_nn__audio__AudioRendererParameter__performanceFrameCount', '../../../Api/HtmlNX/structnn_1_1audio_1_1_audio_renderer_parameter.html#adc0048497f26f959223bdffa24ac4a53' )
+SetUrl( 'ApiLink_PageSampleAudioAudioPerformanceMetrics', '../../../Api/HtmlNX/_page_sample_audio_audio_performance_metrics.html' )
+SetUrl( 'ApiLink_void_*_nn__audio__SetPerformanceFrameBuffer(AudioRendererConfig_*pOutConfig|_void_*buffer|_size_t_bufferSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a7d1532644fd22daad0fe71d9f409ba72' )
+SetUrl( 'ApiLink_size_t_nn__audio__GetRequiredBufferSizeForPerformanceFrames(const_AudioRendererParameter_&parameter)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#af6322903ab06537b41c4330c6eff1b58' )
+SetUrl( 'ApiLink_nn__audio__RequestUpdateAudioRenderer', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ac555128156197608dfaeeb5e824780a6' )
+SetUrl( 'ApiLink_nn__audio__PerformanceInfo__GetEntries', '../../../Api/HtmlNX/classnn_1_1audio_1_1_performance_info.html#a6491cec577ed4e0ee80e0e354ea7162d' )
+SetUrl( 'ApiLink_nn__audio__PerformanceInfo__GetDetails', '../../../Api/HtmlNX/classnn_1_1audio_1_1_performance_info.html#a166a41ade85df3f06efb31828f47927c' )
+SetUrl( 'ApiLink_bool_nn__audio__PerformanceInfo__SetBuffer(const_void_*frameBuffer|_size_t_bufferSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1audio_1_1_performance_info.html#a2b23ccf291687fa6273e6affc7807064' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

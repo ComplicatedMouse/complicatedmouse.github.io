@@ -1,0 +1,247 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>DescriptorPoolAllocator | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- DescriptorPoolAllocator -->
+<div class="pagetitle" id="PageId_162934648">DescriptorPoolAllocator</div>
+<div class="text_separate">
+<h1 id="Anchor_162934648_h1_1">Introduction</h1>
+<p>
+  <code>DescriptorPoolAllocator</code> is an allocator for allocating the slots in a descriptor pool.</p>
+<p>Memory space for management purposes is allocated and freed by user-specified callback functions.</p>
+<h1 id="Anchor_162934648_h1_2">DescriptorPoolAllocator</h1>
+<h2 id="Anchor_162934648_h2_1">Header File</h2>
+<p>Include <code>nn/gfx/util/gfx_DescriptorPoolAllocator.h</code>.</p>
+<h2 id="Anchor_162934648_h2_2">How to Use</h2>
+<p>1. Prepare functions for allocating and freeing the memory used by the allocator.</p>
+<p>The descriptor pool itself must already be initialized at this time.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/gfx/util/gfx_DescriptorPoolAllocator.h&gt;
+</span>
+<span class="kt">void</span><span class="o">*</span> <span class="nf">UserAllocateFunction</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">pParam</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">pParam</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="n">malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">UserFreeFunction</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">ptr</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">pParam</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">pParam</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">free</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nn">nn::gfx::</span><span class="n">DescriptorPool</span> <span class="n">g_DescriptorPool</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>2. Initialize <code>DescriptorPoolAllocator</code>.</p>
+<p>Specify the functions for allocating and freeing memory, the descriptor pool, the index of the starting slot, the number of slots, and the thread-safe flag.</p>
+<p>When the thread-safe flag is enabled, the <code>Allocate</code> and <code>Free</code> functions are called in a thread-safe way.</p>
+<p>
+  <br />
+</p>
+<p>For the starting slot, specify a value of <code>0</code> or greater.</p>
+<p>For the number of slots, specify a value that is no larger than <code><span class="ApiLink_nn__gfx__util__DescriptorPoolAllocator__SlotCountMax">nn::gfx::util::DescriptorPoolAllocator::SlotCountMax</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">baseSlotIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>    <span class="c1">// baseSlotIndex &gt;= 0
+</span><span class="kt">int</span> <span class="n">slotCount</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>    <span class="c1">// (slotCount &gt;= 1) &amp;&amp; (slotCount &lt;= nn::gfx::util::DescriptorPoolAllocator::SlotCountMax)
+</span><span class="kt">bool</span> <span class="n">threadSafe</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+
+<span class="nn">nn::gfx::util::</span><span class="n">DescriptorPoolAllocator</span> <span class="n">allocator</span><span class="p">;</span>
+<span class="n">allocator</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">UserAllocateFunction</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">nullptr</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">UserFreeFunction</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">nullptr</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&amp;</span><span class="n">g_DescriptorPool</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">baseSlotIndex</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">slotCount</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">threadSafe</span>
+<span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>3. Use the <code>Allocate</code> function to allocate slot indexes.</p>
+<p>You can allocate a block of as many as the <code><em>count</em></code> number of consecutive indexes.</p>
+<p>
+  <br />
+</p>
+<p>If allocation fails, the function will return <code><span class="ApiLink_nn__gfx__util__DescriptorPoolAllocator__InvalidIndex">nn::gfx::util::DescriptorPoolAllocator::InvalidIndex</span></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">indexSlotA</span> <span class="o">=</span> <span class="n">allocator</span><span class="p">.</span><span class="n">Allocate</span><span class="p">(</span><span class="n">count</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">indexSlotB</span> <span class="o">=</span> <span class="n">allocator</span><span class="p">.</span><span class="n">Allocate</span><span class="p">(</span><span class="n">count</span><span class="p">);</span>
+&nbsp;
+<span class="k">if</span><span class="p">(</span><span class="n">indexSlotA</span> <span class="o">==</span> <span class="nn">nn::gfx::util::DescriptorPoolAllocator::</span><span class="n">InvalidIndex</span><span class="p">){</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocation fails.
+</span><span class="p">}</span>
+<span class="k">if</span><span class="p">(</span><span class="n">indexSlotB</span> <span class="o">==</span> <span class="nn">nn::gfx::util::DescriptorPoolAllocator::</span><span class="n">InvalidIndex</span><span class="p">){</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocation fails.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>4. Use the <code>Free</code> function to free the allocated block of indexes.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">allocator</span><span class="p">.</span><span class="n">Free</span><span class="p">(</span><span class="n">indexSlotA</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>5. Call the <code>Finalize</code> function to finalize the allocator.</p>
+<p>If any allocated blocks have not been freed at this time, they will be freed automatically inside this function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// indexSlotB is freed automatically by the Finalize() function.
+</span><span class="n">allocator</span><span class="p">.</span><span class="n">Finalize</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>For more information about other functions, see the API reference for each.</p>
+<h2 id="Anchor_162934648_h2_3">Dump Format</h2>
+<p>When the <code><span class="ApiLink_void_nn__gfx__util__DescriptorPoolAllocator__Dump()_NN_NOEXCEPT">Dump()</span></code> function is called, the allocator's internal data is displayed in the following XML format.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&nbsp;<span class="o">&lt;</span><span class="n">heapinfo</span><span class="o">&gt;</span>
+&nbsp;&nbsp;<span class="o">&lt;</span><span class="n">offset</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">&lt;/</span><span class="n">offset</span><span class="o">&gt;</span>
+&nbsp;&nbsp;<span class="o">&lt;</span><span class="n">factor</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="n">factor</span><span class="o">&gt;</span>
+&nbsp;&nbsp;<span class="o">&lt;</span><span class="n">max_allocatable_size</span><span class="o">&gt;</span><span class="mi">16777214</span><span class="o">&lt;/</span><span class="n">max_allocatable_size</span><span class="o">&gt;</span>
+&nbsp;&nbsp;<span class="o">&lt;</span><span class="n">free_memory</span><span class="o">&gt;</span><span class="mi">16777214</span><span class="o">&lt;/</span><span class="n">free_memory</span><span class="o">&gt;</span>
+&nbsp;&nbsp;<span class="o">&lt;</span><span class="n">allocated_memory</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;/</span><span class="n">allocated_memory</span><span class="o">&gt;</span>
+&nbsp;&nbsp;<span class="o">&lt;</span><span class="n">freelists</span><span class="o">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&lt;</span><span class="n">free</span> <span class="n">index</span><span class="o">=</span><span class="err">'</span><span class="mi">255</span><span class="err">'</span> <span class="n">first</span><span class="o">=</span><span class="err">'</span><span class="mo">0000000000000002</span><span class="err">'</span> <span class="n">last</span><span class="o">=</span><span class="err">'</span><span class="mo">0000000001000000</span><span class="err">'</span> <span class="n">size</span><span class="o">=</span><span class="err">'</span><span class="mi">16777214</span><span class="err">'</span><span class="o">/&gt;</span>
+&nbsp;&nbsp;<span class="o">&lt;/</span><span class="n">freelists</span><span class="o">&gt;</span>
+&nbsp;&nbsp;<span class="o">&lt;</span><span class="n">allocs</span><span class="o">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&lt;</span><span class="n">alloc</span> <span class="n">level0</span><span class="o">=</span><span class="sc">'0'</span> <span class="n">level1</span><span class="o">=</span><span class="sc">'0'</span> <span class="n">level2</span><span class="o">=</span><span class="sc">'0'</span> <span class="n">first</span><span class="o">=</span><span class="err">'</span><span class="mo">0000000000000000</span><span class="err">'</span> <span class="n">last</span><span class="o">=</span><span class="err">'</span><span class="mo">0000000000000002</span><span class="err">'</span> <span class="n">size</span><span class="o">=</span><span class="sc">'2'</span><span class="o">/&gt;</span>
+&nbsp;&nbsp;<span class="o">&lt;/</span><span class="n">allocs</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">heapinfo</span><span class="o">&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Descriptions of each element are the same as for <code><span class="ApiLink_nn__mem__NumberLineAllocator__Dump">nn::mem::NumberLineAllocator::Dump</span>()</code>. For more information, see the <a href="../Pages/Page_165040249.html"><code>nn::mem::NumberLineAllocator</code></a> documentation.</p>
+<h2 id="Anchor_162934648_h2_4">API Reference</h2>
+<p>For more information, see the <span class="ApiLink_nn__gfx__util"><code>DescriptorPoolAllocator</code> class</span> in the <span class="ApiLink_nn__gfx__util__DescriptorPoolAllocator"><code>nn::gfx::util</code> namespace</span>.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__util__DescriptorPoolAllocator__SlotCountMax', '../../../Api/HtmlNX/classnn_1_1gfx_1_1util_1_1_descriptor_pool_allocator.html#af8ad5383b56e74dfb5ad7b7ae61065b8' )
+SetUrl( 'ApiLink_nn__gfx__util__DescriptorPoolAllocator__InvalidIndex', '../../../Api/HtmlNX/classnn_1_1gfx_1_1util_1_1_descriptor_pool_allocator.html#ad769f91002a334f6c511852909e6fc41' )
+SetUrl( 'ApiLink_void_nn__gfx__util__DescriptorPoolAllocator__Dump()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1util_1_1_descriptor_pool_allocator.html#a6994eec703f03d7dac3adb88cfee4112' )
+SetUrl( 'ApiLink_nn__mem__NumberLineAllocator__Dump', '../../../Api/HtmlNX/classnn_1_1mem_1_1_number_line_allocator.html#ad1aac471cf6647dda3771c2149ff8e6a' )
+SetUrl( 'ApiLink_nn__gfx__util', '../../../Api/HtmlNX/namespacenn_1_1gfx_1_1util.html' )
+SetUrl( 'ApiLink_nn__gfx__util__DescriptorPoolAllocator', '../../../Api/HtmlNX/classnn_1_1gfx_1_1util_1_1_descriptor_pool_allocator.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

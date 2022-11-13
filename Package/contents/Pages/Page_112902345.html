@@ -1,0 +1,514 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Clustering Mode | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Clustering Mode -->
+<div class="pagetitle" id="PageId_112902345">Clustering Mode</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_112902345_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_112902345_h1_2">Clustering Mode</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_112902345_h2_1">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902345_h2_2">Settings</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902345_h2_3">Output Format</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_112902345_h1_3">Using Clustering Mode</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_112902345_h2_4">Clustering Mode Sample Demo</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_112902345_h1_1">Introduction</h1>
+<p>In clustering mode, objects in the field of the IR Motion Camera are detected as clusters.</p>
+<h1 id="Anchor_112902345_h1_2">Clustering Mode</h1>
+<h2 id="Anchor_112902345_h2_1">Overview</h2>
+<p>In clustering mode, clusters of bright areas in the image are found, and then the coordinates and size of those clusters are calculated.<br />Up to 16 clusters can be detected and retrieved at one time.</p>
+<p>The following image illustrates how the detected clusters are drawn on the screen.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_112902345/125191145.png" class="embedded-image" />
+  </span>
+</p>
+<p>For more information about the coordinate system for the data that is output, see <a href="../Pages/Page_112902609.html#Anchor_112902609_h2_8">IR Motion Camera Coordinate System</a>.</p>
+<h2 id="Anchor_112902345_h2_2">Settings</h2>
+<p>Clustering mode supports the following settings. Use these settings to modify the cluster detection conditions.<br />By adjusting the IR camera and clustering mode settings, you can reliably capture the objects you are trying to detect.<br /><br /></p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+      <th>Default Value</th>
+      <th>Defined Range</th>
+    </tr>
+    <tr>
+      <td>
+        <code>windowOfInterest</code>
+      </td>
+      <td>
+        <p>Specifies which memory region of an image to use.</p>
+        <p>Use this setting when you want to remove part of an image (such as the edges).</p>
+        <p>Say that the image contains a certain bright region that you do not want to detect as a cluster.</p>
+        <p>You would set the WOI to exclude that region.</p>
+      </td>
+      <td>
+        <p>(0,0) to (319, 239)</p>
+        <p>split segment :( copied this into preceding TU</p>
+      </td>
+      <td>
+        <p>You can specify up to the entire 320&times;240-pixel image.</p>
+        <p>The region from (0, 0) (the upper-left corner) to (319,239) (the lower-right corner).</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>objectPixelCountMin</code>
+      </td>
+      <td>
+        <p>The minimum area (in units of pixels) of a memory region that will be detected as a cluster.</p>
+        <p>Bright regions smaller than this value will not be detected as clusters.</p>
+        <p>If a large number of very small clusters are detected in your image, increase this value so that the small clusters are no longer detected.<br />If you set a value greater than <code>objectPixelCountMax</code> - 1, no clusters will be detected at all.</p>
+      </td>
+      <td>3.</td>
+      <td>0 to 65535</td>
+    </tr>
+    <tr>
+      <td>
+        <code>objectPixelCountMax</code>
+      </td>
+      <td>
+        <p>The maximum area (in units of pixels) of a memory region that will be detected as a cluster.</p>
+        <p>Bright regions larger than this value will not be detected as clusters.</p>
+        <p>If a large number of large clusters are detected in your image, decrease this value so that the large clusters are no longer detected.</p>
+        <p>If you set a value greater than <code>objectPixelCountMin</code> + 1, no clusters will be detected at all.</p>
+      </td>
+      <td>76800</td>
+      <td>0 to 76800 (=320x240)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>objectIntensityMin</code>
+      </td>
+      <td>
+        <p>The threshold brightness value.</p>
+        <p>Pixels with a brightness less than this threshold value are counted as dark pixels and are not included as part of a cluster.</p>
+        <p>Decrease this value to detect darker clusters.</p>
+        <p>Increase this threshold value if a large number of dark clusters are detected in your image. (Alternatively, you can try adjusting the camera image.)</p>
+      </td>
+      <td>150</td>
+      <td>
+        <p>0 to 255<br /></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>isExternalLightFilterEnabled</code>
+      </td>
+      <td>
+        <p>Specifies whether the external light filter is enabled or disabled.</p>
+        <p>Disable this filter feature if you deliberately want to include external light in the sensor measurement.</p>
+        <p>For more information, see IR Motion Camera External Light Filter in <a href="../Pages/Page_112902609.html#Anchor_112902609_h2_7">Common Features</a>.</p>
+      </td>
+      <td>
+        <code>true</code>
+      </td>
+      <td>
+        <code>true</code>/<code>false</code></td>
+    </tr>
+  </tbody>
+</table>
+<p>These settings are stored as members of the <code><span class="external-link"><span class="ApiLink_nn__irsensor__ClusteringProcessorConfig">nn::irsensor::ClusteringProcessorConfig</span></span></code> structure. For more information about configuring the IR Motion Camera, see <a href="../Pages/Page_112902609.html">Common Features</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">ClusteringProcessorConfig</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IrCameraConfig</span> <span class="n">irCameraConfig</span><span class="p">;</span>     <span class="c1">//!&lt; IR camera settings.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Rect</span> <span class="n">windowOfInterest</span><span class="p">;</span>             <span class="c1">//!&lt; A rectangular region of the captured image to process. The coordinates of the upper-left corner of the image are (0, 0). The width of the image is IrCameraImageWidth, and the height of the image is IrCameraImageHeight.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">objectPixelCountMin</span><span class="p">;</span>           <span class="c1">//!&lt; The minimum area (in units of pixels) of an object that will be detected as a cluster (0 to ClusteringProcessorObjectPixelCountMax).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">objectPixelCountMax</span><span class="p">;</span>           <span class="c1">//!&lt; The maximum area (in units of pixels) of an object that will be detected as a cluster (0 to ClusteringProcessorObjectPixelCountMax).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">objectIntensityMin</span><span class="p">;</span>            <span class="c1">//!&lt; The minimum brightness value of pixels to be counted as part of a detected object (from 0 through 255).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">bool</span> <span class="n">isExternalLightFilterEnabled</span><span class="p">;</span> <span class="c1">//!&lt; Specifies whether the external light filter is enabled.
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The window of interest rectangle can be represented as an instance of the <code><span class="ApiLink_nn__irsensor__Rect">nn::irsensor::Rect</span></code> structure. This structure includes the following members.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">Rect</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int16_t</span> <span class="n">x</span><span class="p">;</span>      <span class="c1">//!&lt; X coordinate.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int16_t</span> <span class="n">y</span><span class="p">;</span>      <span class="c1">//!&lt; Y coordinate.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int16_t</span> <span class="n">width</span><span class="p">;</span>  <span class="c1">//!&lt; Width.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int16_t</span> <span class="n">height</span><span class="p">;</span> <span class="c1">//!&lt; Height.
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />Pass the desired values for these settings to the <code><span class="ApiLink_nn__irsensor__RunClusteringProcessor">nn::irsensor::RunClusteringProcessor</span></code> function to start clustering mode with the specified settings.</p>
+<h2 id="Anchor_112902345_h2_3">Output Format</h2>
+<p>In clustering mode, data is output in the following format.</p>
+<p>The image is scanned horizontally starting from the upper-left corner (0, 0). If more than 16 clusters are detected, priority is given to the clusters that are highest in the image or the leftmost clusters for clusters that include pixels in the same row.<br /></p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+      <th>Value Range</th>
+    </tr>
+    <tr>
+      <td>
+        <code>samplingNumber</code>
+      </td>
+      <td>Value that increases each time processed results are received.</td>
+      <td>0 or greater</td>
+    </tr>
+    <tr>
+      <td>
+        <code>
+          <em>timeStamp</em>
+        </code>
+      </td>
+      <td>
+        <p>The time from when the process started to when the results of the process were obtained.<br />Taking the difference between this value and the <code>timeStamp</code> value for the previously obtained data, makes it possible to detect packet loss.</p>
+      </td>
+      <td>0 or greater</td>
+    </tr>
+    <tr>
+      <td>
+        <code>
+          <em>objectCount</em>
+        </code>
+      </td>
+      <td>The number of clusters detected.</td>
+      <td>0 to 16</td>
+    </tr>
+    <tr>
+      <td>
+        <code>
+          <em>ambientNoiseLevel</em>
+        </code>
+      </td>
+      <td>
+        <p>The ambient noise level.</p>
+        <p>If there is a lot of ambient light noise, you can look at this variable</p>
+        <p>and do something like guide the user to change the play environment,</p>
+        <p>or make some such notification.</p>
+        <p>Returns <code>Unknown</code> if the external light filter is disabled.</p>
+        <p>For more information, see the <a href="../Pages/Page_112902609.html#Anchor_112902609_h2_7">Common Features</a> section</p>
+        <p>
+          <em>IR Motion Camera External Light Filter</em>.</p>
+      </td>
+      <td>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_Low/</code>
+        </p>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_Middle/</code>
+        </p>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_High/</code>
+        </p>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_Unknown</code>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>objects</code>
+        </p>
+      </td>
+      <td>Details about each cluster.<br />The data is stored in a buffer in the order that the clusters were detected.</td>
+      <td>For more information, click here.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The details for each cluster are stored in the following format.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+      <th>Value Range</th>
+    </tr>
+    <tr>
+      <td>
+        <code>averageIntensity</code>
+      </td>
+      <td>The average brightness of the cluster.</td>
+      <td>
+        <p>0.0 to 255.0</p>
+      </td>
+    </tr>
+    <tr>
+      <td>centroid</td>
+      <td>The cluster&rsquo;s centroid.</td>
+      <td>(0.0, 0.0) to (319.0, 239.0)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>pixelCount</code>
+      </td>
+      <td>The area of the cluster (in pixels).</td>
+      <td>0 to 65535</td>
+    </tr>
+    <tr>
+      <td>
+        <code>bound</code>
+      </td>
+      <td>The cluster&rsquo;s bounding box.</td>
+      <td>1 to <code><span class="ApiLink_nn__irsensor__IrCameraImageWidth">nn::irsensor::IrCameraImageWidth</span></code> in the horizontal direction, 1 to <code><span class="ApiLink_nn__irsensor__IrCameraImageHeight">nn::irsensor::IrCameraImageHeight</span></code> in the vertical direction. This bounding box is also contained within the specified <code>windowOfInterest</code>.<br /><br /></td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>By design, <code><em>pixelCount</em></code> is set to <code>65535</code>, even if the actual size of the detected cluster was greater than 65,535.</p>
+  </div>
+</div>
+<p>These output values are stored as members of the <code><span class="ApiLink_nn__irsensor__ClusteringProcessorState">nn::irsensor::ClusteringProcessorState</span></code> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">ClusteringProcessorState</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int64_t</span> <span class="n">samplingNumber</span><span class="p">;</span>                                    <span class="c1">//!&lt; This value (0 or greater) increases each time processed results are received from the clustering processor.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">::</span><span class="nn">nn::</span><span class="n">TimeSpanType</span> <span class="n">timeStamp</span><span class="p">;</span>                              <span class="c1">//!&lt; The time from when the process started to when the results of the process were obtained.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int8_t</span> <span class="n">objectCount</span><span class="p">;</span>                                        <span class="c1">//!&lt; The number of detected objects (0 to ClusteringProcessorObjectCountMax).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_PADDING3</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IrCameraAmbientNoiseLevel</span> <span class="n">ambientNoiseLevel</span><span class="p">;</span>               <span class="c1">//!&lt; The detected ambient noise level.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">ClusteringData</span> <span class="n">objects</span><span class="p">[</span><span class="n">ClusteringProcessorObjectCountMax</span><span class="p">];</span> <span class="c1">//!&lt; Details about each detected object.
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The details about each cluster are stored as members of the <code><span class="ApiLink_nn__irsensor__ClusteringData">nn::irsensor::ClusteringData</span></code> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">ClusteringData</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">averageIntensity</span><span class="p">;</span>      <span class="c1">//!&lt; The average value of the object's brightness (0 to IrCameraIntensityMax).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">::</span><span class="nn">nn::util::</span><span class="n">Float2</span> <span class="n">centroid</span><span class="p">;</span> <span class="c1">//!&lt; The coordinates of the object's centroid (within the specified ClusteringProcessorConfig::windowOfInterest).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int32_t</span> <span class="n">pixelCount</span><span class="p">;</span>          <span class="c1">//!&lt; The object's area (ClusteringProcessorConfig::objectPixelCountMin to ClusteringProcessorConfig::objectPixelCountMax).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Rect</span> <span class="n">bound</span><span class="p">;</span>                  <span class="c1">//!&lt; The object's bounding box (within the specified ClusteringProcessorConfig::windowOfInterest).
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>To get the calculated values, pass a buffer formatted appropriately for the output values when calling the <code><span class="ApiLink_nn__irsensor__GetClusteringProcessorState">nn::irsensor::GetClusteringProcessorState</span></code> or <code><span class="ApiLink_nn__irsensor__GetClusteringProcessorStates">nn::irsensor::GetClusteringProcessorStates</span></code> function.</p>
+<h1 id="Anchor_112902345_h1_3">Using Clustering Mode</h1>
+<p>The basic workflow for using clustering mode is as follows.</p>
+<ol>
+  <li>
+    <p>Get <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code> for the specified <code><span class="ApiLink_nn__hid__NpadIdType">nn::hid::NpadIdType</span></code>, and initialize the IR Motion Camera.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/irsensor.h&gt;
+</span>
+<span class="nn">nn::irsensor::</span><span class="n">IrCameraHandle</span> <span class="n">handle</span> <span class="o">=</span> <span class="nn">nn::irsensor::</span><span class="n">GetIrCameraHandle</span><span class="p">(</span><span class="n">npadIdType</span><span class="p">);</span>
+<span class="nn">nn::irsensor::</span><span class="n">Initialize</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Generate the initial settings for clustering mode.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">ClusteringProcessorConfig</span> <span class="n">config</span><span class="p">;</span>
+<span class="c1">// Get the default settings (if you want to configure these settings individually, you can also specify them directly).
+</span><span class="nn">nn::irsensor::</span><span class="n">GetClusteringProcessorDefaultConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To begin capturing images, call the <code><span class="ApiLink_nn__irsensor__RunClusteringProcessor">nn::irsensor::RunClusteringProcessor</span></code> function, passing in the retrieved <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code>.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>&nbsp;<span class="nn">nn::irsensor::</span><span class="n">RunClusteringProcessor</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">config</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Get an output buffer formatted appropriately for <code><span class="ApiLink_nn__irsensor__ClusteringProcessorState">nn::irsensor::ClusteringProcessorState</span></code> ready, and then call the <code><span class="ApiLink_nn__irsensor__GetClusteringProcessorState">nn::irsensor::GetClusteringProcessorState</span></code> or <code><span class="ApiLink_nn__irsensor__GetClusteringProcessorStates">nn::irsensor::GetClusteringProcessorStates</span></code> function.  <br /> The <code><span class="ApiLink_nn__irsensor__GetClusteringProcessorStates">nn::irsensor::GetClusteringProcessorStates</span></code> function can get up to <code><span class="ApiLink_nn__irsensor__ClusteringProcessorStateCountMax">nn::irsensor::ClusteringProcessorStateCountMax</span></code> processed results at one time.<br />The latest processed results as of the time the function call was made are retrieved. However, the results are updated at intervals of 15 milliseconds or less due to the restrictions on the speed of data transfer via the controller&rsquo;s Bluetooth module. As a result, we recommend practices such as polling the results to be obtained in synchronization with the game frames.<br /></p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">ClusteringProcessorState</span> <span class="n">state</span><span class="p">[];</span>
+<span class="kt">int</span> <span class="n">count</span><span class="p">;</span>
+<span class="nn">nn::irsensor::</span><span class="n">GetClusteringProcessorStates</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To stop clustering mode, call the <code><span class="ApiLink_nn__irsensor__StopImageProcessor">nn::irsensor::StopImageProcessor</span></code> function, passing in the <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code> of the IR sensor you want to stop.<br />Call the <code><span class="ApiLink_nn__irsensor__Finalize">nn::irsensor::Finalize</span></code> function to finalize the IR Motion Camera.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">StopImageProcessor</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span>
+<span class="nn">nn::irsensor::</span><span class="n">Finalize</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      <br />
+    </p>
+    <h2 id="Anchor_112902345_h2_4">Clustering Mode Sample Demo</h2>
+    <p>See the sample demos located in the <code>Samples\Sources\Applications\IrSensorClusteringBasic</code> directory.<br />To quickly check how clustering mode works, see the sample demos located in the <code>Samples\Sources\Applications\IrSensorViewer</code> directory.</p>
+  </li>
+</ol>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__irsensor__ClusteringProcessorConfig', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_clustering_processor_config.html' )
+SetUrl( 'ApiLink_nn__irsensor__Rect', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_rect.html' )
+SetUrl( 'ApiLink_nn__irsensor__RunClusteringProcessor', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a95a6afcb715377961a0f5382d16408c8' )
+SetUrl( 'ApiLink_nn__irsensor__IrCameraImageWidth', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a63bf35bb56e0d8d50733b01a61f1f4a6' )
+SetUrl( 'ApiLink_nn__irsensor__IrCameraImageHeight', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#ab2ad760b9f753dd1253b3e4172932baf' )
+SetUrl( 'ApiLink_nn__irsensor__ClusteringProcessorState', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_clustering_processor_state.html' )
+SetUrl( 'ApiLink_nn__irsensor__ClusteringData', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_clustering_data.html' )
+SetUrl( 'ApiLink_nn__irsensor__GetClusteringProcessorState', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a6572060a5c7f41d2c19edde462fb5136' )
+SetUrl( 'ApiLink_nn__irsensor__GetClusteringProcessorStates', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#af83d851b9b53c14d5e661f240ac482c2' )
+SetUrl( 'ApiLink_nn__irsensor__IrCameraHandle', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_ir_camera_handle.html' )
+SetUrl( 'ApiLink_nn__hid__NpadIdType', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a5923008962b52bf501f91b30013aedd6' )
+SetUrl( 'ApiLink_nn__irsensor__ClusteringProcessorStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a20ebaaa373036fe0859a0315e33a42fe' )
+SetUrl( 'ApiLink_nn__irsensor__StopImageProcessor', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a3052171f2c63aafc0e4a164366ae22d7' )
+SetUrl( 'ApiLink_nn__irsensor__Finalize', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a6265f5c6e6d6fc0e67fc6882a8945284' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,261 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Overview | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Overview -->
+<div class="pagetitle" id="PageId_83956229">Overview</div>
+<div class="text_separate">
+<h1 id="Anchor_83956229_h1_1">Overview of the Effect Runtime</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83956229_h2_1">GPU Emitter</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956229_h2_2">Custom Shaders</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956229_h2_3">Custom Actions</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956229_h2_4">Emitter Extended Parameter</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956229_h2_5">Viewer Runtime</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_83956229_h1_2">Structure of the Runtime</h1>
+<p>The effect runtime has the following kind of library structure.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956229/235834069.png" class="embedded-image" />
+  </span>
+</p>
+<p>The <code><span class="ApiLink_nn__gfx">nn::gfx</span></code> library is used to issue draw commands and, if particles will be rendered in arbitrary shapes created with Maya or another modeler, the <code><span class="ApiLink_nn__g3d">nn::g3d</span></code> runtime is used to binarize the shapes and route the binary in the runtime.</p>
+<h1 id="Anchor_83956229_h1_3">Embedding in Applications</h1>
+<p>The effect runtime is designed to be embedded in applications with intuitive coding.</p>
+<ol>
+  <li>Create the <code><span class="ApiLink_nn__vfx__System">nn::vfx::System</span></code> class.</li>
+  <li>Register the effect binary created with EffectMaker to a<code> <span class="ApiLink_nn__vfx__System">nn::vfx::System</span></code> object.</li>
+  <li>Create emitter set objects using this <code><span class="ApiLink_nn__vfx__System">nn::vfx::System</span></code> object.</li>
+  <li>Call <code><span class="ApiLink_nn__vfx__System">nn::vfx::System</span></code> functions to calculate and render these created emitter sets.</li>
+</ol>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="with-breadcrumbs">
+          <a href="../Pages/Page_83955666.html">Runtime Embedding Tutorial</a>
+        </span>
+      </th>
+      <td>This tutorial covers how to embed the effect runtime in an application and start playing effects.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_83956229_h1_4">About Emitter Sets</h1>
+<p>An emitter set is a group of several emitters. Emitter sets are typically designed by artists in EffectMaker, and then converted to binary emitter set intermediate files and loaded in the runtime. You can also include the data for several emitter sets in a single binary effect file.</p>
+<p>Application developers create instances of specified emitter sets from the emitter sets included in the binary effect data that was loaded in the runtime and then manipulate aspects of the emitter sets such as display position and color. Emitter sets can be created by using the <code>CreateEmitterSetID</code> member function of the <code><span class="ApiLink_nn__vfx__System">nn::vfx::System</span></code> class.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Sets the effect binary.
+</span><span class="n">vfxSystem</span><span class="o">-&gt;</span><span class="n">EntryResource</span><span class="p">(</span> <span class="n">vfxHeap</span><span class="p">,</span> <span class="n">vfxBinary</span><span class="p">,</span> <span class="n">resourceId</span> <span class="p">);</span>
+
+<span class="c1">// Creates the emitter set.
+</span><span class="nn">nn::vfx::</span><span class="n">Handle</span> <span class="n">handle</span><span class="p">;</span>
+<span class="n">vfxSystem</span><span class="o">-&gt;</span><span class="n">CreateEmitterSetID</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">handle</span><span class="p">,</span> <span class="n">createPos</span><span class="p">,</span> <span class="n">emitterSetId</span><span class="p">,</span> <span class="n">resourceId</span><span class="p">,</span> <span class="n">groupId</span> <span class="p">);</span>
+
+<span class="c1">// Specifies the color.
+</span><span class="n">handle</span><span class="p">.</span><span class="n">GetEmitterSet</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">SetColor</span><span class="p">(</span> <span class="n">color</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>An emitter set is created by &quot;lending&quot; the application an emitter set object that is being managed inside the <code><span class="ApiLink_nn__vfx__System">nn::vfx::System</span></code> class. Creation of the emitter set fails if the search for an empty emitter set fails. You can specify the number of emitter sets that can be managed inside the effect runtime when you create the <code><span class="ApiLink_nn__vfx__System">nn::vfx::System</span></code> class.</p>
+<h1 id="Anchor_83956229_h1_5">Special Features</h1>
+<p>This section describes some special features. For more information about each feature, see the feature descriptions.</p>
+<h2 id="Anchor_83956229_h2_1">GPU Emitter</h2>
+<p> Large number of particles can be controlled at low CPU cost by calculating particle behavior in the vertex shader and the compute shader.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="with-breadcrumbs">
+          <a href="../Pages/Page_83955580.html">NintendoWare Effect Emitters</a>
+        </span>
+      </th>
+      <td>Link to the GPU emitter documentation.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83956229_h2_2">Custom Shaders</h2>
+<p>By customizing the standard shader, you can portray lighting and other application-specific effects.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="with-breadcrumbs">
+          <a href="../Pages/Page_83955512.html">Custom Shaders</a>
+        </span>
+      </th>
+      <td>The custom shader manual.</td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_83955731.html">Custom Shader Examples</a>
+      </th>
+      <td>The custom shader tutorial.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83956229_h2_3">Custom Actions</h2>
+<p>You can customize the behavior of emitters and the behavior and rendering of particles.<br />For example, you can customize things so 3D models are rendered in your application at the locations where particles are supposed to be rendered.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="with-breadcrumbs">
+          <a href="../Pages/Page_83955583.html">Custom Actions</a>
+        </span>
+      </th>
+      <td>The custom action manual.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83956229_h2_4">Emitter Extended Parameter</h2>
+<p>Application-specific parameters can be defined for each emitter.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="with-breadcrumbs">
+          <a href="../Pages/Page_106362252.html">Emitter Extended Parameter</a>
+        </span>
+      </th>
+      <td>The extended emitter parameters manual.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83956229_h2_5">Viewer Runtime</h2>
+<p>The following operations are possible if the viewer runtime is implemented in the developing application.</p>
+<ul>
+  <li>Playback and render the effect data opened in EffectMaker in the application.</li>
+  <li>Adjust the effect data implemented in the application from EffectMaker.</li>
+</ul>
+<p>This differs from using EffectViewer because you can edit effects in states that closely resemble how they will ultimately look in the game.<br />To use the viewer runtime, you must embed the EffectViewer runtime in the application.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <span class="with-breadcrumbs">
+          <a href="../Pages/Page_124007414.html">Embedding the Viewer Runtime</a>
+        </span>
+      </th>
+      <td>This page describes how to embed the viewer runtime.</td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx', '../../../Api/HtmlNX/namespacenn_1_1gfx.html' )
+SetUrl( 'ApiLink_nn__g3d', '../../../Api/HtmlNX/namespacenn_1_1g3d.html' )
+SetUrl( 'ApiLink_nn__vfx__System', '../../../Api/HtmlNX/classnn_1_1vfx_1_1_system.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

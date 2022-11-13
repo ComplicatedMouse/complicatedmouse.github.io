@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Important Implementation Information | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Important Implementation Information -->
+<div class="pagetitle" id="PageId_652072576">Important Implementation Information</div>
+<div class="text_separate">
+<h1 id="Anchor_652072576_h1_1">Introduction</h1>
+<p>This section describes important information that must be considered when implementing applications for Chinese-market Nintendo Switch consoles (consoles for China). </p>
+<h1 id="Anchor_652072576_h1_2">DirtyWord Filter</h1>
+<p>Consoles for China must prohibit the display of improper strings when they are entered in a text box or other location that otherwise allows any text to be entered. For that reason, a specific DirtyWord filter feature is available.</p>
+<p>For more information, see <a href="../Pages/Page_684307164.html">DirtyWord Filter</a>.</p>
+<h1 id="Anchor_652072576_h1_3">Target Age Setting</h1>
+<p>Specify a target age setting for China in the NMETA file when creating applications intended for the Chinese market. A CADPA icon (target age icon) corresponding to this setting is displayed on the Health and Safety warning message screen displayed after the application starts.</p>
+<p>For more information, see <a href="../Pages/Page_166503043.html#Anchor_166503043_AppropriateAgeForChina">Writing the NMETA File &gt; Target Age (for China)</a>.</p>
+<p>An error results if you submit an application via the Nintendo Developer Portal that is intended for the Chinese market but does not have a target age configured in the NSP file.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>A CADPA icon (target age icon) is displayed in the HOME Menu in NintendoSDK Firmware for NX 13.2.0-1.0 and later.</p>
+  </div>
+</div>
+<h1 id="Anchor_652072576_h1_4">Displaying the Health and Safety Warning Message When Starting the Application</h1>
+<p>When an application is started on a console for China, the following Health and Safety warning message screen is displayed for several seconds.</p>
+<p>
+  <br />
+</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_652072576/1230862913.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>To speed up the start of the application, the system begins starting the application while the Health and Safety warning message for fitness games is being displayed. However, during that period, the application cannot be displayed on the screen. As a result, the title text, rights information, and other such screens displayed to the user while the application starts may not be visible to the user.</p>
+<p>If you need to show these screens to the user, start displaying them after the Health and Safety warning message has ended.</p>
+<p>Use the <code><span class="ApiLink_nn__oe__GetHealthWarningDisappearedSystemEvent">nn::oe::GetHealthWarningDisappearedSystemEvent</span>()</code> function in <code>oe_ApplicationControlApisForChina.h</code> to wait for the end of the Health and Safety warning message.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the <code>Application</code> / <code>LogoHandling</code> element in the NMETA file is set to <code>Auto</code>, the Health and Safety warning message automatically disappears after being displayed for a certain amount of time, and the event obtained by the <code><span class="ApiLink_nn__oe__GetHealthWarningDisappearedSystemEvent">nn::oe::GetHealthWarningDisappearedSystemEvent</span>()</code> function is signaled.</p>
+    <p>On the other hand, if this element is set to <code>Manual</code>, the Health and Safety warning message for fitness games continues to be displayed until the application explicitly calls the <code><span class="ApiLink_nn__oe__FinishStartupLogo">nn::oe::FinishStartupLogo</span>()</code> function (except if the system has transitioned to the HOME Menu while the message is being displayed). When <code><span class="ApiLink_nn__oe__FinishStartupLogo">nn::oe::FinishStartupLogo</span>()</code> is called, the Health and Safety warning message for fitness games disappears and the event obtained by the <code><span class="ApiLink_nn__oe__GetHealthWarningDisappearedSystemEvent">nn::oe::GetHealthWarningDisappearedSystemEvent</span>()</code> function is signaled.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In NX Add-On 10.2.0 and later, the Health and Safety warning message for fitness games is not displayed even on Switch consoles for China when the application is started from the following PC hosts.</p>
+    <ul>
+      <li>Starting application with <code>RunOnTarget.exe</code></li>
+      <li>Starting application from <strong>Load Executable File</strong> in Target Manager</li>
+      <li>Starting application from VSI debugger</li>
+    </ul>
+    <p>To verify that the Health and Safety warning message for fitness games is working, take the application's NSP file and either <a href="../Pages/Page_107779320.html"> install it on development hardware</a> or <a href="../Pages/Page_698193408.html">write it to the game card</a> before starting the application.</p>
+  </div>
+</div>
+<h2 id="Anchor_652072576_h2_1">Testing</h2>
+<p>You can check the behavior for <code><span class="ApiLink_nn__oe__GetHealthWarningDisappearedSystemEvent">nn::oe::GetHealthWarningDisappearedSystemEvent</span>()</code> using either the HOME Menu or DevMenu.<br />In the HOME Menu, the preceding Health and Safety warning message appears when starting an application. It does not require any special preparation.<br />In DevMenu, the Health and Safety warning message appears when starting an application after configuring the following settings using DevMenuCommand.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ DevMenuCommand -- debug set-health-warning-enabled true
+set health-warning-enabled = true
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>You can disable the display of the Health and Safety message by setting <code>set-health-warning-enabled</code> to <code>false</code>. It is disabled by default.<br />For more information about using DevMenuCommand, see DevMenuCommand &gt; <a href="../Pages/Page_325711330.html#Anchor_325711330_health-warning-setting">Enabled State Settings for Health and Safety Warning Message for Fitness Games</a>.</p>
+<p>The following Health and Safety warning message appears in DevMenu.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_652072576/669979153.png" height="250" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__oe__GetHealthWarningDisappearedSystemEvent', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a1df2bb2304ad7652987d0e2d46e13d89' )
+SetUrl( 'ApiLink_nn__oe__FinishStartupLogo', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ae84f10193f67da27df3b73c6bf10ac2d' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

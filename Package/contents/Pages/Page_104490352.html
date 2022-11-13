@@ -1,0 +1,546 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Vibration Converter | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Vibration Converter -->
+<div class="pagetitle" id="PageId_104490352">Vibration Converter</div>
+<div class="text_separate">
+<h1 id="Anchor_104490352_h1_1">Vibration Converter</h1>
+<p>This section describes how to use the vibration converter and provides important information.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_104490352_h1_1">Vibration Converter</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_104490352_h2_1">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_104490352_h2_2">Command-Line Options</a>
+      </li>
+      <li>
+        <a href="#Anchor_104490352_h2_3">Parameter File (NVIBCP File)</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_104490352_h3_1">Root Objects</a>
+        </li>
+        <li>
+          <a href="#Anchor_104490352_h3_2">Extractor Object</a>
+        </li>
+        <li>
+          <a href="#Anchor_104490352_h3_3">AmpExtractor Object</a>
+        </li>
+        <li>
+          <a href="#Anchor_104490352_h3_4">FreqExtractor Object</a>
+        </li>
+        <li>
+          <a href="#Anchor_104490352_h3_5">Bpf Object</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_104490352_h2_4">Intermediate (NVIB) File</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_104490352_h3_6">NVIB File Format</a>
+        </li>
+        <li>
+          <a href="#Anchor_104490352_h3_7">How to Use</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_104490352_h4_1">Outputting an NVIB File from a BNVIB File</a>
+          </li>
+          <li>
+            <a href="#Anchor_104490352_h4_2">Converting an NVIB File into a BNVIB File</a>
+          </li>
+        </ul>
+      </ul>
+      <li>
+        <a href="#Anchor_104490352_h2_5">Usage Examples</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_104490352_h3_8">Simplest Example</a>
+        </li>
+        <li>
+          <a href="#Anchor_104490352_h3_9">Example With Explicit Specification of the Output Filename and Conversion Parameters</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_104490352_h2_6">Important Notes About Use</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_104490352_h2_1">Overview</h2>
+<p>The vibration converter creates a <a href="../Pages/Page_104489011.html">binary vibration file</a> (a BNVIB file) based on an audio file (a WAV file or an AIFF file).</p>
+<p>If the audio file contains information for looping (loop start and stop positions), that information is extracted and included in the binary vibration file.</p>
+<p>The created binary vibration file can be played while the program is running by using <code>VibrationFileParser</code> and <code>VibrationPlayer</code>.</p>
+<p>
+  <br />
+</p>
+<p>The process is conducted internally through the following procedure.</p>
+<ol>
+  <li>The data is read from the input audio file and downsampled. (This downsampled waveform is called the <em>DS waveform</em>.)</li>
+  <li>A bandpass filter is applied to the DS waveform to extract a sequence of low-band amplitude values.</li>
+  <li>A bandpass filter is applied to the DS waveform to extract a sequence of low-band frequency values.</li>
+  <li>A bandpass filter is applied to the DS waveform to extract a sequence of high-band amplitude values.</li>
+  <li>A bandpass filter is applied to the DS waveform to extract a sequence of high-band frequency values.</li>
+  <li>The sequences of low-band and high-band amplitude values are scaled so that the largest of the summed values (low-band + high-band) does not exceed 1.0.</li>
+  <li>The sequences of low-band and high-band amplitude and frequency values obtained through these procedures are then used to generate a binary vibration file.</li>
+</ol>
+<p>
+  <br />
+</p>
+<p>You can change the settings for downsampling and for the bandpass filters by specifying arguments in the parameter file (NVIBCP) for the vibration converter.</p>
+<p>As part of the conversion process, the NVIBCP file where the settings used in the process were registered is output automatically to the same folder as the input audio file.</p>
+<p>
+  <br />
+</p>
+<p>Because the minimum unit of vibration control is 5 msec, the length of the vibration binary file will be a multiple of 5 msec, regardless of the source sound file length.</p>
+<h2 id="Anchor_104490352_h2_2">Command-Line Options</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>VibrationConverterConsole.exe &lt;Input&gt; [-o&lt;Output&gt;] [-v] [--in-param=&lt;arg&gt;] [--out-param=&lt;arg&gt;] [--out-wav=&lt;arg&gt;] [-n] [-e] [-d] </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>&lt;Input&gt;</strong>
+</p>
+<p>Specifies the file path for the input file.</p>
+<p>You can specify a standard WAV format audio file.</p>
+<p>If there are two or more audio channels, the data is automatically converted to a monaural signal at the preprocessing stage.</p>
+<p>
+  <strong>-o, --output &lt;Output&gt;</strong>
+</p>
+<p>Specifies the file path for the binary vibration file (BNVIB) that will be output.</p>
+<p>If this option is omitted, the name of the input file is used, except that the extension is changed to <code>.bnvib</code>.</p>
+<p>
+  <strong>-v, --verbose</strong>
+</p>
+<p>Displays a detailed log during the conversion process.</p>
+<p>
+  <strong>--in-param &lt;arg&gt;</strong>
+</p>
+<p>Specifies the file path to the parameter file (NVIBCP) used to specify the conversion settings for the vibration converter.</p>
+<p>If omitted, the vibration converter uses the default settings.</p>
+<p>
+  <strong>--out-param &lt;arg&gt;</strong>
+</p>
+<p>Specifies the file path to use when outputting the parameter file (NVIBCP) with the conversion settings that were used by the vibration converter.</p>
+<p>If this option is omitted, the name of the input file is used, except that the extension is changed to <code>.nvibcp</code>.</p>
+<p>If the <code>-n</code> option has been specified, the NVIBCP file is not output.</p>
+<p>
+  <strong>--out-wav &lt;arg&gt;</strong>
+</p>
+<p>Specifies the output path for the WAV file.</p>
+<p>This option specifies the file path for output of the WAV file that corresponds to the actual vibration waveforms generated by the vibration device when the converted binary vibration file is played.</p>
+<p>If the <code>--out-wav</code> option is omitted, the WAV file is not output.</p>
+<p>This output WAV file is the idealized version of the vibration waveforms. In actuality, some degradation in the vibration waveforms may result from encoding and decoding.</p>
+<p>
+  <strong>-n, --no-out-param</strong>
+</p>
+<p>When this option is specified, the parameter file (NVIBCP) with the conversion settings used by the vibration converter is not output.</p>
+<p>
+  <strong>-e, --enable-auto-amp</strong>
+</p>
+<p>Enables the feature for automatic scaling of amplitude values to be as large as possible. (The <code>-e</code> option, when selected, has priority over the setting in the parameter file specified by the <code>--in-param</code> option.)</p>
+<p>
+  <strong>-d, --disable-auto-amp</strong>
+</p>
+<p>Disables the feature for automatic scaling of amplitude values to be as large as possible. (The <code>-d</code> option, when selected, has priority over the setting in the parameter file specified by the <code>--in-param</code> option.)</p>
+<h2 id="Anchor_104490352_h2_3">Parameter File (NVIBCP File)</h2>
+<p>The parameter file (NVIBCP) for the vibration converter is a text file written in JSON format.</p>
+<p>The following table describes the parameters.</p>
+<h3 id="Anchor_104490352_h3_1">Root Objects</h3>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Parameter Name</th>
+      <th>Description</th>
+      <th>Default Value </th>
+    </tr>
+    <tr>
+      <td>downSamplingRate</td>
+      <td>Specifies the sampling rate when downsampling. (The unit is Hz.)</td>
+      <td>8000</td>
+    </tr>
+    <tr>
+      <td>isAmpCoeffAutoAdjusted</td>
+      <td>
+        <p>Specifies whether to enable the feature for automatic scaling of amplitude values to be as large as possible.</p>
+        <p>
+          <code>true</code> when enabled, or <code>false</code> otherwise.</p>
+      </td>
+      <td>true </td>
+    </tr>
+    <tr>
+      <td>extractorLow </td>
+      <td>
+        <p>The <code>Extractor</code> object indicating the parameters for extracting the low-band amplitude and frequency values. </p>
+      </td>
+      <td>See the <code>Extractor</code> object section.</td>
+    </tr>
+    <tr>
+      <td>extractorHigh </td>
+      <td>The <code>Extractor</code> object indicating the parameters for extracting the high-band amplitude and frequency values. </td>
+      <td>See the <code>Extractor</code> object section.</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_104490352_h3_2">Extractor Object</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Parameter Name</th>
+      <th>Description</th>
+      <th>Default Value</th>
+    </tr>
+    <tr>
+      <td>amfmUpdateFrequency</td>
+      <td>
+        <p>Specifies how frequently to update the vibration value. (The unit is Hz.)</p>
+        <p>Do not change this from the default value.</p>
+      </td>
+      <td>200 </td>
+    </tr>
+    <tr>
+      <td>isSameBpfUsedForFm</td>
+      <td>
+        <p>Specifies whether to use the same filter for extracting frequency values that was used for extracting amplitude values.</p>
+        <p>Specify <code>true</code> to use the same filter. </p>
+      </td>
+      <td>false</td>
+    </tr>
+    <tr>
+      <td>ampExtractor</td>
+      <td>The <code>AmpExtractor</code> object indicating the parameters for extracting amplitude values. </td>
+      <td>See the <code>AmpExtractor</code> object section. </td>
+    </tr>
+    <tr>
+      <td>freqExtractor</td>
+      <td>A <code>FreqExtractor</code> object indicating the parameters for extracting frequencies.</td>
+      <td>See the <code>FreqExtractor</code> object section.</td>
+    </tr>
+    <tr>
+      <td>bpfForAm</td>
+      <td>The <code>Bpf</code> object indicating the bandpass filter parameters for extracting amplitude values. </td>
+      <td>See the <code>Bpf</code> object section. </td>
+    </tr>
+    <tr>
+      <td>bpfForFm</td>
+      <td>The <code>Bpf</code> object indicating the bandpass filter parameters for extracting frequency values. </td>
+      <td>See the <code>Bpf</code> object section.</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_104490352_h3_3">AmpExtractor Object</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Parameter Name</th>
+      <th>Description </th>
+      <th>Default Value</th>
+    </tr>
+    <tr>
+      <td>amplitudeCoeff</td>
+      <td>
+        <p>Specifies the factor by which to multiply the extracted amplitude values.</p>
+        <p>If the feature for automatic scaling of amplitude values to be as large as possible has been enabled,</p>
+        <p>this value is automatically multiplied by the scaling factor and saved.</p>
+      </td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_104490352_h3_4">FreqExtractor Object</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Parameter Name</th>
+      <th>Description</th>
+      <th>Default (Low Band)</th>
+      <th>Default (High Band) </th>
+    </tr>
+    <tr>
+      <td>baseFrequency</td>
+      <td>
+        <p>Specifies the base frequency. (The unit is Hz.)</p>
+        <p>Do not change this from the default value. </p>
+      </td>
+      <td>160 </td>
+      <td>320 </td>
+    </tr>
+    <tr>
+      <td>lowerCutoff</td>
+      <td>Specifies the lower limit extracted frequencies. (The unit is Hz.) </td>
+      <td>128 </td>
+      <td>256 </td>
+    </tr>
+    <tr>
+      <td>higherCutoff</td>
+      <td>Specifies the upper limit extracted frequencies. (The unit is Hz.)</td>
+      <td>200 </td>
+      <td>400 </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_104490352_h3_5">Bpf Object</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Parameter Name</th>
+      <th>Description</th>
+      <th>
+        <p>Default Value</p>
+        <p>(For Extracting Low-Band Amplitude Values)</p>
+      </th>
+      <th>
+        <p>Default Value</p>
+        <p>(For Extracting Low-Band Frequency Values) </p>
+      </th>
+      <th>
+        <p>Default Value</p>
+        <p>(For Extracting High-Band Amplitude Values) </p>
+      </th>
+      <th>
+        <p>Default Value</p>
+        <p>(For Extracting High-Band Frequency Values) </p>
+      </th>
+    </tr>
+    <tr>
+      <td>filterFamily</td>
+      <td>
+        <p>Specifies the kind of filter.</p>
+        <p>Specify <code>0</code> for a Butterworth filter, and <code>1</code> for a Chebyshev filter. </p>
+      </td>
+      <td>0 (Butterworth) </td>
+      <td>0 (Butterworth)  </td>
+      <td>0 (Butterworth)  </td>
+      <td>0 (Butterworth)  </td>
+    </tr>
+    <tr>
+      <td>order</td>
+      <td>
+        <p>Specifies the order of the filter. Specify the positive, even number.</p>
+        <p>With a higher-order filter, anything beyond the cut-off frequency is more distinctly cut off. </p>
+        <p>However, there is a greater tendency for delays along the time axis.</p>
+      </td>
+      <td>6 </td>
+      <td>6 </td>
+      <td>6 </td>
+      <td>6 </td>
+    </tr>
+    <tr>
+      <td>lowerCutoff</td>
+      <td>Specifies the lower cut-off frequency for the filter. (The unit is Hz.) </td>
+      <td>80 </td>
+      <td>128 </td>
+      <td>284 </td>
+      <td>256 </td>
+    </tr>
+    <tr>
+      <td>higherCutoff</td>
+      <td>Specifies the higher cut-off frequency for the filter. (The unit is Hz.)</td>
+      <td>180 </td>
+      <td>200 </td>
+      <td>400 </td>
+      <td>400 </td>
+    </tr>
+    <tr>
+      <td>epsilon</td>
+      <td>
+        <p>Specifies the epsilon value when a Chebyshev filter is used.</p>
+        <p>With a larger epsilon value, anything outside the cut-off frequencies is more distinctly cut off.</p>
+        <p>However, there is more distortion within the cut-off frequencies. </p>
+      </td>
+      <td>1 </td>
+      <td>1 </td>
+      <td>1 </td>
+      <td>1 </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_104490352_h2_4">Intermediate (NVIB) File</h2>
+<p>The vibration binary file can be converted to an NVIB file, which is a text-format type of intermediate file, and then converted back to a vibration binary file.</p>
+<p>This intermediate file can be opened with a text editor to directly edit time series of vibration data.</p>
+<h3 style="margin-left: 0.6em;" id="Anchor_104490352_h3_6">NVIB File Format</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre># Comment                    // '#' is comment
+$LoopStart=&lt;any integer number&gt;      // option
+$LoopEnd=&lt;any integer number&gt;        // option
+$LoopInterval=&lt;any integer number&gt;   // option
+&lt;AmplitudeLow[0]&gt;, &lt;FrequencyLow[0]&gt;, &lt;AmplitudeHigh[0]&gt;, &lt;FrequencyHigh[0]&gt;
+&lt;AmplitudeLow[1]&gt;, &lt;FrequencyLow[1]&gt;, &lt;AmplitudeHigh[1]&gt;, &lt;FrequencyHigh[1]&gt;
+&lt;AmplitudeLow[2]&gt;, &lt;FrequencyLow[2]&gt;, &lt;AmplitudeHigh[2]&gt;, &lt;FrequencyHigh[2]&gt;
+...</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_104490352_h3_7">How to Use</h3>
+<h4 id="Anchor_104490352_h4_1">Outputting an NVIB File from a BNVIB File</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>VibrationConverterConsole.exe &lt;srcFileName&gt;.bnvib --out-nvib &lt;dstFileName&gt;.nvib</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_104490352_h4_2">Converting an NVIB File into a BNVIB File</h4>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>VibrationConverterConsole.exe &lt;srcFileName&gt;.nvib
+VibrationConverterConsole.exe &lt;srcFileName&gt;.nvib -o &lt;dstFileName&gt;.bnvib</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_104490352_h2_5">Usage Examples</h2>
+<h3 id="Anchor_104490352_h3_8">Simplest Example</h3>
+<p>This sample generates the file <code>sample.bnvib</code> based on the file <code>sample.wav</code>. <code>sample.nvibcp</code> is output as a byproduct of the conversion process.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>VibrationConverterConsole.exe sample.wav</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_104490352_h3_9">Example With Explicit Specification of the Output Filename and Conversion Parameters</h3>
+<p>This sample generates the file <code>output.bnvib</code> based on the file <code>sample.wav</code>. The conversion process uses the parameters configured in <code>config.nvibcp</code>.</p>
+<p>
+  <code>sample.nvibcp</code> is output as a byproduct of the conversion process.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>VibrationConverterConsole.exe sample.wav -o output.bnvib --in-param config.nvibcp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>In addition, add the <code>--out-wav</code> option to output the vibration waveform, which is actually output from the vibration motor, as a WAV file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>VibrationConverterConsole.exe sample.wav -o output.bnvib --in-param config.nvibcp --out-wav output.wav</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_104490352_h2_6">Important Notes About Use</h2>
+<p>This tool trims only a certain frequency region from the waveform data contained in the audio file, and extracts the frequency and amplitude of the vibration from that data.</p>
+<p>As a result, if the original audio file does not include low-frequency components, such as 160 Hz and 320 Hz, a file that does not vibrate at all is created.</p>
+<p>In such cases, you must perform processing such as editing the parameter files to expand the band path filter, or using audio editing software to convert the frequency of the audio file in advance.</p>
+<p />
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Instrumented Profile Tab | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Instrumented Profile Tab -->
+<div class="pagetitle" id="PageId_758198879">Instrumented Profile Tab</div>
+<div class="text_separate">
+<p>The <strong>Instrumented Profile</strong> tab allows you to precisely profile code blocks (user inserted begin/end profiling blocks) as well as any single function (chosen within the GUI). Every time a code block or instrumented function is entered or exited, the time is recorded along with optional performance counters.</p>
+<p>In order to instrument a function through the GUI, certain requirements must be met. First, the application must be 64-bit. Second, you must run the application through the Target Manager (or via Visual Studio which goes through the Target Manager).</p>
+<h1 id="Anchor_758198879_h1_1">Profile Buttons</h1>
+<p>The profile buttons operate similarly to the <strong>Sample Profile</strong> tab.</p>
+<p>If you wish to only profile <strong>Code Blocks</strong> without specifying an instrumented function in the GUI, then enable the <strong>Marked</strong> button on the far right side.</p>
+<h1 id="Anchor_758198879_h1_2">Selecting a Function to Instrument</h1>
+<p>To choose a function to instrument, follow these steps:</p>
+<ol>
+  <li>Take a <strong>Sampled Profile</strong> in order to populate the <strong>Functions</strong> tab and <strong>Code Coverage</strong> tab with functions from your game. It might help to take a profile at a very high sample rate (4000x) so that it discovers more functions.</li>
+  <li>Click the <strong>Add Button</strong> so that the button is highlighted.</li>
+  <li>Click on a function in the <strong>Functions</strong> tab, <strong>Call Tree</strong> tab, or <strong>Code Coverage</strong> tab that you want to profile. The function name should appear in the <strong>Instrumented Profile</strong> tab. When using the <strong>Code Coverage</strong> tab, it helps to use the filtering box at the bottom to find a particular function.</li>
+</ol>
+<p>To choose a different function, click the <strong>Add</strong> button again and click on a different function in either the<strong> Functions</strong> tab or the <strong>Code Coverage</strong> tab. To remove your function from being selected, click on the red <strong>X</strong> button next to the function name in the <strong>Instrumented Profile</strong> tab.</p>
+<h2 id="Anchor_758198879_h2_1">
+  <a name="Anchor_758198879_InstrumentationLimitations"></a>Limitations on Selecting Functions to Instrument</h2>
+<p>The instrumentation works by overwriting portions of the instrumented function's code. This means that certain functions cannot be instrumented.</p>
+<ul>
+  <li>Functions that take more than 7 parameters cannot be instrumented. In order to function properly, the profiler modifies the stack between the function call and the function's use of the stack. This means that any attempt to read a value from the stack will read the wrong value.&nbsp;The AARCH64 ABI states that the first 8 registers can be used to pass parameters. Any additional parameters will be pushed onto the stack. However, in C++, the first parameter will be a this pointer if it is a member function. Similarly, floating-point values use a different settings of registers and passing structures by value can introduce a stack push.&nbsp;Currently, the GUI only checks the number of parameters, not what kind of value is used. It also assumes that all functions are member functions since the determination is being made solely by looking at the function name with arguments visible in the GUI. This check may be improved in the future.</li>
+  <li>Functions that read or write the PC in their first instruction cannot be instrumented. The profiler copies the first instruction of the function being instrumented into its own trampoline function. It then overwrites the first instruction with a branch to the trampoline. Attempting to read or write the PC in the first instruction will generally cause problems to occur.</li>
+  <li>NX CPU Profiler functions cannot be instrumented.</li>
+  <li>Functions that branch without linking (jump) to the first instruction should not be profiled. The profiler does not currently check for this behavior. If a function is instrumented and it leads to system destabilization, ensure that it does not jump to the first instruction in the function. Note: Recursive functions can be instrumented.</li>
+  <li>The code overwriting used has a maximum branch offset of 128MB. Functions that require a further offset cannot be instrumented. This may mean that only functions located in the primary application can be instrumented.</li>
+</ul>
+<h1 id="Anchor_758198879_h1_3">Marked Button</h1>
+<p>The <strong>Marked</strong> button only needs to be enabled if you wish to take an instrumented profile of&nbsp;<strong>Code Blocks</strong>&nbsp;without specifying a function to instrument. If you instrument a function, <strong>Code Blocks</strong> will be recorded regardless of the <strong>Marked</strong> button state.</p>
+<h1 id="Anchor_758198879_h1_4">Tracing Group</h1>
+<p>This group bundles together data collection options that record events as they occur (known as&nbsp;<strong>Tracing</strong>), as opposed to statistically sampled.</p>
+<h2 id="Anchor_758198879_h2_2">Threads Toggle Button</h2>
+<p>The&nbsp;<strong>Threads&nbsp;</strong>toggle button allows thread state information to be recorded with the profile. This allows you to see why a thread may be blocked from running.</p>
+<p>Thread state tracing requires the following:</p>
+<ul>
+  <li>The application is a 64-bit application.</li>
+  <li>The nnSdk module can be found and loaded. A warning will appear if it can't be found or loaded.</li>
+  <li>The nnSdk module is within 128MB of the profiler library. If this is not true at the start of sampling, a warning will appear and the&nbsp;<strong>Threads</strong>&nbsp;button will be disabled.</li>
+  <li>The application must call <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li>
+  <li>There must be a free TLS slot obtainable via <span class="ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT">nn::os::AllocateTlsSlot()</span>.</li>
+</ul>
+<p>When the GUI first&nbsp;<strong>Syncs</strong>&nbsp;to the application, data will be sent that attempts to load the nnSdk module and any other modules that are already loaded on the system. This process may take awhile. If it completes successfully, the&nbsp;<strong>Threads</strong>&nbsp;button will be enabled.</p>
+<p>Toggling the&nbsp;<strong>Threads</strong>&nbsp;button on will allow for recording of thread state data. When starting a profile, the GUI will perform some setup on the system to enable everything. This setup may take a few seconds. Profiling has begun when the timer begins to increment. When stopping the profile, the GUI will tear down what was previously set up. This happens in the background while the data parsing is occurring and may take a few seconds.</p>
+<p>To view thread state information, select threads in the&nbsp;<strong>Threads</strong>&nbsp;tab and the data will be shown in the&nbsp;right window&nbsp;<strong>Timeline</strong>&nbsp;tab. More details on how to interpret the thread state information are in the&nbsp;<a href="../Pages/Page_764970037.html">Timeline Tab</a>&nbsp;section.</p>
+<h2 id="Anchor_758198879_h2_3">Graphics Toggle Button</h2>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>GPU Tracing only works when using NVN. Other graphics APIs, such as OpenGL and Vulkan, are not supported.</p>
+    <p>The <span class="ApiLink_nn__gfx">nn::gfx</span> library can be used when NVN is targeted. However, the profiler will perform tracing at the NVN function call level, not at the <span class="ApiLink_nn__gfx">nn::gfx</span> function level.</p>
+  </div>
+</div>
+<p>The&nbsp;<strong>Graphics&nbsp;</strong>toggle button allows GPU information to be recorded with the profile. This allows you to see how work performed on the GPU compares with CPU work.</p>
+<p>GPU tracing requires the following:</p>
+<ul>
+  <li>Call <span class="ApiLink_nn__Result_nn__profiler__InstallGraphicsHooks()_NN_NOEXCEPT">nn::profiler::InstallGraphicsHooks()</span>&nbsp;before NVN functions are loaded with either the nvnLoadCProcs() or nvnLoadCPPProcs() functions and before&nbsp;<span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span> is called.<ul><li>This function can safely be called from a static initializer.</li></ul></li>
+  <li>Ideally, ensure that&nbsp;<span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span> is called before any NVN Queues are initialized.<ul><li>If this is not possible, call <span class="ApiLink_nn__Result_nn__profiler__SetQueuePerFrameOperationEstimates(NVNqueue_*queue|_int_numDraws|_int_numDebugPushes|_int_numComputeDispatches)_NN_NOEXCEPT">nn::profiler::SetQueuePerFrameOperationEstimates()</span>&nbsp;on the queue immediately following the call to <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li></ul></li>
+</ul>
+<p>To view GPU tracing information, click on the&nbsp;right window&nbsp;<strong>Timeline</strong>&nbsp;tab and any recorded GPU data will be shown in the&nbsp;<strong>GPU</strong>&nbsp;section. More details on interpreting this data are in&nbsp;the&nbsp;<a href="../Pages/Page_764970037.html">Timeline Tab</a>&nbsp;section.</p>
+<h2 id="Anchor_758198879_h2_4">Audio Trace Toggle Button</h2>
+<p>The&nbsp;<strong>Audio</strong>&nbsp;toggle button allows AudioRenderer performance metrics to be recorded with the profile. This allows you see how work in the audio system compares with CPU work.</p>
+<p>Audio tracing requires the following:</p>
+<ul>
+  <li>Call <span class="ApiLink_nn__Result_nn__profiler__RegisterAudioRenderer(const_nn__audio__AudioRendererParameter_&parameter|_nn__audio__AudioRendererConfig_*pConfig|_AudioPerformanceMetricsControl_control)_NN_NOEXCEPT">nn::profiler::RegisterAudioRenderer()</span>&nbsp;after opening an AudioRenderer.</li>
+  <li>Call <span class="ApiLink_void_nn__profiler__RecordAudioRendererPerformance(nn__audio__AudioRendererConfig_*pConfig)_NN_NOEXCEPT">nn::profiler::RecordAudioRendererPerformance()</span>&nbsp;each audio frame.</li>
+  <li>The profiler library has been initialized using <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li>
+</ul>
+<p>For a breakdown of the prerequisites to these API calls, please see the API documentation for each function.</p>
+<p>To view&nbsp;<strong>Audio</strong>&nbsp;tracing information, click on the right window&nbsp;<strong>Timeline</strong>&nbsp;tab. If audio trace data was successfully obtained, it will appear in an&nbsp;<strong>Audio</strong>&nbsp;section. More details on interpreting this data is detailed on the&nbsp;<a href="../Pages/Page_764970037.html">Timeline Tab</a>&nbsp;reference page.</p>
+<h2 id="Anchor_758198879_h2_5">File System Trace Button (Experimental)</h2>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>This feature is still considered experimental. For this feature, it means that:</p>
+    <ul>
+      <li>To view data on the&nbsp;<strong><a href="../Pages/Page_764970037.html">Timeline</a></strong>&nbsp;tab, the&nbsp;<a href="../Pages/Page_962042331.html">Thread-Centric Data Views</a>&nbsp;experimental feature must also be enabled.</li>
+      <li>Profiles saved with this feature enabled are not guaranteed to be openable in future version of the profiler.</li>
+    </ul>
+  </div>
+</div>
+<p>The&nbsp;<strong>File</strong>&nbsp;toggle button enables the collection of file system information. Enabling this will hook into the <span class="ApiLink_nn__fs">nn::fs</span> API to watch for file system mounts, file opens and closes, and file reads and writes.</p>
+<p>File system tracing requires:</p>
+<ul>
+  <li>Call <span class="ApiLink_nn__profiler__EnableFileSystemTrace">nn::profiler::EnableFileSystemTrace</span>() before any calls to <span class="ApiLink_nn__fs">nn::fs</span> APIs.</li>
+  <li>The profiler library has been initialized using <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li>
+</ul>
+<p>To view the file system tracing information, some general information will appear in the&nbsp;<strong><a href="../Pages/Page_764970037.html">Timeline</a></strong>&nbsp;tab in the&nbsp;<strong>File System Data</strong>&nbsp;section. To see information on a specific file, go to the left&nbsp;<strong><a href="../Pages/Page_1212546958.html">Files</a></strong>&nbsp;tab and select the file.</p>
+<h2 id="Anchor_758198879_h2_6">Power Toggle Button</h2>
+<p>The&nbsp;<strong>Power</strong>&nbsp;toggle button allows power information to be recorded with the profile. Once recorded, the data appears in the&nbsp;<strong><a href="../Pages/Page_758199045.html">Info</a>&nbsp;</strong>window&nbsp;under the&nbsp;<strong>Power Information</strong>&nbsp;heading. To open the&nbsp;<strong>Info</strong>&nbsp;window, go to the&nbsp;<a href="../Pages/Page_758198966.html"><strong>Overview</strong>&nbsp;</a>tab and click on the&nbsp;<strong>View Detailed Info</strong>&nbsp;link on the right side in the&nbsp;<strong>Profile Info</strong>&nbsp;section. While the individual samples cannot be viewed, an average and range is given for each recorded value, in the format: avg [min, max].</p>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Power information works best on SDEV. EDEV units do not have the ability to report back as much information.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a1fd4585e5e75647e1cb20bb264f58f6e' )
+SetUrl( 'ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2a67ebeb78e5d624b45ec27d66bdf0b2' )
+SetUrl( 'ApiLink_nn__gfx', '../../../Api/HtmlNX/namespacenn_1_1gfx.html' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__InstallGraphicsHooks()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a907804e676e1b37f7e1b62f5bace7992' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__SetQueuePerFrameOperationEstimates(NVNqueue_*queue|_int_numDraws|_int_numDebugPushes|_int_numComputeDispatches)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a7eba4662b2649f42259c6604171e7425' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__RegisterAudioRenderer(const_nn__audio__AudioRendererParameter_&parameter|_nn__audio__AudioRendererConfig_*pConfig|_AudioPerformanceMetricsControl_control)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a9312a49b962cc1cee3ee4a2be86c21fa' )
+SetUrl( 'ApiLink_void_nn__profiler__RecordAudioRendererPerformance(nn__audio__AudioRendererConfig_*pConfig)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#aaff43cb30e5803f4a44ce4f3a741c300' )
+SetUrl( 'ApiLink_nn__fs', '../../../Api/HtmlNX/namespacenn_1_1fs.html' )
+SetUrl( 'ApiLink_nn__profiler__EnableFileSystemTrace', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a1e84c62cb23cbe2b7c628448d1a2fd2a' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

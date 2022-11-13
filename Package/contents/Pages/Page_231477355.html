@@ -1,0 +1,311 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Web Applet | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Web Applet -->
+<div class="pagetitle" id="PageId_231477355">Web Applet</div>
+<div class="text_separate">
+<p>The web applet is a library applet that uses a web browser to display webpages associated with specified URL addresses on the Internet.</p>
+<p>
+  <a name="Anchor_231477355_accessibleurls"></a>
+</p>
+<h1 id="Anchor_231477355_h1_1">Specifying Accessible URLs</h1>
+<p>The web applet can only open URLs that satisfy accessibility rules included in a ROM as associated data.</p>
+<p>Create a text file named <code>accessible-urls.txt</code> (encoding: UTF-8, no BOM, newline code: LF) and specify it in the NMETA file. For more information about editing the NMETA file, see <a href="../Pages/Page_166503043.html">Writing the NMETA File</a>.</p>
+<p>This text file includes regular expressions separated by newlines. A URL is deemed accessible if it is partially matched by any of the regular expressions in the file.</p>
+<p>If you want to exclude some URLs that would otherwise be deemed accessible, create a new regular expression prefixed with <code>----</code> (four dashes) to define an exclusion rule. URLs that are partially matched by such exclusion rules are deemed inaccessible and are excluded even if they are also partially matched by regular expressions on other lines that would normally make them accessible.</p>
+<p>The URL fragment that starts with the hash symbol (#) is removed before the URL is evaluated.<br />The following example shows how to make all pages on the Nintendo website other than amiibo-related pages accessible.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>^https://([0-9A-Za-z\-]+\.)*nintendo\.com(/|$)
+^https://([0-9A-Za-z\-]+\.)*nintendo\.co\.jp(/|$)
+---- ^https://([0-9A-Za-z\-]+\.)*nintendo\.com/amiibo(/|$)
+---- ^https://([0-9A-Za-z\-]+\.)*nintendo\.co\.jp/amiibo(/|$)</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The web applet displays an error page if it attempts to open an URL that was not deemed accessible. The regular expression library in the C++ standard library is used as the regular expression engine. Regular expressions are interpreted using the library's default rules.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>In the retail product environment, the web applet is prohibited from displaying HTTP pages and its use is limited to displaying HTTPS pages.</p>
+    <p>Start each line with <code>^https://</code> or <code>----</code> for accessible URLs in your master ROM.</p>
+    <p>Minimize the number of accessible URLs that you permit access to. In particular, do not allow access to domains that are not absolutely required.<br />Application master ROMs that allow access to an excessive number of unnecessary URLs may potentially be rejected when submitted.</p>
+    <p>You do not need to describe the <a href="#Anchor_231477355_callbackurl">callback URL</a> in an accessible URL.</p>
+  </div>
+</div>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebSimple">WebSimple sample</span>.</p>
+<h2 id="Anchor_231477355_h2_1">Considerations for Regular Expressions for Accessible URLs</h2>
+<p>Mistakes in the regular expressions for accessible URLs may prevent the specified URLs from being opened or allow access to unintended URLs. Pay particular attention to the following when writing your regular expressions.</p>
+<p>Do not forget to escape periods (<code>.</code>) used in URL components such as hostnames. Forgetting to escape this character results in it being treated as a metacharacter that matches any character. An example of forgetting to escape this character follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>^https://([0-9A-Za-z\-]+.)*nintendo.com(/|$)
+^https://([0-9A-Za-z\-]+.)*nintendo.co.jp(/|$)</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Also, do not forget to include <code>(/|$)</code>. Forgetting to include it may result in unexpected matches with hosts on other domains. For example, the following regular expression also matches hosts such as <a href="http://nintendo.comic.com">http://nintendo.comic.com</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>^https://([0-9A-Za-z\-]+\.)*nintendo\.com</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>There may be times during the development of web content when you want to use a host that is different from the host used for the retail product. If you want to match the entire URL during content development, code something like the following. Be careful not to include this code in your retail product.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>^https?://</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>When the web applet opens a webpage, something like the following is output to the log to indicate whether the URL is accessible. Reference this log to check whether the URL has been deemed accessible or inaccessible as intended.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>[Filter] 'https://www.nintendo.co.jp' is accessible.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The url matches '^https://([0-9A-Za-z\-]+\.)*nintendo\.co\.jp(/|$)' on accessible-urls.txt
+
+[Filter] 'https://www.nintendo.co.jp' is 'NOT' accessible.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The url does not match any regular expressions on accessible-urls.txt</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_231477355_h1_2">Including Header Files</h1>
+<p>Link the <code><code>libnn_web.a</code></code> file to your project. Also, add the following code to your program.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/web/web_Api.h&gt; 
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_231477355_h1_3">Starting the Web Applet</h1>
+<p>The web applet can be used by calling a supported API function. The function that starts the web applet blocks until the applet is closed. Specify the URL of the webpage you want to open as a parameter in the constructor for <code><span class="ApiLink_nn__web__ShowWebPageArg">nn::web::ShowWebPageArg</span></code>.</p>
+<p>The following sample code shows how to open the URL <a href="https://www.nintendo.com/">https://www.nintendo.com/</a> in the web applet.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::web::</span><span class="n">ShowWebPageArg</span> <span class="n">showWebPageArg</span><span class="p">(</span><span class="s">&quot;https://www.nintendo.com/&quot;</span><span class="p">);</span>
+<span class="nn">nn::web::</span><span class="n">WebPageReturnValue</span> <span class="n">webPageReturnValue</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::web::</span><span class="n">ShowWebPage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">webPageReturnValue</span><span class="p">,</span> <span class="n">showWebPageArg</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_231477355_h2_2">Specifying Startup Options</h2>
+<p>You can pass a variety of startup options to the web applet when it starts by using <code><span class="ApiLink_nn__web__ShowWebPageArg">nn::web::ShowWebPageArg</span></code> member functions. For more information, see the API reference.</p>
+<h2 id="Anchor_231477355_h2_3">Getting the Status When the Applet Is Closed</h2>
+<p>You can get the status when the web applet is closed from the members of the instance of <code><span class="ApiLink_nn__web__WebPageReturnValue">nn::web::WebPageReturnValue</span></code> passed as the first argument of <code><span class="ApiLink_nn__web__ShowWebPage">nn::web::ShowWebPage</span></code>. For more information, see the API reference.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Note that the <code><span class="ApiLink_nn__web__WebPageReturnValue__GetLastUrl">nn::web::WebPageReturnValue::GetLastUrl</span>()</code> function (which returns the URL of the webpage that was last open) will only return a valid value if the <code><span class="ApiLink_nn__web__WebPageReturnValue__GetWebExitReason">nn::web::WebPageReturnValue::GetWebExitReason</span>()</code> function returns <code>WebExitReason_CallbackUrlReached</code> as the exit reason.</p>
+  </div>
+</div>
+<p>
+  <a name="Anchor_231477355_callbackurl"></a>
+</p>
+<h1 id="Anchor_231477355_h1_4">Callback URLs</h1>
+<p>Using the callback URL feature, you can return the result of user operations in a webpage to the application.<br />When using this feature, the web applet closes and returns program control to the application upon reaching a URL that is prefix-matched by a string (callback URL) specified using <code><span class="ApiLink_nn__web__ShowWebPageArg__SetCallbackUrl">nn::web::ShowWebPageArg::SetCallbackUrl</span>()</code>.<br />You can also restrict the URLs from which that URL can be reached. In this case, the web applet will only close if it reaches the URL that is prefix-matched by the callback URL from a URL that is in turn prefix-matched by a string (callbackable URL) specified using <code><span class="ApiLink_nn__web__ShowWebPageArg__SetCallbackableUrl">nn::web::ShowWebPageArg::SetCallbackableUrl</span>()</code>. If no callbackable URL is specified, the web applet will close regardless of which URL the target URL is reached from.<br />After the applet reaches a URL that is prefix-matched by a callback URL and returns program control to the application, the application can get that URL in addition to the result of the user&rsquo;s last operation on that page.</p>
+<p>In the following sample, the <a href="https://www.nintendo.com/">https://www.nintendo.com/</a> page is displayed, and when the user follows a link on that page to a page about amiibo, the web applet closes and the application that called the applet gets the URL of that amiibo page. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::web::</span><span class="n">ShowWebPageArg</span> <span class="n">showWebPageArg</span><span class="p">(</span><span class="s">&quot;https://www.nintendo.com/&quot;</span><span class="p">);</span>
+<span class="n">showWebPageArg</span><span class="p">.</span><span class="n">SetCallbackableUrl</span><span class="p">(</span><span class="s">&quot;https://www.nintendo.com/&quot;</span><span class="p">);</span>
+<span class="n">showWebPageArg</span><span class="p">.</span><span class="n">SetCallbackUrl</span><span class="p">(</span><span class="s">&quot;https://www.nintendo.com/amiibo/&quot;</span><span class="p">);</span>
+<span class="nn">nn::web::</span><span class="n">WebPageReturnValue</span> <span class="n">webPageReturnValue</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::web::</span><span class="n">ShowWebPage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">webPageReturnValue</span><span class="p">,</span> <span class="n">showWebPageArg</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span> <span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">webPageReturnValue</span><span class="p">.</span><span class="n">GetWebExitReason</span><span class="p">()</span> <span class="o">==</span> <span class="nn">nn::web::</span><span class="n">WebExitReason_CallbackUrlReached</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_LOG</span><span class="p">(</span><span class="s">&quot;%s&quot;</span><span class="p">,</span> <span class="n">webPageReturnValue</span><span class="p">.</span><span class="n">GetLastUrl</span><span class="p">());</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebSimple">WebSimple sample</span>.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The callback URL determination happens before the accessible URL determination. You do not need to add the callback URL to <a href="#Anchor_231477355_accessibleurls">Specifying Accessible URLs</a>.</p>
+  </div>
+</div>
+<h2 id="Anchor_231477355_h2_4">Using Callback URLs for OAuth 2.0 Authentication</h2>
+<p>You can use the web applet for OAuth 2.0 authentication by specifying the redirect destination indicated by <code>redirect_uri</code> in OAuth 2.0 as a callback URL for the web applet. However, this documentation does not cover the exact details because the procedure can vary significantly depending on the APIs provided by each web service.</p>
+<p>
+  <a name="Anchor_231477355_accept_language"></a>
+</p>
+<h1 id="Anchor_231477355_h1_5">Accept-Language</h1>
+<p>The web applet sends language code combinations corresponding to the following languages, along with their priorities, as the Accept-Language HTTP header.</p>
+<ol>
+  <li>Display language (highest priority)</li>
+  <li>System language (q=0.8)</li>
+  <li>en (q=0.5)</li>
+</ol>
+<p>For more information about the display language and system language, see System Features Guide &gt; Appendixes &gt; Mechanism for Displayed Languages.<br />If the UI display language and the system language are the same, the system language part is omitted.<br />For more information about language codes, see <a href="../Pages/Page_100911958.html">Language Settings</a>.</p>
+<h1 id="Anchor_231477355_h1_6">Mixed Content</h1>
+<p>
+  <em>Mixed content</em> refers to webpages that start with https:// and are protected by SSL that contain external resources that start with http:// and are not protected by SSL.<br />Like web standard specifications and standard web browsers, web applets allow external resources not protected by SSL that are images or videos, but block JavaScript, CSS, iframes, and XMLHttpRequests.</p>
+<h1 id="Anchor_231477355_h1_7">Information Stored in System Areas</h1>
+<p>Specifying a user account ID with <code><span class="ApiLink_nn__web__ShowWebPageArg__SetUid">nn::web::ShowWebPageArg::SetUid</span>()</code> when starting the web applet makes it possible to store the following information in a system area for each user account.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Category</th>
+      <th>Size</th>
+    </tr>
+    <tr>
+      <td>Links visited</td>
+      <td>Up to 16 KiB</td>
+    </tr>
+    <tr>
+      <td>Cookies</td>
+      <td>Up to 128 KiB</td>
+    </tr>
+    <tr>
+      <td>Local storage</td>
+      <td>Up to 1280 KiB</td>
+    </tr>
+    <tr>
+      <td>IDs and passwords the user entered in forms and allowed to be saved</td>
+      <td>Up to 100 KiB</td>
+    </tr>
+  </tbody>
+</table>
+<p>The web applet stores information for multiple applications to a shared area. When the upper size limit is exceeded due to the addition of new information, it deletes from the oldest data. Although storage areas are shared, websites cannot read or write information from separate origins, per web standards.</p>
+<p>You cannot delete this information using <strong>Settings</strong> &gt; <strong>Data Management</strong> &gt; <strong>Manage Save Data/Screenshots and Videos</strong> &gt; <strong>Delete Save Data</strong>. Instead, delete it from <strong>Settings</strong> &gt; <strong>System Settings</strong> &gt; <strong>Initialization</strong> &gt; <strong>Initialize Cache</strong>.</p>
+<p>Do not have applications store information that is valuable to users, such as in-game progress, to local storage or cookies.</p>
+<p>Information may become lost when another application uses the web applet, or when a user initializes the cache.</p>
+<h1 id="Anchor_231477355_h1_8">Abbreviating URLs to Just the Domain</h1>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Only use this feature if all of the hosts for all of the webpages that will be displayed are managed by the application developer.</p>
+  </div>
+</div>
+<p>Pressing the + Button or the - Button in the web applet displays a dialog box that contains information such as the URL of the currently displayed webpage. Also, if a webpage cannot be displayed for some reason, the web applet will display an error page containing information such as the URL of the page and the reason why it could not be displayed. Using <code><span class="ApiLink_nn__web__ShowWebPageArg__SetDisplayUrlKind">nn::web::ShowWebPageArg::SetDisplayUrlKind</span>()</code>, you can configure the URLs displayed on these screens to be abbreviated to just the domain.</p>
+<p>
+  <a name="Anchor_231477355_allow_ssl_hosts"></a>
+</p>
+<h1 id="Anchor_231477355_h1_9">Allowing Connections Despite SSL Certificate Errors</h1>
+<p>When the web applet attempts to make an SSL/TLS connection to a web server, an error is generated and it cannot connect if that web server is using a self-signed certificate or a certificate that is not verified by the certificate authority of the loaded root CA certificate. There is no feature that enables the user to allow a temporary connection to that web server.<br />However, during web development there may be times when you want to connect to such a web server. You can allow connections to some web servers by using the settings manager to register the web server hosts in the development hardware. For more information about registering these hosts, see <a href="../Pages/Page_253381544.html#Anchor_253381544_allowed_ssl_hosts">Specification to Ignore SSL Certificate Error and Allow Connection to the Host</a>.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Remember to unregister these hosts before final testing of the retail product.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_PageSampleWebSimple', '../../../Api/HtmlNX/_page_sample_web_simple.html' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html' )
+SetUrl( 'ApiLink_nn__web__WebPageReturnValue', '../../../Api/HtmlNX/classnn_1_1web_1_1_web_page_return_value.html' )
+SetUrl( 'ApiLink_nn__web__ShowWebPage', '../../../Api/HtmlNX/namespacenn_1_1web.html#aad085fed71d0e80a9b15abb60201bdcf' )
+SetUrl( 'ApiLink_nn__web__WebPageReturnValue__GetLastUrl', '../../../Api/HtmlNX/classnn_1_1web_1_1_web_page_return_value.html#a260759f64aead90cbd56410a6c1f6079' )
+SetUrl( 'ApiLink_nn__web__WebPageReturnValue__GetWebExitReason', '../../../Api/HtmlNX/classnn_1_1web_1_1_web_page_return_value.html#a9a2de80217153bfa7c6ff663b2286e78' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetCallbackUrl', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#a3f430caecbeed131235011685e69a368' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetCallbackableUrl', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#ab6dedca1c309fe7e3357ff5beca4e086' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetUid', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#a21f6b14b22223183d36fce6662151bcb' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetDisplayUrlKind', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#afa4c8db6ea9c739f513926fc15f5b91c' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,252 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>User Logged Data and Events | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- User Logged Data and Events -->
+<div class="pagetitle" id="PageId_758198842">User Logged Data and Events</div>
+<div class="text_separate">
+<p>While the profiler can be used with minimal changes to your source code, it can be extremely useful to augment a&nbsp;profile with user logged data and events through additional source code modifications. The following describes available options.</p>
+<h1 id="Anchor_758198842_h1_1">Heartbeats (Frames)</h1>
+<p>When looking at data over long time periods, it is helpful to subdivide the data into meaningful groups, such&nbsp;as frames. Since multiple systems and different cores may operate with different rhythms, we've come up&nbsp;with the broader term &quot;heartbeat&quot; to denote any regularly occurring rhythm or framing that is useful to track (such as vsync).</p>
+<p>If a heartbeat was logged during a profile, it will appear in one of the drop down boxes in the <strong>Heartbeats&nbsp;</strong>tab. When selected, the heartbeat will be graphed for that particular core. You'll notice that there are&nbsp;always two other heartbeats in the drop down boxes: <strong>Fixed 60Hz Intervals</strong> and <strong>Fixed 1ms Intervals</strong>.&nbsp;These heartbeats weren't actually recorded in the profile data, but you can select them to overlay timing&nbsp;information onto a particular core. Please note that these two heartbeats are unlikely to correlate with your&nbsp;data and are only offered as a timing reference.</p>
+<p>If you wish to focus on particular heartbeat frames, you can select them either by clicking and dragging&nbsp;over the frames you want to select on the <strong>Timeline</strong> tab (with the <strong>Select Frames</strong> mode turned on in the <strong>Timeline</strong> toolbar) or by clicking on a particular frame rate in the <strong>Heartbeats</strong> tab (for&nbsp;example, the <strong>60Hz</strong> toggle button).</p>
+<h2 id="Anchor_758198842_h2_1">Marking Frames</h2>
+<p>The profiler API allows you to log multiple heartbeats on each core. Up to 8 different user heartbeats can be logged&nbsp;per core, as listed in the enumeration <span class="ApiLink_nn__profiler__Heartbeats">nn::profiler::Heartbeats</span>&nbsp;in &lt;nn/profiler/profilerTypes.h&gt;.</p>
+<p>The most important heartbeat to log is <span class="ApiLink_nn__profiler__Heartbeats_Main">nn::profiler::Heartbeats_Main</span>. This heartbeat is used&nbsp;by the profiler to draw a frame rate graph at the bottom of the <strong>Timeline</strong>. However, it is extremely&nbsp;important to only log the main heartbeat on your rendering core and not on any other cores (as this&nbsp;confuses the frame rate graphing in the GUI). If you log the main heartbeat too fast (faster than 60Hz), the <strong>Checkers</strong> tab will have the warning <strong>Main Heartbeat Logged Too Frequently</strong>.</p>
+<p>
+  <br />
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">while</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Top of main rendering loop
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::profiler::</span><span class="n">RecordHeartbeat</span><span class="p">(</span><span class="nn">nn::profiler::</span><span class="n">Heartbeats_Main</span><span class="p">);</span>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Additional code ...
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>Note that&nbsp;<strong>Vsync</strong>&nbsp;is automatically logged as a heartbeat, but this might not correspond to your frame rate, so it is still advisable to log a <strong>Main</strong>&nbsp;heartbeat.</p>
+<h2 id="Anchor_758198842_h2_2">Inferred Heartbeats</h2>
+<p>While it is still critical for you to log the <strong>Main</strong> heartbeat, the profiler will infer heartbeats on each core based&nbsp;on function behavior. If there are functions that regularly execute on a periodic basis, the profiler will use&nbsp;the most periodic functions as an indicator of a heartbeat rhythm on that core. <strong>Inferred Heartbeats</strong> are more&nbsp;likely to be detected at higher sampling rates (i.e. <strong>100x</strong> or higher), since there is more data per frame to&nbsp;analyze. These inferred heartbeats are then selectable in the <strong>Heartbeats</strong> tab. Additionally, the <strong>Info</strong> tab&nbsp;has a list of all <strong>Inferred Heartbeats</strong> that were detected. Unfortunately, since these heartbeats are educated&nbsp;guesses based on the data, they are unlikely to actually line up with the conceptual beginning of a frame.&nbsp;If this is a problem, it is recommended that you explicitly log the heartbeat to accurately mark where the&nbsp;frame begins.</p>
+<h1 id="Anchor_758198842_h1_2">User Logged Data</h1>
+<p>Sometimes it can be very powerful to see game data graphed against profiler data. For this case, the&nbsp;profiler offers the ability to log custom data.</p>
+<p>Data that is logged will be displayed on the <strong>Counters</strong> tab in the left window. When a counter is selected on the <strong>Counters</strong> tab, it will be&nbsp;graphed in the <strong>Timeline</strong> tab.</p>
+<p>
+  <br />
+</p>
+<p>The following data types are available to log:</p>
+<ul>
+  <li>Unsigned Int (64-bit):&nbsp;Log a positive integer that represents something in the game.</li>
+  <li>Float (64-bit):&nbsp;Log a floating-point number that represents something in the game.</li>
+</ul>
+<h2 id="Anchor_758198842_h2_3">User Logged Data Examples</h2>
+<p>The following shows the <strong>Logging API</strong> and example usage.</p>
+<p>
+  <br />
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::</span><span class="n">Result</span> <span class="n">RecordData</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">id</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">data</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">RecordData</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">id</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">data</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">RecordData</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">id</span><span class="p">,</span> <span class="kt">double</span> <span class="n">data</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">RecordData</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">id</span><span class="p">,</span> <span class="kt">double</span> <span class="n">data</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::profiler::RecordData(&quot;Size of Stack&quot;, stack.Size());
+nn::profiler::RecordData(&quot;Percentage Done&quot;, percentage);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />For additional details, please see the <strong>Logging API</strong> documentation&nbsp;within the&nbsp;<strong><span class="ApiLink_nn__profiler">nn::profiler</span></strong>&nbsp;API in SDK documentation directory.</p>
+<h1 id="Anchor_758198842_h1_3">Marked Code Blocks</h1>
+<p>Many game developers wrap their game systems with timers so that exact running times can be easily&nbsp;tracked during gameplay. The Nintendo NX CPU Profiler&nbsp;supports this concept. Code Blocks also support tracking CPU performance counters per code block, which can be enabled when you take the profile. Once recorded in a profile, the marked code blocks will be listed on the&nbsp;<strong>Instrumented</strong>&nbsp;tab. When selected&nbsp;on the&nbsp;<strong>Instrumented</strong>&nbsp;tab, they will be graphed in the&nbsp;<strong>Timeline</strong>.</p>
+<h2 id="Anchor_758198842_h2_4">Code Block Examples</h2>
+<p>There are two options for marking code blocks within your game code:</p>
+<h3 id="Anchor_758198842_h3_1">Option 1: Wrap with&nbsp;nn::profiler::EnterCodeBlock() and nn::profiler::ExitCodeBlock()</h3>
+<p>Wrap your code with the functions <span class="ApiLink_nn__Result_nn__profiler__EnterCodeBlock(const_char_*id)_NN_NOEXCEPT">nn::profiler::EnterCodeBlock()</span>&nbsp;and <span class="ApiLink_nn__Result_nn__profiler__ExitCodeBlock(const_char_*id)_NN_NOEXCEPT">nn::profiler::ExitCodeBlock()</span>. You can specify a number or string to identify each unique code block.</p>
+<p>
+  <br />
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::</span><span class="n">Result</span> <span class="n">EnterCodeBlock</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">id</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">EnterCodeBlock</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">id</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">ExitCodeBlock</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">id</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">ExitCodeBlock</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">id</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::profiler::</span><span class="n">EnterCodeBlock</span><span class="p">(</span><span class="s">&quot;Descriptive String&quot;</span><span class="p">);</span>
+<span class="c1">// Code to be timed
+</span><span class="nn">nn::profiler::</span><span class="n">ExitCodeBlock</span><span class="p">(</span><span class="s">&quot;Descriptive String&quot;</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_758198842_h3_2">
+  <br />Option 2: Create an nn::profiler::ScopedCodeBlock object within a scope</h3>
+<p>Create an <span class="ApiLink_nn__profiler__ScopedCodeBlock">nn::profiler::ScopedCodeBlock</span>&nbsp;object within a scope. This will start timing after the creation of the object and automatically stop timing when the object goes out of scope. This method only requires one line of code, compared with <strong>Option 1</strong> which requires two separate lines (an enter and exit).</p>
+<p>
+  <br />
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">ScopedCodeBlock</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">id</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span>
+<span class="n">ScopedCodeBlock</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">id</span><span class="p">)</span> <span class="n">NN_NOEXCEPT</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span> <span class="nf">FunctionCall</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::profiler::</span><span class="n">ScopedCodeBlock</span> <span class="n">codeBlock</span><span class="p">(</span><span class="s">&quot;Descriptive String&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Code to be timed
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_758198842_h3_3">
+  <br />Tips</h3>
+<p>If you want the name of the code block to reflect the file and line, you can use the macro in the following example:</p>
+<p>
+  <br />
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span> <span class="nf">FunctionCall</span><span class="p">()</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::profiler::</span><span class="n">ScopedCodeBlock</span> <span class="n">codeBlock</span><span class="p">(</span><span class="n">__FILE__</span> <span class="s">&quot;:&quot;</span> <span class="n">NN_MACRO_STRINGIZE</span><span class="p">(</span><span class="n">__LINE__</span><span class="p">));</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Code to be timed
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>For additional details, please see the&nbsp;<strong>Code Blocks API</strong>&nbsp;documentation within the&nbsp;<strong><span class="ApiLink_nn__profiler">nn::profiler</span></strong>&nbsp;API in SDK documentation directory.<br /></p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__profiler__Heartbeats', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a8bd43485bd61fe04afe4b789a73b98c4' )
+SetUrl( 'ApiLink_nn__profiler__Heartbeats_Main', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a8bd43485bd61fe04afe4b789a73b98c4afef7944828c76c000d169f2d4b0d5ac2' )
+SetUrl( 'ApiLink_nn__profiler', '../../../Api/HtmlNX/namespacenn_1_1profiler.html' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__EnterCodeBlock(const_char_*id)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#af2b1e434f5b815a86f8185b277df3d1e' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__ExitCodeBlock(const_char_*id)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a550d2f8bd7556acffb35b270cf708109' )
+SetUrl( 'ApiLink_nn__profiler__ScopedCodeBlock', '../../../Api/HtmlNX/classnn_1_1profiler_1_1_scoped_code_block.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

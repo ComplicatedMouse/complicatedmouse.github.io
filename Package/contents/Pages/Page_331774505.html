@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Program-Side Support When Using Capture Effects | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Program-Side Support When Using Capture Effects -->
+<div class="pagetitle" id="PageId_331774505">Program-Side Support When Using Capture Effects</div>
+<div class="text_separate">
+<h1 id="Anchor_331774505_h1_1">About Capture Effects</h1>
+<p>The Capture Effects feature is used to render the texture for the pane rendering results as a texture, then create and display effects such as blurry shadows, borders, or masks based on that texture.</p>
+<p>To use this feature, set the <strong>Borders</strong>, <strong>Brilliance</strong>, <strong>Drop Shadow</strong>, and <strong>Mask</strong> settings in <strong>Capture Effects</strong> in the pane properties in LayoutEditor.</p>
+<h2 id="Anchor_331774505_h2_1">Required Support in Programs</h2>
+<ol>
+  <li>The capture effects use the capture feature internally. When handling a FLYT file that uses capture effects, the program must support using the capture feature.<br />For more information about using the capture feature in a program, see the <a href="../Pages/Page_274170522.html">Capture Features</a> page.</li>
+  <li>Capture effects may change the render target for temporary rendering within <code><span class="ApiLink_nn__ui2d__Layout__Draw">nn::ui2d::Layout::Draw</span></code>.<br />To return the render target for final rendering after this switch occurs, use the <code><span class="ApiLink_nn__ui2d__DrawInfo__SetDefaultColorTargetView">nn::ui2d::DrawInfo::SetDefaultColorTargetView</span>()</code> function to set the render target before the return.</li>
+</ol>
+<h1 id="Anchor_331774505_h1_2">Static Rendering of Capture Effects</h1>
+<p>The static rendering feature is intended to reduce the CPU/GPU load when rendering with capture effects.<br />This feature is enabled by selecting the <strong>Capture First Frame Only</strong> check box in the <strong>Capture Effects</strong> properties.</p>
+<h2 id="Anchor_331774505_h2_2">Effects of Static Rendering</h2>
+<p>Blurring effects and multi-pass rendering in capture effects increases the load on the CPU/GPU when they are all executed in real time.<br />When this feature is enabled, the rendering results from the first rendering pass are stored as a texture, and the second and subsequent rendering passes are then performed by spreading the rendering result texture. This greatly reduces the load on both the CPU and GPU.<br />However, because the initial rendering results continue to be used, animation other than position, scale, rotation, transparency, and display are not applied.</p>
+<h2 id="Anchor_331774505_h2_3">Creating Cache Textures for Static Rendering</h2>
+<p>Because static rendering automatically creates a texture cache of the rendering results the first time <code><span class="ApiLink_nn__ui2d__Layout__Draw">nn::ui2d::Layout::Draw</span>()</code> is called, it basically can be used only when performing normal rendering processing.<br />However, because a texture cache was created before the initial calling of <code><span class="ApiLink_nn__ui2d__Layout__Draw">nn::ui2d::Layout::Draw</span>()</code>, a method function is also available for calling <code><span class="ApiLink_nn__ui2d__Layout__DrawPaneEffectStaticCache">nn::ui2d::Layout::DrawPaneEffectStaticCache</span>()</code>, which can create a texture cache of the rendering results at any user-defined time, without having to draw the entire layout.<br />Use normal rendering in cases like when you want to split the load of generating caches by creating texture caches at different times.<br />However, a cache texture cannot be updated after it has been created.</p>
+<p>Because the capture effects feature is dependent on the capture texture, the capture texture content must be updated by calling the <code><span class="ApiLink_nn__ui2d__Layout__DrawCaptureTexture">nn::ui2d::Layout::DrawCaptureTexture</span>()</code> function before you call the <code><span class="ApiLink_nn__ui2d__Layout__DrawPaneEffectStaticCache">nn::ui2d::Layout::DrawPaneEffectStaticCache</span>()</code> function.</p>
+<h2 id="Anchor_331774505_h2_4">Recreating Cache Textures for Static Rendering</h2>
+<p>You can use the <code><span class="ApiLink_nn__ui2d__Layout__DiscardPaneEffectStaticCachedTexture">nn::ui2d::Layout::DiscardPaneEffectStaticCachedTexture</span>()</code> function to destroy the textures in texture caches that have already been rendered one time, then perform the cache texture creation processing again to update the content.</p>
+<h2 id="Anchor_331774505_h2_5">Problems With Static Rendering and Pane Transparency</h2>
+<p>Panes with transparency 0 do not generate a constant buffer unless a subordinate refresh or rendering process is performed that includes that pane, depending on the optimization.<br />Typically, this feature is useful for reducing computational overhead and rendering load, but in cases where the animation is configured, for example, to change the transparency from 0 to 255, the process tries to create a cache texture with the transparency set to 0, rendering is skipped, and nothing is rendered in the cache texture.</p>
+<p>To avoid this behavior, execute <code><span class="ApiLink_nn__ui2d__Layout__Calculate">nn::ui2d::Layout::Calculate</span>()</code> with <code><span class="ApiLink_nn__ui2d__DrawInfo__SetAlphaZeroPaneCalculated">nn::ui2d::DrawInfo::SetAlphaZeroPaneCalculated</span>()</code> set to <code>true</code>.<br />With this configuration, refresh processing is performed even for the pane with transparency 0, making it possible to correctly create a cache texture.</p>
+<h1 id="Anchor_331774505_h1_3">Dynamically Changing the Size of Panes Using Capture Effects</h1>
+<p>Capture effects are implemented using the internal capture texture feature, and strongly affect the size settings of the pane.<br />For panes that use capture effects, the following restrictions apply for changing the pane size dynamically in the runtime.</p>
+<ul>
+  <li> Panes will not be rendered correctly if static rendering is enabled and the pane size is changed after creating a static rendering texture.<ul><li>Use the <code><span class="ApiLink_nn__ui2d__Layout__DiscardPaneEffectStaticCachedTexture">nn::ui2d::Layout::DiscardPaneEffectStaticCachedTexture</span>()</code> function to destroy the static rendering texture and then recreate the texture to render the pane correctly.</li></ul></li>
+  <li>Rendering is not performed correctly if a size exceeding the pane size, set in layout editor, is set.</li>
+</ul>
+<h1 id="Anchor_331774505_h1_4">Restrictions</h1>
+<ul>
+  <li>If the drawing result of the Capture Effect feature is captured by the capture pane, or if the Capture Effect feature is applied to a pane that uses a texture created in the capture pane, you can only get the correct effect if the actions are done in the same layout.</li>
+</ul>
+<p>
+  <br />
+</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span> For more information, see the following pages.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_329109086.html">UI Description - Capture Effect (Drop Shadow)</a>
+      </th>
+      <td>Describes the UI for <strong>Capture Effect (Drop Shadow)</strong>.</td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_300813797.html">UI Description - Capture Effect (Mask)</a>
+      </th>
+      <td>Describes the UI for <strong>Capture Effect (Mask)</strong>.</td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_329108388.html">Capture Effect (Drop Shadow)</a>
+      </th>
+      <td>Describes the restrictions feature for applying various effects to panes to easily modify appearance.</td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_300813797.html">Capture Effect (Mask)</a>
+        <br />
+      </th>
+      <td>Describes the Capture Effect (Mask) feature for clipping the pane's rendering result by using a mask image.</td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_83956183.html#Anchor_83956183_dropshadow">List of Samples: Capture Effect (Drop Shadow)</a>
+      </th>
+      <td>Samples are rendered using <strong>Capture Effect (Drop Shadow)</strong>.</td>
+    </tr>
+    <tr>
+      <th>
+        <a href="../Pages/Page_83956183.html#Anchor_83956183_mask">List of Samples: Capture Effect (Mask)</a>
+      </th>
+      <td>Samples are rendered using <strong>Capture Effect (Mask)</strong>.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__ui2d__Layout__Draw', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_layout.html#a7e726dc95ad3a80997cb7085d0f67f63' )
+SetUrl( 'ApiLink_nn__ui2d__DrawInfo__SetDefaultColorTargetView', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_draw_info.html#a231bee4ab4d639518e58527e85754ad5' )
+SetUrl( 'ApiLink_nn__ui2d__Layout__DrawPaneEffectStaticCache', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_layout.html#a5e62ac311a2ef01f636af0b1418a2d7c' )
+SetUrl( 'ApiLink_nn__ui2d__Layout__DrawCaptureTexture', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_layout.html#a6f08909cdd99b74e5aeafe104cdc26b1' )
+SetUrl( 'ApiLink_nn__ui2d__Layout__DiscardPaneEffectStaticCachedTexture', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_layout.html#aedcc40dba8d1f9bf6458615269fad28b' )
+SetUrl( 'ApiLink_nn__ui2d__Layout__Calculate', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_layout.html#a59a23fbf33217c59eba47bba35630cb9' )
+SetUrl( 'ApiLink_nn__ui2d__DrawInfo__SetAlphaZeroPaneCalculated', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_draw_info.html#a910d1eb0a5e11ea5e91dfb4d9d564e51' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['manipulating_20the_20language_20code_2e_48133',['Manipulating the language code.',['../_page_sample_settings_language.html',1,'PageSampleSettings']]],
+  ['maxwell_20best_20practices_48134',['Maxwell Best Practices',['../gpu_overview__maxwell_best_practices_index.html',1,'PageGraphicsForNX']]],
+  ['maxwell_20instruction_20set_20architecture_48135',['Maxwell Instruction Set Architecture',['../_page_maxwell_instruction_set_architecture.html',1,'PageGraphicsForNX']]],
+  ['maxwell_20perfworks_20profiling_20guide_48136',['Maxwell PerfWorks Profiling Guide',['../gpu_overview__maxwell_profiling_guide_index.html',1,'PageGraphicsForNX']]],
+  ['maxwell_20technical_20overview_48137',['Maxwell Technical Overview',['../gpu_overview__maxwell_technical_overview_index.html',1,'PageGraphicsForNX']]],
+  ['measure_20power_20consumption_20sample_48138',['Measure Power Consumption Sample',['../_page_sample_pcm_basic.html',1,'PageSamplePcm']]],
+  ['measuring_20opus_20encoder_20and_20decoder_20processing_20times_20sample_48139',['Measuring Opus Encoder and Decoder Processing Times Sample',['../_page_sample_codec_opus_codec_processing_time.html',1,'PageSampleCodec']]],
+  ['media_20transfer_20protocol_48140',['Media Transfer Protocol',['../_page_sample_capmtp.html',1,'']]],
+  ['memoryheap_20sample_48141',['MemoryHeap Sample',['../_page_sample_os_memory_heap.html',1,'PageSampleOs']]],
+  ['messagequeue_20sample_48142',['MessageQueue Sample',['../_page_sample_os_message_queue.html',1,'PageSampleOs']]],
+  ['mii_20library_20samples_48143',['Mii Library Samples',['../_page_sample_mii.html',1,'PageSample']]],
+  ['mii_20shader_20sample_48144',['Mii Shader Sample',['../_page_sample_mii_shader_example.html',1,'PageSampleMii']]],
+  ['mii_20texture_20mipmap_20sample_48145',['Mii Texture Mipmap Sample',['../_page_sample_mii_mip_map.html',1,'PageSampleMii']]],
+  ['miig3dheadwear_20sample_48146',['MiiG3dHeadwear Sample',['../_page_sample_mii_g3d_headwear.html',1,'PageSampleG3d']]],
+  ['miig3dsimple_20sample_48147',['MiiG3dSimple Sample',['../_page_sample_mii_g3d_simple.html',1,'PageSampleG3d']]],
+  ['miipremultipliedalphaicon_48148',['MiiPremultipliedAlphaIcon',['../_page_sample_mii_premultiplied_alpha_icon.html',1,'PageSampleMii']]],
+  ['mode_20change_20notifications_20sample_48149',['Mode Change Notifications Sample',['../_page_sample_oe_mode.html',1,'PageSampleOe']]],
+  ['movie_20library_20samples_48150',['Movie Library Samples',['../_page_sample_movie.html',1,'PageSample']]],
+  ['movieplayersimple_48151',['MoviePlayerSimple',['../_page_sample_movie_player_simple.html',1,'PageSampleMovie']]],
+  ['multi_2daudio_20renderer_20sample_48152',['Multi-Audio Renderer Sample',['../_page_sample_audio_audio_multiple_renderer.html',1,'PageSampleAudio']]],
+  ['multi_2dprogram_20application_48153',['Multi-Program Application',['../_page_sample_multi_program_application.html',1,'PageSample'],['../_page_sample_multi_program_application_main.html',1,'PageSampleMultiProgramApplication']]],
+  ['multicast_20sample_48154',['Multicast sample',['../_page_sample_socket_multicast_basic.html',1,'PageSampleSocket']]],
+  ['multiwait_20sample_48155',['MultiWait Sample',['../_page_sample_os_multi_wait.html',1,'PageSampleOs']]],
+  ['multiwaitutility_20sample_48156',['MultiWaitUtility Sample',['../_page_sample_os_multi_wait_utility.html',1,'PageSampleOs']]],
+  ['mutex_2e_48157',['Mutex.',['../_page_sample_os_mutex.html',1,'PageSampleOs']]]
+];

@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Build Procedure: Creating a Dynamic Module | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Build Procedure: Creating a Dynamic Module -->
+<div class="pagetitle" id="PageId_170694375">Build Procedure: Creating a Dynamic Module</div>
+<div class="text_separate">
+<h1 id="Anchor_170694375_h1_1">Creating a Dynamic Module</h1>
+<h2 id="Anchor_170694375_h2_1">Creating NRS Files<a name="Anchor_170694375_create-nrs"></a></h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_170694375/171384647.png" class="embedded-image" />
+  </span>
+</p>
+<p>Using <code>clang++</code>, you can create a common library file from object files and static library files. NintendoSDK uses <code>.nrs</code> for the filename extension generated at this time.</p>
+<p>For more information about the restrictions on linker options, see <a href="#Anchor_170694375_linker-option-restriction">Restrictions on Linker Options</a>.</p>
+<p style="text-align: left;">The following example describes a simple linking method for creating NRS files for 64-bit applications in the NintendoSDK.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>clang++
+&nbsp;&nbsp;&nbsp;&nbsp;-nostartfiles
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--gc-sections
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--build-id=sha1
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,-init=_init,-fini=_fini
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--shared
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--export-dynamic,-z,combreloc,-z,relro,--enable-new-dtags
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--whole-archive
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--start-group
+&nbsp;&nbsp;&nbsp;&nbsp;%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\rocrt_nro.o
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;input file&gt;...
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,--end-group
+&nbsp;&nbsp;&nbsp;&nbsp;%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\crtend.o
+&nbsp;&nbsp;&nbsp;&nbsp;-Wl,-T -Wl,%NINTENDO_SDK_ROOT%\Resources\SpecFiles\RoModule.aarch64.lp64.ldscript
+&nbsp;&nbsp;&nbsp;&nbsp;-fuse-ld=lld.exe
+&nbsp;&nbsp;&nbsp;&nbsp;-o &lt;OUTPUT_FILE&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Link NRS files to the application in the <a href="../Pages/Page_170694365.html">Creating an Application Program</a> procedure and use the files.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The linker options are different from what is used in <a href="../Pages/Page_170694365.html">Creating an Application Program</a>.</p>
+  </div>
+</div>
+<h2 id="Anchor_170694375_h2_2">Creating NRO Files</h2>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_170694375/171384724.png" class="embedded-image" />
+  </span>
+</p>
+<p>The NRO file is a dynamic module file for the <code>ro</code> library. It is created from the NRS file using <code>MakeNro</code>.</p>
+<p>Use <code>MakeNro</code>, as follows, to create the NRO file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>MakeNro
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;input file&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;output file&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The NRO file is normally stored in the data region directory by using the procedure described in <a href="../Pages/Page_170694395.html">Creating an Application Image</a>. It is referenced from the <code>ro</code> library at the time of executing the application.</p>
+  </div>
+</div>
+<h1 id="Anchor_170694375_h1_2">Restrictions on Linker Options<a name="Anchor_170694375_linker-option-restriction"></a></h1>
+<!--Remove-->
+<h2 id="Anchor_170694375_h2_3">Required.</h2>
+<p>Make sure that you specify the following linker options when you link.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-nostartfiles
+-Wl,--gc-sections
+-Wl,-init=_init,-fini=_fini
+-Wl,--shared
+-Wl,--export-dynamic,-z,combreloc,-z,relro,--enable-new-dtags</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Make sure that you specify the following linker option when creating dynamic modules for 32-bit applications.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-mabi=aapcs-linux
+-mcpu=cortex-a57
+-mfloat-abi=hard
+-mfpu=crypto-neon-fp-armv8
+-Wl,--target2=got-rel</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Make sure that you specify the following linker option when creating dynamic modules for 64-bit applications.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-mcpu=cortex-a57+fp+simd+crypto+crc</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_170694375_h2_4">Link Script Files</h2>
+<p>Use the following linker options to specify the linker script file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-Wl,-T &lt;linker script file&gt; </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the following linker script files appropriate to the application you are building, as provided in the NintendoSDK, without any modifications.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>64-bit applications</th>
+      <td>
+        <pre>%NINTENDO_SDK_ROOT%\Resources\SpecFiles\RoModule.aarch64.lp64.ldscript</pre>
+      </td>
+    </tr>
+    <tr>
+      <th>32-bit applications</th>
+      <td>
+        <pre>%NINTENDO_SDK_ROOT%\Resources\SpecFiles\RoModule.arm.ilp32.ldscript</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_170694375_h2_5">Linker</h2>
+<p>Specify the following linker option to use the fast lld linker. For more information, see <a href="../Pages/Page_92338149.html">Toolchain for NX</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-fuse-ld=lld.exe</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_170694375_h2_6">Build ID</h2>
+<p>Specify the following linker options and assign a build ID to the NRS file. If an ID is not assigned, the debugging information cannot be used in VSI.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-Wl,--build-id=sha1</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the SHA1 hash value is used for the build ID, the same binary NRS file is always generated for the same input file. We recommend using the SHA1 hash value when building release products.<br />In addition to the SHA1 hash value, you can also use the MD5 hash or the UUID, which is a randomly generated unique value, for the build ID. Use the UUID to reduce the time it takes to generate a build ID.<br />For more information, see <a href="../Pages/Page_92338149.html">Toolchain for NX</a>.</p>
+  </div>
+</div>
+<h2 id="Anchor_170694375_h2_7">Mandatory Input File</h2>
+<p>Make sure to link to the following files provided by the NintendoSDK. Also refer to the specification examples in <a href="#Anchor_170694375_create-nrs">Creating NRS Files</a>. For more information about build targets and build types, see <a href="../Pages/Page_106361459.html">Build Targets and Build Types</a>.</p>
+<ul>
+  <li>%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\rocrt_nro.o</li>
+  <li>%NINTENDO_SDK_ROOT%\Libraries\&lt;BuildTarget&gt;\&lt;BuildType&gt;\crtend.o</li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Make sure that you specify <code>crtend.o</code> after all other object files and static library files.</p>
+  </div>
+</div>
+<h1 id="Anchor_170694375_h1_3">Link All Object Files</h1>
+<p>When building the NRS file, only the object files that require linkage are linked by default.</p>
+<p>Use the <code>--whole-archive</code> option to include all of the object files in the NRS file. This links all of the object files in the libraries listed after the option. <a href="#Anchor_170694375_create-nrs">Creating NRS Files</a> provides an example specification.</p>
+<p>Using <code>--no-whole-archive</code> disables the effect of the <code>--whole-archive</code> option for all libraries listed after the <code>--no-whole-archive</code> option.</p>
+<h1 id="Anchor_170694375_h1_4">Next Procedure</h1>
+<ul>
+  <li>
+    <a href="../Pages/Page_170694365.html">Creating an Application Program</a>
+  </li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>SDK LTO Supplemental Information | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- SDK LTO Supplemental Information -->
+<div class="pagetitle" id="PageId_417581939">SDK LTO Supplemental Information</div>
+<div class="text_separate">
+<h2 id="Anchor_417581939_h2_1">Status</h2>
+<p>As of NX Addon 11.0.0</p>
+<ul>
+  <li>FullLTO and ThinLTO are completely supported.</li>
+</ul>
+<h2 id="Anchor_417581939_h2_2">LTO (Link Time Optimization)</h2>
+<h4 id="Anchor_417581939_h4_1">Overview</h4>
+<p>LTO is a different way of compiling and linking code from the traditional compilation workflow. In a traditional compilation workflow, files are moved into an object file format, which tends to limit optimizations that cross source file boundaries. LTO compiles source code to LLVM bitcode instead, leaving a lot more information for the linker.&nbsp;This breaks down the walls between object files allowing the linker to look at each function when making decisions about in-lining, function location for I-Cache considerations, and other optimization passes.&nbsp;This method typically gives a small, but significant, performance benefit to the final executable.&nbsp;There is a cost to this&ndash;the&nbsp;linker is doing more work, so it will take significantly longer and consume more memory while linking than in a traditional compilation workflow. This build cost dramatically increases iteration time and makes this build option more suitable for final/release builds.&nbsp;This holistic approach to LTO is called FullLTO.</p>
+<p>A way to mitigate these increased time and memory costs is to use a variant of LTO called ThinLTO.&nbsp;ThinLTO makes assumptions that FullLTO does not, allowing it to extensively multi-thread the final link process and reduce the overall linking time on modern, multi-core systems. As these assumptions may change the efficiency of the executable, both methods can be attempted.&nbsp;</p>
+<p>In versions of the compiler before Clang for NX 1.9.0, ThinLTO was often inferior in performance, but a lot of improvements to ThinLTO have been made over time and now ThinLTO should perform equal to or even better than FullLTO.&nbsp; In addition, since it requires a lot less RAM and linking time, there will be cases on large executables where only ThinLTO is possible.&nbsp; For these reasons, we now recommend using ThinLTO as the primary LTO method.&nbsp; It is still acceptable to use FullLTO, and in some cases it still might have a slight performance advantage, but the CPU and Memory costs of linking with it makes it undesirable to use.&nbsp; While we cannot say for certain at what size FullLTO should be completely avoided due to its memory and CPU usage being overwhelming, once you .nss symbols file goes over 2G in size, that size might be too big for FullLTO usage to be feasible.</p>
+<h4 id="Anchor_417581939_h4_2">Usage:</h4>
+<p>In order to use <strong>FullLTO</strong>, please add:</p>
+<p style="margin-left: 60.0px;">
+  <code>-flto&nbsp;</code>
+</p>
+<p>or</p>
+<p style="margin-left: 60.0px;">
+  <code>-flto=full</code>
+</p>
+<p>to each compiled file and to the linker command line.&nbsp;</p>
+<p>
+  <br />
+</p>
+<p>For <strong>ThinLTO</strong>, please add:</p>
+<p style="margin-left: 60.0px;">
+  <code>-flto=thin</code>
+</p>
+<p>to each compiled file and to the linker command line.</p>
+<p>
+  <br />
+</p>
+<p>When using <strong>ThinLTO</strong>, the following options may decrease link times:</p>
+<p>
+  <code>-Wl,--thinlto-cache-dir=/path/to/cache</code>
+</p>
+<p>
+  <strong>Caution:</strong>
+</p>
+<p>Using these LTO features will cause the linking step to take extra time and will use significantly more memory. Using ThinLTO instead of FullLTO reduces the amount of extra computational overhead during linking and spreads it across multiple threads.</p>
+<h4 id="Anchor_417581939_h4_3">Advice on Usage:</h4>
+<p>When LTO is first enabled, it will often expose latent issues within the application. These include:</p>
+<ul>
+  <li>
+    <strong>Yet to be discovered buffer overruns, especially within stack space.</strong> This is commonly found due to the reordering of code in memory.</li>
+  <li>
+    <strong>Stack usage changes</strong>. LTO may reduce or increase the amount of stack memory used.</li>
+  <li>
+    <strong>Code size changes.</strong> Code sizes will often increase per function due to increased in-lining, but may decrease overall due to improved dead-stripping.</li>
+  <li>
+    <strong>Race conditions between threads</strong>. LTO changes how long code runs which can expose latent thread timing issues.</li>
+  <li>
+    <strong>LTO changes the output style of the object files to a LLVM bitcode format</strong>. Tools such as readelf, dumpbin, etc. which read these object files may fail due to this change.</li>
+  <li>
+    <strong>LTO linking takes a LOT more RAM and time.</strong>&nbsp;Out of Memory errors may occur on build systems with insufficient RAM.</li>
+  <li>
+    <strong>Legacy linker support</strong>. Older linkers will not support LTO and may cause random issues while building.</li>
+</ul>
+<p>With this in mind, there will occasionally be some bumps when first turning on LTO. As such, if being enabled later in the product cycle, give some time to work through these issues.</p>
+<h4 id="Anchor_417581939_h4_4">FAQ:</h4>
+<p>Q: What do I do when I get a crash/hang issue after I enable LTO in the code?</p>
+<p>A:</p>
+<ol>
+  <li>Verify stack usage in the code in question, especially within areas where stack use is constrained. Constructs such as thread stacks, co-routines, or other stack-layered memory pool structures are especially sensitive to stack usage changes.</li>
+  <li>Look carefully at any buffers in and around areas of memory where crashes occur (as you would for any memory overrun type crash).</li>
+  <li>If a threading hang occurs, naturally verify all locks and mutexes in order to ensure no undefined behavior is being relied upon between threads.</li>
+</ol>
+<p>Q: Why are symbols no longer found while linking or compiling?</p>
+<p>A:</p>
+<ol>
+  <li>Verify that you are not relying on non-LLVM-based binary utilities in your build process. Often build system will use utilities like readelf, dumpbin, nm, etc. to do extra linker work. These utilities will often silently fail when reading bitcode files.</li>
+  <li>Tools that rely on the output of nm, objdump, or other object file processors may need to be updated, even when using their llvm version. The output from these tools can vary depending on if bitcode is encountered within the object files.&nbsp; Routines that use grep search strings to search for symbols or other information should be tested against both regular object files and bitcode files to be sure they still function properly.</li>
+  <li>Verify that you are using lld for linking. ld does not support LTO. Also, be sure you are not mixing tool versions, as this also can cause issues.</li>
+  <li>Verify that you are adding <code>-flto</code>&nbsp;or <code>-flto=thin</code>&nbsp;both&nbsp;for the compiler <em>and</em> for the linker. Both are required for LTO to work.</li>
+  <li>Do not mix FullLTO and ThinLTO within the same build, as this will cause failures.</li>
+  <li>Note the symbol strip utilities do not work the same with bitcode files and they do with standard obj files. Because LTO needs more information at link time, symbol stripping is more complicated and may not be possible.</li>
+</ol>
+<p>Q: What do I do if my build system begins to fail occasionally while linking?</p>
+<p>A:</p>
+<ol>
+  <li>Verify that the build system itself has enough RAM to handle LTO. Even simple tools will require 16G of RAM to properly function and large applications can take 64G of RAM or more to function properly, especially with FullLTO.</li>
+  <li>Beware the linking time for FullLTO are often as long as building all the code files themselves.&nbsp;ThinLTO also increases overall build time, but generally by much less.&nbsp; If your link times do not increase, this may be a sign that LTO is not enabled.</li>
+  <li>Be sure you are using lld as your linker.</li>
+  <li>Verify you are not mixing LTO and ThinLTO within the same build.</li>
+</ol>
+<p>Q: How do I fix performance regressions in code after LTO is enabled?</p>
+<p>A:</p>
+<ol>
+  <li>If you have any prefetch hints, they will need to be re-evaluated, as LTO can change where memory load/store hotspots occur.</li>
+  <li>Be sure to verify that LTO was fully enabled on <em>both</em> the compiler and linker.</li>
+  <li>Verify that the compiler and linker can both use LTO and are from the same toolchain/SDK version.</li>
+  <li>Make sure that code has not accidentally been marked as not visible with attributes such as <code>__attribute__((__visibility__(&quot;hidden&quot;)))</code> as this disables LTO for that function and can hurt performance.</li>
+</ol>
+<h4 id="Anchor_417581939_h4_5">External links:</h4>
+<p>
+  <a href="https://clang.llvm.org/docs/UsersManual.html">https://clang.llvm.org/docs/UsersManual.html</a>
+</p>
+<p>
+  <a href="https://clang.llvm.org/docs/LTOVisibility.html">https://clang.llvm.org/docs/LTOVisibility.html</a>
+</p>
+<p>
+  <a href="https://llvm.org/docs/LinkTimeOptimization.html" title="https://llvm.org/docs/linktimeoptimization.html">https://llvm.org/docs/LinkTimeOptimization.html</a>
+</p>
+<p>
+  <a href="https://clang.llvm.org/docs/ThinLTO.html">https://clang.llvm.org/docs/ThinLTO.html</a>
+</p>
+<p>
+  <a href="http://blog.llvm.org/2016/06/thinlto-scalable-and-incremental-lto.html">http://blog.llvm.org/2016/06/thinlto-scalable-and-incremental-lto.html</a>
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

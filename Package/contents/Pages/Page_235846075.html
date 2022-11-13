@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>HlslCrossCompiler | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- HlslCrossCompiler -->
+<div class="pagetitle" id="PageId_235846075">HlslCrossCompiler</div>
+<div class="text_separate">
+<p>For a description of HlslCrossCompiler, see <a href="../Pages/Page_233735395.html">this page</a>. This page describes feature unique to the NX.</p>
+<h1 id="Anchor_235846075_h1_1">Options</h1>
+<h2 id="Anchor_235846075_h2_1">--hlslcc-option-flags</h2>
+<p>The following flags are available with the NX system.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Flag name.</th>
+      <th>Flag value.</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>HLSLCC_FLAG_SEPARATE_TEXTURE_TYPES</td>
+      <td>0x20000000</td>
+      <td>If set, this shader uses sampler/texture objects</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_235846075_h3_1">Details of Each Flag</h3>
+<h4 id="Anchor_235846075_h4_1">HLSLCC_FLAG_SEPARATE_TEXTURE_TYPES</h4>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This feature is available for NintendoSDK 5.0.0 and later.</p>
+  </div>
+</div>
+<p>It converts to GLSL source code using the separate <code>GL_KHR_vulkan_glsl</code> sampler and a feature comparable to textures.</p>
+<p>It enables <code>SamplerState</code> and <code>Texture</code> to be handled similar to HLSL in order to use <code>uniform sampler</code> and <code>uniform texture</code>.</p>
+<h2 id="Anchor_235846075_h2_2">--enable-min-precision</h2>
+<p>This feature is available for NintendoSDK 10.4.0 and later.</p>
+<p>With this option, conversion is done with <code>mediump</code> added to variables declared as <code>min16</code>-type <code>D3D11_FEATURE_SHADER_MIN_PRECISION_SUPPORT</code>.</p>
+<p />
+<p>In addition, <code>GL_NV_desktop_lowp_mediump</code> is enabled.</p>
+<h1 id="Anchor_235846075_h1_2">Other</h1>
+<h2 id="Anchor_235846075_h2_3">HlslccSystemBuffer</h2>
+<p>When <code>HLSLCC_FLAG_NVN_TARGET</code> is specified, the <code>HlslccSystemBuffer</code> buffer is specified with the following conditions.</p>
+<p>One of the following options is used in HLSL resources.</p>
+<ul>
+  <li>
+    <code>Append/ConsumeStructuredBuffer</code>
+  </li>
+  <li>
+    <code>RWStructuredBuffer</code> with counter</li>
+</ul>
+<p>
+  <code>uniform atomic_uint</code> cannot be used in NVM, so this is used to emulate a counter for each type of HLSL resource in an atomic operation to the buffer.</p>
+<p>For example, when <code>AppendStructuredBuffer</code> declared with the name <code>BufferOut</code> is used in register <code>u2</code>, an <code>HlslccSystemBuffer</code> buffer like the following is specified.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="gutter">1<br />
+2<br />
+3<br />
+4<br />
+5<br />
+6<br />
+7<br />
+8<br />
+9<br />
+10<br />
+11<br />
+12<br />
+13<br />
+14<br />
+15<br />
+16<br />
+17<br />
+18<br />
+19<br />
+20<br />
+21</td>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">HlslccUavHiddenCounterType</span> <span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">BufferOut_counter</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_3</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_4</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_5</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_6</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_7</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_8</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_9</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_10</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_11</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_12</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_13</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_14</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">uint</span> <span class="n">hlslccReserved_counter_15</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="n">layout</span><span class="p">(</span><span class="n">std430</span><span class="p">)</span> <span class="n">buffer</span> <span class="n">HlslccSystemBuffer</span> <span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">HlslccUavHiddenCounterType</span> <span class="n">hlslccUavHiddenCounter</span><span class="p">;</span>
+<span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>When <code>HlslccSystemBuffer</code> exists, make sure that you bind a buffer of the size of the initial value granted to the member variable used for the minimum.</p>
+<p>The member variable offset within <code>HlslccSystemBuffer</code> is uniquely set from the UAV register number, so it is useful when you want to set the initial counter value separately.</p>
+<p>The number of counters that can be used with <code>HlslccSystemBuffer</code> differs depending on the NintendoSDK version.</p>
+<ul>
+  <li>Earlier than NintendoSDK 6.0.0: <code>HlslccSystemBuffer</code> is not supported.</li>
+  <li>NintendoSDK 6.0.0: 8 counters.</li>
+  <li>NintendoSDK 7.1.0: 16 counters.</li>
+</ul>
+<p>An error message is displayed when a UAV counter with a register number higher than this maximum is used.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

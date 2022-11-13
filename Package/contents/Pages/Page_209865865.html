@@ -1,0 +1,494 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Setting the Gamma | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Setting the Gamma -->
+<div class="pagetitle" id="PageId_209865865">Setting the Gamma</div>
+<div class="text_separate">
+<h1 id="Anchor_209865865_h1_1">Setting the Gamma</h1>
+<p>This section describes how to configure the gamma for the rendering of Mii characters.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_209865865_h1_1">Setting the Gamma</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_209865865_h2_1">Gamma Settings and the Rendering Flow</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_209865865_h3_1">Rendering Flow for Face Outline and Mask Textures</a>
+        </li>
+        <li>
+          <a href="#Anchor_209865865_h3_2">Rendering Flow for Mii Face Models in sRGB Space</a>
+        </li>
+        <li>
+          <a href="#Anchor_209865865_h3_3">Rendering Flow for Mii Face Models in Linear Space</a>
+        </li>
+        <li>
+          <a href="#Anchor_209865865_h3_4">Flow of Creating an Icon in sRGB Space</a>
+        </li>
+        <li>
+          <a href="#Anchor_209865865_h3_5">Flow of Creating an Icon in Linear Space</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_209865865_h2_2">Important Information</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_209865865_h3_6">Note About Rendering Translucent Glasses in Linear Space</a>
+        </li>
+        <li>
+          <a href="#Anchor_209865865_h3_7">Note About Rendering an Icon in Gamma Space That Is Different From the Gamma When Icon Was Created</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_209865865_h4_1">Rendering in Linear Space Of an Icon That Was Created in sRGB Space</a>
+          </li>
+          <li>
+            <a href="#Anchor_209865865_h4_2">Rendering in sRGB Space Of an Icon That Was Created in Linear Space</a>
+          </li>
+        </ul>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h2 id="Anchor_209865865_h2_1">Gamma Settings and the Rendering Flow</h2>
+<p>The following gamma-related settings must be configured to display Mii face models and icons. If the Mii character's forehead and face appear with different coloring, it might be because the gamma settings are incorrect. Check these settings.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th class="numberingColumn">
+        <br />
+      </th>
+      <th>Type of settings</th>
+      <th>Face Library Functions for These Settings</th>
+      <th>Example Settings for Rendering in sRGB Space</th>
+      <th>Example Settings for Rendering in Linear Space</th>
+      <th>Comments</th>
+    </tr>
+    <tr>
+      <td class="numberingColumn">1</td>
+      <td>Mii resource gamma settings.</td>
+      <td>
+        <span class="ApiLink_ResourceInfo_&_nn__mii__ResourceInfo__SetGammaType(GammaType_gammaType)_NN_NOEXCEPT">ResourceInfo: SetGammaType()</span>
+      </td>
+      <td>
+        <span class="ApiLink_nn__mii__GammaType">GammaType_Srgb</span>
+      </td>
+      <td>
+        <span class="ApiLink_nn__mii__GammaType">GammaType_Linear</span>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="numberingColumn">2</td>
+      <td>Image format for face outline textures and mask textures.</td>
+      <td>
+        <p>
+          <span class="ApiLink_CharModelInfo_&_nn__mii__CharModelInfo__SetDynamicTextureFormat(nn__gfx__ImageFormat_faceline|_nn__gfx__ImageFormat_mask)_NN_NOEXCEPT">SetDynamicTextureFormat() in CharModelInfo</span>
+        </p>
+      </td>
+      <td>
+        <p>
+          <span class="ApiLink_nn__gfx__ImageFormat_R8_G8_B8_A8_Unorm">R8_G8_B8_A8_Unorm</span>
+        </p>
+      </td>
+      <td>
+        <span class="ApiLink_nn__gfx__ImageFormat_R8_G8_B8_A8_UnormSrgb">R8_G8_B8_A8_UnormSrgb</span>
+      </td>
+      <td>This is just one example of an image format. To render a Mii icon on sRGB space, specify type <code>Unorm</code>. To render a Mii icon on linear space, specify <code>UnormSrgb</code>.</td>
+    </tr>
+    <tr>
+      <td class="numberingColumn">3.</td>
+      <td>Shader settings for the rendering of face outline textures and mask textures.</td>
+      <td>
+        <p>
+          <code>TextureShaderInfo</code>: <span class="ApiLink_TextureShaderInfo_&_nn__mii__TextureShaderInfo__SetFacelineImageFormat(nn__gfx__ImageFormat_imageFormat)_NN_NOEXCEPT"><code>SetFacelineImageFormat()</code></span> and <span class="ApiLink_TextureShaderInfo_&_nn__mii__TextureShaderInfo__SetMaskImageFormat(nn__gfx__ImageFormat_imageFormat)_NN_NOEXCEPT"><code>SetMaskImageFormat()</code></span></p>
+      </td>
+      <td>
+        <p>
+          <code>CharModelInfo</code>: <span class="ApiLink_nn__gfx__ImageFormat_nn__mii__CharModelInfo__GetFacelineFormat()_const_NN_NOEXCEPT"><code>GetFacelineFormat()</code></span></p>
+        <p> and <span class="ApiLink_nn__gfx__ImageFormat_nn__mii__CharModelInfo__GetMaskFormat()_const_NN_NOEXCEPT"><code>GetMaskFormat()</code></span></p>
+      </td>
+      <td>
+        <p>
+          <code>CharModelInfo</code>: <span class="ApiLink_nn__gfx__ImageFormat_nn__mii__CharModelInfo__GetFacelineFormat()_const_NN_NOEXCEPT"><code>GetFacelineFormat()</code></span></p>
+        <p> and <span class="ApiLink_nn__gfx__ImageFormat_nn__mii__CharModelInfo__GetMaskFormat()_const_NN_NOEXCEPT"><code>GetMaskFormat()</code></span></p>
+      </td>
+      <td>Usually configures the image formats set for face outline textures and mask textures.</td>
+    </tr>
+    <tr>
+      <td class="numberingColumn">4</td>
+      <td>Shader settings for the rendering of icons.</td>
+      <td>
+        <span class="ApiLink_IconShaderInfo_&_nn__mii__IconShaderInfo__SetColorTargetImageFormat(nn__gfx__ImageFormat_imageFormat)_NN_NOEXCEPT">IconShaderInfo: SetColorTargetImageFormat()</span>
+      </td>
+      <td>
+        <span class="ApiLink_nn__gfx__ImageFormat_R8_G8_B8_A8_Unorm">R8_G8_B8_A8_Unorm</span>
+      </td>
+      <td>
+        <p>If you specify <code><span class="ApiLink_nn__gfx__ImageFormat_R8_G8_B8_A8_UnormSrgb">nn::gfx::R8_G8_B8_A8_UnormSrgb</span></code>, the final texture data for the icon will be sRGB data.</p>
+        <p>If you specify <code><span class="ApiLink_nn__gfx__ImageFormat_R8_G8_B8_A8_Unorm">nn::gfx::R8_G8_B8_A8_Unorm</span></code>, the final texture data for the icon will be linear data.</p>
+      </td>
+      <td>This is just one example of an image format. Configure the appropriate values in accordance with the icon texture format and gamma.</td>
+    </tr>
+    <tr>
+      <td class="numberingColumn">5</td>
+      <td>The image format of the icon render target texture.</td>
+      <td>
+        <span class="ApiLink_void_nn__gfx__TextureInfo__SetImageFormat(ImageFormat_value)_NN_NOEXCEPT">TextureInfo: SetImageFormat()</span>
+      </td>
+      <td>
+        <span class="ApiLink_nn__gfx__ImageFormat_R8_G8_B8_A8_Unorm">R8_G8_B8_A8_Unorm</span>
+      </td>
+      <td>
+        <span class="ApiLink_nn__gfx__ImageFormat_R8_G8_B8_A8_UnormSrgb">R8_G8_B8_A8_UnormSrgb</span>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following two figures depict the flow when rendering a Mii face model in sRGB space and in linear space. The numbered elements in the figures are settings that users of the <code>Face</code> library would implement in their applications. They correspond to the numbers in the preceding table of gamma-related settings.</p>
+<ul>
+  <li>Schematic of the rendering flow in sRGB space. The flow depicts the steps from creating the face outline and mask textures, to rendering the Mii face model.<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_209863493/209865054.png" width="1002" class="embedded-image" /></span><br /><br /></li>
+  <li>Schematic of the rendering flow in linear space. The flow depicts the steps from creating the face outline and mask textures, to rendering the Mii face model.<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_209863493/209865061.png" width="1002" height="250" class="embedded-image" /></span></li>
+</ul>
+<h3 id="Anchor_209865865_h3_1">Rendering Flow for Face Outline and Mask Textures</h3>
+<p>The <code>Face</code> library invariably generates the face outline texture and mask texture in sRGB space, regardless of the type of gamma space in which the Mii ultimately will be rendered. As a result, even if the resources are for linear gamma, the textures of the parts that comprise the face outline and mask are handled as sRGB data.</p>
+<p>The following two figures depict the flow when rendering the face outline and mask textures in sRGB space and in linear space.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>sRGB Space</th>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865064.png" width="700" height="289" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>Linear Space</th>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865063.png" width="700" height="289" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The rendering target <code><span class="ApiLink_nn__gfx__ColorTargetView">nn::gfx::ColorTargetView</span></code> invariably is set to the <code>Unorm</code> image format. An sRGB write operation is not performed because the face outline and mask textures are rendered in sRGB space. For that reason, the <code>Unorm</code> image format is used for <code><span class="ApiLink_nn__gfx__ColorTargetView">nn::gfx::ColorTargetView</span>,</code> even when the icon will be created in linear space.</p>
+<p>Use the <code><span class="ApiLink_nn__mii__GetDynamicTextureColorTargetFormat">nn::mii::GetDynamicTextureColorTargetFormat</span>()</code> function to get the format to specify in <code>ColorTargetView</code> when creating the face outline and mask textures. You do not need to use <code><span class="ApiLink_nn__mii__GetDynamicTextureColorTargetFormat">nn::mii::GetDynamicTextureColorTargetFormat</span>()</code> if you are using <code><span class="ApiLink_nn__mii__TextureShader">nn::mii::TextureShader</span></code> to create the face outline and mask textures, because in that case, the appropriate format will be set for <code>ColorTargetView</code> inside <code><span class="ApiLink_nn__mii__FacelineGpuBuffer">nn::mii::FacelineGpuBuffer</span></code> and <code><span class="ApiLink_nn__mii__MaskGpuBuffer">nn::mii::MaskGpuBuffer</span></code>. Use the function if you are creating the face outline and mask textures using your own shader.</p>
+<h3 id="Anchor_209865865_h3_2">Rendering Flow for Mii Face Models in sRGB Space</h3>
+<p>The following figure depicts the flow when rendering the Mii face model in sRGB space. The numbered elements in the figures are settings that users of the <code>Face</code> library would implement in their applications. They correspond to the numbers in the preceding table of gamma-related settings.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_209863493/209865018.png" width="750" class="embedded-image" />
+  </span>
+</p>
+<p>The face outline, mask textures, and the various textures for face parts obtained from the resource are all sRGB data. All data passed to the shader is sRGB data.</p>
+<h3 id="Anchor_209865865_h3_3">Rendering Flow for Mii Face Models in Linear Space</h3>
+<p>The following figure depicts the flow when rendering the Mii face model in linear space. The numbered elements in the figures are settings that users of the <code>Face</code> library would implement in their applications. They correspond to the numbers in the preceding table of gamma-related settings.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_209863493/209865009.png" width="750" class="embedded-image" />
+  </span>
+</p>
+<p>Although the data for the face outline and mask textures are generated as sRGB data, the various textures for face parts obtained from the resource are linear data. If the Mii face model is being rendered in linear space, all data received by the shader will be handled as linear data. This means that face outline and mask texture data must be converted to linear data. For this, you specify <code>UnormSrgb</code> as the <code>TextureView</code> format for the face outline and mask textures, and perform an sRGB fetch. The value set to the <code><span class="ApiLink_nn__mii__CharModelInfo__SetDynamicTextureFormat">nn::mii::CharModelInfo::SetDynamicTextureFormat</span>()</code> function becomes the <code>TextureView</code> format for the face outline and mask textures.</p>
+<h3 id="Anchor_209865865_h3_4">Flow of Creating an Icon in sRGB Space</h3>
+<p>The following figure depicts the flow when creating the icon in sRGB space. The numbered elements in the figures are settings that users of the <code>Face</code> library would implement in their applications. They correspond to the numbers in the preceding table of gamma-related settings.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_209863493/209865048.png" width="750" class="embedded-image" />
+  </span>
+</p>
+<p>Simply put, the flow is the same as the flow for rendering a Mii face model in sRGB space. The data received by <code><span class="ApiLink_nn__mii__IconShader">nn::mii::IconShader</span></code> (<code><span class="ApiLink_nn__mii__VariableIconBodyShader">nn::mii::VariableIconBodyShader</span></code>) is handled as sRGB data. Both sRGB fetch and sRGB write are required, so the image format for <code>TextureView</code> and <code>ColorTargetView</code> is set to <code>Unorm</code>.</p>
+<h3 id="Anchor_209865865_h3_5">Flow of Creating an Icon in Linear Space</h3>
+<p>The following figure depicts the flow when creating the icon in linear space. The numbered elements in the figures are settings that users of the <code>Face</code> library would implement in their applications. They correspond to the numbers in the preceding table of gamma-related settings.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_209863493/209865043.png" width="750" class="embedded-image" />
+  </span>
+</p>
+<p>Simply put, the flow is the same as the flow for rendering a Mii face model in linear space. If you want the texture data for the icon to be ultimately saved as sRGB data, set the <code>ColorTargetView</code> texture format to <code>UnormSrgb</code> for the icon texture. The data output by <code>IconShader</code> is linear data, so perform an sRGB write to convert it to sRGB data. If you want to save the icon texture data as linear data, set the <code>ColorTargetView</code> texture format to <code>Unorm</code>.</p>
+<h2 id="Anchor_209865865_h2_2">Important Information</h2>
+<h3 id="Anchor_209865865_h3_6">Note About Rendering Translucent Glasses in Linear Space<a name="Anchor_209865865_CorrectAlpha"></a></h3>
+<p>There are visible differences when you compare the results of rendering a Mii wearing glasses, with translucent lenses, in sRGB space and linear space. Due to a difference in gamma blending calculations, some colors of translucent glasses will have a different opacity when rendered in linear space, and then compared to in sRGB space.</p>
+<p>To approximate the apparent opacity of translucent glasses as rendered in sRGB space, when rendering them in linear space, the <code>Face</code> library makes a correction using the alpha value of the translucent glasses, only when rendering with the linear settings. For more information about this correction process, see the <em>Variations</em> page of the documentation and the API reference for <code><span class="ApiLink_nn__mii__DrawParam__ModulateType">nn::mii::DrawParam::ModulateType</span></code>.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Eyeglass lens color</th>
+      <th>sRGB</th>
+      <th>
+        <p>Linear (uncorrected)</p>
+      </th>
+      <th>LInear (corrected)</th>
+    </tr>
+    <tr>
+      <td>Black</td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865060.png" width="150" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865052.png" width="150" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865053.png" width="150" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>White</td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865062.png" width="150" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865055.png" width="150" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865058.png" width="150" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_209865865_h3_7">Note About Rendering an Icon in Gamma Space That Is Different From the Gamma When Icon Was Created</h3>
+<p>Care is required when rendering the icon on a translucent or transparent background, using a gamma that is different from from the gamma that was used when the icon was created.</p>
+<h4 id="Anchor_209865865_h4_1">Rendering in Linear Space Of an Icon That Was Created in sRGB Space</h4>
+<p>The following Mii icon was created in sRGB space and shows a face wearing protruding translucent glasses on a transparent background.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>
+        <p>Icon without background created in sRGB space</p>
+      </th>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865046.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following figures depict the icon with a background, and the results of rendering the icon without a background to different textures in the two gamma spaces. The render target texture cleared to the same color as the icon with a background.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Icon created in sRGB space with a background</th>
+      <th>Rendering in sRGB space</th>
+      <th>Rendering in linear space</th>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865047.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865051.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865050.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The icon created in sRGB space appears acceptable when rendered in sRGB space. (It looks the same as the icon with a background.) However, when the same icon is rendered in linear space, the parts of the eyeglasses that protrude past the sides of the face look different from the parts that fit within the face. The parts of the translucent glasses that fit within the face are rendered in sRGB space, while the parts that protrude are rendered in linear space. The translucent parts are rendered in different gamma spaces inside and outside of the face, and that is what creates the difference in appearance.</p>
+<h4 id="Anchor_209865865_h4_2">Rendering in sRGB Space Of an Icon That Was Created in Linear Space</h4>
+<p>The following Mii icon was created in linear space and shows a face wearing protruding translucent glasses on a transparent background.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Icon without background created in linear space</th>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865037.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following figures depict the icon with a background, and the results of rendering the icon without a background to different textures in the two gamma spaces. The render target texture cleared to the same color as the icon with a background.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Icon created in linear space with a background</th>
+      <th>Rendering in linear space</th>
+      <th>Rendering in sRGB space</th>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865039.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865044.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_209863493/209865045.png" height="250" class="embedded-image" />
+          </span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>As was previously the case, the icon appears acceptable when rendered in the same gamma space in which it was created. However, when the icon is rendered in a different gamma space, the parts of the eyeglasses that protrude past the sides of the Mii face appear different from the parts that fit within the face. The reason is that the translucent glasses were rendered in linear space, so there is an alpha component that was used for correction and remains in effect. In the preceding example, the parts of the translucent glasses that protrude beyond the sides of the face appear darker.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_ResourceInfo_&_nn__mii__ResourceInfo__SetGammaType(GammaType_gammaType)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1mii_1_1_resource_info.html#af360f7d2d3e4f4c2cf3a2c56bbded541' )
+SetUrl( 'ApiLink_nn__mii__GammaType', '../../../Api/HtmlNX/namespacenn_1_1mii.html#a1ca46f017cb280267571c2c688ba4fa1' )
+SetUrl( 'ApiLink_CharModelInfo_&_nn__mii__CharModelInfo__SetDynamicTextureFormat(nn__gfx__ImageFormat_faceline|_nn__gfx__ImageFormat_mask)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model_info.html#ae082868ad14a637dfaf0e71b37a7ab94' )
+SetUrl( 'ApiLink_nn__gfx__ImageFormat_R8_G8_B8_A8_Unorm', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ae794c2b6a518a4ae9ada4d3339b87605ae9a6f4b8714c06cc877193b5635c8019' )
+SetUrl( 'ApiLink_nn__gfx__ImageFormat_R8_G8_B8_A8_UnormSrgb', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#ae794c2b6a518a4ae9ada4d3339b87605ad679fce65d58a5b097510ff075590526' )
+SetUrl( 'ApiLink_TextureShaderInfo_&_nn__mii__TextureShaderInfo__SetFacelineImageFormat(nn__gfx__ImageFormat_imageFormat)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader_info.html#ae2f84a031a26aba51d21b42a764f9c0c' )
+SetUrl( 'ApiLink_TextureShaderInfo_&_nn__mii__TextureShaderInfo__SetMaskImageFormat(nn__gfx__ImageFormat_imageFormat)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader_info.html#a6d9f78c85a8152212aeba51fab1f2ea9' )
+SetUrl( 'ApiLink_nn__gfx__ImageFormat_nn__mii__CharModelInfo__GetFacelineFormat()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model_info.html#ab50754e3530b8255b432d751c537206f' )
+SetUrl( 'ApiLink_nn__gfx__ImageFormat_nn__mii__CharModelInfo__GetMaskFormat()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model_info.html#acb29ff57f9ea9fe225a01c9f810e300b' )
+SetUrl( 'ApiLink_IconShaderInfo_&_nn__mii__IconShaderInfo__SetColorTargetImageFormat(nn__gfx__ImageFormat_imageFormat)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1mii_1_1_icon_shader_info.html#a9ea361a2e674e8a90142dec8f897a7ec' )
+SetUrl( 'ApiLink_void_nn__gfx__TextureInfo__SetImageFormat(ImageFormat_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_texture_info.html#aabd5c4ee3aaf0dfc3577843da1d8bc1f' )
+SetUrl( 'ApiLink_nn__gfx__ColorTargetView', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a6245fbfbfdca1013ff9e43d3af9eb2ee' )
+SetUrl( 'ApiLink_nn__mii__GetDynamicTextureColorTargetFormat', '../../../Api/HtmlNX/namespacenn_1_1mii.html#ab3128caddb9184af0e354e53d1e0d89a' )
+SetUrl( 'ApiLink_nn__mii__TextureShader', '../../../Api/HtmlNX/classnn_1_1mii_1_1_texture_shader.html' )
+SetUrl( 'ApiLink_nn__mii__FacelineGpuBuffer', '../../../Api/HtmlNX/classnn_1_1mii_1_1_faceline_gpu_buffer.html' )
+SetUrl( 'ApiLink_nn__mii__MaskGpuBuffer', '../../../Api/HtmlNX/classnn_1_1mii_1_1_mask_gpu_buffer.html' )
+SetUrl( 'ApiLink_nn__mii__CharModelInfo__SetDynamicTextureFormat', '../../../Api/HtmlNX/classnn_1_1mii_1_1_char_model_info.html#ae082868ad14a637dfaf0e71b37a7ab94' )
+SetUrl( 'ApiLink_nn__mii__IconShader', '../../../Api/HtmlNX/classnn_1_1mii_1_1_icon_shader.html' )
+SetUrl( 'ApiLink_nn__mii__VariableIconBodyShader', '../../../Api/HtmlNX/classnn_1_1mii_1_1_variable_icon_body_shader.html' )
+SetUrl( 'ApiLink_nn__mii__DrawParam__ModulateType', '../../../Api/HtmlNX/classnn_1_1mii_1_1_draw_param.html#a0dcdb0918bfb96bea9816fca44857bc1' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

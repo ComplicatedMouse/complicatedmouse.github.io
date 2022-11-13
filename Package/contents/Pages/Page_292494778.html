@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Feature to Temporarily Disable Auto-Sleep (Approval Required) | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Feature to Temporarily Disable Auto-Sleep (Approval Required) -->
+<div class="pagetitle" id="PageId_292494778">Feature to Temporarily Disable Auto-Sleep (Approval Required)</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_292494778_h1_1">Overview</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_292494778_h2_1">Target SDK Version</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_292494778_h1_2">Anticipated Use</a>
+    </li>
+    <li>
+      <a href="#Anchor_292494778_h1_3">Implementation Notes</a>
+    </li>
+    <li>
+      <a href="#Anchor_292494778_h1_4">Getting Permission for Use in the Retail Product</a>
+    </li>
+    <li>
+      <a href="#Anchor_292494778_h1_5">Implementation Examples</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_292494778_h2_2">Example 1: Providing a UI to Temporarily Disable Auto-Sleep in the Application</a>
+      </li>
+      <li>
+        <a href="#Anchor_292494778_h2_3">Example 2: Displaying a Confirmation Dialog Box to Temporarily Disable Auto-Sleep in the Application</a>
+      </li>
+      <li>
+        <a href="#Anchor_292494778_h2_4">Example 3: Providing the Temporarily Disable Auto-Sleep Setting in Certain Scenes on the Application's Options Screen</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_292494778_h1_6">Guidelines</a>
+    </li>
+    <li>
+      <a href="#Anchor_292494778_h1_7">Frequently Asked Questions (FAQ)</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_292494778_h2_5">(NintendoSDK Firmware for NX 12.x.x and earlier)Q: When I call nn::oe::EndAutoSleepDisabledSection() when I leave a scene where auto-sleep is temporarily disabled, the system immediately goes to sleep. What can I do about this?</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_292494778_h1_1">Overview</h1>
+<p>You can use the pair of <span class="ApiLink_void_nn__oe__BeginAutoSleepDisabledSection()_NN_NOEXCEPT">nn::oe::BeginAutoSleepDisabledSection()</span> and <span class="ApiLink_void_nn__oe__EndAutoSleepDisabledSection()_NN_NOEXCEPT">nn::oe::EndAutoSleepDisabledSection()</span> in an application to temporarily suppress auto-sleep in the application.</p>
+<p>
+  <strong>Using this feature for retail products requires approval because special considerations are required when using it.</strong>
+</p>
+<p>
+  <strong>In addition, you must comply with additional guidelines when using this function.</strong>
+</p>
+<p>This page describes the anticipated use of this feature, important considerations during use, and applying for approval to use this feature for retail products.</p>
+<h2 id="Anchor_292494778_h2_1">Target SDK Version</h2>
+<p>This feature is available in NX Add-On 5.2.0 and later.</p>
+<h1 id="Anchor_292494778_h1_2">Anticipated Use</h1>
+<p>This feature has been provided to allow temporary suppression of the auto-sleep feature, at the user's discretion, in situations where the possibility of continuous system operation (for periods exceeding one hour) is anticipated while the user is not operating the system (such as music play mode). No other usage is anticipated.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This feature does not affect the operation settings for the screen burn-in reduction feature. As a result, due to the user settings, even if you use this feature to restrict auto-sleep, the screen may darken when the system is idle.</p>
+    <p>Also use <span class="ApiLink_void_nn__oe__SetUserInactivityDetectionTimeExtendedUnsafe(bool_isExtended)_NN_NOEXCEPT">nn::oe::SetUserInactivityDetectionTimeExtendedUnsafe()</span> to control screen burn-in reduction at the same time as auto-sleep.</p>
+    <p>
+      <strong>Note: To also disable screen burn-in reduction, you must comply with additional guidelines that result when disabling screen burn-in reduction.</strong>
+    </p>
+    <ul>
+      <li>To avoid TV screen burn-in by the application, you must implement measures so that pixels do not remain permanently displayed while this feature is in use.</li>
+      <li>It is important to remember that this feature must be released when the images on the screen stop changing, due for example to an error or a pause in play.</li>
+      <li>For more information about these guidelines, see the Nintendo Switch Guidelines.</li>
+    </ul>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This feature is not designed to be used in situations where media content is being played, such as while a video is playing in an Offline Web Applet.</p>
+    <p>A separate system controls the delay of auto-sleep while media content is playing. In addition, the user can disable auto-sleep at such times by going into the system settings and selecting <strong>Suspend Auto-Sleep While Playing Media Content</strong>.</p>
+    <p>For these reasons, this feature does not need to be used.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_292494778_h1_3">Implementation Notes</h1>
+<p>This feature must be implemented in a manner that ensures it is used only in the following cases.</p>
+<ol>
+  <li>
+    <strong>When the user intends to do so</strong>
+  </li>
+  <li>
+    <strong>As a supplementary feature</strong>
+  </li>
+  <li>
+    <strong>Temporarily</strong>
+  </li>
+</ol>
+<p> That is, all of the following conditions must be satisfied.</p>
+<ol>
+  <li>Auto-sleep is not temporarily disabled without the user explicitly giving consent, or performing a selection operation.</li>
+  <li>We do not recommend disabling auto-sleep, and users are not actively prompted to use the feature.<br /><ul><li>The content of user instructions for temporarily disabling auto-sleep, and the timing at which they are displayed, must be handled in a neutral way so as not to give the impression of pro-actively encouraging the user to temporarily disable auto-sleep.</li></ul></li>
+  <li>No application specifications require auto-sleep to be temporarily disabled.</li>
+  <li>Even after auto-sleep is disabled, the user is provided with a method to cancel the disabled state.</li>
+</ol>
+<p>For a specific example of implementation, see Implementation Examples, described later.</p>
+<h1 id="Anchor_292494778_h1_4">Getting Permission for Use in the Retail Product</h1>
+<!--Remove-->
+<p>To use this feature in the retail product, you must apply for permission ahead of time. If you want to use the feature, contact Nintendo.</p>
+<p>When applying, include the following information so that Nintendo can determine whether the intended use cases satisfy the conditions described earlier.</p>
+<ol>
+  <li>List of scenes in the application in which <code><span class="ApiLink_nn__oe__BeginAutoSleepDisabledSection">nn::oe::BeginAutoSleepDisabledSection</span>()</code> will be used.<ul><li>Also, the conditions for later canceling the temporary disabling that was performed by calling <code><span class="ApiLink_nn__oe__EndAutoSleepDisabledSection">nn::oe::EndAutoSleepDisabledSection</span>()</code>.</li></ul></li>
+  <li>Answers to the following questions for the scene (or for each scene if there are multiple scenes) listed in step 1.<br /><ol><li>Reason for providing the user with the steps to temporarily disable auto-sleep.</li><li>Is the user's consent obtained prior to temporarily disabling auto-sleep, or is auto-sleep only temporarily disabled when the user explicitly chooses to do so?<ul><li>If <strong>Yes</strong>, briefly describe how user consent is obtained or how the user can select the auto-sleep setting (including when consent is obtained, what information is displayed to the user, and so on).</li></ul></li><li>Is the scene still playable, even if the auto-sleep feature is not temporarily disabled?</li><li>Even after auto-sleep is temporarily disabled, do you provide the user with a method to change the temporarily disabled state?<br /><ul><li>If <strong>Yes</strong>, briefly describe how the feature can be enabled or disabled. If information about how to enable and disable the feature is presented in a sequence, describe the location in the sequence.</li></ul></li></ol></li>
+</ol>
+<h1 id="Anchor_292494778_h1_5">Implementation Examples</h1>
+<p>This section describes acceptable implementations of this feature. Unless there are special circumstances, we recommend an implementation that follows this example.</p>
+<p>If you are using an implementation method specific to the application, it may take more time for the usage permission application to be accepted.</p>
+<h2 id="Anchor_292494778_h2_2">Example 1: Providing a UI to Temporarily Disable Auto-Sleep in the Application</h2>
+<ul>
+  <li>In certain scenes in the application, add a toggle UI for switching the disabled state of auto-sleep, and set the default value to <strong>No</strong> (<strong>Do not disable</strong> auto-sleep).</li>
+  <li>When the user switches this setting to <strong>Disable</strong> (auto-sleep), call <code><span class="ApiLink_nn__oe__BeginAutoSleepDisabledSection">nn::oe::BeginAutoSleepDisabledSection</span>()</code>.</li>
+  <li>Call <code><span class="ApiLink_nn__oe__EndAutoSleepDisabledSection">nn::oe::EndAutoSleepDisabledSection</span>()</code> to cancel the temporarily disabled state when the user reverts the setting to <strong>Do not disable</strong>, or when the user leaves the scene.</li>
+</ul>
+<h2 id="Anchor_292494778_h2_3">Example 2: Displaying a Confirmation Dialog Box to Temporarily Disable Auto-Sleep in the Application</h2>
+<ul>
+  <li>When entering certain scenes in the application (for example, sound test mode), show a confirmation dialog box containing a message such as &ldquo;You can temporarily disable auto-sleep in this mode.&quot;<ul><li>If the user selects <strong>Disable</strong>, call the <code><span class="ApiLink_nn__oe__BeginAutoSleepDisabledSection">nn::oe::BeginAutoSleepDisabledSection</span>()</code> function to temporarily disable the auto-sleep feature, and then enter the scene.<ul><li>At this time, inform the user about how to cancel disabled auto-sleep with the message, &quot;Auto-sleep has been temporarily disabled. This can be canceled at any time from the XX screen.&quot;</li></ul></li><li>If the user selects <strong>Do not disable</strong>, enter the scene without using the feature to temporarily disable auto-sleep.</li><li>The UI must not give the impression of encouraging the user to temporarily disable auto-sleep by using neutral language, and by presenting both options of <strong>Disable</strong> and <strong>Do not disable</strong>.</li><li>Other than whether the auto-sleep feature is temporarily disabled, the user's selection does not affect any aspects of the scene.</li></ul></li>
+  <li>Provide a UI that allows the user to enable, or temporarily disable, the auto-sleep feature, even after entering the scene.</li>
+  <li>When leaving the scene, if the auto-sleep feature was temporarily disabled, call <code><span class="ApiLink_nn__oe__EndAutoSleepDisabledSection">nn::oe::EndAutoSleepDisabledSection</span>()</code> to enable the auto-sleep feature again.</li>
+</ul>
+<h2 id="Anchor_292494778_h2_4">Example 3: Providing the Temporarily Disable Auto-Sleep Setting in Certain Scenes on the Application's Options Screen</h2>
+<ul>
+  <li>In an options screen for certain scenes in the application, add an option such as <strong>Disable auto-sleep in XYZ scenes</strong>, and set the default value to <strong>No</strong> (do not disable auto-sleep).</li>
+  <li>When entering the scene, if the user changed this option to <strong>Yes</strong> (disable auto-sleep), call <code><span class="ApiLink_nn__oe__BeginAutoSleepDisabledSection">nn::oe::BeginAutoSleepDisabledSection</span>()</code>.</li>
+  <li>Provide a UI that allows the user to enable or disable this option even after entering the scene.</li>
+  <li>When leaving the scene, if the auto-sleep feature was disabled, call <code><span class="ApiLink_nn__oe__EndAutoSleepDisabledSection">nn::oe::EndAutoSleepDisabledSection</span>()</code> to re-enable the auto-sleep feature.</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The application must ensure that the auto-sleep feature only remains disabled while in scenes for which the user explicitly selected to disable the feature. However, the implementation does not need to include any special handling for the user transitions to the HOME Menu or other screens outside of the application.</p>
+    <p>This feature only works while the calling application has the focus.</p>
+    <p>For example, if the auto-sleep feature has been disabled in the application, and the user then transitions to the HOME Menu, the auto-sleep feature gets enabled again while the HOME Menu is displayed. Upon returning to the application, the auto-sleep feature would then be re-disabled.</p>
+  </div>
+</div>
+<h1 id="Anchor_292494778_h1_6">Guidelines</h1>
+<p>The guidelines include sections that describe how to comply with these notes when you use this feature.</p>
+<p>For more information about these guidelines, see the following sections in the Nintendo Switch Guidelines.</p>
+<ul>
+  <li>0158: Using the feature to temporarily disable auto-sleep is prohibited for situations and uses that are not described in the usage approval application.</li>
+</ul>
+<h1 id="Anchor_292494778_h1_7">Frequently Asked Questions (FAQ)</h1>
+<h2 id="Anchor_292494778_h2_5">(NintendoSDK Firmware for NX 12.x.x and earlier)<br />Q: When I call nn::oe::EndAutoSleepDisabledSection() when I leave a scene where auto-sleep is temporarily disabled, the system immediately goes to sleep. What can I do about this?</h2>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>This information only applies if the application is NX Add-On 12.x.x or earlier, and running on NintendoSDK Firmware for NX 12.x.x and earlier.</p>
+    <p>In SDK 13.0.0 / NintendoSDK Firmware for NX 13.0.0 and later, a grace period of up to 90 seconds can be established to prevent the system from going to sleep immediately, so special notice is not required.</p>
+  </div>
+</div>
+<p>When you call <code><span class="ApiLink_nn__oe__EndAutoSleepDisabledSection">nn::oe::EndAutoSleepDisabledSection</span>()</code> and end the temporary disabling of auto-sleep, the screen burn-in reduction feature and auto-sleep feature are triggered immediately if the prescribed amount of idle time has elapsed.</p>
+<p>This is not a problem if the game is designed such that a user operation triggers the transition from a scene where auto-sleep is temporarily disabled to some other scene. But consider the case of a game designed to automatically end a scene while auto-sleep is temporarily disabled without any user operation and transition to a scene that expects user operation. If the system goes to sleep at the moment the scene transitions without giving the user time to make any operation, the user will consider this an unacceptable bug.</p>
+<p>In those cases, do not immediately end the auto-sleep disabled section the moment you reach the screen where user operations are expected. Rather, <strong>set a short wait period to wait for user input, and then end the auto-sleep disabled section.</strong></p>
+<p>For more information, see <a href="../Pages/Page_198946139.html">Control Over Idle State Actions</a> &gt; Common Import Information.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__oe__BeginAutoSleepDisabledSection()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1oe.html#aa8d7caeaf62f2833c9795d42613eea02' )
+SetUrl( 'ApiLink_void_nn__oe__EndAutoSleepDisabledSection()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a27c0216977d28375878821613332bb6d' )
+SetUrl( 'ApiLink_void_nn__oe__SetUserInactivityDetectionTimeExtendedUnsafe(bool_isExtended)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ad3513ab7afd7048df84376b4f684fdf1' )
+SetUrl( 'ApiLink_nn__oe__BeginAutoSleepDisabledSection', '../../../Api/HtmlNX/namespacenn_1_1oe.html#aa8d7caeaf62f2833c9795d42613eea02' )
+SetUrl( 'ApiLink_nn__oe__EndAutoSleepDisabledSection', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a27c0216977d28375878821613332bb6d' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

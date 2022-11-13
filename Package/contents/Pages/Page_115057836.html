@@ -1,0 +1,343 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>GPU performance metrics | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- GPU performance metrics -->
+<div class="pagetitle" id="PageId_115057836">GPU performance metrics</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_115057836_h1_1">Overview of GPU Performance Metrics</a>
+    </li>
+    <li>
+      <a href="#Anchor_115057836_h1_2">Using the GPU Performance Metrics Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_115057836_h2_1">Timing of GPU Metrics</a>
+      </li>
+      <li>
+        <a href="#Anchor_115057836_h2_2">Functions for Getting the Core</a>
+      </li>
+      <li>
+        <a href="#Anchor_115057836_h2_3">Handling the Measurement Results</a>
+      </li>
+      <li>
+        <a href="#Anchor_115057836_h2_4">Measuring Nested Procedures</a>
+      </li>
+      <li>
+        <a href="#Anchor_115057836_h2_5">Attaching</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_115057836_h1_1">Overview of GPU Performance Metrics</h1>
+<p>GPU performance metrics provide a way to measure the GPU processing time for the commands stored in the command buffer.<br />Use of GPU performance metrics allows you to easily tabulate the difference for GPU timestamps and to output performance data internally.  <br />To measure the GPU processing time for a particular section of commands when commands can be added to the command buffer, enclose the section using the <span class="ApiLink_void_nn__perf__GpuMeter__BeginMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT"><code>BeginMeasure()</code></span> function and the <span class="ApiLink_void_nn__perf__GpuMeter__EndMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT"><code>EndMeasure()</code></span> function.</p>
+<p>
+  <span class="ApiLink_void_nn__perf__GpuMeter__BeginMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT">
+    <code>BeginMeasure()</code>
+  </span> and <span class="ApiLink_void_nn__perf__GpuMeter__EndMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT"><code>EndMeasure()</code></span> add commands to the command buffer that request GPU timestamps.<br />Note that these timestamps do not mark when the commands are added by the CPU, but instead mark when the timestamps are run. </p>
+<p>GPU performance metrics are conducted using the <code><span class="ApiLink_nn__perf__GpuMeter">nn::perf::GpuMeter</span></code> class.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <code>
+        <span class="ApiLink_nn__perf__GpuMeter">
+          <code>GpuMeter</code>
+        </span>
+      </code> internally gets the CPU core number during profiling, which makes it possible to measure GPU commands issued in parallel on multiple threads with one object.<br />Unlike with <span class="ApiLink_nn__perf__CpuMeter"><code>CpuMeter</code></span>, you do not need to create separate objects for each parallel thread and measure those threads separately.</p>
+    <p>However, threads that automatically move between cores during the measurement process (between the calls to <span class="ApiLink_void_nn__perf__GpuMeter__BeginMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT"><code>BeginMeasure()</code></span> and <span class="ApiLink_void_nn__perf__GpuMeter__EndMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT"><code>EndMeasure()</code></span>) cannot be measured correctly.<br />When using <span class="ApiLink_nn__perf__GpuMeter"><code>GpuMeter</code></span>, make sure that each thread being profiled is fixed to a single CPU core between the calls to <span class="ApiLink_void_nn__perf__GpuMeter__BeginMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT"><code>BeginMeasure()</code></span> and <span class="ApiLink_void_nn__perf__GpuMeter__EndMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT"><code>EndMeasure()</code></span>.</p>
+  </div>
+</div>
+<h1 id="Anchor_115057836_h1_2">Using the GPU Performance Metrics Feature</h1>
+<p>The basic usage is similar to <code><span class="ApiLink_nn__perf__CpuMeter">CpuMeter</span></code>, but <code><span class="ApiLink_nn__gfx">nn::gfx</span></code> objects are required to issue commands to write the GPU timestamps and load the GPU buffers.</p>
+<ol>
+  <li>
+    <p>An initialized <code><span class="ApiLink_nn__perf__LoadMeterInfo">nn::perf::LoadMeterInfo</span></code> object.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/perf.h&gt;
+</span>
+<span class="nn">nn::perf::</span><span class="n">LoadMeterInfo</span> <span class="n">info</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">SetSectionCountMax</span><span class="p">(</span> <span class="mi">64</span> <span class="p">);</span>　　　　　　　<span class="c1">// The maximum number of sections to measure.
+</span><span class="n">info</span><span class="p">.</span><span class="n">SetBufferCount</span><span class="p">(</span> <span class="mi">2</span> <span class="p">);</span>　　　　　　　　　　<span class="c1">// The number of buffers for storing the measurement results of each frame. (Need at least a double-buffer.)
+</span><span class="n">info</span><span class="p">.</span><span class="n">SetCoreCount</span><span class="p">(</span> <span class="mi">3</span> <span class="p">);</span>                                      <span class="c1">// Sets the maximum number of cores in which the application will run. (In this case, the core numbers to run are 0, 1, 2.)
+</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Allocates memory to use in <code><span class="ApiLink_nn__perf__GpuMeter">nn::perf::GpuMeter</span></code>.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Gets the buffer size and alignment to use in GpuMeter
+</span><span class="kt">size_t</span> <span class="n">memorySize</span> <span class="o">=</span> <span class="nn">GpuMeter::</span><span class="n">CalculateBufferSize</span><span class="p">(</span> <span class="n">info</span> <span class="p">);</span>
+<span class="kt">size_t</span> <span class="n">memoryAlignment</span> <span class="o">=</span> <span class="nn">GpuMeter::</span><span class="n">GetBufferAlignment</span><span class="p">();</span>
+&nbsp;
+<span class="kt">void</span><span class="o">*</span> <span class="n">memory</span> <span class="o">=</span> <span class="n">AllocateMemory</span><span class="p">(</span> <span class="n">memorySize</span><span class="p">,</span> <span class="n">memoryAlignment</span> <span class="p">);</span>　　　<span class="c1">// Allocates memory using an allocator in the application.
+</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Initialize the <code><span class="ApiLink_nn__perf__GpuMeter">nn::perf::GpuMeter</span></code> class.<br />Besides the memory allocated in 2, you need a memory pool to allocate GPU buffers in which to write timestamps. The memory pool configured here preferably has the CPU_CACHED attribute. </p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Gets the memory pool size and alignment to use in GpuMeter.
+</span><span class="kt">size_t</span> <span class="n">memoryPoolSize</span> <span class="o">=</span> <span class="nn">GpuMeter::</span><span class="n">CalculateQueryBufferSize</span><span class="p">(</span> <span class="n">pDevice</span><span class="p">,</span> <span class="n">info</span> <span class="p">);</span>
+<span class="kt">size_t</span> <span class="n">memoryPoolAlignment</span> <span class="o">=</span> <span class="nn">GpuMeter::</span><span class="n">GetQueryBufferAlignment</span><span class="p">(</span> <span class="n">pDevice</span><span class="p">,</span> <span class="n">info</span> <span class="p">);</span>
+&nbsp;
+<span class="n">memoryPoolOffset</span> <span class="o">=</span> <span class="nn">nn::util::</span><span class="n">align_up</span><span class="p">(</span> <span class="n">memoryPoolOffset</span><span class="p">,</span> <span class="n">memoryPoolAlignment</span> <span class="p">);</span>
+<span class="nn">nn::perf::</span><span class="n">GpuMeter</span> <span class="n">meter</span><span class="p">;</span>
+<span class="n">meter</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">device</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">info</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memory</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memorySize</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">&amp;</span><span class="n">memoryPool</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memoryPoolOffset</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memoryPoolSize</span>  <span class="p">);</span>
+<span class="n">memoryPoolOffset</span> <span class="o">+=</span> <span class="n">memoryPoolSize</span> <span class="p">;</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Enclose the group of commands you want to measure between the <span class="ApiLink_void_nn__perf__GpuMeter__BeginMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT"><code>BeginMeasure()</code></span> function and the <span class="ApiLink_void_nn__perf__GpuMeter__EndMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT"><code>EndMeasure()</code></span> function. This can only be used in a state in which commands can be added to the command buffer. <br />After calling the final end measurement function, flush the cache.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">commandBuffer</span><span class="p">.</span><span class="n">Begin</span><span class="p">();</span>                                     　<span class="c1">// Begin adding the commands.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">BeginMeasure</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_CommandBuffer</span> <span class="p">);</span>           <span class="c1">// Begin the measurement.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The commands to measure.
+</span><span class="p">}</span>
+<span class="n">meter</span><span class="p">.</span><span class="n">EndMeasure</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_CommandBuffer</span> <span class="p">);</span>             <span class="c1">// End the measurement.
+</span><span class="n">FlushMemory</span><span class="p">(</span> <span class="nn">nn::gfx::</span><span class="n">GpuAccess_QueryBuffer</span> <span class="p">);</span>  <span class="c1">// Flush the cache.
+</span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">End</span><span class="p">();</span>　                                       <span class="c1">// End adding commands.
+</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Use the <span class="ApiLink_virtual_void_nn__perf__GpuMeter__Next()_NN_NOEXCEPT_NN_OVERRIDE"><code>Next()</code></span> function to switch the buffer to which the measurement results are saved at the end of every frame. If you do not switch the buffer this way, the metrics will not work right.<br />To aggregate the timestamp values recorded in the GPU buffers, execution of the command created (<em>buffer count</em> &ndash; 2) frames earlier must be completed.<br />Also, the aggregated timestamp values are converted to nanoseconds and then converted to <code>Tick</code> values before being stored in an instance of the <span class="ApiLink_nn__perf__LoadMeterBase__Section"><code>nn::perf::LoadMeterBase::Section</code></span> structure. </p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Rendering for each frame
+</span><span class="k">for</span><span class="p">(</span> <span class="kt">int</span> <span class="n">frame</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">frame</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">;</span> <span class="o">++</span><span class="n">frame</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processing details for each frame
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">meter</span><span class="p">.</span><span class="n">Next</span><span class="p">();</span> 
+<span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Output the measurement results to the console.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">meter</span><span class="p">.</span><span class="n">Dump</span><span class="p">();</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The following example shows the results that are output. The results are output in a format that starts by showing the meter name in brackets [<em>meter name</em>], followed by the total time required for processing in that measurement section, followed by a value in parentheses (<em>value</em>) that represents the percentage of the frame rate set by the <span class="ApiLink_void_nn__perf__LoadMeterBase__SetFrameRate(float_frameRate)_NN_NOEXCEPT"><code>SetFrameRate()</code></span> function.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="p">[</span> <span class="n">MyGPUMeter</span> <span class="p">]</span>      <span class="mf">0.557</span> <span class="n">ms</span> <span class="p">(</span><span class="mf">3.343069</span><span class="o">%</span><span class="p">)</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Performs termination processing of the <code>GpuMeter</code>.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">meter</span><span class="p">.</span><span class="n">Finalize</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">device</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>The application runs a process to free the allocated memory.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">FreeMemory</span><span class="p">(</span> <span class="n">memory</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_115057836_h2_1">Timing of GPU Metrics</h2>
+<p>When used for GPU metrics, the <code><span class="ApiLink_void_nn__perf__GpuMeter__BeginMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT">BeginMeasure()</span></code> and  <code><span class="ApiLink_void_nn__perf__GpuMeter__EndMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT">EndMeasure()</span></code> functions add commands that request GPU timestamps to the command buffer.<br />Note that these timestamps refer to the actual times that the commands run.</p>
+<p>The console output and the values obtained by the functions that get measurement results (like <code><span class="ApiLink_const_Section_&_nn__perf__LoadMeterBase__GetLastResult(int_index)_const_NN_NOEXCEPT">GetLastResult()</span></code> and <code><span class="ApiLink_nn__TimeSpan_nn__perf__LoadMeterBase__GetLastTotalSpan()_const_NN_NOEXCEPT">GetLastTotalSpan()</span></code>) are the most recent results returned by the <span class="ApiLink_virtual_void_nn__perf__GpuMeter__Next()_NN_NOEXCEPT_NN_OVERRIDE"><code>Next()</code></span> function.<br />The results calculated by the <code>Next()</code> function are the measurement results for the command created (<em>buffer count</em> &ndash; 2) frames earlier.<br />Because measurements are taken when the command is executed, you must be careful when specifying the buffer count when the frame to create the command and the frame to execute it are different.</p>
+<p>For example, with a framework to execute a GPU command in the current frame that was created one frame before, you need three or more buffers.<br />The number of buffers can be set using the <code><span class="ApiLink_void_nn__perf__LoadMeterInfo__SetBufferCount(int_bufferCount)_NN_NOEXCEPT">nn::perf::LoadMeterInfo::SetBufferCount()</span></code> function. (The default is a double buffer, or <code>2</code>.)</p>
+<p>The following profiling example executes GPU commands that were created one frame earlier in the current frame, with the buffer count set to 3.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">//--------- Frame 0 ------------//
+</span><span class="n">meter</span><span class="p">.</span><span class="n">BeginMeasure</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">,</span> <span class="s">&quot;A&quot;</span><span class="p">);</span>
+<span class="n">meter</span><span class="p">.</span><span class="n">EndMeasure</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Process A has not started, so do not collect any metrics.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">Next</span><span class="p">();</span>
+<span class="c1">// Output the initial value.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">Dump</span><span class="p">();</span>
+&nbsp;
+<span class="c1">//--------- Frame 1 ------------//
+</span><span class="n">meter</span><span class="p">.</span><span class="n">BeginMeasure</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">,</span> <span class="s">&quot;B&quot;</span><span class="p">);</span>
+<span class="n">meter</span><span class="p">.</span><span class="n">EndMeasure</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Collect measurements for process A.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">Next</span><span class="p">();</span>
+<span class="c1">// Output results for process A.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">Dump</span><span class="p">();</span>
+&nbsp;
+<span class="c1">//--------- Frame 2 ------------//
+</span><span class="n">meter</span><span class="p">.</span><span class="n">BeginMeasure</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">,</span> <span class="s">&quot;C&quot;</span><span class="p">);</span>
+<span class="n">meter</span><span class="p">.</span><span class="n">EndMeasure</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g_CommandBuffer</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Collect measurements for process B.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">Next</span><span class="p">();</span>
+<span class="c1">// Output results for process B.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">Dump</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_115057836_h2_2">Functions for Getting the Core</h2>
+<p>
+  <code>GpuMeter</code> internally gets the CPU core on which the current thread is running when the measurement is started and ended.</p>
+<p>However, large measurement errors will appear when measuring multiple embedded segments because <code><span class="ApiLink_int_nn__os__GetCurrentCoreNumber()_NN_NOEXCEPT">nn::os::GetCurrentCoreNumber()</span></code> (which incurs a high processing load) is used by default.</p>
+<p>To get more accurate measurements, we recommend setting <code><span class="ApiLink_void_nn__perf__GpuMeter__SetGetCoreNumberFunction(nn__perf__GetCoreNumberFunction_getCoreNumberFunction)_NN_NOEXCEPT">SetGetCoreNumberFunction()</span></code> as a function for returning core numbers on which each thread is running.</p>
+<h2 id="Anchor_115057836_h2_3">Handling the Measurement Results</h2>
+<p>The measurement results for each section are handled as an <code><span class="ApiLink_nn__perf__LoadMeterBase__Section">nn::perf::LoadMeterBase::Section</span></code> structure object. For more information, see <a href="../Pages/Page_113805876.html">CPU Performance Metrics - Handling the Measurement Results</a>.</p>
+<h2 id="Anchor_115057836_h2_4">Measuring Nested Procedures</h2>
+<p>Nested procedures can also be measured. For more information, see <a href="../Pages/Page_113805876.html">CPU Performance Metrics - Measuring Nested Procedures</a>.</p>
+<h2 id="Anchor_115057836_h2_5">Attaching</h2>
+<p>Use of the <code>AttachLoadMeter()</code> function enables you to attach performance metrics objects. For more information, see <a href="../Pages/Page_113805876.html">CPU Performance Metrics - Attaching</a>.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__perf__GpuMeter__BeginMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_gpu_meter.html#ac14e89c8bbaffef96995baa76dc62d18' )
+SetUrl( 'ApiLink_void_nn__perf__GpuMeter__EndMeasure(nn__gfx__CommandBuffer_*pCommandBuffer)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_gpu_meter.html#a4aa66c799bc7fcf7a14c18838529e658' )
+SetUrl( 'ApiLink_nn__perf__GpuMeter', '../../../Api/HtmlNX/classnn_1_1perf_1_1_gpu_meter.html' )
+SetUrl( 'ApiLink_nn__perf__CpuMeter', '../../../Api/HtmlNX/classnn_1_1perf_1_1_cpu_meter.html' )
+SetUrl( 'ApiLink_nn__gfx', '../../../Api/HtmlNX/namespacenn_1_1gfx.html' )
+SetUrl( 'ApiLink_nn__perf__LoadMeterInfo', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_info.html' )
+SetUrl( 'ApiLink_virtual_void_nn__perf__GpuMeter__Next()_NN_NOEXCEPT_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1perf_1_1_gpu_meter.html#a6ebf8d6a2d0a83f0af2d1c0f0a1cc4e4' )
+SetUrl( 'ApiLink_nn__perf__LoadMeterBase__Section', '../../../Api/HtmlNX/structnn_1_1perf_1_1_load_meter_base_1_1_section.html' )
+SetUrl( 'ApiLink_void_nn__perf__LoadMeterBase__SetFrameRate(float_frameRate)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_base.html#a38bc114bbde7be2db1c62fe185ae7efe' )
+SetUrl( 'ApiLink_const_Section_&_nn__perf__LoadMeterBase__GetLastResult(int_index)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_base.html#aab42a9f8cf7638a2fc0828b1c4d45b16' )
+SetUrl( 'ApiLink_nn__TimeSpan_nn__perf__LoadMeterBase__GetLastTotalSpan()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_base.html#a0bb58ff6d707e0019f189722dfda3b96' )
+SetUrl( 'ApiLink_void_nn__perf__LoadMeterInfo__SetBufferCount(int_bufferCount)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_info.html#a54354c8b7d8625f788bbb4dea35b87d9' )
+SetUrl( 'ApiLink_int_nn__os__GetCurrentCoreNumber()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a4b94c321b41c4fb4d0a4e87473297c48' )
+SetUrl( 'ApiLink_void_nn__perf__GpuMeter__SetGetCoreNumberFunction(nn__perf__GetCoreNumberFunction_getCoreNumberFunction)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_gpu_meter.html#af83adf2bc44dcc3f290e146fd9d40201' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

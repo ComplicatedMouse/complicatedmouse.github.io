@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Tracking Down High Core 3 Impact | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Tracking Down High Core 3 Impact -->
+<div class="pagetitle" id="PageId_961613652">Tracking Down High Core 3 Impact</div>
+<div class="text_separate">
+<p>New in Nintendo NX CPU Profiler version 1.5 and NX Addon 11.4.0 is the ability to view your game's impact upon core 3 (the system core). Using the information provided, it is possible to determine if you are likely to have an issue with asking core 3 to perform too much work, and if so, what the likely culprits are. Due to the limitations of how data can be obtained from core 3, and the inherit limitations of a sampling profiler, it may be difficult to find a direct cause.</p>
+<p>
+  <br />
+</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The information shown regarding core 3 is based on your current environment. Users may have different environmental factors during play, including:</p>
+    <ul>
+      <li>Running background downloads.</li>
+      <li>Running the game from a different storage device.</li>
+      <li>Being in handheld/docked mode.</li>
+      <li>Using a newer firmware than when the game was developed.</li>
+    </ul>
+    <p>Any or all of these may contribute to a user seeing a different profile than you may see during development.</p>
+    <p>It is strongly recommended to have no high impact (red bars) showing on the <strong>Utilization</strong> graph on the <strong>Start</strong> tab, and to minimize any areas of the application that show a medium impact (yellow bars). Ideally, a game will operate while staying at a low impact (only green bars) throughout play.</p>
+    <p>The <strong>Core 3 CPU Impact</strong> on the <strong>Counters</strong> tab is obtained at a higher resolution than the <strong>Utilization</strong> graphs. Therefore, when looking at the <strong>Core 3 CPU Impact</strong> graph in the <strong>Timeline</strong> it is normal to see high impact sections. High impact may occur even when little is happening because there is a general upkeep cost on core 3 for any application that is running. It is only when you start seeing long periods of high or medium impact that the performance is likely to be noticeably impacted.</p>
+  </div>
+</div>
+<h2 id="Anchor_961613652_h2_1">Detect a Problem</h2>
+<p>
+  <strong>Step 1: Sync</strong> to your game using the&nbsp;<strong>Attach</strong> option.&nbsp;<strong>Launch</strong>&nbsp;or <strong>Attach on Launch</strong>&nbsp;will also work as the goal is to enable <strong>Out-of-Process</strong> profiling.</p>
+<p>
+  <strong>Step 2:</strong> On the <strong> <a href="../Pages/Page_758198960.html">Start</a></strong> tab, look at the&nbsp;<strong>Utilization</strong> graph of <strong>Core 3 (System)</strong>. The data in this graph is updated every second and is an average. If the graph has medium or high impact (yellow or red bars), you are asking the system core to do too much work.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 225.0px;" />
+    <col style="width: 225.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>Low Impact:</p>
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_961613652/961634555.png" alt="An example of low impact" title="An example of low impact" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>High Impact:</p>
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_961613652/961634556.png" alt="An example of high impact" title="An example of high impact" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_961613652_h2_2">Investigate a Problem</h2>
+<p>
+  <strong>Step 1:</strong> Take an <strong>Out-of-Process</strong> profile for at least 1 second.</p>
+<p>
+  <strong>Step 2:</strong> On the&nbsp;<strong><a href="../Pages/Page_758198922.html">Counters</a></strong> tab, select the <strong>Core 3 CPU Impact</strong> counter.</p>
+<p>
+  <strong>Step 3</strong>: Go to the&nbsp;<strong><a href="../Pages/Page_764970037.html">Timeline</a></strong> tab and enable the <strong>Mark Vsync</strong> button.</p>
+<p>
+  <strong>Step 4:</strong> View the&nbsp;<strong><a href="../Pages/Page_764970037.html">Timeline</a></strong> tab and look for areas in the&nbsp;<strong style="letter-spacing: 0.0px;">Core 3 CPU Impact</strong> line that are at a high value for long periods of time. Core 3 impact data is gathered at the requested sampling rate, but will not be gathered more frequently than every 0.16 milliseconds (100x per frame). While the term &quot;long periods&quot; is subjective, areas of up to 1.0 milliseconds are not uncommon and usually do not cause a problem. Vsync is also a relatively common time to see longer than average high impact periods.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>A less steep slope upwards than downwards indicates that the profiler was unable to gather data from core 3 because it was busy performing other tasks. This time should be counted as also being at high impact. In the following example, the second rise would indicate that core 3 was too busy to take a sample when originally requested.</p>
+    <p>
+      <span class="embedded-file-wrapper ">
+        <img src="../Attachments/Attach_761288523/961633335.png" alt="An example of the core being too busy to sample" title="An example of the core being too busy to sample" class="embedded-image" />
+      </span>
+    </p>
+  </div>
+</div>
+<p>
+  <strong style="letter-spacing: 0.0px;">Step 5:</strong> Switch to the&nbsp;<strong style="letter-spacing: 0.0px;">Select Time</strong> mouse mode and select time areas immediately prior to and during long periods of high impact.</p>
+<p>
+  <strong>Step 6:</strong> View the <a href="../Pages/Page_758198897.html"> <strong>Functions</strong> </a>tab to see what functions were sampled during this time period. Functions with a high <strong>Self</strong> and/or&nbsp;<strong>Total</strong> value during these times are more likely to be related to the heightened impact.&nbsp;In general, you will want to concentrate on functions that result in Inter-Process Communication (IPC) calls. For more help on this, you can follow the steps in the next section, &quot;Getting a More Detailed Breakdown&quot;.</p>
+<h3 id="Anchor_961613652_h3_1">Getting a More Detailed Breakdown</h3>
+<p>Use the <strong>Thread State Tracing</strong> feature to see clues as to what might be causing an issue.</p>
+<p>
+  <strong>Step 1:</strong>&nbsp;Enabling <strong>Thread State Tracing</strong> requires <a href="../Pages/Page_685594274.html">Full Integration Setup</a>. See the page&nbsp;<a href="../Pages/Page_693933941.html">Take a Profile</a> for more requirements on being able to take profiles using this feature.</p>
+<p>
+  <strong>Step 2:</strong> Follow the steps in &quot;Investigate a Problem&quot; above.</p>
+<p>
+  <strong>Step 3:</strong> On the <a href="../Pages/Page_758198910.html"> <strong>Threads</strong> </a>tab, click the&nbsp;<strong>Top</strong> button to select the top 50 threads. These will now also draw on the&nbsp;<strong><a href="../Pages/Page_764970037.html">Timeline</a></strong> tab.</p>
+<p>
+  <strong>Step 4:</strong> Look in the <strong>Thread State</strong> data in the <strong>Timeline</strong> tab for areas where there are a large number of <strong>Thread State</strong> events happening in quick succession. Pay especially close attention to events classified as <strong>Graphics</strong> and <strong>IPC</strong>. If there are any areas where high impact is showing at the same time as one or more <strong>Thread State</strong> events, double-click on the event to see its callstack.</p>
+<h2 id="Anchor_961613652_h2_3">Previously Seen Causes</h2>
+<p>There can be any number of causes that can lead to your application having a high impact on core 3. Usually, there is not just one thing that is causes massive usage, but a number of things all adding together to cause an issue. Previously, Nintendo has seen the issue occurring due to the following:</p>
+<ul>
+  <li>Frequent calls to nvn::Device::GetTimestampInNanosecods(). The conversion happens as a part of the graphics driver. This means it not only operates on core 3, but that it operates a relatively high priority. Do not call this function in a tight loop.</li>
+  <li>Frequent calls to <span class="ApiLink_nn__os__SleepThread">nn::os::SleepThread</span>() or <span class="ApiLink_nn__os__YieldThread">nn::os::YieldThread</span>(). These functions ask the thread scheduler to perform an operation. If the scheduler is busy dealing with the requests from your application, it can delay the scheduling requests from core 3. Therefore, avoid calling <span class="ApiLink_nn__os__SleepThread">nn::os::SleepThread</span>() with small timeout values, especially not in a tight loop. Additionally, avoid unnecessary calls to <span class="ApiLink_nn__os__YieldThread">nn::os::YieldThread</span>().</li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__os__SleepThread', '../../../Api/HtmlNX/namespacenn_1_1os.html#a96b335e87af44c60a0d6dca75f11c9d2' )
+SetUrl( 'ApiLink_nn__os__YieldThread', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8bd5e5e72c058eb7d1b5f0ebfbb2cf6f' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

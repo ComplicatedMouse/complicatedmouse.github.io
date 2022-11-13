@@ -1,0 +1,911 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>3dExcelToShaderAnnotation | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- 3dExcelToShaderAnnotation -->
+<div class="pagetitle" id="PageId_235839824">3dExcelToShaderAnnotation</div>
+<div class="text_separate">
+<p class="auto-cursor-target">
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This tool is in testing. Its behavior is subject to change without notice.</p>
+  </div>
+</div>
+<p>This section describes the usage of the 3dExcelToShaderAnnotation (<code>%NINTENDO_SDK_ROOT%\Tools\Graphics\3dTools\3dExcelToShaderAnnotation.exe</code>).</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_235839824_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_235839824_h1_2">Command-Line Options</a>
+    </li>
+    <li>
+      <a href="#Anchor_235839824_h1_3">Usage Examples</a>
+    </li>
+    <li>
+      <a href="#Anchor_235839824_h1_4">Excel Format</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_235839824_h2_1">First Worksheet</a>
+      </li>
+      <li>
+        <a href="#Anchor_235839824_h2_2">Second and Later Worksheets</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_235839824_h1_5">Generated Source Code</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_235839824_h2_3">Uniform Block</a>
+      </li>
+      <li>
+        <a href="#Anchor_235839824_h2_4">Example of Generated Source Code</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_235839824_h1_1">Overview</h1>
+<p>Creates shader annotations from Excel able to be used as GLSL source code. To use the command line tool, <strong>you must install Microsoft Excel</strong> in the runtime environment.</p>
+<h1 id="Anchor_235839824_h1_2">Command-Line Options</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dExcelToShaderAnnotation.exe [--version] [-h] [-s] [file]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>--args-file &quot;&quot;</strong>
+</p>
+<p>Specifies the file.<br />You can use the contents in the parameter file to specify arguments. <br />The parameter file allows you to specify each option over several lines. <br />Lines starting with a number sign (#) are treated as comments. <br />Newline characters cannot be included in escape sequences used in option specifications that appear between quotation marks (&quot;).</p>
+<p>
+  <strong>--version</strong>
+</p>
+<p>Displays version information.</p>
+<p>
+  <strong>-h --help</strong>
+</p>
+<p>Displays Help.</p>
+<p>
+  <strong>-s --silent</strong>
+</p>
+<p>Suppresses the display of messages during processing.</p>
+<p>
+  <strong>File</strong>
+</p>
+<p>Specifies an Excel (XLSX) file to convert to annotation, or a shader definition (FSDB) file to convert to an Excel file.</p>
+<h1 id="Anchor_235839824_h1_3">Usage Examples</h1>
+<p>Example of using 3dExcelToShaderAnnotation.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dExcelToShaderAnnotation.exe Input.xlsx</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_235839824_h1_4">Excel Format</h1>
+<h2 id="Anchor_235839824_h2_1">First Worksheet</h2>
+<p>The first worksheet defines the shared information (pages, groups, and so on) for generating the shader parameter annotations. Specifically, the following items are defined.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 255.0px;" />
+    <col />
+    <col style="width: 184.0px;" />
+    <col style="width: 707.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Header</th>
+      <th>Handling When Omitted</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Source Code Filename</td>
+      <td>File Name</td>
+      <td>Cannot be omitted.</td>
+      <td>The filename of the generated source code.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>Source Code Output Folder Path</p>
+      </td>
+      <td>Output Directory</td>
+      <td>Cannot be omitted.</td>
+      <td>
+        <p>The output destination folder path of the generated source code. Enclosing environment variables in %, as in %VAR%, allows you to use environment variables. If a relative path is specified, it is treated as a relative path from the Excel file.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Structure Declaration Format for Option Variable Uniform Block</td>
+      <td>Shader Option Uniform Block / ID<br /><br /></td>
+      <td>layout(std140) uniform Options</td>
+      <td>The declaration format of the structure for the uniform block of option variables in the source code. The format described here is substituted as is.</td>
+    </tr>
+    <tr>
+      <td>Uniform Block ID of Option Variables</td>
+      <td>Shader Option Uniform Block / ID<br /><br /></td>
+      <td>option</td>
+      <td>
+        <p>The uniform block ID of an option variable. Corresponds to the <code>id</code> of the <a href="../Pages/Page_84052806.html#Anchor_84052806_UniformBlock">uniform block</a>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Structure Declaration Format for Material Uniform Block</p>
+      </td>
+      <td>Material Uniform Block / ID</td>
+      <td>layout(std140) uniform Material</td>
+      <td>The declaration format of the structure for the uniform block of the materials in the source code. The format described here is substituted as is.</td>
+    </tr>
+    <tr>
+      <td>Material Uniform Block ID</td>
+      <td>Material Uniform Block / ID</td>
+      <td>material</td>
+      <td>
+        <p>The uniform block ID of the materials. Corresponds to the <code>id</code> of the <a href="../Pages/Page_84052806.html#Anchor_84052806_UniformBlock">uniform block</a>. </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Page Definitions</p>
+        <p>(Page Name, Page Label, Page Order)</p>
+      </td>
+      <td>page, page_label</td>
+      <td>Ignored if the page name is omitted, and the other fields become empty strings</td>
+      <td>The page name corresponds to <code>page</code> of <a href="../Pages/Page_84052806.html#Anchor_84052806_Page">Page</a>. The page label corresponds to <code>label</code>. The page order is the described order.</td>
+    </tr>
+    <tr>
+      <td>
+        <p>Group Definitions</p>
+        <p>(Group Name, Group Label, Group Display Condition Expression, Group Order)</p>
+      </td>
+      <td>group, group_label, group_condition</td>
+      <td>Ignored if the group name is omitted, and the other fields become empty strings</td>
+      <td>The group name corresponds to <code>group</code> of <a href="../Pages/Page_84052806.html#Anchor_84052806_h1_14">Group</a>, the group label corresponds to <code>label</code>, and the group display condition expression corresponds to <code>condition</code>. The group order is the described order.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Describe them in the following format in Excel. <span style="color: rgb(255,0,0);">Red cells</span> are headers for various settings.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Cell Number</th>
+      <th>A</th>
+      <th>B</th>
+      <th>C</th>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td class="highlight-red">File Name</td>
+      <td>Name of the file to generate.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td class="highlight-red">Output Directory</td>
+      <td>Folder path of the file to generate.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td class="highlight-red">Shader Option Uniform Block / ID</td>
+      <td>Structure Declaration Format for Option Variable Uniform Block</td>
+      <td>Uniform Block ID of Option Variables</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td class="highlight-red">Material Uniform Block / ID</td>
+      <td>Structure Declaration Format for Material Uniform Block</td>
+      <td>Material Uniform Block ID</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td class="highlight-red">page</td>
+      <td class="highlight-red">page_label</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>Page A Name</td>
+      <td>Page A Label</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>Page B Name</td>
+      <td>Page B Label</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th> </th>
+      <td> </td>
+      <td> </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td class="highlight-red">group</td>
+      <td class="highlight-red">group_label</td>
+      <td class="highlight-red">group_condition</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>Group A Name</td>
+      <td>Group A Label</td>
+      <td>Group A Display Condition Expression</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>Group B Name</td>
+      <td>Group B Label</td>
+      <td>Group B Display Condition Expression</td>
+    </tr>
+    <tr>
+      <th> </th>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following describes a number of examples.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Cell Number</th>
+      <th>A</th>
+      <th>B</th>
+      <th>C</th>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td class="highlight-red">File Name</td>
+      <td>basic.autogen.glsl</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td class="highlight-red">Output Directory</td>
+      <td>%SHADER_SOURCE_PATH%/Include</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td class="highlight-red">Shader Option Uniform Block / ID</td>
+      <td>layout(std140) uniform Material</td>
+      <td>mat</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td class="highlight-red">Material Uniform Block / ID</td>
+      <td>layout(std140) uniform Options</td>
+      <td>opt</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td class="highlight-red">page</td>
+      <td class="highlight-red">page_label</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>page_a</td>
+      <td>Page A</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>page_b</td>
+      <td>Page B</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td class="highlight-red">group</td>
+      <td class="highlight-red">group_label</td>
+      <td class="highlight-red">group_condition</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>diffuse_group</td>
+      <td>Diffuse</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>normal_map_group</td>
+      <td>Normals</td>
+      <td>$normal_map != 0</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>multi_tex_group</td>
+      <td>Multi-textures</td>
+      <td>$multi_tex != 0</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_235839824_h2_2">Second and Later Worksheets</h2>
+<p>The second and later worksheets define the shader parameter annotations in each page. One worksheet corresponds to one page. The worksheet has the same name as the page name. If there are no pages, the annotations can be described below the group definitions, on the first worksheet. This worksheet defines the following items.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Header</th>
+      <th>Handling When Omitted</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Group name</td>
+      <td>group</td>
+      <td>Goes from the cell to cell with smaller line numbers, and the group name of the first cell found, that is not empty, is substituted. When a cell that is not empty is not found, it is treated as an empty string.</td>
+      <td>Corresponds to <code>group</code> for the parameters of <a href="../Pages/Page_84052806.html">shader annotations</a>.</td>
+    </tr>
+    <tr>
+      <td>Type</td>
+      <td>type</td>
+      <td>Cannot be omitted.</td>
+      <td>The type of parameter. Describes the option variable as <code><em>option</em></code>, the material uniform block variable as <code><em>ub_material</em></code>, the sampler variable as <code><em>sampler</em></code>, the rendering information as <code><em>renderinfo</em></code>, and the group as <code><em>group</em></code>.</td>
+    </tr>
+    <tr>
+      <td>Variable Declarations</td>
+      <td>variable</td>
+      <td>Cannot be omitted.</td>
+      <td>Describes the variable declaration in the source code. Description includes the type name, such as <code>float weight</code>. For option variables, describes the macro name and value, such as <code>SKINNING (0)</code>. The uniform block variable type for option variables is the same as <code>int</code>, and the variable name is the same as <code>id</code>. The variable declaration order, within the uniform block, is the order described with Excel.</td>
+    </tr>
+    <tr>
+      <td>ID</td>
+      <td>id</td>
+      <td>Cannot be omitted.</td>
+      <td>Corresponds to <code>id</code> for the parameters of <a href="../Pages/Page_84052806.html">shader annotations</a>. For rendering information, this corresponds to <code>name</code>.</td>
+    </tr>
+    <tr>
+      <td>Label</td>
+      <td>label</td>
+      <td>None</td>
+      <td>Corresponds to <code>label</code> for the parameters of <a href="../Pages/Page_84052806.html">shader annotations</a>.</td>
+    </tr>
+    <tr>
+      <td>Default Value</td>
+      <td>default</td>
+      <td>None</td>
+      <td>Corresponds to <code>default</code> for the parameters of <a href="../Pages/Page_84052806.html">shader annotations</a>.</td>
+    </tr>
+    <tr>
+      <td>Other Annotations</td>
+      <td>other_annotation</td>
+      <td>None</td>
+      <td>Any other annotation you want to add. The <code>ui_order</code> annotation is automatically included, following the order described in Excel. Do not describe it here.</td>
+    </tr>
+    <tr>
+      <td>Conditional Expressions Using <code>#if</code> Directive to Exclude</td>
+      <td>
+        <code>preprocess</code>
+      </td>
+      <td>None</td>
+      <td>Conditional expressions that use <code>#if</code> directives to exclude a variable declarations. If you write <code>else</code>, the conditions are separated by <code>#else</code>.</td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p class="auto-cursor-target">Generate Uniform Variables for Option Variables</p>
+          <!--Remove-->
+          <p class="auto-cursor-target">
+            <br />
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>generate_uniform_var</p>
+          <p class="auto-cursor-target">
+            <br />
+          </p>
+        </div>
+      </td>
+      <td>TRUE</td>
+      <td>Specify <code>TRUE</code> to generate variables in the option uniform block when there are multiple option variables. Otherwise, specify <code>FALSE</code>. If the <code>choice</code> for option variables is enumerated type, the variables will not be generated even if <code>TRUE</code> has been specified.</td>
+    </tr>
+    <tr>
+      <td>Order in the UI</td>
+      <td>
+        <br />
+      </td>
+      <td>Cannot be omitted.</td>
+      <td>The <code>ui_order</code> for the parameters of <a href="../Pages/Page_84052806.html">shader annotations</a> is automatically included. This is so that the annotations are sorted in the order that they are described in Excel.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Describe them in the following format in Excel. <span style="color: rgb(255,0,0);">Red cells</span> are headers for various settings.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Cell Number</th>
+      <th>A</th>
+      <th>B</th>
+      <th>C</th>
+      <th>D</th>
+      <th>E</th>
+      <th>F</th>
+      <th>G</th>
+      <th>H</th>
+      <th>I</th>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td class="highlight-red">group</td>
+      <td class="highlight-red">type</td>
+      <td class="highlight-red">variable</td>
+      <td class="highlight-red">id</td>
+      <td class="highlight-red">label</td>
+      <td class="highlight-red">default</td>
+      <td class="highlight-red">other_annotation</td>
+      <td class="highlight-red">
+        <code>preprocess</code>
+      </td>
+      <td class="highlight-red">generate_uniform_var</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Parameter A group name</td>
+      <td>Parameter A type</td>
+      <td>Parameter A variable declaration</td>
+      <td>Parameter A ID</td>
+      <td>Parameter A label</td>
+      <td>Parameter A default value</td>
+      <td>Other annotations for Parameter A</td>
+      <td>Excluding conditional expression using an <code>#if</code> directive for Parameter A.</td>
+      <td>TRUE or FALSE</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Parameter B group name</td>
+      <td>Parameter B type</td>
+      <td>Parameter B variable declaration</td>
+      <td>Parameter B ID</td>
+      <td>Parameter B label</td>
+      <td>Parameter B default value</td>
+      <td>Other annotations for Parameter B</td>
+      <td>Excluding conditional expression using an <code>#if</code> directive for Parameter B</td>
+      <td>TRUE or FALSE</td>
+    </tr>
+    <tr>
+      <th> </th>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following describes a number of examples.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col style="width: 75.0px;" />
+    <col style="width: 129.0px;" />
+    <col style="width: 99.0px;" />
+    <col style="width: 186.0px;" />
+    <col style="width: 102.0px;" />
+    <col style="width: 155.0px;" />
+    <col style="width: 70.0px;" />
+    <col style="width: 206.0px;" />
+    <col style="width: 204.0px;" />
+    <col style="width: 29.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Cell Number</th>
+      <th>A</th>
+      <th>B</th>
+      <th>C</th>
+      <th>D</th>
+      <th>E</th>
+      <th>F</th>
+      <th>G</th>
+      <th>H</th>
+      <th>I</th>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td class="highlight-red">group</td>
+      <td class="highlight-red">type</td>
+      <td class="highlight-red">variable</td>
+      <td class="highlight-red">id</td>
+      <td class="highlight-red">label</td>
+      <td class="highlight-red">default</td>
+      <td class="highlight-red">other_annotation</td>
+      <td class="highlight-red">
+        <code>preprocess</code>
+      </td>
+      <td class="highlight-red">generate_uniform_var</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>
+        <br />
+      </td>
+      <td>option</td>
+      <td>SKINNING (0)</td>
+      <td>skinning</td>
+      <td>
+        <br />
+      </td>
+      <td>0</td>
+      <td>choice=&quot;[0, 9]&quot;</td>
+      <td>TRUE</td>
+      <td>TRUE</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>
+        <br />
+      </td>
+      <td>option</td>
+      <td>COORDINATE (c_Local)</td>
+      <td>coord</td>
+      <td>
+        <br />
+      </td>
+      <td>c_Local</td>
+      <td>choice=&quot;c_Local, c_World&quot;</td>
+      <td>FALSE</td>
+      <td>FALSE</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>diffuse_group</td>
+      <td>ub_material</td>
+      <td>vec3 diffColor</td>
+      <td>diffuse</td>
+      <td>Diffuse color.</td>
+      <td>1 1 1</td>
+      <td>hint=&quot;diffuse&quot; item=&quot;color&quot;</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>
+        <br />
+      </td>
+      <td>option</td>
+      <td>USE_VERTEX_COLOR (0)</td>
+      <td>vertex_color</td>
+      <td>Vertex color enabled.</td>
+      <td>0</td>
+      <td>choice=&quot;bool&quot; visible=&quot;true&quot;</td>
+      <td>
+        <br />
+      </td>
+      <td>TRUE</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>
+        <br />
+      </td>
+      <td>sampler</td>
+      <td>sampler2D albedoTex0</td>
+      <td>a0</td>
+      <td>Albedo texture 0</td>
+      <td>
+        <br />
+      </td>
+      <td>hint=&quot;albedo0&quot;</td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>multi_tex_group</td>
+      <td>sampler</td>
+      <td>sampler2D albedoTex1</td>
+      <td>a1</td>
+      <td>Albedo texture 1</td>
+      <td>
+        <br />
+      </td>
+      <td>hint=&quot;albedo1&quot;</td>
+      <td>(ENABLE_MULTI_TEXTURE)</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>
+        <br />
+      </td>
+      <td>ub_material</td>
+      <td>float weightTex</td>
+      <td>weight_tex</td>
+      <td>Weight during interpolation/addition.</td>
+      <td>1</td>
+      <td>min=&quot;-1&quot; max=&quot;1&quot;</td>
+      <td>(ENABLE_MULTI_TEXTURE)</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_235839824_h1_5">Generated Source Code</h1>
+<h2 id="Anchor_235839824_h2_3">Uniform Block</h2>
+<!--Remove-->
+<p>
+  <br />
+</p>
+<p>The variables in the material uniform block are sorted in the following order.</p>
+<ul style="list-style-type: square;">
+  <li>Variables are sorted from largest to smallest.</li>
+  <li>Same-sized variables are sorted in alphabetical order of the type name.</li>
+  <li>Variables with the same type name are sorted in alphabetical order of the variable name.</li>
+</ul>
+<h2 id="Anchor_235839824_h2_4">Example of Generated Source Code</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Automatically generated by 3dExcelToShaderAnnotation. DO NOT edit.
+</span>
+<span class="c1">//------------------------------------------------------------------------------
+// Groups
+//------------------------------------------------------------------------------
+</span>
+<span class="c1">// @@ group=&quot;diffuse_group&quot;    label=&quot;Diffuse&quot;       order=&quot;0&quot;
+// @@ group=&quot;multi_tex_group&quot;  label=&quot;Multi-texture&quot; condition=&quot;$multi_tex != 0&quot; order=&quot;1&quot;
+// @@ group=&quot;specular_group&quot;   label=&quot;Specular&quot;          order=&quot;2&quot;
+// @@ group=&quot;rim_group&quot;        label=&quot;Rim light&quot;          condition=&quot;$rim_light&quot; order=&quot;3&quot;
+// @@ group=&quot;normal_map_group&quot; label=&quot;Normal&quot;                   condition=&quot;$normal_map&quot; order=&quot;4&quot;
+</span>
+
+<span class="c1">//------------------------------------------------------------------------------
+// Shader options
+//------------------------------------------------------------------------------
+</span>
+<span class="cp">#define SKINNING         (-1)      </span><span class="c1">// @@ id=&quot;skinning&quot;     default=&quot;-1&quot;      type=&quot;dynamic&quot; choice=&quot;[-1, 8]&quot; order=&quot;0&quot;
+</span><span class="cp">#define COORDINATE       (c_Local) </span><span class="c1">// @@ id=&quot;coord&quot;        default=&quot;c_Local&quot; type=&quot;dynamic&quot; choice=&quot;c_Local, c_World&quot; order=&quot;10&quot;
+</span><span class="cp">#define USE_VERTEX_COLOR (0)       </span><span class="c1">// @@ id=&quot;vertex_color&quot; group=&quot;diffuse_group&quot;    label=&quot;Vertex color&quot;                               default=&quot;0&quot;       type=&quot;static&quot; choice=&quot;bool&quot; order=&quot;10&quot;
+</span><span class="cp">#define USE_ALBEDO_TEX   (1)       </span><span class="c1">// @@ id=&quot;albedo_tex&quot;   group=&quot;diffuse_group&quot;    label=&quot;Albedo texture&quot;                   default=&quot;1&quot;       type=&quot;static&quot; choice=&quot;bool&quot; order=&quot;20&quot;
+</span><span class="cp">#define MULTI_TEX        (0)       </span><span class="c1">// @@ id=&quot;multi_tex&quot;    group=&quot;multi_tex_group&quot;  label=&quot;Multi-texture blend mode&quot; default=&quot;0&quot;       type=&quot;static&quot; choice=&quot;0:None, 1:Interpolate, 2:Multiply, 3:Add&quot; order=&quot;0&quot;
+</span><span class="cp">#define USE_SPEC_MASK    (0)       </span><span class="c1">// @@ id=&quot;spec_mask&quot;    group=&quot;specular_group&quot;   label=&quot;Specular mask                      default=&quot;0&quot;       type=&quot;static&quot; choice=&quot;bool&quot; order=&quot;20&quot;
+</span><span class="cp">#define USE_RIM_LIGHT    (0)       </span><span class="c1">// @@ id=&quot;rim_light&quot;    group=&quot;rim_group&quot;        label=&quot;Enable rim light&quot;                   default=&quot;0&quot;       type=&quot;static&quot; choice=&quot;bool&quot; order=&quot;0&quot;
+</span><span class="cp">#define USE_NORMAL_MAP   (0)       </span><span class="c1">// @@ id=&quot;normal_map&quot;   group=&quot;normal_map_group&quot; label=&quot;Enable normal map&quot;                   default=&quot;0&quot;       type=&quot;static&quot; choice=&quot;bool&quot; order=&quot;0&quot;
+</span>
+<span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Options</span>  <span class="c1">// @@ id=&quot;opt&quot; type=&quot;option&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">skinning</span><span class="p">;</span>     <span class="c1">// @@ id=&quot;skinning&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">vertex_color</span><span class="p">;</span> <span class="c1">// @@ id=&quot;vertex_color&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">albedo_tex</span><span class="p">;</span>   <span class="c1">// @@ id=&quot;albedo_tex&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">multi_tex</span><span class="p">;</span>    <span class="c1">// @@ id=&quot;multi_tex&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">spec_mask</span><span class="p">;</span>    <span class="c1">// @@ id=&quot;spec_mask&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">rim_light</span><span class="p">;</span>    <span class="c1">// @@ id=&quot;rim_light&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">normal_map</span><span class="p">;</span>   <span class="c1">// @@ id=&quot;normal_map&quot;
+</span><span class="p">};</span>
+
+
+<span class="c1">//------------------------------------------------------------------------------
+// Samplers
+//------------------------------------------------------------------------------
+</span>
+<span class="n">uniform</span> <span class="n">sampler2D</span> <span class="n">albedoTex0</span><span class="p">;</span>  <span class="c1">// @@ id=&quot;_a0&quot;
+</span><span class="n">uniform</span> <span class="n">sampler2D</span> <span class="n">albedoTex1</span><span class="p">;</span>  <span class="c1">// @@ id=&quot;_a1&quot;
+</span><span class="n">uniform</span> <span class="n">sampler2D</span> <span class="n">specularTex</span><span class="p">;</span> <span class="c1">// @@ id=&quot;_s0&quot;
+</span><span class="n">uniform</span> <span class="n">sampler2D</span> <span class="n">normalTex</span><span class="p">;</span>   <span class="c1">// @@ id=&quot;_n0&quot;
+</span>
+<span class="c1">// @@ sampler_id=&quot;_a0&quot; group=&quot;diffuse_group&quot;    label=&quot;Albedo texture 0&quot; hint=&quot;albedo0&quot; order=&quot;30&quot;
+// @@ sampler_id=&quot;_a1&quot; group=&quot;multi_tex_group&quot;  label=&quot;Albedo texture 1&quot; hint=&quot;albedo1&quot; order=&quot;10&quot;
+// @@ sampler_id=&quot;_s0&quot; group=&quot;specular_group&quot;   label=&quot;Specular mask&quot;     hint=&quot;specular0&quot; order=&quot;30&quot;
+// @@ sampler_id=&quot;_n0&quot; group=&quot;normal_map_group&quot; label=&quot;Normal map&quot;              hint=&quot;normal0&quot; order=&quot;10&quot;
+</span>
+
+<span class="c1">//------------------------------------------------------------------------------
+// Uniform block for material
+//------------------------------------------------------------------------------
+</span>
+<span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Material</span>  <span class="c1">// @@ id=&quot;mat&quot; type=&quot;material&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt0</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span> <span class="c1">// @@ id=&quot;texsrt0&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt1</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span> <span class="c1">// @@ id=&quot;texsrt1&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt2</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span> <span class="c1">// @@ id=&quot;texsrt2&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt3</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span> <span class="c1">// @@ id=&quot;texsrt3&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec3</span> <span class="n">diffColor</span><span class="p">;</span>  <span class="c1">// @@ id=&quot;diffuse&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">rimInt</span><span class="p">;</span>    <span class="c1">// @@ id=&quot;rim_int&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">rimPower</span><span class="p">;</span>  <span class="c1">// @@ id=&quot;rim_power&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">specInt</span><span class="p">;</span>   <span class="c1">// @@ id=&quot;spec_int&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">specPower</span><span class="p">;</span> <span class="c1">// @@ id=&quot;spec_power&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">weightTex</span><span class="p">;</span> <span class="c1">// @@ id=&quot;weight_tex&quot;
+</span><span class="p">};</span>
+
+<span class="c1">// @@ uniform_id=&quot;texsrt0&quot;    group=&quot;diffuse_group&quot;    label=&quot;SRT for albedo texture 0&quot; default=&quot;0 1 1 0 0 0 &quot; type=&quot;texsrt&quot; hint=&quot;albedo0&quot; order=&quot;40&quot;
+// @@ uniform_id=&quot;texsrt1&quot;    group=&quot;multi_tex_group&quot;  label=&quot;SRT for albedo texture 1&quot; default=&quot;0 1 1 0 0 0 &quot; type=&quot;texsrt&quot; hint=&quot;albedo1&quot; order=&quot;30&quot;
+// @@ uniform_id=&quot;texsrt2&quot;    group=&quot;normal_map_group&quot; label=&quot;SRT for normal map&quot;              default=&quot;0 1 1 0 0 0 &quot; type=&quot;texsrt&quot; hint=&quot;normal0&quot; order=&quot;20&quot;
+// @@ uniform_id=&quot;texsrt3&quot;    group=&quot;specular_group&quot;   label=&quot;SRT for specular mask&quot;     default=&quot;0 1 1 0 0 0 &quot; type=&quot;texsrt&quot; hint=&quot;specular0&quot; order=&quot;40&quot;
+// @@ uniform_id=&quot;diffuse&quot;    group=&quot;diffuse_group&quot;    label=&quot;Diffuse color&quot;        default=&quot;1 1 1 &quot;       type=&quot;float3&quot; hint=&quot;diffuse&quot; item=&quot;color&quot; order=&quot;0&quot;
+// @@ uniform_id=&quot;rim_int&quot;    group=&quot;rim_group&quot;        label=&quot;Rim light intensity&quot;              default=&quot;0.5&quot;          type=&quot;float&quot; min=&quot;0&quot; max=&quot;1&quot; order=&quot;10&quot;
+// @@ uniform_id=&quot;rim_power&quot;  group=&quot;rim_group&quot;        label=&quot;Rim light power&quot;              default=&quot;2.5&quot;          type=&quot;float&quot; min=&quot;0&quot; order=&quot;20&quot;
+// @@ uniform_id=&quot;spec_int&quot;   group=&quot;specular_group&quot;   label=&quot;Specular intensity&quot;              default=&quot;0.2&quot;          type=&quot;float&quot; min=&quot;0&quot; max=&quot;1&quot; order=&quot;0&quot;
+// @@ uniform_id=&quot;spec_power&quot; group=&quot;specular_group&quot;   label=&quot;Specular power&quot;              default=&quot;50&quot;           type=&quot;float&quot; min=&quot;0&quot; order=&quot;10&quot;
+// @@ uniform_id=&quot;weight_tex&quot; group=&quot;multi_tex_group&quot;  label=&quot;Weight when interpolating or adding&quot;     default=&quot;1&quot;            type=&quot;float&quot; min=&quot;-1&quot; max=&quot;1&quot; order=&quot;20&quot;
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

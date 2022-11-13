@@ -1,0 +1,293 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Submixes | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Submixes -->
+<div class="pagetitle" id="PageId_245241646">Submixes</div>
+<div class="text_separate">
+<p>
+  <br />
+</p>
+<h1 id="Anchor_245241646_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_245241646_h1_1">Contents</a>
+    </li>
+    <li>
+      <a href="#Anchor_245241646_h1_2">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_245241646_h1_3">Submixes</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_245241646_h2_1">What Is a Submix?</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_245241646_h3_1">Bus</a>
+        </li>
+        <li>
+          <a href="#Anchor_245241646_h3_2">Submixes</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_245241646_h2_2">Default atk Structure</a>
+      </li>
+      <li>
+        <a href="#Anchor_245241646_h2_3">User-Defined Submix Structures</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_245241646_h3_3">Benefits of User-Defined Submix Structures</a>
+        </li>
+        <li>
+          <a href="#Anchor_245241646_h3_4">User-Defined Rules</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_245241646_h2_4">Using User-Defined Submix Structures</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_245241646_h3_5">Initializing a Submix</a>
+        </li>
+        <li>
+          <a href="#Anchor_245241646_h3_6">Playing Submixes</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_245241646_h2_5">Important Information</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_245241646_h1_2">Overview</h1>
+<p>In the <code>atk</code> library, submixes are a type of object for managing buses.<br />Normally, <code>atk</code> allowed you to use the following 4 six-channel buses: main and AuxBus_A, B, and C.<br />However, internally, these buses were all managed using a single submix.</p>
+<p>
+  <code>atk</code> allows this submix to be customized by the user.<br />This allows the user to freely modify the bus configuration based on the use case, such as increasing the number of buses or customizing the number of channels per bus, to achieve more flexible bus management.<br /></p>
+<p>In addition to describing submixes and their relationship to buses, this page also describes how <code>atk</code> normally performs bus routing.<br />The process of configuring bus routing using submixes is described later.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The usefulness of submix customizing functions is currently under evaluation. Note that disruptive changes to the specifications may be introduced without warning.</p>
+  </div>
+</div>
+<h1 id="Anchor_245241646_h1_3">Submixes</h1>
+<p>Sounds played by the <code>atk</code> library are output to a number of buses to apply effects-based signal processing before the final mix is ultimately output.<br /></p>
+<p>This section describes submixes, which are part of the system that implements this processing.</p>
+<h2 id="Anchor_245241646_h2_1">What Is a Submix?</h2>
+<p>This section describes the terminology for submixes.</p>
+<h3 id="Anchor_245241646_h3_1">Bus</h3>
+<p>The unit to configure effects in <code>atk</code>.</p>
+<p>A bus is made up of one or more channels. When you configure effects,<br />you can set which channels of the bus to apply the effect's signal processing for channels.</p>
+<p>
+  <img src="../Attachments/Attach_245241646/245252066.png" width="250"></img>
+</p>
+<h3 id="Anchor_245241646_h3_2">Submixes</h3>
+<p>The target specified as the location to send the sound playback request in <code>atk</code>.<br />In the initial state, you do not need to explicitly specify the target during playback, because <code>atk</code> has only one submix.</p>
+<p>The submix includes one or more buses, and it has a connection target that is either another submix or the final mix.<br />The result of mixing all buses in the submix is output to the connection target.</p>
+<p>
+  <img src="../Attachments/Attach_245241646/245252139.png" width="350"></img>
+</p>
+<h2 id="Anchor_245241646_h2_2">Default atk Structure</h2>
+<p>In the initial state, <code>atk</code> has the structure of one submix, the MainBus bus, and the three AuxBus buses A to C.<br />Each bus is made up of six channels.<br />(Reference: The send MAIN illustration in the <a href="../Pages/Page_83955848.html">Wave Sounds</a> section of the SoundMaker manual.)</p>
+<p>
+  <img src="../Attachments/Attach_245241646/245243723.png" width="400"></img>
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>For more information about specifying the volume for each of the six channels and play sounds, see<br />the section about directly specifying the volume for each channel in <a href="../Pages/Page_162953246.html">Mixing</a>.</p>
+  </div>
+</div>
+<h2 id="Anchor_245241646_h2_3">User-Defined Submix Structures</h2>
+<p>In its initial state, <code>atk</code> has the default submix structure.<br />You can use a user-defined submix structure to increase or decrease the number of submixes and buses.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The usefulness of this feature is currently under evaluation. Note that disruptive changes to the specifications may be introduced without warning.</p>
+  </div>
+</div>
+<h3 id="Anchor_245241646_h3_3">Benefits of User-Defined Submix Structures</h3>
+<p>User-defined submix structures have the following advantages.</p>
+<ul>
+  <li>Adding effect buses<ul><li>For each submix, you can add a maximum of 1 ch x 24 buses.</li></ul></li>
+  <li>Adjusting the processing load<br /><ul><li>In contrast to adding buses, by reducing the number of unnecessary effect buses and channels,<br />you can decrease the processing load on the audio renderer and perform tasks like increasing the number of voiced sounds.</li></ul></li>
+  <li>Streamlining processing flow for effects and volume<ul><li>Because you can specify the effects and volume for each submix and bus as a group,<br />you can streamline your game's sound processing pipeline.</li></ul></li>
+</ul>
+<h3 id="Anchor_245241646_h3_4">User-Defined Rules</h3>
+<p>By having the submix structure user-defined, users can change the structure, as in the following.</p>
+<ul>
+  <li>Number of submixes and their connection targets</li>
+  <li>Number of buses in each submix</li>
+  <li>Number of channels in each bus</li>
+</ul>
+<p>themselves.<br />This section describes the rules for changing the structure.</p>
+<p>You can specify another submix as the connection target of a submix.<br />However, ultimately the submixes must be connected to the final mix.</p>
+<p>If a submix is not ultimately connected to the final mix,<br />even if a sound playback request is sent to that submix, that sound will not be output.</p>
+<p>
+  <img src="../Attachments/Attach_245241646/245252309.png" width="450"></img>
+</p>
+<p>Submixes can also be arranged in parallel.</p>
+<p>When doing this, you cannot use one sound handle to control sounds that straddle multiple submixes.<br />When specifying a sound for multiple submixes, you must prepare separate sound handles.</p>
+<!--Remove-->
+<p>
+  <img src="../Attachments/Attach_245241646/245252314.png" width="450"></img>
+</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The maximum total number of channels that can be set to one submix is 24.<br />For example, you cannot set five buses of six channels to one submix.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>You cannot set buses with differing numbers of channels to one submix.<br />For example, you cannot set two buses of six channels, and two buses of two channels, to one submix.</p>
+  </div>
+</div>
+<!--Remove-->
+<h2 id="Anchor_245241646_h2_4">Using User-Defined Submix Structures</h2>
+<p>The following procedures use sample code to show how to use user-defined submix structures within a program.</p>
+<h3 id="Anchor_245241646_h3_5">Initializing a Submix</h3>
+<p>First, when initializing SoundSystem, set the flag to enable user-defined submix structures.<br />When you do this, set the total number of channels the submixes will use in <code><em>mixBufferCount</em></code>, and the total number of submixes in <code><em>mixBufferCount</em></code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::atk::SoundSystem::SoundSystemParam param;
+param.enableCustomSubMix      = true;
+param.subMixTotalChannelCount = totalBusCount * SubMixChannelCount;
+param.subMixCount             = SubMixIndex_Count;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Next, prepare and initialize the necessary number of instances of the submix.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::atk::</span><span class="n">SubMix</span> <span class="n">g_SubMix</span><span class="p">[</span><span class="n">SubMixIndex_Count</span><span class="p">];</span>
+<span class="p">...</span>
+<span class="c1">// Initializes SubMix[A].
+</span><span class="nn">std::</span><span class="kt">size_t</span> <span class="n">memSizeForSubMixA</span> <span class="o">=</span> <span class="nn">nn::atk::SubMix::</span><span class="n">GetRequiredMemorySize</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">SubMixBusCount</span><span class="p">[</span><span class="n">SubMixIndex_A</span><span class="p">],</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">SubMixChannelCount</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">SubMixBusCount</span><span class="p">[</span><span class="n">SubMixIndex_B</span><span class="p">],</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">SubMixChannelCount</span>
+<span class="p">);</span>
+<span class="n">g_pMemoryForSubMix</span><span class="p">[</span><span class="n">SubMixIndex_A</span><span class="p">]</span> <span class="o">=</span> <span class="nn">nns::atk::</span><span class="n">Allocate</span><span class="p">(</span> <span class="n">memSizeForSubMixA</span> <span class="p">);</span>
+<span class="n">g_SubMix</span><span class="p">[</span><span class="n">SubMixIndex_A</span><span class="p">].</span><span class="n">Initialize</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">SubMixBusCount</span><span class="p">[</span><span class="n">SubMixIndex_A</span><span class="p">],</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">SubMixChannelCount</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">SubMixBusCount</span><span class="p">[</span><span class="n">SubMixIndex_B</span><span class="p">],</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">SubMixChannelCount</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_pMemoryForSubMix</span><span class="p">[</span><span class="n">SubMixIndex_A</span><span class="p">],</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">memSizeForSubMixA</span>
+<span class="p">);</span>
+<span class="p">...</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Set the connection target for the initialized submix instance. Set the connection destination of each submix to the final mix.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Connects each submix.
+</span><span class="n">g_SubMix</span><span class="p">[</span><span class="n">SubMixIndex_A</span><span class="p">].</span><span class="n">SetDestination</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_SubMix</span><span class="p">[</span><span class="n">SubMixIndex_B</span><span class="p">]</span> <span class="p">);</span>
+<span class="n">g_SubMix</span><span class="p">[</span><span class="n">SubMixIndex_B</span><span class="p">].</span><span class="n">SetDestination</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">finalMix</span> <span class="p">);</span>
+<span class="n">g_SubMix</span><span class="p">[</span><span class="n">SubMixIndex_C</span><span class="p">].</span><span class="n">SetDestination</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">finalMix</span> <span class="p">);</span>
+&nbsp;
+<span class="c1">// Connects each SubMix[B] bus to the FinalMix bus.
+// (FinalMix has only one bus.)
+</span><span class="k">const</span> <span class="kt">int</span> <span class="n">FinalMixBusIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">busIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">busIndex</span> <span class="o">&lt;</span> <span class="n">SubMixBusCount</span><span class="p">[</span><span class="n">SubMixIndex_B</span><span class="p">];</span> <span class="n">busIndex</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">g_SubMix</span><span class="p">[</span><span class="n">SubMixIndex_B</span><span class="p">].</span><span class="n">SetSend</span><span class="p">(</span> <span class="n">busIndex</span><span class="p">,</span> <span class="n">FinalMixBusIndex</span><span class="p">,</span> <span class="mf">1.0f</span> <span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_245241646_h3_6">Playing Submixes</h3>
+<p>When playing sounds using a user-defined submix structure, you must use <code>SoundStartable::StartInfo</code> to specify which submix to send the playback request to.</p>
+<p>Specify the playback request target to <code>StartInfo::pOutputReceiver</code>, after configuring <code>EnableFlagBit_OutputReceiver</code> to <code>StartInfo::enableFlag</code>.<br />You can specify either <code>SubMix</code> or <code>FinalMix</code> for <code>OutputReceiver</code>.</p>
+<!--Remove-->
+<p>If you want to set an effect, specify the bus and add the effect to the desired submix or the final mix, rather than using SoundSystem.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// Adds effects to the SubMix[B] AppendEffectBusIndex bus.
+// Used in confirming the bus send.
+g_SubMix[SubMixIndex_B].AppendEffect( &amp;g_EffectReverb, AppendEffectBusIndex, g_pMemoryForEffectReverb, memSizeForEffectReverb );
+...
+// Specifies the submix in StartInfo and plays it.
+nn::atk::SoundArchivePlayer::StartInfo info;
+info.enableFlag |= nn::atk::SoundArchivePlayer::StartInfo::EnableFlagBit_OutputReceiver;
+info.pOutputReceiver = &amp;g_SubMix[g_TargetSubMixIndex];
+bool result = g_SoundArchivePlayer.StartSound( &amp;g_SoundHandle, soundId, &amp;info ).IsSuccess();</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<!--Remove-->
+<h2 id="Anchor_245241646_h2_5">Important Information</h2>
+<ul>
+  <li>When the number of submixes and channels increase, the processing load on the audio renderer increases.<br />The load affects the number of sounds and effect processing, so we recommend checking it using <a href="../Pages/Page_165356762.html">Measuring Processing Time</a> as a guide.</li>
+</ul>
+<!--Remove-->
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

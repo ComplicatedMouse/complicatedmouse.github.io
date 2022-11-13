@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Sampled Profile Tab | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Sampled Profile Tab -->
+<div class="pagetitle" id="PageId_758198873">Sampled Profile Tab</div>
+<div class="text_separate">
+<p>The&nbsp;<strong style="letter-spacing: 0.0px;">Sampled Profile</strong>&nbsp;tab controls taking a sampled profile along with the associated settings.</p>
+<p>This tab is only visible when connected to a devkit.&nbsp;When the connection is established, this tab will automatically appear in the <strong>Ribbon Bar</strong> and it&nbsp;will become the&nbsp;selected tab.</p>
+<h1 id="Anchor_758198873_h1_1">Profile Buttons</h1>
+<p>The <strong>Start</strong> and <strong>Stop</strong> profile buttons are available on the far left side. Once the <strong>Start</strong> button is pressed, it will&nbsp;change to a <strong>Stop</strong> button so that the profile can be manually stopped without moving the mouse cursor.</p>
+<p>The number to the right of the <strong>Start</strong> button will time how long you have been taking a profile. It will begin&nbsp;counting when you hit the <strong>Start</strong> button. The format of the number is Hours:Minutes:Seconds.</p>
+<p>The drop down box next to the <strong>Start</strong> button controls when the profile will stop. If you want to profile for a&nbsp;set period of time, choose a time from the drop down box. You can still press the&nbsp;<strong>Stop</strong>&nbsp;button to end a profile at any time before the&nbsp;specified amount of time has elapsed.</p>
+<p>Starting with Nintendo NX CPU Profiler version 1.7, you can control how the profiler handles its buffers, specially its behavior when the buffer has filled to its capacity.</p>
+<p>Above the drop down is an estimated time for how long a profile will run until the buffers fill to capacity. This capacity estimate is based on the selected sample settings, the overhead of sampling, and average callstack depth. The <strong>Tracing</strong> features, <strong>Code Blocks</strong>, <strong>Heartbeats</strong>, and <strong>User Logs</strong> all impact the actual capacity, but the estimate does not currently have a way to include this data in the calculation as it is heavily dependent on the application being profiled.</p>
+<ul>
+  <li>
+    <strong>Stop When Full</strong>: This is how the profiler behaved in previous releases. When the buffers fill, profiling automatically stops.</li>
+  <li>
+    <strong>Ring Buffer</strong>: When the buffers fill, the profiler starts overwriting old data. This enables profiling to continue until explicitly stopped. When the buffers do fill, the estimated capacity will update to reflect the minimum duration you can expect to receive from the profile.</li>
+</ul>
+<h1 id="Anchor_758198873_h1_2">Sample Settings</h1>
+<p>This group of controls will determine the event that triggers a sample to be taken and the rate at which&nbsp;the event should trigger.</p>
+<h2 id="Anchor_758198873_h2_1">Sampling Strategy Drop Down Box</h2>
+<p>This control determines the event that triggers a sample to be taken. There are two choices,&nbsp;<strong>Sample by Time</strong>&nbsp;and <strong>Sample by Time (Lockstep)</strong>.</p>
+<p>
+  <strong>Sample by Time</strong>: The default sampling strategy. For <strong>In-Process</strong> profiling, each core's sampling timer is independent. For <strong>Out-of-Process</strong> profiling, the cores generally sample together, but this is not guaranteed.</p>
+<p>
+  <strong>Sample by Time (Lockstep)</strong>: Guarantees all cores to generate samples at the same time, potentially increasing the accuracy of the callstack but with a substantial increase in overhead. This strategy only applies to <strong>Out-of-Process</strong> profiles. <strong>In-Process</strong> profiles attempting to use this strategy will use the default <strong>Sample by Time</strong> strategy. This strategy was introduced due to issues that were seen when a game contains threads that can migrate between cores and one of these threads has a much larger stack than other threads. Functions sampled on the other cores could finish sampling faster, allowing the thread with the deeper stack to move to that core and continue execution while the stack was still being read. Use this strategy if you suspect that this kind of behavior may be happening to you.</p>
+<h2 id="Anchor_758198873_h2_2">Sampling Rate Drop Down Box</h2>
+<p>The profiler has several sample rates to choose from, reflecting the number of times to sample during a 60Hz frame. For&nbsp;example, a rate of <strong>500x</strong> per frame will result in 500 samples per 60Hz frame. In the case that the game&nbsp;runs at 30 frames per second, a rate of <strong>500x</strong> will effectively sample the game at double the stated rate, or&nbsp;1000 times per frame. A game that runs at 20 frames per second will effectively be sampled at triple the&nbsp;stated rate, or 1500 times per frame.</p>
+<p>As the sampling rate is changed, the estimated max profiling time is displayed.</p>
+<h2 id="Anchor_758198873_h2_3">Performance Counters Drop Down</h2>
+<p>The <strong>Performance Counters</strong> drop down box allows you to choose which performance counters will be&nbsp;recorded with each sample. After the profile is taken, performance counter data appears in the <strong>Counters</strong> tab.</p>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>The Performance Monitor Unit is unique per CPU core and not by thread. Since there is no way for the profiler to detect when a migration is about to occur, there is no way to also migrate the current counter values along with the thread when the thread moves to the other core. This may make it difficult to correlate performance counter data with any particular behavior in the application.</p>
+  </div>
+</div>
+<h2 id="Anchor_758198873_h2_4">Profiling Mode Toggles (In-Process and Out-of-Process)</h2>
+<p>There are two profiling modes that can be available, depending on the <strong>Scenario</strong> that was selected when syncing and if the profiler has been initialized in the target application.</p>
+<p>
+  <strong>In-Process</strong>: The profiler takes samples using a sampling method that operates completely within the target application. This mode can work in any scenario. Requires <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>&nbsp;has been called.</p>
+<p>
+  <strong>Out-of-Process</strong>: The profiler takes samples using a separate process independent of the target application. Requires one of the new&nbsp;<a href="../Pages/Page_758198785.html">Scenarios</a>. Some features require&nbsp;<span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span> has been called.</p>
+<p>When the profiler has finished syncing, the buttons indicating the available modes will be enabled. The <strong>In-Process</strong> button may change state if the profiler is initialized or finalized after the initial sync has occurred. It is possible for both buttons to be disabled. When the profiler is in this state, it is not possible to <strong>Start</strong> profiling as there is no target application to profile.</p>
+<h2 id="Anchor_758198873_h2_5">Callstack Toggle Button</h2>
+<p>There are two choices for what kind of function data should be recorded with each sample:</p>
+<p>
+  <strong>Leaf Only:</strong> When a sample event is&nbsp;triggered, only the function that is currently executing is recorded. As very little data is recorded, this option&nbsp;will generally allow for much longer profile times.</p>
+<p>
+  <strong>Callstack:</strong> When a sample event is triggered, the entire callstack is recorded. This option records a variable amount of memory, depending on the depths&nbsp;of the callstacks recorded. Recording the callstack has the following implications:</p>
+<ul>
+  <li>Good: The <strong>Total</strong> time a function has executed for (the time within the function and all functions it calls)&nbsp;will be shown in the <strong>Functions</strong> tab in addition to its <strong>Self</strong> time.</li>
+  <li>Good: A call tree will be constructed from the individual profiles and displayed in the <strong>Call Tree</strong> tab. The&nbsp;call tree shows the multiple places where each function was called from and the amount of time spent in&nbsp;each function of the tree.</li>
+  <li>Bad: The buffer is filled much more quickly, resulting in shorter possible profile times.</li>
+</ul>
+<p>The number of bytes per sample will be shown on the top left side of the <strong>Data per Sample</strong> group. This&nbsp;number is based on all of the <strong>Data per Sample</strong> settings selected.</p>
+<h1 id="Anchor_758198873_h1_3">Cores</h1>
+<p>The buttons in this section turn on/off profiling for each core. Sometimes it is advantageous to only profile a single core since it will allow significantly longer profile times and reduce profiler overhead on the&nbsp;other cores.</p>
+<h1 id="Anchor_758198873_h1_4">Tracing Group</h1>
+<p>This group bundles together data collection options that record events as they occur (known as <strong>Tracing</strong>), as opposed to statistically sampled.</p>
+<h2 id="Anchor_758198873_h2_6">Threads Toggle Button</h2>
+<p>The <strong>Threads</strong> toggle button allows thread state information to be recorded with the profile. This allows you to see why a thread may be blocked from running.</p>
+<p>Thread state tracing requires the following:</p>
+<ul>
+  <li>The application is a 64-bit application.</li>
+  <li>The nnSdk module can be found and loaded. A warning will appear if it can't be found or loaded.</li>
+  <li>The nnSdk module is within 128MB of the profiler library. If this is not true at the start of sampling, a warning will appear and the <strong>Threads</strong> button will be disabled.</li>
+  <li>The application must call <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li>
+  <li>There must be a free TLS slot obtainable via <span class="ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT">nn::os::AllocateTlsSlot()</span>.</li>
+</ul>
+<p>When the GUI first <strong>Syncs</strong> to the application, data will be sent that attempts to load the nnSdk module and any other modules that are already loaded on the system. This process may take awhile. If it completes successfully, the <strong>Threads</strong> button will be enabled.</p>
+<p>Toggling the <strong>Threads</strong> button on will allow for recording of thread state data. When starting a profile, the GUI will perform some setup on the system to enable everything. This setup may take a few seconds. Profiling has begun when the timer begins to increment. When stopping the profile, the GUI will tear down what was previously set up. This happens in the background while the data parsing is occurring and may take a few seconds.</p>
+<p>To view thread state information, select threads in the&nbsp;<strong>Threads</strong> tab and the data will be shown in the&nbsp;right window&nbsp;<strong>Timeline</strong> tab. More details on how to interpret the thread state information are in the&nbsp;<a href="../Pages/Page_764970037.html">Timeline Tab</a> section.</p>
+<h2 id="Anchor_758198873_h2_7">Graphics Toggle Button</h2>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>GPU Tracing only works when using NVN. Other graphics APIs, such as OpenGL and Vulkan, are not supported.</p>
+    <p>The <span class="ApiLink_nn__gfx">nn::gfx</span> library can be used when NVN is targeted. However, the profiler will perform tracing at the NVN function call level, not at the <span class="ApiLink_nn__gfx">nn::gfx</span> function level.</p>
+  </div>
+</div>
+<p>The&nbsp;<strong>Graphics&nbsp;</strong>toggle button allows GPU information to be recorded with the profile. This allows you to see how work performed on the GPU compares with CPU work.</p>
+<p>GPU tracing requires the following:</p>
+<ul>
+  <li>Call <span class="ApiLink_nn__Result_nn__profiler__InstallGraphicsHooks()_NN_NOEXCEPT">nn::profiler::InstallGraphicsHooks()</span>&nbsp;before NVN functions are loaded with either the nvnLoadCProcs() or nvnLoadCPPProcs() functions and before&nbsp;<span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span> is called.<ul><li>This function can safely be called from a static initializer.</li></ul></li>
+  <li>Ideally, ensure that&nbsp;<span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span> is called before any NVN Queues are initialized.<ul><li>If this is not possible, call <span class="ApiLink_nn__Result_nn__profiler__SetQueuePerFrameOperationEstimates(NVNqueue_*queue|_int_numDraws|_int_numDebugPushes|_int_numComputeDispatches)_NN_NOEXCEPT">nn::profiler::SetQueuePerFrameOperationEstimates()</span>&nbsp;on the queue immediately following the call to <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li></ul></li>
+</ul>
+<p>To view GPU tracing information, click on the&nbsp;right window&nbsp;<strong>Timeline</strong>&nbsp;tab and any recorded GPU data will be shown in the <strong>GPU</strong> section. More details on interpreting this data are in&nbsp;the&nbsp;<a href="../Pages/Page_764970037.html">Timeline Tab</a> section.</p>
+<h2 id="Anchor_758198873_h2_8">Audio Trace Toggle Button</h2>
+<p>The <strong>Audio</strong> toggle button allows AudioRenderer performance metrics to be recorded with the profile. This allows you to see how work in the audio system compares with CPU work.</p>
+<p>Audio tracing requires the following:</p>
+<ul>
+  <li>Call <span class="ApiLink_nn__Result_nn__profiler__RegisterAudioRenderer(const_nn__audio__AudioRendererParameter_&parameter|_nn__audio__AudioRendererConfig_*pConfig|_AudioPerformanceMetricsControl_control)_NN_NOEXCEPT">nn::profiler::RegisterAudioRenderer()</span>&nbsp;after opening an AudioRenderer.</li>
+  <li>Call <span class="ApiLink_void_nn__profiler__RecordAudioRendererPerformance(nn__audio__AudioRendererConfig_*pConfig)_NN_NOEXCEPT">nn::profiler::RecordAudioRendererPerformance()</span>&nbsp;each audio frame.</li>
+  <li>The profiler library has been initialized using <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li>
+</ul>
+<p>For a breakdown of the prerequisites to these API calls, please see the API documentation for each function.</p>
+<p>To view <strong>Audio</strong> tracing information, click on the right window <strong>Timeline</strong> tab. If audio trace data was successfully obtained, it will appear in an <strong>Audio</strong> section. More details on interpreting this data is detailed on the&nbsp;<a href="../Pages/Page_764970037.html">Timeline Tab</a> reference page.</p>
+<h2 id="Anchor_758198873_h2_9">File System Trace Button (Experimental)</h2>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>This feature is still considered experimental. For this feature, it means that:</p>
+    <ul>
+      <li>To view data on the&nbsp;<strong><a href="../Pages/Page_764970037.html">Timeline</a></strong>&nbsp;tab, the&nbsp;<a href="../Pages/Page_962042331.html">Thread-Centric Data Views</a>&nbsp;experimental feature must also be enabled.</li>
+      <li>Profiles saved with this feature enabled are not guaranteed to be openable in future version of the profiler.</li>
+    </ul>
+  </div>
+</div>
+<p>The <strong>File</strong> toggle button enables the collection of file system information. Enabling this will hook into the <span class="ApiLink_nn__fs">nn::fs</span> API to watch for file system mounts, file opens and closes, and file reads and writes.</p>
+<p>File system tracing requires:</p>
+<ul>
+  <li>Call <span class="ApiLink_nn__profiler__EnableFileSystemTrace">nn::profiler::EnableFileSystemTrace</span>() before any calls to <span class="ApiLink_nn__fs">nn::fs</span> APIs.</li>
+  <li>The profiler library has been initialized using <span class="ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT">nn::profiler::Initialize()</span>.</li>
+</ul>
+<p>To view the file system tracing information, some general information will appear in the&nbsp;<strong><a href="../Pages/Page_764970037.html">Timeline</a></strong>&nbsp;tab in the&nbsp;<strong>File System Data</strong>&nbsp;section. To see information on a specific file, go to the left&nbsp;<strong><a href="../Pages/Page_1212546958.html">Files</a></strong>&nbsp;tab and select the file.</p>
+<h2 id="Anchor_758198873_h2_10">Power Toggle Button</h2>
+<p>The <strong>Power</strong> toggle button allows power information to be recorded with the profile. Once recorded, the data appears in the <strong><a href="../Pages/Page_758199045.html">Info</a></strong> window&nbsp;under the <strong>Power Information</strong> heading. To open the <strong>Info</strong> window, go to the <a href="../Pages/Page_758198966.html"><strong>Overview</strong></a> tab and click on the <strong>View Detailed Info</strong> link on the right side in the&nbsp;<strong>Profile Info</strong> section. While the individual samples cannot be viewed, an average and range is given for each recorded value, in the format: avg [min, max].</p>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Power information works best on SDEV, since EDEV units do not have the ability to report back as much information.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__Result_nn__profiler__Initialize(void_*pBuffer|_size_t_bufferSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a1fd4585e5e75647e1cb20bb264f58f6e' )
+SetUrl( 'ApiLink_nn__Result_nn__os__AllocateTlsSlot(TlsSlot_*outTlsSlot|_TlsDestructor_function)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a2a67ebeb78e5d624b45ec27d66bdf0b2' )
+SetUrl( 'ApiLink_nn__gfx', '../../../Api/HtmlNX/namespacenn_1_1gfx.html' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__InstallGraphicsHooks()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a907804e676e1b37f7e1b62f5bace7992' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__SetQueuePerFrameOperationEstimates(NVNqueue_*queue|_int_numDraws|_int_numDebugPushes|_int_numComputeDispatches)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a7eba4662b2649f42259c6604171e7425' )
+SetUrl( 'ApiLink_nn__Result_nn__profiler__RegisterAudioRenderer(const_nn__audio__AudioRendererParameter_&parameter|_nn__audio__AudioRendererConfig_*pConfig|_AudioPerformanceMetricsControl_control)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a9312a49b962cc1cee3ee4a2be86c21fa' )
+SetUrl( 'ApiLink_void_nn__profiler__RecordAudioRendererPerformance(nn__audio__AudioRendererConfig_*pConfig)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#aaff43cb30e5803f4a44ce4f3a741c300' )
+SetUrl( 'ApiLink_nn__fs', '../../../Api/HtmlNX/namespacenn_1_1fs.html' )
+SetUrl( 'ApiLink_nn__profiler__EnableFileSystemTrace', '../../../Api/HtmlNX/namespacenn_1_1profiler.html#a1e84c62cb23cbe2b7c628448d1a2fd2a' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

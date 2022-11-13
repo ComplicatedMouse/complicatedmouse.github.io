@@ -1,0 +1,824 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Performance When Applying Patches | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Performance When Applying Patches -->
+<div class="pagetitle" id="PageId_211661819">Performance When Applying Patches</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_211661819_h1_1">Changes in Performance Due To Patching</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_211661819_h2_1">Changes in File System Performance Due To Patch Application</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_211661819_h3_1">Changes in Sequential Access and Random Access Speeds After Patch Application</a>
+        </li>
+        <li>
+          <a href="#Anchor_211661819_h3_2">Changes in Performance Due To Fragmentation of the Files</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_211661819_h2_2">File System Performance Changes Due to Patch Updates</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_211661819_h1_2">Sample Changes in Performance Due To Patching</a>
+    </li>
+    <li>
+      <a href="#Anchor_211661819_h1_3">Dealing With Decreased Read Performance</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_211661819_h2_3">Handling Decreases Due to Patch Updates</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_211661819_h3_3">Read Performance When Defragmentation Is Used</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_211661819_h2_4">Notes When Using Defragging</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_211661819_h3_4">Sample Patch Size Changes When Using Defragging</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_211661819_h2_5">Yardstick for Using the Defragging Feature</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_211661819_h1_1">Changes in Performance Due To Patching</h1>
+<p>File system read speeds change when a patch is applied. There are two types of performance changes for patches.</p>
+<ul>
+  <li>Changes in File System Performance Due To Patch Application</li>
+  <li>File System Performance Changes Due to Patch Updates</li>
+</ul>
+<h2 id="Anchor_211661819_h2_1">Changes in File System Performance Due To Patch Application</h2>
+<p>
+  <strong>
+    <span style="color: rgb(255,0,0);">In some cases file read performance for all files, and not just those that were patched, decreases after applying a patch.</span>
+  </strong>
+</p>
+<p>This decrease in performance is due to the following two factors.</p>
+<ul>
+  <li>Changes in sequential access and random access speeds after patch application</li>
+  <li>Changes due to fragmentation of the files themselves after the patch is applied</li>
+</ul>
+<p>The following sections describe these modes.</p>
+<!--Remove-->
+<h3 id="Anchor_211661819_h3_1">Changes in Sequential Access and Random Access Speeds After Patch Application</h3>
+<p>There are decreases in performance for both sequential and random access because the file loads access information for both the patch and the original storage.</p>
+<h3 id="Anchor_211661819_h3_2">Changes in Performance Due To Fragmentation of the Files</h3>
+<p>NX patches can be configured to only partially modify application files. Depending on the specific revisions made and the resulting matching behavior, file fragmentation may occur.</p>
+<p>For example, the system may access the original application for a 64-KB region starting from an offset of 0, access the patch for a 2-KB region starting from an offset of 64 KB, access a location other than the patch for a 14-KB region starting from an offset of 66 KB, and so on.</p>
+<p>In this case, the speeds at which the system can access these regions will be close to the random access speeds. The exact speeds will depend on the degree of fragmentation in the storage region in which the initial version of the application and the patch are installed, so be particularly careful to check for cases in which this fragmentation is severe.</p>
+<p>Use the <code>--patched-only-in-detail</code> option of the <code>list</code> command in AuthoringTool to check the fragmentation status. For example, the following results would be displayed for the preceding example.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>00112233445566778899aabbccddeeff.nca/fs1/file/binary.dat
+[Original]
+(offset, size) = (0, 65536)
+[Patch]
+(offset, size) = (65536, 2048), (67584, 14336)
+</pre>
+  </div>
+</div>
+<h2 id="Anchor_211661819_h2_2">File System Performance Changes Due to Patch Updates</h2>
+<p>With NX patching, data location is adjusted to decrease download sizes when updating. As a result, internal data fragmentation increases as the patch version increases, and read performance decreases. The degree of fragmentation is the same for all users with the same patch version. The same fragmentation occurs when all updates have been applied even after skipping an update or reinstalling the application.</p>
+<h1 id="Anchor_211661819_h1_2">Sample Changes in Performance Due To Patching</h1>
+<p>The following examples show the changes in read performance after repeated patch applications and updates.</p>
+<p>These examples are for an application with 256 MB of resource data, with the following types of additions and updates for that resource data.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col style="width: 88.0px;" />
+    <col style="width: 61.0px;" />
+    <col style="width: 52.0px;" />
+    <col style="width: 52.0px;" />
+    <col style="width: 68.0px;" />
+    <col style="width: 59.0px;" />
+    <col style="width: 50.0px;" />
+    <col style="width: 50.0px;" />
+    <col style="width: 49.0px;" />
+    <col style="width: 61.0px;" />
+    <col style="width: 52.0px;" />
+    <col style="width: 52.0px;" />
+    <col style="width: 68.0px;" />
+    <col style="width: 59.0px;" />
+    <col style="width: 50.0px;" />
+    <col style="width: 50.0px;" />
+    <col style="width: 49.0px;" />
+    <col style="width: 49.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th colspan="8">Data Addition Count</th>
+      <th colspan="9">Data Update Count</th>
+    </tr>
+    <tr>
+      <th>Version</th>
+      <th>
+        <p>16 MB</p>
+      </th>
+      <th>4 MB</th>
+      <th>1 MB</th>
+      <th>256 KB</th>
+      <th>64 KB</th>
+      <th>8 KB</th>
+      <th>1 KB</th>
+      <th>64 B</th>
+      <th>16 MB</th>
+      <th>4 MB</th>
+      <th>1 MB</th>
+      <th>256 KB</th>
+      <th>64 KB</th>
+      <th>8 KB</th>
+      <th>1 KB</th>
+      <th>64 B</th>
+      <th>16 B</th>
+    </tr>
+    <tr>
+      <th>v1</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>1</td>
+      <td>1</td>
+      <td>25</td>
+      <td>20</td>
+      <td>15</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>v2</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>1</td>
+      <td>1</td>
+      <td>25</td>
+      <td>20</td>
+      <td>15</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>v3</th>
+      <td>2</td>
+      <td>1</td>
+      <td>3</td>
+      <td>10</td>
+      <td>5</td>
+      <td>8</td>
+      <td>5</td>
+      <td>8</td>
+      <td>1</td>
+      <td>1</td>
+      <td>5</td>
+      <td>15</td>
+      <td>5</td>
+      <td>30</td>
+      <td>65</td>
+      <td>200</td>
+      <td>16</td>
+    </tr>
+    <tr>
+      <th>v4</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>1</td>
+      <td>60</td>
+      <td>40</td>
+      <td>15</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>v5</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>1</td>
+      <td>60</td>
+      <td>40</td>
+      <td>15</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>v6</th>
+      <td>1</td>
+      <td>1</td>
+      <td>5</td>
+      <td>10</td>
+      <td>5</td>
+      <td>29</td>
+      <td>25</td>
+      <td>15</td>
+      <td>1</td>
+      <td>2</td>
+      <td>8</td>
+      <td>10</td>
+      <td>7</td>
+      <td>200</td>
+      <td>300</td>
+      <td>600</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>v7</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>100</td>
+      <td>100</td>
+      <td>15</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>v8</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>100</td>
+      <td>100</td>
+      <td>15</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>v9</th>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>100</td>
+      <td>100</td>
+      <td>15</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>v10</th>
+      <td>1</td>
+      <td>2</td>
+      <td>8</td>
+      <td>15</td>
+      <td>7</td>
+      <td>20</td>
+      <td>10</td>
+      <td>8</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2</td>
+      <td>3</td>
+      <td>50</td>
+      <td>250</td>
+      <td>60</td>
+      <td>260</td>
+      <td>70</td>
+    </tr>
+  </tbody>
+</table>
+<p>The key for the graph is as follows.</p>
+<ul>
+  <li>The first version of the application is v0, before any patches are applied. </li>
+  <li>v1 combines v0 and the v1 patch.</li>
+  <li>v2 combines v0 and the v2 patch.</li>
+</ul>
+<p>For each combination, the graph shows the speed when reading 256 MB of resource data in buffer size increments.</p>
+<table class="relative-table wrapped" style="width: 84.8903%;">
+  <colgroup>
+    <col style="width: 8.70353%;" />
+    <col style="width: 22.8405%;" />
+    <col style="width: 22.7902%;" />
+    <col style="width: 22.8405%;" />
+    <col style="width: 22.8405%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>
+        <p>Game Cards of 4 GB or Less</p>
+      </th>
+      <th>
+        <p>Game Cards of 8 GB or More</p>
+      </th>
+      <th>System Memory</th>
+      <th>microSD Memory Card</th>
+    </tr>
+    <tr>
+      <th>Sequential Access</th>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155426.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155438.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155430.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155434.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>Random Access</th>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155440.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155436.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155428.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155432.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>As seen in the preceding table, there is a tendency toward decreased read performance as the patch revision amount increases.</p>
+<!--Remove-->
+<h1 id="Anchor_211661819_h1_3">
+  <br />Dealing With Decreased Read Performance</h1>
+<p>When resource data read speeds decrease after repeated patching, you might be able to improve speeds using the following methods.</p>
+<h2 id="Anchor_211661819_h2_3">Handling Decreases Due to Patch Updates</h2>
+<p>Repeatedly updating the application increases the fragmentation of the patch data, resulting in a downward trend for read performance. Pass the <code>--defragment</code> parameter when creating a patch in AuthoringTool to consolidate any of the smaller fragments that occurred for the previous patch. This practice can help the decreased speed issue.</p>
+<h3 id="Anchor_211661819_h3_3">Read Performance When Defragmentation Is Used</h3>
+<p>The following examples show changes in read performance after specifying <code>--defragment</code>. The following measurement criteria are used.</p>
+<ul>
+  <li>The v0 version of an application is the first version (prior to any applied patches) and is identical to the v0 version of the application described in Sample Changes in Performance Due To Patching.</li>
+  <li>v10 combines v0 and the v10 patch, and that is identical to the v10 version described in Sample Changes in Performance Due To Patching.</li>
+  <li>v10_defrag is when <code>--defragment</code> is specified when creating the v10 patch.</li>
+</ul>
+<p>For each combination, the graph shows the speed when reading files in buffer size increments.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>
+        <p>Game Cards of 4 GB or Less</p>
+      </th>
+      <th>
+        <p>Game Cards of 8 GB or More</p>
+      </th>
+      <th>System Memory</th>
+      <th>microSD Memory Card</th>
+    </tr>
+    <tr>
+      <th>Sequential Access</th>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155427.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155439.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155431.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155435.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th>Random Access</th>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155441.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155437.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155429.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_211661819/1208155433.png" height="250" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_211661819_h2_4">Notes When Using Defragging</h2>
+<p>Consider the following information when using this feature.</p>
+<ul>
+  <li>There is an increase in the download size when using <code>--defragment</code> because even unchanged content is handled as a delta between earlier patches and the latest patch. For that reason, we do not recommend using <code>--defragment</code> every time, but only specifying it when there are large-scale changes to resource data content.</li>
+</ul>
+<h3 id="Anchor_211661819_h3_4">Sample Patch Size Changes When Using Defragging</h3>
+<p>The following samples show the changes in sizes when using these features. The <em>patch size</em> refers to the size of system memory or the dedicated space on a microSD card for a patch, and the <em>download size</em> refers to the size of the data to download when updating from the v9 to the v10 patch.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Version</th>
+      <th>Patch Size in KB</th>
+      <th>Download Size in KB</th>
+    </tr>
+    <tr>
+      <td>v10</td>
+      <td>218,025</td>
+      <td>106,040</td>
+    </tr>
+    <tr>
+      <td>v10_defrag</td>
+      <td>217,963</td>
+      <td>181,337</td>
+    </tr>
+  </tbody>
+</table>
+<p> In general, download sizes increase when updating with <code>--defragment</code> specified.</p>
+<h2 id="Anchor_211661819_h2_5">Yardstick for Using the Defragging Feature</h2>
+<p>The AuthoringTool command <a href="../Pages/Page_894619842.html">analyze-patch</a> provides advice about whether the patch needs to be defragmented.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

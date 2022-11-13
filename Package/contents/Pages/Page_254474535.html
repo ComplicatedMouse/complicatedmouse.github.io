@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Enabling the Use of Downloadable Content Downloaded in the Background While the Application Is Running | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Enabling the Use of Downloadable Content Downloaded in the Background While the Application Is Running -->
+<div class="pagetitle" id="PageId_254474535">Enabling the Use of Downloadable Content Downloaded in the Background While the Application Is Running</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_254474535_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_254474535_h1_2">Enabling This Feature</a>
+    </li>
+    <li>
+      <a href="#Anchor_254474535_h1_3">Detecting When Available Downloadable Content Has Changed</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_254474535_h2_1">Verifying Behavior in the Development Environment</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_254474535_h1_4">Restrictions</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_254474535_h1_1">Overview</h1>
+<p>In NX Add-On 4.2 and later, it is now possible to enable the use of downloadable content, that was purchased and downloaded in the background, while the application is running without exiting the application. However, this feature is disabled by default. If this feature is disabled, the application must be restarted before the downloadable content becomes available for use, as with versions earlier than NX Add-On 4.1.</p>
+<p>This feature can be used to allow users to use content immediately after purchase. For example, this feature may be useful when the application prompts the user to make a purchase, in the application itself, and jumps to Nintendo eShop to complete the purchase. You can implement a smoother experience, from purchase to use, by enabling use of the new content immediately after it is downloaded, after the user returns to the application.</p>
+<p>Additionally, if the application does not support dynamic addition of downloadable content while running, leave this feature disabled. For example, disable it for cases where such dynamic additions cannot be supported due to the design of the game, or where it cannot be supported because it would increase testing costs.</p>
+<p>
+  <br />
+</p>
+<p>For more information about using this feature, see the AocRuntimeInstall sample application.</p>
+<h1 id="Anchor_254474535_h1_2">Enabling This Feature</h1>
+<p>To enable this feature, write to the NMETA file of the application.</p>
+<p>Add the following content to the NMETA file. Write the following to enable this feature.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>&lt;NintendoSdkMeta&gt;
+    ...
+  &lt;Application&gt;
+    ...
+    &lt;RuntimeAddOnContentInstall&gt;AllowAppend&lt;/RuntimeAddOnContentInstall&gt;
+  &lt;/Application&gt;
+    ...
+&lt;/NintendoSdkMeta&gt;</pre>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>For more information about writing to the NMETA file, see <a href="../Pages/Page_166503043.html">Writing the NMETA File</a>.</p>
+<p>Note that you must write to the NMETA file of the application, rather than the NMETA file of the downloadable content.</p>
+<h1 id="Anchor_254474535_h1_3">Detecting When Available Downloadable Content Has Changed</h1>
+<p>Use the event obtained by the <code><span class="ApiLink_nn__aoc__GetAddOnContentListChangedEvent">nn::aoc::GetAddOnContentListChangedEvent</span>()</code> function to detect when new downloadable content is available.</p>
+<p>If the downloadable content is listed again after this event is signaled, the newly added downloadable content will be enumerated. Then access the downloadable content as usual.</p>
+<h2 id="Anchor_254474535_h2_1">Verifying Behavior in the Development Environment</h2>
+<p>To signal the event in the development environment, install the downloadable content using the following method while the application is running.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ Tools\CommandLineTools\RunOnTarget.exe --suppress-auto-kill TargetTools\NX-NXFP2-a64\DevMenuCommand\Release\DevMenuCommand.nsp -- addoncontent install d:/aoc.nsp --dynamic</pre>
+  </div>
+</div>
+<p>Add the <code>--suppress-auto-kill</code> option when executing <code>RunOnTarget</code>, to run <code>DevMenuCommand,</code> without exiting the running application.</p>
+<p>In addition, add the <code>--dynamic</code> option to the <code>addoncontent install</code> command to signal the event obtained with <code><span class="ApiLink_nn__aoc__GetAddOnContentListChangedEvent">nn::aoc::GetAddOnContentListChangedEvent</span>()</code>. However, this option will fail unless it is set while an application is running and the NMETA file of that application has <code>AllowAppend</code> set for <code>RuntimeAddOnContentInstall</code>. (However, the installation itself will succeed.)</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The development hardware must be connected to TargetManager for this verification method. As a result, this feature can only be verified when the development hardware is in <code>Prod</code> mode.</p>
+    <p>Also, note that the <code>addoncontent install</code> command always installs the updated version of the downloadable content if the applicable downloadable content is not open. However, in the actual production environment, you cannot change the version of the available downloadable content, as described by the following restrictions.</p>
+  </div>
+</div>
+<p>
+  <br />When there are multiple pieces of downloadable content (when using multiple downloadable content indexes), there may be occasions when you want to add only some of the downloadable content while the application is running. However, currently there is no feature to install the downloadable content for only some of the indexes within the NSP file. For this reason, each time you want to install only some of the downloadable content, you must create an NSP file that contains only the applicable content.</p>
+<h1 id="Anchor_254474535_h1_4">Restrictions</h1>
+<p>In the following circumstances, new downloadable content does not become available when the application is running, even if this feature is enabled. In this case, the application must be restarted.</p>
+<ul>
+  <li>The currently running application does not satisfy the required application release version set for the downloadable content.</li>
+  <li>It is an update to downloadable content that is already downloaded.<ul><li>If the index of the downloadable content that was already received is 1, 2, 3, an update with the index 1, 2 cannot be used while the application is running, even if it was downloaded.</li><li>On the other hand, if the existing downloadable content has the index 1, 2, 3 and content with index 4, 5 is newly downloaded while the application is running, this feature can be used to enable the new content without restarting the application.</li></ul></li>
+  <li>When downloading multiple pieces of downloadable content at one time, they cannot be enabled using this feature if some of the content does not satisfy the preceding conditions.<br /><ul><li>These restrictions were implemented to prevent both usable and unusable content being visible to the user, rather than for a technical reason.</li></ul></li>
+  <li>(In versions earlier than NX Add-On 7.1.0) The account purchasing the downloadable content did not set the console running the application as the primary console. <br /><ul><li>This state occurs when an account is linked to multiple consoles.</li><li>In NX Add-On 7.1.0 and later, this restriction does not exist.</li></ul></li>
+</ul>
+<p>An event is not signaled if the content is not added.</p>
+<p>
+  <br />
+</p>
+<p>In versions earlier than NX Add-On 10.0, downloadable content did not continue to download if the application's request to use the network had been accepted. In NX Add-On 10.0 and later versions of the firmware, downloadable content continues to download, even for applications created with earlier versions of the SDK. (Downloading continues only for the downloadable content for the running application. Downloading of downloadable content for other applications does not continue.)</p>
+<p>The downloading takes place in the background, so it can affect the performance of the application's communications. Select <strong>Deny</strong> if your title is highly dependent on the network and cannot tolerate this impact on performance.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__aoc__GetAddOnContentListChangedEvent', '../../../Api/HtmlNX/namespacenn_1_1aoc.html#a2155a2805524d4e943c24b8799ef64c7' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

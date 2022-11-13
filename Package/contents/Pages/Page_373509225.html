@@ -1,0 +1,259 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>License Transfer From the Shop Server | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- License Transfer From the Shop Server -->
+<div class="pagetitle" id="PageId_373509225">License Transfer From the Shop Server</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_373509225_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_373509225_h1_2">States Where License Information Is Available</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_373509225_h2_1">License Information on the Shop Server</a>
+      </li>
+      <li>
+        <a href="#Anchor_373509225_h2_2">License Information on the Client</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_373509225_h1_3">License Transfer</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_373509225_h2_3">License Transfer Process</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_373509225_h3_1">1. Determine whether a license recovery is required.</a>
+        </li>
+        <li>
+          <a href="#Anchor_373509225_h3_2">2. Recover the license.</a>
+        </li>
+        <li>
+          <a href="#Anchor_373509225_h3_3">3. Determine whether the license is available.</a>
+        </li>
+        <li>
+          <a href="#Anchor_373509225_h3_4">4. Get license.</a>
+        </li>
+        <li>
+          <a href="#Anchor_373509225_h3_5">5. Save and commit the obtained license information.</a>
+        </li>
+        <li>
+          <a href="#Anchor_373509225_h3_6">6. Determine whether the license needs to be consumed.</a>
+        </li>
+        <li>
+          <a href="#Anchor_373509225_h3_7">7. Consume license.</a>
+        </li>
+        <li>
+          <a href="#Anchor_373509225_h3_8">8. Save and commit the obtained license information.</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_373509225_h1_4">Asynchronous Request Class</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_373509225_h2_4">Execution Procedure</a>
+      </li>
+      <li>
+        <a href="#Anchor_373509225_h2_5">Handling Errors</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_373509225_h3_9">Error Result When Canceling an Asynchronous Request</a>
+        </li>
+        <li>
+          <a href="#Anchor_373509225_h3_10">Error Result for Accounts Expecting Resolution Using Program Processing</a>
+        </li>
+        <li>
+          <a href="#Anchor_373509225_h3_11">Error Results Requiring Conversion to Error Codes for Display in the Error Viewer Applet</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_373509225_h1_1">Overview</h1>
+<p>To transfer a license, complete the following steps. The consumable service item manager must be completely initialized before performing license transfer.</p>
+<ol>
+  <li>Determine whether a license recovery is required.</li>
+  <li>Recover the license.</li>
+  <li>Determine whether the license is available.</li>
+  <li>Obtain a license.</li>
+  <li>Save and commit the obtained license information.<br /></li>
+  <li>Determine whether the license needs to be consumed.</li>
+  <li>Consume the license.</li>
+  <li>Save and commit the obtained license information.</li>
+</ol>
+<p>The following sections describe the details.</p>
+<h1 id="Anchor_373509225_h1_2">States Where License Information Is Available</h1>
+<p>Before describing license transfers, this section describes the states where license information is available, to serve as a foundation.</p>
+<h2 id="Anchor_373509225_h2_1">License Information on the Shop Server</h2>
+<p>License information on the shop server can have one of the following two states.</p>
+<ul style="list-style-type: square;">
+  <li>The user&rsquo;s consumable service item license is Purchased/Not consumed.</li>
+  <li>The user&rsquo;s license information from the shop server is Consumed.</li>
+</ul>
+<p>When a user purchases a consumable service item on Nintendo eShop, license information with the Purchased/Not consumed state is added to the shop server. <em>Consuming a license</em> refers to the process of requesting a change in the license information state from Purchased/Not consumed to Consumed. When a license is consumed successfully from an application, the state of license information on the shop server changes to Consumed. After the license information is consumed, it can no longer be obtained by the client.</p>
+<h2 id="Anchor_373509225_h2_2">License Information on the Client</h2>
+<p>License information on the client can have one of the following two states.</p>
+<ul style="list-style-type: square;">
+  <li>License Information is in a state where the value is Not available to the user.</li>
+  <li>License Information is in a state where the value is Available to the user.</li>
+</ul>
+<p>It is not possible to change the state of license information on the client directly from an application.</p>
+<p>Initially, when the client has just obtained the license information, it is in the Not available state. It is not possible for an application to reference license information that is Not available. To make the state of license information on the client Available, it must be consumed on the shop server. As a result of consuming the license information, when it enters the Consumed state on the server, the client receives a successful response from the server, and the license information becomes Available on the client.</p>
+<h1 id="Anchor_373509225_h1_3">License Transfer</h1>
+<p>The process of getting license information from the shop server for the first time, consuming it on the shop server, and making it available on the client is called <em>license transfer</em>.</p>
+<h2 id="Anchor_373509225_h2_3">License Transfer Process</h2>
+<p>
+  <br />
+</p>
+<div class="plantuml-svg-inline">
+  <img src="../Attachments/Attach_373509225/plantuml_1.svg" />
+</div>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_373509225_h3_1">1. Determine whether a license recovery is required.</h3>
+<p>Immediately after initializing the consumable service item manager, determine whether license recovery is required for the license information stored in that object. Perform license recovery, if needed.</p>
+<h3 id="Anchor_373509225_h3_2">2. Recover the license.</h3>
+<p>The process of synchronizing license information between server and client is called <em>license recovery</em>. License recovery restores license information that could not be marked as Available due to a power interruption, and deletes license information that has been consumed from other clients.</p>
+<h3 id="Anchor_373509225_h3_3">3. Determine whether the license is available.</h3>
+<p>Determine whether the consumable service item manager can get license information. Get the license, if possible. This process determines whether the manager class can get license information, and not whether license information that is newly-obtained from the server exists.</p>
+<h3 id="Anchor_373509225_h3_4">4. Get license.</h3>
+<p>Get license information that the user has purchased from the shop server to the client. At this point, the license information on the client is in the Not Available state, so you cannot run the processing to mark it as already provided.</p>
+<h3 id="Anchor_373509225_h3_5">5. Save and commit the obtained license information.</h3>
+<p>Always store and commit license information to the user save data prior to consuming a license. If the power gets interrupted while consuming a license, there is a possibility that only the license information on the server will be marked as Consumed, before the license information on the client is set to the Available state. Also store license information in the user save data beforehand in this case, so that it can be restored the next time it is recovered.</p>
+<h3 id="Anchor_373509225_h3_6">6. Determine whether the license needs to be consumed.</h3>
+<p>Determine whether license consumption is required for license information stored in the consumable service item manager. Consume the license, if needed.</p>
+<h3 id="Anchor_373509225_h3_7">7. Consume license.</h3>
+<p>The client consumes a license on the server. When license consumption is successful, license information on the server becomes Consumed, and it changes to the Available state on the client. If license consumption fails, the consumable service item manager changes to a state where license recovery is required. To try consuming the license again, repeat this process after recovering the license.</p>
+<h3 id="Anchor_373509225_h3_8">8. Save and commit the obtained license information.</h3>
+<p>Also store and commit license information, after consuming the license, to the user save data. Only perform this operation if a license was consumed successfully.</p>
+<h1 id="Anchor_373509225_h1_4">Asynchronous Request Class</h1>
+<p>The operations for recovering, obtaining, and consuming licenses are defined in an asynchronous request class, separate from the consumable service item manager.</p>
+<h2 id="Anchor_373509225_h2_4">Execution Procedure</h2>
+<p>Use the following procedure to perform asynchronous requests.</p>
+<ol>
+  <li>Generate an instance of the asynchronous request class.</li>
+  <li>Pass the asynchronous request instance to the manager instance using the <code>SetupAsyncRequest</code> method.<br />This step ensures that the result of the asynchronous request is applied to the license information stored by the manager.</li>
+  <li>Start the asynchronous request.</li>
+  <li>Cancel the asynchronous request.</li>
+  <li>Destroy the asynchronous request instance.</li>
+</ol>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>An asynchronous instance that has been canceled cannot be reused.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Multiple asynchronous request instances cannot be referenced simultaneously for a single instance of the consumable service item manager. Immediately destroy asynchronous request instances after the requests have ended.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_373509225_h2_5">Handling Errors</h2>
+<p>Note the following three areas of error handling with regard to terminating the asynchronous request class. For more information, see the sample code in <code>EcConsumableServiceItemManager</code>.</p>
+<h3 id="Anchor_373509225_h3_9">Error Result When Canceling an Asynchronous Request</h3>
+<p>If an asynchronous request is canceled, the <code><span class="ApiLink_nn__ec__ResultShopServiceAccessCanceled">nn::ec::ResultShopServiceAccessCanceled</span></code> result is returned. When this result occurs, terminate the entire license transfer process without displaying anything in the error viewer applet.</p>
+<h3 id="Anchor_373509225_h3_10">Error Result for Accounts Expecting Resolution Using Program Processing</h3>
+<p>When executing an asynchronous request, <code><span class="ApiLink_nn__account__ResultNetworkServiceAccountUnavailable">nn::account::ResultNetworkServiceAccountUnavailable</span></code> may be returned depending on the state of the account. This executes state recovery processing for the account, and requests that the error be properly resolved. For more information, see <a href="../Pages/Page_172900706.html">Handling Errors</a>.</p>
+<p>During guideline testing, there are checks for whether this error resolution processing is performed by the application. For more information, see the guideline for what process to implement when a network service account is unavailable.</p>
+<h3 id="Anchor_373509225_h3_11">Error Results Requiring Conversion to Error Codes for Display in the Error Viewer Applet</h3>
+<p>For any error results other than the two types just described, display the result in the error viewer applet and then cancel the entire license transfer process. However, if <code><span class="ApiLink_nn__ec__ResultShowErrorCodeRequired">nn::ec::ResultShowErrorCodeRequired</span></code> is returned, do not pass that error result to the error viewer applet. Instead, convert the error result to an error code by using the <code>GetErrorCode</code> member function to get the error code for the asynchronous request result, and then pass that to the error viewer applet.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__ec__ResultShopServiceAccessCanceled', '../../../Api/HtmlNX/classnn_1_1ec_1_1_result_shop_service_access_canceled.html' )
+SetUrl( 'ApiLink_nn__account__ResultNetworkServiceAccountUnavailable', '../../../Api/HtmlNX/classnn_1_1account_1_1_result_network_service_account_unavailable.html' )
+SetUrl( 'ApiLink_nn__ec__ResultShowErrorCodeRequired', '../../../Api/HtmlNX/classnn_1_1ec_1_1_result_show_error_code_required.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

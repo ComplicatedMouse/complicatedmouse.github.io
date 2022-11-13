@@ -1,0 +1,362 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Creating Application Images | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Creating Application Images -->
+<div class="pagetitle" id="PageId_107320222">Creating Application Images</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_107320222_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_107320222_h1_2">Application Image Formats</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_107320222_h2_1">NCA</a>
+      </li>
+      <li>
+        <a href="#Anchor_107320222_h2_2">NSP</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_107320222_h3_1">Standard NSP Files</a>
+        </li>
+        <li>
+          <a href="#Anchor_107320222_h3_2">NSP Files for Secure Startup</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_107320222_h2_3">NCD</a>
+      </li>
+      <li>
+        <a href="#Anchor_107320222_h2_4">NSPD</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_107320222_h1_3">Creating Application Images</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_107320222_h2_5">Creating Application Images in NX VSI</a>
+      </li>
+      <li>
+        <a href="#Anchor_107320222_h2_6">Creating an Application Image From the Command Line</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_107320222_h3_3">Creating Standard NSP Files</a>
+        </li>
+        <li>
+          <a href="#Anchor_107320222_h3_4">Creating NSP Files for Secure Startup</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_107320222_h1_4">Build Output and Uses</a>
+    </li>
+    <li>
+      <a href="#Anchor_107320222_h1_5">Identifying the Build Output</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_107320222_h1_1">Introduction</h1>
+<p>In NintendoSDK, an <em>application image</em> refers to one file or directory that is a collection of configuration elements for an application, such as compiled code and prepared resource data.</p>
+<p>This page describes the format of application images and how to create them.</p>
+<h1 id="Anchor_107320222_h1_2">Application Image Formats</h1>
+<h2 id="Anchor_107320222_h2_1">NCA</h2>
+<p>A file format used as an executable application image and as a data container.<br />NCA application files are categorized as follows according to the purpose for which they are being used and the file content.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Type</th>
+      <th>Content</th>
+    </tr>
+    <tr>
+      <td>program</td>
+      <td>Executable code, DLL, resource data</td>
+    </tr>
+    <tr>
+      <td>Management data</td>
+      <td>Icon data, banner data, and so on</td>
+    </tr>
+  </tbody>
+</table>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Users normally handle only the NSP format and do not need to handle the NCA format.</p>
+  </div>
+</div>
+<h2 id="Anchor_107320222_h2_2">NSP</h2>
+<p>A file format used as the unit for application distribution and installation.<br />It is also the final submission format for an application.</p>
+<p>NSP files contain multiple NCA files corresponding to the program, management data, and manual types, in addition to ticket data and other metadata for management, forming the unit for applications on NX.</p>
+<p>NSP applications can be run on development hardware when <a href="../Pages/Page_107320466.html"><code>RunOnTarget</code></a> is specified as a parameter.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>
+      <span style="color: rgb(23,43,77);">For the downloadable versions of applications, the maximum size is 64 GB.</span>
+      <br />
+      <span style="color: rgb(23,43,77);">Contact Nintendo if you plan to create an application that exceeds this maximum size.</span>
+    </p>
+  </div>
+</div>
+<p>There are two kinds of NSP file.</p>
+<ul>
+  <li>Standard NSP files</li>
+  <li>NSP files for secure startup</li>
+</ul>
+<h3 id="Anchor_107320222_h3_1">Standard NSP Files</h3>
+<p>These files can be created with either VSI or the command-line tool (AuthoringTool). This format of NSP file is usually used during development. This file format is used when submitting applications to Nintendo.</p>
+<h3 id="Anchor_107320222_h3_2">NSP Files for Secure Startup</h3>
+<p>These files can be created only with the command-line tool (AuthoringTool), and are assumed to be used in places where there is a risk of theft, such as when displaying applications.<br />The following requirements must be met to run NSP files for secure startup installed on development machines.</p>
+<ul>
+  <li>In <a href="../Pages/Page_310876774.html">DevMenu</a>, select and start the application.</li>
+  <li>Automatically start the application using <a href="../Pages/Page_522465110.html">exhibition mode</a></li>
+</ul>
+<p>You cannot start applications securely from the HOME Menu.</p>
+<h2 id="Anchor_107320222_h2_3">NCD</h2>
+<p>A directory layout format with the same logical structure as an NCA file. NCD directories are created when building applications using NX-VSI. They are formulated in the following way.</p>
+<ul>
+  <li>The directory has an NCD suffix.</li>
+  <li>There are subdirectories named <code>code</code> and <code>data</code>.<ul><li>For more information about what is included in the <code>code</code> directory, see <a href="../Pages/Page_94757421.html">Creating Proprietary Build Systems (NX Development Hardware Environment)</a>. There will be no <code>code</code> directory if not a program.</li><li>For more information about what is included in the <code>data</code> directory, see <a href="../Pages/Page_107338701.html">Resource Data References (NX Add-On)</a>. There will be no <code>data</code> directory if you are not using resource data.</li></ul></li>
+</ul>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Users normally only handle application images in the NSPD format and do not need to handle the NCD format.</p>
+    <p>The file layout rules for within the NCD may change without notice.<br />Arrange each of the files using the <a href="../Pages/Page_107320233.html">AuthoringTool</a> <code>createnspd</code> command.</p>
+  </div>
+</div>
+<h2 id="Anchor_107320222_h2_4">NSPD</h2>
+<p>A directory layout format with the same logical structure as an NSP file. NSPD directories are created when building applications using NX-VSI. They are formulated in the following way.</p>
+<ul>
+  <li>The directory has an NSPD suffix.</li>
+  <li>A subdirectory with the following name is a directory in the NCD format.<br /><ul><li><code>program0.ncd</code></li><li><code>control0.ncd</code></li><li><code>meta0.ncd</code></li></ul></li>
+</ul>
+<p>Applications within an NSPD-formatted directory can be run on development hardware when <a href="../Pages/Page_107320466.html"><code>RunOnTarget</code></a> is specified as a parameter.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The file layout rules for within the NSPD file may change without notice.<br />Arrange each of the files using the <a href="../Pages/Page_107320233.html">AuthoringTool</a> <code>createnspd</code> command.</p>
+  </div>
+</div>
+<h1 id="Anchor_107320222_h1_3">Creating Application Images</h1>
+<h2 id="Anchor_107320222_h2_5">Creating Application Images in NX VSI</h2>
+<p>To automatically create an application image in the application&rsquo;s output export directory, select NSP for the application program format in <strong>Project Configuration Properties</strong>.<br />For more information, see Configuration Properties &gt; General &gt; Application Program Format in <a href="../Pages/Page_107320422.html">VSI &gt; Parameters That Can Be Specified in VSI</a>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The feature for filtering out resource data can only be used when creating an application image from the command line. (The following section describes this procedure in more detail.) For more information, see the <code>--filter option</code> in the <a href="../Pages/Page_107320233.html">AuthoringTool</a>.<br />Support for filtering resource data will be added in a future release of NX-VSI.</p>
+  </div>
+</div>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_107320222/125193199.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_107320222_h2_6">Creating an Application Image From the Command Line</h2>
+<p>At a command prompt, run the <a href="../Pages/Page_107320233.html">AuthoringTool</a> <code>createnca</code> or <code>creatensp</code> subcommands to create an NCA file or an NSP file. This section provides an example of creating an NSP file.</p>
+<h3 id="Anchor_107320222_h3_3">Creating Standard NSP Files</h3>
+<p>The following items are required to create an NSP file.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item Required for NSP File Creation</th>
+      <th>Description</th>
+      <th>Creation Method</th>
+    </tr>
+    <tr>
+      <td>Code Region Directory</td>
+      <td>
+        <p>The directory for NSO, NDPM, and other files for the program code.</p>
+        <p>The executable code, the permissions settings for the application, and the SDK library DLLs are contained in this directory.</p>
+      </td>
+      <td>Output directories created when building for the NX platform are created within the NSPD-formatted directory.<br />To create without using NX VSI, see <span class="with-breadcrumbs"><a href="../Pages/Page_94757421.html">Build System Environment Setup Guide</a></span>.</td>
+    </tr>
+    <tr>
+      <td>Data Region Directory (Not Required)</td>
+      <td>The directory for files used as resource data.</td>
+      <td>
+        <p>Use any directory with resource data placed in it.<br />You can also use something placed within an NSPD-formatted directory as a <code>data</code> directory in the same way by building for the NX platform when an <strong>Application Data Directory</strong> is specified in the NX application project properties. For more information, see <a href="../Pages/Page_107338701.html">Accessing Resource Data</a>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Metadata Source</td>
+      <td>File containing the application metadata.<br />The application ID, stack size, and other settings are coded in this file.</td>
+      <td>
+        <p>It uses the following items included in NintendoSDK.<br />For 32-bit applications: <code>%NINTENDO_SDK_ROOT%\Resources\SpecFiles\Application.arm.ilp32.nmeta</code></p>
+        <p>For 64-bit applications: <code>%NINTENDO_SDK_ROOT%\Resources\SpecFiles\Application.aarch64.lp64.nmeta</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td>DESC File</td>
+      <td>File containing the application rights information.</td>
+      <td>
+        <p>It uses the following items included in NintendoSDK.<br />%NINTENDO_SDK_ROOT%\Resources\SpecFiles\Application.desc</p>
+        <p>
+          <br />
+        </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Prepare these directories and files and execute the following command in the AuthoringTool to create an NSP file. For more information, see <a href="../Pages/Page_107320233.html#Anchor_107320233_creatensp">AuthoringTool Reference</a> &gt; Creating an NSP File.<br />This command assumes that the output directory for NX application projects is <code>C:/Application/Binaries/NX64/NX_Release</code>.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ AuthoringTool.exe creatensp -o C:/Application/Binaries/NX64/NX_Release/application.nsp --meta $NINTENDO_SDK_ROOT/Resources/SpecFiles/Application.aarch64.lp64.nmeta --type Application --desc $NINTENDO_SDK_ROOT/Resources/SpecFiles/Application.desc --program C:/Application/Binaries/NX64/NX_Release/application.nspd/program0.ncd/code C:/Application/Binaries/NX64/NX_Release/application.nspd/program0.ncd/data</pre>
+  </div>
+</div>
+<h3 id="Anchor_107320222_h3_4">Creating NSP Files for Secure Startup<a name="Anchor_107320222_how_to_create_nsp_for_secure_launch"></a></h3>
+<p>The following items are required to create an NSP file.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item Required for NSP File Creation</th>
+      <th>Description</th>
+      <th>Creation Method</th>
+    </tr>
+    <tr>
+      <td>Standard NSP Files (Original)</td>
+      <td>
+        <p>The NSP file for the application to be started securely.</p>
+      </td>
+      <td>See Creating Standard NSP Files earlier in this document.</td>
+    </tr>
+    <tr>
+      <td>DESC File</td>
+      <td>File containing the application rights information.</td>
+      <td>
+        <p>Use the DESC file that was used to create the original standard NSP file.</p>
+        <p>
+          <br />
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>Passphrase</td>
+      <td>The passphrase to enter when starting the application.</td>
+      <td>Specify when executing the command.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Prepare these files and execute the following command in the AuthoringTool to create an NSP file for secure startup. For more information, see <a href="../Pages/Page_107320233.html#Anchor_107320233_makesecure">AuthoringTool Reference</a> &gt; Creating NSP Files for Secure Startup.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ AuthoringTool.exe makesecure C:/application.nsp -o C:/application_secure.nsp --desc $NINTENDO_SDK_ROOT/Resources/SpecFiles/Application.desc --passphrase &quot;passphrase&quot;</pre>
+  </div>
+</div>
+<h1 id="Anchor_107320222_h1_4">Build Output and Uses</h1>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The following information is provisional. The information on this page may be updated in the future.</p>
+  </div>
+</div>
+<p>Building an NX application produces the following output files. (Assume that the name of the application is &ldquo;app&rdquo;.)</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <p>Output</p>
+      </th>
+      <th>Contents and Use</th>
+    </tr>
+    <tr>
+      <td>app.nsp</td>
+      <td>
+        <p>The application itself including application metadata. This format is used when installing or submitting the application. Can be executed using <a href="../Pages/Page_107320466.html"><code>RunOnTarget</code></a>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>app.nspd</td>
+      <td>
+        <p>A group of files with the same data structure as the NSP file. Can be used for debugging and <a href="../Pages/Page_107320466.html"><code>RunOnTarget</code></a>. The NSS file located in the same directory is required for debugging.<br />The executable code and resource data can be directly replaced, providing a more efficient way to update the application when compared to using the NSP file.<br />Currently, NSPD files cannot be moved to another computer to be used for debugging purposes (because this causes the files to be rebuilt). However, this workflow will be improved in the future.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>app.nss</td>
+      <td>The debugging information. This information is needed to debug applications correctly using NX-VSI.<br />When moving the output files to a different computer for debugging purposes, this file must also be moved.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_107320222_h1_5">
+  <a name="Anchor_107320222_RomIdentifierHash"></a>Identifying the Build Output</h1>
+<p>The application metadata for the build output (<code>app.nsp</code>) incorporates a ROM identification hash in the form of an SHA-256 string that uniquely identifies the NSP.<br />If there are any changes to the program, management data, or any other data in this <code>app.nsp</code>, the ROM identification hash will take a different value.<br />If the program, management data, and other data in this <code>app.nsp</code> are the same, the ROM identification hash will always be the same.<br />For this reason, the ROM identification hash value can be used to identify the application.</p>
+<p>You can check the ROM identification hash by opening <code>app.nsp</code> with <a href="../Pages/Page_187698789.html">AuthoringEditor</a>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>In the future, support will be added for displaying the ROM identification hash values of <code>app.nsp</code> files, submitted on the Nintendo Developer Portal.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The source file path is included in the program's symbol table as a <code>STT_FILE</code> type. If the path is not the same as at the time of the build, the ROM will not be the same.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

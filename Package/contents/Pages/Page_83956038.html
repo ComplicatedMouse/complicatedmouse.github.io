@@ -1,0 +1,440 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Memory Management | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Memory Management -->
+<div class="pagetitle" id="PageId_83956038">Memory Management</div>
+<div class="text_separate">
+<h1 id="Anchor_83956038_h1_1">Contents</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83956038_h2_1">Using the Sound Heap</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956038_h3_1">Clearing All</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956038_h3_2">Restoring the Prior State</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_83956038_h2_2">Using the Sound Heap</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956038_h3_3">Automatically Stopping Invalid Sounds</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956038_h3_4">Multiple Sound Heaps</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956038_h3_5">SoundMemoryAllocatable Class</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_83956038_h2_3">Player Heap</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956038_h3_6">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956038_h3_7">Using Player Heaps</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956038_h3_8">Memory for the Player Heap</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956038_h3_9">Notes About Playback With Different Players</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956038_h3_10">Data Loaded Into the Player Heap</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_83956038_h2_4">Memory Pool</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_83956038_h3_11">Relationship With audio Library Data</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956038_h3_12">Attaching to and Detaching From the Memory Pool</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956038_h3_13">Automatically Detaching From the Memory Pool</a>
+      </li>
+      <li>
+        <a href="#Anchor_83956038_h3_14"> Managing Data for Which Memory Pools Do Not Need to Be Managed on Application Side on the Application Side</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_83956038_h1_2">Memory Management</h1>
+<p>Memory management plays a small role in the <span class="ApiLink_PageSampleAtkSimple">AtkSimple</span> demo. The only time memory management is involved in this demo is when the heap is built during initialization and later, when the data is loaded to the heap.</p>
+<p>This section provides detailed information about managing memory.</p>
+<h2 id="Anchor_83956038_h2_1">Using the Sound Heap</h2>
+<p>Because the sound heap class <code><span class="ApiLink_nn__atk__SoundHeap">nn::atk::SoundHeap</span></code> is a stack-type heap (LIFO), memory is allocated in order from the top and released in order from the bottom.</p>
+<p>Memory from the heap is automatically allocated when sound data is loaded. This process is performed by the <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code> function.</p>
+<p>Sound data that is no longer needed is deleted by releasing the corresponding region of memory. There are two ways to release the memory region.</p>
+<ul>
+  <li>Clear all</li>
+  <li>Restore the prior state</li>
+</ul>
+<h3 id="Anchor_83956038_h3_1">Clearing All</h3>
+<p>This method deletes all sound data and restores the initial state.</p>
+<p>To clear all sound data in the sound heap, call the <code><span class="ApiLink_nn__atk__SoundHeap__Clear">nn::atk::SoundHeap::Clear</span></code> function.</p>
+<h3 id="Anchor_83956038_h3_2">Restoring the Prior State</h3>
+<p>This method deletes only the unnecessary data.</p>
+<p>First, save the current state by calling the <code><span class="ApiLink_nn__atk__SoundHeap__SaveState">nn::atk::SoundHeap::SaveState</span></code> function. As the return value, this function returns the hierarchical level, which indicates the state after saving. You can then use this value to restore the state to the state of the saved heap.</p>
+<p>If, after loading several sets of sound data, you call the <code><span class="ApiLink_nn__atk__SoundHeap__LoadState">nn::atk::SoundHeap::LoadState</span></code> function using this value for the hierarchical level, you can return to the state that existed immediately after the call to <code><span class="ApiLink_nn__atk__SoundHeap__SaveState">nn::atk::SoundHeap::SaveState</span></code>.<br />This has the effect of deleting all data that was loaded after the call to <code><span class="ApiLink_nn__atk__SoundHeap__SaveState">nn::atk::SoundHeap::SaveState</span></code>.</p>
+<p>Figure 3. Using the LoadState Function to Restore a Prior State</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956038/1229087099.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p>At this point, you can continue playing the sound that was being played using the loaded sound data.</p>
+<p>The <code><span class="ApiLink_nn__atk__SoundHeap__SaveState">nn::atk::SoundHeap::SaveState</span></code> function can be called repeatedly, and each time the hierarchical level increases in value.</p>
+<h2 id="Anchor_83956038_h2_2">Using the Sound Heap</h2>
+<p>The following kinds of actions are possible using the sound heap.</p>
+<h3 id="Anchor_83956038_h3_3">
+  <span style="background-color: rgb(255,255,255);">Automatically Stopping Invalid Sounds</span>
+</h3>
+<p>When using data on the sound heap to play back sound, if the region where that data is stored is released, the playback of that sound is automatically stopped.</p>
+<p>The application does not need to confirm whether the sound being played has stopped before a memory region is released.</p>
+<p>However, because the sound is automatically stopped immediately, it may sound unnatural. In these cases, have the application apply a fade-out before releasing the data storage region.</p>
+<h3 id="Anchor_83956038_h3_4">Multiple Sound Heaps</h3>
+<p>By preparing multiple sound heaps you can save and restore the state of each heap independently.</p>
+<p>To use multiple sound heaps, you must create multiple instances of <code><span class="ApiLink_nn__atk__SoundHeap">nn::atk::SoundHeap</span></code> and construct the heaps using the <code><span class="ApiLink_nn__atk__SoundHeap__Create">nn::atk::SoundHeap::Create</span></code> function. You must pass a sound heap to the <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code> function, so this method provides a way to specify which sound heap to allocate memory from.</p>
+<h3 id="Anchor_83956038_h3_5">SoundMemoryAllocatable Class</h3>
+<p>Although the previous session states that a sound heap must be passed to <code><span class="ApiLink_nn__atk__SoundDataManager__LoadData">nn::atk::SoundDataManager::LoadData</span></code>, strictly speaking it is the <code><span class="ApiLink_nn__atk__SoundMemoryAllocatable">nn::atk::SoundMemoryAllocatable</span></code> class and not the <code><span class="ApiLink_nn__atk__SoundHeap">nn::atk::SoundHeap</span></code> class that must be passed.<br />However, because the <code><span class="ApiLink_nn__atk__SoundHeap">nn::atk::SoundHeap</span></code> class inherits the <code><span class="ApiLink_nn__atk__SoundMemoryAllocatable">nn::atk::SoundMemoryAllocatable</span></code> class, it can be passed as is.</p>
+<p>The <code><span class="ApiLink_nn__atk__SoundMemoryAllocatable">nn::atk::SoundMemoryAllocatable</span></code> class is an interface class, with the <code>Allocate</code> function defined as a pure virtual function.</p>
+<p>By independently implementing an <code>Allocate</code> class in the application, you can allocate memory from heaps outside of the <code><span class="ApiLink_nn__atk__SoundHeap">nn::atk::SoundHeap</span></code> class.<br />Note, however, that if you do not use the <code><span class="ApiLink_nn__atk__SoundHeap">nn::atk::SoundHeap</span></code> class, the previously mentioned feature to automatically stop invalid sounds does not work. In this case, if the sound data being played is mistakenly discarded, unexpected sound may occur.</p>
+<h2 id="Anchor_83956038_h2_3">
+  <a name="Anchor_83956038_PLAYER_HEAP"></a>Player Heap</h2>
+<h3 id="Anchor_83956038_h3_6">Overview</h3>
+<p>In addition to the sound heap, a player heap is also available.</p>
+<p>The player heap temporarily stores data only for sound playback. It is automatically allocated when sound playback begins and automatically deallocated when playback stops.</p>
+<p>All sound data can be loaded in the player heap.</p>
+<h3 id="Anchor_83956038_h3_7">Using Player Heaps</h3>
+<p>Because allocation and deallocation of the player heap occurs automatically in the library, the developer does not need to manage the player heap.<br />In addition, the sound archive created by the sound designer determines whether the player heap is used.</p>
+<p>When sound is played using the player heap, data is loaded automatically.</p>
+<p>Data loading is an asynchronous process that takes place on the task thread that was created by the <code><span class="ApiLink_nn__atk__SoundSystem__Initialize">nn::atk::SoundSystem::Initialize</span></code> function, not on the thread that called the function to start sound playback (functions like <code><span class="ApiLink_nn__atk__SoundArchivePlayer__StartSound">nn::atk::SoundArchivePlayer::StartSound</span></code>).<br />Accordingly, sound does not start playing immediately after the function to start sound playback has been called, but it does start automatically after data has finished loading.<br />To control the timing when sound starts to play, use the <code>PrepareSound</code> function instead of the <code>StartSound</code> function. For more information about the <code>PrepareSound</code> function, see <a href="../Pages/Page_83956051.html#Anchor_83956051_SND_PREPARE">Quick Start - Prepare Sounds (Prepare for Playback)</a>.</p>
+<h3 id="Anchor_83956038_h3_8">Memory for the Player Heap</h3>
+<p>The memory region for the player heap is allocated using the <code><span class="ApiLink_nn__atk__SoundArchivePlayer__Initialize">nn::atk::SoundArchivePlayer::Initialize</span></code> function.<br />The amount of memory to allocate to the player heap is based on the values set for <strong>Heap Size</strong> and <strong>Sound Limit</strong> in the Player List in SoundMaker.</p>
+<p>You can get the values set for <strong>Heap Size</strong> and <strong>Sound Limit</strong> using the <code><span class="ApiLink_nn__atk__SoundArchive__ReadPlayerInfo">nn::atk::SoundArchive::ReadPlayerInfo</span></code> function.<br />The memory size for the heap player that is calculated based on these values is applied to the value obtained by the <code><span class="ApiLink_nn__atk__SoundArchivePlayer__GetRequiredMemSize">nn::atk::SoundArchivePlayer::GetRequiredMemSize</span></code> function.</p>
+<p>For player heaps, exactly the maximum number of sound playback times for that player will be allocated.</p>
+<h3 id="Anchor_83956038_h3_9">Notes About Playback With Different Players</h3>
+<p>By passing the <code><span class="ApiLink_nn__atk__SoundStartable__StartInfo">nn::atk::SoundStartable::StartInfo</span></code> structure you can play a sound using the player set for <code><em>playerId</em></code> in that structure.</p>
+<p>By doing this, you can play sounds using a player specified by the program and not the player specified by SoundMaker. However, you must be careful if you are using the player heap.</p>
+<p>The player heap is managed separately for each player, so the existence of a player heap and its size differs by player.<br />Accordingly, if a sound using a player heap is played on a player that either does not have a player heap or has a player heap that is too small, playback fails.</p>
+<h3 id="Anchor_83956038_h3_10">Data Loaded Into the Player Heap</h3>
+<p>When using the player heap, data is automatically loaded on playback. This data includes not only the sound data but also any linked banks and waveform archives.</p>
+<p>Also, when the linked file feature of the waveform archive is used, the required waveform data is loaded as a separate file.</p>
+<p>Playback fails if the total size of the loaded data exceeds the memory size of the player heap.<br />Special care is required because different data is loaded depending on the sound type and whether there are any linked files. This section describes what data is loaded with which settings, and provides information about what to do when playback fails.</p>
+<h4 id="Anchor_83956038_h4_1">Wave Sound (Without Linked Files)</h4>
+<p>If you do not use the linked file feature of the waveform archive, the waveform data required for playback is included in the waveform archive. In this case, the following two files are loaded.</p>
+<ul>
+  <li>Binary wave sound data (BFWSD file)</li>
+  <li>Binary waveform archive data (BFWAR file)</li>
+</ul>
+<h4 id="Anchor_83956038_h4_2">Wave Sound (With Linked Files)</h4>
+<p>If you use the linked file feature of a waveform archive, the waveform data required for playback is loaded separately. In this case, the following three files are loaded.</p>
+<ul>
+  <li>Binary wave sound data (BFWSD file)</li>
+  <li>Binary waveform archive data (BFWAR file) header information</li>
+  <li>Binary waveform data referenced by the wave sounds (BFWAV file)</li>
+</ul>
+<h4 id="Anchor_83956038_h4_3">Sequence Sound (Without Linked Files)</h4>
+<p>Sequence data includes up to four linked banks. Then, each bank has links to waveform archive data, so three types of data are loaded with a maximum of nine files.</p>
+<ul>
+  <li>Binary sequence data (BFSEQ file)</li>
+  <li>Maximum of four units of binary bank data (BFBNK file)</li>
+  <li>Maximum of four units of binary waveform archive data (BFWAR file)</li>
+</ul>
+<h4 id="Anchor_83956038_h4_4">Sequence Sound (With Linked Files) - NOT RECOMMENDED</h4>
+<p>Up to nine files can be loaded into the player heap. If you exceed this limit, playback may not work properly.</p>
+<p>In a sequence sound, a single bank file may have links to multiple waveform data files. If you use the linked file feature of the waveform archive, the number of files might exceed the limit.</p>
+<p>The following four types of data are loaded. We recommend either ensuring that the limit is not exceeded or avoiding using the linked file feature.</p>
+<ul>
+  <li>Binary sequence data (BFSEQ file)</li>
+  <li>Maximum of four units of binary bank data (BFBNK file)</li>
+  <li>Maximum of four units of binary waveform archive data (BFWAR file) header information</li>
+  <li>Binary waveform data (BCWAV) that the banks link to</li>
+</ul>
+<h4 id="Anchor_83956038_h4_5">Addressing Insufficient Memory for the Player Heap</h4>
+<p>If playback fails due to insufficient memory, you can address the problem by either increasing the player heap memory size or by decreasing the size of the data that is loaded.</p>
+<p>The following techniques can be used to decrease the size of the data. The first technique can be used on wave sounds, while the second one can be used on both wave sounds and sequence sounds.</p>
+<ul>
+  <li>The size of the binary wave sound data (BFWSD) file increases when the number of wave sounds included in the wave sound set is large. In this case, the size can be decreased by dividing the wave sound set.</li>
+  <li>In the same way, the size of the binary waveform archive (BFWAR) file and its header information increases when the number of waveforms included in the waveform archive is large. In this case, the size can be decreased by dividing the waveform archive.</li>
+</ul>
+<p>However, depending on file alignment and the management region, the amount of memory required might actually increase in some cases. For this reason, note the following.</p>
+<ul>
+  <li>For player heap loading, memory is allocated using 64-byte alignment.</li>
+  <li>When using linked files, each waveform archive requires a management region of (4 * the number of waveforms + 4) bytes, and each linked waveform requires an 8-byte management region.</li>
+</ul>
+<h2 id="Anchor_83956038_h2_4">Memory Pool</h2>
+<p>Some memory regions managed by <code>atk</code> support use of the memory pool feature provided in the <code>audio</code> library.<br />Supported memory regions are attached and detached to memory pools when the <code>atk</code> library is initialized, updated, or finalized.</p>
+<p>However, memory regions for which the application has to manage allocation, deallocation, and update timing cannot be managed using memory pools in <code>atk</code>.<br />For these types of memory regions, the memory pools must be managed on the application side.</p>
+<h3 id="Anchor_83956038_h3_11">Relationship With audio Library Data</h3>
+<table style="margin-left: 1.5em;" class="table">
+  <tbody>
+    <tr>
+      <th>audio Library Data</th>
+      <th>atk Data</th>
+      <th>Managed on Application Side</th>
+    </tr>
+    <tr>
+      <td rowspan="6">
+        <p>Buffers specified for <code><span class="ApiLink_nn__audio__WaveBuffer">nn::audio::WaveBuffer</span>.buffer</code> and <code><span class="ApiLink_nn__audio__WaveBuffer">nn::audio::WaveBuffer</span>.pContext</code><br /></p>
+      </td>
+      <td>
+        <p>
+          <code>pStreamBuffer</code> passed to <code><span class="ApiLink_nn__atk__SoundArchivePlayer__Initialize">nn::atk::SoundArchivePlayer::Initialize</span>()</code></p>
+      </td>
+      <td style="text-align: center;">
+        <span class="status_macro_base status_macro_Blue">Required</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Waveform data passed to <code><span class="ApiLink_nn__atk__SoundStartable__StartInfo__WaveSoundInfo__waveAddress">nn::atk::SoundStartable::StartInfo::WaveSoundInfo::waveAddress</span></code></p>
+      </td>
+      <td style="text-align: center;">
+        <span class="status_macro_base status_macro_Blue">Required</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>
+            <em>soundArchiveData</em>
+          </code> passed to <code><span class="ApiLink_nn__atk__MemorySoundArchive__Initialize">nn::atk::MemorySoundArchive::Initialize</span>()</code></p>
+      </td>
+      <td style="text-align: center;">
+        <span class="status_macro_base status_macro_Blue">Required</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>
+            <em>groupFile</em>
+          </code> passed to <code><span class="ApiLink_nn__atk__SoundDataManager__SetFileAddressInGroupFile">nn::atk::SoundDataManager::SetFileAddressInGroupFile</span>()</code>.</p>
+      </td>
+      <td style="text-align: center;">
+        <span class="status_macro_base status_macro_Blue">Required</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Files that contain waveform data managed by <code><span class="ApiLink_nn__atk__SoundHeap">nn::atk::SoundHeap</span></code> or <code><span class="ApiLink_nn__atk__PlayerHeap">nn::atk::PlayerHeap</span></code>.</p>
+      </td>
+      <td style="text-align: center;">
+        <span class="status_macro_base status_macro_Grey">Not required</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>ADPCM context for WSD, STRM, and SEQ</p>
+      </td>
+      <td style="text-align: center;">
+        <span class="status_macro_base status_macro_Grey">Not required</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Memory storing the data passed to <code><em>pParameter</em></code> by the <code><span class="ApiLink_nn__audio__AcquireVoiceSlot">nn::audio::AcquireVoiceSlot</span>()</code> function</p>
+      </td>
+      <td>
+        <p>ADPCM context for WSD, STRM, and SEQ</p>
+      </td>
+      <td style="text-align: center;">
+        <span class="status_macro_base status_macro_Grey">Not required</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>Effect work buffers specified as buffers in functions that add effects, such as <code><span class="ApiLink_nn__audio__AddDelay">nn::audio::AddDelay</span>()</code>, <code><span class="ApiLink_nn__audio__AddReverb">nn::audio::AddReverb</span>()</code>, <code><span class="ApiLink_nn__audio__AddAux">nn::audio::AddAux</span>()</code></p>
+        <p />
+      </td>
+      <td>
+        <code>
+          <em>effectBuffer</em>
+        </code> passed to <code><span class="ApiLink_nn__atk__SoundSystem__AppendEffect">nn::atk::SoundSystem::AppendEffect</span>()</code></td>
+      <td style="text-align: center;">
+        <span class="status_macro_base status_macro_Blue">Required</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_83956038_h4_6">Data for Which Memory Pools Must Be Managed on Application Side</h4>
+<p>The application must manage the timing and scope of memory allocation and deallocation for the following data, so also manage the memory pools for them in the application.<br /> For specific implementation information, see the samples provided with the <code>atk</code> library. </p>
+<ul>
+  <li>Stream buffer</li>
+  <li>Addresses of waveform data specified for <code>StartInfo</code> in wave sounds</li>
+  <li>Addresses of sound archive data to use for sound archives in memory</li>
+  <li>Addresses of group data to use for user-managed groups</li>
+  <li>Effect buffers  <br /> </li>
+</ul>
+<h4 id="Anchor_83956038_h4_7">Data for Which Memory Pools Do Not Need to Be Managed on Application Side</h4>
+<ul>
+  <li>Sound heap and player heap</li>
+</ul>
+<p>Files that contain waveform data are loaded into the sound heap and the player heap. However, the heaps are attached to or detached from the memory pool when the loaded memory region is allocated or deallocated.</p>
+<ul>
+  <li>ADPCM context info for WSD, STRM, and SEQ</li>
+</ul>
+<p>
+  <code>atk</code> maintains a memory region for storing ADPCM context information for playing compressed audio data. However, this region is allocated from the buffer passed to <code><span class="ApiLink_nn__atk__SoundSystem">nn::atk::SoundSystem</span></code> or <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code> and attached to or detached from the memory pool when <code>atk</code> is initialized or finalized.<br /></p>
+<ul>
+  <li>File Caching for Stream Sounds</li>
+</ul>
+<p>The stream sound file read cache is a buffer accessed from the <code>fs</code> library. Because it is not directly referenced from the <code>audio</code> library, it does not need to be managed using a memory pool.</p>
+<h3 id="Anchor_83956038_h3_12">Attaching to and Detaching From the Memory Pool</h3>
+<p>For data with memory pools that must be managed on the application side,<br /> make sure to attach it to the memory pool before using the memory area to which the data was loaded.<br /> For more information, see the sections and samples in <a href="../Pages/Page_124010227.html">Memory Pool</a> in the <code>audio</code> library documentation.</p>
+<p>You can use <code><span class="ApiLink_nn__atk__SoundSystem__GetAudioRendererConfig">nn::atk::SoundSystem::GetAudioRendererConfig</span>()</code> to get the <code><span class="ApiLink_nn__audio__AudioRendererConfig">nn::audio::AudioRendererConfig</span></code> that must be attached.<br />However, you can only attach to the memory pool after calling <code><span class="ApiLink_nn__atk__SoundSystem__Initialize">nn::atk::SoundSystem::Initialize</span>()</code>, so be careful to get it after initialization.</p>
+<p>In addition, there is a time lag between requesting attachment to the memory pool and when the memory pool attachment actually occurs.<br />In <code>atk</code>, renderer update processing is performed at each audio frame (approximately five milliseconds) in the sound thread, and attachment to the memory pool completes at this time.</p>
+<p>You must detach from the memory pool after you have finished using the data.<br />Be careful because just like when attaching data requests, there is a time lag between the detach data request being sent and when the data is actually detached.</p>
+<p>If you use an area that is not attached to the memory pool and then another module such as fs accesses that area,<br />the program may stop, so make sure to manage data in using the memory pool.</p>
+<h3 id="Anchor_83956038_h3_13">Automatically Detaching From the Memory Pool</h3>
+<p>Areas attached to the memory pool using the <span class="ApiLink_nn__audio__AudioRendererConfig">nn::audio::AudioRendererConfig</span> obtained from <span class="ApiLink_nn__atk__SoundSystem__GetAudioRendererConfig">nn::atk::SoundSystem::GetAudioRendererConfig</span>()<br />are automatically detached from the memory pool when <span class="ApiLink_nn__atk__SoundSystem__Finalize">nn::atk::SoundSystem::Finalize</span>() is called, so you do not need to detach them explicitly.<br />This feature of <code><span class="ApiLink_nn__audio__CloseAudioRenderer">nn::audio::CloseAudioRenderer</span>()</code> is called internally by <code><span class="ApiLink_nn__atk__SoundSystem__Finalize">nn::atk::SoundSystem::Finalize</span>()</code>.</p>
+<p>Also see the <a href="../Pages/Page_124010227.html">Memory Pool</a> section in the <code>audio</code> library documentation and the API reference for <code><span class="ApiLink_nn__audio__RequestDetachMemoryPool">nn::audio::RequestDetachMemoryPool</span>()</code>.</p>
+<h3 id="Anchor_83956038_h3_14"> Managing Data for Which Memory Pools Do Not Need to Be Managed on Application Side on the Application Side</h3>
+<p>Normally, the memory pool for the buffer used internally in <code><span class="ApiLink_nn__atk__SoundSystem">nn::atk::SoundSystem</span></code> and <code><span class="ApiLink_nn__atk__SoundArchivePlayer">nn::atk::SoundArchivePlayer</span></code> is managed in the library,<br />but it is possible to have the memory pool not managed internally in the library by passing the buffer for managing the memory pool from the application side during initialization.</p>
+<h4 id="Anchor_83956038_h4_8">Advantages of Managing the Buffer on the Application Side</h4>
+<p> <br />When using a method for allocating the buffer from the memory area managed by memory pool management on the application side, you gain the following advantages compared to when using individual memory pool management the library.</p>
+<ul>
+  <li>You can reduce the number of unused areas generated by buffer alignment and size restrictions required for memory pool management.</li>
+  <li>The wait time associated with attaching and detaching memory pools can be managed on the application side.</li>
+</ul>
+<h4 id="Anchor_83956038_h4_9">Managing the Buffer on the Application Side</h4>
+<p>See the following function references.</p>
+<ul>
+  <li>
+    <code>
+      <span class="ApiLink_nn__atk__SoundSystem__Initialize">nn::atk::SoundSystem::Initialize</span>()</code> function that has <code>memoryPoolMem</code> and <code>memoryPoolMemSize</code> parameters</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__atk__SoundArchivePlayer__Initialize">nn::atk::SoundArchivePlayer::Initialize</span>()</code> function that uses <code><span class="ApiLink_nn__atk__SoundArchivePlayer__InitializeParam">nn::atk::SoundArchivePlayer::InitializeParam</span></code></li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__atk__SoundArchivePlayer__GetRequiredStreamInstanceSize">nn::atk::SoundArchivePlayer::GetRequiredStreamInstanceSize</span>()</code> function</li>
+</ul>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_PageSampleAtkSimple', '../../../Api/HtmlNX/_page_sample_atk_simple.html' )
+SetUrl( 'ApiLink_nn__atk__SoundHeap', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_heap.html' )
+SetUrl( 'ApiLink_nn__atk__SoundDataManager__LoadData', '../../../Api/HtmlNX/classnn_1_1atk_1_1detail_1_1_sound_archive_loader.html#a3c8676a9807a4940a79a5c39546ab4f0' )
+SetUrl( 'ApiLink_nn__atk__SoundHeap__Clear', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_heap.html#a6afa8711def33b1181ae78a1e07a7ce0' )
+SetUrl( 'ApiLink_nn__atk__SoundHeap__SaveState', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_heap.html#a33e51be66dfc6630008515579022ec48' )
+SetUrl( 'ApiLink_nn__atk__SoundHeap__LoadState', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_heap.html#a128f40417297c0dcfaa5063525f42422' )
+SetUrl( 'ApiLink_nn__atk__SoundHeap__Create', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_heap.html#aca08fb7027062df41f26798f4d41f6a2' )
+SetUrl( 'ApiLink_nn__atk__SoundMemoryAllocatable', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_memory_allocatable.html' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem__Initialize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html#a3dbeeceef71d2c2a527732d82d923671' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer__StartSound', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_startable.html#a9a075bc1dea627defdc533d514e50c33' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer__Initialize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html#aa2de65567087f698294d36e91fd9b9f9' )
+SetUrl( 'ApiLink_nn__atk__SoundArchive__ReadPlayerInfo', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive.html#a1dfb383f62515dbedd63ec63ba793c06' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer__GetRequiredMemSize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html#a69ae9eba7e9ffd8b45b2714bb721f9aa' )
+SetUrl( 'ApiLink_nn__atk__SoundStartable__StartInfo', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_startable_1_1_start_info.html' )
+SetUrl( 'ApiLink_nn__audio__WaveBuffer', '../../../Api/HtmlNX/structnn_1_1audio_1_1_wave_buffer.html' )
+SetUrl( 'ApiLink_nn__atk__SoundStartable__StartInfo__WaveSoundInfo__waveAddress', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_startable_1_1_start_info_1_1_wave_sound_info.html#aa954ad6c0640c64ec12045e3a92b1a99' )
+SetUrl( 'ApiLink_nn__atk__MemorySoundArchive__Initialize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_memory_sound_archive.html#a7f08bdd4e7dcf0b135795f4a18ec50f5' )
+SetUrl( 'ApiLink_nn__atk__SoundDataManager__SetFileAddressInGroupFile', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_data_manager.html#ae0d5197b5f263c5b17fa4455bfaa0674' )
+// ApiLink_nn__atk__PlayerHeap
+SetUrl( 'ApiLink_nn__audio__AcquireVoiceSlot', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a3cc31617500698ba14f0d1d5e20b7668' )
+SetUrl( 'ApiLink_nn__audio__AddDelay', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ad332d3b8805f5157ef98572a99a9f2a0' )
+SetUrl( 'ApiLink_nn__audio__AddReverb', '../../../Api/HtmlNX/namespacenn_1_1audio.html#aa081b9cab7e4ca8d079093c1fc50bb4d' )
+SetUrl( 'ApiLink_nn__audio__AddAux', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a086c8ae883a8dabacad2c3ff3e995f13' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem__AppendEffect', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html#a79a9bc21b5990c50e4726625ceba6135' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem__GetAudioRendererConfig', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html#ac7206f0c25066cc10d5d96e5f2dd25e2' )
+SetUrl( 'ApiLink_nn__audio__AudioRendererConfig', '../../../Api/HtmlNX/structnn_1_1audio_1_1_audio_renderer_config.html' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem__Finalize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_system.html#a886dcd68a20e0dbb8dd7e3fe312bb069' )
+SetUrl( 'ApiLink_nn__audio__CloseAudioRenderer', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ac008e23e04fb6c5efbb8796dd2aa9f38' )
+SetUrl( 'ApiLink_nn__audio__RequestDetachMemoryPool', '../../../Api/HtmlNX/namespacenn_1_1audio.html#a1d5341a5f593894f840b218eb1929a3b' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer__InitializeParam', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_archive_player_1_1_initialize_param.html' )
+SetUrl( 'ApiLink_nn__atk__SoundArchivePlayer__GetRequiredStreamInstanceSize', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_archive_player.html#ab19f8f15307c045093434d81cc832da0' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

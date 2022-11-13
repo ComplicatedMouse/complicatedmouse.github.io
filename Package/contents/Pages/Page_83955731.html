@@ -1,0 +1,376 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Custom Shader Examples | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Custom Shader Examples -->
+<div class="pagetitle" id="PageId_83955731">Custom Shader Examples</div>
+<div class="text_separate">
+<h1 id="Anchor_83955731_h1_1">Custom Shader Examples</h1>
+<p>This section introduces examples of implementations of various expressions using custom shaders.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83955731_h2_1">Custom Shader Samples</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955731_h2_2">Using a Proprietary Constant Buffer Within the Shader</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955731_h2_3">Implementing a Normal Map</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955731_h2_4">Customizing the Depth Value Referencing Method in Shaders</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955731_h2_5">Using Textures Prepared by the Application in Shaders</a>
+    </li>
+    <li>
+      <a href="#Anchor_83955731_h2_6">Setting a Constant Buffer Referenced by All Custom Shaders</a>
+    </li>
+  </ul>
+</p>
+<h2 id="Anchor_83955731_h2_1">Custom Shader Samples</h2>
+<p>A custom shader sample application is available at <code>Samples\Sources\Applications\VfxCustomShader</code>.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83955731/124259975.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p>It is possible to verify examples of implementations of the following features in this sample.</p>
+<ul>
+  <li>Adjust the final output color.</li>
+  <li>Adjust the rendering positions of each particle.</li>
+  <li>Simple lighting.</li>
+  <li>Output the normal status as a color value.</li>
+  <li>Apply a normal map.</li>
+  <li>Apply a simple light map.</li>
+</ul>
+<p> </p>
+<h2 id="Anchor_83955731_h2_2">Using a Proprietary Constant Buffer Within the Shader</h2>
+<p>This method uses the <code>RenderStateSet</code> callback function to configure the application-specific uniform block parameters.</p>
+<h3 id="Anchor_83955731_h3_1">Specifying a Constant Buffer Using a Temporary Buffer</h3>
+<p>Declare a constant buffer named <code>sysCustomShaderUniformBlock0</code> in the shader code you are using. <code>sysCustomShaderUniformBlock0</code> is a reserved word.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>layout( std140, binding = SYS_CUSTOM_SHADER_UNIFORM_BLOCK_ID_0 ) uniform sysCustomShaderUniformBlock0
+{
+&nbsp;&nbsp;&nbsp;&nbsp;vec4    customShaderUniformBlockParam0;
+&nbsp;&nbsp;&nbsp;&nbsp;vec4    customShaderUniformBlockParam1;
+&nbsp;&nbsp;&nbsp;&nbsp;vec4    customShaderUniformBlockParam2;
+&nbsp;&nbsp;&nbsp;&nbsp;vec4    customShaderUniformBlockParam3;
+};</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Set the <code>sysCustomShaderUniformBlock0</code> buffer you declared in the shader code to the buffer used in the <code>RenderStateSet</code> callback function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>bool _RenderStateSetCallback( nn::vfx::RenderStateSetArg&amp; arg )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;struct UserUniformBlock0
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float4    param0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float4    param1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float4    param2;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float4    param3;
+&nbsp;&nbsp;&nbsp;&nbsp;};
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nn::gfx::GpuAddress gpuAddress;
+&nbsp;&nbsp;&nbsp;&nbsp;void* buffer = GetTemporaryBuffer().Map( &amp;gpuAddress, sizeof( UserUniformBlock ) );
+&nbsp;&nbsp;&nbsp;&nbsp;if ( buffer )
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memcpy( buffer , parameter, sizeof( UserUniformBlock ) );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GetTemporaryBuffer().Unmap();
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// For nn::vfx::CustomShaderConstantBufferIndex_0( sysCustomShaderUniformBlock0 ) in the shader.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Set the uniform block.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg.GetSystem()-&gt;GetShader()-&gt;BindCustomShaderUniformBlock( pCommandBuffer,
+　　　　　　　　　　　　　　　　&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nn::vfx::CustomShaderConstantBufferIndex_0, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;gpuAddress, sizeof( UserUniformBlock ) );
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;return true;
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The temporary buffer used in this example is the buffer for GPU access maintained by the effect system.</p>
+<p>
+  <span class="status_macro_base status_macro_Blue">Related Links</span>
+</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>
+        <a href="../Pages/Page_91194043.html">Memory Consumption in the Runtime</a>
+      </th>
+      <td>Describes the temporary buffer.</td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<h2 id="Anchor_83955731_h2_3">Implementing a Normal Map</h2>
+<p>A normal map is implemented using the following procedure. All are implemented with the custom fragment shader.</p>
+<ol>
+  <li>Disable use of textures that register normal map texture.</li>
+  <li>Get normal information from the normal map texture.</li>
+  <li>Find the pixel normal from the vertex normal, tangent, and binormal.</li>
+</ol>
+<p>In this example, <code>texture0</code> is allocated to albedo color, and <code>texture1</code> is allocated to the normal map.<br />One of the following check boxes are prepared in the EffectMaker side UI.</p>
+<ul>
+  <li>Use <code>texture1</code> as the normal map (<strong>USE_NORMAL_TEX1</strong>)</li>
+</ul>
+<h3 id="Anchor_83955731_h3_2">1. Disabling Use of Textures That Register Normal Map Texture</h3>
+<p>You cannot select and use the location where the normal map texture is registered from <code>texture0</code>, <code>texture1</code>, or <code>texture2</code>.<br />As shown in the following sample, by overwriting the <code>texture0</code> or <code>texture1</code> blending function, the standard <code>texture1</code> processing can be canceled.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>//---------------------------------------------
+// Cancel use of texture1 as the normal map
+//---------------------------------------------
+#ifdef USE_NORMAL_TEX1
+#define USE_USR_BLEND_TEXTURE1_COLOR
+vec4 BlendTexture1Color (vec4 texture0, vec4 texture1)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;return texture0;
+}
+#endif</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955731_h3_3">2. Getting Normal Information From the Normal Map Texture</h3>
+<p>The texture color is obtained from the normal map texture as follows.<br />The sampler uses <strong>sysTextureSampler1</strong>, and texture coordinates use <strong>sysInTexCoord1</strong>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>//---------------------------------------------
+// Final output color adjustment
+//---------------------------------------------
+#define USE_USR_FINAL_ADJUSTMENT_FRAGMENT_COLOR
+void FinalAdjustmentFragmentColor()
+{
+&nbsp;&nbsp;&nbsp;&nbsp;vec3  normal = sysWorldNormalVary;
+
+#ifdef USE_NORMAL_TEX1
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Gets the normal map texture color.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vec3 normalFromMap = texture2D( sysTextureSampler1, sysInTexCoord1 ).xyz;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955731_h3_4">3. Finding the Pixel Normal From the Vertex Normal, Tangent, and Binormal</h3>
+<p>Find the pixel normal based on the obtained normal map information.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;normalFromMap.z = sqrt( clamp(  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.0 -( normalFromMap.x*normalFromMap.x + normalFromMap.y*normalFromMap.y ), 0.0, 1.0 ) );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;normal = normalFromMap.x * sysWorldTangentVary  +
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;normalFromMap.y * sysWorldBinormalVary +
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;normalFromMap.z * sysWorldNormalVary;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;normal = normalize( normal );
+#endif　// #ifdef USE_NORMAL_TEX1
+
+&nbsp;&nbsp;&nbsp;&nbsp;// Perform lighting calculations using normal
+&nbsp;&nbsp;&nbsp;&nbsp;OUTPUT_COLOR.xyz = CalcShading( normal );
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<h2 id="Anchor_83955731_h2_4">Customizing the Depth Value Referencing Method in Shaders</h2>
+<p>When soft particles and other features are enabled, depth values from depth textures imported from the application are referenced in the shaders during processing. When the input depth buffer has already undergone linear transformation by the application, you must customize the following depth value function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>#define USE_USR_GET_DEPTH_VALUE_FROM_TEXTURE
+float GetDepthValueFromTexture (vec4 projection)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;float depth = texture2DProj( sysDepthBufferTexture, projection ).r;
+&nbsp;&nbsp;&nbsp;&nbsp;return depth;
+}
+#endif</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This function exists in both vertex shaders and fragment shaders, and must be customized for both shaders when any customizations are made.</p>
+<p> </p>
+<h2 id="Anchor_83955731_h2_5">Using Textures Prepared by the Application in Shaders</h2>
+<p>This section describes how to use textures prepared by the application in a custom shader, such as when applying a light map to particle rendering. As an example, consider the case of using an application texture in a fragment shader. First, you must prepare the <strong>shader code</strong> and the <strong>runtime code</strong>.</p>
+<h3 id="Anchor_83955731_h3_5">Shader Code</h3>
+<p>The shader code must include a <strong>texture sampler declaration</strong> and code to <strong>draw the texture color using the declared sampler</strong>. Choose the texture type (such as <strong>2D</strong> or <strong>Cube</strong>) to use from the available texture sampler names, and write it in the custom shader code. The available texture samplers are listed in <strong>eft_ParticleDeclaration.glsl</strong>. A texture sampler layout ID is also required. Assign an open ID from <code>SYS_CUSTOM_SHADER_TEXTURE_SAMPLER_ID_0</code> to <code>SYS_CUSTOM_SHADER_TEXTURE_SAMPLER_ID_7</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// Texture sampler declaration.
+layout( binding = SYS_CUSTOM_SHADER_TEXTURE_SAMPLER_ID_0 ) uniform sampler2D sysCustomShaderTextureSampler0;
+
+// Callback function in shader.
+#define USE_USR_FINAL_ADJUSTMENT_FRAGMENT_COLOR
+void FinalAdjustmentFragmentColor()
+{
+&nbsp;&nbsp;&nbsp;&nbsp;lightMap = texture2D( sysCustomShaderTextureSampler0, textureCoord );
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955731_h3_6">Runtime Code</h3>
+<p>Use the <code>RenderStateSet</code> callback to configure the render command with the texture you want to use in the custom shader. In this example, the sampler is declared as <strong>sysCustomShaderTextureSampler0</strong> in the shader code. Consequently, when setting the texture with the <code>BindCustomShaderTexture</code> member function, <strong><span class="ApiLink_nn__vfx__CustomShaderTextureType_2d0">nn::vfx::CustomShaderTextureType_2d0</span></strong> (the ID that corresponds to <strong>sysCustomShaderTextureSampler0</strong>) is specified. For more information about the correspondence between sampler declarations and custom texture IDs, see the custom shader documentation.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>bool _RenderStateSetCallback( nn::vfx::RenderStateSetArg&amp; arg )
+{
+&nbsp;&nbsp;&nbsp;&nbsp;arg.GetSystem()-&gt;BindCustomShaderTexture( pCommandBuffer,
+　　　　　　　　　　　　　　　　&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nn::vfx::CustomShaderTextureType_2d0, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lightMapTextureDescriptorSlot );
+&nbsp;&nbsp;&nbsp;&nbsp;return true;
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<h2 id="Anchor_83955731_h2_6">Setting a Constant Buffer Referenced by All Custom Shaders</h2>
+<p>You can set a constant buffer referenced by all custom shaders at one time.<br />By preparing a large area constant buffer and setting it one time, you can optimize the CPU processing more favorably than if you set the buffer for each shader.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Use nn::vfx::CustomShaderConstantBufferIndex_0 as the global constant buffer.
+
+//-----------------------------------------------------
+// Shader side constant buffer definition
+//-----------------------------------------------------
+layout( std140, binding = SYS_CUSTOM_SHADER_UNIFORM_BLOCK_ID_0 ) uniform sysCustomShaderUniformBlock0
+{
+&nbsp;&nbsp;&nbsp;&nbsp;vec4    customShaderUniformBlockParam0;
+&nbsp;&nbsp;&nbsp;&nbsp;vec4    customShaderUniformBlockParam1;
+&nbsp;&nbsp;&nbsp;&nbsp;vec4    customShaderUniformBlockParam2;
+&nbsp;&nbsp;&nbsp;&nbsp;vec4    customShaderUniformBlockParam3;
+};
+
+//-----------------------------------------------------
+// Runtime side constant buffer definition
+//-----------------------------------------------------
+struct GlobalConstantBuffer
+{
+&nbsp;&nbsp;&nbsp;&nbsp;float4    param0;
+&nbsp;&nbsp;&nbsp;&nbsp;float4    param1;
+&nbsp;&nbsp;&nbsp;&nbsp;float4    param2;
+&nbsp;&nbsp;&nbsp;&nbsp;float4    param3;
+};
+
+GlobalConstantBuffer globalConstantBuffer;
+nn::vfx::System::SetCommonCustomShaderConstantBuffer( nn::vfx::CustomShaderConstantBufferIndex_0,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;globalConstantBuffer, sizeof( GlobalConstantBuffer ) );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__vfx__CustomShaderTextureType_2d0', '../../../Api/HtmlNX/namespacenn_1_1vfx.html#aeec6ab136a4353215b4c02584d3cdc7ca41285fe23391804285b4dac1e9d7d87b' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

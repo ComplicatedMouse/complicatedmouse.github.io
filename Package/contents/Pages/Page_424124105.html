@@ -1,0 +1,230 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Managing Saved Album Files | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Managing Saved Album Files -->
+<div class="pagetitle" id="PageId_424124105">Managing Saved Album Files</div>
+<div class="text_separate">
+<p>Use the <code>album</code> subcommand to download or remove all files saved to an album by using the Capture Button or other means.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The <code>album</code> command is available in NintendoSDK Firmware for NX 5.0.0-1.0 and later.</p>
+    <p>Some of the subcommands were added in later versions.</p>
+  </div>
+</div>
+<p>Run the <code>album</code> command, with the <code>help</code> subcommand, to output a simple <strong>usage</strong>, as shown in the following example.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe DevMenuCommand.nsp -- album help
+
+usage&gt;
+  $ DevMenuCommand album download --storage &lt;builtin|sdcard&gt; --dir &lt;path&gt; [--force] [--check-empty]
+  $ DevMenuCommand album download &lt;filepath&gt; --dir &lt;path&gt; [--force] [--check-empty] 
+  $ DevMenuCommand album list --storage &lt;builtin|sdcard&gt;
+  $ DevMenuCommand album info
+  $ DevMenuCommand album delete &lt;file-path&gt;
+  $ DevMenuCommand album clean --storage &lt;builtin|sdcard&gt;
+  $ DevMenuCommand album get-album-directory
+  $ DevMenuCommand album set-album-directory &lt;pc-host-path&gt;
+  $ DevMenuCommand album unset-album-directory
+  $ DevMenuCommand album remount-album-directory
+  $ DevMenuCommand album help
+
+  options:
+   --force      : Force copy files even if the same file exists in destination.
+   --check-empty: Check if the destination is empty before copying.
+   --nand       : Equivalent to '--storage builtin'.
+   --sd         : Equivalent to '--storage sdcard'.
+   --directory  : Alias of '--dir'.</pre>
+  </div>
+</div>
+<h1 id="Anchor_424124105_h1_1">Displaying a List of Saved Album Files</h1>
+<p>This command displays a list of all files that have been saved to the albums on each storage of the development hardware. You must use an option to specify which album storage to list files for.</p>
+<p>This command displays a list of the files saved to the album save destinations on the development hardware (including the SD card), even if the save destination has been changed using the DevMenuCommand <code>album set-album-directory</code> command.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe --suppress-auto-kill DevMenuCommand.nsp -- album list --sd
+List files: storage=&quot;SD&quot;
+ SD:/Nintendo/Album/2018/10/02/2018100214591100-F1C11A22FAEE3B82F21B330E1B786A39.mp4
+ SD:/Nintendo/Album/2018/10/02/2018100215000700-F1C11A22FAEE3B82F21B330E1B786A39.mp4
+ SD:/Nintendo/Album/2018/10/05/2018100516212500-57B4628D2267231D57E0FC1078C0596D.jpg
+ SD:/Nintendo/Album/2018/10/05/2018100518091300-57B4628D2267231D57E0FC1078C0596D.jpg
+ SD:/Nintendo/Album/2018/10/09/2018100910332200-57B4628D2267231D57E0FC1078C0596D.jpg
+ SD:/Nintendo/Album/2018/10/11/2018101109442200-07B0ADBEAA711C9FD0DAF4593620CEB8.jpg
+ SD:/Nintendo/Album/2018/10/11/2018101109442300-07B0ADBEAA711C9FD0DAF4593620CEB8.jpg
+ SD:/Nintendo/Album/2018/10/11/2018101109444100-07B0ADBEAA711C9FD0DAF4593620CEB8.jpg
+ SD:/Nintendo/Album/2018/10/11/2018101109444300-07B0ADBEAA711C9FD0DAF4593620CEB8.mp4
+Found 9 files
+List files ... completed.
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424124105_h1_2">Downloading Saved Album Files</h1>
+<h2 id="Anchor_424124105_h2_1">Batch Downloading</h2>
+<p>This command copies all files, saved in an album on the development hardware, to a specified directory on the host PC. You must specify both the storage that will serve as the album copy source and the host PC directory that will serve as the copy destination. By default, any files that have the same name as those in the copy destination are skipped. If you start <code>DevMenuCommand.nsp</code> using <a href="../Pages/Page_107320466.html">RunOnTarget.exe</a> with the <code>--suppress-auto-kill</code> option, you can use the <code>album</code> command without ending any application that was started beforehand.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe --suppress-auto-kill DevMenuCommand.nsp -- album download --storage &lt;builtin|sdcard&gt; --directory &lt;path&gt; [options]
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>The following options must be specified.</p>
+<ul>
+  <li>Use the <code>--storage</code> option to specify either <strong>builtin</strong> or <strong>sdcard</strong> as the storage that will be the download source. (This specification is required.) <strong>builtin</strong> is system memory, and <strong>sdcard</strong> is a microSD card. You can also specify this option using the <code>--nand</code> and <code>--sd</code> abbreviations.</li>
+  <li>Use the <code>--directory</code> option to specify the absolute path for the directory on the host PC that will be the download destination. (This specification is required.)</li>
+</ul>
+<p>The following options can be omitted. If you need them, add them where it states [options].</p>
+<ul>
+  <li>If you add the <code>--force</code> option, a file with the same name at the copy destination will be forcibly overwritten.</li>
+  <li>If you add the <code>--check-empty</code> option, the copy destination directory is checked to see whether it is empty before copying starts, and if it is not empty, the downloading stops.</li>
+</ul>
+<p>
+  <br />
+</p>
+<p>The following is an execution example of the command to downland all files from the microSD card of the development hardware to the <code>d:/Album</code> directory on the host PC.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe --suppress-auto-kill DevMenuCommand.nsp -- album download  --dir d:/Album
+Downloading Album: storage=&quot;SD&quot;
+Copying file ... 2017111022341300-4D350FA88D490CB77F0159475D106953.mp4
+Copying file ... 2017111311135901-4D350FA88D490CB77F0159475D106953.mp4
+Skipped file ... 2017111311143200-4D350FA88D490CB77F0159475D106953.jpg
+Skipped file ... 2017111311453700-4D350FA88D490CB77F0159475D106953.jpg
+Copying file ... 2017111311544100-4D350FA88D490CB77F0159475D106953.jpg
+Copying file ... 2017111312135200-4D350FA88D490CB77F0159475D106953.jpg
+Copying file ... 2017111312202800-4D350FA88D490CB77F0159475D106953.jpg
+Copying file ... 2017111312585900-4D350FA88D490CB77F0159475D106953.jpg
+Copying file ... 2017111313124800-4D350FA88D490CB77F0159475D106953.jpg
+Copying file ... 2017111313131300-4D350FA88D490CB77F0159475D106953.jpg
+Copied 10 files
+Downloading Album ... completed.
+[SUCCESS]</pre>
+  </div>
+</div>
+<h2 id="Anchor_424124105_h2_2">Downloading Single Files</h2>
+<p>This feature is available in NintendoSDK Firmware for NX 7.0.0-2.0 and later versions of DevMenuCommand.</p>
+<p>This command copies a single specified file, saved to an album on the development hardware album, to a specified directory on the host PC. You must specify both the album file path that will serve as the copy source and the directory on the host PC that will serve as the copy destination. Otherwise, this process works the same as the batch-downland command. To specify the album file path that will serve as the copy source, we recommend copying and pasting one of the individual album files that is output by the <code>list</code> command.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe --suppress-auto-kill DevMenuCommand.nsp -- album download SD:/Nintendo/Album/2018/10/11/2018101109444300-07B0ADBEAA711C9FD0DAF4593620CEB8.mp4 --dir d:/Album
+Downloading Album: storage=&quot;SD&quot;
+Copying file ... 2018101109444300-07B0ADBEAA711C9FD0DAF4593620CEB8.mp4
+Copied 1 file
+Downloading Album ... completed.
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424124105_h1_3">Removing Single Saved Album Files</h1>
+<p>This feature is available in NintendoSDK Firmware for NX 11.0.0-3.0 and later versions of DevMenuCommand.</p>
+<p>This command removes a single specified file saved in a development hardware album. You must specify the album file path from which to remove the file. To specify the album file path, we recommend copying and pasting one of the individual album files that is created by the list command.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe --suppress-auto-kill DevMenuCommand.nsp -- album delete SD:/Nintendo/Album/2018/10/11/2018101109444300-07B0ADBEAA711C9FD0DAF4593620CEB8.jpg
+Album Deleted: &quot;SD:/Nintendo/Album/2018/10/11/2018101109444300-07B0ADBEAA711C9FD0DAF4593620CEB8.jpg&quot;
+Album Delete ... completed.
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424124105_h1_4">Removing All Saved Album Files</h1>
+<p>This command removes all files saved in a development hardware album. You must specify the storage from which to remove the album.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe --suppress-auto-kill DevMenuCommand.nsp -- album clean --sd
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>For the <code>&ndash;storage</code> option, specify either <strong>builtin</strong> or <strong>sdcard</strong> as the target for album removal. (This specification is required.) <code>builtin</code> is system memory, and <code>sdcard</code> is a microSD card. (You can also use the <code>&ndash;-nand</code> and <code>--sd</code> abbreviations.)</p>
+<h1 id="Anchor_424124105_h1_5">Changing the Album File Save Destination</h1>
+<p>This feature can be used in combination with the versions of the firmware and DevMenuCommand included in NX Add-On 12.3.0 and later.</p>
+<h2 id="Anchor_424124105_h2_3">Checking the Album File Save Destination</h2>
+<p>This command displays information about where album files are saved. As shown below, the default is for album files to be saved to either system memory or an SD card, depending on the system settings.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe --suppress-auto-kill DevMenuCommand.nsp -- album get-album-directory
+  IsAlbumDirectoryChanged: false
+  CurrentAlbumStorage:     Depends on System Settings
+[SUCCESS]</pre>
+  </div>
+</div>
+<h2 id="Anchor_424124105_h2_4">Changing the Album File Save Destination</h2>
+<p>This command changes the album file save destination to a specified directory on PC-Host. The system must be restarted after this command is run for the change to take effect.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe --suppress-auto-kill DevMenuCommand.nsp -- album set-album-directory d:/Album
+  IsAlbumDirectoryChanged: true
+  CurrentAlbumStorage:     PC-Host
+  CurrentAlbumDirectory:   &quot;d:/Album&quot;
+Please restart your target to apply this change.
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>For this feature to work properly, connections must be established with the development hardware and with Target Manager. If the connection with Target Manager is lost when the Capture Button is pressed or an album file is otherwise created, the saving of the album file fails. Note that the system caches a portion of the save destination information for files, so do not change the directory structure or the file structure under the specified directory on PC-Host while the system is running.</p>
+<p>This command creates directories labeled <code>NA/</code> and <code>SD/</code> under the specified directory on PC-Host, and sets those as the save destinations instead of system memory and an SD card.</p>
+<h2 id="Anchor_424124105_h2_5">Reverting the Album File Save Destination</h2>
+<p>This command restores the default save destination for album files, by canceling the change to a destination on PC-Host that was made by the <code>set-album-directory</code> command. Make sure that you restart the system after running this command.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe --suppress-auto-kill DevMenuCommand.nsp -- album unset-album-directory
+  IsAlbumDirectoryChanged: false
+  CurrentAlbumStorage:     Depends on System Settings
+Please restart your target to apply this change.
+[SUCCESS]</pre>
+  </div>
+</div>
+<h2 id="Anchor_424124105_h2_6">Remounting the Album File Save Destination</h2>
+<p>This command remounts the album file save directory. Normally you would not use this command. There is no particular need to run this command if the album file save destination has not been changed to PC-Host.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe --suppress-auto-kill DevMenuCommand.nsp -- album remount-album-directory
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>Depending on the Target Manager connection status, when you change the album file save destination to PC-Host the system might lose the ability to access the album file save directory, or inconsistencies might arise between the list of album files cached by the system and the list of album file that are actually on PC-Host. If that happens, run this command to remount the directory and update the file list cache to the latest state.</p>
+<p>When you run this command, make sure that the system is on the HOME Menu screen and the application is not running.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

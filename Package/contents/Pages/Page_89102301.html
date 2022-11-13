@@ -1,0 +1,280 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Frame Heap | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Frame Heap -->
+<div class="pagetitle" id="PageId_89102301">Frame Heap</div>
+<div class="text_separate">
+<h1 id="Anchor_89102301_h1_1">FrameHeap Features</h1>
+<h2 id="Anchor_89102301_h2_1">Feature Overview</h2>
+<p>The frame heap is a memory allocator that offers simpler features than the expanded heap.</p>
+<p>In general, it can only allocate memory blocks and deallocate memory blocks that have been allocated.</p>
+<p>It has good memory efficiency because no management information is contained in the memory blocks.</p>
+<h3 id="Anchor_89102301_h3_1">Allocating and Freeing Memory Blocks in a Frame Heap</h3>
+<p>In a frame heap, memory blocks are allocated by filling the heap from the top and bottom without any gaps.</p>
+<p>Consequently, no external fragmentation occurs in a frame heap, but this comes at the expense of being unable to deallocate a specific memory block.</p>
+<p>The following four deallocation methods are available.</p>
+<ul>
+  <li>Deallocate all allocated memory blocks.</li>
+  <li>Deallocate memory blocks allocated from the starting address of the heap.</li>
+  <li>Deallocate memory blocks allocated from the ending address of the heap.</li>
+  <li>Deallocate memory blocks allocated after saving the heap state with <span class="ApiLink_FrameHeapState_nn__lmem__GetFrameHeapState(HeapHandle_heapHandle)_NN_NOEXCEPT"><code>nn::lmem::GetFrameHeapState</code></span>.<ul><li>For more information about <span class="ApiLink_FrameHeapState_nn__lmem__GetFrameHeapState(HeapHandle_heapHandle)_NN_NOEXCEPT"><code>nn::lmem::GetFrameHeapState</code></span>, see Using a Frame Heap or the function reference.</li></ul></li>
+</ul>
+<h2 id="Anchor_89102301_h2_2">Using a Frame Heap</h2>
+<p>Allocate the memory space to be managed, and use <span class="ApiLink_HeapHandle_nn__lmem__CreateFrameHeap(void_*startAddress|_size_t_size|_int_option)_NN_NOEXCEPT"><code>nn::lmem::CreateFrameHeap</code></span> to create a frame heap.</p>
+<p>The memory space that is passed to the frame heap must be statically or dynamically allocated beforehand.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;cstdlib&gt;
+#include &lt;nn/lmem/lmem_FrameHeap.h&gt;
+</span>&nbsp;
+<span class="k">const</span> <span class="kt">size_t</span> <span class="n">MemoryHeapSize</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>     <span class="c1">// This example passes a space of 32 MiB to the frame heap.
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">heap</span> <span class="o">=</span> <span class="nn">std::</span><span class="n">malloc</span><span class="p">(</span><span class="n">MemoryHeapSize</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// Initializes the frame heap.
+</span><span class="nn">nn::lmem::</span><span class="n">HeapHandle</span> <span class="n">heapHandle</span><span class="p">;</span>
+<span class="n">heapHandle</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">CreateFrameHeap</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="n">MemoryHeapSize</span><span class="p">,</span> <span class="nn">nn::lmem::</span><span class="n">CreationOption_NoOption</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span><span class="n">heapHandle</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Failed to initialize the frame heap.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>A frame heap allows you to pass the heap management region as an argument at the time of initialization.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Initializes the frame heap.
+</span><span class="nn">nn::lmem::</span><span class="n">HeapHandle</span> <span class="n">heapHandle</span><span class="p">;</span>
+<span class="nn">nn::lmem::</span><span class="n">HeapCommonHead</span> <span class="n">heapHead</span><span class="p">;</span>    <span class="c1">// Heap management region.
+</span><span class="n">heapHandle</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">CreateFrameHeap</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">heap</span><span class="p">),</span> <span class="n">MemoryHeapSize</span><span class="p">,</span> <span class="nn">nn::lmem::</span><span class="n">CreationOption_NoOption</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">heapHead</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span><span class="n">heapHandle</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Failed to initialize the frame heap.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>Use <span class="ApiLink_void_*_nn__lmem__AllocateFromFrameHeap(HeapHandle_heapHandle|_size_t_size)_NN_NOEXCEPT"><code>nn::lmem::AllocateFromFrameHeap</code></span> to allocate the memory block after initialization.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">address</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">AllocateFromFrameHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="mi">64</span><span class="p">);</span><span class="o">&amp;</span>    <span class="p">;</span><span class="c1">// Allocate 64 bytes as an example.
+</span><span class="k">if</span><span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocation of the memory fails.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>Alignment may be specified during memory allocation.<br />If the alignment is set to a positive value, memory is allocated from the starting address of the heap. If a negative value is specified, memory is allocated from the ending address of the heap.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">address</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">AllocateFromFrameHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">);</span><span class="o">&amp;</span>    <span class="p">;</span><span class="c1">// This example allocates a 64-byte space with 4-KiB alignment.
+</span><span class="k">if</span><span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Allocation of the memory fails.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>When you have finished using the allocated space, deallocate it by using <span class="ApiLink_void_nn__lmem__FreeToFrameHeap(HeapHandle_heapHandle|_FreeMode_mode)_NN_NOEXCEPT"><code>nn::lmem::FreeToFrameHeap</code></span>.<br />The following option when freeing memory starts from the beginning of the heap. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Free all allocated memory space.
+</span><span class="nn">nn::lmem::</span><span class="n">FreeToFrameHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="nn">nn::lmem::</span><span class="n">FreeMode_All</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>You can use the <span class="ApiLink_FrameHeapState_nn__lmem__GetFrameHeapState(HeapHandle_heapHandle)_NN_NOEXCEPT"><code>nn::lmem::GetFrameHeapState</code></span> and <span class="ApiLink_void_nn__lmem__RestoreFrameHeapState(HeapHandle_heapHandle|_const_FrameHeapState_&state)_NN_NOEXCEPT"><code>nn::lmem::RestoreFrameHeapState</code></span> functions to save and restore a particular state of the heap.<br />This allows you to deallocate memory blocks that were allocated after saving the return value of <span class="ApiLink_FrameHeapState_nn__lmem__GetFrameHeapState(HeapHandle_heapHandle)_NN_NOEXCEPT"><code>nn::lmem::GetFrameHeapState</code></span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span><span class="o">*</span> <span class="n">address1</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">AllocateFromFrameHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="mi">64</span><span class="p">);</span>    <span class="c1">// Allocate a space of 64 bytes.
+</span>&nbsp;
+<span class="c1">// (A) Save the current state of the frame heap.
+</span><span class="nn">nn::lmem::</span><span class="n">FrameHeapState</span> <span class="n">state</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">GetFrameHeapState</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">);</span>
+&nbsp;
+<span class="kt">void</span><span class="o">*</span> <span class="n">address2</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">AllocateFromFrameHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="mi">64</span><span class="p">);</span>    <span class="c1">// Allocate a space of 64 bytes.
+</span>&nbsp;
+<span class="c1">// Restore the state of the frame heap.
+</span><span class="n">RestorFrameHeapState</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="n">state</span><span class="p">);</span>
+&nbsp;
+<span class="c1">// This restores the state of the heap to (A) and is the same as freeing the memory allocated in address2.
+</span><span class="kt">void</span><span class="o">*</span> <span class="n">address3</span> <span class="o">=</span> <span class="nn">nn::lmem::</span><span class="n">AllocateFromFrameHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">,</span> <span class="mi">64</span><span class="p">);</span>    <span class="c1">// address3 == address2
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>When you have finished using the heap, free it by using <span class="ApiLink_void_nn__lmem__DestroyFrameHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::DestroyFrameHeap</span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::lmem::</span><span class="n">DestroyFrameHeap</span><span class="p">(</span><span class="n">heapHandle</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>For more information about other functions, see the API reference for each.</p>
+<h2 id="Anchor_89102301_h2_3">FrameHeap API Reference</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_HeapHandle_nn__lmem__CreateFrameHeap(void_*startAddress|_size_t_size|_int_option)_NN_NOEXCEPT">nn::lmem::CreateFrameHeap (Heap management region created in the heap)</span>
+  </li>
+  <li>
+    <span class="ApiLink_HeapHandle_nn__lmem__CreateFrameHeap(void_*startAddress|_size_t_size|_int_option|_HeapCommonHead_*pHeapHead)_NN_NOEXCEPT">nn::lmem::CreateFrameHeap (Heap management region passed from outside the heap)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__DestroyFrameHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::DestroyFrameHeap</span>
+  </li>
+  <li>
+    <span class="ApiLink_MemoryRange_nn__lmem__AdjustFrameHeap(HeapHandle_heapHandle|_AdjustMode_adjustMode)_NN_NOEXCEPT">nn::lmem::AdjustFrameHeap</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_*_nn__lmem__AllocateFromFrameHeap(HeapHandle_heapHandle|_size_t_size)_NN_NOEXCEPT">nn::lmem::AllocateFromFrameHeap (no alignment)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_*_nn__lmem__AllocateFromFrameHeap(HeapHandle_heapHandle|_size_t_size|_int_alignment)_NN_NOEXCEPT">nn::lmem::AllocateFromFrameHeap (with alignment)</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__FreeToFrameHeap(HeapHandle_heapHandle|_FreeMode_mode)_NN_NOEXCEPT">nn::lmem::FreeToFrameHeap</span>
+  </li>
+  <li>
+    <span class="ApiLink_size_t_nn__lmem__ResizeFrameHeapBlock(HeapHandle_heapHandle|_void_*pBlock|_size_t_newSize)_NN_NOEXCEPT">nn::lmem::ResizeFrameHeapBlock</span>
+  </li>
+  <li>
+    <span class="ApiLink_size_t_nn__lmem__GetFrameHeapAllocatableSize(HeapHandle_heapHandle|_int_alignment)_NN_NOEXCEPT">nn::lmem::GetFrameHeapAllocatableSize</span>
+  </li>
+  <li>
+    <span class="ApiLink_FrameHeapState_nn__lmem__GetFrameHeapState(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::GetFrameHeapState</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__RestoreFrameHeapState(HeapHandle_heapHandle|_const_FrameHeapState_&state)_NN_NOEXCEPT">nn::lmem::RestoreFrameHeapState</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__lmem__DumpFrameHeap(HeapHandle_heapHandle)_NN_NOEXCEPT">nn::lmem::DumpFrameHeap</span>
+  </li>
+</ul>
+<h2 id="Anchor_89102301_h2_4">Notes About Using FrameHeap</h2>
+<h3 id="Anchor_89102301_h3_2">Heap Management Region</h3>
+<p>The heap management region requires 100 bytes in a 32-bit environment, and 176 bytes in a 64-bit environment.</p>
+<p>Consequently, if the heap management region is created internally, you cannot create a unit heap in a memory space smaller than these sizes.</p>
+<h3 id="Anchor_89102301_h3_3">Minimum Allocatable Memory Block Size</h3>
+<p>Allocated memory blocks must be aligned to a 4-byte boundary at minimum.</p>
+<p>Consequently, even if you allocate a 1-byte memory block, it consumes 4 bytes of memory.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_FrameHeapState_nn__lmem__GetFrameHeapState(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#abd347d006c6676ca3c2c652b56b5540a' )
+SetUrl( 'ApiLink_HeapHandle_nn__lmem__CreateFrameHeap(void_*startAddress|_size_t_size|_int_option)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a90727fbcf266c220ae9409106a467a49' )
+SetUrl( 'ApiLink_void_*_nn__lmem__AllocateFromFrameHeap(HeapHandle_heapHandle|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a7c6889dbc9c14c96fdc10f89b69a3c96' )
+SetUrl( 'ApiLink_void_nn__lmem__FreeToFrameHeap(HeapHandle_heapHandle|_FreeMode_mode)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a2c7c2693342c1151c427651a6323969a' )
+SetUrl( 'ApiLink_void_nn__lmem__RestoreFrameHeapState(HeapHandle_heapHandle|_const_FrameHeapState_&state)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#acdb70197d0fac93ff1c51605de577c0e' )
+SetUrl( 'ApiLink_void_nn__lmem__DestroyFrameHeap(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a5fcec58c14f1288a97cc8853c65215ad' )
+SetUrl( 'ApiLink_HeapHandle_nn__lmem__CreateFrameHeap(void_*startAddress|_size_t_size|_int_option|_HeapCommonHead_*pHeapHead)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#acd38b1a1f739530aa18143e8d7dfc4ee' )
+SetUrl( 'ApiLink_MemoryRange_nn__lmem__AdjustFrameHeap(HeapHandle_heapHandle|_AdjustMode_adjustMode)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a2530fa487300d192b1d7ed6ed33d1a4a' )
+SetUrl( 'ApiLink_void_*_nn__lmem__AllocateFromFrameHeap(HeapHandle_heapHandle|_size_t_size|_int_alignment)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a490bafe2b4b3cbbae2990949be3824d5' )
+SetUrl( 'ApiLink_size_t_nn__lmem__ResizeFrameHeapBlock(HeapHandle_heapHandle|_void_*pBlock|_size_t_newSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#a4c6f50b6ef046e66428d0c4978a2e3d4' )
+SetUrl( 'ApiLink_size_t_nn__lmem__GetFrameHeapAllocatableSize(HeapHandle_heapHandle|_int_alignment)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#abf40e7cffb9c7527baa746570b6de07e' )
+SetUrl( 'ApiLink_void_nn__lmem__DumpFrameHeap(HeapHandle_heapHandle)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1lmem.html#adb56e12364c2c984f7e41fd745b5251e' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

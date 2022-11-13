@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>3D Sound | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- 3D Sound -->
+<div class="pagetitle" id="PageId_83955837">3D Sound</div>
+<div class="text_separate">
+<h1 id="Anchor_83955837_h1_1">3D Sound</h1>
+<p>This section describes the operational specifications for 3D sounds.</p>
+<h2 id="Anchor_83955837_h2_1">Terminology Definitions</h2>
+<p>Describes the terms used in 3D sound.</p>
+<h3 id="Anchor_83955837_h3_1">3D Sound Listener</h3>
+<p>This concept is analogous to a real-world microphone or a person's ear. It keeps information about the coordinates and direction of the microphone listening to each of the 3D sound actors.</p>
+<p>The descriptions in this manual use the abbreviated term <em>listener</em> from now on.</p>
+<h3 id="Anchor_83955837_h3_2">3D Sound Actor</h3>
+<p>This concept is analogous to a real-world sound source (such as a person or an automobile). It keeps information about the position of the sound source and the sound emitted at that position.</p>
+<p>The descriptions in this manual use the abbreviated term <em>actor</em> from now on.</p>
+<h3 id="Anchor_83955837_h3_3">Interior Size</h3>
+<p>The interior size is a representation of the size of the space of the relative positions of the listener and 3D sound actors, expressed as the output balance (the changes in pan and sound pan) between speakers.</p>
+<h3 id="Anchor_83955837_h3_4">Sound Maximum Volume Distance</h3>
+<p>Represents the distance from the listener at which sounds are always played back at the maximum volume when requested from their actors.</p>
+<h3 id="Anchor_83955837_h3_5">Attenuation Unit Distance</h3>
+<p>When sounds are requested from actors, the volume and player priority are attenuated based on the distance from the listener. This term refers to the distance that is used as the standard for this attenuation.</p>
+<h3 id="Anchor_83955837_h3_6">Maximum Priority Reduction</h3>
+<p>This term refers to the limit on how much the player priority can be reduced. It defines the maximum amount by which the originally configured player priority can be decremented for each sound.</p>
+<p>Figure 1. Listener and Actor</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956111/83080145.gif" width="500" class="embedded-image" />
+  </span>
+</p>
+<h2 id="Anchor_83955837_h2_2">Operational Specifications</h2>
+<p>This section describes the operational specifications for 3D sound in two parts: library operations and SoundMaker operations. For more information about operations, see the <a href="../Pages/Page_83955976.html">SoundMaker Manual</a> and other corresponding documentation.</p>
+<p>For more information about the flow of internal processing and the order of priority for controls of sound parameters like volume, pitch, and pan that are configured in SoundMaker or the NintendoWare audio library, see <a href="../Pages/Page_83955829.html">Sound Parameter Control Operations</a>.</p>
+<h3 id="Anchor_83955837_h3_7">Library Operations</h3>
+<p>For sounds you want to apply 3D sounds to, first allocate actors, and then make requests of each actor.</p>
+<p>The application updates the coordinates of the listener and actors as needed, and the 3D sound sets the appropriate parameter values for the coordinates provided, creating a simulated sound field with the speakers.</p>
+<p>Figure 2. Conceptual Diagram of 3D Sound</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956111/83080146.gif" width="500" class="embedded-image" />
+  </span>
+</p>
+<h4 id="Anchor_83955837_h4_1">Listener and Actor Operations</h4>
+<p>Listener and actor operations are performed by using the API. For listeners, you set coordinates and direction. For actors, you set coordinates and request sounds. You can choose when to update the coordinates for listeners and actors.</p>
+<h4 id="Anchor_83955837_h4_2">Determining Pans and Surround Pans</h4>
+<p>Based on the relative positions of the provided listener and actors, set the appropriate values for the pans and surround pans for the sounds requested of the actors.</p>
+<h4 id="Anchor_83955837_h4_3">Volume Attenuation</h4>
+<p>Attenuates the volume of the sounds requested of the actors based on the distance between the listener and actors. For each attenuation unit distance between the listener and the actor, the maximum volume distance is attenuated by the specified attenuation ratio. When this happens, SoundMaker sets the attenuation ratio and attenuation method (curve) for each sound.</p>
+<p>Figure 3. Using 1000 as the Attenuation Unit Distance</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_83956111/83080148.gif" width="300" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+      <td>
+        <div class="content-wrapper">
+          <p>
+            <span class="embedded-file-wrapper ">
+              <img src="../Attachments/Attach_83956111/83080149.gif" width="300" class="embedded-image" />
+            </span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_83955837_h4_4">3D Filter Control</h4>
+<p>Applies a biquad filter to sounds requested of the actors based on the distance between the listener and actors.<br />The applied strength of the biquad filter is linked to the attenuation of volume and assists in the representation of distance through volume attenuation.</p>
+<h4 id="Anchor_83955837_h4_5">Attenuate Player Priority</h4>
+<p>Attenuates the player priority of the sound requested of the actor based on the distance between the listener and the actor.<br />The player priority is attenuated proportionally to the volume attenuation.<br />The player priority set beforehand for each sound is attenuated by a proportion of the maximum for the distance, reduced by a value that is proportionally equivalent to the attenuation in the volume.</p>
+<p>No matter how far apart the actor and listener become, the player priority is not attenuated beyond the maximum priority reduction value, even if no sound can be heard.</p>
+<h4 id="Anchor_83955837_h4_6">Representing the Doppler Effect</h4>
+<p>Represents the <em>Doppler effect</em>, in which the pitch of a sound seems to change according to the relative speeds of a sound source and the person who hears it, by changing the pitch of a sound requested of an actor based on the speed at which the listener and actors are moving.</p>
+<p>The Doppler effect calculates the speed from the difference of the listener and actors' current positions and their positions at the time of the previous call. This speed, along with the speed of sound and Doppler factor parameter set beforehand, is used to change the pitch of the sounds requested of the actors.</p>
+<p>The Doppler factor is a parameter to adjust the amount of Doppler effect to apply.<br />The Doppler factor is specified by SoundMaker on a per-sound basis.</p>
+<h4 id="Anchor_83955837_h4_7">Playback Switch Control</h4>
+<p>You can set playback switches for each sound to individually configure whether to control the various 3D sound parameters. The playback switches for sounds are specified using SoundMaker.</p>
+<h3 id="Anchor_83955837_h3_8">SoundMaker Operation</h3>
+<p>SoundMaker sets the operation of each sound requested in 3D sound.</p>
+<h4 id="Anchor_83955837_h4_8">Specifying Playback Switches</h4>
+<p>For each sound being created, you can individually set playback switches for the volume, pan, surround pan, plater priority, and 3D filters.<br />The playback switches can be used to individually set whether to control the various parameters for 3D sounds.</p>
+<p>You could specify settings for scenarios such as &quot;I want to determine the pan and surround pan, but want the volume to always be the same&quot; or &quot;No matter how far away the sound (how small the volume), I want to set the player priority so it always plays.&quot;</p>
+<h4 id="Anchor_83955837_h4_9">Specifying the Volume Attenuation Curve</h4>
+<p>For each sound to create, you can choose from two types of volume attenuation curve specifications: <strong>Logarithmic</strong> and <strong>Linear</strong>. Selecting <strong>Logarithmic</strong> typically results in more realistic sounds. <strong>Linear</strong> is effective when depicting the sound of a river or a beach with a single actor.</p>
+<h4 id="Anchor_83955837_h4_10">Specifying the Volume Attenuation Ratio</h4>
+<p>For each sound to create, you can specify the volume attenuation ratio. For example, you could specify that important sounds are loud even when they are far away, but less important sounds attenuate quickly.</p>
+<h4 id="Anchor_83955837_h4_11">Doppler Factor</h4>
+<p>For each sound you create, you can specify the Doppler factor. The Doppler factor is a parameter to adjust the amount of Doppler effect to apply.</p>
+<h2 id="Anchor_83955837_h2_3">Interior Size and Maximum Volume Distance</h2>
+<p>This section describes the differences between interior size and maximum volume distance.</p>
+<h3 id="Anchor_83955837_h3_9">Relationship Between Interior Size and Maximum Volume Distance</h3>
+<p>The interior size settings adjust the balance of the output from each speaker based on the relative positions of the listener and actors. Conversely, the maximum volume distance adjusts the output volume based on the relative positions of the listener and actors. These operate independently and do not affect each other.</p>
+<p>Figure 4. Interior Size and Maximum Volume Distance</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956111/83080150.gif" class="embedded-image" />
+  </span>
+</p>
+<p align="center">
+  <br />
+</p>
+<h3 id="Anchor_83955837_h3_10">Characteristics of Interior Size</h3>
+<p>If an actor is outside the circle with the interior size as its radius, the output balance is set as if the actor were at the point on the circumference it is closest to.</p>
+<p>Figure 5. Characteristics of Interior Size 1</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956111/83080151.gif" class="embedded-image" />
+  </span>
+</p>
+<p>In Figure 5, the output balance is set as if actor A1 were at the A1' position and A2 were at the A2' position on the circumference.</p>
+<p>The volume does not change according to changes in the interior size. The volume at A1 and A1' (A2 and A2') are determined by the maximum volume distance.</p>
+<p>Figure 5. Characteristics of Interior Size 1</p>
+<p>
+  <br />
+</p>
+<p>If you make the interior size larger, it becomes easier to include actors within the circle, so the sounds are more easily gathered in the center (less easily swung to the left or right), making changes to the output balance more slowly for the same speed and distance moved.</p>
+<p>Conversely, if you make the interior size smaller it becomes harder to include actors within the circle, so the sounds spread out more easily (are more easily swung to the left or right), making changes to the output balance more rapidly for the same speed and distance moved.</p>
+<p>Figure 6. Characteristics of Interior Size 2</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_83956111/83080152.gif" class="embedded-image" />
+  </span>
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

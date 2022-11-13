@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Classes | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Classes -->
+<div class="pagetitle" id="PageId_83955626">Classes</div>
+<div class="text_separate">
+<h1 id="Anchor_83955626_h1_1">Classes</h1>
+<p>Most functions in <code>gfx</code> are provided as a class.</p>
+<p>This section describes information common to most classes in <code>gfx</code>.</p>
+<h2 id="Anchor_83955626_h2_1">Granularity</h2>
+<p>Features of the graphics system are collected at a manageable granularity and provided as a class.</p>
+<p>The class feature granularity is larger compared to the low-level graphics API, to account for the difference between the low-level graphics APIs</p>
+<h2 id="Anchor_83955626_h2_2">Structure</h2>
+<p>Each class is constructed as an accessor that inherits a data structure.</p>
+<p>The following sections describe each part of the class.</p>
+<h2 id="Anchor_83955626_h2_3">Data</h2>
+<p>Each data structure contains several variables, and is self contained without being dependent on the accessor.</p>
+<p>These structures have the term <code>Data</code> appended to their names.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::gfx::*Data</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>
+  <code>Data</code> is guaranteed to be plain old data, which enables you to save <code>Data</code> as a resource file, and use it directly by loading and directly casting the resource file.</p>
+<p>
+  <code>Data</code> does not have any interface such as member functions.</p>
+<p>In general, do not access <code>Data</code> directly. Instead, use an accessor to access <code>Data</code>.</p>
+<p>Behavior and compatibility are not guaranteed when variables in <code>Data</code> is directly manipulated or referenced.</p>
+<h2 id="Anchor_83955626_h2_4">Accessor</h2>
+<p>An accessor is a class that inherits <code>Data</code> and contains several interfaces.</p>
+<p>Unlike <code>Data</code>, accessors do not have a specific term appended to their names.</p>
+<p>We strongly recommend using accessors, and not <code>Data</code>.</p>
+<p>Accessors guarantee the following.</p>
+<ul>
+  <li>Variables are not stored at the accessor layer.</li>
+  <li>The virtual function table is not stored in the accessor.</li>
+</ul>
+<p>All accessor classes have the following interfaces.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Interfaces</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>DataType</td>
+      <td>Type definition of the corresponding <code>Data</code>.</td>
+    </tr>
+    <tr>
+      <td>Constructor.</td>
+      <td>The data content is zero initialized.</td>
+    </tr>
+    <tr>
+      <td>ToData</td>
+      <td>Converted to its corresponding data.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83955626_h2_5">Mutual Conversion Between Data and Accessor</h2>
+<p>Data may be mutually converted to an accessor, and vice versa.</p>
+<p>Converting an accessor to a data structure allows the various variables used by the accessor to be referenced.</p>
+<p>This allows access to content handled by <code>gfx</code>, such as referencing a low-level graphics API handle.</p>
+<p>This feature is predominantly used when <code>gfx</code> and the low-level graphics API are used in conjunction.</p>
+<h3 id="Anchor_83955626_h3_1">Converting Data to Accessor</h3>
+<p>Every data structure in <code>gfx</code> can be converted to an accessor type reference or a pointer using the following functions.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::gfx::DataToAccessor();</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This function takes a <code>Data</code> reference or a pointer.</p>
+<p>The return value of the function is typically received by the corresponding accessor reference or pointer.</p>
+<p>The following example shows conversion from device <code>Data</code> to device accessor.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::gfx::DeviceData deviceData;
+nn::gfx::Device&amp; device = nn::gfx::DataToAccessor( deviceData );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955626_h3_2">Converting Accessor to Data</h3>
+<p>All accessors in <code>gfx</code> can be converted to a <code>Data</code> type reference or a pointer using the following functions.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::gfx::AccessorToData();</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This function takes an accessor reference or a pointer.</p>
+<p>The return value of the function is typically received by the corresponding <code>Data</code> reference or pointer.</p>
+<p>The following example shows conversion from device accessor to device <code>Data</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::gfx::Device device;
+nn::gfx::Device::DataType&amp; deviceData = nn::gfx::AccessorToData( device );</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83955626_h3_3">Restrictions on Conversions</h3>
+<p>The conversion is made as a <code>static_cast</code>. Conversions that negate a type qualifier is not allowed.</p>
+<h2 id="Anchor_83955626_h2_6">Allocating Memory</h2>
+<p>The <code>GFX</code> class generally does not dynamically allocate memory internally, except for instances where the underlying low level graphics API does so.  <br />The class is designed to accept memory from the application. </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

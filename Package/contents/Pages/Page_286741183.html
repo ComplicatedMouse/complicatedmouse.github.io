@@ -1,0 +1,289 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>News for Developers | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- News for Developers -->
+<div class="pagetitle" id="PageId_286741183">News for Developers</div>
+<div class="text_separate">
+<h1 id="Anchor_286741183_h1_1">News for Developers</h1>
+<p>This document describes the changes for developers in NintendoSDK 5.1.0.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_286741183_h1_1">News for Developers</a>
+    </li>
+    <li>
+      <a href="#Anchor_286741183_h1_2">General</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_286741183_h2_1">Problems Involving Conversion to bc1 / bc2 / bc3 Format Textures</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_286741183_h3_1">Problem 1: Textures cannot be converted correctly to the bc1 / bc2 / bc3 formats on unsupported GPUs.</a>
+        </li>
+        <li>
+          <a href="#Anchor_286741183_h3_2">Problem 2: Low compression quality of A component in bc3 format</a>
+        </li>
+      </ul>
+    </ul>
+    <li>
+      <a href="#Anchor_286741183_h1_3">nn::g3d News ()</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_286741183_h2_2">Resizing by specifying a percentage is now possible in 3D Texture Converter.</a>
+      </li>
+      <li>
+        <a href="#Anchor_286741183_h2_3">Using the assign utility, a different shader can now be allocated while inheriting the existing shader parameter values.</a>
+      </li>
+      <li>
+        <a href="#Anchor_286741183_h2_4">Improved the shape compression feature.</a>
+      </li>
+      <li>
+        <a href="#Anchor_286741183_h2_5">Improved the feature for converting from rigid body to rigid skinning.</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_286741183_h1_4">nn::vfx News ()</a>
+    </li>
+    <li>
+      <a href="#Anchor_286741183_h1_5">nn::ui2d News ()</a>
+    </li>
+    <li>
+      <a href="#Anchor_286741183_h1_6">nn::font News ()</a>
+    </li>
+    <li>
+      <a href="#Anchor_286741183_h1_7">nn::atk News ()</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_286741183_h2_6">New Default Priority Values for Sound Threads and Task Threads</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_286741183_h1_8">nn::spy News ()</a>
+    </li>
+  </ul>
+</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_286741183_h1_2">General</h1>
+<h2 id="Anchor_286741183_h2_1">Problems Involving Conversion to bc1 / bc2 / bc3 Format Textures</h2>
+<p>The following is a description of workarounds for the problems relating to the new encoders for bc1 / bc2 / bc3 format textures introduced in NintendoSDK 5.0.0. (Revision History 5-0-0S56: (TOOL) Improved quality when converting to the bc1, bc2, and bc3 formats using the texture converter.)</p>
+<p>There are two problematic areas, and the only way to deal with both at the same time is to define a value of <code>0</code> for the <code>NINTENDO_TEXTURE_CONVERTER_NVTT_BC123</code> environment variable when using the NintendoWare tools.<br /></p>
+<h3 id="Anchor_286741183_h3_1">Problem 1: Textures cannot be converted correctly to the bc1 / bc2 / bc3 formats on unsupported GPUs.</h3>
+<ul>
+  <li>Due to changes in the bc1 / bc2 / bc3 format encoders, conversion only works on Kepler and later generations of NVIDIA GPUs.</li>
+  <li>If the GPU is a non-NVIDIA chip, then conversion automatically takes place in the CPU, but if the GPU is an unsupported NVIDIA chip, then the texture is output with an indefinite value (for example, it is output as a pitch black texture) without displaying an error.</li>
+</ul>
+<h4 id="Anchor_286741183_h4_1">Resolution</h4>
+<ul>
+  <li>Use the previous encoder (which defines the <code>NINTENDO_TEXTURE_CONVERTER_NVTT_BC123</code> environment variable with the value <code>0</code>).</li>
+  <li>Disable GPU encoding in the 3D texture converter options (<code>--gpu-encoding false</code>).<ul><li>For information about how to set this option from the various NintendoWare modules, see the respective manuals.</li></ul></li>
+  <li>Use a Kepler or later-generation GPU. (For NintendoSDK, we recommend the Maxwell 1st generation or later.)</li>
+</ul>
+<h4 id="Anchor_286741183_h4_2">Support Planned for NintendoSDK 5.2.0</h4>
+<ul>
+  <li>The 3D texture converter will be able to work correctly on unsupported GPUs.</li>
+  <li>The 3D texture converter option for selecting whether to encode using the GPU (<code>--gpu-encoding</code>) will be extended.<ul><li>When the option is specified as <code>--gpu-encoding true</code>, an unsupported GPU will generate an error. (Non-NVIDIA GPUs will always generate an error.)</li><li>When the option is specified as <code>--gpu-encoding false</code>, encoding will always take place in the CPU (as before).</li><li>When the option is specified as <code>--gpu-encoding auto</code>, encoding will always take place in the GPU if possible, and in the CPU if not (behaves like <code>true</code> before).</li><li>If the <code>--gpu-encoding</code> option has not been specified, the default behavior is the same as when <code>--gpu-encoding true</code> is specified.</li></ul></li>
+  <li>The various NintendoWare modules will be able to handle the use of <code>--gpu-encoding</code>.</li>
+</ul>
+<h3 id="Anchor_286741183_h3_2">Problem 2: Low compression quality of A component in bc3 format</h3>
+<ul>
+  <li>Due to changes in the bc3 format encoder, sometimes A component pixels that were a value of <code>0</code> become small, non-zero values.<br />To make it easier to discern differences in the next image, the A component (0-255) is bi-level with a threshold of <code>1</code>.<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_286741183/289926826.png" class="embedded-image" /></span></li>
+</ul>
+<h4 id="Anchor_286741183_h4_3">Resolution</h4>
+<ul>
+  <li>Use the previous encoder (which defines the <code>NINTENDO_TEXTURE_CONVERTER_NVTT_BC123</code> environment variable with the value <code>0</code>).</li>
+</ul>
+<h4 id="Anchor_286741183_h4_4">Support Planned for NintendoSDK 5.2.0</h4>
+<ul>
+  <li>A new encoder will yield better compression quality for the A component in bc3 format.</li>
+</ul>
+<h1 id="Anchor_286741183_h1_3">nn::g3d News (<span class="embedded-file-wrapper "><img src="../Attachments/Attach_286741183/286741154.png" class="embedded-image" /></span>)</h1>
+<h2 id="Anchor_286741183_h2_2">Resizing by specifying a percentage is now possible in 3D Texture Converter.</h2>
+<!--Remove-->
+<p>The size of the input image can now be specified using a percentage with the <code>--resize-w</code> and <code>--resize-h</code> options in <a href="../Pages/Page_239574379.html">3D Texture Converter</a>.</p>
+<h2 id="Anchor_286741183_h2_3">Using the assign utility, a different shader can now be allocated while inheriting the existing shader parameter values.</h2>
+<!--Remove-->
+<p>The <code>--keep-existing-values</code> option has been added to the <code>assign</code> subcommand in the <a href="../Pages/Page_83956043.html">assign utility</a>. Specify this option to have newly allocated shaders inherit the shader parameter values originally included in the input model intermediate files that have matching ID and type information.</p>
+<h2 id="Anchor_286741183_h2_4">Improved the shape compression feature.</h2>
+<!--Remove-->
+<p>Reduced a problem where specifying the <code>--ignore-skinning-count</code> option during shape compression in the intermediate file optimizer causes intermediate file gaps to appear between shapes due to different skinning methods, even though the shapes were contiguous originally. This change standardizes the skinning method among contiguous shapes, but the data size may also increase as a result.</p>
+<h2 id="Anchor_286741183_h2_5">Improved the feature for converting from rigid body to rigid skinning.</h2>
+<!--Remove-->
+<p>When using the intermediate file optimizer's feature for converting rigid body to rigid skinning, all rigid body shapes linked to bones set to enable compression (<code>compress_enable=true</code>) had the specification to be bound to root bones. For this reason, bone visibility animation for shapes converted to rigid skinning could only be applied by setting bones linked to those shapes to disable compression (<code>compress_enable=false</code>). As a result, shape compression could not be performed for converted shapes.</p>
+<p>The specification has been changed so that converted shapes navigate parent bones and become associated with the first bone that is found with disable compression. Shape compression now works for shapes belonging under bones set to disable compression. The following are a few examples.</p>
+<p>
+  <br />
+</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>Before Conversion</td>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_286741183/flowchart_1.svg" />
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>Conversion Results in the Past</td>
+      <td style="text-align: center;">
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_286741183/flowchart_2.svg" />
+          </div>
+          <p style="text-align: left;">
+            <br />
+            <br />
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: left;">Conversion Results for NintendoSDK 5.1.0 and Later</td>
+      <td>
+        <div class="content-wrapper">
+          <div class="flowchart-svg-inline">
+            <img src="../Attachments/Attach_286741183/flowchart_3.svg" />
+          </div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_286741183_h1_4">
+  <br />nn::vfx News (<span class="embedded-file-wrapper "><img src="../Attachments/Attach_286741183/286741155.png" class="embedded-image" /></span>)</h1>
+<p>None.</p>
+<h1 id="Anchor_286741183_h1_5">nn::ui2d News (<span class="embedded-file-wrapper "><img src="../Attachments/Attach_286741183/286741156.png" class="embedded-image" /></span>)</h1>
+<p>None.</p>
+<h1 id="Anchor_286741183_h1_6">nn::font News (<span class="embedded-file-wrapper "><img src="../Attachments/Attach_286741183/286741157.png" class="embedded-image" /></span>)</h1>
+<p>None.</p>
+<h1 id="Anchor_286741183_h1_7">nn::atk News (<span class="embedded-file-wrapper "><img src="../Attachments/Attach_286741183/286741158.png" class="embedded-image" /></span>)</h1>
+<h2 id="Anchor_286741183_h2_6">New Default Priority Values for Sound Threads and Task Threads</h2>
+<p>The default priority values for sound threads and task threads have been lowered, as shown in the following table. </p>
+<table class="relative-table wrapped" style="width: 51.35%;">
+  <colgroup>
+    <col style="width: 57.91%;" />
+    <col style="width: 24.24%;" />
+    <col style="width: 17.81%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Thread Priority</th>
+      <th>Before Change</th>
+      <th>After Change</th>
+    </tr>
+    <tr>
+      <td>The thread priority for sound threads<br />(<span class="ApiLink_nn__atk__SoundSystem__SoundSystemParam__DefaultSoundThreadPriority">nn::atk::SoundSystem::SoundSystemParam::DefaultSoundThreadPriority</span>)</td>
+      <td>
+        <span class="ApiLink_nn__os__HighestThreadPriority">nn::os::HighestThreadPriority</span>
+      </td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>The thread priority for task threads<br />(<span class="ApiLink_nn__atk__SoundSystem__SoundSystemParam__DefaultTaskThreadPriority">nn::atk::SoundSystem::SoundSystemParam::DefaultTaskThreadPriority</span>)</td>
+      <td>
+        <span class="ApiLink_nn__os__HighestThreadPriority">nn::os::HighestThreadPriority</span>
+      </td>
+      <td>3.</td>
+    </tr>
+  </tbody>
+</table>
+<p>If you are using the default priorities for sound and task threads, and want to restore the priorities to the values that were in use prior to 5.1.0, you need to increase <code><span class="ApiLink_nn__atk__SoundSystem__SoundSystemParam__soundThreadPriority">nn::atk::SoundSystem::SoundSystemParam::soundThreadPriority</span></code> and <code><span class="ApiLink_nn__atk__SoundSystem__SoundSystemParam__taskThreadPriority">nn::atk::SoundSystem::SoundSystemParam::taskThreadPriority</span></code> to <code><span class="ApiLink_nn__os__HighestThreadPriority">nn::os::HighestThreadPriority</span></code>.</p>
+<h1 id="Anchor_286741183_h1_8">nn::spy News (<span class="embedded-file-wrapper "><img src="../Attachments/Attach_286741183/286741159.png" class="embedded-image" /></span>)</h1>
+<p>None.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk__SoundSystem__SoundSystemParam__DefaultSoundThreadPriority', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_system_1_1_sound_system_param.html#af187ffc682507337dc0bfa0f08102fb4' )
+SetUrl( 'ApiLink_nn__os__HighestThreadPriority', '../../../Api/HtmlNX/namespacenn_1_1os.html#a44ed3b4dddf9ebfb69bc33167369b816' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem__SoundSystemParam__DefaultTaskThreadPriority', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_system_1_1_sound_system_param.html#a67d65bca7e18f3c538295015be8d8a7e' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem__SoundSystemParam__soundThreadPriority', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_system_1_1_sound_system_param.html#a4c0298a2aac4f2db64857006cb19ab35' )
+SetUrl( 'ApiLink_nn__atk__SoundSystem__SoundSystemParam__taskThreadPriority', '../../../Api/HtmlNX/structnn_1_1atk_1_1_sound_system_1_1_sound_system_param.html#a1afdb7cf195715fb5ba43785f966b384' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,412 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Moment Mode | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Moment Mode -->
+<div class="pagetitle" id="PageId_112902376">Moment Mode</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_112902376_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_112902376_h1_2">Moment Mode</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_112902376_h2_1">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902376_h2_2">Settings</a>
+      </li>
+      <li>
+        <a href="#Anchor_112902376_h2_3">Output Format</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_112902376_h1_3">Using Moment Mode</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_112902376_h2_4">Moment Mode Sample Demo</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_112902376_h1_1">Introduction</h1>
+<p>In moment mode, the image captured by the IR Motion Camera is divided into several blocks, and the average brightness and center of mass coordinate is calculated for each block.</p>
+<h1 id="Anchor_112902376_h1_2">Moment Mode</h1>
+<h2 id="Anchor_112902376_h2_1">Overview</h2>
+<p>In moment mode, the captured image is processed with a moment computation algorithm and then output.<br />Changes in the average brightness and center of mass coordinate of each block provide a way to determine what type of movements are exhibited by objects captured by the IR Motion Camera, whether the objects are close to or far away from the camera, and their general shapes, all without performing any complex object-recognition processes.</p>
+<p>Captured images are divided into 8 blocks in the horizontal direction and 6 blocks in the vertical direction for a total of 48 blocks, and the calculation results are output accordingly. However, due to restrictions on the communication bandwidth available for the controller, this number of divisions is fixed and cannot be changed.<br />In the following visualization, the red points represent the centroids of each block, and each block is filled according to its average brightness.<br /><br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_112902376/125191130.png" class="embedded-image" /></span></p>
+<p>For more information about the coordinate system for the data that is output, see <a href="../Pages/Page_112902609.html#Anchor_112902609_h2_8">IR Motion Camera Coordinate System</a>.</p>
+<h2 id="Anchor_112902376_h2_2">Settings</h2>
+<p>Moment mode supports the following settings.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Member Name</th>
+      <th>Description</th>
+      <th>Default Value</th>
+      <th>Defined Range</th>
+    </tr>
+    <tr>
+      <td>
+        <code>windowOfInterest</code>
+      </td>
+      <td>Specifies which memory region of an image to use. The number of divisions used remains fixed even if the size of the image region used is changed.<br />If the specified image size cannot be divided into the prescribed number of divisions in the horizontal and vertical directions, the remaining regions are simply discarded and no results are calculated for these regions. As a result, we recommend specifying an image size that can be evenly divided into the fixed number of divisions in each direction.<br /><br /><br />Use this setting to remove a specific region of an image (such as noise at the edges of the image) or when you want to calculate information in more detail for a specific region of the image.<br /></td>
+      <td>(0,0) to (319, 239)<br />split segment :( copied this into preceding TU</td>
+      <td>You can specify up to the entire 320&times;240-pixel image.<br />The region from (0, 0) (the upper-left corner) to (319,239) (the lower-right corner).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>preprocess</code>
+      </td>
+      <td>Specifies to apply preprocessing to the image before calculating the moments.<br />You can select a cutoff process that sets the brightness of pixels that have a brightness less than a threshold value to 0, or a digitization process that sets the brightness of pixels that have a brightness less than a threshold value to 0, and sets the brightness of all other pixels to 255.<br /><br /></td>
+      <td>Cutoff</td>
+      <td>Cutoff and digitization</td>
+    </tr>
+    <tr>
+      <td>
+        <code>preprocessIntensityThreshold</code>
+      </td>
+      <td>The brightness threshold value to use for preprocessing. <br />If you do not want to apply any preprocessing to the image, set <code>preprocess</code> to cutoff, and set this threshold value to 0.<br /></td>
+      <td>80</td>
+      <td>0 to 255</td>
+    </tr>
+  </tbody>
+</table>
+<p>These settings are stored as members of the <code><span class="ApiLink_nn__irsensor__MomentProcessorConfig">nn::irsensor::MomentProcessorConfig</span></code> structure. For more information about configuring the IR Motion Camera, see <a href="../Pages/Page_112902609.html">Common Features</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">MomentProcessorConfig</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IrCameraConfig</span> <span class="n">irCameraConfig</span><span class="p">;</span>        <span class="c1">//!&lt; IR camera settings.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Rect</span> <span class="n">windowOfInterest</span><span class="p">;</span>                <span class="c1">//!&lt; A rectangular region of the captured image to process. The coordinates of the upper-left corner of the image are (0, 0). The width of the image is IrCameraImageWidth, and the height of the image is IrCameraImageHeight.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">MomentProcessorPreprocess</span> <span class="n">preprocess</span><span class="p">;</span> <span class="c1">//!&lt; The type of preprocessing to apply.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">preprocessIntensityThreshold</span><span class="p">;</span>     <span class="c1">//!&lt; The threshold value to use for preprocessing (from 0 through 255).
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Pass the desired values for these settings to the <code><span class="ApiLink_nn__irsensor__RunMomentProcessor">nn::irsensor::RunMomentProcessor</span></code> function to start moment mode with the specified settings.</p>
+<h2 id="Anchor_112902376_h2_3">Output Format</h2>
+<p>In moment mode, data is output in the following format.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Member Name</th>
+      <th>Description</th>
+      <th>Value Range</th>
+    </tr>
+    <tr>
+      <td>
+        <code>samplingNumber</code>
+      </td>
+      <td>Value that increases each time processed results are received.</td>
+      <td>0 or greater</td>
+    </tr>
+    <tr>
+      <td>
+        <code>
+          <em>timeStamp</em>
+        </code>
+      </td>
+      <td>
+        <p>The time from when the process started to when the results of the process were obtained.</p>
+        <p>Taking the difference between this value and the <code>timeStamp</code> value for the previously obtained data, makes it possible to detect packet loss.</p>
+      </td>
+      <td>0 or greater</td>
+    </tr>
+    <tr>
+      <td>
+        <code>
+          <em>ambientNoiseLevel</em>
+        </code>
+      </td>
+      <td>
+        <p>The ambient noise level.</p>
+        <p>If there is a lot of ambient light noise, you can look at this variable</p>
+        <p>and do something like guide the user to change the play environment,</p>
+        <p>or make some such notification.</p>
+        <p>For more information, see the <a href="../Pages/Page_112902609.html#Anchor_112902609_h2_7">Common Features</a> section</p>
+        <p>
+          <em>IR Motion Camera External Light Filter</em>.</p>
+      </td>
+      <td>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_Low/</code>
+        </p>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_Middle/</code>
+        </p>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_High</code>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>blocks</code>
+      </td>
+      <td>Statistics for each block.</td>
+      <td>See the following table.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>blocks</code> includes the following elements.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Member Name</th>
+      <th>Description</th>
+      <th>Value Range</th>
+    </tr>
+    <tr>
+      <td>
+        <code>averageIntensity</code>
+      </td>
+      <td>The average value of the brightness.</td>
+      <td>0.0 to 255.0</td>
+    </tr>
+    <tr>
+      <td>centroid</td>
+      <td>The coordinates of the centroid.</td>
+      <td>Within the memory region specified for <code>windowOfInterest</code>.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>These output values are stored as members of the <code><span class="ApiLink_nn__irsensor__MomentProcessorState">nn::irsensor::MomentProcessorState</span></code> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">MomentProcessorState</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int64_t</span> <span class="n">samplingNumber</span><span class="p">;</span>                            <span class="c1">//!&lt; This value (0 or greater) increases each time processed results are received from the moment processor.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">::</span><span class="nn">nn::</span><span class="n">TimeSpanType</span> <span class="n">timeStamp</span><span class="p">;</span>                      <span class="c1">//!&lt; The time from when the process started to when the results of the process were obtained.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IrCameraAmbientNoiseLevel</span> <span class="n">ambientNoiseLevel</span><span class="p">;</span>       <span class="c1">//!&lt; The detected ambient noise level.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_PADDING4</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">MomentStatistic</span> <span class="n">blocks</span><span class="p">[</span><span class="n">MomentProcessorBlockCount</span><span class="p">];</span> <span class="c1">//!&lt; Statistics for each block.
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The information for each block is stored in members of the <code><span class="ApiLink_nn__irsensor__MomentStatistic">nn::irsensor::MomentStatistic</span></code> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">MomentStatistic</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">averageIntensity</span><span class="p">;</span>      <span class="c1">//!&lt; The average value of the block's brightness (0 to IrCameraIntensityMax).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">::</span><span class="nn">nn::util::</span><span class="n">Float2</span> <span class="n">centroid</span><span class="p">;</span> <span class="c1">//!&lt; The coordinates of the block's centroid (coordinates within the memory region specified for MomentProcessorConfig::windowOfInterest).
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>To get the calculated values, pass a buffer formatted appropriately for the output values when calling the <code><span class="ApiLink_nn__irsensor__GetMomentProcessorState">nn::irsensor::GetMomentProcessorState</span></code> or <code><span class="ApiLink_nn__irsensor__GetMomentProcessorStates">nn::irsensor::GetMomentProcessorStates</span></code> function.</p>
+<p>To get more detailed information, such as the overall centroid of several blocks, pass the retrieved <code><span class="ApiLink_nn__irsensor__MomentProcessorState">nn::irsensor::MomentProcessorState</span></code> data, along with the data for the blocks you want to analyze, to the <code><span class="ApiLink_nn__irsensor__CalculateMomentRegionStatistic">nn::irsensor::CalculateMomentRegionStatistic</span></code> function. The function will return an instance of <code><span class="ApiLink_nn__irsensor__MomentStatistic">nn::irsensor::MomentStatistic</span></code> that contains various statistics about the specified group of blocks.<br /></p>
+<h1 id="Anchor_112902376_h1_3">Using Moment Mode</h1>
+<p>The basic workflow for using moment mode is as follows.</p>
+<ol>
+  <li>
+    <p>Get <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code> for the specified <code><span class="ApiLink_nn__hid__NpadIdType">nn::hid::NpadIdType</span></code>, and initialize the IR Motion Camera.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/irsensor.h&gt;
+</span>
+<span class="nn">nn::irsensor::</span><span class="n">IrCameraHandle</span> <span class="n">handle</span> <span class="o">=</span> <span class="nn">nn::irsensor::</span><span class="n">GetIrCameraHandle</span><span class="p">(</span><span class="n">npadIdType</span><span class="p">);</span>
+<span class="nn">nn::irsensor::</span><span class="n">Initialize</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Generate the initial settings for moment mode.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">MomentProcessorConfig</span> <span class="n">config</span><span class="p">;</span>
+<span class="c1">// Get the default settings (if you want to configure these settings individually, you can also specify them directly).
+</span><span class="nn">nn::irsensor::</span><span class="n">GetMomentProcessorDefaultConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To begin capturing images, call the <code><span class="ApiLink_nn__irsensor__RunMomentProcessor">nn::irsensor::RunMomentProcessor</span></code> function, passing in the retrieved <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code>.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>&nbsp;<span class="nn">nn::irsensor::</span><span class="n">RunMomentProcessor</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">config</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Get an output buffer formatted appropriately for <code><span class="ApiLink_nn__irsensor__MomentProcessorState">nn::irsensor::MomentProcessorState</span></code> ready, and then call the <code><span class="ApiLink_nn__irsensor__GetMomentProcessorState">nn::irsensor::GetMomentProcessorState</span></code> or <code><span class="ApiLink_nn__irsensor__GetMomentProcessorStates">nn::irsensor::GetMomentProcessorStates</span></code> function.  <br />The <code><span class="ApiLink_nn__irsensor__GetMomentProcessorStates">nn::irsensor::GetMomentProcessorStates</span></code> function can get up to <code><span class="ApiLink_nn__irsensor__MomentProcessorStateCountMax">nn::irsensor::MomentProcessorStateCountMax</span></code> processed results at one time.<br />The latest processed results as of the time the function call was made are retrieved. However, the results are updated at intervals of 15 milliseconds or less due to the restrictions on the speed of data transfer via the controller&rsquo;s Bluetooth module. As a result, we recommend practices such as polling the results to be obtained in synchronization with the game frames.<br /></p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">MomentProcessorState</span> <span class="n">states</span><span class="p">[</span><span class="nn">nn::irsensor::</span><span class="n">MomentProcessorStateCountMax</span><span class="p">];</span>
+<span class="kt">int</span> <span class="n">count</span><span class="p">;</span>
+<span class="nn">nn::irsensor::</span><span class="n">GetMomentProcessorStates</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">count</span><span class="p">,</span> <span class="nn">nn::irsensor::</span><span class="n">MomentProcessorStateCountMax</span><span class="p">,</span> <span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Use the <code><span class="ApiLink_nn__irsensor__CalculateMomentRegionStatistic">nn::irsensor::CalculateMomentRegionStatistic</span></code> function to get more detailed information about several blocks of interest that are based on the processed results that you obtained. <br /><code><span class="ApiLink_nn__irsensor__CalculateMomentRegionStatistic">nn::irsensor::CalculateMomentRegionStatistic</span></code> is a utility function that takes the retrieved <code><span class="ApiLink_nn__irsensor__MomentProcessorState">nn::irsensor::MomentProcessorState</span></code> data, and the group of rectangular blocks that you want to analyze, and returns an instance of <code><span class="ApiLink_nn__irsensor__MomentStatistic">nn::irsensor::MomentStatistic</span></code>, which contains statistics about the overall group of specified blocks.<br />Perform the following to calculate the average brightness and the coordinates of the centroid for the entire screen.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">MomentStatistic</span> <span class="n">wholeImage</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">startRow</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">startColumn</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">rowCount</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">columnCount</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
+<span class="n">wholeImage</span> <span class="o">=</span> <span class="nn">nn::irsensor::</span><span class="n">CalculateMomentRegionStatistic</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">,</span> <span class="n">startRow</span><span class="p">,</span> <span class="n">startColumn</span><span class="p">,</span> <span class="n">rowCount</span><span class="p">,</span> <span class="n">columnCount</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To stop moment mode, call the <code><span class="ApiLink_nn__irsensor__StopImageProcessor">nn::irsensor::StopImageProcessor</span></code> function, passing in the <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code> of the IR sensor you want to stop.<br />Call the <code><span class="ApiLink_nn__irsensor__Finalize">nn::irsensor::Finalize</span></code> function to finalize the IR Motion Camera.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">StopImageProcessor</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span>
+<span class="nn">nn::irsensor::</span><span class="n">Finalize</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_112902376_h2_4">Moment Mode Sample Demo</h2>
+<p>See the sample demos located in the <code>Samples\Sources\Applications\IrSensorMomentBasic</code> directory.<br />To quickly check how moment mode works, see the sample demos located in the <code>Samples\Sources\Applications\IrSensorViewer</code> directory.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__irsensor__MomentProcessorConfig', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_moment_processor_config.html' )
+SetUrl( 'ApiLink_nn__irsensor__RunMomentProcessor', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a0658b45f92e49e1612735574042920e9' )
+SetUrl( 'ApiLink_nn__irsensor__MomentProcessorState', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_moment_processor_state.html' )
+SetUrl( 'ApiLink_nn__irsensor__MomentStatistic', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_moment_statistic.html' )
+SetUrl( 'ApiLink_nn__irsensor__GetMomentProcessorState', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a505a4e54e2b1931bd78c4a85f5b67276' )
+SetUrl( 'ApiLink_nn__irsensor__GetMomentProcessorStates', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a54d616f420145c9b7ac415d3c3d93523' )
+SetUrl( 'ApiLink_nn__irsensor__CalculateMomentRegionStatistic', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a59c192d7cb6147dc50ac8d4b1751d746' )
+SetUrl( 'ApiLink_nn__irsensor__IrCameraHandle', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_ir_camera_handle.html' )
+SetUrl( 'ApiLink_nn__hid__NpadIdType', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a5923008962b52bf501f91b30013aedd6' )
+SetUrl( 'ApiLink_nn__irsensor__MomentProcessorStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a3c24a28886e911ee63712d5e7dbec526' )
+SetUrl( 'ApiLink_nn__irsensor__StopImageProcessor', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a3052171f2c63aafc0e4a164366ae22d7' )
+SetUrl( 'ApiLink_nn__irsensor__Finalize', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a6265f5c6e6d6fc0e67fc6882a8945284' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

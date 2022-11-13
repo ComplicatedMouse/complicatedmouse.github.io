@@ -1,0 +1,356 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>CPU performance metrics | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- CPU performance metrics -->
+<div class="pagetitle" id="PageId_113805876">CPU performance metrics</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_113805876_h1_1">Overview of CPU Performance Metrics</a>
+    </li>
+    <li>
+      <a href="#Anchor_113805876_h1_2">Using the CPU Performance Metrics Feature</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_113805876_h2_1">Handling the Measurement Results</a>
+      </li>
+      <li>
+        <a href="#Anchor_113805876_h2_2">Measuring Nested Procedures</a>
+      </li>
+      <li>
+        <a href="#Anchor_113805876_h2_3">Attaching</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_113805876_h1_1">Overview of CPU Performance Metrics</h1>
+<p>CPU performance metrics provide a way to measure the CPU processing time for any number of different sections in your code.<br />Performance data can be easily exported by compiling the difference in system ticks, internally, when you surround the segment to measure with appropriate functions.  </p>
+<p>CPU performance metrics are conducted using the <code><span class="ApiLink_nn__perf__CpuMeter">nn::perf::CpuMeter</span></code> class.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>To simultaneously measure the performance of parallel processes, a separate <span class="ApiLink_nn__perf__CpuMeter"><code>nn::perf::CpuMeter</code></span> object must be created and attached to each parallel process.</p>
+  </div>
+</div>
+<h1 id="Anchor_113805876_h1_2">Using the CPU Performance Metrics Feature</h1>
+<ol>
+  <li>
+    <p>An initialized <code><span class="ApiLink_nn__perf__LoadMeterInfo">nn::perf::LoadMeterInfo</span></code> object.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/perf.h&gt;
+</span>
+<span class="nn">nn::perf::</span><span class="n">LoadMeterInfo</span> <span class="n">info</span><span class="p">;</span>
+<span class="n">info</span><span class="p">.</span><span class="n">SetSectionCountMax</span><span class="p">(</span> <span class="mi">64</span> <span class="p">);</span>　　　　　　　<span class="c1">// The maximum number of sections to measure.
+</span><span class="n">info</span><span class="p">.</span><span class="n">SetBufferCount</span><span class="p">(</span> <span class="mi">2</span> <span class="p">);</span>　　　　　　　　　　<span class="c1">// The number of buffers for storing the measurement results of each frame. (Need at least a double-buffer.)
+</span>&nbsp;
+<span class="c1">// You can use info.SetCoreCount() to set the core used, but CpuMeter does not use this setting after it is initialized.
+</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Allocates memory to use in <code><span class="ApiLink_nn__perf__CpuMeter">nn::perf::CpuMeter</span></code>.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="kt">size_t</span> <span class="n">memorySize</span> <span class="o">=</span> <span class="nn">CpuMeter::</span><span class="n">CalculateBufferSize</span><span class="p">(</span> <span class="n">info</span> <span class="p">);</span>
+<span class="kt">size_t</span> <span class="n">memoryAlignment</span> <span class="o">=</span> <span class="nn">CpuMeter::</span><span class="n">GetBufferAlignment</span><span class="p">();</span>
+&nbsp;
+<span class="kt">void</span><span class="o">*</span> <span class="n">memory</span> <span class="o">=</span> <span class="n">AllocateMemory</span><span class="p">(</span> <span class="n">memorySize</span><span class="p">,</span> <span class="n">memoryAlignment</span> <span class="p">);</span>　　　<span class="c1">// Allocates memory using an allocator in the application.
+</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Initialize the <span class="ApiLink_nn__perf__CpuMeter"><code>nn::perf::CpuMeter</code></span> class.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::perf::</span><span class="n">CpuMeter</span> <span class="n">meter</span><span class="p">;</span>
+<span class="n">meter</span><span class="p">.</span><span class="n">Initialize</span><span class="p">(</span> <span class="n">info</span><span class="p">,</span> <span class="n">memory</span><span class="p">,</span> <span class="n">memorySize</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Enclose each section of code you want to measure between the <span class="ApiLink_void_nn__perf__CpuMeter__BeginMeasure()_NN_NOEXCEPT"><code>BeginMeasure()</code></span>  function and the <span class="ApiLink_void_nn__perf__CpuMeter__EndMeasure()_NN_NOEXCEPT"><code>EndMeasure()</code></span> function.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">meter</span><span class="p">.</span><span class="n">BeginMeasure</span><span class="p">();</span>  <span class="c1">//  Starts the measurement.
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Measurement processing
+</span><span class="p">}</span>
+<span class="n">meter</span><span class="p">.</span><span class="n">EndMeasure</span><span class="p">();</span>  <span class="c1">// Ends the measurement.
+</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Use the <span class="ApiLink_virtual_void_nn__perf__CpuMeter__Next()_NN_NOEXCEPT_NN_OVERRIDE"><code>Next()</code></span> function to switch the buffer where the measurement results are aggregated and saved at the end of every frame. If you do not switch the buffer this way, the metrics will not work right.<br />The <span class="ApiLink_virtual_void_nn__perf__CpuMeter__Next()_NN_NOEXCEPT_NN_OVERRIDE"><code>Next()</code></span> function aggregates the measurement results for the (<em>buffer count</em> - 2)th previous frame.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="c1">// Rendering for each frame
+</span><span class="k">for</span><span class="p">(</span> <span class="kt">int</span> <span class="n">frame</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">frame</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">;</span> <span class="o">++</span><span class="n">frame</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">meter</span><span class="p">.</span><span class="n">BeginMeasure</span><span class="p">();</span>  <span class="c1">//  Starts the measurement.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Measurement processing
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">meter</span><span class="p">.</span><span class="n">EndMeasure</span><span class="p">();</span>  <span class="c1">// Ends the measurement.
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">meter</span><span class="p">.</span><span class="n">Next</span><span class="p">();</span>             <span class="c1">// Aggregate results and switch the buffer.
+</span><span class="p">}</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Output the measurement results to the console.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">meter</span><span class="p">.</span><span class="n">Dump</span><span class="p">();</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The following example shows the results that are output. The results are output in a format that starts by showing the meter name in brackets [<em>meter name</em>], followed by the total time required for processing in that measurement section, followed by a value in parentheses (<em>value</em>) that represents the percentage of the frame rate set by the <span class="ApiLink_void_nn__perf__LoadMeterBase__SetFrameRate(float_frameRate)_NN_NOEXCEPT"><code>SetFrameRate()</code></span> function.<br />You can use <code><span class="ApiLink_void_nn__perf__LoadMeterBase__SetName(const_char_*name)_NN_NOEXCEPT">SetName()</span></code> to configure the meter name.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="p">[</span> <span class="n">MyMeter</span> <span class="p">]</span>     <span class="mf">15.657</span> <span class="n">ms</span> <span class="p">(</span><span class="mf">93.943764</span><span class="o">%</span><span class="p">)</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Finalize.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">meter</span><span class="p">.</span><span class="n">Finalize</span><span class="p">();</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Run a process in the application to free the allocated memory. </p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="n">FreeMemory</span><span class="p">(</span> <span class="n">memory</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_113805876_h2_1">Handling the Measurement Results</h2>
+<p>The measurement results for each section are handled as an <code><span class="ApiLink_nn__perf__LoadMeterBase__Section">nn::perf::LoadMeterBase::Section</span></code> structure object.<br />The <code><span class="ApiLink_nn__perf__LoadMeterBase__Section">nn::perf::LoadMeterBase::Section</span></code> structure stores the following information.</p>
+<ul>
+  <li>Section start time</li>
+  <li>Section end time</li>
+  <li>Section color</li>
+  <li>Section name</li>
+  <li>Section tag</li>
+  <li>New section if measuring with a nested procedure</li>
+  <li>Depth of nested procedure<br /></li>
+</ul>
+<p>You can also specify a color, name, and tag for the next section to measure as parameters in the <span class="ApiLink_void_nn__perf__CpuMeter__BeginMeasure(const_char_*name|_uint32_t_tag|_const_nn__util__Color4u8Type_&color)_NN_NOEXCEPT"><code>BeginMeasure()</code></span> function.<br /><br />Use the <code><span class="ApiLink_const_Section_&_nn__perf__LoadMeterBase__GetLastResult(int_index)_const_NN_NOEXCEPT">GetLastResult()</span></code> function to get <code><span class="ApiLink_nn__perf__LoadMeterBase__Section">nn::perf::LoadMeterBase::Section</span></code>.<br />Use the <code><span class="ApiLink_nn__TimeSpan_nn__perf__LoadMeterBase__GetLastTotalSpan()_const_NN_NOEXCEPT">GetLastTotalSpan()</span></code> function to get the total time required for the measured sections.</p>
+<p>
+  <br />
+</p>
+<p>The console output and the values obtained by the functions that get measurement results (like <code><span class="ApiLink_const_Section_&_nn__perf__LoadMeterBase__GetLastResult(int_index)_const_NN_NOEXCEPT">GetLastResult()</span></code> and <code><span class="ApiLink_nn__TimeSpan_nn__perf__LoadMeterBase__GetLastTotalSpan()_const_NN_NOEXCEPT">GetLastTotalSpan()</span></code>) are the most recent results returned by the <span class="ApiLink_virtual_void_nn__perf__CpuMeter__Next()_NN_NOEXCEPT_NN_OVERRIDE"><code>Next()</code></span> function.<br />The <span class="ApiLink_virtual_void_nn__perf__CpuMeter__Next()_NN_NOEXCEPT_NN_OVERRIDE"><code>Next()</code></span> function aggregates the measurement results for the (<em>buffer count</em> - 2)th previous frame.<br />The number of buffers can be set using the <code><span class="ApiLink_void_nn__perf__LoadMeterInfo__SetBufferCount(int_bufferCount)_NN_NOEXCEPT">nn::perf::LoadMeterInfo::SetBufferCount()</span></code> function. (The default is a double buffer, or <code>2</code>.)</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">//--------- Frame 0 ------------//
+</span><span class="n">meter</span><span class="p">.</span><span class="n">BeginMeasure</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">);</span>
+<span class="n">meter</span><span class="p">.</span><span class="n">EndMeasure</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// If buffer is 2, aggregate the measurements for A.
+// If buffer is 3, do not aggregate results.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">Next</span><span class="p">();</span>
+<span class="c1">// If buffer is 2, output results for A.
+// If buffer is 3, output initial values.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">Dump</span><span class="p">();</span>
+&nbsp;
+<span class="c1">//--------- Frame 1 ------------//
+</span><span class="n">meter</span><span class="p">.</span><span class="n">BeginMeasure</span><span class="p">(</span><span class="s">&quot;B&quot;</span><span class="p">);</span>
+<span class="n">meter</span><span class="p">.</span><span class="n">EndMeasure</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// If buffer is 2, aggregate the measurements for B.
+// If buffer is 3, aggregate the measurements for A.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">Next</span><span class="p">();</span>
+<span class="c1">// If buffer is 2, output results for B.
+// If buffer is 3, output results for A.
+</span><span class="n">meter</span><span class="p">.</span><span class="n">Dump</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_113805876_h2_2">Measuring Nested Procedures</h2>
+<p>Nested procedures can be measured in the following way.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">BeginMeasure</span> <span class="p">(</span><span class="s">&quot;Process A&quot;</span><span class="p">);</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">BeginMeasure</span> <span class="p">(</span><span class="s">&quot;Process B&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//  Processing
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">EndMeasure</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="n">EndMeasure</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In this case, the logged time and the time obtained using the <code><span class="ApiLink_nn__TimeSpan_nn__perf__LoadMeterBase__GetLastTotalSpan()_const_NN_NOEXCEPT">GetLastTotalSpan()</span></code> function are for Process A, and not for (Process A + Process B). The measurement results of the nested procedure are not added to this. </p>
+<h2 id="Anchor_113805876_h2_3">Attaching</h2>
+<p>Use <code><span class="ApiLink_void_nn__perf__LoadMeterBase__AttachLoadMeter(LoadMeterBase_*meter)_NN_NOEXCEPT">AttachLoadMeter()</span></code> to attach a separate <code><span class="ApiLink_nn__perf__CpuMeter">nn::perf::CpuMeter</span></code> object and an <code><span class="ApiLink_nn__perf__GpuMeter">nn::perf::GpuMeter</span></code> object to the target.<br />When an object is attached, calling <code><span class="ApiLink_virtual_void_nn__perf__LoadMeterBase__Next()_NN_NOEXCEPT">Next()</span></code> and <code><span class="ApiLink_void_nn__perf__LoadMeterBase__Dump()_NN_NOEXCEPT">Dump()</span></code> results in both of those functions also being called simultaneously for the attached object.   </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::perf::</span><span class="n">CpuMeter</span> <span class="n">meterMain</span><span class="p">;</span>
+<span class="nn">nn::perf::</span><span class="n">CpuMeter</span> <span class="n">meterSubCpu</span><span class="p">;</span>
+<span class="nn">nn::perf::</span><span class="n">GpuMeter</span> <span class="n">meterSubGpu</span><span class="p">;</span>
+&nbsp;
+<span class="n">meterMain</span><span class="p">.</span><span class="n">AttachLoadMeter</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">meterSubCpu</span> <span class="p">);</span>
+<span class="n">meterMain</span><span class="p">.</span><span class="n">AttachLoadMeter</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">meterSubGpu</span> <span class="p">);</span>
+
+<span class="k">for</span><span class="p">(</span> <span class="kt">int</span> <span class="n">frame</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">frame</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">;</span> <span class="o">++</span><span class="n">frame</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Processing details for each frame
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">meterMain</span><span class="p">.</span><span class="n">Next</span><span class="p">();</span> <span class="c1">// Next() is also called internally for meterSubCpu and meterSubGpu.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">meterMain</span><span class="p">.</span><span class="n">Dump</span><span class="p">();</span> <span class="c1">// Dump() is also called internally for meterSubCpu and meterSubGpu.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__perf__CpuMeter', '../../../Api/HtmlNX/classnn_1_1perf_1_1_cpu_meter.html' )
+SetUrl( 'ApiLink_nn__perf__LoadMeterInfo', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_info.html' )
+SetUrl( 'ApiLink_void_nn__perf__CpuMeter__BeginMeasure()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_cpu_meter.html#aaad5315c7acfb81faa43c543263a86a4' )
+SetUrl( 'ApiLink_void_nn__perf__CpuMeter__EndMeasure()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_cpu_meter.html#ad2ca1657fa553bf6b26ee1c5ef148033' )
+SetUrl( 'ApiLink_virtual_void_nn__perf__CpuMeter__Next()_NN_NOEXCEPT_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1perf_1_1_cpu_meter.html#a5c3e1424475d4aa3312cd06223203821' )
+SetUrl( 'ApiLink_void_nn__perf__LoadMeterBase__SetFrameRate(float_frameRate)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_base.html#a38bc114bbde7be2db1c62fe185ae7efe' )
+SetUrl( 'ApiLink_void_nn__perf__LoadMeterBase__SetName(const_char_*name)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_base.html#a003f2ba2f7760c174df40e008ef155dd' )
+SetUrl( 'ApiLink_nn__perf__LoadMeterBase__Section', '../../../Api/HtmlNX/structnn_1_1perf_1_1_load_meter_base_1_1_section.html' )
+SetUrl( 'ApiLink_void_nn__perf__CpuMeter__BeginMeasure(const_char_*name|_uint32_t_tag|_const_nn__util__Color4u8Type_&color)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_cpu_meter.html#adad92a510925364eb81aedba60d22d59' )
+SetUrl( 'ApiLink_const_Section_&_nn__perf__LoadMeterBase__GetLastResult(int_index)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_base.html#aab42a9f8cf7638a2fc0828b1c4d45b16' )
+SetUrl( 'ApiLink_nn__TimeSpan_nn__perf__LoadMeterBase__GetLastTotalSpan()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_base.html#a0bb58ff6d707e0019f189722dfda3b96' )
+SetUrl( 'ApiLink_void_nn__perf__LoadMeterInfo__SetBufferCount(int_bufferCount)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_info.html#a54354c8b7d8625f788bbb4dea35b87d9' )
+SetUrl( 'ApiLink_void_nn__perf__LoadMeterBase__AttachLoadMeter(LoadMeterBase_*meter)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_base.html#a5840e28c79d9cc2fd7ae8bd4f14161d8' )
+SetUrl( 'ApiLink_nn__perf__GpuMeter', '../../../Api/HtmlNX/classnn_1_1perf_1_1_gpu_meter.html' )
+SetUrl( 'ApiLink_virtual_void_nn__perf__LoadMeterBase__Next()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_base.html#a43157c0b871db6e3ac6f7cd43831e92d' )
+SetUrl( 'ApiLink_void_nn__perf__LoadMeterBase__Dump()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1perf_1_1_load_meter_base.html#a0f849fa3a545aaeec11c51358c69b975' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

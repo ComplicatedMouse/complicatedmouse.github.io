@@ -1,0 +1,487 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Future | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Future -->
+<div class="pagetitle" id="PageId_468125835">Future</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_468125835_h1_1">Overview</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_468125835_h2_1">Basic Operations</a>
+      </li>
+      <li>
+        <a href="#Anchor_468125835_h2_2">Sharing Status</a>
+      </li>
+      <li>
+        <a href="#Anchor_468125835_h2_3">SharedFuture</a>
+      </li>
+      <li>
+        <a href="#Anchor_468125835_h2_4">Differences From std::future</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_468125835_h1_2">How to Use</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_468125835_h2_5">Basic Operations of Future</a>
+      </li>
+      <li>
+        <a href="#Anchor_468125835_h2_6">Basic Operations of SharedFuture</a>
+      </li>
+      <li>
+        <a href="#Anchor_468125835_h2_7">Special Member Functions of Future and SharedFuture</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_468125835_h1_1">Overview</h1>
+<p>The <code>async</code> library uses a general pattern for future to return results for asynchronous processing. The application can get execution results of the asynchronous API function call by using the <span class="ApiLink_nn__async__Future">nn::async::Future</span> class template.</p>
+<h2 id="Anchor_468125835_h2_1">Basic Operations</h2>
+<p>NintendoSDK asynchronous API functions start asynchronous processing at the time they are called, and return a <code>Future</code> object as the return value. The returned <code>Future</code> object is associated with the asynchronous process initiated by the API call and functions as an interface for performing asynchronous processing operations.</p>
+<p>The application can use the returned <code>Future</code> object to perform the following operations.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Operation</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Getting Execution Results</td>
+      <td>
+        <p>The results are retrieved after asynchronous processing is completed. Results cannot be obtained before asynchronous processing is complete. The types of values that can be obtained as an result depend on the asynchronous API function used to get the <code>Future</code> object.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Asynchronous Processing Completion Standby</td>
+      <td>Stands by until asynchronous processing is completed and results can be obtained. It can also be used only to determine whether asynchronous processing is complete.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The following implementation is expected for applications using asynchronous API functions.</p>
+<ol>
+  <li>These functions call the asynchronous API function to start asynchronous processing, and get the <code>Future</code> object.</li>
+  <li>While asynchronous processing is in progress, the application runs other processing in parallel.</li>
+  <li>When the execution result of the asynchronous API function is required, the application uses the <code>Future</code> object to wait until the asynchronous processing is complete. Alternatively, it polls for completion of asynchronous processing.</li>
+  <li>It gets the asynchronous API function result from the <code>Future</code> object.</li>
+</ol>
+<h2 id="Anchor_468125835_h2_2">Sharing Status</h2>
+<p>The <code>Future</code> object refers to at most one shared state. A shared state is an object used inside the <code>async</code> library for communicating with a thread executing asynchronous processing.</p>
+<p>The <code>Future</code> object can get the result and completion status of the asynchronous processing by referring to the shared state. The <code>Future</code> object returned from the asynchronous API function refers to the shared state.</p>
+<p>A <code>Future</code> object that does not refer to the shared state can not provide abilities like getting the result and waiting for completion of asynchronous processing. <code>Future</code> objects that do not refer to the shared state are generated by the default constructor. In addition, references may be discarded by calling the member function of the <code>Future</code> object.</p>
+<h2 id="Anchor_468125835_h2_3">SharedFuture</h2>
+<p>The <span class="ApiLink_nn__async__SharedFuture">nn::async::SharedFuture</span> class template is similar to <code>Future</code>.</p>
+<p>The <code>Future</code> class template allows only one owner to get results. For this reason, it has the following characteristics.</p>
+<ul>
+  <li>
+    <code>Future</code> objects cannot be copied. However, they can be moved.</li>
+  <li>You can only get results from the object once.</li>
+  <li>The execution result value is returned by a move.</li>
+</ul>
+<p>In contrast, <code>SharedFuture</code> is a class template where results can be shared by multiple owners. For this reason, it has the following characteristics.</p>
+<ul>
+  <li>
+    <code>SharedFuture</code> objects can be copied and moved.</li>
+  <li>You can get results from this object as many times as you like.</li>
+  <li>The execution result value is returned by a <code>const</code> reference.</li>
+</ul>
+<p>
+  <code>SharedFuture</code> objects can be generated from <code>Future</code> objects. <code>SharedFuture</code> objects cannot be restored into <code>Future</code> objects.</p>
+<p>To reference certain asynchronous processing execution results from multiple locations on the program, consider generating a <code>SharedFuture</code> object. For example, in a case where multiple threads reference an execution result value, we recommend generating a <code>SharedFuture</code> object from a <code>Future</code> object, and copying that for each thread. <code>SharedFuture</code> objects can be copied, and you can get execution results as many times as you like, so this can be treated the same as a general object.</p>
+<p>To reference certain asynchronous processing execution results from only one place on the program, we recommend using a <code>Future</code> object. The <code>Future</code> object returns the value of the result by a move, so it has a performance advantage.</p>
+<h2 id="Anchor_468125835_h2_4">Differences From std::future</h2>
+<p>The <code>Future</code> class template has a function similar to the <code>std::future</code> class template introduced in the standard library from C++11, but mainly differs in the following way.</p>
+<ul>
+  <li>The names of identifiers follow the NintendoSDK naming convention.</li>
+  <li>All member functions of the <code>Future</code> class template are specified as <code>noexcept</code>. Exceptions are not used to return asynchronous processing error information. Depending on the asynchronous API function that returned the <code>Future</code> object, the result value may contain error information.</li>
+  <li>Instead of providing a partial standby member functions, such as <code>wait_for()</code> or <code>wait_until()</code>, of the <code>std::future</code> class template, the <code>Future</code> class template provides a standby function according to the NintendoSDK <span class="ApiLink_nn__os__Event">nn::os::Event</span> class. The <code>Future</code> class template is also supported by the <a href="../Pages/Page_83955865.html">multiple wait feature</a> provided by the <code>os</code> library.</li>
+  <li>An application cannot directly generate a <code>Future</code> object that references the shared state. In other words, the <code>async</code> library does not provide a function corresponding to functions such as <code>std::async()</code> and <code>std::packaged_task</code>.</li>
+</ul>
+<h1 id="Anchor_468125835_h1_2">How to Use</h1>
+<h2 id="Anchor_468125835_h2_5">Basic Operations of Future</h2>
+<h3 id="Anchor_468125835_h3_1">Getting Execution Results</h3>
+<p>You can use the <span class="ApiLink_T_nn__async__Future__Get()_NN_NOEXCEPT">Get()</span> function to get asynchronous processing results. If asynchronous processing execution is not complete when <code>Get()</code> is called, it blocks the caller until completion.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Future object that returns a result of int type.
+</span><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// Gets the result from the Future object. Blocked if asynchronous processing is not complete.
+</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">future</span><span class="p">.</span><span class="n">Get</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Note that <code>Future</code> objects cannot be obtained again after being obtained via Get(). Calling Get() two or more times causes a precondition violation.</p>
+<h3 id="Anchor_468125835_h3_2">Waiting for Asynchronous Processing to Complete</h3>
+<p>Call <span class="ApiLink_void_nn__async__Future__Wait()_const_NN_NOEXCEPT">Wait()</span> to wait for asynchronous processing to complete.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// Blocks the caller until asynchronous processing is complete.
+</span><span class="n">future</span><span class="p">.</span><span class="n">Wait</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Call <span class="ApiLink_bool_nn__async__Future__TryWait()_const_NN_NOEXCEPT">TryWait()</span> to verify whether the processing has already been completed.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">future</span><span class="p">.</span><span class="n">TryWait</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Asynchronous processing is complete.
+</span><span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Asynchronous processing is not complete.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Call <span class="ApiLink_bool_nn__async__Future__TimedWait(TimeSpan_timeout)_const_NN_NOEXCEPT">TimedWait()</span> to wait for asynchronous processing completion with a timeout.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// Waits for asynchronous processing completion with a one-millisecond timeout.
+</span><span class="k">if</span> <span class="p">(</span><span class="n">future</span><span class="p">.</span><span class="n">TimedWait</span><span class="p">(</span><span class="nn">nn::TimeSpan::</span><span class="n">FromMilliSeconds</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Completed prior to timeout.
+</span><span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Timed out.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Use <span class="ApiLink_void_nn__async__Future__AttachCompletionEvent(os__MultiWaitHolderType_*holder)_const_NN_NOEXCEPT">AttachCompletionEvent()</span> to perform multiple wait, meaning simultaneously make the asynchronous processing completion and the synchronization object provided by the <code>os</code> library wait.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// Initializes MultiWaitType.
+</span><span class="nn">nn::os::</span><span class="n">MultiWaitType</span> <span class="n">multiWait</span><span class="p">;</span>
+<span class="nn">nn::os::</span><span class="n">InitializeMultiWait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">);</span>
+
+<span class="c1">// Binds MultiWaitHolderType with the asynchronous processing completion event.
+</span><span class="nn">nn::os::</span><span class="n">MultiWaitHolder</span> <span class="n">futureWaitHolder</span><span class="p">;</span>
+<span class="n">future</span><span class="p">.</span><span class="n">AttachCompletionEvent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">futureWaitHolder</span><span class="p">);</span>
+
+<span class="c1">// Links MultiWaitHolderType to the MultiWaitType list.
+</span><span class="nn">nn::os::</span><span class="n">LinkMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">futureWaitHolder</span><span class="p">);</span>
+
+<span class="c1">// Links MultiWaitHolderType objects bound to other synchronization objects to the MultiWaitType list as needed.
+</span>
+<span class="c1">// Performs multiple wait.
+</span><span class="nn">nn::os::</span><span class="n">MultiWaitHolder</span><span class="o">*</span> <span class="n">signaled</span> <span class="o">=</span> <span class="nn">nn::os::</span><span class="n">WaitAny</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">);</span>
+
+<span class="c1">// Specifies the signaled object.
+</span><span class="k">if</span> <span class="p">(</span><span class="n">signaled</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">futureWaitHolder</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Asynchronous processing is complete.
+</span><span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// A different synchronization object is signaled.
+</span><span class="p">}</span>
+
+<span class="c1">// Destroys MultiWaitType and MultiWaitHolderType.
+</span><span class="nn">nn::os::</span><span class="n">UnlinkAllMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">FinalizeMultiWaitHolder</span><span class="p">(</span><span class="o">&amp;</span><span class="n">futureWaitHolder</span><span class="p">);</span>
+<span class="nn">nn::os::</span><span class="n">FinalizeMultiWait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">multiWait</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_468125835_h3_3">Getting the Shared State Reference Status</h3>
+<p>
+  <span class="ApiLink_bool_nn__async__Future__IsValid()_const_NN_NOEXCEPT">IsValid()</span> determines whether the <code>Future</code> object refers to a shared state.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">future</span><span class="p">.</span><span class="n">IsValid</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Refers to a shared state.
+</span><span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Does not refer to a shared state.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Shared state references for <code>Future</code> objects are discarded when you call <code>Get()</code> or <code>Share()</code> as in the following example.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// Refers to a shared state prior to calling Get().
+</span><span class="n">NN_ASSERT</span><span class="p">(</span><span class="n">future</span><span class="p">.</span><span class="n">IsValid</span><span class="p">());</span>
+
+<span class="c1">// Gets the result from the Future object.
+</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">future</span><span class="p">.</span><span class="n">Get</span><span class="p">();</span>
+
+<span class="c1">// Shared state references are discarded at the same time as the Get() call.
+</span><span class="n">NN_ASSERT</span><span class="p">(</span><span class="o">!</span><span class="n">future</span><span class="p">.</span><span class="n">IsValid</span><span class="p">());</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_468125835_h2_6">Basic Operations of SharedFuture</h2>
+<h3 id="Anchor_468125835_h3_4">Creating an Object</h3>
+<p>
+  <span class="ApiLink_nn__async__SharedFuture">SharedFuture</span> objects can be generated from <span class="ApiLink_SharedFuture__T___nn__async__Future__Share()_NN_NOEXCEPT">Share()</span>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// Generates a SharedFuture object from future.
+</span><span class="nn">nn::async::</span><span class="n">SharedFuture</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">sharedFuture</span> <span class="o">=</span> <span class="n">future</span><span class="p">.</span><span class="n">Share</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The shared state reference held by the <code>Future</code> object is transferred to the <code>SharedFuture</code> object at this time. Note that the <code>Future</code> object can no longer be used after the <code>SharedFuture</code> object is generated.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// The shared state reference of future is moved to sharedFuture when the SharedFuture object is generated.
+</span><span class="nn">nn::async::</span><span class="n">SharedFuture</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">sharedFuture</span> <span class="o">=</span> <span class="n">future</span><span class="p">.</span><span class="n">Share</span><span class="p">();</span>
+
+<span class="c1">// Because the shared state reference moves, future cannot be used after calling Share().
+</span><span class="n">NN_ASSERT</span><span class="p">(</span><span class="o">!</span><span class="n">f</span><span class="p">.</span><span class="n">IsValid</span><span class="p">());</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>SharedFuture</code> objects can also be generated by a constructor.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// Generates a SharedFuture object using a constructor. The Future object needs to be moved.
+</span><span class="nn">nn::async::</span><span class="n">SharedFuture</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">sharedFuture</span><span class="p">(</span><span class="nn">std::</span><span class="n">move</span><span class="p">(</span><span class="n">future</span><span class="p">));</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_468125835_h3_5">Getting Execution Results</h3>
+<p>Just like for <code>Future</code>, the <span class="ApiLink_const_T_&_nn__async__SharedFuture__Get()_const_NN_NOEXCEPT">Get()</span> function can be used to get asynchronous processing results. Note that the return value is a <code>const</code> reference, and can be received as many times as you like.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">SharedFuture</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">sharedFuture</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// Gets an execution result from the SharedFuture object. Blocked if asynchronous processing is not complete.
+</span><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">i</span> <span class="o">=</span> <span class="n">sharedFuture</span><span class="p">.</span><span class="n">Get</span><span class="p">();</span>
+
+<span class="c1">// Use the SharedFuture object to get the execution results multiple times.
+</span><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">i2</span> <span class="o">=</span> <span class="n">sharedFuture</span><span class="p">.</span><span class="n">Get</span><span class="p">();</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_468125835_h3_6">Waiting for Asynchronous Processing to Complete</h3>
+<p>Just like for <code>Future</code> objects, <span class="ApiLink_void_nn__async__SharedFuture__Wait()_const_NN_NOEXCEPT">Wait()</span>, <span class="ApiLink_bool_nn__async__SharedFuture__TryWait()_const_NN_NOEXCEPT">TryWait()</span>, <span class="ApiLink_bool_nn__async__SharedFuture__TimedWait(TimeSpan_timeout)_const_NN_NOEXCEPT">TimedWait()</span>, and <span class="ApiLink_void_nn__async__SharedFuture__AttachCompletionEvent(os__MultiWaitHolderType_*holder)_const_NN_NOEXCEPT">AttachCompletionEvent()</span> can be used.</p>
+<h3 id="Anchor_468125835_h3_7">Getting the Shared State Reference Status</h3>
+<p>Just like for <code>Future</code> objects, <span class="ApiLink_bool_nn__async__SharedFuture__IsValid()_const_NN_NOEXCEPT">IsValid()</span> can be used.</p>
+<h2 id="Anchor_468125835_h2_7">Special Member Functions of Future and SharedFuture</h2>
+<h3 id="Anchor_468125835_h3_8">Default Constructor</h3>
+<p>There are default constructors for both <code>Future</code> and <code>SharedFuture</code> class templates. Objects generated with the default constructor do not refer to the shared state.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Generates a Future object using the default constructor.
+</span><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span><span class="p">;</span>
+
+<span class="c1">// The generated object does not reference the shared state.
+</span><span class="n">NN_ASSERT</span><span class="p">(</span><span class="o">!</span><span class="n">future</span><span class="p">.</span><span class="n">IsValid</span><span class="p">());</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_468125835_h3_9">Copying and Moving</h3>
+<p>
+  <code>Future</code> objects cannot be copied.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// Compile error. Future objects cannot be copied.
+</span><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future2</span> <span class="o">=</span> <span class="n">future</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>Future</code> objects must be moved when substituting them with other variables.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// Future objects can be moved.
+</span><span class="nn">nn::async::</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">future2</span> <span class="o">=</span> <span class="nn">std::</span><span class="n">move</span><span class="p">(</span><span class="n">future</span><span class="p">);</span>
+
+<span class="c1">// Shared state reference moves due to the move.
+</span><span class="n">NN_ASSERT</span><span class="p">(</span><span class="o">!</span><span class="n">future</span><span class="p">.</span><span class="n">IsValid</span><span class="p">());</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>SharedFuture</code> objects do not have this restriction.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::async::</span><span class="n">SharedFuture</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">sharedFuture</span> <span class="o">=</span> <span class="p">...;</span>
+
+<span class="c1">// SharedFuture objects can be copied.
+</span><span class="nn">nn::async::</span><span class="n">SharedFuture</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">sharedFuture2</span> <span class="o">=</span> <span class="n">sharedFuture</span><span class="p">;</span>
+
+<span class="c1">// SharedFuture objects can be moved.
+</span><span class="nn">nn::async::</span><span class="n">SharedFuture</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">sharedFuture3</span> <span class="o">=</span> <span class="nn">std::</span><span class="n">move</span><span class="p">(</span><span class="n">sharedFuture</span><span class="p">);</span>
+
+<span class="c1">// Shared state reference moves due to the move.
+</span><span class="n">NN_ASSERT</span><span class="p">(</span><span class="o">!</span><span class="n">sharedFuture</span><span class="p">.</span><span class="n">IsValid</span><span class="p">());</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__async__Future', '../../../Api/HtmlNX/classnn_1_1async_1_1_future.html' )
+SetUrl( 'ApiLink_nn__async__SharedFuture', '../../../Api/HtmlNX/classnn_1_1async_1_1_shared_future.html' )
+SetUrl( 'ApiLink_nn__os__Event', '../../../Api/HtmlNX/classnn_1_1os_1_1_event.html' )
+SetUrl( 'ApiLink_T_nn__async__Future__Get()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_future.html#a38bfb4c7dd19a0282eccdb46cf55afa2' )
+SetUrl( 'ApiLink_void_nn__async__Future__Wait()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_future.html#ade9d2ba66466ae6b894c7313861f81f7' )
+SetUrl( 'ApiLink_bool_nn__async__Future__TryWait()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_future.html#ad22c064c292a57728b8f4515cf62bba0' )
+SetUrl( 'ApiLink_bool_nn__async__Future__TimedWait(TimeSpan_timeout)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_future.html#a54b1b0ac60781b95b5b6eff19c69afa4' )
+SetUrl( 'ApiLink_void_nn__async__Future__AttachCompletionEvent(os__MultiWaitHolderType_*holder)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_future.html#af40821903a5646af0e132b56b9dec48f' )
+SetUrl( 'ApiLink_bool_nn__async__Future__IsValid()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_future.html#a2cddd642d4f48b6d9d753860434dc55c' )
+SetUrl( 'ApiLink_SharedFuture__T___nn__async__Future__Share()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_future.html#a674edc5eb7cef52a6758f8cb63c3d142' )
+SetUrl( 'ApiLink_const_T_&_nn__async__SharedFuture__Get()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_shared_future.html#a3deb9552b243e830c324bc3bd6a4c33c' )
+SetUrl( 'ApiLink_void_nn__async__SharedFuture__Wait()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_shared_future.html#aa0de3b0e9e7a900a8ef29498e5e8e153' )
+SetUrl( 'ApiLink_bool_nn__async__SharedFuture__TryWait()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_shared_future.html#ae0de7846b7849791dc0a4560415fab34' )
+SetUrl( 'ApiLink_bool_nn__async__SharedFuture__TimedWait(TimeSpan_timeout)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_shared_future.html#abc79adf4dc87c5f188ed04186b23eb1e' )
+SetUrl( 'ApiLink_void_nn__async__SharedFuture__AttachCompletionEvent(os__MultiWaitHolderType_*holder)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_shared_future.html#a7d42f77bea10635b97282b1dd3dfb022' )
+SetUrl( 'ApiLink_bool_nn__async__SharedFuture__IsValid()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1async_1_1_shared_future.html#a22362e0b7310ce23e0c73a05c55b6f82' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

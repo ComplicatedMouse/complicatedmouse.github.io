@@ -1,0 +1,1442 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Shader Annotations | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Shader Annotations -->
+<div class="pagetitle" id="PageId_84052806">Shader Annotations</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_84052806_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_2">General</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_84052806_h2_1">Notation Used in This Document</a>
+      </li>
+      <li>
+        <a href="#Anchor_84052806_h2_2">id</a>
+      </li>
+      <li>
+        <a href="#Anchor_84052806_h2_3">hint</a>
+      </li>
+      <li>
+        <a href="#Anchor_84052806_h2_4">Remote Specification of Annotations</a>
+      </li>
+      <li>
+        <a href="#Anchor_84052806_h2_5">Defining Identifiers With the Same Name</a>
+      </li>
+      <li>
+        <a href="#Anchor_84052806_h2_6">choice Annotation</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_84052806_h1_3">Option Variables</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_4">Vertex Attribute Variables</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_5">Sampler Variables</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_6">Image Variables</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_7">Uniform Blocks</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_8">Uniforms</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_84052806_h2_7">Customizing Uniform Variables</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_84052806_h1_9">Shader Storage Blocks</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_10">Buffer Variables</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_11">Rendering Information</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_12">Text Blocks</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_13">Vertex Interleave</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_14">Group</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_15">Pages</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_16">Revision</a>
+    </li>
+    <li>
+      <a href="#Anchor_84052806_h1_17">Label Attributes</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_84052806_h2_8">Label Color </a>
+      </li>
+      <li>
+        <a href="#Anchor_84052806_h2_9">Label Reference</a>
+      </li>
+      <li>
+        <a href="#Anchor_84052806_h2_10">Label Localization</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_84052806_h1_18">Restrictions</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_84052806_h1_1">Overview</h1>
+<p>Information used at run time and by tools can be controlled using command-style annotation when using the g3d shader system. You can edit shaders using any shader authoring tool as long as it is annotated.</p>
+<p>The 3D shader converter (<code>3dShaderConverter</code>) creates a shader definition (FSDA or FSDB) file from shader source and shader configuration (FSCA and FSCB) files that include shader annotations.</p>
+<h1 id="Anchor_84052806_h1_2">General</h1>
+<p>In the following sections, each annotation type is described in detail. For the individual values that can be taken, see the description of supported elements in the shader definition file for <a href="../IntermediateFileFormat/Html/3d/3dIntermediateFileFormat.html">Intermediate File Specifications</a>. The shader source used in the demos also use annotations, so they also make a good reference.</p>
+<h2 id="Anchor_84052806_h2_1">Notation Used in This Document</h2>
+<p>Shader annotations are made using C-style or C++-style comments that start with <code>@@</code>.</p>
+<p>For C-style comments, a single annotation is identified as from <code>id</code> to the next <code>id</code> or to the end of the comment. By including the group name and a colon at the beginning of a C-style comment, a group can be specified in the entire C-style comment. The C-style comment format cannot be used for annotations after variables.</p>
+<p>Comments must start from the beginning of the line when making annotations using a remote specification.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#define OPTION </span><span class="c1">// @@ id=&quot;option&quot; choice=&quot;bool&quot;
+</span>&nbsp;
+<span class="n">in</span> <span class="n">vec3</span> <span class="n">pos</span><span class="p">;</span> <span class="c1">// @@ id=&quot;position&quot;
+</span><span class="n">uniform</span> <span class="n">sampler2D</span> <span class="n">albedoTex</span><span class="p">;</span> <span class="c1">// @@ id=&quot;albedo&quot;
+</span>&nbsp;
+<span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Material</span> <span class="c1">// @@ id=&quot;mat&quot; type=&quot;material&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span> <span class="c1">// @@ id=&quot;texsrt&quot; type=&quot;texsrt&quot;
+</span><span class="p">};</span>
+&nbsp;
+<span class="c1">// @@ option_id=&quot;option&quot; label=&quot;Option&quot;
+</span>&nbsp;
+<span class="cm">/* @@ groupA:
+&nbsp;&nbsp;&nbsp;&nbsp;attrib_id=&quot;position&quot; label=&quot;Position&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;sampler_id=&quot;albedoTex&quot; label=&quot;Albedo Texture&quot;
+*/</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />Use the equal sign (=) to assign annotation values to annotations. Do not include spaces or other characters before or after the equal sign.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// OK
+</span><span class="cp">#define OPTION </span><span class="c1">// @@ id=&quot;option&quot; choice=&quot;bool&quot;
+</span>
+
+<span class="c1">// NG
+</span><span class="cp">#define OPTION </span><span class="c1">// @@ id = &quot;option&quot; choice =&quot;bool&quot;
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_84052806_h2_2">id</h2>
+<p>When using the g3d shader system, symbols are accessed using a special identifier, not using the variable name inside the shader as with OpenGL. The string used for this identifier is called an <em>ID</em>. Variable names are governed by coding conventions and may change depending on how a shader program is being implemented. Using an ID, on the other hand, enables you to minimize the effect of such changes.</p>
+<p>These IDs are not only used to get shader symbols from a program but also in assigning models and shaders. If the shader source includes an annotation on a line separate from a variable, this ID is used to identify the corresponding variable. For more information, see Remote Specification of Annotations.</p>
+<h2 id="Anchor_84052806_h2_3">hint</h2>
+<p>You can use hint information to automate initial assignments of vertex attributes and sampler when assigning a shader to a model when using a tool like 3DEditor. The vertex attributes and samplers within a model that have matching hint information can be assigned as the shader's vertex attributes and samplers when assigning a shader to a model by providing hint information for that shader ahead of time. You can also change assignments manually after automatic assignment.</p>
+<h2 id="Anchor_84052806_h2_4">Remote Specification of Annotations</h2>
+<p>Excluding the case of being in a block, you can provide an annotation at a point in the code other than immediately after a variable. First, specify an ID immediately after the variable. Then specify that ID in the remotely specified annotation. The following <code>id</code>s can be used. The comment must start at the beginning. Make sure that you include <code>*_id</code> at the beginning.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Name</th>
+      <th>Supported Elements in the Shader Definition File</th>
+      <th>Handling When Omitted</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td style="text-align: right;">option_id</td>
+      <td style="text-align: center;">&lt;option_var&gt;</td>
+      <td style="text-align: center;">Cannot be omitted.</td>
+      <td>Represents the option variable ID.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">attrib_id</td>
+      <td style="text-align: center;">&lt;attrib_var&gt;</td>
+      <td style="text-align: center;">Cannot be omitted.</td>
+      <td>Array of vertex attribute variables.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">sampler_id</td>
+      <td style="text-align: center;">&lt;sampler_var&gt;</td>
+      <td style="text-align: center;">Cannot be omitted.</td>
+      <td>Sampler variable identifier.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">block_id</td>
+      <td style="text-align: center;">&lt;block_var&gt;</td>
+      <td style="text-align: center;">Cannot be omitted.</td>
+      <td>The identifier for uniform blocks.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">uniform_id</td>
+      <td style="text-align: center;">&lt;uniform_var&gt;</td>
+      <td style="text-align: center;">Cannot be omitted.</td>
+      <td>The identifier for uniform variables.</td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">location</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>  <span class="n">in</span> <span class="n">vec4</span>   <span class="n">i_Position</span><span class="p">;</span>     <span class="c1">// @@ id=&quot;_p0&quot;   hint=&quot;position0&quot;
+</span>
+<span class="cm">/* @@
+&nbsp;&nbsp;&nbsp;&nbsp;attrib_id=&quot;_p0&quot;   label=&quot;Position Coordinates&quot; editable=&quot;false&quot;
+*/</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_84052806_h2_5">Defining Identifiers With the Same Name</h2>
+<p>This section describes the behavior when multiple annotations are defined with the same identifier name.</p>
+<p>With variables supported by the following remote operations, elements defined by remote operation annotations are overwritten based on the coding of the annotations for the variable declarations.<br />If multiple remote operations have been coded for the same variable, the one coded last in the source code is overwritten.</p>
+<ul>
+  <li>Option Variables</li>
+  <li>Vertex Attribute Variables</li>
+  <li>Sampler Variables</li>
+  <li>Uniform Block Variables</li>
+  <li>Uniform Variables</li>
+</ul>
+<p>The content of other annotations written later in the source code are overwritten.</p>
+<p>For example, definitions in the following example are merged this way: renderinfo=&quot;ice&quot; type=&quot;int&quot; default=&quot;4&quot; choice=&quot;[0,1]&quot; label=&quot;Receive Ice&rdquo;.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>// @@ renderinfo=&quot;ice&quot; type=&quot;int&quot; default=&quot;0&quot; label=&quot;Receive Ice&quot;
+...
+// @@ renderinfo=&quot;ice&quot; default=&quot;4&quot; choice=&quot;[0,1]&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_84052806_h2_6">choice Annotation</h2>
+<p>There are two ways to make <code>choice</code> annotation for option variables and rendering information: with a range or with a list.</p>
+<p>To use a range, specify a minimum value and a maximum value, like <code>choice=&quot;[0, 4]&quot;</code>. To use a list, enumerate a string, like <code>choice=&quot;add, sub, mul, div&quot;</code>. When creating this string you can specify the individual elements at the UI level, for example, by coding as <code>choice=&quot;add:addition, sub:substration&quot;</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// @@ renderinfo=&quot;culling&quot; type=&quot;int&quot; default=&quot;0&quot; choice=&quot;0:Display Front Face,1:Display Back Face,2:Display Both Faces,3:Do Not Display&quot; order=&quot;1&quot; label=&quot;Culling Mode&quot;
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_84052806_optionvalue"></a>
+</p>
+<h1 id="Anchor_84052806_h1_3">Option Variables</h1>
+<p>An option variable is a pre-processor variable that serves as a key to generating shader variations. When controlling shader variations using a shader configuration file (FSC file), the shader variation to use is identified based on the ID specified for the option variable.</p>
+<p>The following annotations can be used in option variables.</p>
+<div class="section">
+  <p>
+    <br />
+  </p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">enable</td>
+        <td style="text-align: center;">
+          <br />
+        </td>
+        <td style="text-align: center;">true</td>
+        <td>Value of whether the option variable is enabled. When <code>false</code>, not extracted to the shader definition file.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">id</td>
+        <td style="text-align: center;">&lt;option_var&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>Represents the option variable ID.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">type</td>
+        <td style="text-align: center;">&lt;option_var&gt;</td>
+        <td style="text-align: center;">static</td>
+        <td>The option variable variation type. Either <code>static</code> or <code>dynamic</code>.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">choice</td>
+        <td style="text-align: center;">&lt;option_var&gt;</td>
+        <td style="text-align: center;">bool</td>
+        <td>
+          <p>The range of values for the option variable.</p>
+          <p>For boolean values, specify <code>bool</code>. For integer values, specify a range such as <code>[0, 4]</code>. For enumerated values, specify ordered pairs such as <code>add:addition, sub:subtraction</code>.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">default</td>
+        <td style="text-align: center;">&lt;option_var&gt;</td>
+        <td style="text-align: center;">First candidate in <code>choice</code>.</td>
+        <td>Represents the option variable default value.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">label</td>
+        <td style="text-align: center;">&lt;ui_label&gt;</td>
+        <td style="text-align: center;">Same as <code>id</code>.</td>
+        <td>Label for the UI with a variable to edit.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">Comment</td>
+        <td style="text-align: center;">&lt;ui_comment&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>Comment for the UI with a variable to edit.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">group</td>
+        <td style="text-align: center;">&lt;ui_group&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>The type of the UI group for editing a variable.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">order</td>
+        <td style="text-align: center;">&lt;ui_order&gt;</td>
+        <td style="text-align: center;">0</td>
+        <td>Order priority of the UI with a variable to edit. The lowest number has highest priority.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">visible</td>
+        <td style="text-align: center;">&lt;ui_visible&gt;</td>
+        <td style="text-align: center;">true</td>
+        <td>Whether to display the UI to edit the variable.</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="cp">#define SKINNING                   ( 0 )       </span><span class="c1">// @@ id=&quot;skinning&quot; choice=&quot;[0, 9]&quot; type=&quot;dynamic&quot;
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+</div>
+<h1 id="Anchor_84052806_h1_4">Vertex Attribute Variables</h1>
+<p>The following annotations can be used in vertex attribute variables.</p>
+<div class="section">
+  <p>
+    <br />
+  </p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">id</td>
+        <td style="text-align: center;">&lt;attrib_var&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>Vertex attribute variable identifier.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">hint</td>
+        <td style="text-align: center;">&lt;attrib_var&gt;</td>
+        <td style="text-align: center;">Empty string.</td>
+        <td>Represents hint information used when binding vertex attribute variables.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">type</td>
+        <td style="text-align: center;">&lt;attrib_var&gt;</td>
+        <td style="text-align: center;">Defined type.</td>
+        <td>Represents the logical type of the vertex attribute variable. Same as the &lt;attrib_var&gt; type.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">label</td>
+        <td style="text-align: center;">&lt;ui_label&gt;</td>
+        <td style="text-align: center;">Same as <code>id</code>.</td>
+        <td>Label for the UI with a variable to edit.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">Comment</td>
+        <td style="text-align: center;">&lt;ui_comment&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>Comment for the UI with a variable to edit.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">group</td>
+        <td style="text-align: center;">&lt;ui_group&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>The type of the UI group for editing a variable.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">order</td>
+        <td style="text-align: center;">&lt;ui_order&gt;</td>
+        <td style="text-align: center;">0</td>
+        <td>Order priority of the UI with a variable to edit. The lowest number has highest priority.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">editable</td>
+        <td style="text-align: center;">&lt;ui_editable&gt;</td>
+        <td style="text-align: center;">true</td>
+        <td>Whether the variable UI is editable.</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">location</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>  <span class="n">in</span> <span class="n">vec4</span>   <span class="n">i_Position</span><span class="p">;</span>     <span class="c1">// @@ id=&quot;_p0&quot; hint=&quot;position0&quot; label=&quot;Position Coordinates&quot; editable=&quot;false&quot;
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+</div>
+<h1 id="Anchor_84052806_h1_5">Sampler Variables</h1>
+<p>The following annotations can be used in sampler variables.</p>
+<div class="section">
+  <p>
+    <br />
+  </p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">id</td>
+        <td style="text-align: center;">&lt;sampler_var&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>Sampler variable identifier.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">hint</td>
+        <td style="text-align: center;">&lt;sampler_var&gt;</td>
+        <td style="text-align: center;">Empty string.</td>
+        <td>Hint information used when binding sampler variables.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">type</td>
+        <td style="text-align: center;">&lt;sampler_var&gt;</td>
+        <td style="text-align: center;">Defined type.</td>
+        <td>Logical type of the sampler variable. Same as the &lt;sampler_var&gt; type.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">alt</td>
+        <td style="text-align: center;">&lt;sampler_var&gt;</td>
+        <td style="text-align: center;">black</td>
+        <td>Substitute value to use when a sampler has not been bound.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">nostrip</td>
+        <td style="text-align: center;">&lt;sampler_var&gt;</td>
+        <td style="text-align: center;">false</td>
+        <td>Whether to suppress stripping of dead sampler variables. When suppressed, even elements not being used will be written to the intermediate file.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">label</td>
+        <td style="text-align: center;">&lt;ui_label&gt;</td>
+        <td style="text-align: center;">Same as <code>id</code>.</td>
+        <td>Label for the UI with a variable to edit.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">Comment</td>
+        <td style="text-align: center;">&lt;ui_comment&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>Comment for the UI with a variable to edit.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">group</td>
+        <td style="text-align: center;">&lt;ui_group&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>The type of the UI group for editing a variable.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">order</td>
+        <td style="text-align: center;">&lt;ui_order&gt;</td>
+        <td style="text-align: center;">0</td>
+        <td>Order priority of the UI with a variable to edit. The lowest number has highest priority.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">visible</td>
+        <td style="text-align: center;">&lt;ui_visible&gt;</td>
+        <td style="text-align: center;">true</td>
+        <td>Whether to display the UI to edit the variable.</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="n">uniform</span> <span class="n">sampler2D</span> <span class="n">albedoTex0</span><span class="p">;</span>    <span class="c1">// @@ id=&quot;_a0&quot; hint=&quot;albedo0&quot; label=&quot;Albedo Texture 0&quot;
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h1 id="Anchor_84052806_h1_6">Image Variables</h1>
+  <p>The following annotations can be used in image variables.</p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">id</td>
+        <td style="text-align: center;">&lt;image_var&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>The image variable identifier.</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">rgba8</span> <span class="p">)</span> <span class="n">uniform</span> <span class="n">readonly</span> <span class="n">image2D</span> <span class="n">inputImage0</span><span class="p">;</span> <span class="c1">// @@ id=&quot;_image0&quot;
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!--Remove-->
+  <p>
+    <br />
+  </p>
+</div>
+<h1 id="Anchor_84052806_h1_7">
+  <a name="Anchor_84052806_UniformBlock"></a>Uniform Blocks</h1>
+<p>The following annotations can be used in uniform blocks.</p>
+<div class="section">
+  <p>
+    <br />
+  </p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">id</td>
+        <td style="text-align: center;">&lt;block_var&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>The identifier for uniform blocks.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">type</td>
+        <td style="text-align: center;">&lt;block_var&gt;</td>
+        <td style="text-align: center;">none</td>
+        <td>The type of the uniform block. One of: <code>none</code>, <code>material</code>, <code>shape</code>, <code>skeleton</code>, or <code>option</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Material</span> <span class="c1">// @@ id=&quot;mat&quot; type=&quot;material&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt0</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>        <span class="c1">// @@ id=&quot;texsrt0&quot; type=&quot;texsrt&quot; hint=&quot;albedo0&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt1</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>        <span class="c1">// @@ id=&quot;texsrt1&quot; type=&quot;texsrt&quot; hint=&quot;albedo1&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt2</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>        <span class="c1">// @@ id=&quot;texsrt2&quot; type=&quot;texsrt&quot; hint=&quot;normal0&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt3</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>        <span class="c1">// @@ id=&quot;texsrt3&quot; type=&quot;texsrt&quot; hint=&quot;specular0&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec3</span> <span class="n">diffColor</span><span class="p">;</span>         <span class="c1">// @@ id=&quot;diffuse&quot; default=&quot;1 1 1&quot; item=&quot;color&quot; hint=&quot;diffuse&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">weightTex</span><span class="p">;</span>        <span class="c1">// @@ id=&quot;weight_tex&quot; default=&quot;1.0&quot; min=&quot;-1&quot; max=&quot;1&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">specInt</span><span class="p">;</span>          <span class="c1">// @@ id=&quot;spec_int&quot; min=&quot;0&quot; max=&quot;1&quot; default=&quot;0.2&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">specPower</span><span class="p">;</span>        <span class="c1">// @@ id=&quot;spec_power&quot; min=&quot;0&quot; default=&quot;50&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">rimInt</span><span class="p">;</span>           <span class="c1">// @@ id=&quot;rim_int&quot; min=&quot;0&quot; max=&quot;1&quot; default=&quot;0.5&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">rimPower</span><span class="p">;</span>         <span class="c1">// @@ id=&quot;rim_power&quot; min=&quot;0&quot; default=&quot;2.5&quot;
+</span><span class="p">};</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+</div>
+<h1 id="Anchor_84052806_h1_8">Uniforms</h1>
+<p>The following annotations can be used in uniform variables.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Name</th>
+      <th>Supported Elements in the Shader Definition File</th>
+      <th>Handling When Omitted</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td style="text-align: right;">id</td>
+      <td style="text-align: center;">&lt;uniform_var&gt;</td>
+      <td style="text-align: center;">Cannot be omitted.</td>
+      <td>The identifier for uniform variables.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">hint</td>
+      <td style="text-align: center;">&lt;uniform_var&gt;</td>
+      <td style="text-align: center;">Empty string.</td>
+      <td>Hint information used in association with uniform variables.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">type</td>
+      <td style="text-align: center;">&lt;uniform_var&gt;</td>
+      <td style="text-align: center;">Defined type (array cannot be omitted).</td>
+      <td>The logical type of the uniform variable. Same as the &lt;uniform_var&gt; type.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">default</td>
+      <td style="text-align: center;">&lt;uniform_var&gt;</td>
+      <td style="text-align: center;">Default value.</td>
+      <td>The default value for the uniform variable.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">depend</td>
+      <td style="text-align: center;">&lt;depend&gt;</td>
+      <td style="text-align: center;">Empty string.</td>
+      <td>The ID of the dependent uniform variable.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">converter</td>
+      <td style="text-align: center;">&lt;converter&gt;</td>
+      <td style="text-align: center;">Empty string.</td>
+      <td>Name of the conversion to apply when transferring from the CPU. Represents a hint used for binding.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">label</td>
+      <td style="text-align: center;">&lt;ui_label&gt;</td>
+      <td style="text-align: center;">Same as <code>id</code>.</td>
+      <td>Label for the UI with a variable to edit.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">Comment</td>
+      <td style="text-align: center;">&lt;ui_comment&gt;</td>
+      <td style="text-align: center;">Not specified.</td>
+      <td>Comment for the UI with a variable to edit.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">group</td>
+      <td style="text-align: center;">&lt;ui_group&gt;</td>
+      <td style="text-align: center;">Not specified.</td>
+      <td>The type of the UI group for editing a variable.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">order</td>
+      <td style="text-align: center;">&lt;ui_order&gt;</td>
+      <td style="text-align: center;">0</td>
+      <td>Order priority of the UI with a variable to edit. The lowest number has highest priority.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">item</td>
+      <td style="text-align: center;">&lt;ui_item&gt;</td>
+      <td style="text-align: center;">auto</td>
+      <td>The type of the UI for editing a variable. If there is a matching type, you can specify <code>color</code> to change the UI in 3DEditor to a color picker, and <code>check</code> to change it to a check box.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">min</td>
+      <td style="text-align: center;">&lt;ui_min&gt;</td>
+      <td style="text-align: center;">Not specified.</td>
+      <td>The minimum value for the UI for editing a variable.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">max</td>
+      <td style="text-align: center;">&lt;ui_max&gt;</td>
+      <td style="text-align: center;">Not specified.</td>
+      <td>The maximum value for the UI for editing a variable.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">visible</td>
+      <td style="text-align: center;">&lt;ui_visible&gt;</td>
+      <td style="text-align: center;">true</td>
+      <td>Whether to display the UI to edit the variable. Specify <code>param_only</code> to display only the parameter Edit UI, and specify <code>anim_only</code> to display only the Animation Edit UI.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">default_min</td>
+      <td style="text-align: center;">&lt;ui_default_min&gt;</td>
+      <td style="text-align: center;">Not specified.</td>
+      <td>The default minimum value for the UI for editing a variable.</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">default_max</td>
+      <td style="text-align: center;">&lt;ui_default_max&gt;</td>
+      <td style="text-align: center;">Not specified.</td>
+      <td>The default maximum value for the UI for editing a variable.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <code>type</code> specifies the type for a parameter that the library writes, but the parameter can also take values specified as a completely different type on GLSL. As long as the memory layout matches, a single parameter can even take the value of more than one variable or an array. For more information about the memory layout in uniform blocks, see the OpenGL specifications.</p>
+<p>If a matrix type is specified for <code>type</code>, then row-major vectors including padding for each line are written by the library. For example, a parameter for which <code>type</code> is <code>float2x3</code> can take GLSL <code>mat3x2</code> data.</p>
+<p>If the type is <code>srt3d</code>, the library writes a row-major 3&times;4 matrix. Specifically, the library consecutively writes <code>m00</code>, <code>m01</code>, <code>m02</code>, <code>m03</code>, <code>m10</code>, <code>m11</code>, <code>m12</code>, <code>m13</code>, <code>m20</code>, <code>m21</code>, <code>m22</code>, and <code>m23</code>. When using GLSL, you can retrieve values as <code>mat4x3</code> and <code>vec4</code> arrays.</p>
+<p>If the type is <code>srt2d</code> or <code>texsrt</code>, the library writes a row-major 2 &times; 3 matrix. Specifically, the library consecutively writes <code>m00</code>, <code>m10</code>, <code>m01</code>, <code>m11</code>, <code>m02</code>, and <code>m12</code>. When using GLSL, you can retrieve values by coding like the following  <code>texsrt0</code> and <code>texsrt1</code> examples. Note that if you code using an array of <code>vec2</code> objects (like with <code>texsrt2</code>), you cannot retrieve the values because padding is inserted between the <code>vec2</code> objects.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Material</span> <span class="c1">// @@ id=&quot;mat&quot; type=&quot;material&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt0</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>        <span class="c1">// @@ id=&quot;texsrt0&quot; type=&quot;texsrt&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec2</span> <span class="n">texsrt1_column0</span><span class="p">;</span>   <span class="c1">// @@ id=&quot;texsrt1&quot; type=&quot;texsrt&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec2</span> <span class="n">texsrt1_column1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec2</span> <span class="n">texsrt1_column2</span><span class="p">;</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Cannot retrieve values if you code as an array of vec2 objects, because padding is inserted between the vec2 objects.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//vec2 texsrt2[3];      // @@ id=&quot;texsrt2&quot; type=&quot;texsrt&quot;
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt_ex0</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>     <span class="c1">// @@ id=&quot;texsrt_ex&quot; type=&quot;texsrt&quot; converter=&quot;texsrt_ex&quot;
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Shader parameters of type <code>texsrt</code> can be accessed by the CPU using <span class="ApiLink_nn__g3d__TexSrt">nn::g3d::TexSrt</span>. If <code>default</code> is specified, make sure to specify the members of <span class="ApiLink_nn__g3d__TexSrt">nn::g3d::TexSrt</span> in order. <code>mode</code> is an integer. The rotation component must be specified in degrees.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">TexSrt</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">enum</span> <span class="n">Mode</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">MODE_MAYA</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">MODE_3DSMAX</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">MODE_SOFTIMAGE</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NUM_MODE</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">};</span>
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">Mode</span> <span class="n">mode</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">;</span>
+<span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> If the type is <code>float3</code> or <code>float4</code>, you can use the color controls in 3DEditor. For more information, see <a href="../Pages/Page_83955594.html#Anchor_83955594_VectorToColorControl">Switching Between Color Control and Numeric Control</a>. </p>
+<h2 id="Anchor_84052806_h2_7">Customizing Uniform Variables</h2>
+<p> </p>
+<div class="section">
+  <p>You can customize uniform variables by using the <code>depend</code> and <code>converter</code> annotations.</p>
+  <p>The <code>converter</code> annotation is an identifier that tells the library to use a custom algorithm when converting (calculating) uniform variables. Use the <span class="ApiLink_const_char_*_nn__g3d__ResUniformVar__GetConverter()_const_NN_NOEXCEPT">nn::g3d::ResUniformVar::GetConverter()</span> function to get the specified identifier. This identifier specifies which callback functions are added to the library by the application when the library is initialized. Use the <span class="ApiLink_void_nn__g3d__ResShaderParam__SetConvertShaderParamCallback(ConvertShaderParamCallback_callback)_NN_NOEXCEPT">nn::g3d::ResShaderParam::SetConvertShaderParamCallback()</span> function to register the callback.</p>
+  <p>The <code>depend</code> annotation allows you to specify other uniform variables or references to external data when using the custom conversion algorithm specified by <code>converter</code>. To use other uniform variables, specify their IDs. To reference external data, specify the uniform variable's own ID.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">Material</span>  <span class="c1">// @@ id=&quot;mat&quot; type=&quot;material&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">color</span><span class="p">;</span>          <span class="c1">// @@ id=&quot;color&quot; depend=&quot;intensity&quot; converter=&quot;mul_intensity&quot;
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">intensity</span><span class="p">;</span>     <span class="c1">// @@ id=&quot;intensity&quot;
+</span><span class="p">};</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+</div>
+<h1 id="Anchor_84052806_h1_9">Shader Storage Blocks</h1>
+<p>The following annotations can be used in shader storage blocks.</p>
+<div class="section">
+  <p>
+    <br />
+  </p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th style="text-align: center;">Supported Elements in the Shader Definition File</th>
+        <th style="text-align: center;">Handling When Omitted</th>
+        <th style="text-align: center;">Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">id</td>
+        <td style="text-align: center;">&lt;shader_storage_block_var&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>The identifier for a shader storage block.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">type</td>
+        <td style="text-align: center;">&lt;shader_storage_block_var&gt;</td>
+        <td style="text-align: center;">none</td>
+        <td>The type of the shader storage block. One of <code>none</code>, <code>skeleton</code>, and <code>option</code>.<br /><code>option</code> is a development setting. Do not use it.</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">buffer</span> <span class="n">PositionBuffer0</span> <span class="c1">// @@ id=&quot;pos_buf0&quot; type=&quot;none&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">positions0</span><span class="p">[];</span>
+<span class="p">};</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+</div>
+<h1 id="Anchor_84052806_h1_10">Buffer Variables</h1>
+<p>The following annotations can be used in buffer variables.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Name</th>
+      <th style="text-align: center;">Supported Elements in the Shader Definition File</th>
+      <th style="text-align: center;">Handling When Omitted</th>
+      <th style="text-align: center;">Description</th>
+    </tr>
+    <tr>
+      <td style="text-align: right;">id</td>
+      <td style="text-align: center;">&lt;buffer_var&gt;</td>
+      <td style="text-align: center;">
+        <p>Cannot be omitted.</p>
+      </td>
+      <td>The identifier for a buffer variable.</td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">buffer</span> <span class="n">WeightBuffer</span> <span class="c1">// @@ id=&quot;weight_buf&quot; type=&quot;none&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec3</span> <span class="n">weight</span><span class="p">;</span> <span class="c1">// @@ id=&quot;weight&quot;
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_84052806_renderinfo"></a>
+</p>
+<h1 id="Anchor_84052806_h1_11">Rendering Information</h1>
+<div class="section">
+  <p>Rendering information represents material parameters that cannot be directly sent to the GPU. You can freely define data such as rendering priority or flags indicating whether to accept polygon offsets and shadows during shadow rendering.</p>
+  <p>The following annotations can be used in the rendering information. The comment must start at the beginning.</p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">renderinfo</td>
+        <td style="text-align: center;">&lt;render_info_slot&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>Rendering Information identifier.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">type</td>
+        <td style="text-align: center;">&lt;render_info_slot&gt;</td>
+        <td style="text-align: center;">string</td>
+        <td>Specify <code>int</code>, <code>float</code>, or <code>string</code>.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">choice</td>
+        <td style="text-align: center;">&lt;render_info_slot&gt;</td>
+        <td style="text-align: center;">Empty string.</td>
+        <td>
+          <p>The maximum value allowed for rendering information. For numbers, this range is defined in the form [<em>min</em>, <em>max</em>]. For strings, it is defined in the form [add:addition, sub:subtraction].</p>
+          <p>You can dynamically specify the rendering information choice from the application when connected to 3DEditor if no choice has been specified. For more information, see <a href="../Pages/Page_99806869.html#Anchor_99806869_RenderInfo">Embedding Rendering Information</a>.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">default</td>
+        <td style="text-align: center;">&lt;render_info_slot&gt;</td>
+        <td style="text-align: center;">Empty string.</td>
+        <td>The default value for rendering information. Selections are listed delimited by spaces. When there are fewer than <code>count</code> selections, the remainder are blank.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">count</td>
+        <td style="text-align: center;">&lt;render_info_slot&gt;</td>
+        <td style="text-align: center;">1</td>
+        <td>The maximum value allowed for rendering information.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">optional</td>
+        <td style="text-align: center;">&lt;render_info_slot&gt;</td>
+        <td style="text-align: center;">true</td>
+        <td>Boolean value that determines whether there can be a variable number (an arbitrary number) of rendering information values. If <code>false</code>, the number is fixed to the value set for count. Specify <code>false</code> if it is a string and you do not want to add a selection for a blank space to the 3DEditor UI.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">label</td>
+        <td style="text-align: center;">&lt;ui_label&gt;</td>
+        <td style="text-align: center;">Same as <code>renderinfo</code>.</td>
+        <td>Label for the UI with a variable to edit.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">Comment</td>
+        <td style="text-align: center;">&lt;ui_comment&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>Comment for the UI with a variable to edit.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">group</td>
+        <td style="text-align: center;">&lt;ui_group&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>The type of the UI group for editing a variable.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">order</td>
+        <td style="text-align: center;">&lt;ui_order&gt;</td>
+        <td style="text-align: center;">0</td>
+        <td>Order priority of the UI with a variable to edit. The lowest number has highest priority.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">item</td>
+        <td style="text-align: center;">&lt;ui_item&gt;</td>
+        <td style="text-align: center;">auto</td>
+        <td>The type of the UI for editing a variable. If <code>type</code> is a number or string, specify <code>check</code> to change the 3DEditor UI to a check box. If a string, 2 enumerated values must be specified for <code>choice</code>. In this case, <code>false</code> and <code>true</code> check box values are assigned to the enumerated values in the order in which they are defined. For example, if <code>choice</code>=<code>&quot;A, B&quot;</code> is specified, A will be <code>false</code> and B will be <code>true</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// @@ renderinfo=&quot;clear_color&quot; type=&quot;float&quot; count=&quot;3&quot; default=&quot;0.5 0.5 0.5&quot; choice=&quot;[0, 1]&quot; label=&quot;Clear Color&quot; optional=&quot;false&quot;
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h1 id="Anchor_84052806_h1_12">Text Blocks</h1>
+  <p>Text blocks are arbitrary text displayed in the 3DEditor UI. They do not affect data being edited in 3DEditor.</p>
+  <p>The following annotations can be used as text blocks. The comment must start at the beginning.</p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">textblock</td>
+        <td style="text-align: center;">&lt;textblock&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>The text block identifier. If the value is omitted or an empty string as specified as the value, an identifier is assigned automatically.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">text</td>
+        <td style="text-align: center;">&lt;textblock&gt;</td>
+        <td style="text-align: center;">Empty string.</td>
+        <td>
+          <p>The text to set in the text block.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">group</td>
+        <td style="text-align: center;">&lt;ui_group&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>The type of the UI group for editing a variable.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">order</td>
+        <td style="text-align: center;">&lt;ui_order&gt;</td>
+        <td style="text-align: center;">0</td>
+        <td>Order priority of the UI with a variable to edit. The lowest number has highest priority.</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// @@ textblock=&quot;dev_group_comment&quot; text=&quot;The parameters in this group are for development only. Please leave them alone.
+</span><span class="cm">/* @@ dev_group_a:
+&nbsp;&nbsp;&nbsp;&nbsp;textblock=&quot;dev_group_comment&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;renderinfo=&quot;param_a&quot; label=&quot;Parameter A&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;textblock text=&quot;The following parameters are for testing.&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;renderinfo=&quot;param_b&quot; label=&quot;Parameter B&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;renderinfo=&quot;param_c&quot; label=&quot;Parameter C&quot;
+*/</span>
+
+<span class="cm">/* @@ dev_group_b:
+&nbsp;&nbsp;&nbsp;&nbsp;textblock=&quot;dev_group_comment&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;renderinfo=&quot;param_d&quot; label=&quot;Parameter D&quot;
+*/</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+</div>
+<h1 id="Anchor_84052806_h1_13">
+  <span style="color: rgb(117,117,117);">Vertex Interleave</span>
+</h1>
+<div class="section">
+  <p>You can specify which vertex attributes to interleave in the same vertex buffer by specifying vertex interleave. You cannot specify the order of vertex attributes in the vertex buffer, because binary converters are ordered according to the quantization format.</p>
+  <p>The following annotations can be used in the vertex interleave. The comment must start at the beginning.</p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">interleave</td>
+        <td style="text-align: center;">&lt;interleave&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>Vertex Interleave information. The <code>id</code> values of the vertex attributes to interleave are specified, separated by spaces. When an empty string is specified, the remaining vertices for which interleave is not specified are shown.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">binarize</td>
+        <td style="text-align: center;">&lt;interleave&gt;</td>
+        <td style="text-align: center;">true</td>
+        <td>When false is specified, no binary is made.</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">location</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>  <span class="n">in</span> <span class="n">vec4</span>   <span class="n">i_Position</span><span class="p">;</span>     <span class="c1">// @@ id=&quot;_p0&quot;   hint=&quot;position0&quot;
+</span><span class="n">layout</span><span class="p">(</span><span class="n">location</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>  <span class="n">in</span> <span class="n">ivec4</span>  <span class="n">i_Index0</span><span class="p">;</span>       <span class="c1">// @@ id=&quot;_i0&quot;   hint=&quot;blendindex0&quot;
+</span><span class="n">layout</span><span class="p">(</span><span class="n">location</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>  <span class="n">in</span> <span class="n">ivec4</span>  <span class="n">i_Index1</span><span class="p">;</span>       <span class="c1">// @@ id=&quot;_i1&quot;   hint=&quot;blendindex1&quot;
+</span><span class="n">layout</span><span class="p">(</span><span class="n">location</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>  <span class="n">in</span> <span class="n">vec4</span>   <span class="n">i_Weight0</span><span class="p">;</span>      <span class="c1">// @@ id=&quot;_w0&quot;   hint=&quot;blendweight0&quot;
+</span><span class="n">layout</span><span class="p">(</span><span class="n">location</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span>  <span class="n">in</span> <span class="n">vec4</span>   <span class="n">i_Weight1</span><span class="p">;</span>      <span class="c1">// @@ id=&quot;_w1&quot;   hint=&quot;blendweight1&quot;
+</span>
+<span class="cm">/* @@
+&nbsp;&nbsp;&nbsp;&nbsp;attrib_id=&quot;_p0&quot;   label=&quot;Position Coordinates&quot; editable=&quot;false&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;attrib_id=&quot;_i0&quot;   label=&quot;Blend Indices 1 through 4&quot;     editable=&quot;false&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;attrib_id=&quot;_i1&quot;   label=&quot;Blend Indices 5 through 8&quot;     editable=&quot;false&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;attrib_id=&quot;_w0&quot;   label=&quot;Blend Weights 1 through 4&quot;     editable=&quot;false&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;attrib_id=&quot;_w1&quot;   label=&quot;Blend Weights 5 through 8&quot;     editable=&quot;false&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;interleave=&quot;_p0 _i0 _i1 _w0 _w1&quot;
+*/</span>
+<span class="c1">// @@ interleave=&quot;&quot; binarize=&quot;false&quot;
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <a name="Anchor_84052806_Group"></a>
+  </p>
+</div>
+<h1 id="Anchor_84052806_h1_14">Group</h1>
+<div class="section">
+  <p>As the name implies, groups define sets of shader parameters. Before you can assign shader parameters to a group, you must define the group. Grouped parameters are displayed as a group in 3DEditor.</p>
+  <p>The following annotations can be used in a group. The comment must start at the beginning. It cannot be defined in a C-style comment.</p>
+  <p>The same ID cannot be defined in multiple groups (that is, two or more).</p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">group</td>
+        <td style="text-align: center;">&lt;group&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>When defined as a group <code>id</code>, this is the group name. When defined as an <code>id</code> attribute, this is the name of the parent group to which the group belongs. If the parent group name is specified, the group name on 3DEditor is displayed as a subgroup of the specified parent group.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">page</td>
+        <td style="text-align: center;">&lt;group&gt;</td>
+        <td style="text-align: center;">Empty string.</td>
+        <td>Page to which the group belongs.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">condition</td>
+        <td style="text-align: center;">&lt;group&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>
+          <p>You can control whether the group is displayed by using the formula evaluation results. For the formula, you can use alphanumeric characters, various operators (the basic arithmetic operations, bitwise operations, and logical operations), and three types of variables: <code>option</code>, <code>uniform</code>, and <code>renderinfo</code>. To describe a variable, separate the type name and identifier with a period (.) and add a dollar sign symbol ($) as a prefix, as in <code>$renderinfo.mode</code>. If the type name is omitted, the variable is treated as having the <em>option</em> identifier. In addition, <code>true</code> and <code>false</code> can be used as special characters. <code>true</code> is evaluated as 1 and <code>false</code> as 0.</p>
+          <p>The following restrictions apply to using variables. (1) No support for <code>uniform</code> beyond 2D parameters. (2) No support for more than two sets of rendering information (<code>count</code> &gt; 2) or for variable length <code>renderinfo</code> (<code>optional</code> = <code>true</code>).</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">label</td>
+        <td style="text-align: center;">&lt;ui_label&gt;</td>
+        <td style="text-align: center;">Same as <code>group</code>.</td>
+        <td>UI label. If an empty string is specified, the frame for the corresponding group in 3DEditor is hidden.<br />Specify an empty string when you want to insert a line break at an arbitrary position within a list of displayed parameters, for example.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">Comment</td>
+        <td style="text-align: center;">&lt;ui_comment&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>UI comment.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">order</td>
+        <td style="text-align: center;">&lt;ui_order&gt;</td>
+        <td style="text-align: center;">0</td>
+        <td>UI order priority. The lowest number has highest priority.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>You can use <code>condition</code> to hide parameters that are not used with a particular variation. In the following example, if the option variable corresponding to <code>id=&quot;normal_map&quot;</code> is <code>false</code>, parameters that are not used in condition in the group corresponding to <code>group=&quot;normal_map_group&quot;</code> are hidden.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="cp">#define USE_NORMAL_MAP      ( 0 )       </span><span class="c1">// @@ id=&quot;normal_map&quot;
+</span>&nbsp;
+<span class="c1">// @@ group=&quot;normal_map_group&quot; label=&quot;Normal Map&quot; order=&quot;5&quot; condition=&quot;$option.normal_map&quot;
+</span><span class="cm">/* @@ normal_map_group:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;option_id=&quot;normal_map&quot;          order=&quot;1&quot;   label=&quot;Normal Map&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sampler_id=&quot;_n0&quot;                order=&quot;2&quot;   label=&quot;Normal Map&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uniform_id=&quot;texsrt2&quot;            order=&quot;3&quot;   label=&quot;SRT for Normal Map&quot;
+*/</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>For more information about displaying groups in 3DEditor, see <a href="../Pages/Page_83955594.html">Material Property Window: Shader Tab</a>.</p>
+</div>
+<p>
+  <a name="Anchor_84052806_Page"></a>
+</p>
+<h1 id="Anchor_84052806_h1_15">Pages</h1>
+<div class="section">
+  <p>Pages define sets of groups. Before you can assign groups to a page, you must define the page.</p>
+  <p>You can use the following annotations in a page. The comment must start at the beginning. It cannot be defined in a C-style comment.</p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">page</td>
+        <td style="text-align: center;">&lt;page&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>The name of the page.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">label</td>
+        <td style="text-align: center;">&lt;ui_label&gt;</td>
+        <td style="text-align: center;">Same as <code>page</code>.</td>
+        <td>UI label.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">Comment</td>
+        <td style="text-align: center;">&lt;ui_comment&gt;</td>
+        <td style="text-align: center;">Not specified.</td>
+        <td>UI comment.</td>
+      </tr>
+      <tr>
+        <td style="text-align: right;">order</td>
+        <td style="text-align: center;">&lt;ui_order&gt;</td>
+        <td style="text-align: center;">0</td>
+        <td>UI order priority. The lowest number has highest priority.</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// @@ page=&quot;common_page&quot; label=&quot;general&quot;
+</span>&nbsp;
+<span class="c1">// @@ group=&quot;diffuse&quot; label=&quot;diffuse&quot; page=&quot;common_page&quot;
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_84052806_h1_16">Revision</h1>
+<div class="section">
+  <p>You can embed revision information in a shader to track which shader revision a model is associated with. You can check the revision and change the intermediate file filter accordingly when the meaning of shader parameters changes because of a shader update.</p>
+  <p>The following annotations can be used in a group. The comment must start at the beginning.</p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th>Supported Elements in the Shader Definition File</th>
+        <th>Handling When Omitted</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td style="text-align: right;">revision</td>
+        <td style="text-align: center;">&lt;revision&gt;</td>
+        <td style="text-align: center;">Cannot be omitted.</td>
+        <td>Revision information. Specifies the user-defined revision number.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <br />
+  </p>
+</div>
+<h1 id="Anchor_84052806_h1_17">Label Attributes</h1>
+<div class="section">
+  <p>If you use lists for <code>label</code>, <code>comment</code>, and <code>textblock</code> <code>text</code> and <code>choice</code> annotation, there are label attributes for customizing the display in 3DEditor. You can control the display by appending attributes to the end of the string, as shown in the following examples. You can specify one or multiple attributes.<br />Label colors and label references are only enabled for <code>label</code> and <code>choice</code> lists.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// @@ uniform_id=&quot;diffuse&quot; label=&quot;ディフューズ:color{red}:background-color{black}:lang-en{Diffuse}&quot; comment=&quot;ディフューズカラー:lang-en{Diffuse Color}&quot;
+</span>
+<span class="c1">// @@ id=&quot;albedo_color&quot; choice=&quot;0::ref{group/texture0}, 1::ref{option_var/const_color0}&quot;
+</span>
+
+<span class="c1">// @@ textblock=&quot;dev_group_comment&quot; text=&quot;The parameters in this group are for development only. Do not touch this. :lang-en{Developer only}&quot;
+</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h2 id="Anchor_84052806_h2_8">Label Color </h2>
+  <p>Change the color of labels when displayed in 3DEditor.<br />(Only enabled for <code>label</code> and <code>choice</code> lists.)</p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Notation Used in This Document</th>
+        <th>Overview</th>
+        <th>Example Notation</th>
+        <th>Description of Example Notation</th>
+      </tr>
+      <tr>
+        <td rowspan="2">:color{}</td>
+        <td rowspan="2">Specifies the text color</td>
+        <td>:color{red}</td>
+        <td>Sets the text color to red.</td>
+      </tr>
+      <tr>
+        <td>:color{#FF0000}</td>
+        <td>Sets the text color to red.</td>
+      </tr>
+      <tr>
+        <td rowspan="2">:background-color{}</td>
+        <td rowspan="2">Sets the background color.</td>
+        <td>:background-color{red}</td>
+        <td>Sets the background color to red.</td>
+      </tr>
+      <tr>
+        <td>:background-color{#FF0000}</td>
+        <td>Sets the background color to red.</td>
+      </tr>
+    </tbody>
+  </table>
+  <h2 id="Anchor_84052806_h2_9">Label Reference</h2>
+  <p>Reference another label included in the same shading model. Use this to display the contents of another label instead, or to add a button to the right side of the label view in 3DEditor so you can move to the page with the referenced label. The following example shows how to specify a reference target.<br />(Only enabled for <code>label</code> and <code>choice</code> lists.)</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre>:ref{Type/The id or name for the type}</pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>For the reference target type, you can specify the following elements that are in the shader definition file.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="nt">&lt;option_var&gt;</span>
+<span class="nt">&lt;attrib_var&gt;</span>
+<span class="nt">&lt;sampler_var&gt;</span>
+<span class="nt">&lt;uniform_var&gt;</span>
+<span class="nt">&lt;render_info_slot&gt;</span>
+<span class="nt">&lt;group&gt;</span>
+<span class="nt">&lt;page&gt;</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>If you omit the string in the <code>label</code> or <code>choice</code> list and instead code <code>:ref{}</code>, the content of the reference target label specified by <code>:ref{}</code> displays in 3DEditor. For example, if you code <code>label=&quot;:ref{group/texture0}&quot;</code> in the shader annotation, the content of the <code>&lt;ui_label&gt;</code> element of <code>&lt;group name=&quot;texture0&quot;&gt;</code> is displayed.</p>
+  <h2 id="Anchor_84052806_h2_10">Label Localization<a name="Anchor_84052806_LocalizationLabel"></a></h2>
+  <p>Specify the label string when displaying in the English version of 3DEditor.</p>
+  <table class="wrapped">
+    <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+    <tbody>
+      <tr>
+        <th>Notation Used in This Document</th>
+        <th>Overview</th>
+        <th>Example Notation</th>
+        <th>Description of Example Notation</th>
+      </tr>
+      <tr>
+        <td>:lang-en{}</td>
+        <td>Specifies the label name displayed in the English version of 3DEditor.</td>
+        <td>:lang-en{Detail}</td>
+        <td>Displayed as &quot;Detail&quot; in the English version of 3DEditor.</td>
+      </tr>
+    </tbody>
+  </table>
+  <!--Remove-->
+  <h1 id="Anchor_84052806_h1_18">
+    <span style="color: rgb(117,117,117);">Restrictions</span>
+  </h1>
+</div>
+<p>Because extraction of annotations is performed on the shader source after preprocessing, annotations deleted with the preprocessing are not extracted. The following code fails in extracting <code>mat</code> or <code>texsrt</code> annotations. Be careful that annotations are not accidentally deleted by variations.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#define OPTION </span><span class="c1">// @@ id=&quot;option&quot; choice=&quot;bool&quot;
+</span><span class="cp">#ifndef OPTION
+</span><span class="n">uniform</span> <span class="n">Material</span> <span class="c1">// @@ id=&quot;mat&quot; type=&quot;material&quot;
+</span><span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">texsrt</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span> <span class="c1">// @@ id=&quot;texsrt&quot; type=&quot;texsrt&quot;
+</span><span class="p">};</span>
+<span class="cp">#endif
+</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__g3d__TexSrt', '../../../Api/HtmlNX/structnn_1_1g3d_1_1_tex_srt.html' )
+SetUrl( 'ApiLink_const_char_*_nn__g3d__ResUniformVar__GetConverter()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_uniform_var.html#ad241ab7c97aa3bbbdbc84926e70262b2' )
+SetUrl( 'ApiLink_void_nn__g3d__ResShaderParam__SetConvertShaderParamCallback(ConvertShaderParamCallback_callback)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1g3d_1_1_res_shader_param.html#ab9298aece0c7b8114fddeaefb7aa1314' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

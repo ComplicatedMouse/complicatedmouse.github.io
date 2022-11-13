@@ -1,0 +1,247 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Opus Encoder | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Opus Encoder -->
+<div class="pagetitle" id="PageId_164723624">Opus Encoder</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_164723624_h1_1">Opus Encoder</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_164723624_h2_1">Feature Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_164723624_h2_2">Encoding Mode</a>
+      </li>
+      <li>
+        <a href="#Anchor_164723624_h2_3">Getting Internal Latency</a>
+      </li>
+      <li>
+        <a href="#Anchor_164723624_h2_4">Usage Examples</a>
+      </li>
+      <li>
+        <a href="#Anchor_164723624_h2_5">API References</a>
+      </li>
+      <li>
+        <a href="#Anchor_164723624_h2_6">Restrictions</a>
+      </li>
+      <li>
+        <a href="#Anchor_164723624_h2_7">Important Information</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_164723624_h1_1">Opus Encoder</h1>
+<h2 id="Anchor_164723624_h2_1">Feature Overview</h2>
+<p>The Opus encoder provides features for encoding PCM data to convert it to Opus data.</p>
+<p>The Opus encoder provides the following class.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Class Name</th>
+      <th>Overview</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusEncoder</span>
+      </td>
+      <td>Implements the Opus encoding process using CPU resources.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The Opus encoder requires the user to prepare a work buffer.</p>
+<p>To get the size of the work buffer needed for encoding, use the <span class="ApiLink_size_t_nn__codec__OpusEncoder__GetWorkBufferSize(int_sampleRate|_int_channelCount)_const_noexcept_NN_OVERRIDE">nn::codec::OpusEncoder::GetWorkBufferSize()</span> function with the following parameters.</p>
+<ul>
+  <li>Sample Rate</li>
+  <li>Number of Channels</li>
+</ul>
+<p>By passing these parameters and the work buffer information to the <span class="ApiLink_virtual_OpusResult_nn__codec__OpusEncoder__Initialize(int_sampleRate|_int_channelCount|_void_*buffer|_size_t_size)_noexcept_NN_OVERRIDE">nn::codec::OpusEncoder::Initialize()</span> function, the Opus encoder is initialized and becomes ready for use. After the encoder has been initialized, you must not modify the work buffer until the <span class="ApiLink_virtual_void_nn__codec__OpusEncoder__Finalize()_noexcept_NN_OVERRIDE">nn::codec::OpusEncoder::Finalize()</span> function is called.</p>
+<p>The <span class="ApiLink_virtual_OpusResult_nn__codec__OpusEncoder__EncodeInterleaved(size_t_*pOutputSize|_void_*outputBuffer|_size_t_outputBufferSize|_const_int16_t_*inputBuffer|_int_inputSampleCountPerChannel)_noexcept_NN_OVERRIDE">nn::codec::OpusEncoder::EncodeInterleaved()</span> function performs the actual encoding process. When using input and output buffers, note the following.</p>
+<ul>
+  <li>Input Buffer<br /><ul><li>For the number of samples per channel, you can only specify sample counts that correspond to the frames supported by the <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusEncoder</span> class (2.5, 5.0, 10.0, and 20.0-millisecond frames).<ul><li style="list-style-type: none; background-image: none;"><ul><li>Use the <span class="ApiLink_nn__codec__OpusEncoder__CalculateFrameSampleCount">nn::codec::OpusEncoder::CalculateFrameSampleCount()</span> function to get this value.</li></ul></li></ul></li></ul></li>
+  <li>Output Buffer<ul><li>A size of <span class="ApiLink_nn__codec__OpusPacketSizeMaximum">nn::codec::OpusPacketSizeMaximum</span> bytes is sufficient.</li></ul></li>
+</ul>
+<p>The size of the data output from the encoding process can be determined from the value specified for the parameter of the <span class="ApiLink_nn__codec__OpusEncoder__EncodeInterleaved">nn::codec::OpusEncoder::EncodeInterleaved()</span> function.</p>
+<p>The following values can be configured at any time for the encoding process parameters.</p>
+<ul>
+  <li>Bit Rate</li>
+  <li>Bit rate control</li>
+</ul>
+<p>Use the <span class="ApiLink_virtual_void_nn__codec__OpusEncoder__SetBitRate(int_bitRate)_noexcept_NN_OVERRIDE">nn::codec::OpusEncoder::SetBitRate()</span> function to set the bit rate. The initial bit rate is calculated from the sampling rate and the number of channels specified in the call to the <span class="ApiLink_nn__codec__OpusEncoder__Initialize">nn::codec::OpusEncoder::Initialize()</span> function.</p>
+<p>Use the <span class="ApiLink_nn__codec__OpusEncoder__SetBitRateControl">nn::codec::OpusEncoder::SetBitRateControl()</span> function to enable bit rate control. The default bit rate control value is <span class="ApiLink_nn__codec__OpusBitRateControl_Vbr">nn::codec::OpusBitRateControl_Vbr</span>.</p>
+<p>You can configure the encoding mode using the <span class="ApiLink_nn__codec__BindOpusEncoderCodingMode">nn::codec::BindOpusEncoderCodingMode()</span> function for <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusEncoder</span> instances on which <span class="ApiLink_nn__codec__OpusEncoder__EncodeInterleaved">nn::codec::OpusEncoder::EncodeInterleaved()</span> has never been called.</p>
+<p>The default encoding mode is <span class="ApiLink_nn__codec__OpusCodingMode_Auto">nn::codec::OpusCodingMode_Auto</span>.</p>
+<p>For more information about encoding mode, see <a href="#Anchor_164723624_CodingMode">Encoding Mode</a> .</p>
+<h2 id="Anchor_164723624_h2_2">Encoding Mode<a name="Anchor_164723624_CodingMode"></a></h2>
+<p>In encoding mode, you can specify <span class="ApiLink_nn__codec__OpusCodingMode_Celt">nn::codec::OpusCodingMode_Celt</span>,<span class="ApiLink_nn__codec__OpusCodingMode_Auto">, nn::codec::OpusCodingMode_Silk</span>, and <span class="ApiLink_nn__codec__OpusCodingMode_Silk">nn::codec::OpusCodingMode_Auto</span>.</p>
+<p>The following table describes these modes.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Encoding Mode</th>
+      <th>Description</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__codec__OpusCodingMode_Celt">nn::codec::OpusCodingMode_Celt</span>
+      </td>
+      <td>Uses an encoding method that assumes music data compression.</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__codec__OpusCodingMode_Silk">nn::codec::OpusCodingMode_Silk</span>
+      </td>
+      <td>Uses an encoding method that assumes audio data compression.</td>
+      <td>
+        <p>The specifiable frames are limited.</p>
+        <p>See the notes following the table.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__codec__OpusCodingMode_Auto">nn::codec::OpusCodingMode_Auto</span>
+      </td>
+      <td>
+        <p>As of NintendoSDK 0.15.0, encoding is performed using the <span class="ApiLink_nn__codec__OpusCodingMode_Celt">nn::codec::OpusCodingMode_Celt</span> method.</p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Note the following when changing the encoding mode.</p>
+<ul>
+  <li>You can call <span class="ApiLink_nn__codec__BindOpusEncoderCodingMode">nn::codec::BindOpusEncoderCodingMode()</span> to configure encoding only for <span class="ApiLink_nn__codec__OpusEncoder">nn::codec::OpusEncoder</span> instances for which <span class="ApiLink_virtual_OpusResult_nn__codec__OpusEncoder__EncodeInterleaved(size_t_*pOutputSize|_void_*outputBuffer|_size_t_outputBufferSize|_const_int16_t_*inputBuffer|_int_inputSampleCountPerChannel)_noexcept_NN_OVERRIDE">nn::codec::OpusEncoder::EncodeInterleaved()</span> has never been called.</li>
+  <li>If you specify <span class="ApiLink_nn__codec__OpusCodingMode_Silk">nn::codec::OpusCodingMode_Silk</span>, the only supported frames are 10.0-millisecond and 20.0-millisecond frames.<ul><li><span class="ApiLink_nn__codec__OpusResult_UnsupportedSampleCount">nn::codec::OpusResult_UnsupportedSampleCount</span> is returned if you specify sample counts equivalent to 2.5 milliseconds and 5.0 milliseconds in <span class="ApiLink_virtual_OpusResult_nn__codec__OpusEncoder__EncodeInterleaved(size_t_*pOutputSize|_void_*outputBuffer|_size_t_outputBufferSize|_const_int16_t_*inputBuffer|_int_inputSampleCountPerChannel)_noexcept_NN_OVERRIDE">nn::codec::OpusEncoder::EncodeInterleaved()</span>.</li></ul></li>
+</ul>
+<h2 id="Anchor_164723624_h2_3">Getting Internal Latency</h2>
+<p>Normal audio codecs contain internal latency elements. The Opus encoder also has internal latency.</p>
+<p>The value that can be obtained using <span class="ApiLink_nn__codec__OpusEncoder__GetPreSkipSampleCount">nn::codec::OpusEncoder::GetPreSkipSampleCount()</span> represents the encoder latency in number of samples (number of latent samples).</p>
+<p>For more information, see <a href="../Pages/Page_99805007.html#Anchor_99805007_OpusCodecInternalDelayCorrection">Correcting Internal Latency</a>.</p>
+<h2 id="Anchor_164723624_h2_4">Usage Examples</h2>
+<p>See the <span class="ApiLink_PageSampleCodecOpusEncoder">Opus encoder sample</span>.</p>
+<h2 id="Anchor_164723624_h2_5">API References</h2>
+<p>For more information, see the <span class="ApiLink_nn__codec">OpusEncoder class</span> in the <span class="ApiLink_nn__codec__OpusEncoder">nn::codec namespace</span>.</p>
+<h2 id="Anchor_164723624_h2_6">Restrictions</h2>
+<p>None.</p>
+<h2 id="Anchor_164723624_h2_7">Important Information</h2>
+<ul>
+  <li>Depending on the parameters, clipping noise may be generated when the encoded results are decoded.<ul><li>As a workaround, lower the amplitude of the source waveforms used as input.</li></ul></li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__codec__OpusEncoder', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html' )
+SetUrl( 'ApiLink_size_t_nn__codec__OpusEncoder__GetWorkBufferSize(int_sampleRate|_int_channelCount)_const_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#a3823391fd8fe523bcd4a38bf64cc32f7' )
+SetUrl( 'ApiLink_virtual_OpusResult_nn__codec__OpusEncoder__Initialize(int_sampleRate|_int_channelCount|_void_*buffer|_size_t_size)_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#adee7bf9f60139e169535f3214bdf2fc7' )
+SetUrl( 'ApiLink_virtual_void_nn__codec__OpusEncoder__Finalize()_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#ae5b663961cc9013798ddaf19748b531e' )
+SetUrl( 'ApiLink_virtual_OpusResult_nn__codec__OpusEncoder__EncodeInterleaved(size_t_*pOutputSize|_void_*outputBuffer|_size_t_outputBufferSize|_const_int16_t_*inputBuffer|_int_inputSampleCountPerChannel)_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#a808ecd9e87c513626b5554b291a17f94' )
+SetUrl( 'ApiLink_nn__codec__OpusEncoder__CalculateFrameSampleCount', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#a09865c4e5930369a1c9bc78d8974f68b' )
+SetUrl( 'ApiLink_nn__codec__OpusPacketSizeMaximum', '../../../Api/HtmlNX/namespacenn_1_1codec.html#adca7d12653ef7695e8ce6864d58f7011' )
+SetUrl( 'ApiLink_nn__codec__OpusEncoder__EncodeInterleaved', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#a808ecd9e87c513626b5554b291a17f94' )
+SetUrl( 'ApiLink_virtual_void_nn__codec__OpusEncoder__SetBitRate(int_bitRate)_noexcept_NN_OVERRIDE', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#ad97a6bd5bb9799a718b1bdaba7ac34b8' )
+SetUrl( 'ApiLink_nn__codec__OpusEncoder__Initialize', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#adee7bf9f60139e169535f3214bdf2fc7' )
+SetUrl( 'ApiLink_nn__codec__OpusEncoder__SetBitRateControl', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#ab0b21bd4737f260008ae8dfdadfdd03a' )
+SetUrl( 'ApiLink_nn__codec__OpusBitRateControl_Vbr', '../../../Api/HtmlNX/namespacenn_1_1codec.html#a3a2d885fcb1cff929552d0a81ba26872ac5c2fb789093ec4453f359a69b50282d' )
+SetUrl( 'ApiLink_nn__codec__BindOpusEncoderCodingMode', '../../../Api/HtmlNX/namespacenn_1_1codec.html#afccee8d7b49294680c51d71338c34fca' )
+SetUrl( 'ApiLink_nn__codec__OpusCodingMode_Auto', '../../../Api/HtmlNX/namespacenn_1_1codec.html#a9b257771e1088b6cba2836bbe3a53ccfa8919df620449726b867ab74825a6fc8e' )
+SetUrl( 'ApiLink_nn__codec__OpusCodingMode_Celt', '../../../Api/HtmlNX/namespacenn_1_1codec.html#a9b257771e1088b6cba2836bbe3a53ccfa1ab64f14137951c75d53c073bbdfaa70' )
+SetUrl( 'ApiLink_nn__codec__OpusCodingMode_Silk', '../../../Api/HtmlNX/namespacenn_1_1codec.html#a9b257771e1088b6cba2836bbe3a53ccfabe6634ee1371b268050b40b8abacb259' )
+SetUrl( 'ApiLink_nn__codec__OpusResult_UnsupportedSampleCount', '../../../Api/HtmlNX/namespacenn_1_1codec.html#a375cd42044f1aabca06eba955018b7d5ad01d9f871fbb7a54a17099a32f4ce8e9' )
+SetUrl( 'ApiLink_nn__codec__OpusEncoder__GetPreSkipSampleCount', '../../../Api/HtmlNX/classnn_1_1codec_1_1_opus_encoder.html#a7e64504bba6e8b626d132d459cf3afb4' )
+SetUrl( 'ApiLink_PageSampleCodecOpusEncoder', '../../../Api/HtmlNX/_page_sample_codec_opus_encoder.html' )
+SetUrl( 'ApiLink_nn__codec', '../../../Api/HtmlNX/namespacenn_1_1codec.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

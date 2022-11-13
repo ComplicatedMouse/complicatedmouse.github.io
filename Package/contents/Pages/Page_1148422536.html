@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>atk News | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- atk News -->
+<div class="pagetitle" id="PageId_1148422536">atk News</div>
+<div class="text_separate">
+<p style="margin-left: 44.0px; text-align: left;">This document describes the changes made in NintendoSDK 13.1.0.</p>
+<p style="margin-left: 44.0px; text-align: left;">
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_1148422536_h1_1">SoundMaker</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_1148422536_h2_1">Added a feature for specifying the rounding direction for sequence sound ticks.</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_1148422536_h1_2">Changes for Developers</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_1148422536_h2_2">Added nn::atk::EffectCapture effect for getting sample data.</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 style="text-decoration: none; text-align: left;" id="Anchor_1148422536_h1_1">
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_1148422536/1148422444.png" class="embedded-image" />
+  </span>SoundMaker</h1>
+<h2 id="Anchor_1148422536_h2_1">Added a feature for specifying the rounding direction for sequence sound ticks.</h2>
+<p>Added a feature to SoundMaker's sound archive settings for specifying the rounding direction for sequence sound ticks.<br />As part of this change, older SoundMaker project (FSPJ) files must be automatically updated when loaded.</p>
+<p>Set the tick rounding direction for sequence sounds to either the new playback method, rounding up, or the playback method compatible with Nintendo SDK 13.0.0 and earlier, rounding down.<br />New FSPJ files created with this version or a later version of SoundMaker are set to rounding up by default, creating a different waveform output when playing back a sequence sound.<br />When FSPJ files are updated using this or later version of SoundMaker or SoundProjectUtility, or files are imported using the <a href="../Pages/Page_83955597.html">Importing External Files</a> feature, they are imported as rounding down by default, maintaining compatibility of the waveform output results during sequence sound playback.</p>
+<p>The following description explains the changes in behavior due to the difference in the rounding direction of sequence sound ticks.</p>
+<p>If a sequence sound tick falls between audio frames (which delimit the minimum intervals of time in which the <code>atk</code> library can control volume and sound production), this feature defines whether to process the sequence commands included in that tick in the former audio frame or the latter audio frame.<br />The relationship between sequence sounds and audio frames is as follows.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_1148422536/1148422451.png" width="615" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>In NintendoSDK 13.0.0 or earlier, if sequence sound ticks are between audio frames, the tick is rounded forward in time to process the sequence command.<br />The rounding process for this tick is rounding down, as shown in the following diagram.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_1148422536/1148422516.png" width="615" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <br />
+</p>
+<p>With the rounding down method, when playback is cued from the sample position as calculated from tick, a sound that is supposed to play might possibly be treated as already played.<br />For this reason, a newly prepared method for processing sequence commands rounds the sequence sound tick backward in time.<br />This tick rounding process is rounding up, as shown in the following diagram.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_1148422536/1148422553.png" width="615" class="embedded-image" />
+  </span>
+</p>
+<p>With rounding up, the opposite of what happens with rounding down may happen. When playback is cued from the sample position as calculated from tick, the end of a sound that was supposed to have finished being played might possibly be included in the start of the part that has been cued.</p>
+<p>This change has a large scope of impact, including potential changes to the loop length configured in the sequence sound. Each method has its advantages and disadvantages, regardless of the method selected.<br />For this reason, an option has been added to SoundMaker's sound archive settings for specifying the rounding direction for sequence sound ticks.</p>
+<p>For more information about SoundMaker settings, see NintendoWare &gt; Audio &gt; Tools &gt; SoundMaker &gt; Practical Guide &gt; <a href="../Pages/Page_83956179.html">Option Settings</a> &gt; Sound Archive Settings 1.</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_1148422536_h1_2">Changes for Developers</h1>
+<h2 id="Anchor_1148422536_h2_2">Added nn::atk::EffectCapture effect for getting sample data.</h2>
+<p>Added the <code><span class="ApiLink_nn__atk__EffectCapture">nn::atk::EffectCapture</span></code> effect for implementing the processing for getting sample data.<br />For more information about AtkEffect sample usage and behavior, see the appropriate sections in <a href="../Pages/Page_93362777.html">Audio Effects</a>.</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk__EffectCapture', '../../../Api/HtmlNX/classnn_1_1atk_1_1_effect_capture.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

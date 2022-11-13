@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>websocket Library | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- websocket Library -->
+<div class="pagetitle" id="PageId_419702846">websocket Library</div>
+<div class="text_separate">
+<h1 id="Anchor_419702846_h1_1">Introduction</h1>
+<h2 id="Anchor_419702846_h2_1">Purpose of This Documentation</h2>
+<p>This documentation describes the <code>websocket</code> library features included in NintendoSDK.</p>
+<h2 id="Anchor_419702846_h2_2">Intended Audience</h2>
+<p>This documentation is intended for people developing applications using NintendoSDK.</p>
+<h2 id="Anchor_419702846_h2_3">Related Documentation</h2>
+<p>In addition to this documentation, also see <span class="ApiLink_nn__websocket">websocket Function Reference</span>.</p>
+<h2 id="Anchor_419702846_h2_4">SDK Version</h2>
+<p>This feature is available in 7.0.0 and later.</p>
+<h1 id="Anchor_419702846_h1_2">websocket Library Functionality</h1>
+<p>The <code>websocket</code> library in NintendoSDK provides WebSocket functionality, a mechanism for Web applications to perform bidirectional communication between clients and servers.</p>
+<p>It can be used to realize connections with Web applications and client-server network services.</p>
+<h2 id="Anchor_419702846_h2_5">WebSocket Clients</h2>
+<p>Use the <span class="ApiLink_nn__websocket__WebSocket">nn::websocket::WebSocket class</span> to communicate with servers.</p>
+<h3 id="Anchor_419702846_h3_1">Connecting</h3>
+<p>Applications must first connect to servers.<br />Use <span class="ApiLink_nn__Result_nn__websocket__WebSocket__Open(const_char_*pUri)_NN_NOEXCEPT">nn::websocket::WebSocket::Open()</span> to connect to a server.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>You must configure the connection using <span class="ApiLink_void_nn__websocket__WebSocket__SetConnection(ConnectionBase_*pConnection)_NN_NOEXCEPT">nn::websocket::WebSocket::SetConnection()</span> in advance.</p>
+  </div>
+</div>
+<p>This function blocks until it either connects to the server or communication fails.<br />Setting a cancellation function, using <span class="ApiLink_void_nn__websocket__WebSocket__SetCancellationFunction(CancellationFunction_pFunction|_void_*pParam)_NN_NOEXCEPT">nn::websocket::WebSocket::SetCancellationFunction()</span> allows you to interrupt a connection attempt at any point.</p>
+<h3 id="Anchor_419702846_h3_2">Sending</h3>
+<p>Use the following functions to send data.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__Result_nn__websocket__WebSocket__SendText(const_char_*pText)_NN_NOEXCEPT">nn::websocket::WebSocket::SendText()</span>
+  </li>
+  <li>
+    <span class="ApiLink_nn__Result_nn__websocket__WebSocket__SendBinary(const_void_*pData|_size_t_size)_NN_NOEXCEPT">nn::websocket::WebSocket::SendBinary()</span>
+  </li>
+</ul>
+<p>Sending has not yet occurred when these functions are called. (Data is simply placed in a send queue.)<br />Data in that send queue is sent during the processing for <span class="ApiLink_void_nn__websocket__WebSocket__Perform()_NN_NOEXCEPT">nn::websocket::WebSocket::Perform()</span>.</p>
+<h3 id="Anchor_419702846_h3_3">Receiving</h3>
+<p>Data is received within the message receipt event handler.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__websocket__WebSocket__SetMessageEventHandler(MessageEventHandler_pHandler|_void_*pParam)_NN_NOEXCEPT">nn::websocket::WebSocket::SetMessageEventHandler()</span>
+  </li>
+</ul>
+<h3 id="Anchor_419702846_h3_4">Disconnection (Requests)</h3>
+<p>Use <span class="ApiLink_nn__Result_nn__websocket__WebSocket__Close()_NN_NOEXCEPT">nn::websocket::WebSocket::Close()</span> to disconnect from a server with normal procedures.</p>
+<p>Disconnection does not occur immediately when this function is called.<br />A closing packet is sent to the server during processing for <span class="ApiLink_void_nn__websocket__WebSocket__Perform()_NN_NOEXCEPT">nn::websocket::WebSocket::Perform()</span> and then disconnection occurs.</p>
+<h2 id="Anchor_419702846_h2_6">Connections</h2>
+<p>The <code>websocket</code> library is a mechanism for adding connections from an external source, using <span class="ApiLink_void_nn__websocket__WebSocket__SetConnection(ConnectionBase_*pConnection)_NN_NOEXCEPT">nn::websocket::WebSocket::SetConnection()</span>, to enable communication with a server using any means of communication.<br />The following connections are currently available.</p>
+<ul>
+  <li>
+    <span class="ApiLink_nn__websocket__Connection">nn::websocket::Connection Class</span>
+    <br />
+    <ul>
+      <li>Connection that performs infrastructure communication using the SOCKET and SSL libraries.</li>
+    </ul>
+  </li>
+  <li>
+    <span class="ApiLink_nn__websocket__HtcsConnection">nn::websocket::HtcsConnection Class</span>
+    <br />
+    <ul>
+      <li>Connection that performs communication between development hardware and a host PC using the HTCS library.</li>
+    </ul>
+  </li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Applications can create classes that inherit the <span class="ApiLink_nn__websocket__ConnectionBase">nn::websocket::ConnectionBase class</span> to use custom connections.</p>
+  </div>
+</div>
+<h2 id="Anchor_419702846_h2_7">Automatically Establishing Proxies</h2>
+<p>You get proxy data from the system settings (within the <code>nifm</code> library) and automatically apply that data when communicating with a server using the <span class="ApiLink_nn__websocket__Connection">nn::websocket::Connection class</span>.<br />Communication occurs via the proxy when the proxy settings are valid.</p>
+<h2 id="Anchor_419702846_h2_8">Custom Application CA Certificates</h2>
+<p>Configure an import function using <span class="ApiLink_void_nn__websocket__Connection__SetSslContextCertificateImportFunction(SslContextCertificateImportFunction_pFunction|_void_*pParam)_NN_NOEXCEPT">nn::websocket::Connection::SetSslContextCertificateImportFunction()</span> to use a custom application CA certificate.<br />The <span class="ApiLink_nn__websocket__Connection">nn::websocket::Connection class</span> calls the import function immediately prior to making the SSL connection. You can configure a certificate at that point.</p>
+<h2 id="Anchor_419702846_h2_9">Compression Extensions</h2>
+<p>The WebSocket per-message compression extensions, PMCE, defined using RFC7692, are supported.</p>
+<p>The <code>websocket</code> library automatically enables compression extensions if they are available when connecting to a server.<br />Transmitted data is compressed and decompressed, using the <code>deflate</code> algorithm, when compression extensions are enabled.</p>
+<h1 id="Anchor_419702846_h1_3">Formats Provided by the websocket Library</h1>
+<p>See the following pages.</p>
+<ul>
+  <li>
+    <a href="../Pages/Page_95685382.html">How the Libraries Are Provided and How to Use Them</a>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__websocket', '../../../Api/HtmlNX/namespacenn_1_1websocket.html' )
+SetUrl( 'ApiLink_nn__websocket__WebSocket', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_web_socket.html' )
+SetUrl( 'ApiLink_nn__Result_nn__websocket__WebSocket__Open(const_char_*pUri)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_web_socket.html#a135a40070aabf78adc15fc04d28e51ab' )
+SetUrl( 'ApiLink_void_nn__websocket__WebSocket__SetConnection(ConnectionBase_*pConnection)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_web_socket.html#acb73ca3d1af7466e1788bdde19e4a755' )
+SetUrl( 'ApiLink_void_nn__websocket__WebSocket__SetCancellationFunction(CancellationFunction_pFunction|_void_*pParam)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_web_socket.html#a79540ddcd207897c2d9c8a3d8dc48e07' )
+SetUrl( 'ApiLink_nn__Result_nn__websocket__WebSocket__SendText(const_char_*pText)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_web_socket.html#a6c23a362251e250ae91824664636ab72' )
+SetUrl( 'ApiLink_nn__Result_nn__websocket__WebSocket__SendBinary(const_void_*pData|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_web_socket.html#aea9c45c5260849591956afa0a68a81cb' )
+SetUrl( 'ApiLink_void_nn__websocket__WebSocket__Perform()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_web_socket.html#acada369011ecdc1e2303b701f58fae93' )
+SetUrl( 'ApiLink_void_nn__websocket__WebSocket__SetMessageEventHandler(MessageEventHandler_pHandler|_void_*pParam)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_web_socket.html#a9df020963186929dcb3177491fb29de0' )
+SetUrl( 'ApiLink_nn__Result_nn__websocket__WebSocket__Close()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_web_socket.html#a2c549ff0049a2463395608a9c9f33d56' )
+SetUrl( 'ApiLink_nn__websocket__Connection', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_connection.html' )
+SetUrl( 'ApiLink_nn__websocket__HtcsConnection', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_htcs_connection.html' )
+SetUrl( 'ApiLink_nn__websocket__ConnectionBase', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_connection_base.html' )
+SetUrl( 'ApiLink_void_nn__websocket__Connection__SetSslContextCertificateImportFunction(SslContextCertificateImportFunction_pFunction|_void_*pParam)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1websocket_1_1_connection.html#aaa01d301192510ed54895582ee1aa32c' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

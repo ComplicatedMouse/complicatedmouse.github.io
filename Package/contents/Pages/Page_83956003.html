@@ -1,0 +1,247 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>NintendoSDK Migration Guide for NintendoWare Effect | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- NintendoSDK Migration Guide for NintendoWare Effect -->
+<div class="pagetitle" id="PageId_83956003">NintendoSDK Migration Guide for NintendoWare Effect</div>
+<div class="text_separate">
+<h1 id="Anchor_83956003_h1_1"> NintendoWare Effect Runtime Migration Guide</h1>
+<p>The NintendoSDK NintendoWare Effect runtime and tool have been completely redesigned from the NintendoWare for Cafe versions. <br />The following topics describe the procedure for migrating from NintendoWare for Cafe to NintendoSDK NintendoWare Effect.</p>
+<ol>
+  <li>Updating Intermediate Files</li>
+  <li>Creating the Effect Binary</li>
+  <li>Playback Process</li>
+</ol>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This page refers to the EffectMaker in Nintendo SDK as <em>NintendoSDK EffectMaker</em> and the EffectMaker in NintendoWare for Cafe as <em>NintendoWare EffectMaker</em>.</p>
+  </div>
+</div>
+<h2 id="Anchor_83956003_h2_1">Updating Intermediate Files</h2>
+<p>The format of intermediate files (ESET files) in NintendoSDK NintendoWare Effect has changed. Intermediate files must be updated to the new format. <br />To update intermediate files to this new format, use <code>NintendoSDK\Tools\Graphics\EffectMaker\FE1Updater\FE1Updater.exe</code>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The EffectMaker in NintendoSDK NintendoWare Effect can also load intermediate files in the earlier format.</p>
+  </div>
+</div>
+<h3 id="Anchor_83956003_h3_1">Updates</h3>
+<p>You can convert a NintendoWare for Cafe intermediate file to a NintendoSDK NintendoWare Effect intermediate file by specifying a conversion list file with the <code>-u2</code> option when running EffectMaker. <br />Use the binary conversion list file from NintendoWare for Cafe as the conversion list file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>FE1Updater.exe -u2  [conversion_list_file_path] [output_directory_path]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_83956003_h4_1">Caution When Updating Intermediate Files That Use a Custom Shader or Action</h4>
+<ul>
+  <li>
+    <span style="color: rgb(255,0,0);">
+      <strong>If you update the file without specifying the custom shader or action definition file, the custom shader or action data will be lost. </strong>
+    </span>
+    <br />When updating an intermediate file that uses a custom shader or custom action, you must specify the USD/UDD definition file that the file uses.</li>
+</ul>
+<p>
+  <br />
+</p>
+<ul>
+  <li>
+    <span style="color: rgb(255,0,0);">
+      <strong>Even if the update of the intermediate file completes normally, the custom shader or custom action data may be lost. </strong>
+    </span>
+    <br />When loading an updated intermediate file in NintendoSDK EffectMaker, you must set the same custom shader or action definition file used during the update in advance via the project configuration file for NintendoSDK EffectMaker.<br /></li>
+</ul>
+<h4 id="Anchor_83956003_h4_2">Updating Intermediate Files That Use a Custom Shader</h4>
+<p>Use the <code>-us</code> option to specify the <strong>absolute path</strong> of the custom shader definition file. This can be used at the same time as the <code>-ua</code> option.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>FE1Updater.exe -us [absolute_path_of_custom_shader_UI_definition_list_file_to_use] -u2 [conversion_list_file_path] [output_directory_path]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_83956003_h4_3">Updating Intermediate Files That Use a Custom Action</h4>
+<p>Use the <code>-u2</code> option to specify the conversion list and the <code>-ua</code> option to specify the <strong>absolute path</strong> of the directory that contains the UDD definition files. This can be used at the same time as the <code>-us</code> option.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>FE1Updater.exe -ua  [absolute_path_of_directory_containing _UDD_file_to_use] -u2 [conversion_list_file_path] [output_directory_path]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83956003_h3_2">Setting a Custom Shader in NintendoSDK EffectMaker</h3>
+<p>Use the configuration file from NintendoWare EffectMaker as the custom shader definition file. <br />To set the custom shader definition file in NintendoSDK EffectMaker, specify the path in the project configuration file. <br />For more information, see the Effect Programming Guide.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;CustomShaderUIDefList&gt;
+&nbsp;&nbsp;&lt;GeneralShaders&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;VertexShaderPaths&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ShaderPath&gt;UsrShader_General.vsh&lt;/ShaderPath&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/VertexShaderPaths&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;FragmentShaderPaths&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ShaderPath&gt;UsrShader_General.fsh&lt;/ShaderPath&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/FragmentShaderPaths&gt;
+&nbsp;&nbsp;&lt;/GeneralShaders&gt;
+&nbsp;&nbsp;&lt;CustomShaderUIDefLinkData CallbackId=&quot;1&quot;&gt;CustomShader_Sample1.usd&lt;/CustomShaderUIDefLinkData&gt;
+&nbsp;&nbsp;&lt;CustomShaderUIDefLinkData CallbackId=&quot;2&quot;&gt;CustomShader_Sample2.usd&lt;/CustomShaderUIDefLinkData&gt;
+&nbsp;&nbsp;&lt;CustomShaderUIDefLinkData CallbackId=&quot;3&quot;&gt;CustomShader_Sample3.usd&lt;/CustomShaderUIDefLinkData&gt;
+&lt;/CustomShaderUIDefList&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_83956003_h3_3">Setting a Custom Action in NintendoSDK EffectMaker</h3>
+<p>The UDD filename specified in <code>DataModelName</code> and <code>UddPath</code> must be the same in the custom action definition file to be imported in NintendoSDK EffectMaker. <br /><span style="color: rgb(255,0,0);"><strong>The ID specified in <code>CallbackId</code> uses one-based numbering, which is different from the index specified in the UDD filename. <br />Add one to the ID value used in FE1 for this definition file. Continue to use zero-based numbering in the editor and runtime. </strong></span><br />To set the custom action definition file in NintendoSDK EffectMaker, specify the path in the project configuration file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;ArrayOfCustomActionSettingInfo xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CustomActionUddInfo CallbackId=&quot;1&quot; DataModelName=&quot;EmitterUserDataDefinition_0&quot; UddPath=&quot;EmitterUserDataDefinition_0.udd&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CustomActionUddInfo CallbackId=&quot;2&quot; DataModelName=&quot;EmitterUserDataDefinition_1&quot; UddPath=&quot;EmitterUserDataDefinition_1.udd&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CustomActionUddInfo CallbackId=&quot;3&quot; DataModelName=&quot;EmitterUserDataDefinition_2&quot; UddPath=&quot;EmitterUserDataDefinition_2.udd&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CustomActionUddInfo CallbackId=&quot;4&quot; DataModelName=&quot;EmitterUserDataDefinition_3&quot; UddPath=&quot;EmitterUserDataDefinition_3.udd&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CustomActionUddInfo CallbackId=&quot;5&quot; DataModelName=&quot;EmitterUserDataDefinition_4&quot; UddPath=&quot;EmitterUserDataDefinition_4.udd&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CustomActionUddInfo CallbackId=&quot;6&quot; DataModelName=&quot;EmitterUserDataDefinition_5&quot; UddPath=&quot;EmitterUserDataDefinition_5.udd&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CustomActionUddInfo CallbackId=&quot;7&quot; DataModelName=&quot;EmitterUserDataDefinition_6&quot; UddPath=&quot;EmitterUserDataDefinition_6.udd&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;CustomActionUddInfo CallbackId=&quot;8&quot; DataModelName=&quot;EmitterUserDataDefinition_7&quot; UddPath=&quot;EmitterUserDataDefinition_7.udd&quot; /&gt;
+&lt;/ArrayOfCustomActionSettingInfo&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83956003_h2_2">Creating the Effect Binary</h2>
+<p>This section describes the process of creating an effect binary.</p>
+<h3 id="Anchor_83956003_h3_4">Command-Line Conversion Arguments</h3>
+<p>Specify the project configuration file as an argument of the command-line binary converter to create an effect binary.</p>
+<div>
+  <div class="syntaxhighlighter bash">
+    <p>The format of the conversion list has changed. For more information, see <a href="../Pages/Page_83955581.html">Binary Converter</a> when creating the file.</p>
+  </div>
+</div>
+<h3 id="Anchor_83956003_h3_5">Preparing the Project Configuration File</h3>
+<p>In NintendoSDK EffectMaker, project-specific settings are now defined in a project configuration file. This includes settings such as custom shaders, custom actions, and linear settings. <br />The project configuration file is required to apply custom shaders and custom actions to a binary conversion. <br />For more information, see <a href="../Pages/Page_83955992.html">Preparing the Project Configuration File</a> when creating the file.</p>
+<h2 id="Anchor_83956003_h2_3">Playback Process</h2>
+<p>There are no major changes to the creation of the <code>nw::eft2::System</code> class and registration of an effect binary.</p>
+<p>
+  <a href="../Pages/Page_83955666.html">Effect Playback Tutorial</a>
+</p>
+<h3 id="Anchor_83956003_h3_6">Processing Calculations</h3>
+<p>This process is described based on the following code with a simple calculation.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Frame start.
+</span><span class="nn">nw::eft2::System::</span><span class="n">BeginFrame</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// Calculation processes.
+</span><span class="nn">nw::eft2::System::</span><span class="n">Calc</span><span class="p">(</span> <span class="n">group</span><span class="p">,</span> <span class="n">frameRate</span><span class="p">,</span> <span class="n">swapUbo</span> <span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="expand-content">
+  <br />
+  <p>There are three changes to the calculation process.</p>
+  <ul>
+    <li>Added the <code>swapUbo</code> flag to the parameters of the <code>nw::eft2::System::Calc</code> function. <br />Previously, the <code>UniformBlock(Ubo)</code> of the emitter was retrieved from <code>DoubleBuffer</code> inside the <code>Calc</code> function, but now the double buffer is allocated during system initialization and the buffers are swapped. <br />The <code>swapUbo</code> flag determines whether the emitter <code>Ubo</code> is swapped. For normal use, specify <code>true</code>.</li>
+  </ul>
+  <ul>
+    <li>Removed <code>cacheFlush</code> from the <code>nw::eft2::System::Calc</code> parameters. <br />The <code>cacheFlush</code> flag was replaced with a new setting that was added to <code>nw::eft2::Config</code>.</li>
+  </ul>
+  <ul>
+    <li>Removed the <code>forwardFrame</code> flag from the <code>nw::eft2::System::Calc</code> parameters.</li>
+  </ul>
+  <h3 id="Anchor_83956003_h3_7">Rendering</h3>
+  <p>This description is based on the following code with a simple rendering process.</p>
+  <table class="codeblock">
+    <tbody>
+      <tr>
+        <td class="code">
+          <div class="codeblock"><pre><span class="c1">// Swap buffers.
+</span><span class="nn">nw::eft2::System::</span><span class="n">SwapBuffer</span><span class="p">();</span>
+&nbsp;
+<span class="c1">// Set the view.
+</span><span class="nn">nw::eft2::</span><span class="n">ViewParam</span> <span class="n">view</span><span class="p">;</span>
+<span class="n">view</span><span class="p">.</span><span class="n">Set</span><span class="p">(</span> <span class="n">viewMtx</span><span class="p">,</span> <span class="n">projMtx</span><span class="p">,</span> <span class="n">cameraPos</span><span class="p">,</span> <span class="n">nearZ</span><span class="p">,</span> <span class="n">farZ</span> <span class="p">);</span>
+<span class="nn">nw::eft2::System::</span><span class="n">SetViewParam</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">view</span> <span class="p">);</span>
+&nbsp;
+<span class="c1">// Group rendering process.
+</span><span class="nn">nw::eft2::System::</span><span class="n">Draw</span><span class="p">(</span> <span class="n">group</span> <span class="p">);</span></pre></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="expand-content">
+    <div>
+      <div class="syntaxhighlighter nogutter cpp">
+        <p> </p>
+      </div>
+    </div>
+    <p>There are two changes to the rendering process.</p>
+    <ul>
+      <li>Renamed the <code>SwapDoubleBuffer</code> member function to <code>SwapBuffer</code>, and changed the timing of the function call to before the <code>SetViewParam</code> function.</li>
+      <li>Removed the <code>System::BeginRender</code> member function and added the <code>System::SetViewParam</code> function to replace it.</li>
+    </ul>
+  </div>
+</div>
+<h2 id="Anchor_83956003_h2_4">Changes to NintendoWare for Cafe Features in Nintendo SDK NintendoWare</h2>
+<p>Due to several changes that have been made to the NintendoWare Effect specifications in NintendoSDK, effect data that uses some features may need to be updated.</p>
+<p class="expand-control">
+  <span class="status_macro_base status_macro_Blue">Related Link</span> For more information about the changes to NintendoWare for Cafe features in NintendoSDK NintendoWare, see <strong><a href="../Pages/Page_175837873.html">this page</a></strong>.  <br />For more information about the features for which data must be updated, see <strong><a href="../Pages/Page_175837873.html#Anchor_175837873_correction">this table</a></strong>.<br /></p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

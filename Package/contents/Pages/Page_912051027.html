@@ -1,0 +1,285 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Important Considerations When Using Audio Features on the Switch | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Important Considerations When Using Audio Features on the Switch -->
+<div class="pagetitle" id="PageId_912051027">Important Considerations When Using Audio Features on the Switch</div>
+<div class="text_separate">
+<h1 id="Anchor_912051027_h1_1">Setting the Volume for Each Output Device</h1>
+<p>Audio output can be sent from the Switch to four types of devices: audio equipment connected via HDMI, the console speakers, headphones, and USB audio output devices.</p>
+<p style="margin-left: 44.0px;">When the HDMI output is connected to a TV or audio equipment like an amplifier, users might experience discomfort and it might be necessary to adjust the TV volume for each kind of content that is played if the output volume is different from the TV broadcast volume. To avoid this situation and improve usability, make sure the volume conforms to loudness standards.</p>
+<p style="margin-left: 44.0px;">On the other hand, when listening to the console speakers outside, or when listening through headphones on a train, make sure the volume is loud enough to be heard in environments with a lot of ambient noise.</p>
+<p style="margin-left: 44.0px;">
+  <strong>The assumption for the Switch is that different types of audio output devices are used in different kinds of environments, so we recommend configuring an appropriate volume level for each kind of output device. </strong>For more information, see Nintendo Switch Sound Design Guide &gt; Support Recommendations.</p>
+<!--Remove-->
+<p style="margin-left: 44.0px;">The Switch provides a feature for setting the output volume for each output device.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The volume settings configured with this feature are valid only for the application in which they have been set. They do not affect other applications or the system itself.</p>
+  </div>
+</div>
+<h2 id="Anchor_912051027_h2_1">
+  <span style="color: rgb(117,117,117);">Usage Example</span>
+</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Gets a list of &quot;real audio devices&quot; running on the NX platform.
+</span><span class="k">const</span> <span class="kt">int</span> <span class="n">nameCount</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+<span class="nn">nn::audio::</span><span class="n">AudioDeviceName</span> <span class="n">deviceNames</span><span class="p">[</span><span class="n">nameCount</span><span class="p">];</span>
+<span class="kt">int</span> <span class="n">actualDeviceCount</span> <span class="o">=</span> <span class="nn">nn::audio::</span><span class="n">ListAudioOutputDeviceName</span><span class="p">(</span><span class="n">deviceNames</span><span class="p">,</span> <span class="n">nameCount</span><span class="p">);</span>
+
+<span class="c1">// Searches for the index for AudioTvOutput to adjust the TV output volume.
+// This sample assumes it is the 0th index in the array.
+</span><span class="kt">int</span> <span class="n">tvOutIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="c1">// Sets the TV output volume to 0.8f.
+</span><span class="kt">float</span> <span class="n">targetVolume</span> <span class="o">=</span> <span class="mf">0.8f</span><span class="p">;</span>
+<span class="nn">nn::audio::</span><span class="n">SetAudioDeviceOutputVolume</span><span class="p">(</span><span class="o">&amp;</span><span class="n">deviceNames</span><span class="p">[</span><span class="n">tvOutIndex</span><span class="p">],</span> <span class="n">targetVolume</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_912051027_h1_2">Downmix Processing</h1>
+<p>The Switch console dynamically switches audio output among the audio devices listed in <strong>real audio devices</strong> according to the operating state. <code><span class="ApiLink_nn__audio">nn::audio</span></code> determines the necessity of downmix processing according to the operating state and automatically switches downmix processing between enabled and disabled.</p>
+<p>Whether downmix processing is enabled or disabled is determined by whether the following conditions are satisfied each time the output destination is switched.</p>
+<ol>
+  <li>Input from the <a href="../Pages/Page_89991490.html">audio output</a> and the <a href="../Pages/Page_89991492.html">audio renderer</a> to the virtual audio device <code>MainAudioOut</code> is 6-channel input.</li>
+  <li>One of the following conditions is satisfied.<br /><ul><li>The real audio device output channel is 2 channel.</li><li>The system settings are set to stereo or mono.</li></ul></li>
+</ol>
+<p>If both conditions are satisfied, downmix processing is enabled.</p>
+<p>If input to <code>MainAudioOut</code> is a mix of 2 channel and 6 channel, downmixing is only performed for the 6-channel input. For example, if there is both 2-channel input from the <a href="../Pages/Page_89991490.html">audio output</a> and 6-channel input from the <a href="../Pages/Page_89991492.html">audio renderer</a> to <code>MainAudioOut</code>, only the 6-channel input from the <a href="../Pages/Page_89991492.html">audio renderer</a> is downmixed. Accordingly, the 2-channel output includes a mix of the 2-channel content from the <a href="../Pages/Page_89991490.html">audio output</a> and the downmixed 2-channel content of the <a href="../Pages/Page_89991492.html">audio renderer</a>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>By specifying two mix buffers in <code>DeviceSink</code>, you can handle the audio as fixed to two-channel output. For more information, see the function reference for <code><span class="ApiLink_Result_nn__audio__AddDeviceSink(AudioRendererConfig_*pOutConfig|_DeviceSinkType_*pOutSink|_FinalMixType_*pFinalMix|_const_int8_t_*input|_int_inputCount|_const_char_*name)_NN_NOEXCEPT">AddDeviceSink()</span></code>.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the audio is set to mono in the system settings, the six channel audio will be downmixed to two channels, and that will then be downmixed to one channel audio.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>If the audio is being output as HDMI output via the dock, some TVs will receive the six channel audio signal even if equipped with only two speakers and perform the downmixing to two-channel audio on their own.</p>
+    <p>In this case, note that system default downmix processing and dedicated application-specific downmix processing for the audio renderer are not performed.</p>
+  </div>
+</div>
+<h2 id="Anchor_912051027_h2_2">System Default Downmix Processing</h2>
+<p>The system provides a fixed downmix processing. It is used when application-specific downmix processing is disabled. This downmixing is always performed on the <a href="../Pages/Page_89991490.html">audio output</a>. For the <a href="../Pages/Page_89991492.html">audio renderer</a>, this downmixing is performed when the dedicated application-specific downmix processing for the audio renderer, described later, is not used.</p>
+<p>System default downmix processing, from six to two channels, uses the following formula.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>left = saturate(frontLeft + scale(center, -3dB) + scale(lfe, -12dB) + scale(rearLeft, -3dB))
+right = saturate(frontRight + scale(center, -3dB) + scale(lfe, -12dB) + scale(rearRight, -3dB))</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This code has the following behavior for the pseudo-functions <code>saturate</code> and <code>scale</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>scale(sample, db): Pseudo-function that scales only the dB of the sample
+saturate(sample): Pseudo-function that saturates the sample to int16_t</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>System default downmix processing from two channels to one channel also uses the following formula. This processing cannot be replaced with proprietary processing in the application.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>output = scale(left, -6dB) + scale(right, -6dB)</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_912051027_h2_3">Dedicated Application-Specific Downmix Processing for the Audio Renderer</h2>
+<p>Separate from the system default downmix processing, for the <a href="../Pages/Page_89991492.html">audio renderer</a> you can freely set the coefficients to use for the downmixing calculations.</p>
+<p>When this processing is enabled, system default downmix processing is skipped, and only this downmix processing is applied. (When the system settings are set to mono, downmixing from two channels to one channel is performed.)</p>
+<p>The following formula is used in downmixing.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>left  = saturate(coeff[0] * frontLeft  + coeff[1] * center + coeff[2] * lfe + coeff[3] * rearLeft)
+right = saturate(coeff[0] * frontRight + coeff[1] * center + coeff[2] * lfe + coeff[3] * rearRight)</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In this example <code>coeff</code>, which represents each coefficient, corresponds to <code><span class="ApiLink_nn__audio__DeviceSinkType__DownMixParameter">nn::audio::DeviceSinkType::DownMixParameter</span>.coeff</code> that is configured by <code><span class="ApiLink_nn__audio__SetDownMixParameter">nn::audio::SetDownMixParameter</span>()</code>. The default for these parameters are all set to <code>0.0f</code>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <code>
+        <span class="ApiLink_nn__audio__DeviceSinkType__DownMixParameter">nn::audio::DeviceSinkType::DownMixParameter</span>.coeff</code> can configure four or more parameters, but the current release ignores parameters starting with the fifth parameter.</p>
+  </div>
+</div>
+<p>After configuring <code><span class="ApiLink_nn__audio__DeviceSinkType__DownMixParameter">nn::audio::DeviceSinkType::DownMixParameter</span></code>, if you enable it with <code><span class="ApiLink_nn__audio__SetDownMixParameterEnabled">nn::audio::SetDownMixParameterEnabled</span>()</code>, the system switches to this downmix processing. If <code><span class="ApiLink_nn__audio__SetDownMixParameterEnabled">nn::audio::SetDownMixParameterEnabled</span>()</code> is disabled again, the system reverts to system default downmix processing.</p>
+<p>This downmix processing can be configured individually for each <a href="../Pages/Page_89991492.html">audio renderer</a>. If there are multiple audio renderers, this downmix processing is applied only to the audio renderer enabled using <code><span class="ApiLink_nn__audio__SetDownMixParameterEnabled">nn::audio::SetDownMixParameterEnabled</span>()</code>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This processing increases the processing time for <code>PerformanceEntryType_Sink</code> in <code><span class="ApiLink_nn__audio__PerformanceEntry">nn::audio::PerformanceEntry</span></code> due to the individual audio renderer processing.</p>
+  </div>
+</div>
+<p>
+  <a name="Anchor_912051027_DspResourceLimitations"></a>
+</p>
+<h1 id="Anchor_912051027_h1_3">
+  <span style="color: rgb(117,117,117);">DSP Resource Limitations</span>
+</h1>
+<p>Because the application and the system use the DSP at the same time on the NX, resource allocation is controlled so that both the application and the system can use the DSP successfully. This section describes the conventions for resource allocation.</p>
+<h2 id="Anchor_912051027_h2_4">Allocating DSP Resources to Applications</h2>
+<p>DSP time is allocated to the application and the system by using time division.<br />Unlike graphics, audio is dependent on the focus state of the application and its distribution does not change.<br />The distribution ratios are as follows.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th style="text-align: center;">SDK Version</th>
+      <th>System DSP Time</th>
+      <th>Application DSP Time</th>
+    </tr>
+    <tr>
+      <td>NX Add-On 0.16 and Later</td>
+      <td style="text-align: right;">1,500 microseconds (30%)</td>
+      <td style="text-align: right;">3,500 microseconds (70%)</td>
+    </tr>
+    <tr>
+      <td>NX Add-On 4.0.0 and Later</td>
+      <td style="text-align: right;">1,250 microseconds (25%)</td>
+      <td style="text-align: right;">3,750 microseconds (75%)</td>
+    </tr>
+    <tr>
+      <td>NX Add-On 6.0.0 and Later</td>
+      <td style="text-align: right;">1,000 microseconds (20%)</td>
+      <td style="text-align: right;">4,000 microseconds (80%)</td>
+    </tr>
+  </tbody>
+</table>
+<p>An audio frame on the NX has 5,000 microseconds. Accordingly, the upper limit on the time per audio frame that is sure to be available to the application is 4,000 microseconds (NX Add-On 6.0.0 and later).<br />System DSP time is mainly used in the following processing.</p>
+<ul>
+  <li>
+    <code>
+      <span class="ApiLink_nn__audio__AudioOut">nn::audio::AudioOut</span>
+    </code> audio processing (including what the application uses)</li>
+  <li>HOME Menu audio processing</li>
+  <li>Library applet audio processing</li>
+  <li>Overlay applet audio processing</li>
+  <li>System internal audio processing</li>
+</ul>
+<p>DSP time for the application is used in the following processing. The DSP time consumed by the application is the total value of these processing times on the DSP.</p>
+<ul>
+  <li>Rendering using the <code><span class="ApiLink_nn__audio">nn::audio</span></code> AudioRenderer</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__codec__HardwareOpusDecoder">nn::codec::HardwareOpusDecoder</span>
+    </code> decoding</li>
+</ul>
+<h2 id="Anchor_912051027_h2_5">Notes</h2>
+<ul>
+  <li>In a future release, system and other improvements may increase the distribution allocated to the application.<br />However, applications built with a version of the SDK prior to the increase automatically have 4,000 microseconds allocated to them even after the increase (NX Add-On 6.0.0 and later).</li>
+  <li>The <code><span class="ApiLink_nn__audio">nn::audio</span></code> AudioRenderer DSP processing time can be verified using the <code><span class="ApiLink_nn__audio">nn::audio</span></code> <code>PerformanceMetrics</code> function or the Spy tool, which makes the result viewable.<br />Note, however, that due to how processing time is limited, there may be a slight discrepancy between the result output by the function and tool, and the value used in the DSP resource limitations.<br />For more information about usage, see the respective API and tool reference.</li>
+  <li>If the application is using multiple instances of AudioRenderer, the time distribution to each instance, when the total DSP processing time for the application has exceeded the allocated time, is dependent on the system state. </li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__audio', '../../../Api/HtmlNX/namespacenn_1_1audio.html' )
+SetUrl( 'ApiLink_Result_nn__audio__AddDeviceSink(AudioRendererConfig_*pOutConfig|_DeviceSinkType_*pOutSink|_FinalMixType_*pFinalMix|_const_int8_t_*input|_int_inputCount|_const_char_*name)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ae8e93a633168c40c9b716c88c49c5e47' )
+SetUrl( 'ApiLink_nn__audio__DeviceSinkType__DownMixParameter', '../../../Api/HtmlNX/structnn_1_1audio_1_1_device_sink_type_1_1_down_mix_parameter.html' )
+SetUrl( 'ApiLink_nn__audio__SetDownMixParameter', '../../../Api/HtmlNX/namespacenn_1_1audio.html#abdc3e7a542ed11a8d218214377c4e511' )
+SetUrl( 'ApiLink_nn__audio__SetDownMixParameterEnabled', '../../../Api/HtmlNX/namespacenn_1_1audio.html#ae390b4fb4f79f895e18e24c93ac4483b' )
+SetUrl( 'ApiLink_nn__audio__PerformanceEntry', '../../../Api/HtmlNX/structnn_1_1audio_1_1_performance_entry.html' )
+SetUrl( 'ApiLink_nn__audio__AudioOut', '../../../Api/HtmlNX/structnn_1_1audio_1_1_audio_out.html' )
+SetUrl( 'ApiLink_nn__codec__HardwareOpusDecoder', '../../../Api/HtmlNX/classnn_1_1codec_1_1_hardware_opus_decoder.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

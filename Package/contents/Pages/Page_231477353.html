@@ -1,0 +1,1818 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Information Common to Both | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Information Common to Both -->
+<div class="pagetitle" id="PageId_231477353">Information Common to Both</div>
+<div class="text_separate">
+<h1 id="Anchor_231477353_h1_1">
+  <span style="color: rgb(117,117,117);">Important Information About Using the Web Applet and Offline Web Applet</span>
+</h1>
+<h2 id="Anchor_231477353_h2_1">Effect of System Updates</h2>
+<p>System updates may potentially include updates for the web applet and Offline Web Applet. Because of the web browser design, these updates can change both the display and the behavior of webpages.</p>
+<p>This document describes the specification and behavior changes caused by different firmware versions from the previous web applet and Offline Web Applet. For more information about the specifications of the web browser included in the web applet and Offline Web Applet, see <a href="../Pages/Page_307200722.html">HTML/CSS/ECMAScript Support List</a>.</p>
+<p>Use the web applet and Offline Web Applet with the understanding that they might be affected by system updates in a similar manner in the future.</p>
+<!--Remove-->
+<h2 id="Anchor_231477353_h2_2">Effect of Application Processes on Performance</h2>
+<p>The web applet and Offline Web Applet run on the same CPU that the application that calls them is using. If the application continues to run processes using threads or the like while the web applet and Offline Web Applet are running, the performance of the web applet and Offline Web Applet may be reduced.</p>
+<h2 id="Anchor_231477353_h2_3">Exit Reason Values</h2>
+<p>Future changes to the web applet and Offline Web Applet specifications may potentially cause the following functions to return exit reasons that are not currently defined. Make sure that your application can continue to run and will not end unexpectedly even if an undefined exit reason is returned.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>web applet</td>
+      <td>
+        <span class="ApiLink_nn__web__WebPageReturnValue__GetWebExitReason">nn::web::WebPageReturnValue::GetWebExitReason</span>()</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__OfflineHtmlPageReturnValue__GetOfflineExitReason">nn::web::OfflineHtmlPageReturnValue::GetOfflineExitReason</span>()</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_231477353_h2_4">Disabling the Screen Burn-In Reduction Feature During Video Playback</h2>
+<p>The web applet and Offline Web Applet include a video player and can play some videos included on websites and offline HTML pages. During such video playback, the Screen Burn-In Reduction feature is disabled.</p>
+<h1 id="Anchor_231477353_h1_2">Enabling JavaScript Extensions</h1>
+<p>Various JavaScript extensions can be used on webpages displayed in the web applet and Offline Web Applet. Use the following functions to enable use of JavaScript extensions on webpages.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>web applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowWebPageArg__SetJsExtensionEnabled">nn::web::ShowWebPageArg::SetJsExtensionEnabled</span>()</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetJsExtensionEnabled">nn::web::ShowOfflineHtmlPageArg::SetJsExtensionEnabled</span>()</td>
+    </tr>
+  </tbody>
+</table>
+<p>In the web applet, the following conditions must also be satisfied.</p>
+<ul>
+  <li>Connected to the web server via an SSL/TLS connection</li>
+  <li>Displaying a webpage on the same domain as the URL specified when the applet was started</li>
+</ul>
+<p>When JavaScript extensions are enabled, a property named <code>nx</code> is added to the <code>window</code> object. As a result, no objects named <code>window.nx</code> can be defined on the webpage.</p>
+<h1 id="Anchor_231477353_h1_3">Starting and Closing</h1>
+<h2 id="Anchor_231477353_h2_5">Passing Parameters From Applications</h2>
+<p>Webpages displayed in the web applet and Offline Web Applet can include information from applications. Displayed webpages can also be changed based on information from applications by changing the URL (for the web applet) or by changing the path of the offline HTML page (for the Offline Web Applet). In addition, using URL parameters in the URL and path, you can add information from the application and apply it in the same webpage.</p>
+<p>The following sample code shows how to pass a player&rsquo;s positional information to the Offline Web Applet using URL parameters and then display that position on a map on an offline HTML page.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">char</span> <span class="n">path</span><span class="p">[</span><span class="nn">nn::web::ShowOfflineHtmlPageArg::</span><span class="n">DocumentPathMaxLength</span><span class="p">];</span>
+<span class="n">snprintf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s">&quot;map.htdocs/index.html?x=%d&amp;y=%d&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+
+<span class="nn">nn::web::</span><span class="n">ShowOfflineHtmlPageArg</span> <span class="n">showOfflineHtmlPageArg</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+<span class="nn">nn::web::</span><span class="n">OfflineHtmlPageReturnValue</span> <span class="n">offlineHtmlPageReturnValue</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::web::</span><span class="n">ShowOfflineHtmlPage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">offlineHtmlPageReturnValue</span><span class="p">,</span> <span class="n">showOfflineHtmlPageArg</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For usage examples, see the <span class="ApiLink_PageSampleWebDemoQuickHelp">WebDemoQuickHelp sample</span> and the <span class="ApiLink_PageSampleWebDemoRaceResult">WebDemoRaceResult sample</span>.</p>
+<!--Remove-->
+<h2 id="Anchor_231477353_h2_6">Returning Results to Applications</h2>
+<p>Using the callback URL feature, you can return the result of user operations in a webpage to the application. The specifications for this feature are different for the web applet and the Offline Web Applet, so see the documentation for both applets.</p>
+<ul>
+  <li>
+    <a href="../Pages/Page_231477355.html#Anchor_231477355_callbackurl">Callback URLs in the Web Applet</a>
+  </li>
+  <li>
+    <a href="../Pages/Page_231477360.html#Anchor_231477360_callbackurl">Callback URLs in the Offline Web Applet</a>
+  </li>
+</ul>
+<h2 id="Anchor_231477353_h2_7">Restoring the Applets When Closed by the System</h2>
+<p>While a webpage is being displayed using an instance of the web applet or Offline Web Applet called from an application, if the user presses the HOME Button and then starts a system application from the HOME Menu, the system will close the instance of the web applet or Offline Web Applet called from the application. Applications can detect this and then call the web applet or Offline Web Applet again to restore them.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The state of the webpage that was displayed is not saved, so the applets cannot be completely restored.</p>
+  </div>
+</div>
+<p>The following describes an example of the system closing an instance of the web applet or Offline Web Applet called from an application.</p>
+<ol style="margin-left: 1.8em;">
+  <li>The web applet or Offline Web Applet is called from the application to display a webpage.</li>
+  <li>The user presses the HOME Button and transitions to the HOME Menu.</li>
+  <li>The user starts the My Page applet (a system application).<ol><li>At this point, the system closes the instance of the web applet or Offline Web Applet called from the application.</li></ol></li>
+  <li>The user returns to the HOME Menu.</li>
+  <li>The user selects the application that is currently being played.</li>
+  <li>In this example, the instance of the web applet or Offline Web Applet called from the application has been closed.</li>
+  <li>The application detects that the system has closed the web applet or Offline Web Applet and can restore the applet by calling it again.</li>
+</ol>
+<p>The following sample shows how to restore the Offline Web Applet after it has been closed by the system.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span><span class="p">;</span>
+<span class="nn">nn::web::</span><span class="n">OfflineHtmlPageReturnValue</span> <span class="n">offlineHtmlPageReturnValue</span><span class="p">;</span>
+<span class="k">do</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::web::</span><span class="n">ShowOfflineHtmlPageArg</span> <span class="n">showOfflineHtmlPageArg</span><span class="p">(</span><span class="s">&quot;htmlcontents0.htdocs/index.html&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">result</span> <span class="o">=</span> <span class="nn">nn::web::</span><span class="n">ShowOfflineHtmlPage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">offlineHtmlPageReturnValue</span><span class="p">,</span> <span class="n">showOfflineHtmlPageArg</span><span class="p">);</span>
+<span class="p">}</span> <span class="k">while</span> <span class="p">(</span> <span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">offlineHtmlPageReturnValue</span><span class="p">.</span><span class="n">GetOfflineExitReason</span><span class="p">()</span> <span class="o">==</span> <span class="nn">nn::web::</span><span class="n">OfflineExitReason_ExitMessage</span> <span class="p">)</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebDemoRaceResult">WebDemoRaceResult sample</span>.</p>
+<!--Remove-->
+<h1 id="Anchor_231477353_h1_4">Design</h1>
+<h2 id="Anchor_231477353_h2_8">Using an Application Screenshot in the Background</h2>
+<p>You can apply a screenshot of the application to the background of the webpage, make the webpage transparent, and display the screenshot layered on top of it. The applied screenshot can also be blurred. This feature can be used to display a game application&rsquo;s pause screen as an offline HTML page in the Offline Web Applet, for example.</p>
+<p>The following sample code shows how to do this.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::web::</span><span class="n">ShowOfflineHtmlPageArg</span> <span class="n">showOfflineHtmlPageArg</span><span class="p">(</span><span class="s">&quot;htmlcontents0.htdocs/index.html&quot;</span><span class="p">);</span>
+<span class="n">showOfflineHtmlPageArg</span><span class="p">.</span><span class="n">SetBackgroundKind</span><span class="p">(</span><span class="nn">nn::web::</span><span class="n">OfflineBackgroundKind_ApplicationCaptureBlur</span><span class="p">);</span>
+<span class="nn">nn::web::</span><span class="n">OfflinePageReturnValue</span> <span class="n">offlinePageReturnValue</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::web::</span><span class="n">ShowOfflineHtmlPage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">offlinePageReturnValue</span><span class="p">,</span> <span class="n">showOfflineHtmlPageArg</span><span class="p">);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For usage examples, see the <span class="ApiLink_PageSampleWebDemoPauseMenu">WebDemoPauseMenu sample</span> and the <span class="ApiLink_PageSampleWebDemoQuickHelp">WebDemoQuickHelp sample</span>.</p>
+<p>
+  <a name="Anchor_231477353_customize_spatial_navigation"></a>
+</p>
+<h2 id="Anchor_231477353_h2_9">Customizing the Spatial Navigation Focus Frame</h2>
+<p>Performing a spatial navigation operation on a webpage will display the standard focus frame. Instead of using the standard focus frame, you can use CSS to customize focus effects on the webpage to match the design of the application.</p>
+<p>Place the following <code>&lt;meta&gt;</code> element in the webpage to hide the standard focus frame.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;focus-ring-visibility&quot;</span> <span class="na">content=</span><span class="s">&quot;hidden&quot;</span><span class="nt">&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following CSS sample code shows how to display a custom focus frame on button elements.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">button</span><span class="nd">:focus</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="k">outline</span><span class="o">:</span> <span class="k">solid</span> <span class="m">4px</span> <span class="k">rgb</span><span class="p">(</span><span class="m">0</span><span class="o">,</span> <span class="m">128</span><span class="o">,</span> <span class="m">255</span><span class="p">);</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>There are also many other methods of expression. For more information, see the <span class="ApiLink_PageSampleWebDemoSpatialNavigation">WebDemoSpatialNavigation sample</span>.</p>
+<p>The standard focus frame is rendered at the front of the webpage. As a result, except when using full screen, the focus frame is not hidden even if the in-focus element is hidden by a different element. By using an independent focus frame instead of the standard focus frame, you can avoid this issue and correctly hide the frame. If the in-focus element is hidden by an element that is displayed in the full-screen state, the standard focus frame is not displayed.</p>
+<!--Remove-->
+<h2 id="Anchor_231477353_h2_10">Controlling Display of the Footer</h2>
+<p>The footer can be displayed and hidden as necessary as the user selects links or scrolls on the webpage.</p>
+<p>There are several features for controlling the footer display state.</p>
+<ul>
+  <li>In the Offline Web Applet, the footer is always hidden.</li>
+  <li>Changing the method for controlling display of the footer.</li>
+  <li>Temporarily locking the footer display state with a JavaScript extension.</li>
+</ul>
+<h3 id="Anchor_231477353_h3_1">Keeping the Footer Hidden</h3>
+<p>In the Offline Web Applet, you can use the <code><span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetFooterEnabled">nn::web::ShowOfflineHtmlPageArg::SetFooterEnabled</span>()</code> function when starting the applet to keep the footer hidden so that offline HTML pages can be displayed full-screen. This feature makes it possible to make offline HTML pages displayed in the Offline Web Applet appear to be part of the application. In the web applet, there is no way to keep the footer hidden.</p>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebDemoInstructionManual">WebDemoInstructionManual sample</span>.</p>
+<h3 id="Anchor_231477353_h3_2">Changing the Method for Controlling Display of the Footer</h3>
+<p>The method for controlling display of the footer can be changed using the following functions. By default, the footer is shown or hidden when required. It is possible to change the control method to always display the footer.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowWebPageArg__SetFooterFixedKind">nn::web::ShowWebPageArg::SetFooterFixedKind</span>()</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetFooterFixedKind">nn::web::ShowOfflineHtmlPageArg::SetFooterFixedKind</span>()</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_231477353_h3_3">Temporarily Locking the Footer Display State With a JavaScript Extension</h3>
+<p>The footer display state can be temporarily locked using the following JavaScript extension. This extension can be used to hide the footer when you want to display a full-screen image or to keep the footer constantly displayed when you want to keep user instructions displayed, for example. The locked display state becomes unlocked when the user transitions to a different webpage, and the display state changes depending on the control method.</p>
+<h4 id="Anchor_231477353_h4_1">window.nx.footer.setFixed</h4>
+<p>Locks the footer display state.</p>
+<h6 id="Anchor_231477353_h6_1">Syntax</h6>
+<ul>
+  <li>window.nx.footer.setFixed(state)</li>
+</ul>
+<h6 id="Anchor_231477353_h6_2">Parameters</h6>
+<ul>
+  <li>
+    <code>state</code>: <code>String</code><br />String representing the state to set.</li>
+</ul>
+<h6 id="Anchor_231477353_h6_3">Return Values</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_4">Details</h6>
+<ul>
+  <li>state<ul><li>Strings that can be specified.</li></ul></li>
+</ul>
+<table class="wrapped" style="margin-left: 30.0px;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody style="margin-left: 30.0px;">
+    <tr style="margin-left: 30.0px;">
+      <th style="margin-left: 30.0px;">String</th>
+      <th style="margin-left: 30.0px;">Display State</th>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">shown</td>
+      <td style="margin-left: 30.0px;">Displayed</td>
+    </tr>
+    <tr style="margin-left: 30.0px;">
+      <td style="margin-left: 30.0px;">hidden</td>
+      <td style="margin-left: 30.0px;">Hidden</td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_231477353_h4_2">window.nx.footer.unsetFixed</h4>
+<p>Resets the display state set with <code>window.nx.footer.setFixed()</code> to the default value.</p>
+<h6 id="Anchor_231477353_h6_5">Syntax</h6>
+<ul>
+  <li>window.nx.footer.unsetFixed()</li>
+</ul>
+<h6 id="Anchor_231477353_h6_6">Parameters</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_7">Return Values</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_8">Details</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h2 id="Anchor_231477353_h2_11">Changing the Webpage Style Depending on the Operating Mode</h2>
+<p>To handle switching webpage operating modes, use the CSS <code>-webkit-nintendo-switch-device-mode</code> media attribute. Use when you want to change the style of a webpage dynamically according to the operating mode. For more information about the operating modes, see <a href="../Pages/Page_158270821.html">Operating Modes</a>.</p>
+<p>The following values can be specified for the <code>-webkit-nintendo-switch-device-mode</code> media attribute.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Value</th>
+      <th>Operating Modes</th>
+    </tr>
+    <tr>
+      <td>-webkit-nintendo-switch-device-handheld</td>
+      <td>Handheld mode</td>
+    </tr>
+    <tr>
+      <td>-webkit-nintendo-switch-device-console</td>
+      <td>Console mode</td>
+    </tr>
+  </tbody>
+</table>
+<p>The following example shows how to apply a style using a CSS @media rule.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">@media</span> <span class="o">(</span><span class="nt">-webkit-nintendo-switch-device-mode</span><span class="o">:</span> <span class="nt">-webkit-nintendo-switch-device-console</span><span class="o">)</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="nt">body</span> <span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">font-size</span><span class="o">:</span> <span class="m">0.8em</span><span class="p">;</span>
+&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The media attribute in tags such as <code>&lt;link&gt;</code>, and the JavaScript <code>window.matchMedia</code> method also support this attribute.</p>
+<h1 id="Anchor_231477353_h1_5">Language</h1>
+<p>The web applet and the Offline Web Applet use the application's UI display language and the system language. For more information about the display language and system language, see System Features Guide &gt; Appendixes &gt; Mechanism for Displayed Languages.</p>
+<p>The web applet and the Offline Web Applet assume that webpages are written in the system language. The display language determines the priorities of the built-in system fonts for rendering the characters of the webpage. For more information about font priorities, see <a href="#Anchor_231477353_font_priority">Font Priority</a>.</p>
+<p>The <code>Accept-Language HTTP</code> header sent by the web applet to the web server also uses the display language as the highest-priority language. For more information about the <code>Accept-Language HTTP</code> header, see <a href="../Pages/Page_231477355.html#Anchor_231477355_accept_language">Accept-Language</a>.</p>
+<p>The system language is used for the text in places like footers and dialog boxes. The language code that corresponds to the system language is set for <code>NavigatorLanguage.language</code>. For more information about language codes, see <a href="../Pages/Page_100911958.html">Language Settings</a>.</p>
+<h1 id="Anchor_231477353_h1_6">Fonts</h1>
+<p>The web applet and the Offline Web Applet use a number of system fonts to display webpages in a variety of languages.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Displaying ligatures is not supported.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<p>
+  <a name="Anchor_231477353_font_priority"></a>
+</p>
+<h2 id="Anchor_231477353_h2_12">Font Priority</h2>
+<p>The display language determines the priority of the different fonts for different webpages. For example, if the webpage is in Chinese, the Chinese-language fonts have higher priority than Japanese- and Western-language fonts.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The system language determines the priority of fonts for <code>&lt;select&gt;</code> element select boxes for the alert messages and other UI elements of the <code>window.alert()</code> method.</p>
+    <p>As a result, if the display language and the system language are different, the same character may be presented using different glyphs in webpages and the user interface.</p>
+    <p>For example, if a webpage that is written in Chinese uses a select box and the system language is set to <code>AmericanEnglish</code>, the glyphs for Japanese characters rather than Chinese characters might get displayed in that select box.</p>
+  </div>
+</div>
+<h2 id="Anchor_231477353_h2_13">Displaying Characters in a Specified System Font</h2>
+<p>For situations like webpages featuring a mixture of languages, you can use a system font <strong>family name</strong> to specify the system fonts for the display of characters.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Type</th>
+      <th>Family Name</th>
+    </tr>
+    <tr>
+      <td>For Japan, North America, and Europe</td>
+      <td>nintendo_udsg-r_std_003</td>
+    </tr>
+    <tr>
+      <td>For Hangul (Korean)</td>
+      <td>nintendo_udsg-r_ko_003</td>
+    </tr>
+    <tr>
+      <td>For Simplified Chinese</td>
+      <td>nintendo_udsg-r_org_zh-cn_003, nintendo_udsg-r_ext_zh-cn_003</td>
+    </tr>
+    <tr>
+      <td>For Traditional Chinese</td>
+      <td>nintendo_udjxh-db_zh-tw_003</td>
+    </tr>
+    <tr>
+      <td>For the Nintendo Extended Character Set</td>
+      <td>NintendoExt003</td>
+    </tr>
+  </tbody>
+</table>
+<p>The following example shows a CSS file that specifies a system font for each language.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nd">:lang</span><span class="o">(</span><span class="nt">zh-Hans</span><span class="o">)</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="k">font-family</span><span class="o">:</span> <span class="n">nintendo_udsg</span><span class="o">-</span><span class="n">r_ext_zh</span><span class="o">-</span><span class="n">cn_003</span><span class="o">,</span> <span class="n">nintendo_udsg</span><span class="o">-</span><span class="n">r_org_zh</span><span class="o">-</span><span class="n">cn_003</span><span class="o">,</span> <span class="n">nintendo_udsg</span><span class="o">-</span><span class="n">r_std_003</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nd">:lang</span><span class="o">(</span><span class="nt">ko</span><span class="o">)</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="k">font-family</span><span class="o">:</span> <span class="n">nintendo_udsg</span><span class="o">-</span><span class="n">r_ko_003</span><span class="o">,</span> <span class="n">nintendo_udsg</span><span class="o">-</span><span class="n">r_std_003</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nd">:lang</span><span class="o">(</span><span class="nt">zh-Hant</span><span class="o">)</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="k">font-family</span><span class="o">:</span> <span class="n">nintendo_udjxh</span><span class="o">-</span><span class="n">db_zh</span><span class="o">-</span><span class="n">tw_003</span><span class="o">,</span> <span class="n">nintendo_udsg</span><span class="o">-</span><span class="n">r_std_003</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_231477353_h2_14">Displaying Characters in Custom Fonts</h2>
+<p>By default, system fonts are used for characters displayed in webpages. However, using web fonts makes it possible to display custom fonts that match the design of the application.</p>
+<p>The following sample CSS code shows how to use a font file named <code>sample_font.ttf</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">@font-face</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="nt">font-family</span><span class="o">:</span> <span class="s1">'SampleFont'</span><span class="o">;</span>
+&nbsp;&nbsp;<span class="nt">src</span><span class="o">:</span> <span class="nt">url</span><span class="o">(</span><span class="nt">sample_font</span><span class="nc">.ttf</span><span class="o">)</span> <span class="nt">format</span><span class="o">(</span><span class="s1">'truetype'</span><span class="o">);</span>
+<span class="p">}</span>
+
+<span class="nt">p</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="k">font-family</span><span class="o">:</span> <span class="s1">'SampleFont'</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebDemoRaceResult">WebDemoRaceResult sample</span>.</p>
+<!--Remove-->
+<h2 id="Anchor_231477353_h2_15">Displaying Nintendo Extended Characters</h2>
+<p>The system fonts include the Nintendo extended character set. The Nintendo extended character set can be used when displaying manuals in the web applet or Offline Web Applet to describe how to play an application.<br />For more information, see Supplement: Descriptions and Warnings for Nintendo Extended Characters in the System Features Guide.</p>
+<h2 id="Anchor_231477353_h2_16">Displaying Emoji</h2>
+<p>The web applet and Offline Web Applet support Unicode Emoji version 3.0, which makes it possible to display emoji in webpages.</p>
+<h2 id="Anchor_231477353_h2_17">Valid Font Ranges for Traditional Chinese</h2>
+<p>The glyphs of the alphanumeric characters of the system font for Traditional Chinese differs from those of other fonts. To pair these alphanumeric glyphs with the fonts for Japanese and Western languages, the font for Traditional Chinese is confined to the following ranges.</p>
+<ul>
+  <li>U+02B0 to U+02FF</li>
+  <li>U+2002 to U+2003</li>
+  <li>U+2574 to U+2574</li>
+  <li>U+2641to U+2641</li>
+  <li>U+2E00 to U+303F</li>
+  <li>U+3100 to U+32FF</li>
+  <li>U+3400 to U+9FFF</li>
+  <li>U+F001 to U+F002</li>
+  <li>U+F900 to U+FAFF</li>
+</ul>
+<h1 id="Anchor_231477353_h1_7">Keyboard</h1>
+<p>When text needs to be entered on a webpage, a software keyboard applet opens.</p>
+<h2 id="Anchor_231477353_h2_18">Starting the Software Keyboard Applet</h2>
+<p>The software keyboard applet is started in the following cases.</p>
+<ul>
+  <li>The A Button is pressed while navigating the focus to an input field, such as an <code>&lt;input&gt;</code> element.</li>
+  <li>The A Button is pressed while navigating the focus to a noninput field, and the click event sent to the webpage causes an input field to become in focus.</li>
+  <li>When using the pointer, the A Button is pressed or the screen is touched, and the click or touchend event sent to the webpage causes an input field to become in focus.</li>
+</ul>
+<h3 id="Anchor_231477353_h3_4">Preventing the Software Keyboard Applet From Starting</h3>
+<p>To prevent the software keyboard applet from starting when an input field becomes in focus from a click or touchend event, you can use <code>setTimeout()</code> as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;!DOCTYPE html&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;button id=&quot;button&quot;&gt;button&lt;/button&gt;
+&lt;input type=&quot;text&quot; id=&quot;input&quot;&gt;
+&lt;script&gt;
+onload = function() {
+&nbsp;&nbsp;document.querySelector('#button').onclick = function() {
+&nbsp;&nbsp;&nbsp;&nbsp;var e = document.querySelector('#input');
+&nbsp;&nbsp;&nbsp;&nbsp;setTimeout(function() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e.focus();
+&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;};
+};
+&lt;/script&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_231477353_play_movie"></a>
+</p>
+<h1 id="Anchor_231477353_h1_8">Playing Video Files</h1>
+<p>The web applet and the Offline Web Applet include a built-in video player that can be used to play video files. The video player only supports full-screen playback. It does not support inline playback inside a webpage. For the supported file formats, see Library Applets &gt; Web Applet in the System Feature Guide. Possible uses for this feature include displaying lists of videos played in a game application in the Offline Web Applet and playing promotional videos on websites in the web applet.</p>
+<!--Remove-->
+<p>Use the following functions to set the volume balance of the video player. If these functions have not been called, the audio is played at the volume set by the <code><em>sdkVolume</em></code> parameter of the <code><span class="ApiLink_nn__oe__SetExpectedVolumeBalance">nn::oe::SetExpectedVolumeBalance</span>()</code> function.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>Web applet</td>
+      <td>
+        <code>
+          <span class="ApiLink_nn__web__ShowWebPageArg__OverrideMediaAudioVolume">nn::web::ShowWebPageArg::OverrideMediaAudioVolume</span>()</code>
+      </td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <code>
+          <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__OverrideMediaAudioVolume">nn::web::ShowOfflineHtmlPageArg::OverrideMediaAudioVolume</span>()</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p class="auto-cursor-target">
+  <br />
+</p>
+<h2 id="Anchor_231477353_h2_19">Using as a Simple Video Player in the Application</h2>
+<p>The video player can also be used in applications as a simple video player that makes it possible to play video files directly without having to go to a webpage. Use the following functions to play video files directly from the application.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>web applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowWebPageArg__SetBootAsMediaPlayer">nn::web::ShowWebPageArg::SetBootAsMediaPlayer</span>()</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetBootAsMediaPlayer">nn::web::ShowOfflineHtmlPageArg::SetBootAsMediaPlayer</span>()</td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the following functions to automatically close the video player and return to the webpage or application when the video file finishes playback.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>web applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowWebPageArg__SetMediaPlayerAutoCloseEnabled">nn::web::ShowWebPageArg::SetMediaPlayerAutoCloseEnabled</span>()</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetMediaPlayerAutoCloseEnabled">nn::web::ShowOfflineHtmlPageArg::SetMediaPlayerAutoCloseEnabled</span>()</td>
+    </tr>
+  </tbody>
+</table>
+<p>To disable the display and operation of the video player UI, use the <code><span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetMediaPlayerUiEnabled">nn::web::ShowOfflineHtmlPageArg::SetMediaPlayerUiEnabled</span>()</code> function. If this function has been called, the video player closes automatically as soon as the movie file has played to the end. The web applet does not support this feature.</p>
+<p>For usage examples, see the <span class="ApiLink_PageSampleWebDemoShootingMovie">WebDemoShootingMovie sample</span> and the <span class="ApiLink_PageSampleWebDemoDirectPlayback">WebDemoDirectPlayback sample</span>.</p>
+<h2 id="Anchor_231477353_h2_20">Displaying Inline Animated Images</h2>
+<p>The video player does not support inline playback inside webpages. However, GIF animations and other animated image files such as APNG files and WebP animations can be displayed inline instead of video files.</p>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebDemoShootingMovie">WebDemoShootingMovie sample</span>.</p>
+<!--Remove-->
+<h2 id="Anchor_231477353_h2_21">Enabling Movie Playback Without User Operations</h2>
+<p>The web applet and the Offline Web Applet only play movie files if the user has performed an operation, such as by using a controller or touching the screen.</p>
+<p>For this reason, movie files do not play automatically even if the <code>autoplay</code> attribute has been specified for the <code>&lt;video&gt;</code> element. In addition, movies do not play even if playback is started by a <code>window.onload</code> event handler.</p>
+<p>When playback is being controlled by scanning for user operations, if the movie does not start immediately upon something like a <code>click</code> event, it may never start to play.</p>
+<p>Use the following functions if you want to play a movie even in the absence of any user operations.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowWebPageArg__SetMediaAutoPlayEnabled">nn::web::ShowWebPageArg::SetMediaAutoPlayEnabled</span>()</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetMediaAutoPlayEnabled">nn::web::ShowOfflineHtmlPageArg::SetMediaAutoPlayEnabled</span>()</td>
+    </tr>
+  </tbody>
+</table>
+<p class="auto-cursor-target">
+  <br />
+</p>
+<h1 id="Anchor_231477353_h1_9">Sound</h1>
+<h2 id="Anchor_231477353_h2_22">Playing Background Music</h2>
+<p>By playing background music before calling the web applet or Offline Web Applet, you can continue to play that background music while displaying a webpage. Functions that start the web applet and Offline Web Applet, block until the applet is closed, at which point the thread on which the applet was called is terminated, so background music processes must be executed on a separate thread. Background music cannot be played while the web applet or Offline Web Applet are playing videos.</p>
+<p>You can set the volume balance for background music using the <code><em>applicationVolume</em></code> parameter of the <code><span class="ApiLink_nn__oe__SetExpectedVolumeBalance">nn::oe::SetExpectedVolumeBalance</span>()</code> function.</p>
+<!--Remove-->
+<h2 id="Anchor_231477353_h2_23">Playing Sound Effects</h2>
+<p>When operations such as spatial navigation or button presses are performed on a webpage, the web applet and the Offline Web Applet will play the standard system sound effects that have been configured. You can also use JavaScript extensions to play system sound effects other than the standard system sound effects. You can also use Web Audio to play custom sound effects that match the design of applications.</p>
+<p>You can set the volume balance for sound effects using the <code><em>sdkVolume</em></code> parameter of the <code><span class="ApiLink_nn__oe__SetExpectedVolumeBalance">nn::oe::SetExpectedVolumeBalance</span>()</code> function.</p>
+<p>Add the <code>nx-se-disabled</code> attribute to the HTML elements in the webpage to disable the default system sound effects when the element is in focus or when selecting or clicking the element.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;button</span> <span class="na">nx-se-disabled</span><span class="nt">&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the <code>window.nx.footer.unsetAssign()</code> or <code>window.nx.footer.setAssign()</code> JS extensions to disable the standard controller operation features and system sound effects and customize your own. For more information, see <a href="#Anchor_231477353_jsextensions_customize_controller">Using JavaScript Extensions to Customize Controller Operations</a>.</p>
+<h3 id="Anchor_231477353_h3_5">Playing System Sound Effects With JavaScript Extensions</h3>
+<p>Using the following JavaScript extension makes it possible to easily play system sound effects on webpages. Up to four sound effects can be played at the same time, including sound effects played by the applet. Sound effects played using this feature stop when the page transitions.</p>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebDemoKeyboardEvents">WebDemoKeyboardEvents sample</span>.</p>
+<h4 id="Anchor_231477353_h4_3">window.nx.playSystemSe</h4>
+<p>Plays the specified system sound effects.</p>
+<h6 id="Anchor_231477353_h6_9">Syntax</h6>
+<ul>
+  <li>window.nx.playSystemSe(label)</li>
+</ul>
+<h6 id="Anchor_231477353_h6_10">Parameters</h6>
+<ul>
+  <li>
+    <code>label</code>: <code>String</code><br /> String indicating the sound effect to play.</li>
+</ul>
+<h6 id="Anchor_231477353_h6_11">Return Values</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_12">Details</h6>
+<ul>
+  <li>label<ul><li>When the specified sound effect is the same as the sound effect that is currently playing, the sound effect that is currently playing is stopped and a new instance of the sound effect is played.</li><li>Strings that can be specified as sound effects to play.</li></ul></li>
+</ul>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>String</th>
+      <th>Standard Usage</th>
+    </tr>
+    <tr>
+      <td>SeFooterDecideBack</td>
+      <td>Returned to the webpage.</td>
+    </tr>
+    <tr>
+      <td>SeWebNaviFocus</td>
+      <td>Focused using spatial navigation.</td>
+    </tr>
+    <tr>
+      <td>SeWebKeyError</td>
+      <td>When attempting to move using focus navigation, and there is no element in that direction.</td>
+    </tr>
+    <tr>
+      <td>SeWebPointerFocus</td>
+      <td>Focused using the control stick pointer.</td>
+    </tr>
+    <tr>
+      <td>SeWebLinkDecide</td>
+      <td>Decided a link.</td>
+    </tr>
+    <tr>
+      <td>SeWebButtonDecide</td>
+      <td>Pressed a button.</td>
+    </tr>
+    <tr>
+      <td>SeWebCheckboxCheck</td>
+      <td>Selected a check box.</td>
+    </tr>
+    <tr>
+      <td>SeWebCheckboxUncheck</td>
+      <td>Cleared a check box.</td>
+    </tr>
+    <tr>
+      <td>SeWebRadioBtnOn</td>
+      <td>Selected an option button.</td>
+    </tr>
+    <tr>
+      <td>SeWebMenuListOpen</td>
+      <td>Opened a selection box.</td>
+    </tr>
+    <tr>
+      <td>SeWebTextboxStartEdit</td>
+      <td>Decided a text box, input form.</td>
+    </tr>
+    <tr>
+      <td>SeBtnDecide</td>
+      <td>Decided the footer feature.</td>
+    </tr>
+    <tr>
+      <td>SeWebZoomIn</td>
+      <td>Zoomed in on the webpage.</td>
+    </tr>
+    <tr>
+      <td>SeWebZoomOut</td>
+      <td>Zoomed out on the webpage.</td>
+    </tr>
+    <tr>
+      <td>SeWebChangeCursorPointer</td>
+      <td>Switched to Left Stick operation.</td>
+    </tr>
+    <tr>
+      <td>SeWebTouchFocus</td>
+      <td>Touched the screen and put it in focus.</td>
+    </tr>
+    <tr>
+      <td>SeTextAreaMove</td>
+      <td>Moved the caret with the keyboard.</td>
+    </tr>
+  </tbody>
+</table>
+<p class="auto-cursor-target">
+  <br />
+</p>
+<h4 id="Anchor_231477353_h4_4">window.nx.stopSystemSe</h4>
+<p>Stops system sound effects that are being played.</p>
+<h6 id="Anchor_231477353_h6_13">Syntax</h6>
+<ul>
+  <li>window.nx.stopSystemSe([options])</li>
+</ul>
+<h6 id="Anchor_231477353_h6_14">Parameters</h6>
+<ul>
+  <li>options: Object<br />The Options object. Optional.</li>
+</ul>
+<h6 id="Anchor_231477353_h6_15">Return Values</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_16">Details</h6>
+<ul>
+  <li>Stops sound effects played using <code>window.nx.playSystemSe()</code>.</li>
+  <li>options<ul><li><code>label</code>: <code>String</code> <br />String representing the sound effect to stop.<ul><li>If not specified, all sound effects are stopped.</li></ul></li><li><code>fadeFrame</code>: <code>Number</code> <br />Number of frames in the fadeout to apply when stopping the sound effect.<ul><li>The default is 0.</li></ul></li></ul></li>
+</ul>
+<p>
+  <a name="Anchor_231477353_web_audio_play_se"></a>
+</p>
+<h3 id="Anchor_231477353_h3_6">Using Web Audio to Play Sound Effects</h3>
+<p>You can use Web Audio to play custom sound effects that match the design of applications. You can use this to play WAVE_FORMAT_PCM type WAVE container format files (WAV) and AAC-LC codec MP4 container format files (MP4 and M4A).</p>
+<p>To use Web Audio, you must first use the following functions to enable the feature.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>web applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowWebPageArg__SetWebAudioEnabled">nn::web::ShowWebPageArg::SetWebAudioEnabled</span>()</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetWebAudioEnabled">nn::web::ShowOfflineHtmlPageArg::SetWebAudioEnabled</span>()</td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the following functions to set the volume balance for Web Audio. If these functions have not been called, the audio is played at the volume set by the <code><em>sdkVolume</em></code> parameter of the <code><span class="ApiLink_nn__oe__SetExpectedVolumeBalance">nn::oe::SetExpectedVolumeBalance</span>()</code> function.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>Web applet</td>
+      <td>
+        <code>
+          <span class="ApiLink_nn__web__ShowWebPageArg__OverrideWebAudioVolume">nn::web::ShowWebPageArg::OverrideWebAudioVolume</span>()</code>
+      </td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <code>
+          <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__OverrideWebAudioVolume">nn::web::ShowOfflineHtmlPageArg::OverrideWebAudioVolume</span>()</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following HTML sample code is for playing the file <code>sample_se.mp4</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>&lt;!DOCTYPE html&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;button id='play-se-button' disabled nx-se-disabled&gt;play&lt;/button&gt;
+&lt;script&gt;
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+var audioCtx = new AudioContext();
+window.onload = function() {
+&nbsp;&nbsp;var request = new XMLHttpRequest();
+&nbsp;&nbsp;request.open('GET', 'sample_se.mp4', true);
+&nbsp;&nbsp;request.responseType = 'arraybuffer';
+&nbsp;&nbsp;request.onload = function () {
+&nbsp;&nbsp;&nbsp;&nbsp;audioCtx.decodeAudioData(request.response, function (buffer) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var element = document.getElementById('play-se-button');
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;element.disabled = false;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;element.onclick = function() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var source = audioCtx.createBufferSource();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source.buffer = buffer;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source.connect(audioCtx.destination);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source.start(0);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;};
+&nbsp;&nbsp;request.send();
+};
+&lt;/script&gt;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebDemoPauseMenu">WebDemoPauseMenu sample</span>.</p>
+<p>The following restrictions apply to the use of Web Audio in the web applet and the Offline Web Applet.</p>
+<p>
+  <code>AudioNode</code> can use only <code>AudioBufferSourceNode</code>, <code>AudioDestinationNode</code>, and <code>GainNode</code>.</p>
+<p>The <code>AudioBufferSourceNode.detune</code> method does not work correctly.</p>
+<p>
+  <code>AudioParam</code> can be used for each <code>AudioNode</code>, but the <code>linearRampToValueAtTime</code> and <code>exponentialRampToValueAtTime</code> methods do not work correctly.</p>
+<p>Numerous <code>AudioContext</code> objects can be created on a webpage, but only one can be played. Be careful when using the <code>iframe</code> element to embed a different page.</p>
+<p>Although there is no limit on the number of sound effects that can play at the same time, the mixed waveform will be clipped if the amplitude exceeds the maximum value, so noise can be generated if you play loud sound effects at the same time or many sound effects at the same time. If noise is generated, do not play multiple sound effects at the same time.</p>
+<p>When you move to another page, the <code>AudioContext</code> objects are destroyed and the playing sound effect stops playing. If you want to play a sound effect when moving to another page, wait for the sound effect to end and then move. You can use the <code>AudioBufferSourceNode.onended</code> event handler to wait for playback to end, but the <code>onended</code> event handler may not be called if the reference to the <code>AudioBufferSourceNode</code> object is lost after the <code>AudioBufferSourceNode.start</code> method starts the playback. To make sure that the <code>onended</code> event handler gets called, keep the <code>AudioBufferSourceNode</code> object and have the <code>onended</code> event handler free the reference.</p>
+<h1 id="Anchor_231477353_h1_10">Adjusting the Output Volume Level</h1>
+<p>For the web applet and Offline Web Applet, the volume level of each output device is adjusted based on the value configured in the NX system features. For more information about this value, see Sound Design Guide &gt; Support Recommendations &gt; Examples of Adjusting Volume With NX System Features. The configured value is used to adjust the output volume for Web Audio, the video player, and system sound effects.</p>
+<p>As a result, depending on the settings in the application, files played using Web Audio or the video player might play at a different volume than files played by the application, even if the files were created to play at the same volume. You can align the volume levels by adjusting the volume balance for Web Audio and the video player. For more information about the volume balance, see <a href="#Anchor_231477353_web_audio_play_se">Using Web Audio to Play Sound Effects</a> and <a href="#Anchor_231477353_play_movie">Playing Video Files</a>.</p>
+<h1 id="Anchor_231477353_h1_11">Customizing Operations</h1>
+<p>
+  <span class="emoticon emoticon-red-star" title="(赤い星)">There are several features for customizing controller operations.</span>
+</p>
+<ul>
+  <li>Disable the zoom feature assigned to the Right Stick and Right Stick presses.</li>
+  <li>Disable touch operations.</li>
+  <li>Limit Left Stick operations to spatial navigation.</li>
+  <li>Use JavaScript extensions to disable standard features and assign custom controller features.</li>
+  <li>Use keyboard events and the Gamepad API to read controller operations.</li>
+  <li>Change the scrolling speed.</li>
+  <li>Change the key repeat frame.</li>
+</ul>
+<p>
+  <a name="Anchor_231477353_disable_zoom"></a>
+</p>
+<h2 id="Anchor_231477353_h2_24">Disabling the Zoom Feature</h2>
+<p>
+  <span class="emoticon emoticon-red-star" title="(赤い星)">To display webpages that are always fitted to the screen, add the following <code>&lt;meta&gt;</code> element to disable the zoom feature.</span>
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content=</span><span class="s">&quot;user-scalable=no&quot;</span><span class="nt">&gt;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>When the zoom feature is disabled, the zoom feature instructions are not displayed in the footer.</p>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebDemoQuickHelp">WebDemoQuickHelp sample</span>.</p>
+<!--Remove-->
+<h2 id="Anchor_231477353_h2_25">Disabling Touch Operations</h2>
+<p>Use the following functions to always use controller operations and disable touch operations for webpages.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>web applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowWebPageArg__SetTouchEnabledOnContents">nn::web::ShowWebPageArg::SetTouchEnabledOnContents</span>()</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetTouchEnabledOnContents">nn::web::ShowOfflineHtmlPageArg::SetTouchEnabledOnContents</span>()</td>
+    </tr>
+  </tbody>
+</table>
+<p>Write the following JavaScript to disable touch operations for each webpage.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'touchstart'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">(</span><span class="p">);</span>
+<span class="p">});</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Note that this code will not disable touch operations in web applet and Offline Web Applet UI elements such as footers and dialog boxes or in applet UIs such as the software keyboard and the error viewer. Because it is impossible to completely disable scrolling using the JavaScript method, you can use these functions for pages that do not scroll.</p>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebDemoSpatialNavigation">WebDemoSpatialNavigation sample</span>.</p>
+<!--Remove-->
+<h2 id="Anchor_231477353_h2_26">Limiting Left Stick Operations to Spatial Navigation</h2>
+<p>The web applet and Offline Web Applet support two methods of controller input: spatial navigation and a cursor. The user can press the Left Stick to switch between the two input methods at any time.</p>
+<p>The cursor input method is different from the input methods used in system feature and most applications and may be unfamiliar to users. As a result, Left Stick operations can be limited to spatial navigation if desired.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Only use this feature when displaying webpages that are designed to support spatial navigation operations.</p>
+    <p>Be especially careful when enabling this feature in the web applet for general-purpose web services or webpages designed to be displayed on various devices. These types of webpages were not originally designed for display in the web applet and may not necessarily be usable with only spatial navigation. When these types of webpages are among the pages to display using the web applet, do not limit Left Stick operations to spatial navigation, and allow the user to switch to the cursor input method.</p>
+  </div>
+</div>
+<p>Use the following functions to limit Left Stick operations to spatial navigation.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>web applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowWebPageArg__SetPointerEnabled">nn::web::ShowWebPageArg::SetPointerEnabled</span>()</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetPointerEnabled">nn::web::ShowOfflineHtmlPageArg::SetPointerEnabled</span>()</td>
+    </tr>
+  </tbody>
+</table>
+<p>When Left Stick operations are limited to spatial navigation, the instructions for switching the Left Stick input method are not displayed in the footer.</p>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebDemoInstructionManual">WebDemoInstructionManual sample</span>.</p>
+<p>
+  <a name="Anchor_231477353_jsextensions_customize_controller"></a>
+</p>
+<h2 id="Anchor_231477353_h2_27">Using JavaScript Extensions to Customize Controller Operations</h2>
+<p>Using the following JavaScript extension makes it possible to disable standard controller operation features and assign custom features. Features customized using this feature revert to the default state when the page transitions. If you want to customize multiple pages, call the function on each webpage.</p>
+<p>For usage examples, see the <span class="ApiLink_PageSampleWebDemoGamepadApi">WebDemoGamepadApi sample</span> and the <span class="ApiLink_PageSampleWebDemoRaceResult">WebDemoRaceResult sample</span>.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>By default, the feature to revert from page transition is assigned to the B Button, while exiting the web applet or Offline Web Applet is assigned to the X Button. If these buttons are customized, make sure to use other features to make it possible for the user to perform webpage operations and return to the application. In particular, be careful to avoid the situation with the web applet where Javascript files cannot be loaded (such as due to the network status) and the applet enters a state of customization that is unintended by the developer.</p>
+  </div>
+</div>
+<h3 id="Anchor_231477353_h3_7">window.nx.footer.setAssign</h3>
+<p>Changes the specified key features and the operations guide.</p>
+<h6 id="Anchor_231477353_h6_17">Syntax</h6>
+<ul>
+  <li>window.nx.footer.setAssign(key, label, function [,options])</li>
+  <li>window.nx.footer.setAssign(key, label, statusFunctions [,options])</li>
+</ul>
+<h6 id="Anchor_231477353_h6_18">Parameters</h6>
+<ul>
+  <li>
+    <code>key</code>: <code>String</code> <br />Key to change.</li>
+  <li>
+    <code>label</code>: <code>String</code> <br />String to display in instructions in footer.</li>
+  <li>
+    <code>function</code>: <code>Function</code><br /> Feature to assign.</li>
+  <li>statusFunctions: Object<br />Object that assigns a function to each pressed key.</li>
+  <li>options: Object<br />The Options object. Optional.</li>
+</ul>
+<h6 id="Anchor_231477353_h6_19">Return Values</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_20">Details</h6>
+<ul>
+  <li>key<ul><li>You can specify any of the following: A, B, X, Y, L, R, ZL, ZR, or StickLPress. Either uppercase or lowercase is acceptable.</li></ul></li>
+  <li>label<ul><li>The maximum number of characters is 63.</li><li>The standard operations guide appears when <code>null</code> is specified. The operations guide does not appear for keys to which no functionality has been assigned.</li><li>The operations guide does not appear when a blank string is specified.</li></ul></li>
+  <li>function<ul><li>If no restrictions are required on the functions for each key pressed, specifies the function.</li><li>Standard functionality is assigned when <code>null</code> is specified.</li></ul></li>
+  <li>statusFunctions<br /><ul><li>To restrict the operations for each key pressed, specify an object with the following properties.<ul><li><code>down: Function</code><br />Function that is executed when a key is pressed or held down.</li><li><code>up: Function</code><br />Function that is executed when the key is released.</li></ul></li><li>An object with the following properties is passed to the first argument of the functions specified for down and up.<ul><li><code>repeat: Boolean</code><br />For a function specified as <code>down</code>, passes <code>true</code> when the key is held down.</li><li><code>cancel: Boolean</code><br />For a function specified as <code>up</code>, passes <code>true</code> when a touch is removed from the footer operation guide while the screen remains touched.</li></ul></li><li>A sound effect plays when the function specified as <code>down</code> is executed.</li></ul></li>
+</ul>
+<ul>
+  <li>options<ul><li><code>se: String</code><br />Sound effect to play when the assigned feature is executed.<ul><li>The strings that can be specified are the same as the strings that can be specified for <code>label</code> in <code>window.nx.playSystemSe(label)</code>.</li><li>The standard sound effects are played when this is omitted or when <code>null</code> is specified.</li><li>If an empty string is specified, no sound effects is played.</li></ul></li></ul></li>
+</ul>
+<p>The following sample provides customizations to the Y Button and L Button with JavaScript.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kd">var</span> <span class="nx">sampleFunction</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="kd">var</span> <span class="nx">sampleStatusFunctions</span> <span class="o">=</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="nx">down</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;down:&quot;</span> <span class="o">+</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">repeat</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">cancel</span><span class="p">);</span> <span class="p">},</span>
+&nbsp;&nbsp;<span class="nx">up</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;up:&quot;</span> <span class="o">+</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">repeat</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">cancel</span><span class="p">);</span> <span class="p">},</span>
+<span class="p">};</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">nx</span><span class="p">.</span><span class="nx">footer</span><span class="p">.</span><span class="nx">setAssign</span><span class="p">(</span><span class="s1">'Y'</span><span class="p">,</span> <span class="s1">'function'</span><span class="p">,</span> <span class="nx">sampleFunction</span><span class="p">,</span> <span class="p">{</span> <span class="nx">se</span><span class="o">:</span><span class="s1">'SeWebCheckboxCheck'</span><span class="p">});</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">nx</span><span class="p">.</span><span class="nx">footer</span><span class="p">.</span><span class="nx">setAssign</span><span class="p">(</span><span class="s1">'L'</span><span class="p">,</span> <span class="s1">'statusFunctions'</span><span class="p">,</span> <span class="nx">sampleStatusFunctions</span><span class="p">,</span> <span class="p">{</span> <span class="nx">se</span><span class="o">:</span><span class="s1">'SeWebZoomIn'</span><span class="p">});</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_231477353_h3_8">window.nx.footer.unsetAssign</h3>
+<p>Disables the feature for the specified key and hides the footer instructions.</p>
+<h6 id="Anchor_231477353_h6_21">Syntax</h6>
+<ul>
+  <li>window.nx.footer.unsetAssign(key)</li>
+</ul>
+<h6 id="Anchor_231477353_h6_22">Parameters</h6>
+<ul>
+  <li>
+    <code>key</code>: <code>String</code> <br />Key for which to disable the assigned feature and hide the footer instructions.</li>
+</ul>
+<h6 id="Anchor_231477353_h6_23">Return Values</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_24">Details</h6>
+<ul>
+  <li>key<ul><li>You can specify any of the following: A, B, X, Y, L, R, ZL, ZR, or StickLPress. Either uppercase or lowercase is acceptable.</li></ul></li>
+</ul>
+<h3 id="Anchor_231477353_h3_9">window.nx.footer.setDefaultAssign</h3>
+<p>Resets the feature for the specified key to the default feature.</p>
+<h6 id="Anchor_231477353_h6_25">Syntax</h6>
+<ul>
+  <li>window.nx.footer.setDefaultAssign(key [,label])</li>
+</ul>
+<h6 id="Anchor_231477353_h6_26">Parameters</h6>
+<ul>
+  <li>
+    <code>key</code>: <code>String</code> <br />Key to reset to default feature.</li>
+  <li>
+    <code>label</code>: <code>String</code> <br />String to display in instructions in footer. Optional.</li>
+</ul>
+<h6 id="Anchor_231477353_h6_27">Return Values</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_28">Details</h6>
+<ul>
+  <li>key<ul><li>You can specify any of the following: A, B, X, Y, L, R, ZL, ZR, or StickLPress. Either uppercase or lowercase is acceptable.</li></ul></li>
+  <li>label<ul><li>The maximum number of characters is 63.</li><li>The standard operations guide appears when <code>null</code> is specified or when the label is omitted. The operations guide does not appear for keys to which no functionality has been assigned.</li><li>The operations guide does not appear when a blank string is specified.</li></ul></li>
+</ul>
+<h2 id="Anchor_231477353_h2_28">Using Keyboard Events to Read Controller Operations</h2>
+<p>Keyboard events can be used to read controller operations.</p>
+<p>For a usage example, see the <span class="ApiLink_PageSampleWebDemoKeyboardEvents">WebDemoKeyboardEvents sample</span>.</p>
+<p>The following operations can be read as values of the <code>keyCode</code> property in <code>KeyboardEvent</code> objects.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Operation</th>
+      <th>keyCode</th>
+    </tr>
+    <tr>
+      <td>A Button</td>
+      <td>13/32</td>
+    </tr>
+    <tr>
+      <td>Left Button, L Stick Left</td>
+      <td>37</td>
+    </tr>
+    <tr>
+      <td>Up Button, L Stick Up</td>
+      <td>38</td>
+    </tr>
+    <tr>
+      <td>Right Button, L Stick Right</td>
+      <td>39</td>
+    </tr>
+    <tr>
+      <td>Down Button, L Stick Down</td>
+      <td>
+        <p>40</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_231477353_h3_10">Additional Information on A Button Operations</h3>
+<ul>
+  <li> Button elements such as <code>&lt;button&gt;</code> and <code>&lt;input type=&quot;submit&quot;&gt;</code> send <code>32</code> (Space) for <code>keyCode</code>, while other button elements send <code>13</code> (Enter).</li>
+  <li> <code>&lt;select&gt;</code> elements do not trigger an event when selected.</li>
+  <li> Text boxes similarly do not trigger an event when selected.</li>
+</ul>
+<!--Remove-->
+<h2 id="Anchor_231477353_h2_29">Using the Gamepad API to Read Controller Operations</h2>
+<p>You can also use the Gamepad API to read controller operations.<br />For a usage example, see the <span class="ApiLink_PageSampleWebDemoGamepadApi">WebDemoGamepadApi sample</span>.<br />When multiple controllers are connected, information from all of the controllers is combined and read as if it was information from one controller. Controller information cannot be read individually.</p>
+<p>Depending on the controller type and how it is held, the following information can be read as <code>Gamepad</code> object properties.</p>
+<h4 id="Anchor_231477353_h4_5">Joy-Con Console Mounted, Joy-Con Dual-controller Grip, Joy-Con Attached to the Joy-Con Grip, Nintendo Switch Pro Controller</h4>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Operation</th>
+      <th>Property</th>
+    </tr>
+    <tr>
+      <td>A</td>
+      <td>buttons[1]</td>
+    </tr>
+    <tr>
+      <td>B</td>
+      <td>buttons[0]</td>
+    </tr>
+    <tr>
+      <td>X</td>
+      <td>buttons[3]</td>
+    </tr>
+    <tr>
+      <td>Y</td>
+      <td>buttons[2]</td>
+    </tr>
+    <tr>
+      <td>L</td>
+      <td>buttons[4]</td>
+    </tr>
+    <tr>
+      <td>R</td>
+      <td>buttons[5]</td>
+    </tr>
+    <tr>
+      <td>ZL</td>
+      <td>buttons[6]</td>
+    </tr>
+    <tr>
+      <td>ZR</td>
+      <td>buttons[7]</td>
+    </tr>
+    <tr>
+      <td>Left Stick</td>
+      <td>
+        <p style="margin-left: 0.2em;">Horizontal direction is <code>axes[0].</code></p>
+        <p style="margin-left: 0.2em;">Vertical direction is <code>axes[1].</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td>Right Stick</td>
+      <td>
+        <p style="margin-left: 0.2em;">Horizontal direction is <code>axes[2].</code></p>
+        <p style="margin-left: 0.2em;">Vertical direction is <code>axes[3].</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td>Left Stick Press</td>
+      <td>buttons[10]</td>
+    </tr>
+    <tr>
+      <td>Right Stick Press</td>
+      <td>buttons[11]</td>
+    </tr>
+    <tr>
+      <td>+</td>
+      <td>buttons[9]</td>
+    </tr>
+    <tr>
+      <td>-</td>
+      <td>buttons[8]</td>
+    </tr>
+    <tr>
+      <td>Up</td>
+      <td>buttons[12]</td>
+    </tr>
+    <tr>
+      <td>Down</td>
+      <td>buttons[13]</td>
+    </tr>
+    <tr>
+      <td>Right</td>
+      <td>buttons[15]</td>
+    </tr>
+    <tr>
+      <td>Left</td>
+      <td>buttons[14]</td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_231477353_h4_6">Joy-Con (R) Solo Remote Grip</h4>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Operation</th>
+      <th>Property</th>
+    </tr>
+    <tr>
+      <td>A</td>
+      <td>buttons[1]</td>
+    </tr>
+    <tr>
+      <td>B</td>
+      <td>buttons[0]</td>
+    </tr>
+    <tr>
+      <td>X</td>
+      <td>buttons[3]</td>
+    </tr>
+    <tr>
+      <td>Y</td>
+      <td>buttons[2]</td>
+    </tr>
+    <tr>
+      <td>R</td>
+      <td>buttons[5]</td>
+    </tr>
+    <tr>
+      <td>ZR</td>
+      <td>buttons[7]</td>
+    </tr>
+    <tr>
+      <td>SL</td>
+      <td>Not assigned.</td>
+    </tr>
+    <tr>
+      <td>SR</td>
+      <td>Not assigned.</td>
+    </tr>
+    <tr>
+      <td>Right Stick</td>
+      <td>
+        <p style="margin-left: 0.2em;">Horizontal direction is <code>axes[0].</code></p>
+        <p style="margin-left: 0.2em;">Vertical direction is <code>axes[1].</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td>Press the Right Stick</td>
+      <td>buttons[10]</td>
+    </tr>
+    <tr>
+      <td>+</td>
+      <td>buttons[9]</td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_231477353_h4_7">Joy-Con (L) Solo Remote Grip</h4>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Operation</th>
+      <th>Property</th>
+    </tr>
+    <tr>
+      <td>L</td>
+      <td>buttons[4]</td>
+    </tr>
+    <tr>
+      <td>ZL</td>
+      <td>buttons[6]</td>
+    </tr>
+    <tr>
+      <td>SL</td>
+      <td>Not assigned.</td>
+    </tr>
+    <tr>
+      <td>SR</td>
+      <td>Not assigned.</td>
+    </tr>
+    <tr>
+      <td>Left Stick</td>
+      <td>
+        <p style="margin-left: 0.2em;">Horizontal direction is <code>axes[0].</code></p>
+        <p style="margin-left: 0.2em;">Vertical direction is <code>axes[1].</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td>Left Stick Press</td>
+      <td>buttons[10]</td>
+    </tr>
+    <tr>
+      <td>-</td>
+      <td>buttons[8]</td>
+    </tr>
+    <tr>
+      <td>Up</td>
+      <td>buttons[3]</td>
+    </tr>
+    <tr>
+      <td>Down</td>
+      <td>buttons[0]</td>
+    </tr>
+    <tr>
+      <td>Right</td>
+      <td>buttons[1]</td>
+    </tr>
+    <tr>
+      <td>Left</td>
+      <td>buttons[2]</td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_231477353_h4_8">Joy-Con (R) Solo Horizontal Grip</h4>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Operation</th>
+      <th>Property</th>
+    </tr>
+    <tr>
+      <td>A</td>
+      <td>buttons[0]</td>
+    </tr>
+    <tr>
+      <td>B</td>
+      <td>buttons[2]</td>
+    </tr>
+    <tr>
+      <td>X</td>
+      <td>buttons[1]</td>
+    </tr>
+    <tr>
+      <td>Y</td>
+      <td>buttons[3]</td>
+    </tr>
+    <tr>
+      <td>R</td>
+      <td>Not assigned.</td>
+    </tr>
+    <tr>
+      <td>ZR</td>
+      <td>Not assigned.</td>
+    </tr>
+    <tr>
+      <td>SL</td>
+      <td>buttons[4]</td>
+    </tr>
+    <tr>
+      <td>SR</td>
+      <td>buttons[5]</td>
+    </tr>
+    <tr>
+      <td>Right Stick</td>
+      <td>
+        <p style="margin-left: 0.2em;">Horizontal direction is <code>axes[0].</code></p>
+        <p style="margin-left: 0.2em;">Vertical direction is <code>axes[1].</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td>Press the Right Stick</td>
+      <td>buttons[10]</td>
+    </tr>
+    <tr>
+      <td>+</td>
+      <td>buttons[9]</td>
+    </tr>
+  </tbody>
+</table>
+<h4 id="Anchor_231477353_h4_9">Joy-Con (L) Solo Horizontal Grip</h4>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Operation</th>
+      <th>Property</th>
+    </tr>
+    <tr>
+      <td>L</td>
+      <td>Not assigned.</td>
+    </tr>
+    <tr>
+      <td>ZL</td>
+      <td>Not assigned.</td>
+    </tr>
+    <tr>
+      <td>SL</td>
+      <td>buttons[4]</td>
+    </tr>
+    <tr>
+      <td>SR</td>
+      <td>buttons[5]</td>
+    </tr>
+    <tr>
+      <td>Left Stick</td>
+      <td>
+        <p style="margin-left: 0.2em;">Horizontal direction is <code>axes[0].</code></p>
+        <p style="margin-left: 0.2em;">Vertical direction is <code>axes[1].</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td>Left Stick Press</td>
+      <td>buttons[10]</td>
+    </tr>
+    <tr>
+      <td>-</td>
+      <td>buttons[8]</td>
+    </tr>
+    <tr>
+      <td>Up</td>
+      <td>buttons[3]</td>
+    </tr>
+    <tr>
+      <td>Down</td>
+      <td>buttons[0]</td>
+    </tr>
+    <tr>
+      <td>Right</td>
+      <td>buttons[1]</td>
+    </tr>
+    <tr>
+      <td>Left</td>
+      <td>buttons[2]</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_231477353_h2_30">Changing the Scrolling Speed</h2>
+<p>Use the following JavaScript extension to change scrolling speed for spatial navigation operations. Scrolling speed does not change when using pointer operations. Any scrolling speed that was changed using this feature reverts to the standard speed when you transition the page. Call the function for each webpage to change the speed for multiple pages.</p>
+<h3 id="Anchor_231477353_h3_11">window.nx.setCursorScrollSpeed(speed)</h3>
+<p>Sets the scrolling speed for spatial navigation operations.</p>
+<h6 id="Anchor_231477353_h6_29">Syntax</h6>
+<ul>
+  <li>window.nx.setCursorScrollSpeed(speed)</li>
+</ul>
+<h6 id="Anchor_231477353_h6_30">Parameters</h6>
+<ul>
+  <li>speed: Number<br />The speed, in pixels per frame.</li>
+</ul>
+<h6 id="Anchor_231477353_h6_31">Return Values</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_32">More Information</h6>
+<ul>
+  <li>speed<ul><li>The value can be in the range from <code>0.0</code> to <code>50.0</code>. The default value is <code>28.0</code>.</li></ul></li>
+  <li>The scroll speed is constant, and the same as if <code>'constant'</code> was specified for <code>behavior</code> in <code>window.nx.setCursorScrollSpeed(behavior [,options])</code>.</li>
+</ul>
+<h3 id="Anchor_231477353_h3_12">window.nx.setCursorScrollSpeed(behavior [,options])</h3>
+<p>Sets the scrolling behavior and speed for spatial navigation operations.</p>
+<h6 id="Anchor_231477353_h6_33">Syntax</h6>
+<ul>
+  <li>window.nx.setCursorScrollSpeed(behavior [,options])</li>
+</ul>
+<h6 id="Anchor_231477353_h6_34">Parameters</h6>
+<ul>
+  <li>behavior: String<br />String that represents the behavior type.</li>
+  <li>options: Object<br />The Options object. Optional.</li>
+</ul>
+<h6 id="Anchor_231477353_h6_35">Return Values</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_36">More Information</h6>
+<ul>
+  <li>behavior<ul><li>Select and specify the scrolling behavior, when operating the spatial navigator, from one of the following types.</li></ul></li>
+</ul>
+<table class="wrapped" style="margin-left: 60.0px;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>String</th>
+      <th>Behavior</th>
+    </tr>
+    <tr>
+      <td>constant</td>
+      <td>Makes the scroll speed constant.</td>
+    </tr>
+    <tr>
+      <td>step</td>
+      <td>Changes the scroll speed between two levels based on the length of continuous controller input.</td>
+    </tr>
+    <tr>
+      <td>exponential</td>
+      <td>Changes the scroll speed, as an exponential function, between two levels based on the length of continuous controller input.</td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>options<ul><li>Specifies the properties based on the type of behavior specified for <code>behavior</code>.</li><li>When <code>constant</code> is specified<ul><li><code>speed</code>: <code>Number</code><br />The speed, in pixels per frame. Optional.<ul><li>The value can be in the range from <code>0.0</code> to <code>50.0</code>. The default value is <code>28.0</code>.</li></ul></li></ul></li><li>When <code>step</code> is specified<ul><li>speed: Number<br />Speed of the first level (in pixels per frame). Optional.<ul><li>The value can be in the range from <code>0.0</code> to <code>50.0</code>. The default value is <code>28.0</code>.</li></ul></li><li>stepFrame: Number<br />The number of frames of continuous controller input before switching to the speed for the second level. Optional.<ul><li>The default is <code>105</code>.</li></ul></li><li>stepSpeed: Number<br />Speed of the second level (in pixels per frame). Optional.<ul><li>The default is <code>52.0</code>.</li></ul></li></ul></li><li>When <code>exponential</code> is specified<ul><li><code>speed</code>: <code>Number</code><br />The standard speed, in pixels per frame. Optional.<ul><li>The value can be in the range from <code>0.0</code> to <code>50.0</code>. The default value is <code>28.0</code>.</li></ul></li><li>startFrame: Number<br />The number of frames of continuous controller input before the speed changes as an exponential function. Optional.<ul><li>The default is <code>40</code>.</li></ul></li><li>span: Number<br />The interval (frame) at which to change the speed. Optional.<ul><li>The default is <code>15</code>.</li></ul></li><li>rate: Number<br />The rate at which to change the speed. Optional.<ul><li>The speed changes at the rate specified by <code>rate</code> at each interval specified by <code>span</code>.</li><li>The default is <code>1.25</code>.</li></ul></li><li>maxSpeed: Number<br />Maximum speed, in pixels per frame. Optional.<ul><li>Specify <code>0</code> for unlimited.</li><li>The default is <code>0</code>.</li></ul></li></ul></li></ul></li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Available in NintendoSDK Firmware for NX 10.0.0-6.0 and later.</p>
+    <p>The <code>exponential</code> specified for <code>behavior</code> is available in NintendoSDK Firmware for NX 11.0.0-6.0 and later.</p>
+  </div>
+</div>
+<h2 id="Anchor_231477353_h2_31">Changing the key repeat frame</h2>
+<p>You can use the following JS extension to change the key repeat frame when there is continuous controller input. Key repeat frames that were changed using this feature returns to standard settings after you transition to another page. Call the function for each webpage to change the speed for multiple pages.</p>
+<h3 id="Anchor_231477353_h3_13">window.nx.setKeyRepeatFrame</h3>
+<p>Configures the key repeat frame.</p>
+<h6 id="Anchor_231477353_h6_37">Syntax</h6>
+<ul>
+  <li>window.nx.setKeyRepeatFrame(delayFrame, pulseFrame[, stepDelayFrame, stepPulseFrame])</li>
+</ul>
+<h6 id="Anchor_231477353_h6_38">Parameters</h6>
+<ul>
+  <li>delayFrame: Number<br />The number of frames until a key repeat starts.</li>
+  <li>pulseFrame: Number<br />The number of key repeat interval frames.</li>
+  <li>stepDelayFrame: Number<br />The number of frames until changing to the second level of key repeat interval. Optional.</li>
+  <li>stepPulseFrame: Number<br />The number of key repeat interval frames for the second level. Optional.</li>
+</ul>
+<h6 id="Anchor_231477353_h6_39">Return Values</h6>
+<ul>
+  <li>None</li>
+</ul>
+<h6 id="Anchor_231477353_h6_40">More Information</h6>
+<ul>
+  <li>delayFrame<ul><li>The default is <code>15</code>.</li></ul></li>
+  <li>pulseFrame<ul><li>The default is <code>5</code>.</li><li>Specify <code>0</code> to disable key repeat.</li></ul></li>
+  <li>stepDelayFrame, stepPulseFrame<br /><ul><li>You can specify these parameters to change the key repeat frame between two levels depending on the amount of time the controller receives continuous input.</li></ul></li>
+</ul>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Available in NintendoSDK Firmware for NX 10.0.0-6.0 and later.</p>
+  </div>
+</div>
+<p>
+  <a name="Anchor_231477353_memory"></a>
+</p>
+<h1 id="Anchor_231477353_h1_12">Memory</h1>
+<p>Memory is allocated in the web applet and Offline Web Applet for displaying web pages.</p>
+<h2 id="Anchor_231477353_h2_32">Behavior With Insufficient Memory</h2>
+<p>Due to limited memory capacity, webpages that consume a large amount of memory may not be able to be displayed. The web applet and Offline Web Applet have different behavior when there is not enough memory.</p>
+<p>When there is not enough memory, the web applet works to preserve operation of the included web browser as much as possible. The behavior is as follows.</p>
+<ul>
+  <li>Automatically omits portions of the webpage, such as displaying images and running JavaScript. A log message like the following is displayed in red when parts of a page are omitted.</li>
+</ul>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Parts of this page were omitted</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>If there is not enough memory even after omitting a portion of the page, the web browser restarts and displays the following message. A log message like the following is displayed in red when the web browser is restarted.</li>
+</ul>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Browser engine restarted</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p class="auto-cursor-target">When there is not enough memory, the Offline Web Applet works to preserve the page as much as possible. The behavior is as follows.</p>
+<ul>
+  <li>Unlike the web applet, no portion of the page is omitted.</li>
+  <li>The web browser restarts and the page is reloaded.<br /><ul><li>Unlike the web applet, no dialog box message is shown.</li><li>Like the web applet, a log message is displayed.</li></ul></li>
+  <li>If memory runs out again immediately after reloading the webpage, the web browser restarts and a dialog box is displayed.</li>
+</ul>
+<p>If the dialog box is displayed frequently because there is not enough memory, it may be because the webpage consumes more than the allocated memory. Adjust the content of the webpage so that it consumes less memory.</p>
+<h2 id="Anchor_231477353_h2_33">Displaying Memory Usage Rates</h2>
+<p>The memory usage rate of the webpage being displayed can be displayed on the screen for purposes of web content development.</p>
+<p>For more information about displaying the memory usage rate, see <a href="../Pages/Page_253381544.html#Anchor_253381544_show_memory_usage_rate">Display Memory Usage Rates</a>.</p>
+<h1 id="Anchor_231477353_h1_13">Cookies</h1>
+<p>Cookies can be used on webpages displayed in the web applet.</p>
+<p>However, third party cookies are blocked.</p>
+<p>Offline HTML pages displayed in the Offline Web Applet do not support using cookies.</p>
+<h1 id="Anchor_231477353_h1_14">Web Storage</h1>
+<p>Webpages displayed in the web applet support use of <code>sessionStorage</code> and <code>localStorage</code>. Offline HTML pages displayed in the Offline Web Applet support use of <code>sessionStorage</code> but do not support using <code>localStorage</code>.</p>
+<p>
+  <a name="Anchor_231477353_viewport"></a>
+</p>
+<h1 id="Anchor_231477353_h1_15">Viewport</h1>
+<p>The viewport is a virtual window used when laying out pages and can be modified via the <code>name=&quot;viewport&rdquo;</code> attribute in the <code>&lt;meta&gt;</code> element.<br />The default size is <code>width=1280, height=648</code>. In the Offline Web Applet, when the <code><span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetFooterEnabled">nn::web::ShowOfflineHtmlPageArg::SetFooterEnabled</span>()</code> function is used while starting the applet to set the footer to be kept hidden, the size of the viewport is set to <code>width=1280, height=720</code>. These same values can also be set by specifying <code>width=device-width, height=device-height</code>.<br />Although any values can be specified for the viewport size, some values may result in pages no longer being displayed on a pixel-for-pixel basis, or may result in pages no longer fitting on the screen.</p>
+<!--Remove-->
+<h1 id="Anchor_231477353_h1_16">Page Cache</h1>
+<p>The web applet and the Offline Web Applet have a feature called <em>page cache</em>. When the browser opens the links to webpages, the states of those pages are temporarily stored in memory. When the browser navigates back through the history, those saved pages are displayed again. The page cache feature enables the applets to quickly navigate back through the history and to restore the states of pages. However, sometimes you may want to retrieve the page again from the website when you navigate back through the history, or undo the dynamic changes added to webpages.<br />For these kinds of situations, you can use the following functions to always disable page cache.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>web applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowWebPageArg__SetPageCacheEnabled">nn::web::ShowWebPageArg::SetPageCacheEnabled</span>()</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>
+        <span class="ApiLink_nn__web__ShowOfflineHtmlPageArg__SetPageCacheEnabled">nn::web::ShowOfflineHtmlPageArg::SetPageCacheEnabled</span>()</td>
+    </tr>
+  </tbody>
+</table>
+<p>To disable page cache for individual webpages, you can use the following methods.</p>
+<ul>
+  <li>For HTTPS sites, specify <code>no-store</code> for <code>Cache-Control</code> in the HTTP response header so the page will not be cached.</li>
+  <li>Evaluate the <code>persisted</code> property with the <code>pageshow</code> event handler and reload pages if they have been cached.</li>
+</ul>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nx">onpageshow</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">persisted</span><span class="p">)</span> <span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nx">location</span><span class="p">.</span><span class="nx">reload</span><span class="p">(</span><span class="p">);</span>
+&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_231477353_h1_17">User Agents</h1>
+<p>The following user agents are used for the web applet and Offline Web Applet.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>User Agent</th>
+    </tr>
+    <tr>
+      <td>web applet</td>
+      <td>Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/&lt;WEBKIT_VERSION&gt; (KHTML, like Gecko) NF/&lt;ENGINE_VERSION&gt; NintendoBrowser/&lt;APPLICATION_VERSION&gt;</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/&lt;WEBKIT_VERSION&gt; (KHTML, like Gecko) NF/&lt;ENGINE_VERSION&gt; NintendoBrowser/&lt;APPLICATION_VERSION&gt;</td>
+    </tr>
+  </tbody>
+</table>
+<p>The following are examples of actual user agents.</p>
+<table class="wrapped">
+  <colgroup> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <th>Applet</th>
+      <th>User Agent</th>
+    </tr>
+    <tr>
+      <td>web applet</td>
+      <td>Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341</td>
+    </tr>
+    <tr>
+      <td>Offline Web Applet</td>
+      <td>Mozilla/5.0 (Nintendo Switch; OfflineWebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341</td>
+    </tr>
+  </tbody>
+</table>
+<p>The following JavaScript sample shows how to distinguish between the web applet and the Offline Web Applet.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kd">function</span> <span class="nx">isNintendoSwitch</span><span class="p">(</span><span class="p">)</span> <span class="p">{</span>
+&nbsp;&nbsp;<span class="k">return</span> <span class="nb">window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^.*\bNintendo Switch\b.+\bNintendoBrowser\/.*$/</span><span class="p">)</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_231477353_h2_34">Add Strings to UserAgent</h2>
+<p>The web applet can use <code><span class="ApiLink_nn__web__ShowWebPageArg__SetUserAgentAdditionalString">nn::web::ShowWebPageArg::SetUserAgentAdditionalString</span>()</code> at startup to add an arbitrary string to <code>UserAgent</code>. The web server can use the string added by <code>UserAgent</code> to determine the type or version of the client. The Offline Web Applet does not support this feature.</p>
+<p>
+  <a name="Anchor_231477353_web_inspector"></a>
+</p>
+<h1 id="Anchor_231477353_h1_18">Web Inspector</h1>
+<p>Web Inspector can be used for developing web content.</p>
+<p>The procedure for using Web Inspector is as follows.</p>
+<ul>
+  <li>Web Inspector can be enabled in the Settings Manager.<ul><li>For more information, see <a href="../Pages/Page_253381544.html#Anchor_253381544_use_web_inspector">Enabling Web Inspector</a>.</li></ul></li>
+  <li>The web applet and the Offline Web Applet can be started using <a href="../Pages/Page_824215284.html">WebAppletCaller</a>.</li>
+  <li>A dialog showing the IP address is displayed.</li>
+  <li>The web inspector resources include resources for the web applet and resources for the Offline Web Applet.<ul><li>The resources for the web applet are located in <code>$(NINTENDO_SDK_ROOT)/Tools/WebInspector/Web/Resources</code>.</li><li>The resources for the Offline Web Applet are located in <code>$(NINTENDO_SDK_ROOT)/Tools/WebInspector/OfflineWeb/Resources</code>.</li></ul></li>
+  <li>Use a PC browser to open <code>Main.html</code> included among these resources.<ul><li>Web Inspector does not operate properly with the default settings of the PC browsers, so make the following changes.<ul><li>For Google Chrome, run the browser with the <code>--allow-file-access-from-files</code> option.<ul><li>In Windows, create a shortcut link, and add the option to the link destination settings.</li></ul></li><li>In Mac Safari 10.x, in the <strong>Developer</strong> menu, add a check mark to <strong>Disable cross origin restrictions</strong>.</li></ul></li></ul></li>
+  <li>In the file path, after Main.html, add &ldquo;?ws=&lt;IP address shown in the dialog&gt;:9222/devtools/page/1&rdquo; and then run.</li>
+  <li>Use of Web Inspector starts.</li>
+</ul>
+<p>
+  <br />
+</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Some of the features are not supported in the web inspector for the Web Applet.</p>
+    <ul>
+      <li>Cannot check Call Trees for JavaScript &amp; Events in the Timeline tab</li>
+      <li>Frames is not displayed in the Timeline tab</li>
+      <li>The Protocol, Priority, and IP Address columns are not displayed in the list display in the Network tab</li>
+      <li>The information is incorrect for the Transfer Size column in the list display in the Network tab</li>
+      <li>The Cookie, Bytes Sent, and Bytes Received information is not displayed in the detailed information display for each request in the Network tab.</li>
+    </ul>
+  </div>
+</div>
+<h2 id="Anchor_231477353_h2_35">console</h2>
+<p>The Web Inspector debugging console can be accessed by using a console object in the web page.<br />Output from the <code>console.log()</code> member function is also sent to Target Manager and other logs.<br />Logs are generated by web applets and Offline Web Applets on development hardware initialized with development firmware (DEV MODE), and not from firmware approximating a retail unit with log output from a microSD card functionality (ProdWithLog).</p>
+<h1 id="Anchor_231477353_h1_19">CPU Boost</h1>
+<p>Under specific conditions, the web applet and the Offline Web Applet can use the CPU boost feature to speed up the display of webpages.</p>
+<p>To use this CPU boost, the calling application must specify <code>InFocusOnly</code> as the focus handling mode before the web applet or the Offline Web Applet starts.</p>
+<p>When this condition is satisfied, a CPU boost equivalent to specifying <code><span class="ApiLink_nn__oe__CpuBoostMode_FastLoad">nn::oe::CpuBoostMode_FastLoad</span></code> is enabled under the following circumstances.</p>
+<ul style="margin-left: 1.8em;">
+  <li>From after the applet starts until the first page has finished loading<ul><li>If starting in dedicated media mode, it is enabled until video is ready to be played.</li></ul></li>
+  <li>While loading pages</li>
+  <li>While preparing to play video<ul><li>If an error occurs during these playback preparations, the CPU boost will end at that time.</li></ul></li>
+</ul>
+<p>If these conditions are satisfied, a log like the following is displayed when the applet starts.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>[CpuBoost] enabled</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Developers of web content can use <a href="../Pages/Page_824215284.html">WebAppletCaller</a> to check their web content with CPU boost enabled.</p>
+<p>For more information about CPU boost, see <a href="../Pages/Page_503094447.html">CPU Boost Functionality</a>.</p>
+<p>For more information about the focus handling modes, see <a href="../Pages/Page_166065886.html">Notifications For Programs</a>.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Available in NintendoSDK NX Add-On 10.4.0 (Firmware for NX 10.0.0-6.0) and later.</p>
+    <p>A log is displayed when the applet starts in NintendoSDK NX Add-On 14.0.0 and later.</p>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__web__WebPageReturnValue__GetWebExitReason', '../../../Api/HtmlNX/classnn_1_1web_1_1_web_page_return_value.html#a9a2de80217153bfa7c6ff663b2286e78' )
+SetUrl( 'ApiLink_nn__web__OfflineHtmlPageReturnValue__GetOfflineExitReason', '../../../Api/HtmlNX/classnn_1_1web_1_1_offline_html_page_return_value.html#ae66570dabc972bc28e450e6615f2a733' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetJsExtensionEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#a9fdb76b2d99a5061c6a6d7b1480d55dd' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetJsExtensionEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#af872bde822a165e81dfc46e2fb074f22' )
+SetUrl( 'ApiLink_PageSampleWebDemoQuickHelp', '../../../Api/HtmlNX/_page_sample_web_demo_quick_help.html' )
+SetUrl( 'ApiLink_PageSampleWebDemoRaceResult', '../../../Api/HtmlNX/_page_sample_web_demo_race_result.html' )
+SetUrl( 'ApiLink_PageSampleWebDemoPauseMenu', '../../../Api/HtmlNX/_page_sample_web_demo_pause_menu.html' )
+SetUrl( 'ApiLink_PageSampleWebDemoSpatialNavigation', '../../../Api/HtmlNX/_page_sample_web_demo_spatial_navigation.html' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetFooterEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#ae47c5526d1fe5a3790acdae14dd2f2df' )
+SetUrl( 'ApiLink_PageSampleWebDemoInstructionManual', '../../../Api/HtmlNX/_page_sample_web_demo_instruction_manual.html' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetFooterFixedKind', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#a201df50236c6e29dfdd3a98a1983ea27' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetFooterFixedKind', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#acd3995bb01a1ffce849ec68b919b02f5' )
+SetUrl( 'ApiLink_nn__oe__SetExpectedVolumeBalance', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a5d07d123fcacb8b074ed97f486c8fe04' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__OverrideMediaAudioVolume', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#a23c2446d088e25fde69d2caa9e5cd9e6' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__OverrideMediaAudioVolume', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#adf326fb7f0120109f78f14220bfa6df4' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetBootAsMediaPlayer', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#ac98377e4896d2e1c1bb98c157b7aba61' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetBootAsMediaPlayer', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#ae413bc72379f0490ac7e0cabe1538ccd' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetMediaPlayerAutoCloseEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#aa6c42dad0ef18d89fa5fc15f9c5e427a' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetMediaPlayerAutoCloseEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#aa30f72529b20d98ddb500ba57d22a4a6' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetMediaPlayerUiEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#ac3d5e33fc2020ecb2138d2b54eb61585' )
+SetUrl( 'ApiLink_PageSampleWebDemoShootingMovie', '../../../Api/HtmlNX/_page_sample_web_demo_shooting_movie.html' )
+SetUrl( 'ApiLink_PageSampleWebDemoDirectPlayback', '../../../Api/HtmlNX/_page_sample_web_demo_direct_playback.html' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetMediaAutoPlayEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#a8f1eb2be4bdd855fae969431fb31c4b8' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetMediaAutoPlayEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#a08891491a2e2986e1f6645f330b40e06' )
+SetUrl( 'ApiLink_PageSampleWebDemoKeyboardEvents', '../../../Api/HtmlNX/_page_sample_web_demo_keyboard_events.html' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetWebAudioEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#a753cd44886b5ea77d32ac80c0ec1e02a' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetWebAudioEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#a6b6d08cb1ac2092735b2aee42458334c' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__OverrideWebAudioVolume', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#a39be1237233e510ceef6909a26253f62' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__OverrideWebAudioVolume', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#a543e321ba08c2bab3362fdf54e32f3e4' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetTouchEnabledOnContents', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#ac83868404970934934f4567c1354909b' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetTouchEnabledOnContents', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#a13b4fd6119082068b81a4be6ea620b44' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetPointerEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#aba61eeddc3ccd998ecd3d93af10d82cb' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetPointerEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#ab92700331a84f2f9baef2942cc003d3c' )
+SetUrl( 'ApiLink_PageSampleWebDemoGamepadApi', '../../../Api/HtmlNX/_page_sample_web_demo_gamepad_api.html' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetPageCacheEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#a603d84570ce73660d2ef70361b566158' )
+SetUrl( 'ApiLink_nn__web__ShowOfflineHtmlPageArg__SetPageCacheEnabled', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_offline_html_page_arg.html#a6cdc51003fe3f1b6eacceb23c8f15a9a' )
+SetUrl( 'ApiLink_nn__web__ShowWebPageArg__SetUserAgentAdditionalString', '../../../Api/HtmlNX/classnn_1_1web_1_1_show_web_page_arg.html#aeeb8bfd79a985fcdfc76840ee2e0e448' )
+SetUrl( 'ApiLink_nn__oe__CpuBoostMode_FastLoad', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a9a4c06113b2d2e39157e21fd9d33c874a56d0c008e285dc2c80ab2f33c225e4c6' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

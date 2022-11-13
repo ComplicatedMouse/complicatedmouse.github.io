@@ -1,0 +1,469 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>3DEditorBridge | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- 3DEditorBridge -->
+<div class="pagetitle" id="PageId_105678555">3DEditorBridge</div>
+<div class="text_separate">
+<p>This chapter describes procedures and cautions for using 3DEditorBridge.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_105678555_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_105678555_h1_2">Options</a>
+    </li>
+    <li>
+      <a href="#Anchor_105678555_h1_3">Function Details</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_105678555_h2_1">Starting 3DEditor</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_2">Closing 3DEditor</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_3">Getting Information in 3DEditor</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_4">Getting the Edit State of a 3DEditor Intermediate File as a Temporary Intermediate File</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_5">Reloading a Temporary Intermediate File to 3DEditor</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_6">Loading Files Into 3DEditor</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_7">Overwriting and Saving Files Loaded Into 3DEditor</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_8">Saving All Files Loaded Into 3DEditor With Unsaved Changes</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_9">Closing All Files Loaded Into 3DEditor</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_10">Connecting to the Runtime</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_11">Disconnecting the Runtime Connection</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_12">Deleting the Edit History</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_13">Enabling and Disabling Shader Optimization</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_14">Displaying the Runtime's Connection State</a>
+      </li>
+      <li>
+        <a href="#Anchor_105678555_h2_15">Setting the Current 3DEditor Frame</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_105678555_h1_1">Overview</h1>
+<p>3DEditorBridge is a command-line tool that connects 3DEditor with external tools.</p>
+<p>It performs processing such as getting information for intermediate files being edited in 3DEditor and loading intermediate files edited externally into 3DEditor.</p>
+<p>The executable file is <code>%NINTENDO_SDK_ROOT%\Tools\Graphics\3dEditor\3dEditorBridge.exe</code>.</p>
+<p>When you run 3DEditorBridge, it closes when the specified processing ends in 3DEditor, except when errors occur, such as when 3DEditor does not start.</p>
+<p>If the operation succeeds, it returns 0. In any other case it returns a value other than 0. Messages from 3DEditor, such as error messages, are output normally.</p>
+<h1 id="Anchor_105678555_h1_2">Options</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe [--args-file] [--version] [-h] 
+[start-3deditor [--team-settings-file team settings file path or filename]]  |
+[close-3deditor] |
+[export-info --output &quot;&quot;] |
+[export-temporary-files --path &quot;&quot; intermediate file name ... ] |
+[reload-temporary-files --path &quot;&quot; intermediate file name ... ] |
+[load-files file path or folder path ... ] |
+[save-files [--disable-file-info] file path or filename ... ] |
+[save-all [--disable-file-info]]  |
+[close-all] |
+[connect-runtime --target &quot;Device&quot;|&quot;Pc&quot; [--platform platform name]]  |
+[disconnect-runtime] |
+[clear-history] |
+[optimize-shader [--disable]] 
+[set-current-frame --frame &quot;&quot;]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>--args-file &quot;&quot;</strong>
+</p>
+<p>Specifies the file.<br />You can use the contents in the parameter file to specify arguments. <br />The parameter file allows you to specify each option over several lines. <br />Lines starting with a number sign (#) are treated as comments. <br />Newline characters cannot be included in escape sequences used in option specifications that appear between quotation marks (&quot;).</p>
+<p>
+  <strong>--version</strong>
+</p>
+<p>Displays version information.</p>
+<p>
+  <strong>-h --help</strong>
+</p>
+<p>Displays Help.</p>
+<p>
+  <strong>start-3deditor</strong>
+</p>
+<p>Start 3DEditor.</p>
+<p>
+  <strong>--team-settings-file</strong>
+</p>
+<p>Specifies the team settings file path or filename.</p>
+<p>
+  <strong>close-3deditor</strong>
+</p>
+<p>Closes the 3DEditor.</p>
+<p>
+  <strong>export-info</strong>
+</p>
+<p>Subcommand that exports the files and preview information loaded in 3DEditor.</p>
+<p>
+  <strong>-o &quot;&quot; --output &quot;&quot;</strong>
+</p>
+<p>Specifies the file to output. 　</p>
+<p>
+  <strong>export-temporary-files</strong>
+</p>
+<p>Subcommand that exports intermediate files for models and other objects being edited in 3DEditor to the specified directory.</p>
+<p>
+  <strong>--path &quot;&quot;</strong>
+</p>
+<p>Specifies the folder that includes intermediate files.</p>
+<p>
+  <strong>reload-temporary-files</strong>
+</p>
+<p>Subcommand that reloads intermediate files into 3DEditor from the specified directory.</p>
+<p>
+  <strong>load-files</strong>
+</p>
+<p>Subcommand that loads the specified project file, intermediate files, or files in the specified folder.</p>
+<p>
+  <strong>save-files</strong>
+</p>
+<p>Subcommand that saves the files in the specified directory or saves the files with the specified filenames. Files with no changes will not be saved.</p>
+<p>
+  <strong>save-all</strong>
+</p>
+<p>Subcommand that overwrites and saves all files with unsaved changes.</p>
+<p>
+  <strong>close-all</strong>
+</p>
+<p>Subcommand that closes all files currently open in 3DEditor.</p>
+<p>No dialog box is displayed to confirm saving unsaved files.</p>
+<p>
+  <strong>connect-runtime</strong>
+</p>
+<p>Subcommand that connects to the runtime.</p>
+<p>
+  <strong>--target</strong>
+</p>
+<p>Specifies the target to connect to.</p>
+<p>
+  <strong>--platform</strong>
+</p>
+<p>Specifies the platform to connect to.</p>
+<p>
+  <strong>disconnect-runtime</strong>
+</p>
+<p>Subcommand that disconnects the runtime connection.</p>
+<p>Also disables the automatic connection feature if it is enabled. Does not do anything if you are already disconnected from the runtime.</p>
+<p>
+  <strong>clear-history</strong>
+</p>
+<p>Subcommand that deletes the edit history.</p>
+<p>
+  <strong>optimize-shader</strong>
+</p>
+<p>Subcommand that enables and disables shader optimization.</p>
+<p>
+  <strong>query-connection-state</strong>
+</p>
+<p>Indicates the runtime's connection state.</p>
+<p>
+  <strong>set-current-frame</strong>
+</p>
+<p>Sets the current 3DEditor frame.</p>
+<h1 id="Anchor_105678555_h1_3">Function Details</h1>
+<h2 id="Anchor_105678555_h2_1">Starting 3DEditor</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe start-3deditor [--team-settings-file team settings file path or filename]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Start 3DEditor. If 3DEditor has already started, this function does nothing.</li>
+  <li>You can specify the team settings file using <code>--team-settings-file</code>.</li>
+</ul>
+<h2 id="Anchor_105678555_h2_2">Closing 3DEditor</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe close-3deditor</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Exits 3DEditor. If 3DEditor is already closed, this function does nothing.</li>
+</ul>
+<h2 id="Anchor_105678555_h2_3">Getting Information in 3DEditor</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe export-info --output &quot;output file&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Outputs file information loaded in the current file view as an XML file.</li>
+  <li>You can get the following information.<ul><li>Model path<ul><li>Animation set information, and bind animation full path (for each model)</li></ul></li><li>Animation full path</li><li>Texture full path</li><li>Shader definition full path</li><li>Scene animation full path</li><li>Animation current frame position</li></ul></li>
+</ul>
+<h2 id="Anchor_105678555_h2_4">Getting the Edit State of a 3DEditor Intermediate File as a Temporary Intermediate File</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe export-temporary-files --path &quot;output destination&quot; [filename]...</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Outputs models edited in 3DEditor as intermediate files.</li>
+  <li>Cannot output files with the same name but different paths.</li>
+  <li>Outputs even when a modal dialog box is displayed in 3DEditor.</li>
+</ul>
+<h2 id="Anchor_105678555_h2_5">Reloading a Temporary Intermediate File to 3DEditor</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe reload-temporary-files --path &quot;folder to be reloaded&quot; [filename]...</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Reloads a temporary intermediate file that has been output and applies it in 3DEditor.</li>
+</ul>
+<h2 id="Anchor_105678555_h2_6">Loading Files Into 3DEditor</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe load-files [file path or folder path]...</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Loads a file into 3DEditor.</li>
+  <li>If you specify a folder, intermediate files in that folder will be loaded.</li>
+</ul>
+<h2 id="Anchor_105678555_h2_7">Overwriting and Saving Files Loaded Into 3DEditor</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe save-files [--disable-file-info] [file path pr filename]...</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Overwrites and saves files loaded into 3DEditor.</li>
+  <li>Files with no changes will not be saved.</li>
+  <li>If multiple files with the same name are not loaded, you can specify the filename.</li>
+  <li>When the <code>--disable-file-info</code> option has been specified, the <code>&lt;file_info&gt;</code> element of the intermediate file is saved without being updated.</li>
+</ul>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The <code>--disable-file-info</code> option is included in NintendoSDK 1.0.0 and later versions.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_105678555_h2_8">Saving All Files Loaded Into 3DEditor With Unsaved Changes</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe save-all [--disable-file-info]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Saves all files with unsaved changes.</li>
+  <li>When the <code>--disable-file-info</code> option has been specified, the <code>&lt;file_info&gt;</code> element of the intermediate file is saved without being updated.</li>
+</ul>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>The <code>--disable-file-info</code> option is included in NintendoSDK 1.0.0 and later versions. </p>
+  </div>
+</div>
+<h2 id="Anchor_105678555_h2_9">Closing All Files Loaded Into 3DEditor</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe close-all</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Closes all files loaded into 3DEditor.</li>
+</ul>
+<h2 id="Anchor_105678555_h2_10">Connecting to the Runtime</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe connect-runtime --target &quot;Device&quot;|&quot;Pc&quot; [--platform platform name]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Connects to the target specified with the <code>--target</code> option. Specify <strong>Device</strong> to connect to the development hardware runtime. Specify <strong>Pc</strong> to connect to the PC runtime.</li>
+  <li>Connects to the platform specified with the <code>--platform</code> option. Connects to the current platform if unspecified. </li>
+  <li>If you are already connected to a different target, it will try connecting to the new target after disconnecting.</li>
+  <li>Does not do anything if you are already connected to the specified runtime.</li>
+</ul>
+<h2 id="Anchor_105678555_h2_11">Disconnecting the Runtime Connection</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe disconnect-runtime</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Disconnects the runtime connection.</li>
+  <li>Does not do anything if you are already disconnected from the runtime.</li>
+  <li>If automatic connection is enabled in 3DEditor, this option is disabled.</li>
+</ul>
+<h2 id="Anchor_105678555_h2_12">Deleting the Edit History</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe clear-history</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Deletes the edit history.</li>
+  <li>The memory used to maintain the history is also released.</li>
+</ul>
+<h2 id="Anchor_105678555_h2_13">Enabling and Disabling Shader Optimization</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe optimize-shader [--disable]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Enables and disables shader optimization.</li>
+  <li>When the <code>--disable</code> option is not specified, shader optimization is enabled.</li>
+  <li>When the <code>--disable</code> option is specified, shader optimization is disabled.</li>
+</ul>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_105678555_h2_14">Displaying the Runtime's Connection State</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe query-connection-state</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Indicates the runtime's connection state.</li>
+  <li>&quot;Disconnected&quot; is displayed when the runtime is disconnected.</li>
+  <li>&quot;Connected&quot; is displayed when the runtime is connected.</li>
+  <li>&quot;Communicating&quot; is displayed when the runtime is connected and communications are currently ongoing.</li>
+</ul>
+<h2 id="Anchor_105678555_h2_15">Setting the Current 3DEditor Frame</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dEditorBridge.exe set-current-frame --frame &quot;Current frame&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>Sets the current 3DEditor frame.</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

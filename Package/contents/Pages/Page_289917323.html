@@ -1,0 +1,454 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Adaptive Clustering Mode | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Adaptive Clustering Mode -->
+<div class="pagetitle" id="PageId_289917323">Adaptive Clustering Mode</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_289917323_h1_1">Introduction</a>
+    </li>
+    <li>
+      <a href="#Anchor_289917323_h1_2">Adaptive Clustering Mode</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_289917323_h2_1">Overview</a>
+      </li>
+      <li>
+        <a href="#Anchor_289917323_h2_2">Settings</a>
+      </li>
+      <li>
+        <a href="#Anchor_289917323_h2_3">Output Format</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_289917323_h1_3">Important Information</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_289917323_h2_4">Easily Detected Markers</a>
+      </li>
+      <li>
+        <a href="#Anchor_289917323_h2_5">Battery Life</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_289917323_h1_4">Using Adaptive Clustering Mode</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_289917323_h2_6">Adaptive Clustering Mode Sample Demo</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_289917323_h1_1">Introduction</h1>
+<p>Adaptive clustering mode detects clusters, while changing the camera settings of exposure time and LED intensity for each frame, to make it easier to detect markers appearing in the IR Motion Camera.<br />Think of it as clustering mode with auto-exposure (auto-exposure correction) functionality that is specialized for detecting markers.<br />There is also less information about the objects that can be obtained compared to clustering mode, but the number of points that can be detected has increased.<br />We recommend that you select the mode that better suits your use case.<br />Controller firmware must be updated to <span style="color: rgb(23,43,77);">3.8b.06.1a or later to use this feature</span>, so the firmware must be updated if it is an earlier version.</p>
+<h1 id="Anchor_289917323_h1_2">Adaptive Clustering Mode</h1>
+<h2 id="Anchor_289917323_h2_1">Overview</h2>
+<p>In clustering mode, clusters of bright areas in the image are found, and then the coordinates and size of those clusters are calculated.<br />The brightness of the IR Motion Camera is automatically adjusted to detect more markers, accurately, at high speed.<br />Up to 32 clusters can be detected and retrieved at the same time.</p>
+<p>The rectangle data that could be obtained in clustering mode can no longer be obtained in adaptive clustering mode. Instead, the maximum number of clusters that can be detected has been increased.</p>
+<p>For more information about the coordinate system for the data that is output, see <a href="../Pages/Page_112902609.html">IR Motion Camera Coordinate System</a>.</p>
+<h2 id="Anchor_289917323_h2_2">Settings</h2>
+<p>Adaptive Clustering Mode automatically adjusts the camera settings to better detect markers, so there is no functionality for manually configuring camera settings. <br />You can, however, configure the detection algorithm.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+      <th>Default Value</th>
+      <th>Defined Range</th>
+    </tr>
+    <tr>
+      <td>mode</td>
+      <td>
+        <p>The cluster detection algorithm setting.<br />In StaticFov mode, clusters are detected using a static FOV size.<br />The resolution is low, so when detected objects get farther away from the IR Motion Camera, </p>
+        <p>output precision decreases and blurriness increases. However, it is hard to lose sight of objects even if they move quickly.</p>
+        <p>In DynamicFov mode, tracking is processed internally and the FOV dynamically changes to a smaller value, increasing the resolution when detecting clusters.<br />When objects move quickly, they are sometimes lost, but even if the camera is far away from the object, <br />high-precision output can still be obtained.</p>
+      </td>
+      <td>
+        <p>AdaptiveClusteringMode_StaticFov</p>
+      </td>
+      <td>
+        <p>AdaptiveClusteringMode_StaticFov/</p>
+        <p>AdaptiveClusteringMode_DynamicFov</p>
+      </td>
+    </tr>
+    <tr>
+      <td>distance</td>
+      <td>
+        <p>The setting for automatically adjusting the camera to a detected object.</p>
+        <p>When the camera and object are close to each other, the behavior remains the same regardless of this value.<br />However, setting a distance that cannot be detected with the <strong>Near</strong> setting as <strong>Middle</strong> or <strong>Far</strong> makes it so that objects that are far away can be detected while only giving up a small amount of precision.</p>
+      </td>
+      <td>AdaptiveClusteringTargetDistance_Near</td>
+      <td>
+        <p>AdaptiveClusteringTargetDistance_Near/</p>
+        <p>AdaptiveClusteringTargetDistance_Middle/</p>
+        <p>AdaptiveClusteringTargetDistance_Far</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>These settings exist in the members of the <span class="external-link"> <span class="ApiLink_nn__irsensor__AdaptiveClusteringProcessorConfig">nn::irsensor::AdaptiveClusteringProcessorConfig</span></span> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">AdaptiveClusteringProcessorConfig</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">AdaptiveClusteringMode</span> <span class="n">mode</span><span class="p">;</span> <span class="c1">// The algorithm operating mode.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">AdaptiveClusteringTargetDistance</span> <span class="n">distance</span><span class="p">;</span> <span class="c1">//!&lt; The object distance setting.
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Pass the handles and settings you want to use to the <code><span class="ApiLink_nn__irsensor__RunAdaptiveClusteringProcessor">nn::irsensor::RunAdaptiveClusteringProcessor</span></code> function to start marker detection mode.</p>
+<p>The external light filter is always enabled, so you cannot catch light-emitting markers.</p>
+<h2 id="Anchor_289917323_h2_3">Output Format</h2>
+<p>In marker detection mode, data is output in the following format.</p>
+<p>The image is scanned horizontally, starting from the upper left corner (0, 0). If there are more than 32 clusters, priority is <br />given to the clusters that are highest in the image, or the leftmost clusters for clusters that include pixels in the same row.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+      <th>Value Range</th>
+    </tr>
+    <tr>
+      <td>
+        <code>samplingNumber</code>
+      </td>
+      <td>Value that increases each time processed results are received.</td>
+      <td>0 or greater</td>
+    </tr>
+    <tr>
+      <td>timestamp</td>
+      <td>The time from when the process started to when the results of the process were obtained.<br />Taking the difference between this value and the <code>timeStamp</code> value for the previously obtained data, makes it possible to detect packet loss.</td>
+      <td>0 or greater</td>
+    </tr>
+    <tr>
+      <td>
+        <code>
+          <em>objectCount</em>
+        </code>
+      </td>
+      <td>The number of clusters detected.</td>
+      <td>0 to 32</td>
+    </tr>
+    <tr>
+      <td>accuracyLevel</td>
+      <td>
+        <p>Information about the precision of the retrieved data.<br />In StaticFov mode, <code>AdaptiveClusteringAccuracyLevel_Middle</code> is always returned.<br />In DynamicFov mode, if markers appear in the entire angle of view, <br /><code>AdaptiveClusteringAccuracyLevel_Middle</code> is returned, the same as for StaticFov mode.<br />If the markers are far away and only appear in part of the angle of view, <code>AdaptiveClusteringAccuracyLevel_High</code> is returned. <br />During the time that <code>AdaptiveClusteringAccuracyLevel_High</code> is returned, the entire angle of view is periodically checked to handle any drastic marker movements.<br /><code>AdaptiveClusteringAccuracyLevel_Low</code> is returned for data retrieved when switching parameters internally to perform checks.<br />The data's precision is equivalent to <code>Middle</code>, but is set as <code>Low</code> because the precision is greatly reduced from the tracking at <code>High</code> precision performed until immediately before this.</p>
+        <p>In some cases, <code>AdaptiveClusteringAccuracyLevel_Low</code> can also be ignored, because it may result in lower periodic precision.</p>
+      </td>
+      <td>
+        <p>AdaptiveClusteringAccuracyLevel_Low/<br />AdaptiveClusteringAccuracyLevel_Middle/</p>
+        <p>AdaptiveClusteringAccuracyLevel_High</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>
+          <em>ambientNoiseLevel</em>
+        </code>
+      </td>
+      <td>
+        <p>The ambient noise level.</p>
+        <p>If there is a lot of ambient light noise, you can look at this variable</p>
+        <p>and do something like guide the user to change the play environment,</p>
+        <p>or make some such notification.</p>
+        <p>For more information, see the <a href="../Pages/Page_112902609.html">Common Features</a> section</p>
+        <p>
+          <em>IR Motion Camera External Light Filter</em>.</p>
+      </td>
+      <td>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_Low/</code>
+        </p>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_Middle/</code>
+        </p>
+        <p>
+          <code>IrCameraAmbientNoiseLevel_High</code>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>backgroundIntensity</td>
+      <td>The average brightness value of background pixels with detected objects excluded.</td>
+      <td>0 to 255</td>
+    </tr>
+    <tr>
+      <td>
+        <p>
+          <code>objects</code>
+        </p>
+      </td>
+      <td>Details about each cluster.<br />The data is stored in a buffer in the order that the clusters were detected.</td>
+      <td>For more information, click here.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The details for each cluster are stored in the following format.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 98.0px;" />
+    <col style="width: 315.0px;" />
+    <col style="width: 474.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Item</th>
+      <th>Description</th>
+      <th>Value Range</th>
+    </tr>
+    <tr>
+      <td>
+        <code>centroid</code>
+      </td>
+      <td>The cluster&rsquo;s centroid.</td>
+      <td>(0.0, 0.0) to (320.0, 240.0)</td>
+    </tr>
+    <tr>
+      <td>area</td>
+      <td>The area of the cluster (in pixels).</td>
+      <td>0 to 76800</td>
+    </tr>
+    <tr>
+      <td>isIncomplete</td>
+      <td>Flag that indicates whether a cluster is partially non-visible or otherwise incomplete from the angle of view.</td>
+      <td>Returns <code>true</code> if a cluster is incomplete.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>These output values exist in the members of the <code><span class="ApiLink_nn__irsensor__AdaptiveClusteringProcessorState">nn::irsensor::AdaptiveClusteringProcessorState</span></code> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">AdaptiveClusteringProcessorState</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int64_t</span> <span class="n">samplingNumber</span><span class="p">;</span>                                    <span class="c1">//!&lt; This value (0 or greater) increases each time processed results are received from the marker detection processor.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">::</span><span class="nn">nn::</span><span class="n">TimeSpanType</span> <span class="n">timeStamp</span><span class="p">;</span>                              <span class="c1">//!&lt; The timestamp data from when the processor was started (Greater than 0).
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">IrCameraAmbientNoiseLevel</span> <span class="n">ambientNoiseLevel</span><span class="p">;</span>               <span class="c1">//!&lt; The detected ambient noise level.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">AdaptiveClusteringAccuracyLevel</span> <span class="n">accuracyLevel</span><span class="p">;</span>             <span class="c1">//!&lt; The precision of the data.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int8_t</span> <span class="n">objectCount</span><span class="p">;</span>                                        <span class="c1">//!&lt; The number of detected objects.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">uint8_t</span> <span class="n">backgroundIntensity</span><span class="p">;</span>                               <span class="c1">//!&lt; The average value of the brightness in regions without the marker.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">char</span> <span class="n">reserved</span><span class="p">[</span><span class="mi">6</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">AdaptiveClusteringData</span> <span class="n">objects</span><span class="p">[</span><span class="n">AdaptiveClusteringProcessorObjectCountMax</span><span class="p">];</span> <span class="c1">//!&lt; Data about the detected objects.
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The details about each cluster exist in the members of the <code><span class="ApiLink_nn__irsensor__ClusteringData">nn::irsensor::ClusteringData</span></code> structure.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="k">struct</span> <span class="n">AdaptiveClusteringData</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">::</span><span class="nn">nn::util::</span><span class="n">Float2</span> <span class="n">centroid</span><span class="p">;</span>     <span class="c1">//!&lt; subpixel position of the marker in a 320x240 image.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">//!&lt; Value for x can vary from 0 to 320. Value for y can vary from 0 to 240.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">area</span><span class="p">;</span>                      <span class="c1">//!&lt; Approximation of the pixel count of the marker. Vary between 0.f and 320.f * 240.f = 76800.f
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">bool</span> <span class="n">isIncomplete</span><span class="p">;</span>               <span class="c1">//!&lt; True if the object surface doesn't have complete information like touching border.
+</span><span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>To get the output data, pass a buffer for the output format to the <code><span class="ApiLink_nn__irsensor__GetAdaptiveClusteringProcessorStates">nn::irsensor::GetAdaptiveClusteringProcessorStates</span></code> function and call it.</p>
+<p>The minimum value for sampling numbers to get can also be specified for <code><span class="ApiLink_nn__irsensor__GetAdaptiveClusteringProcessorStates">nn::irsensor::GetAdaptiveClusteringProcessorStates</span></code>.<br />The load from getting data in this mode is higher than from other modes, but it enables you to get only necessary data, which can reduce the load.<br />For normal usage, we recommend that you enter <strong>0</strong> for the initial call, and enter a value equal to the sampling number for the previously obtained data + 1.</p>
+<h1 id="Anchor_289917323_h1_3">Important Information</h1>
+<h2 id="Anchor_289917323_h2_4">Easily Detected Markers</h2>
+<p>Brightness is adjusted to enable detection of more markers on the same plane.<br />The farther away a marker, the more difficult it is to detect. This is because the feature adjusts brightness to match areas closer to the camera.</p>
+<h2 id="Anchor_289917323_h2_5">Battery Life</h2>
+<p>When a marker is far away, or when nothing is detected, the IR Motion Camera is given a brighter setting to perform detection.<br />As a result, note that power consumption in this situation is greater than during normal use.</p>
+<h1 id="Anchor_289917323_h1_4">Using Adaptive Clustering Mode</h1>
+<p>To use adaptive clustering mode, use the following basic workflow.</p>
+<ol>
+  <li>
+    <p>Get <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code> for the specified <code><span class="ApiLink_nn__hid__NpadIdType">nn::hid::NpadIdType</span></code>, and initialize the IR Motion Camera.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="cp">#include &lt;nn/irsensor.h&gt;
+</span>
+<span class="nn">nn::irsensor::</span><span class="n">IrCameraHandle</span> <span class="n">handle</span> <span class="o">=</span> <span class="nn">nn::irsensor::</span><span class="n">GetIrCameraHandle</span><span class="p">(</span><span class="n">npadIdType</span><span class="p">);</span>
+<span class="nn">nn::irsensor::</span><span class="n">Initialize</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Generate the initial settings for adaptive clustering mode.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">AdaptiveClusteringProcessorConfig</span> <span class="n">config</span><span class="p">;</span>
+<span class="c1">// Get the default settings (if you want to configure these settings individually, you can also specify them directly).
+</span><span class="nn">nn::irsensor::</span><span class="n">GetAdaptiveClusteringProcessorDefaultConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To start capture, call the <code><span class="ApiLink_nn__irsensor__RunAdaptiveClusteringProcessor">nn::irsensor::RunAdaptiveClusteringProcessor</span></code> function, and specify the obtained <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code> as an argument.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>&nbsp;<span class="nn">nn::irsensor::</span><span class="n">RunAdaptiveClusteringProcessor</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">config</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>Prepare a buffer for <code><span class="ApiLink_nn__irsensor__AdaptiveClusteringProcessorState">nn::irsensor::AdaptiveClusteringProcessorState</span></code> for output, and call the <code><span class="ApiLink_nn__irsensor__GetAdaptiveClusteringProcessorStates">nn::irsensor::GetAdaptiveClusteringProcessorStates</span></code> function.  <br />The <code><span class="ApiLink_nn__irsensor__GetAdaptiveClusteringProcessorStates">nn::irsensor::GetAdaptiveClusteringProcessorStates</span></code> function can get up to <code><span class="ApiLink_nn__irsensor__AdaptiveClusteringProcessorStateCountMax">nn::irsensor::AdaptiveClusteringProcessorStateCountMax</span></code> processed results at the same time.<br />You can get only newer data than the currently obtained data by entering a value equal to the sampling number specified for <code>infSamplingNumber</code> for the current data +1.<br />If you always enter <code>0</code>, it gets the latest status that the system can provide.<br />The latest processed results as of the time the function call was made are retrieved. However, the results are updated at intervals of 15 milliseconds or less due to the restrictions on the speed of data transfer via the controller&rsquo;s Bluetooth module. As a result, we recommend practices such as polling the results to be obtained in synchronization with the game frames.<br /></p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">AdaptiveClusteringProcessorState</span> <span class="n">state</span><span class="p">[];</span>
+<span class="kt">int</span> <span class="n">count</span><span class="p">;</span>
+<span class="kt">int64_t</span> <span class="n">latestSamplingNumber</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="nn">nn::irsensor::</span><span class="n">GetAdaptiveClusteringProcessorStates</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">latestSamplingNumber</span><span class="p">,</span> <span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To stop clustering mode, call the <code><span class="ApiLink_nn__irsensor__StopImageProcessor">nn::irsensor::StopImageProcessor</span></code> function, passing in the <code><span class="ApiLink_nn__irsensor__IrCameraHandle">nn::irsensor::IrCameraHandle</span></code> of the IR sensor you want to stop.<br />Call the <code><span class="ApiLink_nn__irsensor__Finalize">nn::irsensor::Finalize</span></code> function to finalize the IR Motion Camera.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::irsensor::</span><span class="n">StopImageProcessor</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span>
+<span class="nn">nn::irsensor::</span><span class="n">Finalize</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      <br />
+    </p>
+    <h2 id="Anchor_289917323_h2_6">Adaptive Clustering Mode Sample Demo</h2>
+    <p>For more information, see the sample program in the <code>Samples\Sources\Applications\IrSensorAdaptiveClusteringBasic</code> directory.<br />To quickly check how adaptive clustering mode works, see the sample demos located in the <code>Samples\Sources\Applications\IrSensorViewer</code> directory.</p>
+  </li>
+</ol>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__irsensor__AdaptiveClusteringProcessorConfig', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_adaptive_clustering_processor_config.html' )
+SetUrl( 'ApiLink_nn__irsensor__RunAdaptiveClusteringProcessor', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a561f17291cfd5377790181ebe352f14e' )
+SetUrl( 'ApiLink_nn__irsensor__AdaptiveClusteringProcessorState', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_adaptive_clustering_processor_state.html' )
+SetUrl( 'ApiLink_nn__irsensor__ClusteringData', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_clustering_data.html' )
+SetUrl( 'ApiLink_nn__irsensor__GetAdaptiveClusteringProcessorStates', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#aa7ac056dc32e02615fd272dc24188ce7' )
+SetUrl( 'ApiLink_nn__irsensor__IrCameraHandle', '../../../Api/HtmlNX/structnn_1_1irsensor_1_1_ir_camera_handle.html' )
+SetUrl( 'ApiLink_nn__hid__NpadIdType', '../../../Api/HtmlNX/namespacenn_1_1hid.html#a5923008962b52bf501f91b30013aedd6' )
+SetUrl( 'ApiLink_nn__irsensor__AdaptiveClusteringProcessorStateCountMax', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a749c05e24d85d5436c304ab14ceb2854' )
+SetUrl( 'ApiLink_nn__irsensor__StopImageProcessor', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a3052171f2c63aafc0e4a164366ae22d7' )
+SetUrl( 'ApiLink_nn__irsensor__Finalize', '../../../Api/HtmlNX/namespacenn_1_1irsensor.html#a6265f5c6e6d6fc0e67fc6882a8945284' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

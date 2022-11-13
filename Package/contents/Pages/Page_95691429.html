@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Descriptor Pool | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Descriptor Pool -->
+<div class="pagetitle" id="PageId_95691429">Descriptor Pool</div>
+<div class="text_separate">
+<h1 id="Anchor_95691429_h1_1">Descriptor Pool</h1>
+<h2 id="Anchor_95691429_h2_1">Overview</h2>
+<p>The descriptor pool describes a memory allocation for storing and managing descriptors.</p>
+<p>Each descriptor that is managed in this pool is a description of a resource that is referenced by the GPU. The descriptor size may be found dynamically, but the content is not visible.</p>
+<p>An update must be started when setting a descriptor in the descriptor pool. There are several types of descriptor pools, and only the corresponding descriptor may be set to a descriptor pool. An update must be completed when there are no more descriptors to be set in a descriptor pool. An update may be made as frequently as needed, but may not be made while the GPU is using the descriptor pool.</p>
+<p>The descriptor pool space where a descriptor is set is abstracted as a descriptor slot. <strong>Note:</strong> Some of the descriptor slots may be reserved by the system in some variations of the low-level graphics API.</p>
+<h2 id="Anchor_95691429_h2_2">Information</h2>
+<p>The descriptor pool information is defined as <span class="ApiLink_nn__gfx__DescriptorPoolInfo"><code>nn::gfx::DescriptorPoolInfo</code></span>.</p>
+<h3 id="Anchor_95691429_h3_1">Descriptor Pool Type</h3>
+<p>Use <span class="ApiLink_void_nn__gfx__DescriptorPoolInfo__SetDescriptorPoolType(DescriptorPoolType_value)_NN_NOEXCEPT"><code>SetDescriptorPoolType</code></span> to specify the type of descriptor pool.<br />Attempting to set a descriptor that does not correspond to the type specified by this function causes an error.</p>
+<h3 id="Anchor_95691429_h3_2">Number of Descriptor Slots</h3>
+<p>Use <span class="ApiLink_void_nn__gfx__DescriptorPoolInfo__SetSlotCount(int_value)_NN_NOEXCEPT"><code>SetSlotCount</code></span> to set the number of descriptor slots.<br />The memory pool requirements of the object become larger when more slots are specified.</p>
+<h2 id="Anchor_95691429_h2_3">Object</h2>
+<p> The descriptor pool object is defined as <span class="ApiLink_nn__gfx__DescriptorPool"><code>nn::gfx::DescriptorPool</code></span>.</p>
+<h3 id="Anchor_95691429_h3_3"> Initialization and Destruction</h3>
+<p>Initializing and freeing descriptor pools generally follows the method for <a href="../Pages/Page_83955654.html">objects</a></p>
+<h3 id="Anchor_95691429_h3_4">Memory Pool</h3>
+<p>The required memory pool size may be calculated by calling <span class="ApiLink_static_size_t_nn__gfx__TDescriptorPool__CalculateDescriptorPoolSize(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT"><code>CalculateDescriptorPoolSize</code></span> with the information to be initialized as an argument.</p>
+<p>The memory pool offset to specify when initializing descriptor pools has an alignment limitation. You can get this value using <span class="ApiLink_static_size_t_nn__gfx__TDescriptorPool__GetDescriptorPoolAlignment(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT">nn::gfx::DescriptorPool::GetDescriptorPoolAlignment</span>.</p>
+<h3 id="Anchor_95691429_h3_5">Starting and Ending Updates</h3>
+<p>Descriptor pool updates are started using <span class="ApiLink_void_nn__gfx__TDescriptorPool__BeginUpdate()_NN_NOEXCEPT"><code>BeginUpdate</code></span> and ended using <span class="ApiLink_void_nn__gfx__TDescriptorPool__EndUpdate()_NN_NOEXCEPT"><code>EndUpdate</code></span>. The processes to start and end an update must always appear as a pair. A descriptor pool update must be started when setting a descriptor in the descriptor pool.</p>
+<h3 id="Anchor_95691429_h3_6">Setting a Descriptor</h3>
+<p>The function used to set a descriptor differs depending on the type of the descriptor pool.<br />The following is a list of functions that correspond to the descriptor pool types.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Descriptor Pool Type</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__gfx__DescriptorPoolType_BufferView">nn::gfx::DescriptorPoolType_BufferView</span>
+      </td>
+      <td>
+        <span class="ApiLink_void_nn__gfx__TDescriptorPool__SetBufferView(int_indexSlot|_const_GpuAddress_&gpuAddress|_size_t_size)_NN_NOEXCEPT">SetBufferView</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__gfx__DescriptorPoolType_TextureView">nn::gfx::DescriptorPoolType_TextureView</span>
+      </td>
+      <td>
+        <span class="ApiLink_void_nn__gfx__TDescriptorPool__SetTextureView(int_indexSlot|_const_TTextureView__Target___*pTextureView)_NN_NOEXCEPT">SetTextureView</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="ApiLink_nn__gfx__DescriptorPoolType_Sampler">nn::gfx::DescriptorPoolType_Sampler</span>
+      </td>
+      <td>
+        <span class="ApiLink_void_nn__gfx__TDescriptorPool__SetSampler(int_indexSlot|_const_TSampler__Target___*pSampler)_NN_NOEXCEPT">SetSampler</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Specify the slot number to set and the target resource to set to the function.</p>
+<h3 id="Anchor_95691429_h3_7">Getting the Descriptor Slot</h3>
+<p>To get the descriptor slot of the specified slot number, use <span class="ApiLink_void_nn__gfx__TDescriptorPool__GetDescriptorSlot(DescriptorSlot_*pOutDescriptorSlot|_int_indexSlot)_const_NN_NOEXCEPT"><code>GetDescriptorSlot</code></span>.<br />The descriptor slot is used by many different functions related to the command buffer.</p>
+<h2 id="Anchor_95691429_h2_4">Setting the Descriptor Pool</h2>
+<p>Call <span class="ApiLink_void_nn__gfx__TCommandBuffer__SetDescriptorPool(const_TDescriptorPool__Target___*pDescriptorPool)_NN_NOEXCEPT"><code>nn::gfx::CommandBuffer::SetDescriptorPool</code></span> to set the descriptor pool to use. Note that switching the descriptor pool in use may be a high cost operation in some low-level graphics APIs.</p>
+<h1 id="Anchor_95691429_h1_2">Descriptor Slot</h1>
+<p>The descriptor slot represents a specific slot in a descriptor pool.</p>
+<p>To get the descriptor slot, use the <span class="ApiLink_nn__gfx__DescriptorPool"><code>GetDescriptorSlot</code></span> function of <span class="ApiLink_void_nn__gfx__TDescriptorPool__GetDescriptorSlot(DescriptorSlot_*pOutDescriptorSlot|_int_indexSlot)_const_NN_NOEXCEPT"><code>nn::gfx::DescriptorPool</code></span>.<br />Resource binding to the command buffer is conducted via the descriptor slot. As a result, the descriptor pool does not need to be referenced to set resources after the descriptor slot is obtained.</p>
+<p>Unlike most other objects, the descriptor slot object is designed in a way that permits the copying of the object itself.</p>
+<h2 id="Anchor_95691429_h2_5">Descriptor Slot Offset</h2>
+<p>When the order of descriptors in the descriptor pool is known, different descriptor slots may be referenced by offset from the obtained descriptor slot, instead of getting the descriptor slot from the descriptor pool every time. The descriptor size differs depending on the low-level graphics API and the descriptor type. The offset value to reference the next descriptor slot must be obtained using <span class="ApiLink_static_ptrdiff_t_nn__gfx__TDescriptorPool__GetDescriptorSlotIncrementSize(TDevice__Target___*pDevice|_DescriptorPoolType_type)_NN_NOEXCEPT"><code>nn::gfx::DescriptorPool::GetDescriptorSlotIncrementSize</code></span>. For example, an offset of 10 times the size obtained using the function will reference a descriptor slot 10 slots away.</p>
+<h2 id="Anchor_95691429_h2_6">Descriptor Slot Validity</h2>
+<p>Descriptor slots are built in a invalidated state. To validate the obtained descriptor slot, use <span class="ApiLink_void_nn__gfx__TDescriptorPool__GetDescriptorSlot(DescriptorSlot_*pOutDescriptorSlot|_int_indexSlot)_const_NN_NOEXCEPT"><code>nn::gfx::DescriptorPool::GetDescriptorSlot</code></span> .<br />To determine the validity of a descriptor slot, use <span class="ApiLink_bool_nn__gfx__DescriptorSlot__IsValid()_const_NN_NOEXCEPT">nn::gfx::DescriptorSlot::IsValid</span>. To explicitly invalidate a descriptor slot, call the <span class="ApiLink_void_nn__gfx__DescriptorSlot__Invalidate()_NN_NOEXCEPT">nn::gfx::DescriptorSlot::Invalidate</span> function.</p>
+<h2 id="Anchor_95691429_h2_7">Getting the Descriptor Pool Index</h2>
+<p>Use <code><span class="ApiLink_int_nn__gfx__TDescriptorPool__GetDescriptorSlotIndex(const_DescriptorSlot_&descriptorSlot)_const_NN_NOEXCEPT">nn::gfx::DescriptorPool::GetDescriptorSlotIndex</span></code> to get the index for the descriptor slot in the descriptor pool. If the descriptor slot is offset, the index that is obtained takes the offset into consideration. The descriptor slot being inquired about, must be a descriptor slot obtained from the target descriptor pool. If not, the returned value will be undefined.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__gfx__DescriptorPoolInfo', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_descriptor_pool_info.html' )
+SetUrl( 'ApiLink_void_nn__gfx__DescriptorPoolInfo__SetDescriptorPoolType(DescriptorPoolType_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_descriptor_pool_info.html#a9a411ac342c1d77a029771436d7db638' )
+SetUrl( 'ApiLink_void_nn__gfx__DescriptorPoolInfo__SetSlotCount(int_value)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_descriptor_pool_info.html#a0ad0426ae3ed984e03a6e4d1b390e47c' )
+SetUrl( 'ApiLink_nn__gfx__DescriptorPool', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a8328da4b85c36c8bdeade65a44196d84' )
+SetUrl( 'ApiLink_static_size_t_nn__gfx__TDescriptorPool__CalculateDescriptorPoolSize(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#a82a7f8cf8719fba71ce6d652b41cc3d1' )
+SetUrl( 'ApiLink_static_size_t_nn__gfx__TDescriptorPool__GetDescriptorPoolAlignment(TDevice__Target___*pDevice|_const_InfoType_&info)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#a4daa7d7869ad16b2f02f9d3ebeb7e11c' )
+SetUrl( 'ApiLink_void_nn__gfx__TDescriptorPool__BeginUpdate()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#acf7f87de8d82282810176876267e9e43' )
+SetUrl( 'ApiLink_void_nn__gfx__TDescriptorPool__EndUpdate()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#a038a1844514768b94b47376d6105f52b' )
+SetUrl( 'ApiLink_nn__gfx__DescriptorPoolType_BufferView', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a14fc8bd39227425748a8fb55c035d10ca2aad5a856c8b554d31af6143ac2df562' )
+SetUrl( 'ApiLink_void_nn__gfx__TDescriptorPool__SetBufferView(int_indexSlot|_const_GpuAddress_&gpuAddress|_size_t_size)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#a1467c6e08b4d07a0d813f7d7ba38849b' )
+SetUrl( 'ApiLink_nn__gfx__DescriptorPoolType_TextureView', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a14fc8bd39227425748a8fb55c035d10cae1ab626ffc219a9f27d569a732154bd0' )
+SetUrl( 'ApiLink_void_nn__gfx__TDescriptorPool__SetTextureView(int_indexSlot|_const_TTextureView__Target___*pTextureView)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#af45507b68edfff5b381d5e62e5fa4157' )
+SetUrl( 'ApiLink_nn__gfx__DescriptorPoolType_Sampler', '../../../Api/HtmlNX/namespacenn_1_1gfx.html#a14fc8bd39227425748a8fb55c035d10ca831f2090660e1269d9440b8095bf004d' )
+SetUrl( 'ApiLink_void_nn__gfx__TDescriptorPool__SetSampler(int_indexSlot|_const_TSampler__Target___*pSampler)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#a41ed5672e5dd2cb6db7a625d086f0bec' )
+SetUrl( 'ApiLink_void_nn__gfx__TDescriptorPool__GetDescriptorSlot(DescriptorSlot_*pOutDescriptorSlot|_int_indexSlot)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#ac2b65342f8057bd6423d99bfa6aa526b' )
+SetUrl( 'ApiLink_void_nn__gfx__TCommandBuffer__SetDescriptorPool(const_TDescriptorPool__Target___*pDescriptorPool)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_command_buffer.html#a442595cd1fd51ba8054116b1e9437cf5' )
+SetUrl( 'ApiLink_static_ptrdiff_t_nn__gfx__TDescriptorPool__GetDescriptorSlotIncrementSize(TDevice__Target___*pDevice|_DescriptorPoolType_type)_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#ae33316d611cd1261c1e304cd70921a47' )
+SetUrl( 'ApiLink_bool_nn__gfx__DescriptorSlot__IsValid()_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_descriptor_slot.html#adcd95d6cda65fe4ee6f5b44324dc4e1a' )
+SetUrl( 'ApiLink_void_nn__gfx__DescriptorSlot__Invalidate()_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_descriptor_slot.html#ac779e782372dce900399af2151a275f2' )
+SetUrl( 'ApiLink_int_nn__gfx__TDescriptorPool__GetDescriptorSlotIndex(const_DescriptorSlot_&descriptorSlot)_const_NN_NOEXCEPT', '../../../Api/HtmlNX/classnn_1_1gfx_1_1_t_descriptor_pool.html#a5b1637777db82c8bb2e7785829b3b6d5' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Fiber | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Fiber -->
+<div class="pagetitle" id="PageId_92328412">Fiber</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_92328412_h1_1">Fibers</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_92328412_h2_1">Feature Overview</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_92328412_h3_1">Relation Between Threads and Fibers</a>
+        </li>
+        <li>
+          <a href="#Anchor_92328412_h3_2">Switching Fibers</a>
+        </li>
+        <li>
+          <a href="#Anchor_92328412_h3_3">Fiber Stack</a>
+        </li>
+      </ul>
+      <li>
+        <a href="#Anchor_92328412_h2_2">Using Fibers</a>
+      </li>
+      <li>
+        <a href="#Anchor_92328412_h2_3">Example of Using Fibers</a>
+      </li>
+      <li>
+        <a href="#Anchor_92328412_h2_4">Fiber API References</a>
+      </li>
+      <li>
+        <a href="#Anchor_92328412_h2_5">Notes About Using Fibers</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_92328412_h3_4">Notes About Thread Safety and Fibers</a>
+        </li>
+        <li>
+          <a href="#Anchor_92328412_h3_5">Notes on Using Fibers in Libraries</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_92328412_h1_1">Fibers</h1>
+<h2 id="Anchor_92328412_h2_1">Feature Overview</h2>
+<p>Fibers are a feature for switching among more contexts on a thread. Users of fibers must manually specify scheduling opportunities.</p>
+<p>Fibers run on existing <a href="../Pages/Page_83955697.html">thread</a> contexts. You switch to a fiber by explicitly calling the <span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">SwitchToFiber</span> function. Unlike threads, fibers are not preempted automatically by other fibers.</p>
+<p>Use the <span class="ApiLink_void_nn__os__InitializeFiber(FiberType_*fiber|_FiberFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_fiberFlag)_NN_NOEXCEPT">InitializeFiber()</span> function to prepare the fiber context. The entry to the fiber function, parameters, the starting address of the stack region, and the size of the stack are all passed to <span class="ApiLink_void_nn__os__InitializeFiber(FiberType_*fiber|_FiberFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_fiberFlag)_NN_NOEXCEPT">InitializeFiber()</span>. In this way, you can switch to the fiber by calling the <span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">SwitchToFiber()</span> function from the thread. You also use <span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">SwitchToFiber()</span> to move from one fiber to another. To destroy a used fiber, call <span class="ApiLink_void_nn__os__FinalizeFiber(FiberType_*fiber)_NN_NOEXCEPT">FinalizeFiber()</span>.</p>
+<h3 id="Anchor_92328412_h3_1">Relation Between Threads and Fibers</h3>
+<p>All fibers operate in the context of their originating <a href="../Pages/Page_83955697.html">threads</a>. The fiber-specific context is only used for the program code and the stack region, and the thread context is used for the priority, the <a href="../Pages/Page_83955692.html">thread local storage</a>, and the like.</p>
+<p style="color: rgb(51,51,51);">Use the <span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">SwitchToFiber()</span> function to switch between fibers among all threads. In a context that has switched from a thread to a fiber, the <span class="ApiLink_ThreadType_*_nn__os__GetCurrentThread()_NN_NOEXCEPT">GetCurrentThread()</span> function returns all the same values, but the <span class="ApiLink_FiberType_*_nn__os__GetCurrentFiber()_NN_NOEXCEPT">GetCurrentFiber()</span> function returns different values.</p>
+<p style="color: rgb(51,51,51);">Because all fibers operate on their originating thread contexts, all thread-related features remain available. You can use features like <a href="../Pages/Page_83955800.html">mutex</a>, but note that ownership management by the <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">LockMutex()</span> and <span class="ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT">UnlockMutex()</span> functions is linked to the threads. In other words, if <span class="ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT">LockMutex()</span> has been called in fiber <em>A</em> running in some thread, fiber <em>B</em> in the same thread can call <span class="ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT">UnlockMutex()</span>. However, this kind of design is complicated to use and we do not recommend it.</p>
+<h3 style="color: rgb(51,51,51);" id="Anchor_92328412_h3_2">Switching Fibers</h3>
+<p style="color: rgb(51,51,51);">Fibers are switched only by calls to <span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">SwitchToFiber()</span> or by returning from a fiber function. (On returning, you specify the 'switch to' fiber as the return value.) As a result, fibers are not implicitly preempted by other fibers. However, a running fiber can be preempted by another thread. If this happens, the preempted fiber resumes execution from where it left off when its thread was rescheduled.</p>
+<p style="color: rgb(51,51,51);">If you want to return to the place where the original thread switched to a fiber, specify <code>NULL</code> as the fiber to switch to (<code><span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">SwitchToFiber</span>(NULL);</code>). You can also make this switch when the fiber function returns by specifying <code>return NULL;</code>.</p>
+<p style="color: rgb(51,51,51);">You cannot switch to a returned fiber function using <span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">SwitchToFiber</span>. After a fiber function returns, free it by using the <span class="ApiLink_void_nn__os__FinalizeFiber(FiberType_*fiber)_NN_NOEXCEPT">FinalizeFiber</span> function.</p>
+<p style="color: rgb(51,51,51);">To switch to your own fiber function inside a library function, first call <span class="ApiLink_FiberType_*_nn__os__GetCurrentFiber()_NN_NOEXCEPT">GetCurrentFiber()</span> to determine whether the calling context is a thread or a fiber, and when it is time to return to the library function, first return to this originating context.</p>
+<h3 id="Anchor_92328412_h3_3">Fiber Stack</h3>
+<p>Every fiber context has its own stack region. The originating thread also has a different stack.</p>
+<p>For <span class="ApiLink_void_nn__os__InitializeFiber(FiberType_*fiber|_FiberFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_fiberFlag)_NN_NOEXCEPT">fiberFlag</span> parameter of the <span class="ApiLink_nn__os__FiberFlag">InitializeFiber()</span> function, specify a logical OR of flags of the <code>FiberFlag</code> enumerated type. There is a specification there to enable or disable Stack Guard. Stack Guard is enabled if you do not specify <span class="ApiLink_nn__os__FiberFlag_NoStackGuard">FiberFlag_NoStackGuard</span> in this <code><em>fiberFlag</em></code> parameter.</p>
+<p>When Stack Guard is enabled, the stack address specified by the <span class="ApiLink_void_nn__os__InitializeFiber(FiberType_*fiber|_FiberFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_fiberFlag)_NN_NOEXCEPT">InitializeFiber()</span> function is not used for the stack space. The specified stack address is mirrored in another space, with guard pages that deny memory access placed on either side, and this is used as the stack space. While a fiber is valid, the originally specified stack address (the memory region being mirrored) is used as a read-only region. When the <span class="ApiLink_void_nn__os__FinalizeFiber(FiberType_*fiber)_NN_NOEXCEPT">FinalizeFiber()</span> function is called, this mirrored region is deleted and the memory region at the original stack address becomes available in the normal way again.</p>
+<p>Stack Guard is disabled if you specify <span class="ApiLink_nn__os__FiberFlag_NoStackGuard">FiberFlag_NoStackGuard</span> in <code><em>fiberFlag</em></code>. When Stack Guard is disabled, there is no mirroring, and the memory region at the specified stack address is directly used for the stack. In this case, you must be careful about stack overflows while the fiber is running.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_92328412_h2_2">Using Fibers</h2>
+<p>To use a fiber, you make use of a <span class="ApiLink_nn__os__FiberType">nn::os::FiberType</span> structure object, as in the following example. The stack space to be used by the fiber is also prepared in advance.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="cp">#include &lt;nn/os.h&gt;
+</span>
+<span class="k">const</span> <span class="kt">size_t</span>                       <span class="n">fiberStackSize</span> <span class="o">=</span> <span class="mi">8192</span><span class="p">;</span>
+<span class="n">NN_OS_ALIGNAS_FIBER_STACK</span> <span class="kt">uint8_t</span>  <span class="n">g_FiberStack</span><span class="p">[</span> <span class="n">fiberStackSize</span> <span class="p">];</span>
+<span class="nn">nn::os::</span><span class="n">FiberType</span>                  <span class="n">g_Fiber</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>In addition, define a fiber function as follows to register an entry function for the fiber.<br />Fiber functions are of the <span class="ApiLink_nn__os__FiberFunction">FiberFunction</span> type and are written as follows. A return value is required, so implement a <code>return</code> statement that specifies the fiber to switch to.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">FiberType</span><span class="o">*</span> <span class="nf">UserFiberFunction</span><span class="p">(</span> <span class="kt">void</span> <span class="o">*</span><span class="n">arg</span> <span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The fiber's execution process.
+</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// If returning to the original thread, set to return NULL.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>After these preparations are complete, follow this procedure to use the fiber.</p>
+<ol>
+  <li>
+    <p>First, initialize the fiber object. If nothing will be set in <span class="ApiLink_nn__os__FiberFlag">FiberFlag</span>, specify <code>0</code> for this parameter.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">InitializeFiber</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Fiber</span><span class="p">,</span> <span class="n">UserFiberFunction</span><span class="p">,</span> <span class="n">g_FiberStack</span><span class="p">,</span> <span class="n">fiberStackSize</span><span class="p">,</span> <span class="mi">0</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>After the fiber object has been initialized, switch to the fiber at the appropriate time from inside the thread function.<br />To later move from this fiber to another fiber, use the function to switch fibers.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">SwitchToFiber</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Fiber</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>If you want to return from the fiber to the originating thread, write something like the following, or return from the fiber function with <code>return NULL;</code> set for the return value.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">SwitchToFiber</span><span class="p">(</span> <span class="nb">NULL</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>To free a fiber, do so when the fiber is not running.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">FinalizeFiber</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">g_Fiber</span> <span class="p">);</span></pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+<h2 id="Anchor_92328412_h2_3">Example of Using Fibers</h2>
+<p>For a specific example of using fibers, see the <span class="ApiLink_PageSampleOsFiber">Fiber Features Sample Program</span>.</p>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_92328412_h2_4">Fiber API References</h2>
+<p>For more information, see the following links.</p>
+<ul>
+  <li>
+    <span class="ApiLink_void_nn__os__InitializeFiber(FiberType_*fiber|_FiberFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_fiberFlag)_NN_NOEXCEPT">nn::os::InitializeFiber</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__FinalizeFiber(FiberType_*fiber)_NN_NOEXCEPT">nn::os::FinalizeFiber</span>
+  </li>
+  <li>
+    <span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">nn::os::SwitchToFiber</span>
+  </li>
+  <li>
+    <span class="ApiLink_FiberType_*_nn__os__GetCurrentFiber()_NN_NOEXCEPT">nn::os::GetCurrentFiber</span>
+  </li>
+</ul>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_92328412_h2_5">Notes About Using Fibers</h2>
+<h3 id="Anchor_92328412_h3_4">Notes About Thread Safety and Fibers</h3>
+<p>Be careful not to reference the same fiber from multiple threads at the same time. That kind of use is a precondition violation.</p>
+<p>Fibers provide functionality that is normally used for rapidly switching contexts on a single thread. For this reason, the <code>os</code> library does not lock individual fiber objects. Attempting to operate a single fiber from multiple threads without proper synchronization causes problems.</p>
+<p>For example, if you call <span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">SwitchToFiber( &amp;g_Fiber )</span> at basically the same time from thread <em>A</em> and thread <em>B</em>, you will not be able to operate correctly on the <code>g_Fiber</code> object. In general, you must implement separate blocking measures and synchronization features to manage which thread (<em>A</em> or <em>B</em>) operates on the <code>g_Fiber</code> object.</p>
+<h3 id="Anchor_92328412_h3_5">Notes on Using Fibers in Libraries</h3>
+<p>If you are going to use fibers inside libraries and then return to the originating contexts, you must not transition directly from inside the library using <code><span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">SwitchToFiber</span>( NULL );</code> or return from a fiber function using <code>return NULL;</code>. The originating context of the library call may already be a fiber, and in that case the process does not work right.</p>
+<p>Instead, use the <span class="ApiLink_FiberType_*_nn__os__GetCurrentFiber()_NN_NOEXCEPT">nn::os::GetCurrentFiber</span> function to determine whether the current context that called functions inside the library is a thread or a fiber, run through the set of processes that use a fiber and, as the final step, pass the originating context to the <span class="ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT">nn::os::SwitchToFiber</span> function. When you act this way, you can correctly return to the calling context, whether functions inside the library were called from a thread state or a fiber state.</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_void_nn__os__SwitchToFiber(FiberType_*fiber)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3ba39dbca8b416903a5e2947927ed3e0' )
+SetUrl( 'ApiLink_void_nn__os__InitializeFiber(FiberType_*fiber|_FiberFunction_function|_void_*argument|_void_*stack|_size_t_stackSize|_int_fiberFlag)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a9f0b5787e55da6b3b0e089d6b3ee6816' )
+SetUrl( 'ApiLink_void_nn__os__FinalizeFiber(FiberType_*fiber)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#af54bbd489d9e733f72e8555d7ff940cf' )
+SetUrl( 'ApiLink_ThreadType_*_nn__os__GetCurrentThread()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#ad106866a5b13bc3d430104333966b479' )
+SetUrl( 'ApiLink_FiberType_*_nn__os__GetCurrentFiber()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a5bacafa4afccd548bb410d0f2fb3762e' )
+SetUrl( 'ApiLink_void_nn__os__LockMutex(MutexType_*mutex)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a8d4678856d87c3faea21f47ced342bb6' )
+SetUrl( 'ApiLink_void_nn__os__UnlockMutex(MutexType_*mutex)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#aa661a7036a18c378a694ad67941cd75e' )
+SetUrl( 'ApiLink_nn__os__FiberFlag', '../../../Api/HtmlNX/namespacenn_1_1os.html#a39b515dc6753642a34364d91b5813104' )
+SetUrl( 'ApiLink_nn__os__FiberFlag_NoStackGuard', '../../../Api/HtmlNX/namespacenn_1_1os.html#a39b515dc6753642a34364d91b5813104ac2bbce12f37e3e01eb6a244e2ada14c7' )
+SetUrl( 'ApiLink_nn__os__FiberType', '../../../Api/HtmlNX/structnn_1_1os_1_1_fiber_type.html' )
+SetUrl( 'ApiLink_nn__os__FiberFunction', '../../../Api/HtmlNX/namespacenn_1_1os.html#a00a0fffd9172c3779939c06927973bed' )
+SetUrl( 'ApiLink_PageSampleOsFiber', '../../../Api/HtmlNX/_page_sample_os_fiber.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

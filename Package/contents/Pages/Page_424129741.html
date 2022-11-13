@@ -1,0 +1,398 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Parental Controls Settings | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Parental Controls Settings -->
+<div class="pagetitle" id="PageId_424129741">Parental Controls Settings</div>
+<div class="text_separate">
+<p>Use the <code>pctl</code> command to configure the Parental Controls on the command line.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>$ RunOnTarget.exe DevMenuCommand.nsp -- pctl
+usage: DevMenuCommand pctl set-pin &lt;pin-code&gt;
+       DevMenuCommand pctl unset-pin
+       DevMenuCommand pctl check-pin &lt;pin-code&gt;
+       DevMenuCommand pctl get-safety-level
+       DevMenuCommand pctl set-safety-level &lt;level&gt;
+       DevMenuCommand pctl dump-current-settings
+       DevMenuCommand pctl dump-custom-settings
+       DevMenuCommand pctl set-custom-settings [--rating-age &lt;age&gt;] [--sns-post &lt;true|false&gt;] [--free-communication &lt;true|false&gt;]
+       DevMenuCommand pctl set-rating-organization &lt;organization&gt;
+       DevMenuCommand pctl get-rating-organization
+      DevMenuCommand pctl dump-free-communication-app-list
+      DevMenuCommand pctl set-free-communication-restriction &lt;true|false&gt; --application-id &lt;id&gt;
+       DevMenuCommand pctl delete-settings
+       DevMenuCommand pctl timer-start
+       DevMenuCommand pctl timer-stop
+       DevMenuCommand pctl timer-status
+       DevMenuCommand pctl timer-set [--timer-mode &lt;mode&gt;] [--using-week-settings &lt;true|false&gt;] [--week &lt;week&gt;] [--bedtime [&lt;true|false&gt;][,HH:mm]]  [--limit-time [&lt;true|false&gt;][,&lt;minutes&gt;]] </pre>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <ul>
+      <li>All of the parental controls are enabled after a PIN is set using <code>set-pin</code>.</li>
+      <li>The feature linking to smart devices that use the Nintendo Switch Parental Controls app is not available. However, you can configure time restrictions by using subcommands such as <code>timer-set</code>.</li>
+    </ul>
+  </div>
+</div>
+<h1 id="Anchor_424129741_h1_1">Setting a PIN</h1>
+<p>To enable parental controls, a PIN must be registered. Conversely, you can disable the parental controls by clearing the PIN.<br />You can set the PIN before or after configuring the various other parental control settings (described later). If it is set afterwards, the other configured settings only become enabled at that time.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Set a PIN.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl set-pin 12345
+[SUCCESS]
+
+# Check the PIN.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl check-pin 12345
+[SUCCESS]
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl check-pin 1234
+[FAILURE]
+
+# Clear the PIN.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl unset-pin
+[SUCCESS]</pre>
+  </div>
+</div>
+<h1 id="Anchor_424129741_h1_2">Control Settings</h1>
+<p>The controls are set using different levels of restrictions. Some restriction values are preset to correspond to each restriction level, and when a level is set, those restriction values are applied to using the system.</p>
+<p>The following table lists the restriction levels. Except for <strong>None</strong> and <strong>Custom</strong>, the restriction values that correspond to any particular restriction level vary from region to region, and are subject to future changes. Use the  <code>dump-current-settings</code> option to check which restriction values have been applied after a restriction level has been set. If the restriction level has been set to <strong>Custom</strong>, the configured restriction values can be changed using the custom settings.</p>
+<table class="wrapped">
+  <tbody>
+    <tr>
+      <th>Restriction Levels</th>
+    </tr>
+    <tr>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>Custom</td>
+    </tr>
+    <tr>
+      <td>Children</td>
+    </tr>
+    <tr>
+      <td>Young Teens</td>
+    </tr>
+    <tr>
+      <td>Older Teens</td>
+    </tr>
+  </tbody>
+</table>
+<p>Use the <code>dump-current-settings</code> option to get the restriction values that can currently be applied. This command generates information about the following items.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>
+        <br />
+      </th>
+    </tr>
+    <tr>
+      <td>Restriction enabled</td>
+      <td>If a PIN has been set, this is <code>true</code> and restrictions are set on all of the following items.</td>
+    </tr>
+    <tr>
+      <td>Rating age</td>
+      <td>Age-based restriction as defined by the rating. (Restrictions on software rated for players <u>over</u> a certain age.)</td>
+    </tr>
+    <tr>
+      <td>SNS post restriction</td>
+      <td>Indicates whether posting to social network services is restricted.</td>
+    </tr>
+    <tr>
+      <td>Free communication restriction</td>
+      <td>Indicates whether there are restrictions on communications with others. (If <code>false</code>, there are no restrictions. If <code>true</code>, the restriction value set for each software title takes precedence.)</td>
+    </tr>
+    <tr>
+      <td>Rating organization</td>
+      <td>The identifier for the rating organization being used for age-based restrictions. (When this value is not set, the rating organization is determined based on the current region and language settings.)</td>
+    </tr>
+  </tbody>
+</table>
+<p>When the restriction level is set to <strong>Custom</strong>, values can be set for <strong>Rating age</strong>, <strong>SNS post restriction</strong>, and <strong>Free communication restriction</strong>. You can use the <code>set-rating-organization</code> command to change the value for <strong>Rating organization</strong>.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Set the restriction level.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl set-safety-level Children
+*** To apply restrictions, please set pin code (use 'set-pin').
+[SUCCESS]
+
+# Check the restriction level.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl get-safety-level
+level = 2 (Children)
+[SUCCESS]
+
+# Output the applied restrictions.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl dump-current-settings
+--- Current Settings ---
+Restriction enabled: false
+Rating age: 7
+SNS post restriction: true
+Free communication restriction: true
+Rating organization: ESRB (3)
+[SUCCESS]
+
+# Enable the restrictions (set a PIN).
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl set-pin 12345
+[SUCCESS]
+
+# Change the custom settings.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl set-custom-settings --rating-age 12 --sns-post false --free-communication true
+--- Custom Settings ---
+Rating age: 12
+SNS post restriction: false
+Free communication restriction: true
+*** To use custom settings, please set safety-level to 'Custom' (use 'set-safety-level').
+[SUCCESS]
+
+# Set the restriction level.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl set-safety-level Custom
+[SUCCESS]
+
+# Confirm that the custom settings have been applied.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl dump-current-settings
+--- Current Settings ---
+Restriction enabled: true
+Rating age: 12
+SNS post restriction: false
+Free communication restriction: true
+Rating organization: CERO (0)
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>The restriction on free communication is based on the previously-mentioned global <code>true</code>/<code>false</code> setting, but when the restriction is globally enabled, the restriction can be enabled and disabled for individual applications using a separate specification. The separate specification is applied to the applications for which it has been set. For other applications, the global setting for free communication is applied.</p>
+<p>One of the following steps must be taken to set restrictions on free communication for individual applications.</p>
+<ul>
+  <li>Start the application from an NMETA file that has been configured with the appropriate usage restrictions.</li>
+  <li>Install the application in the system with an NMETA file that has been configured with the appropriate usage restrictions.</li>
+</ul>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Output a list of applications for which the restriction can be set.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl dump-free-communication-app-list
+--- Free Communication Application List ---
+total count: 0
+[SUCCESS]
+
+# Run an application with the feature to freely communicate with anyone. (Example)
+$ RunOnTarget.exe Samples\Sources\Applications\PctlSimple\Binaries\NX64\NX_Debug\PctlSimple.nspd
+(Omitted)
+
+# Output a list of applications for which the restriction can be set.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl dump-free-communication-app-list
+--- Free Communication Application List ---
+total count: 1
+[   0] 0x0100F80000492000: true
+[SUCCESS]
+
+# Disable the restriction.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl set-free-communication-restriction false --application-id 0x0100F80000492000
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>To delete the restriction values and the rest of the parental control settings, use the <code>delete-settings</code> command. You can use the <code>unset-pin</code> command to disable the restrictions, but the <code>delete-settings</code> command will both disable the restrictions and initialize the settings. For applications with individually specified free-communication settings, the restriction values will revert to their default values. (The applications will remain in the list.)</p>
+<h1 id="Anchor_424129741_h1_3">Setting Play Time Restrictions</h1>
+<p>Play time restrictions on the retail product can be set locally or via a smart device. During application development, you can use DevMenuCommand to set play time restrictions to check behavior and to debug.</p>
+<p>To set play time restrictions, use the <code>timer-set</code> command to configure a remaining balance of time and other parameters. If you are going to use this feature, note the following.</p>
+<ul>
+  <li>You must set a PIN ahead of time.</li>
+  <li>You must enable the network clock. The Internet settings must be completed and the system must be capable of Internet communications.</li>
+  <li>To actually issue notifications about time limits and to forcibly interrupt games, the HOME Menu must start when the system starts.</li>
+  <li>The <code>timer-start</code> command starts measuring the time limit and the remaining balance of time, and the <code>timer-stop</code> command stops the measurements, but these commands normally do not need to be issued because when the HOME Menu is running the comparable processes are conducted automatically.</li>
+  <li>These DevMenuCommand features are designed to be convenient during development for purposes such as debugging, so the behavior may differ in some ways from the retail product. In addition, unexpected behavior could be result from operations that would never arise in the retail product.</li>
+</ul>
+<p>The <code>timer-set</code> subcommands use the following syntax.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre>usage: DevMenuCommand pctl timer-set [--timer-mode &lt;mode&gt;] [--using-week-settings &lt;true|false&gt;] [--week &lt;week&gt;] [--bedtime [&lt;true|false&gt;][,HH:mm]]  [--limit-time [&lt;true|false&gt;][,&lt;minutes&gt;]] 
+    --timer-mode &lt;mode&gt; : set timer mode
+      &lt;mode&gt; : Alarm (0), Suspend (1)
+    --using-week-settings &lt;true|false&gt; : specify whether the week settings is used
+    --week &lt;week&gt; : specify the week (or daily-settings) which to change settings
+      &lt;week&gt; : Sunday (0), Monday (1), Tuesday (2), Wednesday (3),
+               Thursday (4), Friday (5), Saturday (6), Daily (7)
+      * if omitted, Daily settings will be changed
+    --bedtime [&lt;true|false&gt;][,HH:mm] : set bedtime
+      &lt;true|false&gt; : if true, the bedtime will be used (if omitted, the flag will not be changed)
+      HH:mm : the bedtime to set (24h format)
+      * example: --bedtime false / --bedtime 22:00 / --bedtime true,23:45
+    --limit-time [&lt;true|false&gt;][,&lt;minutes&gt;] : set limit time
+      &lt;true|false&gt; : if true, the limit-time will be used (if omitted, the flag will not be changed)
+      &lt;minutes&gt; : the limit-time to set (minutes)
+      * example: --limit-time false / --limit-time 60 / --limit-time true,90
+  * At least one option except --week must be specified to change settings.
+  * The omitted settings will not be changed.</pre>
+  </div>
+</div>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Options</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>
+        <code>--timer-mode</code>
+      </td>
+      <td>Sets the mode for play time restrictions. <strong>Alarm</strong> mode just notifies users that time is ending. <strong>Suspend</strong> mode forces the suspension of gameplay when time is up.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>--using-week-settings</code>
+      </td>
+      <td>Specifies whether to use settings for individual days. The day of the week is based on the date in the system settings.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>--week</code>
+      </td>
+      <td>
+        <p>Specifies whether to change the settings for an individual day (or for the <code>Daily</code> settings). There are a total of eight sets of settings: one for each individual day, and one for the <code>Daily</code> settings.</p>
+        <p>If this option is omitted, the values are changed for the <code>Daily</code> settings.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>--bedtime</code>
+      </td>
+      <td>
+        <p>Sets a restriction that treats the specified time as the cutoff for play. When the specified time is reached, play time is over. This specification is based on the time settings in the system settings and the time zone. Times between 00:00 and 05:59 are treated as the next day.</p>
+        <p>You can control whether to actually use this time setting by adding <code>true</code> or <code>false</code> to the option. If omitted, use is invariable.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>--limit-time</code>
+      </td>
+      <td>
+        <p>Sets the amount of <em>playable time</em> that is permitted. <em>Played time</em> is the amount of time played (during the interval of 00:00 today to just before 00:00 tomorrow) between <code>timer-start</code> and <code>timer-stop</code> (including system sleep and normal power off), or until the current time if not  <code>timer-stop</code>. The amount of remaining time is calculated by subtracting <em>playable time</em> from <em>played time</em>. Note that changing this setting only changes the value for playable time, and does not reset the amount of remaining time. (<em>Played time</em> gets reset when the day changes.)</p>
+        <p>You can control whether to actually use this time setting by adding <code>true</code> or <code>false</code> to the option. If omitted, use is invariable.</p>
+        <p>
+          <br />
+        </p>
+        <p>If both <code>--bedtime</code> and <code>--limit-time</code> are enabled, a value for remaining time is calculated for both, and the smaller value is applied.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If you run the command and configure the settings, the output looks something like the following. It shows the current settings, whether play time restrictions are in effect (<code>Timer enabled</code>), whether the time limit will be enforced (<code>Restricted by timer</code>, and the time remaining as calculated based on the settings.</p>
+<div style="border-width: 1px;" class="preformatted panel">
+  <div class="preformattedContent panelContent">
+    <pre># Enable a 60-minute play limitation on Thursdays.
+$ RunOnTarget.exe DevMenuCommand.nsp -- pctl timer-set --week Thursday --limit-time true,60
+--- Timer Status ---
+Timer enabled: false
+Restricted by timer: false
+Remaining time: 0 [sec.]
+--- Timer Settings ---
+Timer mode: Alarm
+Using week settings: false
+* Daily settings
+Bedtime enabled: false
+Bedtime: 00:00
+Limit time enabled: false
+Limit time: 0 [min.]
+* 'Sunday' settings
+Bedtime enabled: false
+Bedtime: 00:00
+Limit time enabled: false
+Limit time: 0 [min.]
+* 'Monday' settings
+Bedtime enabled: false
+Bedtime: 00:00
+Limit time enabled: false
+Limit time: 0 [min.]
+* 'Tuesday' settings
+Bedtime enabled: false
+Bedtime: 00:00
+Limit time enabled: false
+Limit time: 0 [min.]
+* 'Wednesday' settings
+Bedtime enabled: false
+Bedtime: 00:00
+Limit time enabled: false
+Limit time: 0 [min.]
+* 'Thursday' settings
+Bedtime enabled: false
+Bedtime: 00:00
+Limit time enabled: true
+Limit time: 60 [min.]
+* 'Friday' settings
+Bedtime enabled: false
+Bedtime: 00:00
+Limit time enabled: false
+Limit time: 0 [min.]
+* 'Saturday' settings
+Bedtime enabled: false
+Bedtime: 00:00
+Limit time enabled: false
+Limit time: 0 [min.]
+[SUCCESS]</pre>
+  </div>
+</div>
+<p>This same information is output using the <code>timer-status</code> subcommand.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <ul>
+      <li>If there are no play time restrictions for the day and time that the command is executed, a remainder time of <code>0</code> is output. Note that <em>remainder time</em> and <em>cutoff time</em> can differ.</li>
+      <li>The play time restriction settings are deleted when you run <code>unset-pin</code> or <code>delete-settings</code>.</li>
+    </ul>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

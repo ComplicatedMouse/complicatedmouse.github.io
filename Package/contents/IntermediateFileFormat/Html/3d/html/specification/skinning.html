@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<link href="../css/template.css" rel="stylesheet" type="text/css" />
+<title>Skinning</title>
+</head>
+<body>
+<h1>Skinning</h1>
+<h2>Skinning Types</h2>
+<p>
+Skinning is a feature for changing the shape of models using the <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> element.
+</p>
+<p>
+There are three types of skinning according to differences in processing on actual hardware: smooth skinning, rigid skinning, and rigid body (no skinning). The skinning type can be specified at the <strong><a href="../reference/elements/shape.html"><CODE>&lt;shape&gt;</CODE></a> level</strong>. To support this, models generate a smooth skinning matrix palette and rigid skinning matrix palette at the time of rendering.
+</p>
+
+<h3>Smooth Skinning</h3>
+<p>
+Smooth skinning smoothly changes the shape so that a single vertex is influenced by multiple <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> elements. Each vertex includes an index to a smooth skinning matrix palette created from <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> information, a weight value that specifies how the vertex is influenced by <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> information, and a <CODE><CODE>vertex_skinning_count</CODE></CODE> attribute under <a href="../reference/elements/shape_info.html"><CODE>&lt;shape_info&gt;</CODE></a>.
+</p>
+
+<h3>Rigid Skinning</h3>
+<p>
+Rigid skinning changes the shape such that a single vertex is influenced by a single<a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> element. Each vertex includes an index to a rigid skinning matrix palette created from <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> information.
+</p>
+
+<h3>Rigid Body</h3>
+<p>
+Rigid bodies do not change shape due to the influence of <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> information. Vertices do not include <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> information. They are displayed as is in the coordinate system of the <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> specified by <CODE>bone_name</CODE> under <a href="../reference/elements/shape_info.html"><CODE>&lt;shape_info&gt;</CODE></a>.
+</p>
+
+<h2>Skinning-Related Items in Intermediate Files</h2>
+
+<table>
+    <thead>
+        <tr>
+<th>Smooth Skinning</th>
+<th>Rigid Skinning</th>
+<th>Rigid Body</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td class="center"><CODE><a href="../reference/elements/shape_info.html">&lt;shape_info&gt;</a> vertex_skinning_count &gt;= 2</CODE></td>
+<td class="center"><CODE><a href="../reference/elements/shape_info.html">&lt;shape_info&gt;</a> vertex_skinning_count == 1</CODE></td>
+<td class="center"><CODE><a href="../reference/elements/shape_info.html">&lt;shape_info&gt;</a> vertex_skinning_count == 0</CODE></td>
+        </tr>
+        <tr>
+<td class="center">Vertex positions are given in the model coordinate system (bind pose).</td>
+        <td class="center">
+Vertex positions are given in the local coordinate system of the <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> element indicated by <CODE>blendindex0</CODE> under <a href="../reference/elements/vtx_attrib.html"><CODE>&lt;vtx_attrib&gt;</CODE></a>.
+        </td>
+        <td class="center">
+Vertex positions are given in the local coordinate system of the <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> element indicated by <CODE>bone_name</CODE> under <a href="../reference/elements/shape_info.html"><CODE>&lt;shape_info&gt;</CODE></a>.
+        </td>
+        </tr>
+        <tr>
+        <td class="center">
+Blending is performed by accessing multiple smooth skinning matrix palettes using <CODE><a href="../reference/elements/vtx_attrib.html">&lt;vtx_attrib&gt;</a> ((blendindex, blendweight) &times; <a href="../reference/elements/shape_info.html">&lt;shape_info&gt;</a><br /> vertex_skinning_count)</CODE>.
+        </td>
+        <td class="center">
+Accesses the rigid skinning matrix palette given by <CODE>blendindex0</CODE> under <a href="../reference/elements/vtx_attrib.html"><CODE>&lt;vtx_attrib&gt;</CODE></a>.
+        </td>
+        <td class="center">
+Does not reference a matrix palette.
+        </td>
+        </tr>
+        <tr>
+        <td class="center">
+Creates a matrix palette for the index before <CODE>matrix_index</CODE> of the <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> element.
+        </td>
+        <td class="center">
+Creates a matrix palette for the index after <CODE>matrix_index</CODE> of the <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> element.
+        </td>
+        <td class="center">
+No matrix palette is created.
+        </td>
+        </tr>
+        <tr>
+        <td class="center">
+Creates <a href="../reference/elements/inv_model_matrix.html"><CODE>&lt;inv_model_matrix&gt;</CODE></a> as long as the index before <CODE>matrix_index</CODE> of the <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> element is not <CODE>-1</CODE>.
+        </td>
+        <td class="center">
+No <a href="../reference/elements/inv_model_matrix.html"><CODE>&lt;inv_model_matrix&gt;</CODE></a>
+        </td>
+        <td class="center">
+No <a href="../reference/elements/inv_model_matrix.html"><CODE>&lt;inv_model_matrix&gt;</CODE></a>
+        </td>
+        </tr>
+<!--         <tr>         <td class="center">         </td>         </tr> -->
+    </tbody>
+</table>
+<p>
+The <CODE>render_matrix</CODE> attribute of the <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> element is <CODE>false</CODE> if the <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> element is not used for smooth skinning, rigid skinning, or rigid body.
+</p>
+<p>
+Regardless of the skinning type, the visibility of a <a href="../reference/elements/shape.html"><CODE>&lt;shape&gt;</CODE></a> element depends on the <CODE>visibility</CODE> attribute of the <a href="../reference/elements/bone.html"><CODE>&lt;bone&gt;</CODE></a> element referenced by the <CODE>bone_name</CODE> attribute of the <a href="../reference/elements/shape_info.html"><CODE>&lt;shape_info&gt;</CODE></a> element.
+</p>
+</body>
+</html>

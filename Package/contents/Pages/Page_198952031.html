@@ -1,0 +1,212 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Stream Sounds | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Stream Sounds -->
+<div class="pagetitle" id="PageId_198952031">Stream Sounds</div>
+<div class="text_separate">
+<h1 id="Anchor_198952031_h1_1">Stream Sounds</h1>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_198952031_h2_1">Stream Sounds</a>
+    </li>
+    <li>
+      <a href="#Anchor_198952031_h2_2">Characteristics of Stream Sounds</a>
+    </li>
+    <li>
+      <a href="#Anchor_198952031_h2_3">Multi-Track Features</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_198952031_h3_1">Restrictions</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_198952031_h2_4">Prefetching Feature</a>
+    </li>
+    <li>
+      <a href="#Anchor_198952031_h2_5">Stream Jumps</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_198952031_h3_2">Possible Uses for Stream Jumps</a>
+      </li>
+      <li>
+        <a href="#Anchor_198952031_h3_3">Using Stream Jumps</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_198952031_h2_6">Other Features</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_198952031_h3_4">Embedding the marker information contained in the waveform into the binary</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h2 id="Anchor_198952031_h2_1">Stream Sounds</h2>
+<p>Stream sounds are one of the supported <code>atk</code> sound data formats. When stream sounds are played using the <code><span class="ApiLink_nn__atk">nn::atk</span></code> library, the minimum possible amount of data is loaded from the files while those sounds are playing.<br /></p>
+<p>When playing audio data that is large in size (such as background music), loading all of the data at the same time would require a long loading time and consume a large amount of memory. Using stream sounds makes it possible to mitigate these problems.<br /></p>
+<h2 id="Anchor_198952031_h2_2">Characteristics of Stream Sounds</h2>
+<p>Stream sounds exhibit the following characteristics.<br /> <br /> <span class="embedded-file-wrapper "><img src="../Attachments/Attach_83955555/218171351.png" class="embedded-image" /></span>They consume a small amount of memory because only the minimum amount of data is loaded while they are playing.<br /> <span class="embedded-file-wrapper "><img src="../Attachments/Attach_83955555/218171351.png" class="embedded-image" /></span>They consume a fixed amount of memory regardless of the overall size of the audio data being played.<br /> <span class="embedded-file-wrapper "><img src="../Attachments/Attach_83955555/218171352.png" class="embedded-image" /></span>After a playback request is sent, playback does not begin until a sufficient amount of data has been loaded into memory.<br /> <span class="embedded-file-wrapper "><img src="../Attachments/Attach_83955555/218171352.png" class="embedded-image" /></span>Non-audio file I/O operations that occur during playback may delay the audio data loading process and cause noise or skipping.</p>
+<h2 id="Anchor_198952031_h2_3">Multi-Track Features</h2>
+<p>Multiple tracks can be contained within a single stream sound.<br />One waveform (maximum 2 ch) can be set for each track, and parameters such as the volume can be changed for each track. As a result, it is easy to implement systems such as playing multiple tracks simultaneously or playing only a certain track, based on the state of the game scene.<br /></p>
+<p>In addition, the post-conversion data is collated in one file, so this result can be implemented by streaming only one file. However, note that the processing load also increases based on the number of tracks.</p>
+<p>Handling multi-track stream sound is basically the same as stream sound. The sound can be played by specifying the ID or string label of the stream sound for which multi-track settings are configured.<br />For more information about creating multi-track stream sound, see the stream sound track settings section on the <a href="../Pages/Page_83956090.html#Anchor_83956090_Set_StrmSndTrack">Stream Sound</a> page in the SoundMaker manual.</p>
+<p>In addition, the <code><span class="ApiLink_nn__atk__SoundHandle">nn::atk::SoundHandle</span></code> and <code><span class="ApiLink_nn__atk__StreamSoundHandle">nn::atk::StreamSoundHandle</span></code> functions can be used to change the parameters for multi-track stream sound, basically the same as for stream sound.<br /><br />For more information about changing track parameters, see the API reference for <code><span class="ApiLink_nn__atk__StreamSoundHandle">nn::atk::StreamSoundHandle</span></code>.</p>
+<p>Also note that when playing all tracks at the same time, you must use a number of stream channels equal to the total number of channels for all tracks.<br />If there are insufficient stream channels, a warning that stream channel allocation failed is displayed and playback fails.</p>
+<p>If playback does not work correctly, check whether the number of stream channels is correct in the Sound Archive settings in SoundMaker.<br />For more information, see <a href="../Pages/Page_83956179.html#Anchor_83956179_サウンドアーカイブ">Option Settings</a> &gt; Sound Archive in the SoundMaker manual.</p>
+<h3 id="Anchor_198952031_h3_1">Restrictions</h3>
+<p>Multi-tracking is not supported for Opus files.</p>
+<h2 id="Anchor_198952031_h2_4">Prefetching Feature</h2>
+<p>The prefetching feature pre-loads the data at the beginning of stream sounds into memory to eliminate the loading wait time before playback (which is otherwise one of the disadvantages of using stream sounds).</p>
+<p>You can enable this feature in SoundMaker in the <strong>Stream Sounds</strong> tab by selecting the <strong>Pre-fetch</strong> check box, which pre-loads the sounds in the program.<br />When using prefetched data, the size of resources and amount of memory consumed will increase by an amount corresponding to the size of the data at the beginning of the sounds.<br />For more information, see <a href="../Pages/Page_83956090.html">Stream Sounds</a> in the SoundMaker manual and <a href="../Pages/Page_200573824.html">Stream Sounds</a> in the Programming Guide.</p>
+<p>
+  <br />
+</p>
+<!--Remove-->
+<h2 id="Anchor_198952031_h2_5">Stream Jumps</h2>
+<p>The stream jump feature makes it possible to jump between predefined regions of a waveform.<br /> <span style="color: rgb(255,0,0);">This feature is available in NintendoSDK NX Add-On 3.0.0 and later.</span> </p>
+<h3 id="Anchor_198952031_h3_2">Possible Uses for Stream Jumps</h3>
+<p>One way of using the stream jump feature is to divide a background music track into three regions, play the first region once, play the middle region a prescribed number of times, and then transition to the final region.<br /><br />It is also possible to change which regions are played according to user input.<br /> <br />However, region changes can only be specified when data that includes a region terminator finishes being loaded into memory, so it is not possible to change the region in certain cases, such as immediately after the user presses a button.<br /><br />For more information about when region changes can be specified, see the Stream Jumps section in the <a href="../Pages/Page_200573824.html">Stream Sounds</a> page of the programming guide.</p>
+<h3 id="Anchor_198952031_h3_3">Using Stream Jumps</h3>
+<p>To use stream jumps, the waveform regions must be configured and the program must be updated accordingly. This section only describes how to set the waveform regions.<br />For more information about updating the program, see the Stream Jumps section in the <a href="../Pages/Page_200573824.html">Stream Sound</a> page of the programming guide.</p>
+<h4 id="Anchor_198952031_h4_1">Setting Regions</h4>
+<p>Using a waveform editing tool, create regions named using the following naming convention within the waveform. When the waveform is converted to binary data, the region information is then embedded in the stream sound binary, and the Atk library can get that region information. </p>
+<h5 id="Anchor_198952031_h5_1">Naming Convention for Waveform Regions</h5>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelContent">
+    <p>[NW]Region_Name#Region_Index</p>
+  </div>
+</div>
+<ul>
+  <li>The region name and region index can both be omitted.</li>
+  <li>If the region name is omitted, an empty string will be included in the binary data.</li>
+  <li>If the region index is omitted, the smallest unused index number will be assigned automatically.<ul><li>When omitting this data, including the # symbol will result in an error.</li></ul></li>
+  <li>Region indices must be unique. The same index cannot be specified for multiple regions.<ul><li>A conversion error will occur if duplicate indices are found.</li></ul></li>
+  <li>Region names must also be unique. The same name cannot be specified for multiple regions.<ul><li>Currently (as of 2017-02-23), specifying the same name does not actually cause a conversion error, but this bug will be fixed in an upcoming release.</li></ul></li>
+  <li>The region indices do not necessarily need to be sequential, but any unused index numbers will be included in the binary data as 0-padded region information.<br />In some cases, this can cause an unexpected increase in file size.</li>
+</ul>
+<h5 id="Anchor_198952031_h5_2">Strings That Can Be Used in Atk Region Names</h5>
+<ul>
+  <li>The first character must be a single-byte letter or an underscore.</li>
+  <li>Subsequent characters may be single-byte alphanumeric characters or underscores.</li>
+  <li>The string can be up to 63 characters long.</li>
+</ul>
+<h5 id="Anchor_198952031_h5_3">Waveform Region Naming Examples</h5>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>[NW]RegionA#1    // Region name: RegionA. Region index: 1.
+[NW]RegionB#3    // Region name: RegionB. Region index: 3.
+[NW]RegionC      // Region name: RegionC. Region index: 0.
+[NW]#4           // Region name: none. Region index: 4.
+RegionD#5        // Invalid because it does not start with [NW] (ignored during conversion).
+[NW]2_Region     // Invalid because the region name starts with a character that cannot be used as the first character (the conversion itself will succeed, but the invalid character will be replaced with an underscore).
+[NW]RegionE#1    // Invalid because this region index has already been used (results in a conversion error).</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_198952031_h2_6">Other Features</h2>
+<h3 id="Anchor_198952031_h3_4">Embedding the marker information contained in the waveform into the binary</h3>
+<p>Information is also included in steam sound binaries for markers with names that follow specific naming conventions.<br />The marker information contained in the stream sound binary can also be loaded from the program and used.</p>
+<h5 id="Anchor_198952031_h5_4">Naming format for markers embedded in the waveform</h5>
+<div class="panel" style="border-width: 1px;">
+  <div class="panelContent">
+    <p>[NW] Marker name</p>
+  </div>
+</div>
+<h5 id="Anchor_198952031_h5_5">Strings That Can Be Used in Atk Marker Names</h5>
+<ul>
+  <li>Single-byte alphanumeric characters and single-byte symbols</li>
+  <li>The string can be up to 63 characters long (excluding [NW])<br /><ul><li>A conversion error occurs if there is a maker of 64 characters or more.</li></ul></li>
+</ul>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__atk', '../../../Api/HtmlNX/namespacenn_1_1atk.html' )
+SetUrl( 'ApiLink_nn__atk__SoundHandle', '../../../Api/HtmlNX/classnn_1_1atk_1_1_sound_handle.html' )
+SetUrl( 'ApiLink_nn__atk__StreamSoundHandle', '../../../Api/HtmlNX/classnn_1_1atk_1_1_stream_sound_handle.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

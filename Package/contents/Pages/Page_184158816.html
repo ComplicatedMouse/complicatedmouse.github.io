@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Network Monitoring | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Network Monitoring -->
+<div class="pagetitle" id="PageId_184158816">Network Monitoring</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_184158816_h1_1">Network Monitoring</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_184158816_h2_1">Getting Network Information</a>
+      </li>
+      <li>
+        <a href="#Anchor_184158816_h2_2">Monitoring for Station Connections and Disconnections</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_184158816_h1_1">Network Monitoring</h1>
+<h2 id="Anchor_184158816_h2_1">Getting Network Information</h2>
+<p>Use the <code><span class="ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork)_NN_NOEXCEPT">nn::ldn::GetNetworkInfo()</span></code> function to get information about the network. This function can be used if the state is either <span class="ApiLink_nn__ldn__State_AccessPointCreated"><code>nn::ldn::State_AccessPointCreated</code></span>, meaning the network was created by the system in the role of an access point, or <code><span class="ApiLink_nn__ldn__State_StationConnected">nn::ldn::State_StationConnected</span></code>, meaning the system is connected to the network in the role of a station. The <code><span class="ApiLink_nn__ldn__NetworkInfo">nn::ldn::NetworkInfo</span></code> object obtained by this function contains a list of currently connected stations and their signal strengths, together with the data set by the access point using the <code><span class="ApiLink_Result_nn__ldn__SetAdvertiseData(const_void_*data|_size_t_dataSize)_NN_NOEXCEPT">nn::ldn::SetAdvertiseData()</span></code> function, and the <code><span class="ApiLink_Result_nn__ldn__SetStationAcceptPolicy(AcceptPolicy_policy)_NN_NOEXCEPT">nn::ldn::AcceptPolicy</span></code> set using the <code><span class="ApiLink_nn__ldn__AcceptPolicy">nn::ldn::SetStationAcceptPolicy()</span></code> function.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::ldn::</span><span class="n">NetworkInfo</span> <span class="n">network</span><span class="p">;</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::ldn::</span><span class="n">GetNetworkInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">network</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultDeviceNotAvailable::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::err::</span><span class="n">ShowError</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultInvalidState::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Disconnected from the network.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If you use the <code><span class="ApiLink_nn__ldn__NodeLatestUpdate">nn::ldn::GetNetworkInfo()</span></code> function that can get <code><span class="ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork|_NodeLatestUpdate_*pOutUpdates|_int_bufferCount)_NN_NOEXCEPT">nn::ldn::NodeLatestUpdate</span></code>, you can check on the differences in connection states that have occurred between the last time the function was called (which serves as the starting point) and the time the function is called. Note, however, that immediately after the network is created, or immediately after the station connects to the network, the <code><span class="ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork|_NodeLatestUpdate_*pOutUpdates|_int_bufferCount)_NN_NOEXCEPT">nn::ldn::GetNetworkInfo()</span></code> function will calculate the differences in connection states based on a starting point where not even one system is joined in the network.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::ldn::</span><span class="n">NetworkInfo</span> <span class="n">network</span><span class="p">;</span>
+<span class="nn">nn::ldn::</span><span class="n">NodeLatestUpdate</span> <span class="n">updates</span><span class="p">[</span><span class="nn">nn::ldn::</span><span class="n">NodeCountMax</span><span class="p">];</span>
+<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::ldn::</span><span class="n">GetNetworkInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">network</span><span class="p">,</span> <span class="n">updates</span><span class="p">,</span> <span class="nn">nn::ldn::</span><span class="n">NodeCountMax</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nn">nn::ldn::</span><span class="n">NodeCountMax</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">switch</span> <span class="p">(</span><span class="n">updates</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">stateChange</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::ldn::</span><span class="nl">NodeStateChange_None</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// No change in the connection state.
+</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::ldn::</span><span class="nl">NodeStateChange_Connect</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// A new connection.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::ldn::</span><span class="nl">NodeStateChange_Disconnect</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// A disconnection.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">case</span> <span class="nn">nn::ldn::</span><span class="nl">NodeStateChange_DisconnectAndConnect</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// There was a disconnection followed by a new connection.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">default</span><span class="o">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_UNEXPECTED_DEFAULT</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultDeviceNotAvailable::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::err::</span><span class="n">ShowError</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultInvalidState::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Disconnected from the network.
+</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>You can get the MAC address from <span class="ApiLink_nn__ldn__NetworkInfo"><code>nn::ldn::NodeInfo</code></span> included in <span class="ApiLink_nn__ldn__NodeInfo"><code>nn::ldn::NetworkInfo</code></span>. However, in principle, applications must not use the MAC address. To identify users, use the <span class="ApiLink_Uuid_nn__util__GenerateUuid()_NN_NOEXCEPT">nn::util::GenerateUuid()</span> function to generate UUIDs, and use those UUIDs instead.</p>
+  </div>
+</div>
+<h2 id="Anchor_184158816_h2_2">Monitoring for Station Connections and Disconnections</h2>
+<p>To monitor for station connections and disconnections, you could make periodic calls to the <code><span class="ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork|_NodeLatestUpdate_*pOutUpdates|_int_bufferCount)_NN_NOEXCEPT">nn::ldn::GetNetworkInfo()</span></code> function, but by using the events that can be obtained using the <code><span class="ApiLink_void_nn__ldn__AttachStateChangeEvent(nn__os__SystemEventType_*pOutSystemEvent)_NN_NOEXCEPT">nn::ldn::AttachStateChangeEvent()</span></code> function you can detect by signaled events when stations newly connect and disconnect. This function can be used at any time after the <code>ldn</code> library has been initialized.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="nn">nn::os::</span><span class="n">SystemEvent</span> <span class="n">stateChangeEvent</span><span class="p">;</span>
+<span class="nn">nn::ldn::</span><span class="n">AttachStateChangeEvent</span><span class="p">(</span><span class="n">stateChangeEvent</span><span class="p">.</span><span class="n">GetBase</span><span class="p">());</span>
+&nbsp;
+<span class="k">while</span> <span class="p">(</span><span class="n">stateChangeEvent</span><span class="p">.</span><span class="n">Wait</span><span class="p">())</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::ldn::</span><span class="n">NetworkInfo</span> <span class="n">network</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::ldn::</span><span class="n">NodeLatestUpdate</span> <span class="n">updates</span><span class="p">[</span><span class="nn">nn::ldn::</span><span class="n">NodeCountMax</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::ldn::</span><span class="n">GetNetworkInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">network</span><span class="p">,</span> <span class="n">updates</span><span class="p">,</span> <span class="nn">nn::ldn::</span><span class="n">NodeCountMax</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">IsSuccess</span><span class="p">())</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">/* ... */</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultDeviceNotAvailable::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::err::</span><span class="n">ShowError</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nn">nn::ldn::ResultInvalidState::</span><span class="n">Includes</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Disconnected from the network.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">break</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You must free events obtained with the <span class="ApiLink_void_nn__ldn__AttachStateChangeEvent(nn__os__SystemEventType_*pOutSystemEvent)_NN_NOEXCEPT"><code>nn::ldn::AttachStateChangeEvent()</code></span> function. If you are using the <code><span class="ApiLink_nn__os__SystemEvent">nn::os::SystemEvent</span></code> class as in the preceding sample code, the events are freed automatically by the destructor. If you are using an <code><span class="ApiLink_nn__os__SystemEventType">nn::os::SystemEventType</span></code> object, call <code><span class="ApiLink_void_nn__os__DestroySystemEvent(SystemEventType_*event)_NN_NOEXCEPT">nn::os::DestroySystemEvent()</span></code> to free the event.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a429039282420b36ff23e629950a9560d' )
+SetUrl( 'ApiLink_nn__ldn__State_AccessPointCreated', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#abc1339e71c5817f213faea9b89d46a77aa69ec0e3820b19c8c03d53afe9638a9f' )
+SetUrl( 'ApiLink_nn__ldn__State_StationConnected', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#abc1339e71c5817f213faea9b89d46a77a4f1ac10f7434907fa2443f84fb5f9233' )
+SetUrl( 'ApiLink_nn__ldn__NetworkInfo', '../../../Api/HtmlNX/structnn_1_1ldn_1_1_network_info.html' )
+SetUrl( 'ApiLink_Result_nn__ldn__SetAdvertiseData(const_void_*data|_size_t_dataSize)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a203e0c1570e7cb7a9b7460150a54672b' )
+SetUrl( 'ApiLink_Result_nn__ldn__SetStationAcceptPolicy(AcceptPolicy_policy)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#aad8852e74bee4515b83be0a33f83d1aa' )
+SetUrl( 'ApiLink_nn__ldn__AcceptPolicy', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#ada79079a0b492e49f132fddc782d59e8' )
+SetUrl( 'ApiLink_nn__ldn__NodeLatestUpdate', '../../../Api/HtmlNX/structnn_1_1ldn_1_1_node_latest_update.html' )
+SetUrl( 'ApiLink_Result_nn__ldn__GetNetworkInfo(NetworkInfo_*pOutNetwork|_NodeLatestUpdate_*pOutUpdates|_int_bufferCount)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a3d7236430d0f89d87e6b64827ed8fb0c' )
+SetUrl( 'ApiLink_nn__ldn__NodeInfo', '../../../Api/HtmlNX/structnn_1_1ldn_1_1_node_info.html' )
+SetUrl( 'ApiLink_Uuid_nn__util__GenerateUuid()_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1util.html#a7df2ac5ca47857cc945af5421ea54aa5' )
+SetUrl( 'ApiLink_void_nn__ldn__AttachStateChangeEvent(nn__os__SystemEventType_*pOutSystemEvent)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1ldn.html#a9164167a58c8362e69bffbf544d944f5' )
+SetUrl( 'ApiLink_nn__os__SystemEvent', '../../../Api/HtmlNX/classnn_1_1os_1_1_system_event.html' )
+SetUrl( 'ApiLink_nn__os__SystemEventType', '../../../Api/HtmlNX/structnn_1_1os_1_1_system_event_type.html' )
+SetUrl( 'ApiLink_void_nn__os__DestroySystemEvent(SystemEventType_*event)_NN_NOEXCEPT', '../../../Api/HtmlNX/namespacenn_1_1os.html#a3d924bc362ec80648323428be5182338' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

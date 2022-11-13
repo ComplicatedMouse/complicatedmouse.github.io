@@ -1,0 +1,576 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>libcurl | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- libcurl -->
+<div class="pagetitle" id="PageId_107338327">libcurl</div>
+<div class="text_separate">
+<div class="layout-root">
+  <div class="layout-base">
+    <div class="layout-section two_right_sidebar">
+      <div class="layout-cell">
+        <h1 id="Anchor_107338327_h1_1">Introduction</h1>
+        <p>Nintendo provides a version of libcurl which has been adapted for use within the Nintendo SDK.</p>
+        <ul>
+          <li>The source for libcurl was retrieved from <span class="url"> <a href="http://curl.haxx.se/download.html">curl.haxx.se</a> version</span> <span class="url"> <strong>7.64.1</strong>.</span> <span class="url"> See&nbsp;  <a href="http://curl.haxx.se/changes.html#7_64_1">curl.haxx.se/changes</a> for more details about this specific version.</span></li>
+          <li>
+            <span class="url">In addition to the documentation presented below, please see also&nbsp;<a href="http://curl.haxx.se/libcurl/">curl.haxx.se/libcurl/</a> </span> <span class="url">.</span></li>
+        </ul>
+        <p>Nintendo attempted to minimize changes while <span class="url">porting libcurl to the SDK. Most of the changes were related to threading, memory allocation and use of standard streams and file I/O. Additionally a limited number of custom curl options have been added and are documented in the below note concerning automatic proxy configuration and DNS cache below.</span></p>
+      </div>
+      <div class="layout-cell">
+        <table class="wrapped">
+          <colgroup>
+            <col />
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>Table of Contents</th>
+            </tr>
+            <tr>
+              <td>
+                <div class="content-wrapper">
+                  <p>
+                    <ul class="macro_toc">
+                      <li>
+                        <a href="#Anchor_107338327_h1_1">Introduction</a>
+                      </li>
+                      <li>
+                        <a href="#Anchor_107338327_h1_2">Supported Functionality</a>
+                      </li>
+                      <ul>
+                        <li>
+                          <a href="#Anchor_107338327_h2_1">Protocols</a>
+                        </li>
+                        <li>
+                          <a href="#Anchor_107338327_h2_2">HTTP/2</a>
+                        </li>
+                        <li>
+                          <a href="#Anchor_107338327_h2_3">Maximum Number of Simultaneous Connections</a>
+                        </li>
+                      </ul>
+                      <li>
+                        <a href="#Anchor_107338327_h1_3">API</a>
+                      </li>
+                      <ul>
+                        <li>
+                          <a href="#Anchor_107338327_h2_4">Standard Easy Interface</a>
+                        </li>
+                        <li>
+                          <a href="#Anchor_107338327_h2_5">Standard Multi Interface</a>
+                        </li>
+                        <ul>
+                          <li>
+                            <a href="#Anchor_107338327_h3_1">curl_multi_fdset</a>
+                          </li>
+                        </ul>
+                      </ul>
+                      <li>
+                        <a href="#Anchor_107338327_h1_4">Initialization Considerations</a>
+                      </li>
+                      <ul>
+                        <li>
+                          <a href="#Anchor_107338327_h2_6">curl_global_init</a>
+                        </li>
+                        <li>
+                          <a href="#Anchor_107338327_h2_7">curl_global_init_mem</a>
+                        </li>
+                      </ul>
+                      <li>
+                        <a href="#Anchor_107338327_h1_5">Finalization Considerations</a>
+                      </li>
+                      <li>
+                        <a href="#Anchor_107338327_h1_6">Threading</a>
+                      </li>
+                      <li>
+                        <a href="#Anchor_107338327_h1_7">Compression</a>
+                      </li>
+                      <li>
+                        <a href="#Anchor_107338327_h1_8">Automatic Proxy Configuration</a>
+                      </li>
+                      <li>
+                        <a href="#Anchor_107338327_h1_9">Disabling DNS Cache</a>
+                      </li>
+                      <li>
+                        <a href="#Anchor_107338327_h1_10">HTTPS</a>
+                      </li>
+                      <li>
+                        <a href="#Anchor_107338327_h1_11">Functionality disabled by Nintendo</a>
+                      </li>
+                      <li>
+                        <a href="#Anchor_107338327_h1_12">Examples</a>
+                      </li>
+                    </ul>
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="layout-base">
+    <div class="layout-section single">
+      <div class="layout-cell">
+        <h1 id="Anchor_107338327_h1_2">
+          <span class="url">Supported Functionality</span>
+        </h1>
+        <h2 id="Anchor_107338327_h2_1">
+          <span class="url">Protocols<br /></span>
+        </h2>
+        <p>
+          <span class="url">The following table summarizes which protocols are supported by Nintendo SDK libcurl.</span>
+        </p>
+        <table class="wrapped">
+          <colgroup>
+            <col style="width: 155.0px;" />
+            <col style="width: 103.0px;" />
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>Protocol</th>
+              <th>Supported?</th>
+            </tr>
+            <tr>
+              <td>DICT</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong>No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>FILE</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>FTP</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Gopher</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>HTTP</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(51,153,102);">
+                      <strong>Yes</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>HTTP Authentication</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(51,153,102);">
+                      <strong>Yes</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>HTTP + SSL/TLS</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(51,153,102);">
+                      <strong>Yes</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>HTTP/2</td>
+              <td style="text-align: center;">
+                <span style="color: rgb(51,153,102);">
+                  <strong style="text-align: center;">Yes</strong>
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td>HTTP/3</td>
+              <td style="text-align: center;">
+                <span style="color: rgb(255,0,0);">
+                  <strong style="text-align: center;">No</strong>
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td>IMAP</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>LDAP</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>POP3</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Proxy</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(51,153,102);">
+                      <strong>Yes</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>RTMP</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>RTSP</td>
+              <td>
+                <div class="content-wrapper">
+                  <p style="text-align: center;">
+                    <span style="color: rgb(255,0,0);">
+                      <strong>No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>SCP</td>
+              <td style="text-align: center;">
+                <span style="color: rgb(255,0,0);">
+                  <strong style="text-align: center;">No</strong>
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td>SMB</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>SMTP</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Telnet</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>TFTP</td>
+              <td style="text-align: center;">
+                <div class="content-wrapper">
+                  <p>
+                    <span style="color: rgb(255,0,0);">
+                      <strong style="text-align: center;">No</strong>
+                    </span>
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <h2 id="Anchor_107338327_h2_2">HTTP/2</h2>
+        <p>Support for HTTP/2 was added in&nbsp;Nintendo SDK&nbsp;10.3.0.</p>
+        <p>Some advantages of HTTP/2 include:</p>
+        <ul>
+          <li>Single Connection: Only one connection to the server is used to load a website, and that connection remains open as long as the website is open. This reduces the number of round trips needed to set up multiple TCP connections.</li>
+          <li>Multiplexing: Multiple requests are allowed at the same time, on the same connection. With HTTP/1.1, each transfer has to wait for other transfers to complete.</li>
+          <li>Server Push: Additional resources can be sent to a client for future use.</li>
+          <li>Prioritization: Requests are assigned dependency levels that the server can use to deliver higher priority resources faster.</li>
+          <li>Binary: Makes HTTP/2 easier for a server to parse, more compact and less error-prone. No additional time is wasted translating information from text to binary.</li>
+          <li>Header Compression: HTTP/2 uses HPACK compression, which reduces overhead. Many headers are sent with the same values in every request in HTTP/1.1.</li>
+        </ul>
+        <p>More information on HTTP/2 features and how to use it with libcurl can be found at the <a href="https://curl.haxx.se/docs/http2.html">libcurl HTTP/2 page</a>.</p>
+        <h2 id="Anchor_107338327_h2_3">Maximum Number of Simultaneous Connections</h2>
+        <p>The maximum number of simultaneous connections is subject to the following constraints.</p>
+        <ul style="list-style-type: square;">
+          <li>The sum of all HTTP and HTTPS connections cannot exceed the <a href="../Pages/Page_107338335.html#Anchor_107338335_h2_1">nn::socket descriptor limit</a>.</li>
+          <li>HTTPS connections cannot exceed the <a href="../Pages/Page_288014117.html#Anchor_288014117_h3_5">created nn::ssl::Connection limit</a>.</li>
+        </ul>
+        <h1 id="Anchor_107338327_h1_3">API</h1>
+        <p>Nintendo SDK provides<a href="http://curl.haxx.se/libcurl/c/"> libcurl C language bindings</a>, usable from both C and C++ programs.</p>
+        <h2 id="Anchor_107338327_h2_4">Standard Easy Interface</h2>
+        <p>The easy interface has synchronous behavior, providing a single transfer per calling application thread. See <a href="http://curl.haxx.se/libcurl/c/libcurl-easy.html">easy interface overview </a>for details.</p>
+        <h2 id="Anchor_107338327_h2_5">Standard Multi Interface</h2>
+        <p>The multi interface has asynchronous behaviors, allowing multiple simultaneous transfers to be managed by a single application thread. See <a href="http://curl.haxx.se/libcurl/c/libcurl-multi.html">multi interface overview </a>for details.</p>
+        <p>The Nintendo SDK fully supports the <a href="https://curl.haxx.se/libcurl/c/curl_multi_perform.html">curl_multi_perform</a> API. However, the&nbsp;<a href="https://curl.haxx.se/libcurl/c/curl_multi_socket_action.html">curl_multi_socket_action</a> API is limited to non-SSL connections due to our custom SSL implementation.</p>
+        <h3 id="Anchor_107338327_h3_1">
+          <span style="color: rgb(117,117,117);">curl_multi_fdset</span>
+        </h3>
+        <p>
+          <span style="color: rgb(117,117,117);">One of the new data types that was introduced with the addition of the new <span class="ApiLink_nn__socket">nn::socket</span> API is<span style="color: rgb(117,117,117);">&nbsp;</span><em><span class="ApiLink_nn__socket__FdSet">nn::socket::FdSet</span></em>. If you are using the new API then this type can be used directly with <a href="https://curl.haxx.se/libcurl/c/curl_multi_fdset.html">curl_multi_fdset()</a> just as if it was the <em>fd_set</em> type.</span>
+        </p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre>extern CURLM* curlMultiHandle;
+
+
+nn::socket::FdSet   fdread      = nn::socket::FdSet();
+nn::socket::FdSet   fdwrite     = nn::socket::FdSet();
+nn::socket::FdSet   fdexcep     = nn::socket::FdSet();
+int                 maxfd       = -1;
+
+nn::socket::FdSetZero(&amp;fdread);
+nn::socket::FdSetZero(&amp;fdwrite);
+nn::socket::FdSetZero(&amp;fdexcep);
+
+curl_multi_fdset(curlMultiHandle, &amp;fdread, &amp;fdwrite, &amp;fdexcep, &amp;maxfd);</pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          <span style="color: rgb(117,117,117);">
+            <br />
+          </span>
+        </p>
+        <h1 id="Anchor_107338327_h1_4">Initialization Considerations</h1>
+        <p>Nintendo SDK libcurl behavior is standard. However there are some implications which must be considered, depending upon the specific initialization method which is selected.</p>
+        <h2 id="Anchor_107338327_h2_6">curl_global_init</h2>
+        <p>If libcurl is initialized using <a href="https://curl.haxx.se/libcurl/c/curl_global_init.html">curl_global_init()</a> the default heap is used for all internal memory allocations. The application is responsible for setting up the default heap.</p>
+        <h2 id="Anchor_107338327_h2_7">curl_global_init_mem</h2>
+        <p>If libcurl is initialized using <a href="https://curl.haxx.se/libcurl/c/curl_global_init_mem.html">curl_global_init_mem()</a>, then the default heap is not used. However the application is responsible for passing valid allocation callbacks.</p>
+        <h1 id="Anchor_107338327_h1_5">Finalization Considerations</h1>
+        <p>When done using libcurl, such as upon process exit, it is important to call <a href="https://curl.haxx.se/libcurl/c/curl_global_cleanup.html">curl_global_cleanup()</a>. It is guaranteed that upon return from curl_global_cleanup() any resources allocated while using libcurl, such as threads and memory, are released.</p>
+        <h1 id="Anchor_107338327_h1_6">Threading</h1>
+        <p>Nintendo&nbsp;SDK libcurl is configured to use the system resolver, instead of c-ares asynchronous resolver. And libcurl is also configured to use internal threading. During operation libcurl may launch threads internally. Users should be aware of that, and budget process thread resources accordingly.</p>
+        <h1 id="Anchor_107338327_h1_7">
+          <span style="color: rgb(117,117,117);">Compression</span>
+        </h1>
+        <p>Nintendo&nbsp;SDK libcurl is linked against libz to enable compressed accept encoding therefore if you link your application with libcurl you must also link with libz. To enable all supported accept encodings see the below code block.</p>
+        <p>By default CURLOPT_ACCEPT_ENCODINGS is disabled.</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre>curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, &quot;&quot;);</pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <h1 id="Anchor_107338327_h1_8">Automatic Proxy Configuration</h1>
+        <p>Nintendo SDK libcurl reads proxy information from the system settings (NIFM) and automatically applies it to each curl easy handle. Because of this, the following curl options will be ignored by default: <code>CURLOPT_PROXY</code>, <code>CURLOPT_PROXYPORT</code>, <code>CURLOPT_PROXYUSERPWD</code>, <code>CURLOPT_PROXYUSERNAME</code>, and <code>CURLOPT_PROXYPASSWORD</code>. In order to use those options instead of applying the proxy settings from the system, the custom Nintendo SDK libcurl option, <code>CURLOPT_PROXYAUTOCONFIG</code>,&nbsp;must be set to 0.</p>
+        <p>The default value of <code>CURLOPT_PROXYAUTOCONFIG</code>&nbsp;is 1.</p>
+        <p>If <code>CURLOPT_PROXYAUTOCONFIG</code>&nbsp;is 1 (the default), then the environment variables <code>http_proxy, all_proxy,&nbsp;ALL_PROXY,&nbsp;</code><code>no_proxy,</code> and <code>NO_PROXY</code>&nbsp;will be ignored.&nbsp;</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre>curl_easy_setopt(curl, CURLOPT_PROXYAUTOCONFIG, 0L);    /* Do not read proxy information from the system settings for this handle */
+curl_easy_setopt(curl, CURLOPT_PROXY, &quot;&lt;Proxy_hostname_or_ip&gt;&quot;);
+curl_easy_setopt(curl, CURLOPT_PROXYPORT, &lt;Proxy_port&gt;);
+curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, &quot;&lt;Proxy_username&gt;&quot;);
+curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, &quot;&lt;Proxy_password&gt;&quot;);</pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="warn_new">
+          <div class="warn_new_left">Warning</div>
+          <div class="warn_new_right">
+            <p>Please be aware that setting CURLOPT_PROXYAUTOCONFIG to 0 will result in not applying proxy information which a user may configure in the system with expectation to all applications would honor it. If an application somehow needs to do so even in the product code, it is highly encouraged to provide a way to take proxy information from a user.</p>
+          </div>
+        </div>
+        <h1 id="Anchor_107338327_h1_9">Disabling DNS Cache</h1>
+        <p>Nintendo SDK libcurl adds the ability to&nbsp;disable the use of DNS cache for requests using the provided curl handle, the default value is 0 (i.e. it is enabled by default), and it is accessed with the CURLOPT_DISABLE_CACHE constant.</p>
+        <table class="codeblock">
+          <tbody>
+            <tr>
+              <td class="code">
+                <div class="codeblock"><pre>curl_easy_setopt(curl, CURLOPT_DISABLE_CACHE, 1L);    /* Disable the DNS cache for this handle */</pre></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <h1 id="Anchor_107338327_h1_10">HTTPS</h1>
+        <p>Nintendo SDK libcurl supports HTTPS backed by the SSL library. The SSL library is integrated with the libcurl hence the user of libcurl can use HTTPS with the least effort. Though non-trivial amount of knowledge of the SSL library is neccessary to use it propely.</p>
+        <p>Please refer&nbsp;<a href="../Pages/Page_157461290.html">HTTPS</a>&nbsp;to understand differences between the public version of the libcurl and the Nintendo SDK libcurl. Please also refer&nbsp;<a href="../Pages/Page_181899138.html">SSL Library</a>&nbsp;for details about the SSL library.</p>
+        <p>To utilize HTTPS with Nintendo servers, please refer &quot;Device Client Certificate&quot; section in&nbsp;<a href="../Pages/Page_288014097.html#Anchor_288014097_h3_1">Certificate Store</a>.</p>
+        <h1 id="Anchor_107338327_h1_11">Functionality disabled by Nintendo</h1>
+        <ul>
+          <li>By default curl expires DNS entries from its own internal cache at a 60 second interval or whatever the CURLOPT_DNS_CACHE_TIMEOUT is set to. Both of these features have been disabled in Nintendo's release of libcurl. Instead, we use the Nintendo resolver to expire DNS records from the system cache at the lowest TTL of all records in the DNS address query response message.<br /><br /></li>
+          <li>All file IO has been disabled and will abort if used.&nbsp;<br /><br /></li>
+          <li>The following curl options are not used and will return CURLE_NOT_BUILT_IN if used.<ul><li><p>CURLOPT_SSL_CIPHER_LIST&nbsp;</p></li><li><p>CURLOPT_PROXY_SSL_CIPHER_LIST&nbsp;</p></li><li><p>CURLOPT_PROXY_SSLVERSION&nbsp;</p></li><li><p>CURLOPT_SSLCERT</p></li><li><p>CURLOPT_PROXY_SSLCERT</p></li><li><p>CURLOPT_SSLCERTTYPE</p></li><li><p>CURLOPT_PROXY_SSLCERTTYPE</p></li><li><p>CURLOPT_SSLKEY</p></li><li><p>CURLOPT_PROXY_SSLKEY</p></li><li><p>CURLOPT_SSLKEYTYPE</p></li><li><p>CURLOPT_PROXY_SSLKEYTYPE</p></li><li><p>CURLOPT_KEYPASSWD</p></li><li><p>CURLOPT_PROXY_KEYPASSWD</p></li><li><p>CURLOPT_SSLENGINE</p></li><li><p>CURLOPT_SSLENGINE_DEFAULT</p></li><li><p>CURLOPT_CAINFO</p></li><li><p>CURLOPT_PROXY_CAINFO</p></li><li><p>CURLOPT_CRLFILE</p></li><li><p>CURLOPT_PROXY_CRLFILE</p></li><li><p>CURLOPT_ISSUERCERT</p></li><li><p>CURLOPT_USE_SSL</p></li><li><p>CURLOPT_SSL_OPTIONS</p></li><li><p>CURLOPT_PROXY_SSL_OPTIONS</p></li><li><p>CURLOPT_DNS_CACHE_TIMEOUT&nbsp;</p></li></ul></li>
+        </ul>
+        <h1 id="Anchor_107338327_h1_12">Examples</h1>
+        <p>To learn how to use libcurl refer to <a href="https://curl.haxx.se/libcurl/c/example.html">curl.haxx.se provided examples</a>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__socket', '../../../Api/HtmlNX/namespacenn_1_1socket.html' )
+SetUrl( 'ApiLink_nn__socket__FdSet', '../../../Api/HtmlNX/structnn_1_1socket_1_1_fd_set.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

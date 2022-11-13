@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Using the Dump Feature | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Using the Dump Feature -->
+<div class="pagetitle" id="PageId_172911316">Using the Dump Feature</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_172911316_h1_1">Creating Dump Files</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_172911316_h2_1">How to Create Them</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_172911316_h3_1">When Debugging Using VSI</a>
+        </li>
+        <li>
+          <a href="#Anchor_172911316_h3_2">When Running at the Application Level</a>
+        </li>
+        <ul>
+          <li>
+            <a href="#Anchor_172911316_h4_1">Automatic Dump on a Crash</a>
+          </li>
+          <li>
+            <a href="#Anchor_172911316_h4_2">Manual Dump</a>
+          </li>
+        </ul>
+      </ul>
+      <li>
+        <a href="#Anchor_172911316_h2_2">Choosing the Dumped Data</a>
+      </li>
+    </ul>
+    <li>
+      <a href="#Anchor_172911316_h1_2">Using Dump Files</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_172911316_h2_3">Load</a>
+      </li>
+      <li>
+        <a href="#Anchor_172911316_h2_4">Reproducing Process Conditions When the Dump Occurred</a>
+      </li>
+      <ul>
+        <li>
+          <a href="#Anchor_172911316_h3_3">Loading Debug Data</a>
+        </li>
+      </ul>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_172911316_h1_1">Creating Dump Files</h1>
+<h2 id="Anchor_172911316_h2_1">How to Create Them</h2>
+<h3 id="Anchor_172911316_h3_1">When Debugging Using VSI</h3>
+<p>When stopped on an assertion failure or stopped at a breakpoint, you can save dump files at those specific points in time by selecting <strong>Debug</strong> &gt; <strong>Save Dump As</strong>.<br />If you want to output all of memory, select <strong>Minidump with Heap</strong> as the same method. If you do not need to output memory, select <strong>Minidump</strong>.</p>
+<h3 id="Anchor_172911316_h3_2">
+  <a name="Anchor_172911316_WhenRunningattheApplicationLevel"></a>When Running at the Application Level</h3>
+<h4 id="Anchor_172911316_h4_1">Automatic Dump on a Crash</h4>
+<p>If <strong>Debug</strong> &gt; <strong>CrashDump</strong> &gt; <strong>CPU Crash Automatic Dump</strong> is selected in DevMenu, a dump file is created when an application crashes.<br />Also select <strong>CPU Crash Full Dump</strong> to export all memory, including user memory.<br />These settings can also be configured from DevMenuCommand. (<a href="../Pages/Page_325711330.html#Anchor_325711330_cpu_dump_setting">DevMenuCommand &gt; Development Support Features - Settings for CPU Dump Output During Crashes</a>)</p>
+<p>The dump file will be created on your computer when connected to the computer using TargetManager. The file will be created in the <code>NXDMP</code> directory or on the microSD card when not connected to a computer.<br />The filename will be <code>$<em>(serial number of executed target)</em>_$<em>(date and time configured for the target)</em>.nxdmp</code>.</p>
+<p>No dump file will be created when you are neither connected to a computer nor have a microSD card inserted.</p>
+<p>When the dump begins, the log:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>[SnapShotDumper] Start dumping to $(path)</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>is output to the following log when the dump completes:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>[SnapShotDumper] Dump completed to $(path)</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <br />
+</p>
+<p>If you are not connected to a computer, check the dump state using <a href="../Pages/Page_241559062.html#Anchor_241559062_h2_8">Log Viewer</a>, which checks the log at the target.</p>
+<p>A dump file is saved to the computer's <code>%USERPROFILE%\Documents\Nintendo\NXDMP</code> directory by default. However, you can change that setting by replacing the value for <em>&quot;current&quot;</em> in the following code, saving, and then using SettingsManager to import your changes.</p>
+<p>Restart to apply the imported changes.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>{
+&nbsp;&nbsp;&nbsp;&nbsp;&quot;head&quot;: {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;version&quot;: &quot;1.0&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;},
+&nbsp;&nbsp;&nbsp;&nbsp;&quot;body&quot;: {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;snap_shot_dump&quot;: {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;output_dir&quot;: {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;current&quot;: &quot;%NINTENDO_SDK_ROOT%\\NewDirectory&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;auto_dump&quot;: {  // Whether to enable CPU Crash Automatic Dump (optional).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;current&quot;: true
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;full_dump&quot;: {  // Whether to enable CPU Crash Full Dump (optional).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;current&quot;: true
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;debug_settings&quot;: { // Whether to enable User Exception Handle (optional).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;user_exception_handler_flag&quot;: {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;current&quot;: false
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For more information about using SettingsManager, see <a href="../Pages/Page_107320698.html">Settings Manager</a>.</p>
+<h4 id="Anchor_172911316_h4_2">Manual Dump</h4>
+<p>To output a dump file, right-click the target while the application is running and select the <strong>Dump</strong> menu item.</p>
+<h2 id="Anchor_172911316_h2_2">Choosing the Dumped Data</h2>
+<p>Only data exclusive of user memory is exported by default, to minimize the export time.</p>
+<p>You can also export user memory if, in DevMenu, you select <strong>Debug</strong> &gt; <strong>CrashDump</strong> &gt; <strong>Full Dump</strong>.</p>
+<h1 id="Anchor_172911316_h1_2">Using Dump Files</h1>
+<p>You can reproduce the conditions that caused the dump file to be created when you subsequently load that file using VSI. <br />You will not, however, be able to run the application again from that point.</p>
+<h2 id="Anchor_172911316_h2_3">Load</h2>
+<p>You can either drag the dump file to VSI or select the NXDMP file and load it by selecting <strong>File</strong> &gt; <strong>Open</strong> &gt; <strong>File</strong>.<br />The filename extension must be NXDMP.</p>
+<h2 id="Anchor_172911316_h2_4">Reproducing Process Conditions When the Dump Occurred</h2>
+<p>To reproduce process conditions when the dump occurred, in <strong>Actions</strong>, click <strong>Debug with Native Only</strong>.<br />You do not need to connect the development hardware. However, you must start TargetManager in advance.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_172911316/175094787.png" class="embedded-image" />
+  </span>
+</p>
+<h3 id="Anchor_172911316_h3_3">
+  <a name="Anchor_172911316_LoadingDebugData"></a>Loading Debug Data</h3>
+<p>When you start debugging, you may need to load debug data for libraries, and the like, that were used during the process build.<br />Either specify the path to the NSS file using <strong>Symbol Path</strong> &gt; <strong>Add Path</strong>, or select <strong>Debug</strong> &gt; <strong>Windows</strong> &gt; <strong>Modules</strong> to open the <strong>Modules</strong> window and then right-click each NSO row and select the corresponding NSS file from <strong>Load Symbols</strong>.</p>
+<p>You can find the NSS files from the NintendoSDK in the <code>NintendoSDK\Libraries\</code> directory.<br />Select the NSS file that corresponds to the platform and build type used during the build.</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

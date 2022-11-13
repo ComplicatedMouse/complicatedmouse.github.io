@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Example 3: Get a List of the Top 5 Functions in a Bad Frame | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Example 3: Get a List of the Top 5 Functions in a Bad Frame -->
+<div class="pagetitle" id="PageId_753912837">Example 3: Get a List of the Top 5 Functions in a Bad Frame</div>
+<div class="text_separate">
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre># Get a list of the top 5 functions in the worst frame in a profile.
+#   1. Get profile data.
+#   2. Analyze the profile to find the worst frame.
+#   3. Sort and ensure our units are percentages.
+#   4. Get the top 5 functions of that frame.
+#   5. Reset the UI back to normal.
+# When running the profiler, if you launch it from a PowerShell prompt, it is possible to see written output:
+#   &gt; &amp; &quot;Nintendo CPU Profiler.exe&quot; | Out-Default
+# Note: This example assumes that Example 1 has already been run.
+
+
+# 1. Get profile data.
+# We will get our data by opening the profile saved in Example 1.
+# This could also be run on existing data, or any other profile.
+$profilePath = Join-Path -Path $env:TEMP -ChildPath &quot;example-1.nprof&quot;
+Profiler-Open -FileName $profilePath
+
+# 2. Analyze the profile to find the worst frame.
+Profiler-Analyze -SpikeDetection BadFrame
+
+# 3. Sort and ensure our units are percentages.
+Profiler-Sort -Tab Functions -SortBy Self
+Profiler-Units -UnitType Percent -ShowError $false
+
+# 4. Get the top 5 functions of that frame.
+$badFrameFunctionsText = Profiler-Copy -Tab Functions -NoClipboard
+$badFrameFunctionsLines = $badFrameFunctionsText -split [System.Environment]::NewLine
+Write-Output &quot;Top 5 Functions:&quot;
+# Also write out the column header
+for ($i = 0; $i -lt 5 + 1; ++$i)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;$index = $i + 2
+&nbsp;&nbsp;&nbsp;&nbsp;if ($index -lt $badFrameFunctionsLines.Length)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Write-Output $badFrameFunctionsLines[$index]
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}
+
+# 5. Reset the UI back to normal.
+Profiler-Select -Tab Functions -DeselectAll
+Profiler-Timeline -DeselectAllFrames</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

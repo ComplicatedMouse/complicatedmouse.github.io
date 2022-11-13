@@ -1,0 +1,496 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Coordinate system | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Coordinate system -->
+<div class="pagetitle" id="PageId_106332655">Coordinate system</div>
+<div class="text_separate">
+<h2 id="Anchor_106332655_h2_1">Vertices</h2>
+<p>Vertex positions are indicated using a right-hand coordinate system.</p>
+<p>The coordinate system where the vertex belongs differs according to the skinning type of the shape. If rigid body or rigid skinning is being used, the local coordinate system of the bone is used. If smooth skinning is being used, the model coordinate system is used.</p>
+<p>Standard vertex conversion for rigid body and rigid skinning is as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Clip Coordinates = Projection Matrix * Camera Matrix * Base Matrix * Model Matrix * Vertex Matrix</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The g3d library calculates the base matrix times the model matrix.</p>
+<p>Standard vertex conversion for smooth skinning is as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Clip Coordinates = Projection Matrix * Camera Matrix * Base Matrix * Model Matrix * Inverse Model Matrix for the Bind Pose * Vertex Matrix</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The g3d library calculates the base matrix times the model matrix times the inverse model matrix of the bind pose.</p>
+<h2 id="Anchor_106332655_h2_2">Bounding Volumes</h2>
+<p>Bounding volumes are calculated in the local bone coordinate system regardless of the type of the skinning applied to the shape. If you are using smooth skinning, the bounding volumes enclose all of the points in the local coordinate system of the bone used for each vertex.</p>
+<h2 id="Anchor_106332655_h2_3">Bone World Matrix</h2>
+<p>The library supports several ways to calculate the bone world matrix. In addition to the standard calculation method, the library also supports a calculation method that takes Maya's &quot;Segment Scale Compensate&quot; feature into account, and one that takes Softimage's &quot;Hierarchical Scaling&quot; feature into account.</p>
+<h3 id="Anchor_106332655_h3_1">Selecting the Bone World Matrix</h3>
+<p>The method for calculating the bone world matrix differs depending on the 3D computer graphics tool you are using.</p>
+<p>With the NintendoWare 3D module, you use <code>scale_mode</code> to specify which method to use for calculating the bone world matrix. If you specify &quot;Maya,&quot; you use the <code>scale_compensate</code> property of each bone to specify whether the &quot;Segment Scale Compensate&quot; feature is enabled. If you specify &quot;Softimage,&quot; the calculation takes hierarchical scaling into account.</p>
+<p>This section provides some examples of how each method creates different scaling results, using the following models.</p>
+<p style="text-align: left;">
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_106332655/106435564.png" width="100" class="embedded-image" />
+  </span>
+</p>
+<p style="text-align: left;">Bone structure.</p>
+<p style="text-align: left;">
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_106332655/106435565.png" width="100" class="embedded-image" />
+  </span>
+</p>
+<p style="text-align: left;">All scales are <code>1</code>.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Bone World Matrix Calculation Method</th>
+      <th>Standard</th>
+      <th>Maya<br />Segment Scale Compensate Enabled</th>
+      <th>Softimage<br />Hierarchical Scaling</th>
+    </tr>
+    <tr>
+      <td>Red bones are scaled 2x in the vertical axis of the image.</td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106332655/106435566.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106332655/106435567.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+      <td>
+        <span class="embedded-file-wrapper ">
+          <img src="../Attachments/Attach_106332655/106435568.png" width="100" class="embedded-image" />
+        </span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_106332655_h2_4">Bone World Matrix Calculation Methods</h2>
+<p>The bone world matrix specific to each 3D computer graphics tool is calculated as follows. Use <em><code>S</code></em> as the scale matrix, <em><code>R</code></em> as the rotation matrix, and <em><code>T</code></em> as the translation matrix. Parent-child relationships between bones are expressed as <em><code>i-1, i, i+1, ...</code></em>. (The smaller the index, the closer the bone is to the root.) Coordinates are right-handed.</p>
+<h3 id="Anchor_106332655_h3_2">Standard Calculation Method</h3>
+<p>The library uses this calculation method when the <code>scale_mode</code> attribute of <code>&lt;skeleton_info&gt;</code> is <code>standard</code>.</p>
+<p>The bone world matrix for element <em><code>i</code></em> is calculated as follows.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_106332655/106435818.png" class="embedded-image" />
+  </span>
+</p>
+<h3 id="Anchor_106332655_h3_3">Maya Calculation Method</h3>
+<p>The library uses this calculation method when the <code>scale_mode</code> attribute of <code>&lt;skeleton_info&gt;</code> is <code>maya</code>.</p>
+<p>In Maya, there are two objects equivalent to the <code>&lt;bone&gt;</code> element: <em>transform nodes</em> and <em>joint nodes</em>.</p>
+<p>A joint node has a Segment Scale Compensate (scale compensation) attribute.</p>
+<p>When Segment Scale Compensate is enabled for a joint node, the parent's scale only affects the child's translation. Otherwise, the effect of the parent's scale is the same as the standard method.</p>
+<p>Consequently, the bone world matrix for element <em><code>i</code></em> is calculated as follows.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_106332655/106435578.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <em>
+    <code>ISi</code>
+  </em> is the inverse of matrix <code>Si</code> if Segment Scale Compensate is enabled for element <em><code>i+1</code></em>, and otherwise is the identity matrix.</p>
+<p>Enable or disable Segment Scale Compensate by setting the <code>scale_compensate</code> attribute of each <code>&lt;bone&gt;</code> to <code>true</code> or <code>false</code>.</p>
+<h3 id="Anchor_106332655_h3_4">Softimage Calculation Method</h3>
+<p>The library uses this calculation method when the <code>scale_mode</code> attribute of <code>&lt;skeleton_info&gt;</code> is <code>softimage</code>.</p>
+<p>Softimage|XSI has two calculation methods: standard (Hierarchical Scaling disabled) and Softimage (Hierarchical Scaling enabled).</p>
+<p>When you use the Softimage method, the parent's scale is applied to child coordinates.</p>
+<p>Consequently, the bone world matrix for element <em><code>i</code></em> is calculated as follows.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_106332655/106435819.png" class="embedded-image" />
+  </span>
+</p>
+<p>
+  <em>
+    <code>Ti'</code>
+  </em> is the translation vector of <code>Ti</code> times the parent's scale value as of that time. Expresses as a matrix, it looks like this:</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_106332655/106435820.png" class="embedded-image" />
+  </span>
+</p>
+<p>With XSI, you can specify <strong>Hierarchical Scaling</strong> on a per-node basis. However, the NintendoWare 3D module assumes that <strong>Hierarchical Scaling</strong> is enabled for all bones.</p>
+<h2 id="Anchor_106332655_h2_5">Origin</h2>
+<p>Textures use a coordinate system that takes the upper left corner as the origin. Compared to an upper-left origin for the GX2 render target, the OpenGL has a lower-left origin. Before using a rendered texture on a PC version, it must first be flipped vertically.</p>
+<h2 id="Anchor_106332655_h2_6">Cube Maps</h2>
+<p>Cube maps in the g3d library are maintained by rendering a right-hand coordinate world with the z-axis reversed for the left-hand coordinate cube. For this reason, when looking up in the right-hand coordinate direction, the z-coordinate must be reversed.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>lookupDir.z = -lookupDir.z;
+vec4 sample = texture(cube, lookupDir);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_106332655_h2_7">Normal Map</h2>
+<p>The normal vector map in the g3d library may have mixed right-hand coordinate and left-hand coordinate systems. For vertices referencing a right-hand coordinate system, a <code>1</code> is entered in the fourth component of the tangent and binormal. For vertices that reference a left-hand coordinate system, a <code>-1</code> is entered in the fourth component of the tangent and binormal. When omitting one of the normal, tangent, or binormal and looking for a cross product in the shader, these signs must be used to identify the coordinate system.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>vec3 binormal = cross(normal, tangent.xyz) * tangent.w;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Note that the z components of normal maps compressed with the BC5 method must be restored after sampling.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>vec3 normal = vec3(texture(normalSampler, uv).xy, 0.0f);
+normal.z = sqrt(1.0f - normal.x * normal.x - normal.y * normal.y));</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Also, the encoding for normal maps created for SNORM is stored in <code>(0x01, 0xFF)</code>, so the following correction is necessary when sampling them as UNORM such as when they are compressed with the BC1 method.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>vec3 normal = texture(normalSampler, uv).xyz * (255.0f / 127.0f) - (128.0f / 127.0f);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_106332655_h2_8">Texture Coordinate Transformation</h2>
+<p>The library supports several methods of transforming texture SRTs. In addition to the standard transformations applied to texture coordinates in the order of scale, rotate, and translate, the library also supports transformations specific to different 3D computer-graphics tools.</p>
+<h3 id="Anchor_106332655_h3_5">Texture Matrix Selection</h3>
+<p>Each 3D computer graphics tool has its own method of calculating texture matrices.</p>
+<p>With NintendoWare 3D, the texture matrix information is stored in the five elements <code>ScaleU</code>, <code>ScaleV</code>, <code>Rotate</code>, <code>TranslateU</code>, and <code>TranslateV</code>, and the method to use for matrix calculations is specified by <code>mode</code>.</p>
+<p>This section provides some examples of the different results produced by each method, using specific parameters. The image is simply a polygon cube onto which a texture has been projected using standard UV values.</p>
+<p style="text-align: left;">
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_106332655/106435823.png" width="100" class="embedded-image" />
+  </span>
+</p>
+<p style="text-align: left;">The state after which <code>scale( 1, 1 )</code>, <code>rotate( 0 )</code>, and <code>translate( 0, 0 )</code> have been applied.</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <th>Texture Matrix Method</th>
+      <th>Maya </th>
+      <th>3ds Max</th>
+      <th>Softimage</th>
+    </tr>
+    <tr>
+      <td>Translation<br /><code>translate( 0.2, 0 )</code></td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435826.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Move, with up and right positive.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435839.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Move, with up and right positive.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435848.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Move, with up and right positive.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Scaling<br /><code>scale( 1.5, 1.5 )</code></td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435828.png" width="100" class="embedded-image" />
+          </span> Lower left is center.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435840.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Middle is center.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435849.png" width="100" class="embedded-image" />
+          </span> Lower left is center.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Rotation<br /><code>rotate( 30 )</code></td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435830.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Clockwise rotation centered around the exact center.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435841.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Clockwise rotation centered around the exact center.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435850.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Counterclockwise rotation centered around the lower left.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Rotation and Translation<br /><code>rotate( 30 )</code><br /><code>translate( 0.2, 0 )</code></td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435832.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Move along the top, bottom, left, and right of the texture.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435842.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Motion up, down, left, and right.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435852.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Motion up, down, left, and right.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Scaling and Rotation<br /><code>scale( 1.5, 1.5 )</code><br /><code>rotate( 30 )</code></td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435833.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Scaling Followed by Rotation</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435843.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Scaling Followed by Rotation</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435853.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Scaling Followed by Rotation</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Scaling and Translation<br /><code>scale( 1.5, 1.5 )</code><br /><code>translate( 0.2, 0 )</code></td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435834.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Scaling, followed by translation.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435845.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Scaling, followed by translation.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435854.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Scaling, followed by translation.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Scaling, Rotation, and Translation<br /><code>scale( 1.5, 1.5 )</code><br /><code>rotate( 30 )</code><br /><code>translate( 0.2, 0 )</code></td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435838.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Scaling, then translation, and then rotation.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435847.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Scaling, then rotation, and then translation.</p>
+      </td>
+      <td>
+        <p>
+          <span class="embedded-file-wrapper ">
+            <img src="../Attachments/Attach_106332655/106435855.png" width="100" class="embedded-image" />
+          </span>
+        </p>
+        <p>Scaling, then rotation, and then translation.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_106332655_h3_6">Texture Matrix Calculations</h3>
+<p>The different 3G computer graphics tools calculate texture matrices as follows. Use <em><code>s</code></em> as scale, <em><code>r</code></em> as rotation, and <em><code>t</code></em> as translation.</p>
+<h4 id="Anchor_106332655_h4_1">Texture Matrices in Maya</h4>
+<p>Maya calculates texture matrices by applying transformations in the following order, multiplying the coordinates after.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>scale( 1, -1 )
+translate( 0, 1 )
+translate( -0.5, -0.5 )
+rotate( -r )
+translate( 0.5, 0.5 )
+translate( -ts, -tt )
+scale( ss, st )
+scale( 1, -1 )
+translate( 0, 1 )</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This results in the following texture matrix.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_106332655/106435856.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<h4 id="Anchor_106332655_h4_2">Texture Matrices in 3ds Max</h4>
+<p>3ds Max calculates texture matrices by applying transformations in the following order, multiplying the coordinates after.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>scale( 1, -1 )
+translate( -0.5, 0.5 )
+translate( -ts, -tt )
+rotate( -r )
+scale( ss, st )
+translate( 0.5, -0.5 )
+scale( 1, -1 )</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This results in the following texture matrix.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_106332655/106435857.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<h4 id="Anchor_106332655_h4_3">Texture Matrices in Softimage</h4>
+<p>Softimage calculates texture matrices by applying transformations in the following order, multiplying the coordinates after.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>scale( 1, -1 )
+translate( 0, 1 )
+translate( -ts, -tt )
+rotate( r )
+scale( ss, st )
+translate( 0, -1 )
+scale( 1, -1 )</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This results in the following texture matrix.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_106332655/106435858.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p> </p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,247 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>User Shaders | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- User Shaders -->
+<div class="pagetitle" id="PageId_126563338">User Shaders</div>
+<div class="text_separate">
+<h1 id="Anchor_126563338_h1_1">User Shaders</h1>
+<p>This section describes how to use a user-created shader (<em>user shader</em>) instead of the layout runtime default shader when rendering layout data.<br /></p>
+<p>The user shader function completely replaces the pixel shader provided by <code>ui2d</code>.<br />The <code>ui2d</code> runtime cannot be used in combination with functions achieved using a pixel shader, such as the shape and detailed combiner functions.</p>
+<h2 id="Anchor_126563338_h2_1">User Shader Sample</h2>
+<p>A sample application in <code>Samples\Sources\Applications\Ui2dDemo</code> makes use of a user shader.<br />A number of demo programs are implemented in <code>Ui2dDemo</code>. The user shader sample is implemented in <code>Ui2dUserShader.cpp</code>.</p>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_126563338/125191811.png" width="500" class="embedded-image" />
+  </span>
+</p>
+<p>This sample application replaces the vertex shader, pixel shader, and geometry shader with user-created shaders when rendering the Picture Pane.</p>
+<h2 id="Anchor_126563338_h2_2">Creating User Shaders</h2>
+<h3 id="Anchor_126563338_h3_1">Creation Method</h3>
+<p>User shaders are created by customizing the default shader codes in the layout runtime.<br />The source code for the default shader in the layout runtime is available under the following directory.</p>
+<p>NintendoSDK\Sources\Resources\Ui2dShaders</p>
+<p>When adding shaders, you can only configure data settings using the constant buffer for user shaders.<br />Other vertexes or textures that are added are fixed settings specified by the layout runtime and cannot be changed. <br />It is possible to freely change the shader code. <br />In addition, there is no shader code for the geometry shader because it is not used by default.<br />A geometry shader is used in the Ui2dUserShader sample, so refer to that shader code. </p>
+<h3 id="Anchor_126563338_h3_2">Adding User Shader Data</h3>
+<p>To add user shader data to the constant buffer, set the parameters used by the user shaders after the parameters used by the layout runtime by default.<br /><br />The size that is extended must be set when the user shaders are initialized in the runtime. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="n">layout</span><span class="p">(</span><span class="n">std140</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">uConstantBufferForPixelShader</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">uInterpolateWidth</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">uInterpolateOffset</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">uIndirectMtx0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">uIndirectMtx1</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">mat4</span> <span class="n">uVertexColorPsh</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">uTextureMode</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">int</span> <span class="n">uColorEffectMode</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec2</span> <span class="n">uPadding0</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Define the variables used by the user shader.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Specify the user shader constant buffer size corresponding to the size of the defined variables.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">vec4</span> <span class="n">uUserShaderColor</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">uTime</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kt">float</span> <span class="n">uDistortion</span><span class="p">;</span>
+<span class="p">};</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_126563338_h3_3">Shader Conversion</h3>
+<p>Use ShaderConverter to convert the created shader code into shader binary data (.bnsh).<br />For more information about using ShaderConverter, see <a href="../Pages/Page_89982392.html">Shader Converter</a>. </p>
+<h2 id="Anchor_126563338_h2_3">Setting Up the User Shader</h2>
+<h3 id="Anchor_126563338_h3_4">Loading System</h3>
+<p>User shaders are initialized by using the system for loading <strong>archive shaders</strong> in the layout runtime.</p>
+<p>Archive shaders are shader binary files (BNSH files), other than the basic shader, that are incorporated into the layout binary data as required.<br />The archive shader identifies the required shaders and incorporates them when data is converted in the LayoutConverter. <br />This system was originally created to reduce the number of unneeded shader binaries, but it can also be used for loading without greatly changing the specifications to support user shaders.</p>
+<p>The shader binariries used for the archive shader are named according to the following rules.</p>
+<p style="margin-left: 60.0px;">ArchiveShader-XXXXX.bnsh</p>
+<p>Any 5 characters may be used for XXXXX.</p>
+<p>In the original archive shader, shader variations are switched based on the names of the binary shader files. The following names are reserved for this purpose and cannot be used as the names for user shaders.</p>
+<p style="margin-left: 60.0px;">The values indicated by <strong>[A]</strong>, <strong>[B]</strong> in &quot;ArchiveShader-<strong>[A]</strong>_<strong>[B]</strong>&quot; and the numbers from 1 through 11.</p>
+<p>Also, the archive shader always uses shader variation 0 in a shader binary file, and as a result user shaders do not support shader variation switching either.</p>
+<h3 id="Anchor_126563338_h3_5">Preparing Data</h3>
+<p>The shader binaries for the archive shader are located in the BGSH directory, which holds the layout data that has been converted to binary.<br />To add shader binaries for the user shader, copy the shader binary file (BNSH) that is used as the user shader into the BGSH directory to which the LayoutConverter converted and output the layout data in binary, and archive it using LayoutArchiver.<br /> </p>
+<h3 id="Anchor_126563338_h3_6">Runtime Initialization Processing</h3>
+<p>To use user shaders, it is necessary to use a callback to notify the runtime of the user shader information during layout data setup.<br /></p>
+<p>Set the callback function using the <code>BuildOption</code> passed at build time.</p>
+<p style="margin-left: 60.0px;">
+  <code>
+    <span class="ApiLink_nn__ui2d__Layout__BuildOption__pGetUserShaderInformationFromUserDataCallback">nn::ui2d::Layout::BuildOption::pGetUserShaderInformationFromUserDataCallback</span>
+  </code>
+</p>
+<p>This callback function will be called each time shaders are set up in the layout data.<br />Because it is called for all of the shader setups, a system is required so that user shaders are enabled only for the required panes.<br />In the Ui2dUserShader sample, user-extended data is used to determine whether a pane uses user shaders. <br />The user extended data contains the user shader name, extended constant buffer size, and so on, and these are passed to the layout runtime.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Get user shader information from the user extended data.
+// Set in userShaderInformation.
+// The following user-extended data definitions are only an example.
+// The name and other attributes can be determined at the discretion of the application.
+</span><span class="k">if</span> <span class="p">(</span><span class="n">pExtUserDataList</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// User shader name.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The &quot;XXXXX&quot; part of ArchiveShader-XXXXX.bnsh.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Based on the archive shader specifications, the length should be nn::ui2d::ArchiveShaderNameMax-1 characters.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::ui2d::</span><span class="n">ResExtUserData</span><span class="o">*</span> <span class="n">pShaderName</span> <span class="o">=</span> <span class="n">GetExtUserData</span><span class="p">(</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pExtUserDataList</span><span class="p">,</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">&quot;UserShaderName&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pShaderName</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">isValidShaderNameSet</span> <span class="o">=</span> <span class="n">userShaderInformation</span><span class="p">.</span><span class="n">SetShaderName</span><span class="p">(</span><span class="n">pShaderName</span><span class="o">-&gt;</span><span class="n">GetString</span><span class="p">());</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The size of the constant buffer extended by the user vertex shader.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::ui2d::</span><span class="n">ResExtUserData</span><span class="o">*</span> <span class="n">pVertexShaderConstantBufferSize</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">=</span> <span class="n">GetExtUserData</span><span class="p">(</span><span class="n">pExtUserDataList</span><span class="p">,</span> <span class="s">&quot;UserVertexShaderConstantBufferSize&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pVertexShaderConstantBufferSize</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">userShaderInformation</span><span class="p">.</span><span class="n">vertexShaderConstantBufferExtendSize</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">=</span> <span class="n">pVertexShaderConstantBufferSize</span><span class="o">-&gt;</span><span class="n">GetIntArray</span><span class="p">()[</span><span class="mi">0</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The size of the constant buffer extended by the user geometry shader.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::ui2d::</span><span class="n">ResExtUserData</span><span class="o">*</span> <span class="n">pGeometryShaderConstantBufferSize</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">=</span> <span class="n">GetExtUserData</span><span class="p">(</span><span class="n">pExtUserDataList</span><span class="p">,</span> <span class="s">&quot;UserGeometryShaderConstantBufferSize&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pGeometryShaderConstantBufferSize</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">userShaderInformation</span><span class="p">.</span><span class="n">geometryShaderConstantBufferExtendSize</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">=</span> <span class="n">pGeometryShaderConstantBufferSize</span><span class="o">-&gt;</span><span class="n">GetIntArray</span><span class="p">()[</span><span class="mi">0</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// The size of the constant buffer extended by the user pixel shader.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::ui2d::</span><span class="n">ResExtUserData</span><span class="o">*</span> <span class="n">pPixelShaderConstantBufferSize</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">=</span> <span class="n">GetExtUserData</span><span class="p">(</span><span class="n">pExtUserDataList</span><span class="p">,</span> <span class="s">&quot;UserPixelShaderConstantBufferSize&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pPixelShaderConstantBufferSize</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">userShaderInformation</span><span class="p">.</span><span class="n">pixelShaderConstantBufferExtendSize</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">=</span> <span class="n">pPixelShaderConstantBufferSize</span><span class="o">-&gt;</span><span class="n">GetIntArray</span><span class="p">()[</span><span class="mi">0</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If <code>true</code> is returned for this callback function, then the value set in <code><span class="ApiLink_nn__ui2d__UserShaderInformation">nn::ui2d::UserShaderInformation</span></code> is used to initialize the user shader.</p>
+<p>However, the user shader cannot be used if detailed combiner settings were configured for the pane.</p>
+<h2 id="Anchor_126563338_h2_4">User Shader Update Processing</h2>
+<p>To update the constant buffer specified in the user shader, use the following methods to set the callback functions for updating.</p>
+<p>
+  <span class="ApiLink_nn__ui2d__DrawInfo__SetUpdateUserShaderCallback">nn::ui2d::DrawInfo::SetUpdateUserShaderCallback</span>
+</p>
+<p>This callback function is called during update processing for all of the Picture Panes and Window Panes in the layout data.<br />In the Ui2dUserShader sample, whether a pane requires user shader processing is determined from the name of the pane.</p>
+<p>Because the callback function is passed to the target pane as a variable, it is possible to obtain the constant buffer for the user shader by following the material from the pane.  </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="kt">void</span> <span class="nf">UpdateUserShaderConstantBuffers</span><span class="p">(</span><span class="k">const</span> <span class="nn">nn::ui2d::</span><span class="n">DrawInfo</span><span class="o">&amp;</span> <span class="n">drawInfo</span><span class="p">,</span> <span class="nn">nn::ui2d::</span><span class="n">Pane</span><span class="o">*</span> <span class="n">pPane</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">pUserData</span><span class="p">)</span>
+<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">NN_UNUSED</span><span class="p">(</span><span class="n">pUserData</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get the material from the pane that is set to use user shaders.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Write the required information to the user shader constant buffer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// This is because the user shader constant buffer does not maintain the value that was written in the previous frame.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// You must write all of the parameters to each frame.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="nn">std::</span><span class="n">strcmp</span><span class="p">(</span><span class="n">pPane</span><span class="o">-&gt;</span><span class="n">GetName</span><span class="p">(),</span> <span class="s">&quot;UserShader&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nn">nn::ui2d::</span><span class="n">Material</span><span class="o">*</span> <span class="n">pMaterial</span> <span class="o">=</span> <span class="n">pPane</span><span class="o">-&gt;</span><span class="n">GetMaterial</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get the pointer and write the value to the constant buffer area extended by the user shader.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">UserShaderConstantBufferForPixelShader</span><span class="o">*</span> <span class="n">pConstantBufferForUserPixelShader</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">UserShaderConstantBufferForPixelShader</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">pMaterial</span><span class="o">-&gt;</span><span class="n">GetConstantBufferForUserPixelShader</span><span class="p">(</span><span class="n">drawInfo</span><span class="p">));</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> <span class="p">(</span><span class="n">pConstantBufferForUserPixelShader</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pConstantBufferForUserPixelShader</span><span class="o">-&gt;</span><span class="n">color</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5f</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pConstantBufferForUserPixelShader</span><span class="o">-&gt;</span><span class="n">color</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.75f</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pConstantBufferForUserPixelShader</span><span class="o">-&gt;</span><span class="n">color</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0f</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pConstantBufferForUserPixelShader</span><span class="o">-&gt;</span><span class="n">color</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0f</span><span class="p">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c1">// Get the values from the user extended data animations and set them to the constant buffer.
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::ui2d::</span><span class="n">ResExtUserData</span><span class="o">*</span>   <span class="n">pTimeUserData</span> <span class="o">=</span> <span class="n">pPane</span><span class="o">-&gt;</span><span class="n">FindExtUserDataByName</span><span class="p">(</span><span class="s">&quot;Time&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pConstantBufferForUserPixelShader</span><span class="o">-&gt;</span><span class="n">time</span> <span class="o">=</span> <span class="n">pTimeUserData</span><span class="o">-&gt;</span><span class="n">GetFloatArray</span><span class="p">()[</span><span class="mi">0</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> <span class="nn">nn::ui2d::</span><span class="n">ResExtUserData</span><span class="o">*</span>   <span class="n">pDistortionUserData</span> <span class="o">=</span> <span class="n">pPane</span><span class="o">-&gt;</span><span class="n">FindExtUserDataByName</span><span class="p">(</span><span class="s">&quot;Distortion&quot;</span><span class="p">);</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">pConstantBufferForUserPixelShader</span><span class="o">-&gt;</span><span class="n">distortion</span> <span class="o">=</span> <span class="n">pDistortionUserData</span><span class="o">-&gt;</span><span class="n">GetFloatArray</span><span class="p">()[</span><span class="mi">0</span><span class="p">];</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span>
+<span class="p">}</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__ui2d__Layout__BuildOption__pGetUserShaderInformationFromUserDataCallback', '../../../Api/HtmlNX/structnn_1_1ui2d_1_1_layout_1_1_build_option.html#a8e96bcdc2366bb519ba8134edc2f4676' )
+SetUrl( 'ApiLink_nn__ui2d__UserShaderInformation', '../../../Api/HtmlNX/structnn_1_1ui2d_1_1_user_shader_information.html' )
+SetUrl( 'ApiLink_nn__ui2d__DrawInfo__SetUpdateUserShaderCallback', '../../../Api/HtmlNX/classnn_1_1ui2d_1_1_draw_info.html#a56a8df0da5fcd248b871be39ed872f4e' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

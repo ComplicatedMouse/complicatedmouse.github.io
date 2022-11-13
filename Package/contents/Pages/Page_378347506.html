@@ -1,0 +1,232 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>RenderDoc For NX | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- RenderDoc For NX -->
+<div class="pagetitle" id="PageId_378347506">RenderDoc For NX</div>
+<div class="text_separate">
+<h1 id="Anchor_378347506_h1_1">Overview</h1>
+<p>RenderDoc For NX is a package that enables you to use the <a href="https://renderdoc.org/">RenderDoc</a> graphics debugger in the NX environment. It supports the Vulkan API and the OpenGL API for debugging in the NX environment.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This package is available in NX Add-On 6.4.0 and later.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Support for the OpenGL API was added in NX Add-On 8.1.0. Previous versions support only the Vulkan API.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_378347506_h2_1">Package</h2>
+<p>RenderDoc For NX is provided in a separate package from NintendoSDK NX Add-On. It may also be released later than other NintendoSDK packages.</p>
+<p>The following table lists the packages.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Package Name</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>NintendoSDK RenderDocKit For NX</td>
+      <td>An NX package for the RenderDoc open source graphics debugger. It supports the Vulkan API and the OpenGL API for debugging in the NX environment.</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_378347506_h2_2">
+  <br />Distribution</h2>
+<p>RenderDoc For NX is distributed integrated with NintendoSDK.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre># Libraries (Prior to NX Add-On 8.1.0. Can only be used with Vulkan.)
+Libraries/NX-NXFP2-a32/Develop/vulkanWithLayers.nso
+Libraries/NX-NXFP2-a32/Release/vulkanWithLayers.nso
+Libraries/NX-NXFP2-a64/Develop/vulkanWithLayers.nso
+Libraries/NX-NXFP2-a64/Release/vulkanWithLayers.nso
+
+
+# Libraries (NX Add-On 8.1.0 and later. Can be used with both Vulcan and OpenGL.)
+Libraries/NX-NXFP2-a32/Develop/vulkanOpenGlDebug.nso
+Libraries/NX-NXFP2-a32/Release/vulkanOpenGlDebug.nso
+Libraries/NX-NXFP2-a64/Develop/vulkanOpenGlDebug.nso
+Libraries/NX-NXFP2-a64/Release/vulkanOpenGlDebug.nso
+
+# Target tools
+TargetTools/NX-NXFP2-a32/renderdoccmd/Release/renderdoccmd.nsp
+TargetTools/NX-NXFP2-a64/renderdoccmd/Release/renderdoccmd.nsp
+
+# Host tools
+Tools/Graphics/RenderDoc/qrenderdoc.exe</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The descriptions that follow on this page use the library named <code>vulkanOpenGlDebug.nso</code>.</p>
+<h1 id="Anchor_378347506_h1_2">Manual</h1>
+<h2 id="Anchor_378347506_h2_3">Using RenderDoc</h2>
+<p>This section describes how to use RenderDoc to debug Vulkan applications and OpenGL applications that run on the NX.</p>
+<p>For more information about the basic non-platform-dependent usage method for RenderDoc, see <a href="https://renderdoc.org/docs/index.html">https://renderdoc.org/docs/index.html</a>.</p>
+<h3 id="Anchor_378347506_h3_1">Building an Application</h3>
+<p>With Vulcan, use the following procedure to build the application.</p>
+<ol>
+  <li>As the <code>nso</code> library, link <code>vulkanOpenGlDebug.nso</code> to the application, instead of linking <code>vulkan.nso</code> or <code>opengl.nso</code>.</li>
+  <li>
+    <p>Use the standard method to enable the <code>VK_LAYER_RENDERDOC_Capture</code> layer.</p>
+    <table class="codeblock">
+      <tbody>
+        <tr>
+          <td class="code">
+            <div class="codeblock"><pre>std::vector&lt;const char*&gt; layers = {
+&nbsp;&nbsp;&nbsp;&nbsp;&quot;VK_LAYER_RENDERDOC_Capture&quot;
+};
+
+VkInstanceCreateInfo createInfo = {};
+createInfo.ppEnabledLayerNames = layers.data();
+createInfo.enabledLayerCount = static_cast&lt;uint32_t&gt;(layers.size());</pre></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      <br />
+    </p>
+    <ol>
+      <li>If necessary, use the Vulkan API to increase the thread stack size. Approximately 256 KB is required.</li>
+    </ol>
+  </li>
+  <li>Build the application.</li>
+</ol>
+<p>With OpenGL, use the following procedure to build the application.</p>
+<ol>
+  <li>As the <code>nso</code> library, link <code>vulkanOpenGlDebug.nso</code> to the application, instead of linking <code>opengl.nso</code>.</li>
+  <li>Build the application.</li>
+</ol>
+<h3 id="Anchor_378347506_h3_2">Capturing Frames</h3>
+<p>Use the following procedure to perform frame capture for the application.</p>
+<ol>
+  <li>Run the application on the development hardware. If the capture feature is enabled, a dedicated banner is displayed on the upper left (lower left for OpenGL applications).<ol><li>The &quot;[Vulkan|OpenGL]. No remote access connection. Frame: xxxx&quot; message is displayed.<br />Vulkan:                                                                                    OpenGL:<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_378347506/379426094.png" height="250" class="embedded-image" /></span><span class="embedded-file-wrapper "><img src="../Attachments/Attach_378347506/1201433472.bmp" height="250" class="embedded-image" /></span><br /><br /></li></ol></li>
+  <li>Start the <code>Tools/Graphics/RenderDoc/qrenderdoc.exe</code> host tool, and perform the following operations.<ol><li>From the toolbar, select <strong>File</strong> &gt; <strong>Attach To Running Instance</strong>.<br /><br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_378347506/878560720.png" height="400" class="embedded-image" /></span></li><li>At the top of the dialog box, in the host list, <strong>Default Target</strong> is displayed, and the development hardware running the application is listed below that. Select it and click <strong>Run Server</strong>.<br />Alternatively, double-click the application name immediately below <strong>Default Target</strong>.<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_378347506/1031400836.png" height="250" class="embedded-image" /></span><br /><br /></li><li>After a few moments, the application appears underneath the target, with the status <strong>Running</strong>. Select it and click <strong>Connect to App</strong>.<br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_378347506/1038420960.png" height="250" class="embedded-image" /></span></li><li>The banner displayed in the development hardware changes to &ldquo;Vulkan|OpenGL]. Connected by <em>user_name</em>.&rdquo; In addition, the connection status on the host tool changes to <strong>Established</strong>.<br /><br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_378347506/379426113.png" height="250" class="embedded-image" /></span><span class="embedded-file-wrapper "><img src="../Attachments/Attach_378347506/878560677.png" height="250" class="embedded-image" /></span></li><li>Run <strong>Capture Frame(s) Immediately</strong> on the host tool to capture the frame. If the capture succeeds, a thumbnail is added to the <strong>Captures collected:</strong> pane. The captured data is automatically saved as a temporary capture file to the specified directory. (This directory can be set from the RenderDoc settings.) If necessary, right-click this thumbnail and select <strong>Save</strong> to save it separately.<br /><br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_378347506/878560667.png" height="250" class="embedded-image" /></span></li></ol></li>
+</ol>
+<h2 id="Anchor_378347506_h2_4">Playing the Captured Data</h2>
+<p>Play the captured data.</p>
+<ol>
+  <li>On development hardware, start <code>$NintendoSDK/TargetTools/NX-NXFP2-a{32|64}/renderdoccmd/Release/renderdoccmd.nsp</code>. Select and run either the 32-bit or 64-bit version, corresponding to the application that performed the capture.</li>
+  <li>From the toolbar of the host tool, select <strong>File</strong> &gt; <strong>Open Capture</strong> to open the saved capture data. You can also drag capture data files to the host tool to open them.<ol><li><strong>NXAdd-On 14.0.0 and later:</strong> If <code>renderdoccmd.nsp</code> is not running, <code>$NintendoSDK/TargetTools/NX-NXFP2-a64/renderdoccmd/Release/renderdoccmd.nsp</code> starts automatically.</li></ol></li>
+  <li>The <strong>Choose Remote Host?</strong> dialog box is displayed. Select <strong>Remote</strong> &gt; <strong>Default Target (Online)</strong>.<br /><br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_378347506/1038420947.png" height="250" class="embedded-image" /></span><br /><ol><li><strong>Note:</strong> If you close the <strong>Choose Remote Host?</strong> dialog box, you must open the capture data file again.</li></ol></li>
+  <li>The content of the captured data is displayed. From then on, perform work using the standard <code>RenderDoc</code> operations.<br /><br /><span class="embedded-file-wrapper "><img src="../Attachments/Attach_378347506/379426955.png" height="250" class="embedded-image" /></span></li>
+</ol>
+<h2 id="Anchor_378347506_h2_5">Using Vulkan Standard Validation Layers</h2>
+<p>With the <code>vulkanOpenGlDebug.nso</code> library, the following Vulkan standard validation layers are available for debugging Vulkan applications.</p>
+<ul>
+  <li>
+    <code>VK_LAYER_LUNARG_core_validation</code>
+  </li>
+  <li>
+    <code>
+      <span style="color: rgb(36,41,46);">VK_LAYER_LUNARG_parameter_validation</span>
+    </code>
+    <br />
+  </li>
+  <li>
+    <code>
+      <span style="color: rgb(36,41,46);">VK_LAYER_LUNARG_object_tracker</span>
+    </code>
+    <br />
+  </li>
+  <li>
+    <code>
+      <span style="color: rgb(36,41,46);">VK_LAYER_GOOGLE_threading</span>
+    </code>
+    <br />
+  </li>
+  <li>
+    <code>
+      <span style="color: rgb(36,41,46);">VK_LAYER_GOOGLE_unique_objects</span>
+    </code>
+    <br />
+  </li>
+</ul>
+<p>
+  <span style="color: rgb(36,41,46);">Use the following procedure.</span>
+</p>
+<p>
+  <br />
+</p>
+<ol>
+  <li>Link the <code>vulkanOpenGlDebug.nso</code> library to the application instead of linking <code>vulkan.nso</code>.</li>
+  <li>Enable the <code>VK_LAYER_LUNARG_standard_validation</code> layer using the standard Vulkan method.</li>
+</ol>
+<p>
+  <br />
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>std::vector&lt;const char*&gt; layers = {
+&nbsp;&nbsp;&nbsp;&nbsp;&quot;VK_LAYER_LUNARG_standard_validation&quot;
+};
+
+VkInstanceCreateInfo createInfo = {};
+createInfo.ppEnabledLayerNames = layers.data();
+createInfo.enabledLayerCount = static_cast&lt;uint32_t&gt;(layers.size());</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

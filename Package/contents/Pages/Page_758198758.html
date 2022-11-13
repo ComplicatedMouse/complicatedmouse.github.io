@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Thread State: System Call Details Window | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Thread State: System Call Details Window -->
+<div class="pagetitle" id="PageId_758198758">Thread State: System Call Details Window</div>
+<div class="text_separate">
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>This window will only appear if <strong>Thread State</strong> recording is enabled under the <strong>Sampled Profile</strong> or&nbsp;<strong>Instrumented Profile</strong> tab.</p>
+  </div>
+</div>
+<p>The <strong>System Call Details</strong> window provides additional information about a given blocking function call in the <strong>Thread State</strong> view on the <strong>Timeline</strong>&nbsp;tab. Double-click a <strong>Thread State</strong> function call rectangle to open this window. Multiple copies of this window can be open at once to allow for attempting to dig into thread synchronization issues.</p>
+<h1 id="Anchor_758198758_h1_1">Contents</h1>
+<h2 id="Anchor_758198758_h2_1">Header</h2>
+<p>An identifier for the function that can cause a thread state change. This usually takes the form of a function name or short description.</p>
+<h2 id="Anchor_758198758_h2_2">Details</h2>
+<p>The details contains information that can help provide additional understanding of which thread made the call to the function and if there is another thread that is blocking the call from completing.</p>
+<ul>
+  <li>
+    <strong>Called by thread</strong>: The name of the thread that called the function that can cause a thread state change.</li>
+  <li>
+    <strong>Blocked by thread</strong>: If a thread may block this call from completing, that thread is listed. If there is no potential block, &quot;None&quot; is displayed. If the same thread is shown here as is shown in Called by thread, then the current thread owns the object and no block should occur.</li>
+  <li>
+    <strong>Type</strong>: The type of the operation. This matches the color key that is used when drawing the thread state trace event on the Timeline.</li>
+  <li>
+    <strong>Duration</strong>: The duration of the function call, from entry to exit.</li>
+  <li>
+    <strong>Core started</strong>: Two values are shown here. The first is a time value that shows when the call was entered. The core number is also shown for the core that was executing the function when the function was entered.</li>
+  <li>
+    <strong>Core ended</strong>: Two values are shown here. The first is a time value that shows when the call returned. The core number is also shown for the core that was executing the function what the function returned.</li>
+</ul>
+<h2 id="Anchor_758198758_h2_3">Kernel Call Arguments</h2>
+<p>Each of the different types of thread state tracing events can have its own listing of values that show up in this section. Many of these are how the information is communicated to the thread scheduler itself based on the calling thread or synchronization object itself. While the profiler uses these values to show potential blocking threads and the synchronization object, they are not directly useful and are planned to be removed in a future release.</p>
+<p>The more directly useful values that may appear in this section are:</p>
+<ul>
+  <li>Synchronization object: The object type and its address. These include a&nbsp;<strong>View</strong> button that shows the&nbsp;<a href="../Pages/Page_758198764.html">Thread State: Synchronization Object Details Window</a> window containing a table of times the object was used.</li>
+  <li>
+    <strong>Requested Wait Time</strong>: A time requested of the thread scheduler. This may be either a wait time, like in the case of Sleep calls, or a timeout, like in the case of TimedWait calls.</li>
+  <li>
+    <strong>Return</strong>: The value returned from the call made to the thread scheduler. This is an <span class="ApiLink_nn__Result">nn::Result</span> value where the value 0x0 means that there were no problems. For timed wait events, you may also see 0xEA01, which indicates that the function call timed out.</li>
+</ul>
+<h2 id="Anchor_758198758_h2_4">Callstack</h2>
+<p>The callstacks shown have been truncated from the full callstack. The inner details of functions from nnSdk are not displayed to more quickly show where your application called a function to be called that can cause a change in a thread's state.</p>
+<h1 id="Anchor_758198758_h1_2">Exploring System Calls</h1>
+<p>If you click the <strong>View</strong> button to the right of a synchronization object in the window, it will bring up a <strong>Synchronization Object Details</strong> window, displaying every system call that referenced this object. You can double-click any of those system calls to open a <strong>System Call Details </strong>window for that system call.</p>
+<p>More details about the <strong>Synchronization Object Details</strong> window can be found at&nbsp;<a href="../Pages/Page_758198764.html">Thread State: Synchronization Object Details Window</a>.</p>
+<h1 id="Anchor_758198758_h1_3">Limitation of the Blocked by Thread Display</h1>
+<p>In the case that a thread is blocked, the thread displayed in <strong>Blocked by thread</strong>&nbsp;is determined at the time it was first blocked. When there are multiple threads contending for the same synchronization object, <strong>Blocked by thread</strong> will show the first thread that owned the object, even if another thread took ownership of it. This will occur when the calling thread did not get a chance to wake up and attempt to gain ownership of the object.</p>
+<p>As an example, assume there are three threads, A, B, and C. Threads A and B run at a high priority and thread C runs at a low priority. During execution, thread A locks a mutex. On another core, thread C attempts to lock the mutex, fails, and enters a blocked state where it is blocked by thread A. While waiting for the mutex to be released, thread B starts up on the same core that thread C was executing on and attempts to lock the mutex. When thread A releases the mutex, thread B finishes locking the mutex and resumes execution. Thread C never wakes up as thread B runs at a higher priority. Eventually, thread B releases the lock and goes to sleep, allowing thread C to finally lock the mutex and resume execution. During this entire time range, thread C will show as being blocked by thread A, because thread A was the owner of the lock when it was first blocked.</p>
+<p>There are a couple of ways that can be used to see this type of behavior occurring.</p>
+<p>For a visual representation, go to the <strong>Timeline</strong> tab and move the mouse over the blocking call. All uses of the synchronization object should highlight for all threads to show what other threads were competing for the object.</p>
+<p>For a pure data view, click on the <strong>View</strong> button to see a table of all uses of the synchronization object. Cross reference the <strong>Core started</strong> time from the <strong>Details</strong> of this window with the <strong>Begin time</strong> from the table to find which threads were also referencing the object around the same time.</p>
+<p>
+  <br />
+</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__Result', '../../../Api/HtmlNX/classnn_1_1_result.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

@@ -1,0 +1,845 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>3D Texture Converter | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- 3D Texture Converter -->
+<div class="pagetitle" id="PageId_239574379">3D Texture Converter</div>
+<div class="text_separate">
+<p>This section describes how to use the 3D texture converter and important considerations when using it.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_239574379_h1_1">Overview</a>
+    </li>
+    <li>
+      <a href="#Anchor_239574379_h1_2">Command-Line Options</a>
+    </li>
+    <li>
+      <a href="#Anchor_239574379_h1_3">Example Use</a>
+    </li>
+    <li>
+      <a href="#Anchor_239574379_h1_4">Order of Internal Processing</a>
+    </li>
+  </ul>
+</p>
+<h1 id="Anchor_239574379_h1_1">Overview</h1>
+<p>The 3D texture converter is a converter like the <a href="../Pages/Page_83956254.html">GFX texture converter</a> with the added functionality of handling texture intermediate files.</p>
+<p>It creates texture intermediate (FTXA and FTXB) files from image (TGA, PNG, DDS, and EXR) files.<br />Also converts one or many texture intermediate files into a texture binary (BNTX) file.</p>
+<p>You can also import texture intermediate files, change the format, and reconvert.<br />In addition, you can convert texture intermediate files to image files.</p>
+<p>You can convert image files to DDS files in each format, and convert one or more DDS files to texture binary files.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>
+        <br />
+      </th>
+      <th>Texture Intermediate File (FTXA, FTXB) </th>
+      <th>Texture Binary File (BNTX)</th>
+    </tr>
+    <tr>
+      <td>Platform-dependent</td>
+      <td>None<br />(Yes when specifying <code>--resource-options</code>)</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Storage of multiple files</td>
+      <td>Not possible</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Original image data before encoding</td>
+      <td>
+        <p>Yes<br />(None when specifying <code>--disable-original-image</code>)</p>
+      </td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>Reconversion</td>
+      <td>Yes</td>
+      <td>Not possible</td>
+    </tr>
+    <tr>
+      <td>Additional Information</td>
+      <td>
+        <p>Hint information, user data,</p>
+        <p>tool data, and more.</p>
+      </td>
+      <td>
+        <p>User data only.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Texture binary files store data in a format that is optimized for the target platform.</p>
+<p>The origin is always at the upper-left for images in texture intermediate files and texture binary files.<br />Cube map texture data is stored using a right-hand coordinate system, in +x, -x, +y, -y, -z, +z order. (A left-hand coordinate system is used when referenced in the shader.)<br />In the following description, the coordinate axes of cube maps use a right-hand coordinate system.<br />In the following description, formats that use 9 bits or more for one element, as well as HDR-compatible formats, are real-number types, and all other formats are integer types.</p>
+<p>
+  <a name="Anchor_239574379_option"></a>
+</p>
+<h1 id="Anchor_239574379_h1_2">Command-Line Options</h1>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe [input file]... [--args-file &quot;&quot;] [--version] [-h] [-s]
+[--job-list &quot;&quot;] [--continue-on-error] [-o &quot;&quot;]
+[--project-root &quot;&quot;] [--disable-file-info] [--disable-original-image] [--disable-memory-pool]
+[--tile-mode &quot;&quot;] [--tile-optimize &quot;&quot;] [--tile-size-threshold &quot;&quot;] [--sparse-tiled &quot;&quot;]
+[--abgr]
+[--resource-options]
+[-m &quot;&quot;] [--disable-merge-error] [--dcc-preset &quot;&quot;]
+[-n &quot;&quot;] [-l &quot;&quot;] [-d &quot;&quot;]
+[-f &quot;&quot;] [--format-with-a &quot;&quot;] [--format-translucent &quot;&quot;] [-w &quot;&quot;]
+[-t &quot;&quot;] [--discrete-number &quot;&quot;]
+[--no-encoding] [--gpu-encoding &quot;&quot;] [--check-gpu-encoding]
+[-i &quot;&quot;] [--mip-gen-filter &quot;&quot;] [-c &quot;&quot;]
+[--cubemap-back &quot;&quot;] [--cubemap-left &quot;&quot;] [--cubemap-right &quot;&quot;]
+[--cubemap-top &quot;&quot;] [--cubemap-bottom &quot;&quot;] [--mip-imageM &quot;&quot;]
+[--cubemap-frontM &quot;&quot;] [--cubemap-backM &quot;&quot;] [--cubemap-leftM &quot;&quot;]
+[--cubemap-rightM &quot;&quot;] [--cubemap-topM &quot;&quot;] [--cubemap-bottomM &quot;&quot;] [--comment &quot;&quot;]
+[--crop &quot;&quot;] [-e &quot;&quot;] [-x &quot;&quot;] [-y &quot;&quot;] [--resize-single-color &quot;&quot;]
+[--resize-filter &quot;&quot;] [--resize-gamma &quot;&quot;] [--reduction-only &quot;&quot;]
+[--ignore-alpha &quot;&quot;] [-u &quot;&quot;] [-r &quot;&quot;] [-g &quot;&quot;] [-b &quot;&quot;] [-a &quot;&quot;] [--no-tga-rle]
+[--extract-image-files &quot;&quot;] [--extract-ldr-type &quot;&quot;] [--extract-hdr-type &quot;&quot;]</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Input File</strong>
+</p>
+<p>Specifies the input file. Specifies an image file (TGA, PNG, DDS, or EXR) or a texture intermediate file.<br />If a texture binary file is being exported, you can specify multiple texture intermediate files or DDS files.<br />(You can also directly convert a single image file to a texture binary file, but we do not recommend it because a large amount of data is generated for alignment purposes.)<br />The input file becomes the front face of the cube map (+Z direction) if you specify the options <code>--cubemap-back</code>, <code>--cubemap-left</code>, <code>--cubemap-right</code>, <code>--cubemap-top</code>, and <code>--cubemap-bottom</code>. <br />16 bit/channel PNG files are handled as real-number type files.<br />DDS files support the following formats: DXTC, BC, ASTC, and all RGBA formats. If the input file is a DDS file, the output file is not re-encoded if you do not specify an option such as <code>-f</code> or <code>-i</code>. (If multiple DDS files are being converted to texture binary files, the files are never re-encoded). (If you specify <code>-i 1</code> without specifying <code>-f</code>, the mipmap is deleted, and the file is not re-encoded.)<br />The filename must end with a numeric value when using the <code>-t</code> option to export 3D textures or array textures. For more information, see the description of the <code>-t</code> option.<br />Specify only one texture binary file as the input file if the <code>--extract-image-files</code> option has been specified.</p>
+<p>
+  <strong> --args-file &quot;&quot;</strong>
+</p>
+<p>You can use the contents in the parameter file to specify arguments.<br />The parameter file allows you to specify each option over several lines.<br />Lines starting with a number sign (#) are treated as comments.<br />Newline characters cannot be included in escape sequences used in option specifications that appear between quotation marks (&quot;).<br />Save the parameter file using an ANSI encoding (Shift-JIS in Japanese environments).</p>
+<p>
+  <strong>--version</strong>
+</p>
+<p>Displays version information.</p>
+<p>
+  <strong>-h --help</strong>
+</p>
+<p>Displays Help.</p>
+<p>
+  <strong>-s --silent</strong>
+</p>
+<p>Suppresses the display of messages during processing.</p>
+<p>
+  <strong>--job-list &quot;&quot;</strong>
+</p>
+<p>Specifies the job list file.<br />When you use the job list, multiple conversion processes can be executed with one instance of process startup.<br />The job list file writes each process argument in a newline.<br />When specifying arguments other than <code>--job-list</code> at the same time, it results in the same operation as if you added arguments specified in each line of the job list file after the arguments other than <code>--job-list</code>.<br />Lines starting with a number sign (#) are treated as comments. <br />In the job list file, the <code>--version</code>, <code>-h</code>, <code>-s</code>, <code>--job-list</code>, and <code>--continue-on-error</code> options cannot be specified.<br />Save the job list file using an ANSI encoding (Shift-JIS in Japanese environments).</p>
+<p>
+  <strong>--continue-on-error</strong>
+</p>
+<p>When the <code>--job-list</code> option is being used, processing continues even if errors occur in some jobs.</p>
+<p>
+  <strong>-o &quot;&quot; --output &quot;&quot;</strong>
+</p>
+<p>Specifies the output file. Specifies a texture intermediate file, a texture binary file, or an image file (TGA, PNG, DDS, or EXR).<br />If this option is not specified and the input file is an image file, the output file will be named with the <code>.ftxb</code> extension.<br />If the input file is a texture intermediate file, that file gets overwritten.</p>
+<p>When you have specified a texture binary file, <code>-i</code>, <code>-c</code>, and any options not related to texture intermediate files are ignored when the input file is either a texture intermediate file or a DDS file. (For the <code>-i</code> option, only deleting mipmaps by specifying <code>-i 1</code> is effective.) All options will be used, however, when the input includes only one DDS file. This case is an exception.<br /><br />Specify an image file to export the pre-encoded image data of the texture intermediate file to a TGA, PNG, DDS, or EXR file.<br />Specify the <code>-f / --format-with-a / --format-translucent</code> option to encode image files and export them to the various different DDS format files.<br />You can output TGA files only when the input files are integer type files.<br />You can output EXR files only when the input files are real-number type files.<br />When you output a PNG file, the pixel value is clamped to the range of [0,1] if the input file is a real-number type.<br />When exporting to a TGA, PNG, or EXR file, cube maps are exported in the state of a horizontal cross-shaped cube map.<br />If you specify the <code>-i</code> option when exporting a DDS file, the file will have mipmaps.<br />The <code>-l</code> and <code>--mip-gen-filter</code> options are also applied.<br />If you specify an <code>srgb_*</code> format using the <code>-f / --format-with-a / --format-translucent</code> option, mipmaps are calculated in linear color space and then reverted to sRGB color space for export.<br />The <code>quantize_type</code>, <code>linear</code>, and <code>mip_gen_filter</code> settings are used if the input file is a texture intermediate file and the <code>-f</code>, <code>--format-with-a</code>, <code>--format-translucent</code>, <code>-l</code>, and <code>--mip-gen-filter</code> options are not explicitly specified.</p>
+<p>
+  <strong>--project-root &quot;&quot; </strong>
+</p>
+<p>Specifies the project's root folder.<br />When specified, a relative path from the root folder is generated based on the following attributes of the texture intermediate file.</p>
+<ul>
+  <li>
+    <code>src_path</code> for <code>&lt;create&gt;</code></li>
+  <li>
+    <code>src_path_r / g / b / a</code> for <code>&lt;texture_info&gt;</code></li>
+  <li>
+    <code>original_path</code> for <code>&lt;original_image&gt;</code> </li>
+</ul>
+<p>
+  <strong>--disable-file-info</strong>
+</p>
+<p>
+  <code>&lt;file_info&gt;</code> is not exported to the texture intermediate file if the input file is anything other than a texture intermediate file.<br />If the input file is a texture intermediate file, the file's <code>&lt;file_info&gt;</code> is not modified.<br />This option has no effect if something other than a texture intermediate file is being exported.</p>
+<p>
+  <strong>--disable-original-image</strong>
+</p>
+<p>This option omits the original image data from before encoding from the texture intermediate file.<br />Although the file size is smaller, the image quality deteriorates if the output file is reconverted.<br />If the input file is a texture intermediate file that does not include the original image, the output file does not include the original image data even without specifying this option.<br />This option has no effect if something other than a texture intermediate file is being exported.</p>
+<p>
+  <strong>--disable-memory-pool</strong>
+</p>
+<p>When a texture binary file is exported, a region for a memory pool object is not allocated, regardless of the memory pool alignment restriction.</p>
+<div>
+  <p>Specify this option when using an external memory pool.<br />This option has no effect if something other than a texture binary file is being exported. </p>
+  <p>
+    <strong>--tile-mode &quot;&quot;</strong>
+  </p>
+  <p>Specifies the tiling mode when a texture binary file is being exported.<br />Specify <strong>linear</strong> to export linear tiling data.<br />When a value other than <strong>linear</strong> is specified, the add-on for the target platform must be installed.<br />If this option is not specified, linear tiling data is exported.<br />When using linear tiling, the address and size of the data for each mipmap level are aligned to bytes per pixel (the number of bytes in one block in compressed format). The exception is when the data is in an uncompressed format and the number of bytes per pixel is less than 4 or not a power of 2, in which case the alignment is 4 bytes.</p>
+  <p>
+    <strong>--tile-optimize &quot;&quot;</strong>
+  </p>
+  <p>Specifies the tiling optimization mode when a texture binary file is being exported.<br />Specify <code>performance</code> for optimization for higher performance, specify <code>size</code> for optimization to make the file smaller, and specify <code>size_auto</code> to automatically select size optimization according to the data reduction rate.<br />When <code>size_auto</code> is specified, specify the threshold value of the data reduction rate using the <code>--tile-size-threshold</code> option.<br />If you do not specify this option, optimization for performance is executed.<br />This option only has an effect when a specific mode is specified using the <code>--tile-mode</code> option.</p>
+  <p>
+    <strong>--tile-size-threshold &quot;&quot;</strong>
+  </p>
+  <p>If you specified <code>size_auto</code> using the <code>--tile-optimize</code> option, specify an integer from 0 to 100 for the threshold value [%] to judge whether to execute optimization for size.<br />Textures for which (size for size priority / size for performance priority) x 100 is less than the threshold value are optimized for size. All other textures are optimized for performance.<br />The larger the threshold value, the higher the probability that size priority is selected.<br />If you do not specify this option, the threshold value is 75.</p>
+  <p>
+    <strong>--sparse-tiled &quot;&quot;</strong>
+  </p>
+  <p>When exporting texture binary files, specify <code>true</code> if you are performing tiling conversion for sparse textures, and specify <code>false</code> if you are performing tiling conversion for ordinary textures.<br />If this option is not specified, tiling conversion for ordinary textures is performed. <br />Currently, sparse textures can only be used for specific platforms.</p>
+</div>
+<p>
+  <strong>--abgr</strong>
+</p>
+<p>Specify this option if textures in 16 bit/pixel RGB(A) format will be generated in order from the lowest bit (in (A)BGR order) when the texture binary files are generated. (Available in NintendoSDK 11.1.0 and later.)<br />This option affects textures in <code>unorm_5_6_5</code>, <code>unorm_5_5_5_1</code>, and <code>unorm_4_4_4_4</code> format. This option is specified when these formats are used in OpenGL or Vulkan.<br />If this option is not specified, textures are generated in RGB(A) order.</p>
+<p>
+  <strong>
+    <a name="Anchor_239574379_resource-options"></a>--resource-options &quot;&quot;</strong>
+</p>
+<p>Stores the options, for converting to a texture binary file, in the texture intermediate file. (This feature is available in NintendoSDK 13.0.0 and later.)<br />Use this option when you want to use the texture intermediate file to control the texture binary file status.<br /><strong><span style="color: rgb(255,0,0);">Note that texture intermediate files created with the <code>--resource-options</code> option will be platform-dependent. Normally, when exporting a texture binary file, we recommend specifying options related to texture binary files.</span></strong></p>
+<p>The texture binary file related options that you can specify are <code>--disable-memory-pool</code>, <code>--tile-mode</code>, <code>--tile-optimize</code>, <code>--tile-size-threshold</code>, <code>--sparse-tiled</code>, and <code>--abgr</code>.<br />For example, when converting <code>image1.ftxb</code> created with <code>--resource-options &quot;--sparse-tiled true&quot;</code> into a texture binary file, specify <code>3dTextureConverter.exe image1.ftxb -o image1.bntx</code> to apply a tiling conversion for space textures.<br /><br /><br />Use single quotation marks when enclosing each option value in quotation marks.<br />(Example: <code>--resource-options &quot;--tile-mode 'linear'&quot;</code>)</p>
+<p>When converting multiple textures into a single texture binary file, an error will occur if the <code>--disable-memory-pool</code> and <code>--tile-mode</code> settings differ between textures. You can specify different values for each texture for the other options.<br />The options specified by the argument when converting to texture binary files take priority over the options stored in the texture intermediate file.<br />　3dTextureConverter.exe image1.ftxb image2.ftxb -o images.bntx --tile-mode linear<br />If you specify the above, all files will be processed as <code>--tile-mode linear</code> regardless of the <code>--tile-mode</code> settings in <code>image1.ftxb</code> and <code>image2.ftxb</code>.</p>
+<p>The <code>--resource-options</code> options are enabled even when converting one image file directly into a texture binary file.</p>
+<p>
+  <strong> <a name="Anchor_239574379_tex_merge"></a>-m &quot;&quot; --merge &quot;&quot;</strong>
+</p>
+<p>Specifies the texture intermediate file to merge.<br />This option creates a texture intermediate file from the <code>&lt;texture_info&gt;</code> settings of the specified texture intermediate file (<code>hint</code>, <code>linear</code>, <code>dimension</code>, <code>quantize_type</code>, <code>mip_level</code>, <code>mip_gen_filter</code>, <code>comp_sel</code>, <code>weighted_compress</code>, and <code>resource_options</code>) and the <code>&lt;comment&gt;</code>, <code>&lt;user_data_array&gt;</code>, <code>&lt;tool_data&gt;</code> and <code>&lt;user_tool_data&gt;</code> settings.<br /><br /><br />If the <code>mip_level</code> of the file being merged is two or higher, a mipmap that includes levels where the height and width of the smallest level in the output file is less than the height and width of the smallest level in the file being merged is created.<br />If the input file is a texture intermediate file and the <code>text</code> attribute for the <code>&lt;comment&gt;</code> element is not blank, <code>text</code> is not merged.<br />If you specify this option, and at the same time, specify the <code>-n</code>, <code>-l</code>, <code>-d</code>, <code>-f</code>, <code>--format-with-a</code>, <code>--format-translucent</code>, <code>-w</code>, <code>-i</code>, <code>--mip-gen-filter</code>, <code>-c</code>, or <code>--comment</code> option, specification of those other options takes priority.</p>
+<p>
+  <strong>--disable-merge-error</strong>
+</p>
+<p>Suppresses the error that occurs when the file specified by the <code>--merge</code> option does not exist (a merge is not performed if the file does not exist).<br />Specify this option when the <code>merge</code> option is used only for merging user data or tool data.</p>
+<p>
+  <strong>--dcc-preset &quot;&quot;</strong>
+</p>
+<p>Specifies the preset name for the DCC plug-in. This option has no effect if something other than a texture intermediate file is being output.</p>
+<p>
+  <strong>-n &quot;&quot; --hint &quot;&quot;</strong>
+</p>
+<p>Specifies hint information.<br />If you do not specify this option, it is treated as <code>normal</code> if the format is <strong>snorm_bc5</strong> or <strong>snorm_eac_11_11</strong>. If the format is something else, the output is an empty string.<br />If the hint information is set to <code>normal</code> and the input file is an integer type, the data is normalized so the z-component of the normal is <code>0</code> or more and the length is <code>1.0</code>, after which the data is encoded in the output format and output. However, if normalization of the normal map has been specified by either the <code>--replace-r</code>, <code>--replace-g</code>, <code>--replace-b</code>, or <code>--replace-a</code> option, the data is not normalized before encoding.</p>
+<p>
+  <strong>-l &quot;&quot; --linear &quot;&quot;</strong>
+</p>
+<p>To convert a particular RGBA color component from sRGB to linear, specify <code>1</code> for that component. Specify <code>0</code> if you do want that component to be converted.<br />For example, is you specify the option as <code>-l 1110</code>, the  R, G, and B components are converted to linear, but the A component is not.<br />If you do not specify this option, no components are converted to linear.<br />The values set for the RGB components in this option will be ignored if the format is <code>srgb_*</code> (the RGB components are always converted to linear), and only the setting for the A component is applied in the output.</p>
+<p>
+  <strong>-d &quot;&quot; --dimension &quot;&quot;</strong>
+</p>
+<p>Specifies the dimension (<code>1d</code> / <code>2d</code> / <code>3d</code> / <code>cube</code> / <code>1d_array</code> / <code>2d_array</code> / <code>cube_array</code>).<br />For <code>3d</code>, <code>1d_array</code>, and <code>2d_array</code>, you must specify the depth using the <code>-t</code> option.<br />For <code>cube_array</code>, you must specify the number of cubes using the <code>-t</code> option.<br />For <code>1d</code> and <code>1d_array</code>, this option exports the top line of the input file.<br />If this option is not specified, and the input file is TGA , PNG, or EXR, <code>2d</code> is used as the dimension for the output file.<br />If the input file is a DDS file or a texture intermediate file, the original dimension is maintained.<br />If the <code>--cubemap-back</code>, <code>--cubemap-left</code>, <code>--cubemap-right</code>, <code>--cubemap-top</code>, or <code>--cubemap-bottom</code> options have been specified, <code>cube</code> is used as the dimension for the output file even if <code>-d cube</code> has not been specified.<br /></p>
+<p>
+  <a name="Anchor_239574379_horizontal_cross"></a>
+</p>
+<p>
+  <strong>Using a Horizontal Cross or a Vertical Cross Cube Map</strong>
+</p>
+<p>Specify <code>-d cube</code> without specifying the <code>--cubemap-back</code>, <code>--cubemap-left</code>, <code>--cubemap-right</code>, <code>--cubemap-top</code>, or <code>--cubemap-bottom</code> options.<br />Horizontal cross and vertical cross cube maps are distinguished based on the height and width of the input file.</p>
+<p>For a horizontal cross cube map, the square-shaped images for each view direction must be arranged as follows, without any gaps. (Axes are oriented in a right-handed coordinate system.)</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup> <col /> <col /> <col /> <col /> </colgroup>
+  <tbody>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>
+        <p>+Y</p>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>-X</p>
+      </td>
+      <td>
+        <p>-Z</p>
+      </td>
+      <td>
+        <p>+X</p>
+      </td>
+      <td>
+        <p>+Z</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>
+        <p>-Y</p>
+      </td>
+      <td>
+        <br />
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For a vertical cross cube map, the square image for each view direction must be arranged as follows, without any gaps.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>
+        <p>+Y</p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>-X</p>
+      </td>
+      <td>
+        <p>-Z</p>
+      </td>
+      <td>
+        <p>+X</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>
+        <p>-Y</p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <br />
+      </td>
+      <td>
+        <p>+Z</p>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>-f &quot;&quot; --format &quot;&quot;</strong>
+</p>
+<p>Specifies the format.<br />When this option is not specified, the output format is <code>unorm_8_8_8_8</code> when the input file is a TGA file; either <code>unorm_8_8_8_8</code> or <code>float_16_16_16_16</code>, depending on the original format, when the input file is a PNG file, and <code>float_16_16_16_16</code> when it is an EXR file. (If the output file is DDS, it is exported in 32-bit <code>float</code> format instead of <code>float_16_16_16_16</code>.) The original format is maintained when the input or texture intermediate file is a DDS file. <br />The following formats are currently supported.</p>
+<p>
+  <strong>Conversion Possible From All Input Files</strong>
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>unorm_8_8_8_8 / snorm_8_8_8_8 / srgb_8_8_8_8 
+unorm_bc1 / unorm_bc2 / unorm_bc3 / unorm_bc4 / unorm_bc5 / unorm_bc7
+srgb_bc1 / srgb_bc2 / srgb_bc3 / snorm_bc4 / snorm_bc5 / srgb_bc7
+unorm_astc_4x4 / unorm_astc_5x4 / unorm_astc_5x5 / unorm_astc_6x5
+unorm_astc_6x6 / unorm_astc_8x5 / unorm_astc_8x6 / unorm_astc_8x8
+unorm_astc_10x5 / unorm_astc_10x6 / unorm_astc_10x8
+unorm_astc_10x10 / unorm_astc_12x10 / unorm_astc_12x12
+srgb_astc_4x4 / srgb_astc_5x4 / srgb_astc_5x5 / srgb_astc_6x5
+srgb_astc_6x6 / srgb_astc_8x5 / srgb_astc_8x6 / srgb_astc_8x8
+srgb_astc_10x5 / srgb_astc_10x6 / srgb_astc_10x8
+srgb_astc_10x10 / srgb_astc_12x10 / srgb_astc_12x12 </pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Conversion Only Possible When Input Files Are Integer Type</strong>
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>unorm_5_6_5 / unorm_5_5_5_1 / unorm_4_4_4_4 
+unorm_8 / unorm_4_4 / unorm_8_8 
+snorm_8 / snorm_8_8 
+uint_8 / uint_8_8 / uint_8_8_8_8 
+sint_8 / sint_8_8 / sint_8_8_8_8
+unorm_etc1 / unorm_etc2 / unorm_etc2_mask / unorm_etc2_alpha
+srgb_etc2 / srgb_etc2_mask / srgb_etc2_alpha
+unorm_eac_11 / unorm_eac_11_11 / snorm_eac_11 / snorm_eac_11_11
+unorm_pvrtc1_2bpp / unorm_pvrtc1_4bpp / srgb_pvrtc1_2bpp / srgb_pvrtc1_4bpp
+unorm_pvrtc1_alpha_2bpp / unorm_pvrtc1_alpha_4bpp
+srgb_pvrtc1_alpha_2bpp / srgb_pvrtc1_alpha_4bpp
+unorm_pvrtc2_alpha_2bpp / unorm_pvrtc2_alpha_4bpp
+srgb_pvrtc2_alpha_2bpp / srgb_pvrtc2_alpha_4bpp</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>Conversion Only Possible When Input Files Are Real Number Type</strong>
+</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>unorm_16 / unorm_16_16 / unorm_16_16_16_16
+snorm_16 / snorm_16_16 / snorm_16_16_16_16
+uint_16 / uint_16_16 / uint_16_16_16_16
+sint_16 / sint_16_16 / sint_16_16_16_16
+uint_32 / uint_32_32 / uint_32_32_32_32
+sint_32 / sint_32_32 / sint_32_32_32_32
+unorm_10_10_10_2 / uint_10_10_10_2
+float_16 / float_32 / float_16_16 / float_32_32
+float_11_11_10 / float_16_16_16_16 / float_32_32_32_32
+ufloat_bc6 / float_bc6</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If <code>unorm_4_4</code>, <code>unorm_8_8</code>, <code>unorm_bc5</code>, or <code>unorm_eac_11_11</code> has been specified as the format and something other than <code>normal</code> has been specified for the hint information, the A component of the input file is applied to the G component of the texture (if the input file has an alpha channel component).<br /><br />If you specify either the <code>snorm</code> or <code>sint</code> format when the input file is an integer type, a value equal to the unsigned 8-bit value, ranging from 0 to 255, minus 128 is encoded. As a result, when the unsigned 8-bit value is <code>0</code>, it will be encoded as <code>-127</code>.<br />If the ASTC format has been specified and <code>normal</code> has been specified for the hint information, the R component of the input file is applied to the RGB components of the texture, and the G component of the input file is applied to the A component of the texture.<br />When an input file that contains real number pixel values is converted to an ASTC file, pixel values in the input file that are outside of the [0,1] range are clamped to [0,1]. <br />You can specify the ETC, EAC, and PVRTC file formats only when the output file is a texture intermediate file or a texture binary file.</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>The <code>unorm_4_4</code> format may only be used for specific platforms.<br />An error occurs if you convert <code>unorm_4_4</code> format texture intermediate files into Generic texture binary files.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>If the format has been specified as BC1, BC2, or BC3 in an environment where no special add-on has been installed, use dithering to cut down on padding when the image contains broad areas where the color changes gradually.<br />Use dithering when all of the following conditions are satisfied.</p>
+    <ul>
+      <li>Input File Is Integer Type</li>
+      <li>The image width or height is at least 256 pixels, and the smaller of the two is at least 8 pixels.</li>
+      <li>The maximum difference in RGB values with pixels around the periphery is 1 for at least 50 percent of the pixels.</li>
+      <li>The maximum difference in RGB values with pixels around the periphery is 64 or more for fewer than 20 percent of the pixels.</li>
+    </ul>
+    <p>The RGB values for the pixels around the periphery in all eight directions (top, bottom, left, right, and the diagonals) are calculated as 8-bit (256-level) color.</p>
+  </div>
+</div>
+<p>
+  <strong>--format-with-a &quot;&quot;</strong>
+</p>
+<p>Specifies the format to use when the input file contains the A component. If the input file contains the A component, it is converted to the format specified by this option. If the file does not contain the A component, it is converted to the format specified by the <code>-f</code> option.<br />If the input file is in a format that has the A component (the alpha channel), the A component is considered to exist in the file even if the alpha value for all pixels is <code>255</code> (<code>1.0</code>).<br />If this option is not specified, the file is converted to the format specified by the <code>-f</code> option regardless of whether it contains the A component.<br />When there is a component A, you can specify selection of another component in the format &quot;<em>format</em>, <em>component selection</em>&quot; (available with NintendoSDK 9.0.0 and later).<br />Specify the component selection in the same format as the <code>-c</code> option. If a component selection is omitted, the component selection specified with the <code>-c</code> option is applied, regardless of whether there is a component A.</p>
+<p>
+  <strong>--format-translucent &quot;&quot;</strong>
+</p>
+<p>Specifies the format to use when the input file contains a translucent alpha component. If the input file contains a translucent alpha component, it is converted to the format specified by this option. If the file does not contain a translucent alpha component, it is converted to the format specified by the <code>-f</code> or <code>--format-with-a</code> option.<br />When this option is not specified, the <code>-f</code> or <code>--format-with-a</code> option is used to covert to the specified format.<br />The <code>--format-translucent</code> option takes precedence over the <code>--format-with-a</code> option. When both are specified, the file is converted to the format specified by the <code>--format-with-a</code> option if none of the pixels have a translucent A component (that is, if the pixels are all opaque or all transparent or a combination of both).<br />If component selection has been specified by the <code>--format-with-a</code> option, the component selection specified by that option is applied even if the format specified by this option is being used.</p>
+<p>
+  <strong>-w &quot;&quot; --weighted-compress &quot;&quot;</strong>
+</p>
+<p>Specify <code>true</code> to apply a weight according to the human eye to RGB errors when using texture compression method bc1, bc2, bc3, and so on; otherwise, specify <code>false</code>. <br />If this option is not specified, weighting is not applied if the input file is a TGA, PNG, DDS, or EXR file. <br />If the input file is a texture intermediate file, the original setting is maintained.</p>
+<p>
+  <strong>-t &quot;&quot; --depth &quot;&quot;</strong>
+</p>
+<p>Specifies the depth of a 3D texture and array texture. <br />For cube array textures, specifies the number of cubes.<br />At the same time, specifies <code>-d 1d_array</code> for a 1D array texture, <code>-d 2d_array</code> for a 2D array texture, and <code>-d cube_array</code> for a horizontal cross or vertical cross cube map.<br /></p>
+<p>If you specify this option and omit the <code>-d</code> option, the result is a 3D texture if the input file is 2D, or a cube array texture if the input file is a cube map.</p>
+<p>If there are input files with names ending in incrementing numeric values, the number specified in this option defines how many of the input files to use.<br />For example, if there is an input file named <code>image1.tga</code> and the option has been specified as <code>-t 3</code>, the input files <code>image1.tga</code>, <code>image2.tga</code>, and <code>image3.tga</code> are used.<br />If there is an input file named <code>image010.tga</code> and the option has been specified as <code>-t 4</code>, the input files <code>image010.tga</code>, <code>image011.tga</code>, <code>image012.tga</code>, and <code>image013.tga</code> are used.<br />If individual images are being specified for each face of a cube map, files with names that end in incrementing numeric values specified by the <code>--cubemap-back</code>, <code>--cubemap-left</code>, <code>--cubemap-right</code>, <code>--cubemap-top</code>, and <code>--cubemap-bottom</code> options  are also used as input files.<br />To convert a group of files with filenames that end in numbers that are not in numerical sequence, set <code>--discrete-number</code> <code>true</code>.</p>
+<p>
+  <strong>--discrete-number &quot;&quot;</strong>
+</p>
+<p>Specify <code>true</code> to convert a group of files whose filenames end in numbers that are not in sequential order to a 3D texture or an array texture. Specify <code>false</code> to convert a group of files whose filenames end in numbers that are sequential. (This feature is in Nintendo SDK 9.1.0 and later.)<br />If you specify <code>true</code>, a number of files specified by the <code>-t</code> option are used as input files, starting in order from the file with the filename ending with the lowest number.<br />If this option is not specified, conversion involves the group of files whose filenames end in numerical sequence.<br />For example, if you have the files <code>image03.tga</code>, <code>image05.tga</code>, and <code>image08.tga</code>, and you specify <code>image05.tga</code> as the input file and <code> -t 2 --discrete-number true</code> as the options, the conversion process involves <code>image05.tga</code> and <code>image08.tga</code>.</p>
+<p>
+  <strong>--no-encoding</strong>
+</p>
+<p>Specified when converting without re-encoding.<br />Specify this option when creating an array texture if you are combining the encoded data from either DDS files or texture intermediate files.<br />Encoded texture intermediate file data is exported to a DDS file when specified while converting texture intermediate files to DDS files. (The mipmap images are also applied.)<br />When this option is used, all options not related to texture binary files are ignored, as are <code>--version</code>, <code>-h</code>, <code>-s</code>, <code>-o</code>, <code>-t</code>, <code>-i</code>, and <code>-c</code>. (For the <code>-i</code> option, only deleting mipmaps by specifying <code>-i 1</code> is effective.)</p>
+<p>When creating texture arrays, note the following important considerations.<br />The input files must be DDS files or texture intermediate files. The input file mipmap data is also applied.<br />Specify this option at the same time as the <code>-t</code> option.<br />The input file dimensions must be 1d, 2d, or cube.<br />The hint information, linear conversion flag, dimension, width, height, format, number of mipmaps, and component selections must be the same for each input file.<br />The preset name, initial swizzle value, user data, editing comments, tool data, and user tool data in the DCC plug-in output a leading input file.<br />For example, if the dimension is <code>2d</code> for <code>image1.dds</code>, <code>image2.dds</code>, and <code>image3.dds</code> and you specify <code>image1.dds -o array1.dds -t 3 --no-encoding</code>, encoded data will be combined and output to the file <code>array1.dds</code> (with the dimension <code>2d_array</code>).</p>
+<p>
+  <strong>--gpu-encoding &quot;&quot;</strong>
+</p>
+<p>Sets whether to encode in the GPU when converting to a particular format.<br />In the current environment, if you specify <code>true</code>, encoding takes place in the GPU if possible, or otherewsie an error is generated.<br />Specify <code>false</code> to use CPU encoding.<br />If you specify <code>auto</code>, encoding takes place in the GPU if possible, or in the CPU otherwise.<br />When this option is not specified, the behavior will be the same as if <code>true</code> was specified.<br />Currently, this option only works when converting to the BC1, BC2, BC3, BC6, BC7, and ASTC formats.<br />The encoding results might differ between encoding on the GPU and encoding on the CPU.<br />The encoding results might differ even when both instances occur on the CPU if the CPU vendors are different.<br />In some cases, GPU encoding might not be possible if the graphics driver version is out of date.<br />If the specific add-ons are not installed, this option is ignored, and encoding always takes place in the CPU.</p>
+<p>
+  <strong>--check-gpu-encoding</strong>
+</p>
+<p>Determines whether GPU encoding is possible in the current environment.<br />If GPU encoding is possible, the <code>3dTextureConverter.exe</code> exit code (<code>%ERRORLEVEL%</code>) is <code>0</code>. If it is not possible, the exit code is some nonzero value.<br />Even if the exit code is <code>0</code>, encoding takes place in the CPU if the format does not support GPU encoding.<br />GPU encoding is possible if the specific add-on is installed, and the GPU and graphics driver satisfy the conditions.<br />If this option has been specified, the other options are ignored, and conversion does not take place.</p>
+<p>
+  <strong>-i &quot;&quot; --mip-level &quot;&quot;</strong>
+</p>
+<p>Specifies the maximum number of mipmap levels. <br />If the height and width of the input file are too small to create the specified number of mipmap levels, mipmaps are created up to the level where the height and width are 1.<br />If this option is not specified and the input file is in TGA, PNG, or EXR format, mipmaps are generated down to the level where the height and width are 1. (However, if the output file format is DDS, mipmaps are not generated unless the <code>-i</code>, <code>-f</code>, <code>--format-with-a</code>, and <code>--format-translucent</code> options have also been specified.)<br />If this option is not specified, and the input file is a DDS file or a texture intermediate file, the original number of levels is maintained.<br />If the input file is a DDS file and neither the <code>-i</code>, <code>-m</code>,  <code>--crop</code>, <code>-e</code>,  <code>-x</code> nor <code>-y</code> option is specified, the mipmap images of the input file will be used.<br />If the input file is a texture intermediate file and the <code>--no-encoding</code> option is specified without the <code>-i</code> option, the mipmap images of the encoded data are used in the output file.</p>
+<p>
+  <strong>--mip-gen-filter &quot;&quot;</strong>
+</p>
+<p>Specify the filter to use when creating the mipmaps.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <td>point</td>
+      <td>Point sampling.</td>
+    </tr>
+    <tr>
+      <td>linear</td>
+      <td>Linear interpolation.</td>
+    </tr>
+    <tr>
+      <td>cubic</td>
+      <td>Standard cubic interpolation.</td>
+    </tr>
+    <tr>
+      <td>cubic_sharp</td>
+      <td>Sharp cubic interpolation. (Available in NintendoSDK 9.0.0 and later.)</td>
+    </tr>
+  </tbody>
+</table>
+<p>If this option is not specified, linear interpolation is used if the input file is a TGA, PNG, DDS, or EXR file. The original filter is maintained if the input file is a texture intermediate file.<br />Depending on the image, the <code>cubic</code> value might yield sharper results than the <code>cubic_sharp</code> value.</p>
+<p>
+  <strong>
+    <a name="Anchor_239574379_comp_sel"></a>-c &quot;&quot; --comp-sel &quot;&quot;</strong>
+</p>
+<p>You can specify which color component to select (<code>r</code>, <code>g</code>, <code>b</code>, <code>a</code>, <code>0</code>, or <code>1</code>) for each RGBA channel.<br />Enabled when the export file is either a texture intermediate file or a texture binary file.<br />For example, by specifying <code>-c rrr1</code>, you can select the R component for all three RGB channels and the constant <code>1</code> for the A channel.<br />If this option is not specified, you can select any of the following depending on the format.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>rrr1 (number of format components is 1) 
+rrrg (number of format components is 2, unsigned) 
+rg01 (number of format components is 2, signed, or either unorm_16_16 or uint_*_*) 
+rgb1 (number of format components is 3)
+rgba (number of format components is 4)
+ra01 (ASTC format, with &quot;normal&quot; specified for the hint information)</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>As an exception, the default component selection is rg01 when the input file is a DDS file with unsigned red and green components.<br />If the input file is a texture intermediate file and this option is not specified, the original <code>comp_sel</code> will be maintained, providing there is no change in the number of format components or whether they are signed or unsigned.</p>
+<p>
+  <strong>--cubemap-back &quot;&quot;</strong>
+</p>
+<p>Specifies the back face of the cube map (-z direction).</p>
+<p>
+  <strong>--cubemap-left &quot;&quot;</strong>
+</p>
+<p>Specifies the left face of the cube map (-x direction).</p>
+<p>
+  <strong>--cubemap-right &quot;&quot;</strong>
+</p>
+<p>Specifies the right face of the cube map (+x direction).</p>
+<p>
+  <strong>--cubemap-top &quot;&quot;</strong>
+</p>
+<p>Specifies the top face of the cube map (+y direction).</p>
+<p>
+  <strong>--cubemap-bottom &quot;&quot;</strong>
+</p>
+<p>Specifies the bottom face of the cube map (-y direction).</p>
+<p>
+  <strong>--mip-imageM &quot;&quot;<br /></strong>(<em>M</em> is an integer between 1 and 14 that indicates the mipmap level.)</p>
+<p>When specifying mipmap images individually, specify the image file for each level.<br />Levels not specified in this option are compressed versions of high-resolution level images.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>For example, say that you specify the command-line options base.tga -i 5 --mip-image2 sub.tga.
+level 0 is a base.tga image,
+level 1 is an image with base.tga compressed to 1/2,
+level 2 is a sub.tga image,
+level 3 is an image with sub.tga compressed to 1/2, and
+level 4 is an image with sub.tga compressed to 1/4.
+If the width and height of sub.tga is not one-fourth of the width and height of base.tga, an error occurs.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>--cubemap-frontM &quot;&quot;<br /></strong>
+  <strong>--cubemap-backM &quot;&quot;<br /></strong>
+  <strong>--cubemap-leftM &quot;&quot;<br /></strong>
+  <strong>--cubemap-rightM &quot;&quot;<br /></strong>
+  <strong>--cubemap-topM &quot;&quot;<br /></strong>
+  <strong>--cubemap-bottomM &quot;&quot;<br /></strong>(<em>M</em> is an integer between 1 and 14 that indicates the mipmap level.)</p>
+<p>Specifies the image file for each level when you are individually specifying the images for each direction of a cube map using the <code>--cubemap-back</code>, <code>--cubemap-left</code>, <code>--cubemap-right</code>, <code>--cubemap-top</code> and <code>--cubemap-bottom</code> options, and individually specifies the mipmap images.<br /><code>--cubemap-frontM,</code> <code>--cubemap-backM,</code> <code>--cubemap-leftM</code>, <code>--cubemap-rightM</code>, <code>--cubemap-topM</code>, and <code>--cubemap-bottomM</code> correspond to level M for the front, back, left, right, top, and bottom faces of the cube.<br />Levels not specified in this option are compressed versions of high-resolution level images.</p>
+<p>
+  <strong>--comment &quot;&quot;</strong>
+</p>
+<p>Represents comment text for editing the texture intermediate file.</p>
+<p>
+  <strong>--crop &quot;&quot;</strong>
+</p>
+<p>When cutting out a part of an image for export, specify a rectangle to cut out with four integer values that are separated by commas (in X, Y, W, H format).<br />X and Y specify an integer value of <code>0</code> or greater for the upper-left coordinate of the rectangle.<br />W and H specify an integer value of <code>1</code> or greater for the width and height of the rectangle.<br />If you are using the <code>-e</code>,  <code>-x</code>, and <code>-y</code> options together, the size of the rectangle is changed after it has been cut out. <br />If the input image is a horizontal or vertical cross-shaped cube, specify a rectangle for an image with a single view direction.</p>
+<p>
+  <strong>-e &quot;&quot; --reduce-level &quot;&quot;</strong>
+</p>
+<p>Specifying an integer N that is greater than or equal to 1 reduces the size of the output image to 1/(2^N).<br />(By half if N = 1, by one-quarter if N = 2, and by one-eighth if N = 3.)<br />If you do not specify this option, the size of the image is not reduced.<br />If you are using the <code>-x</code> and  <code>-y</code> options together, this option is disabled.</p>
+<p>
+  <strong>-x &quot;&quot; --resize-w &quot;&quot;<br /></strong>
+  <strong>-y &quot;&quot; --resize-h &quot;&quot;</strong>
+</p>
+<p>Specifies the resized width (<code>-x</code>) and height (<code>-y)</code> when images are resized and output, either in terms of a number of pixels (an integer of 1 or more) or in terms of a percentage of the original size (real number + %).<br />If only either the <code>-x</code> or the  <code>-y</code> option is specified, the aspect ratio is fixed when the size is changed.<br />If <code>-x 100% -y 50%</code> is specified, the height is reduced by half without changing the width of the image.<br />To specify a percentage value in a Windows BAT file, you must <strong><span style="color: rgb(255,0,0);">write two percentage symbols</span></strong>, as in <strong><span style="color: rgb(255,0,0);">50%%</span></strong>.<br />If the input image is a horizontal or vertical cross-shaped cubemap, specify the height and width of the image in a single view direction.</p>
+<p>
+  <strong>--resize-single-color &quot;&quot;<br /></strong>
+</p>
+<p>Resizes the height and width of single-color images to the specified sizes (available in NintendoSDK 9.2.0 and later).<br />For example, <code>--resize-single-color 4</code> changes the size of an image to 4 &times; 4 if the image is a single-color image.<br />When used along with the <code>-e</code>, <code>-x</code>, or <code>-y</code> option, this option first determines whether the resized result is a single-color image, and then if so resizes to the size specified in this option.<br />When used along with the <code>-r</code>, <code>-g</code>, <code>-b</code>, or <code>-a</code> option, this option determines whether the result of replacing the R/G/B/A channel is a single-color image.</p>
+<p>
+  <strong>--resize-filter &quot;&quot;</strong>
+</p>
+<p>Specifies the filter when changing the image size with the <code>-e</code>, <code>-x</code>, and <code>-y</code> options.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <tbody>
+    <tr>
+      <td>point</td>
+      <td>Point sampling.</td>
+    </tr>
+    <tr>
+      <td>linear</td>
+      <td>Linear interpolation.</td>
+    </tr>
+    <tr>
+      <td>cubic</td>
+      <td>Standard cubic interpolation.</td>
+    </tr>
+    <tr>
+      <td>cubic_smooth</td>
+      <td>Smooth cubic interpolation.</td>
+    </tr>
+    <tr>
+      <td>cubic_sharp</td>
+      <td>Sharp cubic interpolation.</td>
+    </tr>
+  </tbody>
+</table>
+<p>If this option is not specified, the size change is performed with linear interpolation.</p>
+<p>
+  <strong>--resize-gamma &quot;&quot;</strong>
+</p>
+<p>If specifying the <code>-e</code>, <code>-x</code> or <code>-y</code> options and converting the gamma from sRGB to linear using either the <code>-l</code> option or the input image settings, specify <code>true</code> to calculate the size changes in linear space, or <code>false</code> to calculate the size changes without converting the color space.<br />If this option is not specified, the resizing is calculated in linear space.</p>
+<p>
+  <strong>--reduction-only &quot;&quot;<br /></strong>
+</p>
+<p>Specify <code>true</code> if you only want to resize if the size specified with the <code>-x</code> or <code>-y</code> option yields an image smaller than the original size, or specify <code>false</code> if you want to resize regardless of the relationship to the original size (available in NintendoSDK 9.2.0 and later).<br />If this option is not specified, the image is resized regardless of the relationship to the original size.</p>
+<p>
+  <strong>--ignore-alpha &quot;&quot;</strong>
+</p>
+<p>Specify <code>true</code> to ignore the alpha component of the input image file and process it as opaque. Specify <code>false</code> to take the alpha into consideration.<br />For example, specify <code>true</code> if converting an image file unnecessarily configured with an alpha component, or if the format is something such as <code>unorm_bc5</code> and you do not want the alpha to be applied to the G component.<br />If this option is not specified, the alpha is used.<br />The <code>-a</code> option takes precedence over this option. The replaced alpha component is not ignored when <code>-a <em>replacement alpha component image file</em></code> is specified and <code>--ignore-alpha-true</code> is also specified.</p>
+<p>
+  <strong>-u &quot;&quot; --adjust-transparent-rgb &quot;&quot;</strong>
+</p>
+<p>Specify <code>true</code> if you are adjusting the RGB components of transparent pixels to prevent transparent pixel color bleeding due to linear interpolation. Specify <code>false</code> if you are not making such adjustments.<br />If you specify <code>true</code>, the RGB components of transparent pixels (those with an A component of <code>0</code>) are set with the average of the RGB components of adjacent non-transparent pixels (those with an A component of greater than <code>0</code>).<br />Also, when <code>true</code> is specified, the RGB components of transparent pixels are not affected when the size changes due to the <code>-e</code>, <code>-x</code>, or <code>-y</code> options.<br />If the sampling range is made entirely of transparent pixels, however, the RGB components of the transparent pixels are averaged. <br />If this option is not specified, the RGB components of transparent pixels are not adjusted. </p>
+<p>
+  <strong>-r &quot;&quot; --replace-r &quot;&quot;</strong> <br /><strong>-g &quot;&quot; --replace-g &quot;&quot;</strong> <br /><strong>-b &quot;&quot; --replace-b &quot;&quot;</strong> <br /><strong>-a &quot;&quot; --replace-a &quot;&quot;</strong></p>
+<p>Specifies the other image file to use when replacing the R, G, B, and A channels of the input file with the values of another image file.<br />To use the specified channel from that other image file, enter a colon followed by a color channel (<code>:r</code>, <code>:g</code>, <code>:b</code>, or <code>:a</code>) after its name.<br />The R channel is used if the color channel is omitted.<br />You can specify <code>-a</code> even if the input file does not have the A component. (This adds the A component, rather than replacing it.)<br />For example, if you specify <code>-g image1.tga -b image2.tga:a</code>, the G channel of the input file is swapped with the R channel of <code>image1.tga</code> and the B channel of the input file is swapped with the A channel of <code>image2.tga</code>.<br />If the other image is an FTX file or DDS file, the linear conversion flag is also replaced.</p>
+<p>If you specify <code>,normal</code> after the channel name, the RGB components of the other image file are normalized as the normal map (adjusted so that z-component is <code>0</code> or more and the length is <code>1.0</code>) and then replaced. (This feature is available in NintendoSDK 13.0.0 and later.)<br />For example, if you want the RG channels to be the xy-components of the normal map and the B channel to be the specular map, specify as <code>-r normal1.tga:<strong>r,normal</strong> -g normal1.tga:<strong>g,normal</strong> -b specular1.tga:r</code>.<br />If the normals have been normalized at the time of replacement, the original image data of the FTX file will consist of the normalized values.</p>
+<p>If the resolution of the other image file is different from the input file, this other image file is resized to match the input file. This operation uses the filter specified by the <code>--resize-filter</code> option.<br />There is no support for using this option together with the <code>-t</code>, <code>--cubemap-back</code>, <code>--cubemap-left</code>, <code>--cubemap-right</code>, <code>--cubemap-top</code>, <code>--cubemap-bottom</code>, and <code>--mip-imageM</code> options.</p>
+<p>
+  <strong>--no-tga-rle</strong>
+</p>
+<p>Specify this option to leave TGA files uncompressed when exporting them.<br />TGA files are exported with RLE compression if this option is not specified.</p>
+<p>
+  <strong>--extract-image-files &quot;&quot;</strong>
+</p>
+<p>Converts the textures in the texture binary file to image files. (This feature is available in NintendoSDK 12.2.0 and later.)<br />Specifies the path to the output folder for the image files.<br />As the input file, only one texture binary file is specified.<br />By default, the images are PNG files. To change the output file type, use the <code>--extract-ldr-type</code> and <code>--extract-hdr-type</code> options.<br />In the case of TGA, PNG, and EXR files, the data is converted and the output applies the selected components. (Cubemaps are flattened into the shape of a cross. 3D textures and array textures appear vertically as a stack of faces.)<br />In the case of DDS files, encoded data is output if possible. (Mipmaps are also output. The selected components are not applied.)<br />If this option has been specified, all other options except for <code>--version</code>, <code>-h</code>, <code>-s</code>, <code>--extract-ldr-type</code>, <code>--extract-hdr-type</code>, and <code>--no-tga-rle</code> are ignored.</p>
+<p>
+  <strong>--extract-ldr-type &quot;&quot;</strong>
+</p>
+<p>Specifies the output file type (TGA, PNG, or DDS) when extracting LDR images from the texture binary file. (This feature is available in NintendoSDK 12.2.0 and later.)<br />This option is used together with the <code>--extract-image-files</code> option.<br />If this option is not specified, the output files are PNG files.</p>
+<p>
+  <strong>--extract-hdr-type &quot;&quot;</strong>
+</p>
+<p>Specifies the output file type (TGA, PNG, DDS, or EXR) when extracting HDR images from the texture binary file. (This feature is available in NintendoSDK 12.2.0 and later.)<br />This option is used together with the <code>--extract-image-files</code> option.<br />Textures in real-number formats and in formats with 9 bits or more per component are output in the file type specified by this option.<br />If this option is not specified, the output files are PNG files.<br />In the case of TGA and PNG files, the output images have 8 bits per channel, with the RGBA values clamped to the range of [0,1].</p>
+<h1 id="Anchor_239574379_h1_3">Example Use</h1>
+<h2 id="Anchor_239574379_h2_1">Converting Image Files to Texture Intermediate Files</h2>
+<p>The following command converts the file named <code>image.tga</code> and creates a texture intermediate file named <code>image.ftxb</code> in <code>srgb_bc1</code> format with eight mipmap levels.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe image.tga -o image.ftxb -f srgb_bc1 -i 8</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The following command specifies merging <code>image.tga</code> with <code>merge.ftxb</code> using the settings (hint information, linear conversion, dimension, format, mipmap, component selection, initial swizzle values, user data, tool data, and user tool data) in <code>merge.ftxb</code>, and then creates a texture intermediate file named <code>image.ftxb</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe image.tga -o image.ftxb -m merge.ftxb</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Converts <code>image1.tga</code>, <code>image2.tga</code>, and <code>image3.tga</code>, and creates a texture intermediate file <code>array1.ftxb</code> for a two-dimensional array.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe image1.tga -o array1.ftxb -d 2d_array -t 3</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Batch conversion is possible using the job list file.<br />The <code>image1.ftxb</code> and <code>image2.ftxb</code> hint information is <code>albedo</code>, and the <code>image3.ftxb</code> hint information is <code>specular</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>list.txt
+
+image1.tga -o image1.ftxb -f srgb_bc1
+image2.tga -o image2.ftxb -f srgb_bc3
+image3.tga -o image3.ftxb -f unorm_8 --hint specular</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe --job-list list.txt --hint albedo</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_239574379_h2_2">Converting Texture Intermediate Files to a Texture Binary File</h2>
+<p>Converts <code>imageA.ftxb</code>, <code>imageB.ftxb</code>, and <code>imageC.ftxb</code> to the texture binary file <code>textures.bntx</code>, using linear tiling.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe imageA.ftxb imageB.ftxb imageC.ftxb -o textures.bntx --tile-mode linear</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_239574379_h2_3">Reconverting Texture Intermediate Files</h2>
+<p>The following command changes the format of <code>image.ftxb</code> to <code>unorm_5_6_5</code> and saves it.<br />There is no degradation of image quality due to re-encoding because the texture intermediate file includes image data before encoding.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe image.ftxb -o image.ftxb -f unorm_5_6_5</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_239574379_h2_4">Converting Texture Intermediate Files to TGA Files</h2>
+<p>Before encoding, the image data for <code>image.ftxb</code> is output to <code>original.tga</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe image.ftxb -o original.tga</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_239574379_h2_5">Converting Image Files to the Various DDS Format Files</h2>
+<p>The following command converts the file named <code>image.tga</code> and creates a DDS file named <code>image.DDS</code> in <code>srgb_bc1</code> format with eight mipmap levels.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe image.tga -o image.dds -f srgb_bc1 -i 8</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Converts <code>image1.tga</code>, <code>image2.tga</code>, and <code>image3.tga</code>, and creates a DDS file called <code>array1.dds</code> for a two-dimensional array.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe image1.tga -o array1.dds -f srgb_bc1 -d 2d_array -t 3</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Batch conversion is possible using the job list file.<br />The format for <code>image1.dds</code> and <code>image2.dds</code> is <code>srgb_bc1</code>, and the format for <code>image3.dds</code> is <code>unorm_5_6_5</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>list.txt
+
+image1.tga -o image1.dds
+image2.tga -o image2.dds
+image3.tga -o image3.dds -f unorm_5_6_5</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe --job-list list.txt -f srgb_bc1</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_239574379_h2_6">Converting DDS Files to a Texture Binary File</h2>
+<p>Converts <code>image_dxt1.dds</code>, <code>image_bc3.dds</code>, and <code>image_r5g6b5.dds</code> into the texture binary file named <code>textures.bntx,</code> using linear tiling.<br />DDS files are used as is during the conversion process. No re-encoding occurs. </p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>3dTextureConverter.exe image_dxt1.dds.dds image_bc3.dds image_r5g6b5.dds -o textures.bntx --tile-mode linear</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_239574379_h1_4">Order of Internal Processing</h1>
+<ol>
+  <li>Read the input file.</li>
+  <li>Delete the A component if <code>--ignore-alpha true</code> is specified.</li>
+  <li>Replace the channels if <code>--replace-r/g/b/a</code> is specified and any of the following conditions are met.<br />&bull; <code>--reduce-level</code> and <code>--resize-w/h</code> are not specified.<br />&bull; <code>--crop</code> is specified.<br />&bull; Horizontal (vertical) cross cube map.<br />&bull; The input file and the replacement file are the same size and <code>--replace-r/g/b/a</code> does not specify normalization of the normals.</li>
+  <li>Crop, if <code>--crop </code> is specified.</li>
+  <li>Resize, if <code>--reduce-level</code> or <code>--resize-w/h</code> is specified.<br />(Affected by the specification of <code>--resize-filter</code>, <code>--resize-gamma</code>, <code>--adjust-transparent-rgb</code>, and <code>--linear</code>.)</li>
+  <li>If the channels were not replaced in step 3, replace them in this step according to <code>--replace-r/g/b/a</code>.</li>
+  <li>Adjust the RGB components of transparent pixels if <code>--adjust-transparent-rgb true</code> has been specified.</li>
+  <li>Resize if <code>--resize-single-color</code> is specified and the color is monochrome.</li>
+  <li>(&uarr; The result of the processing to this point becomes the original image data of the FTX file.)</li>
+  <li>Create mipmaps.</li>
+  <li>Copy the A component to the G component if the output format is either <code>unorm_4_4</code>, <code>unorm_8_8</code>, <code>unorm_bc5</code>, or <code>unorm_eac_11_11</code>, the hint information is not specified as <code>normal</code>, and the image has an A component.</li>
+  <li>Normalize the normals, if the hint information is <code>normal</code> and the input file is an integer type and <code>--replace-r/g/b/a</code> does not specify normalization of the normals.</li>
+  <li>Encode the data in the output format.</li>
+</ol>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

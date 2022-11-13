@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Other | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Other -->
+<div class="pagetitle" id="PageId_166500119">Other</div>
+<div class="text_separate">
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_166500119_h1_1">Setting the Output Devices</a>
+    </li>
+    <ul>
+      <li>
+        <a href="#Anchor_166500119_h2_1">Device Mapping</a>
+      </li>
+    </ul>
+  </ul>
+</p>
+<h1 id="Anchor_166500119_h1_1">Setting the Output Devices</h1>
+<p>Audio created with the <code><span class="ApiLink_nn__audio">nn::audio</span></code> library is output from the devices that correspond to the platform that is running. This section describes the feature for configuring the settings for the devices from which the audio is being output.</p>
+<p>This description uses the terms <em>real audio devices</em> and <em>virtual audio devices</em>.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Term</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>Real Audio Devices</td>
+      <td>
+        <div class="content-wrapper">This term refers to the audio-output devices that are supported on the platform on which application is running.<p>In the PC environment, it refers to those playback devices that have been installed and enabled on the PC. To check which devices are enabled on your PC, select <strong>Control Panel </strong>&gt; <strong>Sound</strong>.</p><div class="platform_nx"><p>On the NX platform, the following devices are supported.</p><ul><li><code>AudioTvOutput</code>: Devices that output audio via the HDMI interface of the dock.</li><li><code>AudioBuiltInSpeakerOutput</code>: Devices that output audio from the built-in speakers.</li><li><code>AudioExternalOutput</code>: An external audio output device connected to the main unit. In the current version, this setting correlates to devices connected to the built-in headphone/microphone jack, USB audio output devices, and Bluetooth audio output devices.</li></ul></div></div>
+      </td>
+    </tr>
+    <tr>
+      <td>Virtual Audio Devices</td>
+      <td>
+        <p>This term refers to the virtual devices that are specified as the audio output by the <a href="../Pages/Page_89991490.html">audio output  feature</a> and the <a href="../Pages/Page_89991492.html">audio renderer</a>. The audio output to these virtual devices ends up being automatically output to the real devices that correspond to the platform on which the application is running. If the number of input channels for the <em>virtual audio device</em> is different from the number of output channels for the <em>real audio device</em>, the <code><span class="ApiLink_nn__audio">nn::audio</span></code> library will downmix the audio. For more information about downmixing, see <a href="../Pages/Page_89991492.html#Anchor_89991492_h4_2">audio Library &gt; Manual &gt; Feature Descriptions &gt; Audio Renderer#DeviceSinkType</a>.</p>
+        <p>
+          <br />
+        </p>
+        <p>The current release supports only <code>MainAudioOut</code> as a virtual audio device. MainAudioOut functions as one 5.1 channel 48kHz audio output device.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_166500119_h2_1">Device Mapping</h2>
+<p>In the PC environment, the audio device that has been specified as the default playback device for the PC is recognized as the <em>real audio device</em>, and an attempt is made to output the audio from the <em>virtual audio device</em> to there. However, a device mapping feature is provided as a way to specify any destination for the <em>virtual audio device</em> output, allowing the audio to be output from devices other than the default playback device. You can use this feature to select any enabled playback device as the audio output device.</p>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Make sure that you configure this setting before using any of the <code><span class="ApiLink_nn__audio">nn::audio</span></code> functions.</p>
+  </div>
+</div>
+<h3 id="Anchor_166500119_h3_1">Usage Examples</h3>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="c1">// Gets a list of the &quot;real audio devices&quot; running on the platform.
+</span><span class="k">const</span> <span class="kt">int</span> <span class="n">nameCount</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+<span class="nn">nn::audio::</span><span class="n">AudioDeviceName</span> <span class="n">deviceNames</span><span class="p">[</span><span class="n">nameCount</span><span class="p">]</span>
+<span class="kt">int</span> <span class="n">actualDeviceCount</span> <span class="o">=</span> <span class="nn">nn::audio::</span><span class="n">ListAudioOutputDeviceName</span><span class="p">(</span><span class="n">deviceNames</span><span class="p">,</span> <span class="n">nameCount</span><span class="p">);</span> 
+
+<span class="c1">// Searches deviceNames for the index of the device you want to use.
+// This sample assumes it is the 2nd index in the array.
+</span><span class="kt">int</span> <span class="n">desiredDeviceIndex</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+
+<span class="c1">// Conducts device mapping. You can only use &quot;MainAudioOut&quot; for the virtualName parameter.
+</span><span class="nn">nn::</span><span class="n">Result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">nn::audio::</span><span class="n">SetAudioDeviceMapping</span><span class="p">(</span><span class="s">&quot;MainAudioOut&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">deviceNames</span><span class="p">[</span><span class="n">desiredDeviceIndex</span><span class="p">]);</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__audio', '../../../Api/HtmlNX/namespacenn_1_1audio.html' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>

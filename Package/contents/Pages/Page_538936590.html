@@ -1,0 +1,562 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Features | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Features -->
+<div class="pagetitle" id="PageId_538936590">Features</div>
+<div class="text_separate">
+<h1 id="Anchor_538936590_h1_1">Introduction</h1>
+<p>The Auto Test Assist Tool library is divided into four DLL libraries for capture and image processing, HID input operations, log acquisition, and TargetManager utility functions.</p>
+<ul>
+  <li>
+    <code>CaptureProcessor.dll</code>
+  </li>
+  <li>
+    <code>HidInputter.dll</code>
+  </li>
+  <li>
+    <code>LogReader.dll</code>
+  </li>
+  <li>
+    <code>TmUtility.dll</code>
+  </li>
+</ul>
+<p>There is also a wrapper library that wraps the preceding DLLs in C#.</p>
+<ul>
+  <li>
+    <code>CaptureProcessorNet.dll</code>
+  </li>
+  <li>
+    <code>HidInputterNet.dll</code>
+  </li>
+  <li>
+    <code>LogReaderNet.dll</code>
+  </li>
+</ul>
+<p>These wrapper libraries use common definitions from the following library. Also see that library.</p>
+<ul>
+  <li>
+    <code>CommonUtil.dll</code>
+  </li>
+</ul>
+<p>No wrapper library for <code>TmUtility.dll</code> is available.<br />Use the provided library for the .NET version of TargetManager as <code>Nintendo.Tm.dll</code>.<br />Find it in <code>C:\Program Files\Nintendo\Oasis\lib</code>, where TargetManager is installed.</p>
+<p>This section describes the features available and operating environments for each library, based on the four base libraries.</p>
+<h1 id="Anchor_538936590_h1_2">Advance Preparations</h1>
+<p>The following advance preparations are required for using each library.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col style="width: 134.0px;" />
+    <col style="width: 425.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>DLL</th>
+      <th>Advance Preparations</th>
+    </tr>
+    <tr>
+      <td>CaptureProcessor</td>
+      <td>
+        <p>
+          <strong>For capture via the network</strong>
+        </p>
+        <ul>
+          <li>Connect the development hardware and the host PC via a wired LAN.</li>
+          <li>Connect to the development hardware on TargetManager.</li>
+        </ul>
+        <p>
+          <br />
+        </p>
+        <p>
+          <strong>For capture via a capture board</strong>
+        </p>
+        <ul>
+          <li>Connect the HDMI output port from the SDEV, the SDEV cradle, or the Switch dock to the capture port on the host PC.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>HidInputter</td>
+      <td>
+        <ul>
+          <li>Connect to the development hardware on TargetManager and InputDirector.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>LogReader</td>
+      <td>
+        <ul>
+          <li>Connect to the development hardware on TargetManager.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>TmUtility</td>
+      <td>
+        <ul>
+          <li>Start TargetManager.</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>For more information about the following tools, see NintendoSDK Documents.</p>
+<ul>
+  <li>Target Manager</li>
+  <li>Input Director</li>
+</ul>
+<h1 id="Anchor_538936590_h1_3">CaptureProcessor</h1>
+<h2 id="Anchor_538936590_h2_1">Overview</h2>
+<p>The CaptureProcessor library is a library for performing development hardware screen capture and image processing.</p>
+<p>It allows a preview of the development hardware screen to be displayed on the host PC, a static image to be retrieved at any time, and for files to be created. It also allows you to perform operations on retrieved images like simple image detection (such as template matching) and to adjust the display position of a desired image on the screen.</p>
+<p>
+  <br />
+</p>
+<p>Screenshots can be routed in one of two ways: via a capture board, and via Target Manager. The following table compared the characteristics of each method.</p>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col style="width: 133.0px;" />
+    <col style="width: 119.0px;" />
+    <col style="width: 456.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Route</th>
+      <th>Item</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td rowspan="5">Capture Board</td>
+      <td>Compatible Development Hardware</td>
+      <td>
+        <p>SDEV, EDEV</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Connection Method</td>
+      <td>Connect the HDMI output port from the SDEV, the SDEV cradle, or the Switch dock to the capture port on the host PC.</td>
+    </tr>
+    <tr>
+      <td>Method of Specifying the Target</td>
+      <td>
+        <div class="content-wrapper">
+          <p>Device ID of the target capture device.</p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>Frame Rate</td>
+      <td>Approximately 60 fps.</td>
+    </tr>
+    <tr>
+      <td>Resolution</td>
+      <td>1920 &times; 1080 and 1280 &times; 720.</td>
+    </tr>
+    <tr>
+      <td rowspan="5">Target Manager</td>
+      <td>Compatible Development Hardware</td>
+      <td>
+        <p>SDEV, EDEV</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Connection Method</td>
+      <td>
+        <p>Connect the development hardware and the host PC via a wired LAN or USB.</p>
+        <p>Connect to the development hardware with Target Manager.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Method of Specifying the Target</td>
+      <td>
+        <p>Serial number of the target development hardware.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Frame Rate</td>
+      <td>
+        <table class="wrapped">
+          <tbody>
+            <tr>
+              <th>Type of Initialization</th>
+              <th>Frame Rate</th>
+            </tr>
+            <tr>
+              <td>DevkitCapture (SDEV only)</td>
+              <td>Approximately 6 to 7 fps.</td>
+            </tr>
+            <tr>
+              <td>RemoteVideo</td>
+              <td>
+                <p>Approximately 30 fps.</p>
+                <p>
+                  <strong>Note:</strong> Equivalent to DevkitCapture (SDEV only) if video capture is disabled in the running application.</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="content-wrapper">
+                  <p>Screenshot</p>
+                  <div class="info_new">
+                    <div class="info_new_left">Info</div>
+                    <div class="info_new_right">
+                      <p>Available in NX Add-On 12.2.0 and later.</p>
+                    </div>
+                  </div>
+                  <p>
+                    <strong>Note:</strong> Several restrictions apply during use. For more information, see the Note block below.</p>
+                </div>
+              </td>
+              <td>Approximately 0.6 to 0.7 fps.</td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td>Resolution</td>
+      <td>1280 &times; 720.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>All the capture device names and device IDs connected to the host PC can be checked by executed the included ConfirmDeviceList.py sample.</p>
+  </div>
+</div>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Screen capture does not work normally unless the input resolution of the capture board and the resolution specified when CaptureProcessor is initialized are the same.</p>
+    <p>Specify the initialization value to 1280 &times; 720 when directly connecting SDEV and the capture board by HDMI, and to the resolution off the system menu when connecting from the HDMI output port of the SDEV cradle or Nintendo Switch dock.</p>
+  </div>
+</div>
+<div class="note_new">
+  <div class="note_new_left">Note</div>
+  <div class="note_new_right">
+    <p>Screenshots display the same as with the screenshot feature of Target Manager. Note that the following restrictions apply during use.</p>
+    <ul>
+      <li>The Capture Button does not work.</li>
+      <li>Some of the RunOnTarget and ControlTarget features become unavailable.</li>
+    </ul>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h3 id="Anchor_538936590_h3_1">Image Processing Features</h3>
+<p>The CaptureProcessor can use the image processing features to search for items such as the coordinates of the target object in the development hardware screen during capture. For more information about each feature, see <a href="../Pages/Page_538936591.html">Image Processing Features</a>.</p>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_538936590_h1_4">HidInputter</h1>
+<h2 id="Anchor_538936590_h2_2">Overview</h2>
+<p>The HidInputter library is for emulating HID input operations by the controller or touch screen to the development hardware, and recording HID input operations.</p>
+<p>Connecting and disconnecting controller devices, input operations, and touch and drag input to the touch screen can be emulated for development hardware. The information about input to physical controller devices and the touch screen can be recorded and exported as a Python script.</p>
+<h2 id="Anchor_538936590_h2_3">HID Operation Emulation</h2>
+<table class="relative-table wrapped" style="width: 69.2938%;">
+  <colgroup>
+    <col style="width: 38.98%;" />
+    <col style="width: 27.3224%;" />
+    <col style="width: 15.7559%;" />
+    <col style="width: 17.9417%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Device</th>
+      <th>Features</th>
+      <th>Support Status</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td rowspan="5">
+        <p>Joy-Con (L)</p>
+        <p>Joy-Con (R)</p>
+      </td>
+      <td>Connection</td>
+      <td>〇</td>
+      <td>Up to 8 devices.</td>
+    </tr>
+    <tr>
+      <td>Button operations</td>
+      <td>〇</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Stick operations</td>
+      <td>〇</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Accelerometer</td>
+      <td>&times;</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Gyroscope</td>
+      <td>&times;</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="5">Switch Pro Controller</td>
+      <td>Connection</td>
+      <td>〇</td>
+      <td>Up to 8 devices.</td>
+    </tr>
+    <tr>
+      <td>Button operations</td>
+      <td>〇</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Stick operations</td>
+      <td>〇</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Accelerometer</td>
+      <td>&times;</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Gyroscope</td>
+      <td>&times;</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="3">Debug pad</td>
+      <td>Connection</td>
+      <td>〇</td>
+      <td>Maximum of one device.</td>
+    </tr>
+    <tr>
+      <td>Button operations</td>
+      <td>〇</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Stick operations</td>
+      <td>〇</td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td>Touch screen</td>
+      <td>Touch operations</td>
+      <td>〇</td>
+      <td>Up to 10 points.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>No more than eight Joy-Con (L), Joy-Con (R), and Switch Pro Controller devices can be connected.</p>
+    <p>Also, only one device can be connected to each of the left and right console rails.</p>
+  </div>
+</div>
+<h3 id="Anchor_538936590_h3_2">Characteristics of Controller Device Connection API Functions</h3>
+<table class="relative-table wrapped" style="width: 82.913%;">
+  <colgroup>
+    <col style="width: 16.0578%;" />
+    <col style="width: 18.6454%;" />
+    <col style="width: 65.2968%;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Function Name</th>
+      <th>Device</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>AddController</td>
+      <td>
+        <ul>
+          <li>Switch Pro Controller</li>
+        </ul>
+      </td>
+      <td>
+        <p>Allows you to connect a Switch Pro Controller.</p>
+        <p>The connected controller is assigned to an <code>NpadId</code> in the same way as when a new physics device is connected.</p>
+        <p>Use <code>AddControllerWithDeviceInfo</code> to specify information such as the device type and connection interface.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>AddControllerWithDeviceInfo</td>
+      <td>
+        <ul>
+          <li>Switch Pro Controller</li>
+          <li>Joy-Con(L)</li>
+          <li>Joy-Con(R)</li>
+        </ul>
+      </td>
+      <td>
+        <p>Allows you to connect a controller and specify its device type, connection interface, and color.</p>
+        <p>The connected controller is assigned to an <code>NpadId</code> in the same way as when a new physics device is connected.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>AddDebugController</td>
+      <td>
+        <ul>
+          <li>Debug pad</li>
+        </ul>
+      </td>
+      <td>Allows you to connect a debug pad.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Note that if you are emulating the connection of Joy-Con attached to the rails, no input will be accepted from Joy-Con actually physically attached to the rails until the emulated connection is disconnected.</p>
+    <p>Either terminate InputDirector or disconnect from the target in Target Manager to reset all emulation input states.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h2 id="Anchor_538936590_h2_4">Recording HID Operations</h2>
+<p>You can use the feature for recording HID operations to record the HID input to the development hardware and export that information as a Python script.</p>
+<p>The following information can be recorded for each device.</p>
+<table class="wrapped">
+  <colgroup>
+    <col style="width: 190.0px;" />
+    <col style="width: 118.0px;" />
+    <col style="width: 469.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Device</th>
+      <th>Connection Target</th>
+      <th>Record Content</th>
+    </tr>
+    <tr>
+      <td>Joy-Con(L), Joy-Con(R)</td>
+      <td>SDEV or EDEV</td>
+      <td rowspan="4">Identical to the emulatable information listed in HID Operation Emulation.</td>
+    </tr>
+    <tr>
+      <td>Switch Pro Controller</td>
+      <td>SDEV or EDEV</td>
+    </tr>
+    <tr>
+      <td>Debug pad</td>
+      <td>SDEV</td>
+    </tr>
+    <tr>
+      <td>Touch screen</td>
+      <td>SDEV or EDEV</td>
+    </tr>
+    <tr>
+      <td>
+        <p>XInput-compatible GamePad</p>
+      </td>
+      <td>Host PC</td>
+      <td>
+        <p>Button and stick input.</p>
+        <p>
+          <strong>Note:</strong> Recorded as Switch Pro Controller operations.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>
+      <code>Samples\Sources\Tools\AutoTestAssistTool\ScriptSamples\ExportScript.py</code> has been prepared as a sample to show the processing sequence from recording to generating operations.</p>
+    <p>The script that is generated is stored in the same <code>HACDllDriver.py</code> directory.</p>
+  </div>
+</div>
+<h1 id="Anchor_538936590_h1_5">LogReader</h1>
+<h2 id="Anchor_538936590_h2_5">Overview</h2>
+<p>The LogReader library is for retrieving log output from development hardware.</p>
+<p>Because logs obtained via TargetManager are buffered and run internally, logs can be retraced to the past and retrieved at any time. Retained logs are also compatible with search features, making it possible to perform processing like retrieving logs that match a regular expression or waiting until a log including a new optional string has been generated.</p>
+<h2 id="Anchor_538936590_h2_6">Accessing Logs</h2>
+<p>When the <code>StartLogStoring</code> function is called, the log from a target development hardware is buffered until the <code>StopLogStoring</code> function is called. You can access the buffered log by moving the cursor position to any line indicated in line count units.</p>
+<p>There are two ways to move the cursor, which can also be used in combination. One is to use the <code>MoveToNextLine</code> or <code>MoveToPreviousLine</code> function to move the cursor sequentially, and the other is to use a function like <code>WaitUntilMatched</code> or <code>SearchFormerLog</code> to search for the log to match a regular expression and move to that location.</p>
+<p>
+  <br />
+</p>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>Log buffering is limited to the number of lines specified when the <code>StartLogStoring</code> function is called. If the maximum number of lines is exceeded, lines are deleted starting from the log starting from the oldest line.</p>
+    <p>If a log has been buffered for more than the maximum number of lines while the cursor position indicates the oldest log, the oldest log will be deleted and the cursor position will be updated to show the new oldest log.</p>
+  </div>
+</div>
+<p>
+  <br />
+</p>
+<h1 id="Anchor_538936590_h1_6">TmUtility</h1>
+<h2 id="Anchor_538936590_h2_7">Overview</h2>
+<p>The TmUtility library is a library of utilities for the <code>tm</code> library.</p>
+<p>Features that are often used in addition to Auto Test Assist Tool are available as utilities.</p>
+<p>The following features are currently available.</p>
+<ul>
+  <li>Listing connected development hardware</li>
+</ul>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

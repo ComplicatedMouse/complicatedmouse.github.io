@@ -1,0 +1,867 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Exporting by Batch File | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Exporting by Batch File -->
+<div class="pagetitle" id="PageId_83956120">Exporting by Batch File</div>
+<div class="text_separate">
+<p>You can use Windows batch files to start Maya in a mode that does not display the user interface and export the specified scene intermediate files.<br />This section describes how to write code when using the Maya plug-in and important related considerations.</p>
+<p>
+  <ul class="macro_toc">
+    <li>
+      <a href="#Anchor_83956120_h1_1">Using NintendoExportByFdes</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956120_h1_2">Using NintendoExportByFdes2</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956120_h1_3">Using NintendoExportByFdes3</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956120_h1_4">Using NintendoExportByScene</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956120_h1_5">Using MEL Files</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956120_h1_6">Using mayapy.exe</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956120_h1_7">Sample Uses</a>
+    </li>
+    <li>
+      <a href="#Anchor_83956120_h1_8">Related Links</a>
+    </li>
+  </ul>
+</p>
+<p>
+  <a name="Anchor_83956120_NW4F_ExpByFdes"></a>
+</p>
+<h1 id="Anchor_83956120_h1_1">Using NintendoExportByFdes</h1>
+<p>Batch files can be coded in the following format when exporting using FDES file option settings:</p>
+<p>For a description of the batch files for starting Maya, see <a href="../Pages/Page_83955981.html#Anchor_83955981_start">here</a>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>call Maya startup batchfile -batch -proj &quot;project_folder&quot; -file &quot;scene_filename&quot;
+&nbsp;-command &quot;NintendoExportByFdes \&quot;fdes_filepath\&quot;&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Write everything from <code>call</code> to the final double quote of <code>-command</code> on a single line. If you want to break the code into multiple lines, add a caret (^) to the end of the line at each line break.</p>
+<p>For scene files you can specify files in the various formats supported by Maya (such as MA, MB, OBJ, FBX).</p>
+<p>If the FDES file path is not a full file path, it is treated as a relative path from the current project folder.</p>
+<p>If settings in the FDES file have been made to export selected nodes, include <strong>select node_name;</strong> before <code>NintendoExportByFdes</code>.</p>
+<p>For example, code as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>call StartMaya-2019.bat -batch -proj &quot;C:/Project1&quot; -file &quot;Scene1.mb&quot; -command &quot;NintendoExportByFdes \&quot;C:/Data/Scene1.fdes\&quot;&quot;
+call StartMaya-2019.bat -batch -proj &quot;C:/Project2&quot; -file &quot;Scene2.mb&quot; -command &quot;NintendoExportByFdes \&quot;C:/Data/Scene2.fdes\&quot;&quot;
+call StartMaya-2019.bat -batch -proj &quot;C:/Project3&quot; -file &quot;Scene3.mb&quot; ^
+&nbsp;-command &quot;select RootNode; NintendoExportByFdes \&quot;C:/Data/Scene3.fdes\&quot;&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_83956120_NW4F_ExpByFdes2"></a>
+</p>
+<h1 id="Anchor_83956120_h1_2">Using NintendoExportByFdes2</h1>
+<p>You can use the following format to export to a path other than the export path specified in the FDES file.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>call Maya startup batchfile -batch -proj &quot;project_folder&quot; -file &quot;scene_filename&quot;
+&nbsp;-command &quot;NintendoExportByFdes2 \&quot;fdes_filepath\&quot; \&quot;export_path\&quot;&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Specify the export path using the form <strong>export folder or intermediate folder (excluding the extension)</strong> or <strong>intermediate filename (excluding the extension)</strong>.</p>
+<p>In the case of the latter, data is exported to the export folder specified in the FDES file.</p>
+<p>For example, code as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>call StartMaya-2019.bat -batch -proj &quot;C:/Project1&quot; -file &quot;Scene1.mb&quot; ^
+&nbsp;-command &quot;NintendoExportByFdes2 \&quot;C:/Data/Scene1.fdes\&quot; \&quot;C:/Output/Player1\&quot;&quot;
+call StartMaya-2019.bat -batch -proj &quot;C:/Project2&quot; -file &quot;Scene2.mb&quot; ^
+&nbsp;-command &quot;NintendoExportByFdes2 \&quot;C:/Data/Scene2.fdes\&quot; \&quot;Player2\&quot;&quot;
+call StartMaya-2019.bat -batch -proj &quot;C:/Project3&quot; -file &quot;Scene3.mb&quot; ^
+&nbsp;-command &quot;select RootNode; NintendoExportByFdes2 \&quot;C:/Data/Scene3.fdes\&quot; \&quot;Player3\&quot;&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <a name="Anchor_83956120_NW4F_ExpByFdes3"></a>
+</p>
+<h1 id="Anchor_83956120_h1_3">Using NintendoExportByFdes3</h1>
+<p>The following format can be used to specify any option in the third argument.<br />Options specified in the third argument have priority over setting stored in the FDES file.</p>
+<p>However, if you are using presets, options that have been edit locked have priority over options specified in the third argument.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>call Maya startup batchfile -batch -proj &quot;project_folder&quot; -file &quot;scene_filename&quot;
+&nbsp;-command &quot;NintendoExportByFdes3 \&quot;fdes_filepath\&quot; \&quot;output_path\&quot; \&quot;option_string\&quot;&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Specify the option string in the form <em>option_name value</em>. Include an ASCII space character between the option name and value. It is possible to enter another space at the end and include yet more options by using the form <em>option_name value</em>.</p>
+<p>You can include <a href="../Pages/Page_83955854.html#Anchor_83955854_keyword">fdes file keywords</a> by using a hyphen (-) after an option name. Values used in FDES files can also be used. Short names such as <code>-s</code> and <code>-e</code> can also be used instead of long names such as <code>-start_frame</code> and <code>-end_frame</code>.</p>
+<p>The following table lists the options that you can specify.</p>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Long Name (Short Name)</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">
+        <strong>-preset (-prs)</strong>
+      </td>
+      <td>Available in NintendoSDK 11.3.0 and later.<br /><span style="color: rgb(23,43,77);">We do not recommend specifying this option as an additional option of the multi-export plug-in.</span></td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-export_target (-et)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-lod_export (-le)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-merge_fmd (-mmd)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-merge_fmd_path (-mmdp)</strong>
+      </td>
+      <td>If this option is specified, operations are the same as if <code>-merge_fmd true</code> was specified, even if <code>-merge_fmd true</code> was not specified.</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-merge_ftx (-mtx)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-merge_anim (-man)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-merge_anim_folder (-manf)</strong>
+      </td>
+      <td>If this option is specified, the program operates as if <code>-merge_anim true</code> was specified, even if it was not.</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-merge_anim_name (-mann)</strong>
+      </td>
+      <td>If this option is specified, the program operates as if <code>-merge_anim true</code> was specified, even if it was not.</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-magnify (-mag)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-texsrt_mode (-tsm)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-remove_namespace (-rn)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-comment (-ct)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-reset_root_scale (-rrs)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-reset_root_rotate (-rrr)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-reset_root_translate (-rrt)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-frame_range (-fr)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-start_frame (-s)</strong>
+      </td>
+      <td>If this option is specified, the program operates as if <code>-frame_range range</code> was specified, even if it was not.</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-end_frame (-e)</strong>
+      </td>
+      <td>If this option is specified, the program operates as if <code>-frame_range range</code> was specified, even if it was not.</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-loop_anim (-l)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-bake_all_anim (-baa)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-frame_precision (-fp)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-motion_mirroring (-mm)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-output_fmd (-fmd)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-output_ftx (-ftx)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-output_fsk (-fsk)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-output_fvb (-fvb)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-output_fcl (-fcl)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-output_fts (-fts)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-output_ftp (-ftp)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-output_fsh (-fsh)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-output_fsn (-fsn)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-compress_bone (-cb)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-unite_child (-uc)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-compress_material (-cm)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-compress_shape (-cs)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-divide_submesh (-ds)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-divide_submesh_mode (-dsm)</strong>
+      </td>
+      <td>If this option is specified, the program operates as if <code>-divide_submesh true</code> was specified, even if it was not.</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-poly_reduction (-pr)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-poly_reduction_mode (-prm)</strong>
+      </td>
+      <td>If this option is specified, the program operates as if <code>-poly_reduction true</code> was specified, even if it was not.</td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-tolerance_scale (-ts)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-tolerance_rotate (-tr)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-tolerance_translate (-tt)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-tolerance_color (-tc)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-tolerance_tex_scale (-tts)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-tolerance_tex_rotate (-ttr)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-tolerance_tex_translate (-ttt)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-quantize_tolerance_scale (-qts)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-quantize_tolerance_rotate (-qtr)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-quantize_tolerance_translate (-qtt)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-quantize_tolerance_tex_scale (-qtts)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-quantize_tolerance_tex_rotate (-qttr)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-quantize_tolerance_tex_translate (-qttt)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-pre_export_script (-pres)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">
+        <strong>-post_export_script (-poes)</strong>
+      </td>
+      <td>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In the case of options where <code>true</code> or <code>false</code> can be specified as the value, you can also use <code>on</code> or <code>1</code> instead of <code>true</code>, and <code>off</code> or <code>0</code> instead of <code>false</code>.</p>
+<p>If a value specified by a string includes an ASCII space character, surround the value in single quotes ('). Single quotes (') cannot be used in the value itself.</p>
+<p>If you use quotation marks (&quot;) in the string value, write them as <code>\\\&quot;</code> in the batch file. (If <code>-batch</code> is not the first argument in the Maya startup batch file, use <code>\\&quot;</code>.)</p>
+<p>
+  <code>-start_frame</code> and <code>-end_frame</code> must be specified together.</p>
+<p>For example, code as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>call StartMaya-2019.bat -batch -proj &quot;C:/Project1&quot; -file &quot;Scene1.mb&quot; ^
+&nbsp;-command &quot;NintendoExportByFdes3 \&quot;C:/Data/Scene1.fdes\&quot; \&quot;C:/Output/Player1\&quot; \&quot;-start_frame 10 -end_frame 30\&quot;&quot;
+
+call StartMaya-2019.bat -batch -proj &quot;C:/Project2&quot; -file &quot;Scene2.mb&quot; ^
+&nbsp;-command &quot;NintendoExportByFdes3 \&quot;C:/Data/Scene2.fdes\&quot; \&quot;Player2\&quot; \&quot;-merge_fmd_path C:/Data/Merge2.fmdb\&quot;&quot;
+
+call StartMaya-2019.bat -batch -proj &quot;C:/Project3&quot; -file &quot;Scene3.mb&quot; ^
+&nbsp;-command &quot;select RootNode; NintendoExportByFdes3 \&quot;C:/Data/Scene3.fdes\&quot; \&quot;Player3\&quot; \&quot;-output_fsk true\&quot;&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If you are using the start from the system command in <code>-pre_export_script</code> and <code>-post_export_script</code>, in the batch file, enclose system commands in parentheses (()).</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>-post_export_script 'system \\\&quot;(start D:/data/post_export1.bat)\\\&quot;'</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_83956120_h1_4">Using NintendoExportByScene</h1>
+<p>You can code batch files in the following format when exporting using settings stored in scenes.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>call Maya startup batchfile -batch -proj &quot;project_folder&quot; -file &quot;scene_filename&quot; -command &quot;NintendoExportByScene&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="info_new">
+  <div class="info_new_left">Info</div>
+  <div class="info_new_right">
+    <p>When using this format, note that the correct option settings must be stored in the scene.<br />Data is not exported if option settings are not saved in the scene.</p>
+  </div>
+</div>
+<h1 id="Anchor_83956120_h1_5">Using MEL Files</h1>
+<p>If there are a large number of intermediate files to export, it is efficient to prepare a MEL file like the following and run Maya only once.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>setProject &quot;C:/Project1&quot;;             // Set the project folder.
+file -f -o &quot;Scene1.mb&quot;;               // Open a scene.
+NintendoExportByFdes &quot;C:/Data/Scene1.fdes&quot;; // Export using the option settings in the FDES file.
+
+setProject &quot;C:/Project2&quot;;                        // Set the project folder.
+file -f -o &quot;Scene2.mb&quot;;                          // Open the scene.
+NintendoExportByFdes2 &quot;C:/Data/Scene2.fdes&quot; &quot;Player2&quot;; // Change the intermediate file based on option settings in the file and export.
+
+setProject &quot;C:/Project3&quot;;                                           /// Set the project folder.
+file -f -o &quot;Scene3.mb&quot;;                                             // Open the scene.
+select RootNode;                                                    // Select the node to export.
+NintendoExportByFdes3 &quot;C:/Data/Scene3.fdes&quot; &quot;Player3&quot; &quot;-output_fsk true&quot;; // Also export the FSK file.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>The batch file that executes this MEL file is coded as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>call Maya startup batchfile -batch -script &quot;mel_file_path&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>You can pass paths and other information from the batch file to the MEL file by using environment variables.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Batch File
+set PROJECT1=C:\Data\Project1
+call StartMaya-2019.bat -batch -script &quot;mel_file_path&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>MEL File
+setProject (`getenv PROJECT1`);
+file -f -o &quot;Scene1.mb&quot;;
+NintendoExportByFdes &quot;fdes/Scene1.fdes&quot;; // Because this is a relative path from the project folder,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// export using the settings in C:/Data/Project1/fdes/Scene1.fdes.</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Forward slashes (/) are used as the delimiter for folders in paths obtained using the <code>getenv</code> MEL command.</p>
+<h1 id="Anchor_83956120_h1_6">
+  <a name="Anchor_83956120_mayapy"></a>Using mayapy.exe</h1>
+<p>Use <code>mayapy.exe</code> to start Maya faster than when using batch mode (<code>mayabatch.exe</code>).<br />Specify <code>--environment-only</code> to set the environment variables for the plug-in, and then run <code>mayapy.exe</code>.<br /></p>
+<p>
+  <code>mayapy.exe</code> does not automatically load plug-ins, so any necessary plug-ins must be loaded using the <code>loadPlugin</code> command.</p>
+<h2 id="Anchor_83956120_h2_1"> Example of Opening a Scene and Exporting the Intermediate File</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>[StandAloneExport.bat]
+setlocal
+call StartMaya-2019.bat --environment-only
+&quot;%NINTENDO_MAYA_APP_ROOT%\bin\mayapy.exe&quot; &quot;%~dp0StandAloneExport.py&quot; %*</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="p">[</span><span class="n">StandAloneExport</span><span class="o">.</span><span class="n">py</span><span class="p">]</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">maya.cmds</span> <span class="kn">as</span> <span class="nn">cmds</span><span class="o">,</span> <span class="nn">maya.mel</span> <span class="kn">as</span> <span class="nn">mel</span><span class="o">,</span> <span class="nn">maya.standalone</span>
+<span class="n">maya</span><span class="o">.</span><span class="n">standalone</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;python&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">cmds</span><span class="o">.</span><span class="n">about</span><span class="p">(</span><span class="n">uiLanguage</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;ja_JP&quot;</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">reload</span><span class="p">(</span><span class="n">sys</span><span class="p">);</span> <span class="n">sys</span><span class="o">.</span><span class="n">setdefaultencoding</span><span class="p">(</span><span class="s2">&quot;shift-jis&quot;</span><span class="p">)</span>
+<span class="n">projPath</span><span class="p">,</span> <span class="n">scenePath</span><span class="p">,</span> <span class="n">fdesPath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">outputName</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">5</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">scenePath</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">cmds</span><span class="o">.</span><span class="n">loadPlugin</span><span class="p">(</span><span class="s2">&quot;fbxmaya.mll&quot;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">mel</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">&quot;FBXImportConstraints -v true&quot;</span><span class="p">)</span> <span class="c"># Apply the IK and constrain of the FBX file.</span>
+<span class="n">cmds</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="n">projPath</span><span class="p">,</span> <span class="n">openWorkspace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">cmds</span><span class="o">.</span><span class="n">file</span><span class="p">(</span><span class="n">scenePath</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">open</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">mel</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">&quot;NintendoExportByFdes2 </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">fdesPath</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2"> </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">outputName</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="s2">&quot;uninitialize&quot;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">maya</span><span class="o">.</span><span class="n">standalone</span><span class="p">):</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">maya</span><span class="o">.</span><span class="n">standalone</span><span class="o">.</span><span class="n">uninitialize</span><span class="p">()</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>[Usage example] (The final parameter is the intermediate filename. If omitted, the scene name will be used as the intermediate filename.)
+call StandAloneExport.bat &quot;C:/Project1&quot; &quot;Player1.mb&quot; &quot;C:/Data/Anim1.fdes&quot; &quot;Player1_Anim&quot;
+call StandAloneExport.bat &quot;C:/Project2&quot; &quot;fbx/Stage1.fbx&quot; &quot;C:/Data/Model1.fdes&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_83956120_h2_2">Example of Converting Model Intermediate Files to FBX Files</h2>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>[Fmd2Fbx.bat]
+setlocal
+call StartMaya-2019.bat --environment-only
+&quot;%NINTENDO_MAYA_APP_ROOT%\bin\mayapy.exe&quot; &quot;%~dp0Fmd2Fbx.py&quot; %*</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre><span class="p">[</span><span class="n">Fmd2Fbx</span><span class="o">.</span><span class="n">py</span><span class="p">]</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">maya.cmds</span> <span class="kn">as</span> <span class="nn">cmds</span><span class="o">,</span> <span class="nn">maya.mel</span> <span class="kn">as</span> <span class="nn">mel</span><span class="o">,</span> <span class="nn">maya.standalone</span>
+<span class="n">maya</span><span class="o">.</span><span class="n">standalone</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;python&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">cmds</span><span class="o">.</span><span class="n">about</span><span class="p">(</span><span class="n">uiLanguage</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;ja_JP&quot;</span><span class="p">:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">reload</span><span class="p">(</span><span class="n">sys</span><span class="p">);</span> <span class="n">sys</span><span class="o">.</span><span class="n">setdefaultencoding</span><span class="p">(</span><span class="s2">&quot;shift-jis&quot;</span><span class="p">)</span>
+<span class="n">projPath</span><span class="p">,</span> <span class="n">fmdPath</span><span class="p">,</span> <span class="n">outputPath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+
+<span class="n">cmds</span><span class="o">.</span><span class="n">loadPlugin</span><span class="p">(</span><span class="s2">&quot;NintendoExport.mll&quot;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">cmds</span><span class="o">.</span><span class="n">loadPlugin</span><span class="p">(</span><span class="s2">&quot;fbxmaya.mll&quot;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">cmds</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="n">projPath</span><span class="p">,</span> <span class="n">openWorkspace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">mel</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">&quot;NintendoImportCmd -newScene true </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">fmdPath</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">mel</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">&quot;FBXExport -f </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">outputPath</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="s2">&quot;uninitialize&quot;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">maya</span><span class="o">.</span><span class="n">standalone</span><span class="p">):</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="n">maya</span><span class="o">.</span><span class="n">standalone</span><span class="o">.</span><span class="n">uninitialize</span><span class="p">()</span></pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>[Usage Example] (The texture image files are output to the sourceimages folder of the specified project.)
+call Fmd2Fbx.bat &quot;C:/Project1&quot; &quot;C:/Data/Player1.fmdb&quot; &quot;C:/Project1/fbx/Player1.fbx&quot;
+call Fmd2Fbx.bat &quot;C:/Project2&quot; &quot;C:/Data/Stage1.fmdb&quot; &quot;C:/Project2/fbx/Stage1.fbx&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_83956120_h1_7">Sample Uses</h1>
+<p>If you do not want to export a particular node, include <strong><code>delete node_name;</code></strong> before <code>NintendoExportByFdes/2/3</code> or <code>NintendoExportByScene</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Batch File That Does Not Use a MEL File
+call StartMaya-2019.bat -batch -proj &quot;C:/Project1&quot; -file &quot;Scene1.mb&quot; ^
+&nbsp;-command &quot;delete Sword; NintendoExportByFdes \&quot;C:/Data/Scene1.fdes\&quot;&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>MEL File When a MEL File Is Used
+setProject &quot;C:/Project1&quot;;
+file -f -o &quot;Scene1.mb&quot;;
+delete Sword; // Delete the node (Sword) you do not want exported.
+NintendoExportByFdes &quot;C:/Data/Scene1.fdes&quot;;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>If you do not want to export the nodes in a particular display layer, include <strong><code>delete display_layer_name;</code></strong> before <code>NintendoExportByFdes/2/3</code> or <code>NintendoExportByScene</code>.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>Batch File That Does Not Use a MEL File
+call StartMaya-2019.bat -batch -proj &quot;C:/Project1&quot; -file &quot;Scene1.mb&quot; ^
+&nbsp;-command &quot;setAttr layer1.dt 1; NintendoExportByFdes \&quot;C:/Data/Scene1.fdes\&quot;&quot;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>MEL File When a MEL File Is Used
+setProject &quot;C:/Project1&quot;;
+file -f -o &quot;Scene1.mb&quot;;
+setAttr layer1.dt 1; // Put a display layer you do not want exported into template status.
+NintendoExportByFdes &quot;C:/Data/Scene1.fdes&quot;;</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_83956120_h1_8">Related Links</h1>
+<p>
+  <a href="../Pages/Page_83955842.html">Using Plug-Ins From Scripts</a>
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+</body>
+</html>

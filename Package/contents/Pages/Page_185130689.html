@@ -1,0 +1,954 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript" src="../template/js/jquery/jquery.js"></script>
+<script type="text/javascript" src="../template/js/common/manualLib.js"></script>
+<script type="text/javascript" src="../tocData.js"></script>
+<script type="text/javascript" src="../tocDataApi.js"></script>
+<link rel="stylesheet" type="text/css" href="../template/css/template.css" />
+<title>Performance | NintendoSDK Documents</title>
+</head>
+<body data-reassemble="autoindex=no,forceNoLabel=yes">
+<div id="autoindex_content">
+<div class="body_content">
+<noscript>
+<div style="text-align: center;"><img src="../template/img/noscript.svg" /></div>
+</noscript>
+<div class="page_navigation_top">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+</table>
+</div>
+<div class="breadcrumb"></div>
+
+<!-- Performance -->
+<div class="pagetitle" id="PageId_185130689">Performance</div>
+<div class="text_separate">
+<h1 id="Anchor_185130689_h1_1">Causes of Performance Hits</h1>
+<h2 id="Anchor_185130689_h2_1">Storage Media Access Speed</h2>
+<p>The access speeds for storage media vary depending on the type of storage media: system memory, game card, or SD card. Even for the same media type, access speeds differ due to factors such as storage capacity and product generation, individual differences, and age-related wear.</p>
+<p>Game cards of 4 GB or less run at 25 MHz. Game cards of 8 GB or more run at 50 MHz. There is a 100 percent difference in performance depending on the card capacity. You can change the capacity and operating frequency for an NX development card using the NMETA file settings. For more information, see <a href="../Pages/Page_177655843.html">NX Development Card</a> in Features.</p>
+<p>There are a wide variety of retail products on the market for SD cards. Their performance varies. Performance can vary even among SD cards in the same class.</p>
+<p>Applications need to work as they normally would, even when storage media access speeds change. To detect bugs that are dependent on access speed, a speed emulation feature is available for the NintendoSDK. You can test application operations in three different speed modes within the speed emulation feature: faster, slower, and random mode. For more information about using this feature, see the fs library &gt; Debugging Features &gt; <a href="../Pages/Page_177646410.html">Checking Access Speed Dependency</a>.</p>
+<h2 id="Anchor_185130689_h2_2">Simultaneous Access to Storage Media</h2>
+<p>There is only one communication pathway for system memory and for each game card or SD card. Any attempt by the application to simultaneously access data on the same storage media multiple times will be blocked internally.</p>
+<p>When the application was started from a game card, only the running application can access the game card where the ROM resource data is saved. But because the system memory where the save data is saved can also be accessed with firmware, the system memory is affected by simultaneous access.</p>
+<p>When the application was started from system memory or an SD card, access to not only the save data but also to the resource data can be affected by simultaneous access.</p>
+<p>A typical example of simultaneous access is the application downloading in the background.</p>
+<p>Access is temporarily blocked for these types of simultaneous accesses. As a result, access speeds might be slower than the values from performance measurements listed in this documentation.</p>
+<h2 id="Anchor_185130689_h2_3">Loads for CPU Resources and Memory Bandwidth</h2>
+<p>There is a hit on file system performance if graphic processing places a load on CPU resources or memory bandwidth. The file system takes a roughly 10% hit when you enable the <a href="../Pages/Page_258035870.html#Anchor_258035870_h2_2">video capture feature</a>.</p>
+<p>The <code>oe</code> library provides a CPU boost feature that temporarily increases CPU processing capacity at the expense of lowered GPU processing capacity. For more information, see <a href="../Pages/Page_503094447.html">CPU Boost Functionality</a>.</p>
+<h2 id="Anchor_185130689_h2_4">Access Method</h2>
+<p>File system performance depends heavily on the method used to access data. Sequential access, where files are accessed from sequential offset addresses, is faster than random access, where files are accessed from non-sequential offset addresses. In addition, accessing data collected together in one large buffer is faster than accessing data in multiple small buffers. For more information about practical implementation methods, see <a href="#Anchor_185130689_access_optimization">Optimizing the Access Speed</a>.</p>
+<h2 id="Anchor_185130689_h2_5">Placing Data</h2>
+<p>When the creation and deletion of directories and files is repeated in system memory or SD cards, contiguous free space is lost, and the possibility for data fragmentation occurs. In such cases, performance suffers because you cannot access all storage media at the same time.</p>
+<p>You also see inefficient access and lower performance speeds when SD cards are not formatted correctly, because data placement does not match the physical access units within the SD card.</p>
+<h1 id="Anchor_185130689_h1_2">Actual Performance Measurements (Reference)</h1>
+<div class="warn_new">
+  <div class="warn_new_left">Warning</div>
+  <div class="warn_new_right">
+    <p>
+      <span style="color: rgb(4,52,108);">The measured values in this documentation are not assured performance values. Performance depends greatly on the preceding factors.</span>
+    </p>
+  </div>
+</div>
+<p>The measured results are for ROM resource data and save data access speeds under the following conditions.</p>
+<!--Remove-->
+<ul>
+  <li>NintendoSDK SystemUpdater for NX 13.0.0-5 (NX Add-On 13.3.0)</li>
+  <li>Enable the video capture feature.</li>
+  <li>Joy-Con connection status</li>
+  <li>
+    <code>
+      <span class="ApiLink_nn__oe__CpuBoostMode_Normal">nn::oe::CpuBoostMode_Normal</span>
+    </code>, <code><span class="ApiLink_nn__oe__PerformanceConfiguration_Cpu1020MhzGpu307MhzEmc1331Mhz">nn::oe::PerformanceConfiguration_Cpu1020MhzGpu307MhzEmc1331Mhz</span></code></li>
+</ul>
+<h2 id="Anchor_185130689_h2_6">Loading ROM Resource Data</h2>
+<h3 id="Anchor_185130689_h3_1">Storage Media Comparisons</h3>
+<p>
+  <span class="embedded-file-wrapper ">
+    <img src="../Attachments/Attach_185130689/268862286.png" height="400" class="embedded-image" />
+  </span>
+</p>
+<ul>
+  <li>A: The <code>faster mode</code> speed emulation</li>
+  <li>B: System memory</li>
+  <li>C: SD cards</li>
+  <li>D: Game Cards of 8 GB or more</li>
+  <li>E: Game Cards of 4 GB or less</li>
+  <li>F: The <code>slower mode</code> speed emulation</li>
+</ul>
+<h3 id="Anchor_185130689_h3_2">Game Cards of 4 GB or Less</h3>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Buffer Size<br />(KB) </th>
+      <th>Sequential Access<br />(MB/sec) </th>
+      <th>Random Access<br />(MB/sec) </th>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1</th>
+      <td style="text-align: right;">4.2</td>
+      <td style="text-align: right;">0.6</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2</th>
+      <td style="text-align: right;">5.4</td>
+      <td style="text-align: right;">1.0</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4</th>
+      <td style="text-align: right;">6.4</td>
+      <td style="text-align: right;">1.7</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">8</th>
+      <td style="text-align: right;">6.8</td>
+      <td style="text-align: right;">3.1</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">16</th>
+      <td style="text-align: right;">7.2</td>
+      <td style="text-align: right;">5.2</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">32</th>
+      <td style="text-align: right;">10.4</td>
+      <td style="text-align: right;">8.2</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">64</th>
+      <td style="text-align: right;">13.4</td>
+      <td style="text-align: right;">11.1</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">128</th>
+      <td style="text-align: right;">15.6</td>
+      <td style="text-align: right;">12.7</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">256</th>
+      <td style="text-align: right;">17.2</td>
+      <td style="text-align: right;">15.3</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">512</th>
+      <td style="text-align: right;">18.0</td>
+      <td style="text-align: right;">16.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1024</th>
+      <td style="text-align: right;">18.8</td>
+      <td style="text-align: right;">17.7</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2048</th>
+      <td style="text-align: right;">19.3</td>
+      <td style="text-align: right;">18.5</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4096</th>
+      <td style="text-align: right;">19.5</td>
+      <td style="text-align: right;">19.2</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_185130689_h3_3">Game Cards of 8 GB or More</h3>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Buffer Size<br />(KB) </th>
+      <th>Sequential Access<br />(MB/sec) </th>
+      <th>Random Access<br />(MB/sec) </th>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1</th>
+      <td style="text-align: right;">5.2</td>
+      <td style="text-align: right;">0.8</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2</th>
+      <td style="text-align: right;">6.7</td>
+      <td style="text-align: right;">1.2</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4</th>
+      <td style="text-align: right;">7.5</td>
+      <td style="text-align: right;">2.1.</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">8</th>
+      <td style="text-align: right;">8.2</td>
+      <td style="text-align: right;">3.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">16</th>
+      <td style="text-align: right;">8.6</td>
+      <td style="text-align: right;">6.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">32</th>
+      <td style="text-align: right;">13.8</td>
+      <td style="text-align: right;">11.5</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">64</th>
+      <td style="text-align: right;">19.6</td>
+      <td style="text-align: right;">16.6</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">128</th>
+      <td style="text-align: right;">25.1</td>
+      <td style="text-align: right;">19.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">256</th>
+      <td style="text-align: right;">29.2</td>
+      <td style="text-align: right;">25.3</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">512</th>
+      <td style="text-align: right;">31.2</td>
+      <td style="text-align: right;">29.5</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1024</th>
+      <td style="text-align: right;">33.4</td>
+      <td style="text-align: right;">30.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2048</th>
+      <td style="text-align: right;">35.3</td>
+      <td style="text-align: right;">34.0</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4096</th>
+      <td style="text-align: right;">36.3</td>
+      <td style="text-align: right;">35.3</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_185130689_h3_4">System Memory</h3>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Buffer Size<br />(KB) </th>
+      <th>Sequential Access<br />(MB/sec) </th>
+      <th>Random Access<br />(MB/sec) </th>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1</th>
+      <td style="text-align: right;">6.4</td>
+      <td style="text-align: right;">2.0</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2</th>
+      <td style="text-align: right;">10.8</td>
+      <td style="text-align: right;">3.1</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4</th>
+      <td style="text-align: right;">13.9</td>
+      <td style="text-align: right;">5.3</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">8</th>
+      <td style="text-align: right;">19.1</td>
+      <td style="text-align: right;">9.6</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">16</th>
+      <td style="text-align: right;">21.9</td>
+      <td style="text-align: right;">17.1</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">32</th>
+      <td style="text-align: right;">35.0</td>
+      <td style="text-align: right;">28.6</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">64</th>
+      <td style="text-align: right;">51.3</td>
+      <td style="text-align: right;">42.4</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">128</th>
+      <td style="text-align: right;">65.2</td>
+      <td style="text-align: right;">50.8</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">256</th>
+      <td style="text-align: right;">68.8</td>
+      <td style="text-align: right;">58.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">512</th>
+      <td style="text-align: right;">74.3</td>
+      <td style="text-align: right;">69.1</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1024</th>
+      <td style="text-align: right;">81.5</td>
+      <td style="text-align: right;">77.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2048</th>
+      <td style="text-align: right;">98.0</td>
+      <td style="text-align: right;">91.6</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4096</th>
+      <td style="text-align: right;">105.6</td>
+      <td style="text-align: right;">101.1</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_185130689_h3_5">SD Card</h3>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Buffer Size<br />(KB) </th>
+      <th>Sequential Access<br />(MB/sec) </th>
+      <th>Random Access<br />(MB/sec) </th>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1</th>
+      <td style="text-align: right;">4.6</td>
+      <td style="text-align: right;">0.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2</th>
+      <td style="text-align: right;">5.9</td>
+      <td style="text-align: right;">1.2</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4</th>
+      <td style="text-align: right;">7.1</td>
+      <td style="text-align: right;">2.0</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">8</th>
+      <td style="text-align: right;">8.0</td>
+      <td style="text-align: right;">3.5</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">16</th>
+      <td style="text-align: right;">8.5</td>
+      <td style="text-align: right;">5.8</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">32</th>
+      <td style="text-align: right;">11.5</td>
+      <td style="text-align: right;">9.0</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">64</th>
+      <td style="text-align: right;">14.6</td>
+      <td style="text-align: right;">12.1</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">128</th>
+      <td style="text-align: right;">16.3</td>
+      <td style="text-align: right;">14.3</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">256</th>
+      <td style="text-align: right;">17.4</td>
+      <td style="text-align: right;">16.2</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">512</th>
+      <td style="text-align: right;">18.0</td>
+      <td style="text-align: right;">17.3</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1024</th>
+      <td style="text-align: right;">19.3</td>
+      <td style="text-align: right;">18.6</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2048</th>
+      <td style="text-align: right;">20.0</td>
+      <td style="text-align: right;">19.3</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4096</th>
+      <td style="text-align: right;">20.5</td>
+      <td style="text-align: right;">20.2</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_185130689_h3_6">Faster Mode Speed Emulation</h3>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Buffer Size<br />(KB) </th>
+      <th>Sequential Access<br />(MB/sec) </th>
+      <th>Random Access<br />(MB/sec) </th>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1</th>
+      <td style="text-align: right;">7.8</td>
+      <td style="text-align: right;">3.3</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2</th>
+      <td style="text-align: right;">13.8</td>
+      <td style="text-align: right;">4.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4</th>
+      <td style="text-align: right;">19.3</td>
+      <td style="text-align: right;">8.1</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">8</th>
+      <td style="text-align: right;">27.4</td>
+      <td style="text-align: right;">14.3</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">16</th>
+      <td style="text-align: right;">33.7</td>
+      <td style="text-align: right;">24.5</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">32</th>
+      <td style="text-align: right;">50.6</td>
+      <td style="text-align: right;">40.4</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">64</th>
+      <td style="text-align: right;">72.4</td>
+      <td style="text-align: right;">58.8</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">128</th>
+      <td style="text-align: right;">88.4</td>
+      <td style="text-align: right;">75.5</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">256</th>
+      <td style="text-align: right;">100.1</td>
+      <td style="text-align: right;">89.0</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">512</th>
+      <td style="text-align: right;">95.9</td>
+      <td style="text-align: right;">90.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1024</th>
+      <td style="text-align: right;">119.7</td>
+      <td style="text-align: right;">105.4</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2048</th>
+      <td style="text-align: right;">124.1</td>
+      <td style="text-align: right;">115.6</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4096</th>
+      <td style="text-align: right;">131.8</td>
+      <td style="text-align: right;">126.5</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="Anchor_185130689_h3_7">Slower Mode Speed Emulation</h3>
+<table class="wrapped" style="margin-left: 1.5em;">
+  <colgroup>
+    <col style="width: 115.0px;" />
+    <col style="width: 168.0px;" />
+    <col style="width: 128.0px;" />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Buffer Size<br />(KB) </th>
+      <th>Sequential Access<br />(MB/sec) </th>
+      <th>Random Access<br />(MB/sec) </th>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1</th>
+      <td style="text-align: right;">3.7</td>
+      <td style="text-align: right;">0.1</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2</th>
+      <td style="text-align: right;">5.0</td>
+      <td style="text-align: right;">0.2</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4</th>
+      <td style="text-align: right;">5.5</td>
+      <td style="text-align: right;">0.4</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">8</th>
+      <td style="text-align: right;">6.1</td>
+      <td style="text-align: right;">0.7</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">16</th>
+      <td style="text-align: right;">6.2</td>
+      <td style="text-align: right;">1.4</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">32</th>
+      <td style="text-align: right;">7.8</td>
+      <td style="text-align: right;">2.7</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">64</th>
+      <td style="text-align: right;">12.2</td>
+      <td style="text-align: right;">4.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">128</th>
+      <td style="text-align: right;">14.2</td>
+      <td style="text-align: right;">7.7</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">256</th>
+      <td style="text-align: right;">15.5</td>
+      <td style="text-align: right;">11.2</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">512</th>
+      <td style="text-align: right;">16.6</td>
+      <td style="text-align: right;">14.5</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1024</th>
+      <td style="text-align: right;">17.0</td>
+      <td style="text-align: right;">15.3</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2048</th>
+      <td style="text-align: right;">17.3</td>
+      <td style="text-align: right;">16.4</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4096</th>
+      <td style="text-align: right;">17.7</td>
+      <td style="text-align: right;">17.6</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_185130689_h2_7">Loading Save Data</h2>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Buffer Size<br />(KB) </th>
+      <th>Sequential Access<br />(MB/sec) </th>
+      <th>Random Access<br />(MB/sec) </th>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1</th>
+      <td style="text-align: right;">8.6</td>
+      <td style="text-align: right;">3.5</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2</th>
+      <td style="text-align: right;">14.3</td>
+      <td style="text-align: right;">4.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4</th>
+      <td style="text-align: right;">20.5</td>
+      <td style="text-align: right;">8.7</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">8</th>
+      <td style="text-align: right;">26.7</td>
+      <td style="text-align: right;">16.0</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">16</th>
+      <td style="text-align: right;">31.7</td>
+      <td style="text-align: right;">31.8</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">32</th>
+      <td style="text-align: right;">50.5</td>
+      <td style="text-align: right;">48.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">64</th>
+      <td style="text-align: right;">73.6</td>
+      <td style="text-align: right;">68.0</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">128</th>
+      <td style="text-align: right;">92.7</td>
+      <td style="text-align: right;">86.8</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">256</th>
+      <td style="text-align: right;">104.3</td>
+      <td style="text-align: right;">100.1</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">512</th>
+      <td style="text-align: right;">100.3</td>
+      <td style="text-align: right;">99.8</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1024</th>
+      <td style="text-align: right;">101.4</td>
+      <td style="text-align: right;">100.0</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2048</th>
+      <td style="text-align: right;">101.3</td>
+      <td style="text-align: right;">101.1</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4096</th>
+      <td style="text-align: right;">99.9</td>
+      <td style="text-align: right;">101.9</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="Anchor_185130689_h2_8">Writing Save Data</h2>
+<table class="wrapped">
+  <colgroup>
+    <col />
+    <col />
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Buffer Size<br />(KB) </th>
+      <th>Sequential Access<br />(MB/sec) </th>
+      <th>Random Access<br />(MB/sec) </th>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1</th>
+      <td style="text-align: right;">4.7</td>
+      <td style="text-align: right;">1.2</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2</th>
+      <td style="text-align: right;">6.3</td>
+      <td style="text-align: right;">1.5</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4</th>
+      <td style="text-align: right;">8.3</td>
+      <td style="text-align: right;">2.7</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">8</th>
+      <td style="text-align: right;">9.3</td>
+      <td style="text-align: right;">4.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">16</th>
+      <td style="text-align: right;">12.8</td>
+      <td style="text-align: right;">12.4</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">32</th>
+      <td style="text-align: right;">26.6</td>
+      <td style="text-align: right;">25.4</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">64</th>
+      <td style="text-align: right;">35.1</td>
+      <td style="text-align: right;">32.4</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">128</th>
+      <td style="text-align: right;">33.2</td>
+      <td style="text-align: right;">32.4</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">256</th>
+      <td style="text-align: right;">42.8</td>
+      <td style="text-align: right;">40.8</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">512</th>
+      <td style="text-align: right;">47.0</td>
+      <td style="text-align: right;">44.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">1024</th>
+      <td style="text-align: right;">47.0</td>
+      <td style="text-align: right;">45.9</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">2048</th>
+      <td style="text-align: right;">47.4</td>
+      <td style="text-align: right;">46.6</td>
+    </tr>
+    <tr>
+      <th style="text-align: right;">4096</th>
+      <td style="text-align: right;">47.1</td>
+      <td style="text-align: right;">47.2</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="Anchor_185130689_h1_3">Optimizing the Access Speed<a name="Anchor_185130689_access_optimization"></a></h1>
+<p>The following methods are available for suppressing lowered performances, but the effectiveness of each method greatly depends on the data structure and access patterns for each application. Consider this fact when you are designing the structure of data for your application. If you do not consider these concepts and performance suffers, the need for later revisions may prove costly.<br /><br />For more information about the considerations when designing the structure of your resource data (ROM), see Patches &gt; <a href="../Pages/Page_185135554.html">Optimization Information</a>.<br /></p>
+<p>Note that guidelines that restrict access frequency have been established to protect the storage media. The following performance optimization methods are also effective at reducing access frequency.</p>
+<h2 id="Anchor_185130689_h2_9">Use the File Data Cache Feature Effectively</h2>
+<p>A <a href="../Pages/Page_331387591.html">file data cache</a> feature is available to automatically cache file data in the <code>fs</code> library.<br />Performance may be improved simply by having the application assign memory for the file data cache.</p>
+<p>For more information, see fs Library &gt; Manual &gt; Features &gt; <a href="../Pages/Page_331387591.html">File Data Cache</a>.</p>
+<h2 id="Anchor_185130689_h2_10">Collect Data Into a Large Buffer for Access</h2>
+<p>Instead of accessing data repeatedly with small buffers, it is much more efficient to use <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> and <code><span class="ApiLink_nn__fs__WriteFile">nn::fs::WriteFile</span>()</code> to access all the data collected in a large buffer at the same time.</p>
+<p>Based on the actual performance measurements for game cards of 4 GB or less, you can expect the following types of performance.</p>
+<ul>
+  <li>If there is 16 MB of data to read from a contiguous address space:<br class="_mce_tagged_br" /><ul><li>With a 1-KB buffer, the process of calling the <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> function 16 &times; 1024 times takes approximately 3.8 seconds.<br /></li><li>With a 1-MB buffer, the process of calling the <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> function 16 times is completed in approximately 0.9 seconds.</li></ul></li>
+  <li>If data is scattered within a 1-MB memory region:<br /><ul><li>With a 1-KB buffer, 500 calls to the <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> function would take approximately 814 milliseconds.<br /></li><li>With a 1-MB buffer, a single call to <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code> would take 56 milliseconds, and it would be faster if the data was accessed in RAM.</li></ul></li>
+</ul>
+<h2 id="Anchor_185130689_h2_11">Limit the Number of File System Operations</h2>
+<p>Operations for referencing and updating file and directory information access metadata.</p>
+<p>Because the resource data (ROM) and DLC retain meta information in memory at the time of mounting, you can perform operations faster for the file system being mounted than for other file systems.<br />For this reason, reducing file system operations during mounting for resource data (ROM) and DLC does not have a major effect in improving performance.<br />However, redundant file system operations place a load on CPU resources and memory bands. For this reason, limit the number of file system operations for each file system.</p>
+<h3 id="Anchor_185130689_h3_8">Limit Mount and Unmount Operations</h3>
+<p>For frequently accessed file systems, it is more efficient to keep the system mounted instead of mounting and unmounting each time it is accessed.</p>
+<h3 id="Anchor_185130689_h3_9">Limit Opening and Closing Files</h3>
+<p>For frequently accessed files, it is more efficient to keep the file open instead of repeatedly calling <code><span class="ApiLink_nn__fs__OpenFile">nn::fs::OpenFile</span>()</code> and <code><span class="ApiLink_nn__fs__CloseFile">nn::fs::CloseFile</span>()</code> each time the file is accessed.<br /></p>
+<h3 id="Anchor_185130689_h3_10">Limit Extending Files</h3>
+<p>When writing to a file multiple times, writing content that exceeds the end of the file each time you call <code><span class="ApiLink_nn__fs__WriteFile">nn::fs::WriteFile</span>()</code> also updates the metadata each time. It is more efficient to first call <code><span class="ApiLink_nn__fs__CreateFile">nn::fs::CreateFile</span>()</code> or <code><span class="ApiLink_nn__fs__SetFileSize">nn::fs::SetFileSize</span>()</code> to set the final file size, and then call <code><span class="ApiLink_nn__fs__WriteFile">nn::fs::WriteFile</span>()</code> to write the data.</p>
+<h3 id="Anchor_185130689_h3_11">Limit File Flushing</h3>
+<p>When writing to file multiple times, it is more efficient to flush all of the files once at the end instead of calling <code><span class="ApiLink_nn__fs__WriteFile">nn::fs::WriteFile</span>()</code> to specify <code>fs::WriteOptionFlag_Flush</code>, or calling <code><span class="ApiLink_nn__fs__FlushFile">nn::fs::FlushFile</span>()</code> each time you call <code><span class="ApiLink_nn__fs__WriteFile">nn::fs::WriteFile</span>()</code>.</p>
+<h3 id="Anchor_185130689_h3_12">Commit at the Appropriate Time</h3>
+<p>To update multiple files and directories with a save, call <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code> after completing all write operations for those files and directories.<br />If you call <code><span class="ApiLink_nn__fs__Commit">nn::fs::Commit</span>()</code> individually during each write operation, files and directories that were updated and those that were not updated would co-exist in cases where the application was forcibly closed, such as when the user removes the game card.</p>
+<h2 id="Anchor_185130689_h2_12">Pack Small Files and Access All of Them at the Same Time</h2>
+<p>Packing a number of small files into one file reduces the number of calls to <code><span class="ApiLink_nn__fs__OpenFile">nn::fs::OpenFile</span>()</code>, <code><span class="ApiLink_nn__fs__CloseFile">nn::fs::CloseFile</span>()</code>, <code><span class="ApiLink_nn__fs__ReadFile">nn::fs::ReadFile</span>()</code>, and <code><span class="ApiLink_nn__fs__WriteFile">nn::fs::WriteFile</span>()</code>, which increases performance. This method is effective when you need to load many small files.<br />Note that there is no inherent advantage to packing files. Accessing all of the files at the same time reduces the number of calls to the <code><span class="ApiLink_nn__fs">nn::fs</span></code> API, and results in increased performance.</p>
+<p>Because changing the file structure after the fact has a high cost in application development, we recommend taking file packing into consideration from the beginning if your application has high performance requirements, and designing the data structure so that it can be accessed efficiently.</p>
+<h2 id="Anchor_185130689_h2_13">Use the RamDisk Feature Effectively</h2>
+<p>The <a href="../Pages/Page_685577216.html">RamDisk</a> feature provides the functionality to temporarily use a buffer provided by the application as a file system.<br />When you want to access certain data through the file system I/F, you can retain that data in <a href="../Pages/Page_685577216.html">RamDisk</a> at the necessary timing and access it in memory to greatly increase performance.</p>
+<p>For more information, see fs Library &gt; Manual &gt; Features &gt; <a href="../Pages/Page_685577216.html">RamDisk</a>.</p>
+<h2 id="Anchor_185130689_h2_14">Design Threads Appropriately</h2>
+<p>You can reduce overall processing time by performing other necessary processes in parallel with accessing files. For example, if compressed data is being read, or if data is being compressed and written, you can save time by performing the expansion and reading or the compression and writing in parallel.</p>
+<p>In addition, thread priority settings are important. If thread priority is not configured appropriately, the CPU may be co-opted by other threads, and the processing for returning the <code><span class="ApiLink_nn__fs">nn::fs</span></code> API will not progress even after the response from the storage media is complete.</p>
+<p>For more information about thread behavior, see the information about scheduling in os Library &gt; Manual &gt; <a href="../Pages/Page_83955697.html">Threads</a>.</p>
+<h2 id="Anchor_185130689_h2_15">Optimization Examples</h2>
+<p>As an example, <span style="letter-spacing: 0.0px;">write 10 pieces of data with the <code>Data</code> type to <code>save:/data.dat</code>. Also assume that you can get the <em>ith</em> element of data by calling the function <code>const Data* GetData(i);</code>. For the sake of readability, this example uses pseudocode, omitting the processes of mounting and error handling. When writing your actual code, perform appropriate error handling as described in fs Library &gt; Manual &gt; Features &gt; </span><a href="../Pages/Page_174247773.html">Handling Errors</a><span style="letter-spacing: 0.0px;">.</span></p>
+<p>First, consider the simplest code.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::fs::CreateFile(&quot;save:/data.dat&quot;, 0);
+for (int i = 0; i &lt; 10; ++i)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::FileHandle fileHandle;
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::OpenFile(&amp;fileHandle, &quot;save:/data.dat&quot;, nn::fs::OpenMode_Write | nn::fs::OpenMode_AllowAppend);
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::WriteFile(fileHandle, sizeof(Data) * i, GetData(i), sizeof(Data), nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::CloseFile(fileHandle);
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In this code, the file size in the file's memory management region is updated every time a data element is written to the file, and this slows access. In addition, the physical regions to which the data elements are written are not necessarily contiguous, and this can slow subsequent processes of file access. When creating a file, we recommend specifying the required file size ahead of time as follows, and accessing the file without the <code><span class="ApiLink_nn__fs__OpenMode_AllowAppend">nn::fs::OpenMode_AllowAppend</span></code> option.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::fs::CreateFile(&quot;save:/data.dat&quot;, sizeof(Data) * 10);
+for (int i = 0; i &lt; 10; ++i)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::FileHandle fileHandle;
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::OpenFile(&amp;fileHandle, &quot;save:/data.dat&quot;, nn::fs::OpenMode_Write);
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::WriteFile(fileHandle, sizeof(Data) * i, GetData(i), sizeof(Data), nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::CloseFile(fileHandle);
+}</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In this code, the file is opened every time a data element is written. The file management information is loaded and freed every time the file is opened and closed, which puts a heavy processing load on the file system. Instead, you could write the code as follows.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::fs::CreateFile(&quot;save:/data.dat&quot;, sizeof(Data) * 10);
+nn::fs::FileHandle fileHandle;
+nn::fs::OpenFile(&amp;fileHandle, &quot;save:/data.dat&quot;, nn::fs::OpenMode_Write);
+for (int i = 0; i &lt; 10; ++i)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::WriteFile(fileHandle, sizeof(Data) * i, GetData(i), sizeof(Data), nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
+}
+nn::fs::CloseFile(fileHandle);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>  You can decrease the overall processing time by the reduction in times that files are opened. However, memory is still flushed several times.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::fs::CreateFile(&quot;save:/data.dat&quot;, sizeof(Data) * 10);
+nn::fs::FileHandle fileHandle;
+nn::fs::OpenFile(&amp;fileHandle, &quot;save:/data.dat&quot;, nn::fs::OpenMode_Write);
+for (int i = 0; i &lt; 10; ++i)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::WriteFile(fileHandle, sizeof(Data) * i, GetData(i), sizeof(Data), nn::fs::WriteOption());
+}
+nn::fs::FlushFile(fileHandle);
+nn::fs::CloseFile(fileHandle);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Performing a single flush at the end, as in the preceding code, can decrease overall processing times.</p>
+<p>However, when <code>sizeof(Data)</code> is relatively small, the overhead for accessing the file any one time is large. It may take longer than expected to access everything. When this is the case, you can improve speed by collecting the data together and accessing it all at one time, as shown:</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::fs::CreateFile(&quot;save:/data.dat&quot;, sizeof(Data) * 10);
+nn::fs::FileHandle fileHandle;
+nn::fs::OpenFile(&amp;fileHandle, &quot;save:/data.dat&quot;, nn::fs::OpenMode_Write);
+char* buffer = allocator.Allocate(sizeof(Data) * 10, 4);
+NN_ABORT_UNLESS_NOT_NULL(buffer);
+for (int i = 0; i &lt; 10; ++i)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;std::memcpy(buffer + sizeof(Data) * i, GetData(i), sizeof(Data));
+}
+nn::fs::WriteFile(fileHandle, 0, buffer, sizeof(Data) * 10, nn::fs::WriteOption::MakeValue(nn::fs::WriteOptionFlag_Flush));
+allocator.Free(buffer);
+nn::fs::CloseFile(fileHandle);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> You can improve the speed somewhat by specifying 4-byte alignment for the buffer for reading and writing, because this eliminates the need for the file system to adjust the alignment internally. To allocate a buffer with a specified alignment, use the <code><span class="ApiLink_NN_ALIGNAS">NN_ALIGNAS</span></code> macro or the <code><a href="../Pages/Page_89102552.html">StandardAllocator</a></code> class.</p>
+<p>If you cannot secure a large enough buffer to access all the data at one time, you can also gather and access the data in portions, using code like the following.</p>
+<table class="codeblock">
+  <tbody>
+    <tr>
+      <td class="code">
+        <div class="codeblock"><pre>nn::fs::CreateFile(&quot;save:/data.dat&quot;, sizeof(Data) * 10);
+nn::fs::FileHandle fileHandle;
+nn::fs::OpenFile(&amp;fileHandle, &quot;save:/data.dat&quot;, nn::fs::OpenMode_Write);
+char* buffer = allocator.Allocate(sizeof(Data) * 5, 4);
+NN_ABORT_UNLESS_NOT_NULL(buffer);
+for (int j = 0; j &lt; 2; ++j)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; 5; ++i)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;std::memcpy(buffer + sizeof(Data) * i, GetData(5 * j + i), sizeof(Data));
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;nn::fs::WriteFile(fileHandle, (sizeof(Data) * 5) * j, buffer, sizeof(Data) * 5, nn::fs::WriteOption());
+}
+allocator.Free(buffer);
+nn::fs::FlushFile(fileHandle);
+nn::fs::CloseFile(fileHandle);</pre></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<p>If you will be reading and writing more than 512 KB of data, allocate a buffer of at least 512 KB for collecting the data. Performance could suffer greatly if you access the data in smaller chunks. We recommend allocating a buffer of 1 MB or larger if you plan to access collections of extremely large amounts of data (10 MB or more).</p>
+<p>
+  <br />
+</p>
+</div>
+<div class="breadcrumb_bottom"></div>
+<div class="page_navigation">
+<table class="page_navi_root">
+<tr>
+<td class="page_navi_left"></td>
+<td class="page_navi_right"></td>
+</tr>
+<tr><td colspan="2" class="page_navi_bottom"></td></tr>
+</table>
+</div>
+<p>&nbsp;</p>
+<hr />
+<p>CONFIDENTIAL</p>
+</div>
+</div>
+<!--AddLink-->
+<script>
+var NintendoSdkApiRefernce = {
+    idMap: {},
+    linkRewrite: function ()
+    {
+        var idMap = NintendoSdkApiRefernce.idMap;
+        function rewrite(el)
+        {
+            var e = idMap[el.className];
+            if (e === undefined)
+            {
+                return;
+            }
+            var html = '';
+            html += '<a href=';
+            html += e.url;
+            html += ' target="_blank" rel="noopener noreferrer" >';
+            html += el.innerHTML;
+            html += '</a>';
+            el.innerHTML = html;
+        }
+        var apiLinkElems = document.querySelectorAll('span[class*="ApiLink_"]');
+        for (var i = 0, n = apiLinkElems.length; i< n; ++i) {
+            rewrite(apiLinkElems[i]);
+        }
+    }
+};
+function SetUrl( id, url )
+{
+    NintendoSdkApiRefernce.idMap[id] = { url: url };
+}
+SetUrl( 'ApiLink_nn__oe__CpuBoostMode_Normal', '../../../Api/HtmlNX/namespacenn_1_1oe.html#a9a4c06113b2d2e39157e21fd9d33c874a68b6ac86a64960519ad1bc96e5630653' )
+SetUrl( 'ApiLink_nn__oe__PerformanceConfiguration_Cpu1020MhzGpu307MhzEmc1331Mhz', '../../../Api/HtmlNX/namespacenn_1_1oe.html#ae6b0bdb08dc359246714ed330d9c9fc2' )
+SetUrl( 'ApiLink_nn__fs__ReadFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a90b280140b3e9d7eb83af3e807e4c0c3' )
+SetUrl( 'ApiLink_nn__fs__WriteFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ab4351ff3a319e9a63093324a669492ab' )
+SetUrl( 'ApiLink_nn__fs__OpenFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a0f2b5b30657b1ffaf1dec49bfb36462b' )
+SetUrl( 'ApiLink_nn__fs__CloseFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac8bd9e828751bd4f953acfa765278f84' )
+SetUrl( 'ApiLink_nn__fs__CreateFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a3e89c4d57cc8379265894ff7f3e98b2c' )
+SetUrl( 'ApiLink_nn__fs__SetFileSize', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ab469b77c1d8c44eaedb9b6d658aba6c6' )
+SetUrl( 'ApiLink_nn__fs__FlushFile', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a543a813b9e0c46a2d6ccb24d7c863a76' )
+SetUrl( 'ApiLink_nn__fs__Commit', '../../../Api/HtmlNX/namespacenn_1_1fs.html#ac90e600c3fc51adb6823a4ef900fad3a' )
+SetUrl( 'ApiLink_nn__fs', '../../../Api/HtmlNX/namespacenn_1_1fs.html' )
+SetUrl( 'ApiLink_nn__fs__OpenMode_AllowAppend', '../../../Api/HtmlNX/namespacenn_1_1fs.html#a4c97b79cce78a95c2333dbc9053b9393aac1149600d18adbb26a1ae87de7096c1' )
+SetUrl( 'ApiLink_NN_ALIGNAS', '../../../Api/HtmlNX/nn___macro_8h.html#a6ce9d4b07ab8bec971ac8875873615b5' )
+
+NintendoSdkApiRefernce.linkRewrite();
+</script>
+<!--AddLink-->
+</body>
+</html>
